@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Rutgers</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_dtable">DTable</string>
+    <string name="title_activity_single_fragment">SingleFragmentActivity</string>
+
+</resources>
