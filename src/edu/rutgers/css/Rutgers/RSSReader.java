@@ -31,10 +31,11 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		public String author;
 		public String date;
 		
-		public RSSItem(String title, String description, String url) {
-			this.title = title;
-			this.description = description;
-			this.url = url;
+		public RSSItem(XmlDom item) {
+			this.title = item.text("title");
+			this.description = item.text("description");
+			this.url = item.text("url");
+			this.author = item.text("author");
 		}
 		
 		public String toString() {
@@ -94,7 +95,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 				List<XmlDom> items = xml.tags("item");
 				
 				for(XmlDom item: items) {
-					RSSItem newItem = new RSSItem(item.text("title"), item.text("description"), item.text("link"));
+					RSSItem newItem = new RSSItem(item);
 					rssItemAdapter.add(newItem);
 					Log.d("RSSReader","Adding RSS item " + newItem);
 				}
