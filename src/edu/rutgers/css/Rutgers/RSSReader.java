@@ -3,6 +3,9 @@ package edu.rutgers.css.Rutgers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,12 +28,19 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		public String title;
 		public String description;
 		public String url;
+		public String author;
+		public String date;
 		
 		public RSSItem(String title, String description, String url) {
 			this.title = title;
 			this.description = description;
 			this.url = url;
 		}
+		
+		public String toString() {
+			return this.title;
+		}
+		
 	}
 	
 	private List<RSSItem> rssItems;
@@ -49,38 +59,58 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_rssreader, parent, false);
-		final ListView mList = (ListView) v.findViewById(R.id.rssreader_list);
 		Bundle args = getArguments();
+		final ListView mList = (ListView) v.findViewById(R.id.rssreader_list);
 		
+		Log.d("RSSReader", "Fragment for RSS feed " + args.getString("rss"));
+		
+		// Sets title to name of the RSS feed being displayed
 		getActivity().setTitle(args.getString("title"));
 		
-		// TODO Request RSS data & parse it for list
-		Log.d("RSSReader", "Fragment for RSS feed " + args.getString("rss"));
-			
+		// Adapter & click listener for RSS list view
 		mList.setAdapter(rssItemAdapter);
 		mList.setOnItemClickListener(this);
 		
-		aq.ajax(args.getString("rss"), XmlDom.class, this, "rssCallback");
+		// Populate the list with given RSS feed
+		setupList(v, args.getString("rss"));
 		
 		return v;
-	}
-	
-	private void setupList() {
-		
-	}
-
-	public void rssCallback(String url, XmlDom xml, AjaxStatus status) {
-		List<XmlDom> items = xml.tags("item");
-		
-		for(XmlDom item: items) {
-			Log.d("RSSReader", item.text("title") + "," + item.text("description") + item.text("link"));
-		}
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	private void setupList(View v, String rssUrl) {
+		final ListView mList = (ListView) v.findViewById(R.id.rssreader_list);
+		
+		// Get RSS feed XML and add items through the array adapter
+		Request.xml(rssUrl).done(new DoneCallback<XmlDom>() {
+			
+			@Override
+			public void onDone(XmlDom xml) {
+				List<XmlDom> items = xml.tags("item");
+				
+				for(XmlDom item: items) {
+					RSSItem newItem = new RSSItem(item.text("title"), item.text("description"), item.text("link"));
+					rssItemAdapter.add(newItem);
+					Log.d("RSSReader","Adding RSS item " + newItem);
+				}
+			}
+			
+		}).fail(new FailCallback<AjaxStatus>() {
+		
+			@Override
+			public void onFail(AjaxStatus e) {
+				Log.e("RSSReader", e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
+			}
+			
+		});
+		
+		// Redraw list
+		mList.invalidate();
 	}
 	
 }
