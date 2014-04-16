@@ -6,5 +6,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_dtable">DTable</string>
     <string name="title_activity_single_fragment">SingleFragmentActivity</string>
+    <string name="title_activity_rssreader">RSSReader</string>
 
 </resources>

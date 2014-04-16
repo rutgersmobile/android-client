@@ -6,10 +6,14 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -107,6 +111,33 @@ public class DTable extends Fragment {
 		JSONAdapter a = new JSONAdapter(mData);
 		
 		mList.setAdapter(a);
+		
+		/* Clicks on the news list launch RSS reader activity from JSON 'rss' field */
+		mList.setOnItemClickListener(new OnItemClickListener() {
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+					JSONObject c = (JSONObject) parent.getAdapter().getItem(position);
+					try {
+						Log.d("DTable", "Clicked \"" + c.getString("title") + "\", RSS feed: " + c.getString("rss"));
+						
+						FragmentManager fm = getFragmentManager();
+						
+						Bundle args = new Bundle();
+						args.putString("component", "rssreader");
+						args.putString("title",  c.getString("title"));
+						args.putString("rss",  c.getString("rss"));
+						Fragment fragment = ComponentFactory.getInstance().createFragment(args);
+						
+						fm.beginTransaction()
+							.replace(R.id.main_content_frame, fragment)
+							.addToBackStack(null)
+							.commit(); 
+						
+					} catch (JSONException e) {
+						Log.e("DTable", "Clicked item #" + position + " and failed to read JSON title/rss");
+					}
+					
+				}
+		});
 	}
 	
 	private class JSONAdapter extends BaseAdapter {

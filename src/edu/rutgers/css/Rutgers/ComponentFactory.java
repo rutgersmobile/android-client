@@ -32,9 +32,13 @@ public class ComponentFactory {
 		}
 		
 		else if (options.getString("component").equals("bus")) {
-			
 			fragment = new BusMain();
 			Log.d(TAG, "creating a busmain");
+		}
+		
+		else if (options.getString("component").equals("rssreader")) {
+			fragment = new RSSReader();
+			Log.d(TAG, "creating an rssreader");
 		}
 		
 		fragment.setArguments(options);

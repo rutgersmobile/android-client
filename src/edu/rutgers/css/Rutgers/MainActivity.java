@@ -59,21 +59,21 @@ public class MainActivity extends FragmentActivity {
 		contentFrame.removeAllViews();
 		
 		Bundle args = new Bundle();
-		/*
+		
 		args.putString("title", "News");
 		args.putString("component", "dtable");
-		args.putString("data", "[{\"title\":\"Rutgers Today\"}, {\"title\": \"Newark News\"}, {\"title\": \"Camden News\"}]");
+		args.putString("data", "[{\"title\":\"Rutgers Today\", \"rss\":\"http://news.rutgers.edu/rss/today\"}, {\"title\": \"Newark News\", \"rss\":\"http://news.rutgers.edu/rss/camden\"}, {\"title\": \"Camden News\", \"rss\":\"http://news.rutgers.edu/rss/newark\"}]");
 		//args.putString("api", "test");
-		 */
+		 
 		
-		args.putString("component", "bus");
+		//args.putString("component", "bus");
 		
 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {
 				Log.d("MainActivity", "got app data " + result.toString());
 			}
 		});
-		
+		/*
 		Nextbus.stopPredict("nb", "Hill Center").done(new DoneCallback<ArrayList>() {
 			@Override
 			public void onDone(ArrayList predictions) {
@@ -89,7 +89,7 @@ public class MainActivity extends FragmentActivity {
 				Log.d("Main", Log.getStackTraceString(e));
 			}
 		});
-		
+		*/
 		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 		
 		fm.beginTransaction()
