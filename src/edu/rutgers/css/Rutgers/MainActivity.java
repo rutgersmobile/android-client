@@ -62,7 +62,7 @@ public class MainActivity extends FragmentActivity {
 		
 		args.putString("title", "News");
 		args.putString("component", "dtable");
-		args.putString("data", "[{\"title\":\"Rutgers Today\", \"rss\":\"http://news.rutgers.edu/rss/today\"}, {\"title\": \"Newark News\", \"rss\":\"http://news.rutgers.edu/rss/camden\"}, {\"title\": \"Camden News\", \"rss\":\"http://news.rutgers.edu/rss/newark\"}]");
+		args.putString("data", "[{\"title\":\"Rutgers Today\", \"rss\":\"http://news.rutgers.edu/rss/today\"}, {\"title\": \"Newark News\", \"rss\":\"http://news.rutgers.edu/rss/newark\"}, {\"title\": \"Camden News\", \"rss\":\"http://news.rutgers.edu/rss/camden\"}]");
 		//args.putString("api", "test");
 		 
 		

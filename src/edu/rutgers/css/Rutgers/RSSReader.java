@@ -7,6 +7,7 @@ import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 
 import android.support.v4.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,7 +16,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -23,7 +26,7 @@ import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
 public class RSSReader extends Fragment implements OnItemClickListener {
-
+	
 	private class RSSItem {
 		public String title;
 		public String description;
@@ -32,6 +35,8 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		public String date;
 		
 		public RSSItem(XmlDom item) {
+			if(item == null) return;
+			
 			this.title = item.text("title");
 			this.description = item.text("description");
 			this.url = item.text("url");
@@ -44,17 +49,62 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		
 	}
 	
+	public class RSSAdapter extends ArrayAdapter<RSSItem> {
+
+		private int layoutResource;
+		
+		/* Class to hold data for RSS list rows */
+		private final class RSSHolder {
+				ImageView iconImageView;
+				TextView titleTextView;
+				TextView authordateTextView;
+				TextView descriptionTextView;
+		}
+		
+		public RSSAdapter(Context context, int resource, List<RSSItem> objects) {
+			super(context, resource, objects);
+			this.layoutResource = resource;
+		}
+		
+		public View getView(int position, View convertView, ViewGroup parent) {
+			LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			RSSHolder mHolder = null;
+			
+			/* Make new data holder or get existing one */
+			if(convertView == null) {
+					mHolder = new RSSHolder();
+					/* Create new RSS Row view */
+					convertView = mLayoutInflater.inflate(this.layoutResource, null);
+					convertView.setTag(mHolder);
+			}
+			else {	
+					mHolder = (RSSHolder)convertView.getTag();
+			}
+
+			/* Populate RSS row layout elements */
+			mHolder.iconImageView = (ImageView) convertView.findViewById(R.id.rssRowIconView);
+			mHolder.titleTextView = (TextView) convertView.findViewById(R.id.rssRowTitleView);
+			mHolder.authordateTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorDateView);
+			mHolder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
+			
+			mHolder.titleTextView.setText(this.getItem(position).title);
+			mHolder.authordateTextView.setText(this.getItem(position).author + " - " + this.getItem(position).date);
+			mHolder.descriptionTextView.setText(this.getItem(position).description);
+			
+			return convertView;
+		}
+		
+	}
+	
 	private List<RSSItem> rssItems;
 	private ArrayAdapter<RSSItem> rssItemAdapter;
-	private AQuery aq;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		aq = new AQuery(this.getActivity());
+
 		rssItems = new ArrayList<RSSItem>();
-		rssItemAdapter = new ArrayAdapter<RSSItem>(this.getActivity(), android.R.layout.simple_list_item_1, rssItems);
+		rssItemAdapter = new RSSAdapter(this.getActivity(), R.layout.rss_row, rssItems);
 	}
 
 	@Override
@@ -86,6 +136,14 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 
 	private void setupList(View v, String rssUrl) {
 		final ListView mList = (ListView) v.findViewById(R.id.rssreader_list);
+		
+		RSSItem dummy = new RSSItem(null);
+		dummy.title = "Article Title";
+		dummy.author = "Author Name";
+		dummy.url = "http://news.google.com/";
+		dummy.description = "This is a fake article entry.";
+		dummy.date = "April 17th, 2014 - 11:00 AM";
+		rssItemAdapter.add(dummy);
 		
 		// Get RSS feed XML and add items through the array adapter
 		Request.xml(rssUrl).done(new DoneCallback<XmlDom>() {
