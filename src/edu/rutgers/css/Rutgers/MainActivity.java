@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 
 import org.jdeferred.DoneCallback;
@@ -19,6 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.androidquery.util.AQUtility;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 public class MainActivity extends FragmentActivity {
@@ -41,6 +43,7 @@ public class MainActivity extends FragmentActivity {
         menu.setBehindOffset(200);
         menu.setMenu(R.layout.menu);
 		
+        //false to disable <back arrow on title bar
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         
@@ -68,12 +71,21 @@ public class MainActivity extends FragmentActivity {
 		
 		//args.putString("component", "bus");
 		
+		/* didn't help
+		AQUtility.setExceptionHandler(new UncaughtExceptionHandler() {
+	        @Override
+	        public void uncaughtException(Thread thread, Throwable ex) {
+	               Log.e("AQUtility", ex.getMessage());
+	        }
+		});
+		*/
+		
 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {
 				Log.d("MainActivity", "got app data " + result.toString());
 			}
 		});
-		/*
+		
 		Nextbus.stopPredict("nb", "Hill Center").done(new DoneCallback<ArrayList>() {
 			@Override
 			public void onDone(ArrayList predictions) {
@@ -89,7 +101,7 @@ public class MainActivity extends FragmentActivity {
 				Log.d("Main", Log.getStackTraceString(e));
 			}
 		});
-		*/
+		
 		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 		
 		fm.beginTransaction()

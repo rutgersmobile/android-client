@@ -33,6 +33,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		public String url;
 		public String author;
 		public String date;
+		public String imgUrl;
 		
 		public RSSItem(XmlDom item) {
 			if(item == null) return;
@@ -41,6 +42,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 			this.description = item.text("description");
 			this.url = item.text("url");
 			this.author = item.text("author");
+			// this.imgUrl = item.child("enclosure").attr("url"); TODO test when RSS read from net works
 		}
 		
 		public String toString() {
@@ -88,7 +90,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 			mHolder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
 			
 			mHolder.titleTextView.setText(this.getItem(position).title);
-			mHolder.authordateTextView.setText(this.getItem(position).author + " - " + this.getItem(position).date);
+			mHolder.authordateTextView.setText(this.getItem(position).date);
 			mHolder.descriptionTextView.setText(this.getItem(position).description);
 			
 			return convertView;
@@ -98,6 +100,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	
 	private List<RSSItem> rssItems;
 	private ArrayAdapter<RSSItem> rssItemAdapter;
+	private AQuery aq;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -105,6 +108,8 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 
 		rssItems = new ArrayList<RSSItem>();
 		rssItemAdapter = new RSSAdapter(this.getActivity(), R.layout.rss_row, rssItems);
+
+		aq = new AQuery(this.getActivity());
 	}
 
 	@Override
@@ -125,6 +130,24 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		// Populate the list with given RSS feed
 		setupList(v, args.getString("rss"));
 		
+
+		/* testing ajax q
+		aq.ajax(args.getString("rss"), XmlDom.class, new AjaxCallback<XmlDom>() {
+
+			@Override
+			public void callback(String url, XmlDom xml, AjaxStatus status) {
+				Log.d("RSSReader", "aq - " + status.getMessage() + "; code " + status.getCode());
+				if (xml != null) {
+					Log.d("RSSReader", "aq - xml != null");
+				}
+				else {
+					Log.e("RSSReader", "aq - xml null"); 
+				}
+			}
+			
+		});
+		*/
+		
 		return v;
 	}
 
@@ -141,7 +164,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		dummy.title = "Article Title";
 		dummy.author = "Author Name";
 		dummy.url = "http://news.google.com/";
-		dummy.description = "This is a fake article entry.";
+		dummy.description = "This is a fake article entry. This is a fake article entry. This is a fake article entry. This is a fake article entry. This is a fake article entry.";
 		dummy.date = "April 17th, 2014 - 11:00 AM";
 		rssItemAdapter.add(dummy);
 		
