@@ -8,6 +8,8 @@ import org.jdeferred.FailCallback;
 
 import android.support.v4.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,7 +32,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	private class RSSItem {
 		public String title;
 		public String description;
-		public String url;
+		public String link;
 		public String author;
 		public String date;
 		public String imgUrl;
@@ -40,8 +42,9 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 			
 			this.title = item.text("title");
 			this.description = item.text("description");
-			this.url = item.text("url");
+			this.link = item.text("link");
 			this.author = item.text("author");
+			this.date = item.text("pubDate");
 			// this.imgUrl = item.child("enclosure").attr("url"); TODO test when RSS read from net works
 		}
 		
@@ -134,9 +137,13 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// TODO Auto-generated method stub
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		// For now send URL to browser
+		RSSItem item = rssItemAdapter.getItem(position);
 		
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setData(Uri.parse(item.link));
+		startActivity(i);
 	}
 
 	private void setupList(View v, String rssUrl) {
