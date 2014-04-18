@@ -71,15 +71,6 @@ public class MainActivity extends FragmentActivity {
 		
 		//args.putString("component", "bus");
 		
-		/* didn't help
-		AQUtility.setExceptionHandler(new UncaughtExceptionHandler() {
-	        @Override
-	        public void uncaughtException(Thread thread, Throwable ex) {
-	               Log.e("AQUtility", ex.getMessage());
-	        }
-		});
-		*/
-		
 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {
 				Log.d("MainActivity", "got app data " + result.toString());
