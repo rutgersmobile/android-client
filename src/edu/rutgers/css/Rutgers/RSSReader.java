@@ -68,7 +68,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 					Date parsedEnd = eventDf.parse(item.text("event:endDateTime"));
 					this.date = outDf.format(parsedDate) + " - " + outEndDf.format(parsedEnd);
 				} catch (ParseException e) {
-					Log.e("RSSReader", "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
+					Log.e(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
 					this.date = item.text("event:beginDateTime");
 				}
 			}
@@ -135,6 +135,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		
 	}
 	
+	private static final String TAG = "RSSReader";
 	private List<RSSItem> rssItems;
 	private ArrayAdapter<RSSItem> rssItemAdapter;
 	private AQuery aq;
@@ -155,7 +156,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		Bundle args = getArguments();
 		final ListView mList = (ListView) v.findViewById(R.id.rssreader_list);
 		
-		Log.d("RSSReader", "Fragment for RSS feed " + args.getString("rss"));
+		Log.d(TAG, "Fragment for RSS feed " + args.getString("rss"));
 		
 		// Sets title to name of the RSS feed being displayed
 		getActivity().setTitle(args.getString("title"));
@@ -203,7 +204,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 				for(XmlDom item: items) {
 					RSSItem newItem = new RSSItem(item);
 					rssItemAdapter.add(newItem);
-					//Log.d("RSSReader","Adding RSS item " + newItem);
+					//Log.d(TAG,"Adding RSS item " + newItem);
 				}
 			}
 			
@@ -211,7 +212,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		
 			@Override
 			public void onFail(AjaxStatus e) {
-				Log.e("RSSReader", e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
+				Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
 			}
 			
 		});

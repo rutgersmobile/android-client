@@ -14,7 +14,10 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -63,12 +66,18 @@ public class MainActivity extends FragmentActivity {
 		
 		Bundle args = new Bundle();
 		
+		/*
 		args.putString("title", "News");
 		args.putString("component", "dtable");
 		args.putString("data", "[{\"title\":\"Rutgers Today\", \"rss\":\"http://news.rutgers.edu/rss/today\"}, {\"title\": \"Newark News\", \"rss\":\"http://news.rutgers.edu/rss/newark\"}, {\"title\": \"Camden News\", \"rss\":\"http://news.rutgers.edu/rss/camden\"}, {\"title\": \"Rutgers Events\", \"rss\": \"http://ruevents.rutgers.edu/events/getEventsRss.xml\"}]");
+		*/
 		//args.putString("api", "test");
 		 
 		//args.putString("component", "bus");
+		
+		args.putString("component",  "food");
+		args.putString("location", "Brower Commons");
+		args.putString("meal", "Breakfast");
 		
 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {

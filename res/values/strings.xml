@@ -7,5 +7,6 @@
     <string name="title_activity_dtable">DTable</string>
     <string name="title_activity_single_fragment">SingleFragmentActivity</string>
     <string name="title_activity_rssreader">RSSReader</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

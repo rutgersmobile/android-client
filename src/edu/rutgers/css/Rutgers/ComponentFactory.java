@@ -41,6 +41,11 @@ public class ComponentFactory {
 			Log.d(TAG, "creating an rssreader");
 		}
 		
+		else if (options.getString("component").equals("food")) {
+			fragment = new FoodMeal();
+			Log.d(TAG, "creating a foodmeal");
+		}
+		
 		fragment.setArguments(options);
 		
 		Log.d("ComponentFactory", "created fragment");
