@@ -65,10 +65,9 @@ public class MainActivity extends FragmentActivity {
 		
 		args.putString("title", "News");
 		args.putString("component", "dtable");
-		args.putString("data", "[{\"title\":\"Rutgers Today\", \"rss\":\"http://news.rutgers.edu/rss/today\"}, {\"title\": \"Newark News\", \"rss\":\"http://news.rutgers.edu/rss/newark\"}, {\"title\": \"Camden News\", \"rss\":\"http://news.rutgers.edu/rss/camden\"}]");
+		args.putString("data", "[{\"title\":\"Rutgers Today\", \"rss\":\"http://news.rutgers.edu/rss/today\"}, {\"title\": \"Newark News\", \"rss\":\"http://news.rutgers.edu/rss/newark\"}, {\"title\": \"Camden News\", \"rss\":\"http://news.rutgers.edu/rss/camden\"}, {\"title\": \"Rutgers Events\", \"rss\": \"http://ruevents.rutgers.edu/events/getEventsRss.xml\"}]");
 		//args.putString("api", "test");
 		 
-		
 		//args.putString("component", "bus");
 		
 		Request.api("app").done(new DoneCallback<JSONObject>() {
