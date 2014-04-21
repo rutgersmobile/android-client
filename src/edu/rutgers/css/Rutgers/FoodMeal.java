@@ -57,15 +57,42 @@ public class FoodMeal extends Fragment {
 		return v;
 	}
 	
-	private void setupList(String location, String meal) {
-		mList.setAdapter(foodItemAdapter);
-		foodItemAdapter.add("Super Pancakes");
+	private void setupList(final String location, final String meal) {
 		
+		mList.setAdapter(foodItemAdapter);
+		
+		if(location == null || meal == null) {
+			Log.e(TAG, "null location/meal args to setupList");
+			return;
+		}
+		
+		// Get JSON array from dining API
 		Request.jsonArray("https://rumobile.rutgers.edu/1/rutgers-dining.txt").done(new DoneCallback<JSONArray>() {
 
 			@Override
 			public void onDone(JSONArray data) {
-				Log.d(TAG, data.toString());
+				Log.d(TAG, "Loaded dining data");
+				mData = data;
+				
+				// Successfully grabbed dining data, now get specific location & meal
+				JSONObject dinLoc = getDiningLocation(mData, location);
+				JSONArray mealGenres = null;
+				if(dinLoc != null) mealGenres = getMealGenres(dinLoc, meal);			
+				
+				// Populate list
+				if(mealGenres != null) {
+					for(int i = 0; i < mealGenres.length(); i++) {
+						try {
+							JSONArray mealItems = ((JSONObject) mealGenres.get(i)).getJSONArray("items");
+							for(int j = 0; j < mealItems.length(); j++) {
+								foodItemAdapter.add(mealItems.getString(j));
+							}
+						} catch (JSONException e) {
+							Log.e(TAG, e.getMessage());
+						}
+					}
+				}
+			
 			}
 			
 		}).fail(new FailCallback<AjaxStatus>() {
@@ -73,10 +100,66 @@ public class FoodMeal extends Fragment {
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
+				mData = null;
 			}
 			
 		});	
+	
+	}
+	
+	private JSONObject getDiningLocation(JSONArray diningData, String location) {
+		if(diningData == null) {
+				Log.e(TAG, "null dining data jsonarray");
+				return null;
+		}
 		
+		// Find dining location in dining data
+		for(int i = 0; i < diningData.length(); i++) {
+			JSONObject curLoc;
+			try {
+				curLoc = (JSONObject) diningData.get(i);
+				if(curLoc.getString("location_name").equalsIgnoreCase(location)) {
+					return curLoc;
+				}
+			} catch (JSONException e) {
+				Log.e(TAG, "Could not read location: " + e.getMessage());
+				//return null;
+			}
+		}
+		
+		Log.e(TAG, "Dining hall location \""+location+"\" not found in Dining API output");
+		return null;
+	}
+	
+	private JSONArray getMealGenres(JSONObject diningLocation, String meal) {
+		if(diningLocation == null) {
+			Log.e(TAG, "null dining location data");
+			return null;
+		}
+		
+		try {
+			JSONArray meals = diningLocation.getJSONArray("meals");
+			
+			// Find meal in dining hall data
+			for(int i = 0; i < meals.length(); i++) {
+				JSONObject curMeal = (JSONObject) meals.get(i);
+				
+				// Found meal - check if marked available & if so, return genres array
+				if(curMeal.getString("meal_name").equalsIgnoreCase(meal)) {
+					if(!curMeal.getBoolean("meal_avail")) {
+						return null;
+					}
+					
+					return curMeal.getJSONArray("genres");
+				}
+			}
+			
+		} catch (JSONException e) {
+			Log.e(TAG, e.getMessage());
+			return null;
+		}
+		
+		return null;
 	}
 
 }
