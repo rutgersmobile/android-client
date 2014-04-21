@@ -100,7 +100,9 @@ public class FoodMeal extends Fragment {
 				if(mealGenres != null) {
 					for(int i = 0; i < mealGenres.length(); i++) {
 						try {
-							JSONArray mealItems = ((JSONObject) mealGenres.get(i)).getJSONArray("items");
+							JSONObject curGenre = mealGenres.getJSONObject(i);
+							JSONArray mealItems = curGenre.getJSONArray("items");
+							foodItemAdapter.add("CATEGORY - " + curGenre.getString("genre_name")); // Category title placeholder
 							for(int j = 0; j < mealItems.length(); j++) {
 								foodItemAdapter.add(mealItems.getString(j));
 							}
