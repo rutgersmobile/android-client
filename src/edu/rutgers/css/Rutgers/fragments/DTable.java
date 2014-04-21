@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.fragments;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +22,11 @@ import android.widget.Toast;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+
+import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.R.id;
+import edu.rutgers.css.Rutgers.R.layout;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 
 public class DTable extends Fragment {
 	

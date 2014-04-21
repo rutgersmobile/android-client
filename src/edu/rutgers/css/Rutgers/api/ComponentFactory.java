@@ -1,5 +1,10 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.api;
 
+import edu.rutgers.css.Rutgers.SingleFragmentActivity;
+import edu.rutgers.css.Rutgers.fragments.BusMain;
+import edu.rutgers.css.Rutgers.fragments.DTable;
+import edu.rutgers.css.Rutgers.fragments.FoodMeal;
+import edu.rutgers.css.Rutgers.fragments.RSSReader;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;

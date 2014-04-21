@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.fragments;
 
 import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
@@ -11,6 +11,12 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.androidquery.AQuery;
+
+import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.R.id;
+import edu.rutgers.css.Rutgers.R.layout;
+import edu.rutgers.css.Rutgers.api.Nextbus;
+import edu.rutgers.css.Rutgers.auxiliary.JSONArrayAdapter;
 
 public class BusStops extends Fragment {
 

@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,8 @@ import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
+
+import edu.rutgers.css.Rutgers.auxiliary.Prediction;
 
 // Singleton class that provides access to the nextbus api. Uses the json that nextbusjs generates to create requests
 // against the official nextbus api.

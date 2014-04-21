@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;

@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.fragments;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -30,6 +30,11 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
+
+import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.R.id;
+import edu.rutgers.css.Rutgers.R.layout;
+import edu.rutgers.css.Rutgers.api.Request;
 
 public class RSSReader extends Fragment implements OnItemClickListener {
 	

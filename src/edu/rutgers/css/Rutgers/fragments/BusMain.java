@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,10 @@ import android.view.ViewGroup;
 import android.widget.TabHost;
 
 import com.androidquery.AQuery;
+
+import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.R.id;
+import edu.rutgers.css.Rutgers.R.layout;
 
 public class BusMain extends Fragment {
 	private AQuery aq;

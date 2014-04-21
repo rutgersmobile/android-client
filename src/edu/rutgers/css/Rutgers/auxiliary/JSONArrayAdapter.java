@@ -1,10 +1,13 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.auxiliary;
 
 import java.util.Iterator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.R.id;
 
 import android.content.Context;
 import android.database.DataSetObserver;

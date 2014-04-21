@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.api;
 
 import org.jdeferred.Promise;
 import org.jdeferred.impl.DeferredObject;
@@ -9,6 +9,8 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
+
+import edu.rutgers.css.Rutgers.MyApplication;
 
 // Convenience class for making requests
 public class Request {

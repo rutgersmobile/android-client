@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="edu.rutgers.css.Rutgers.DTable"
+            android:name="edu.rutgers.css.Rutgers.fragments.DTable"
             android:label="@string/title_activity_dtable" >
         </activity>
         <activity
@@ -34,7 +34,7 @@
             android:label="@string/title_activity_single_fragment" >
         </activity>
         <activity
-            android:name="edu.rutgers.css.Rutgers.RSSReader"
+            android:name="edu.rutgers.css.Rutgers.fragments.RSSReader"
             android:label="@string/title_activity_rssreader" >
         </activity>
     </application>

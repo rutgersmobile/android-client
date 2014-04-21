@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.fragments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,11 @@ import org.json.JSONObject;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
+
+import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.R.id;
+import edu.rutgers.css.Rutgers.R.layout;
+import edu.rutgers.css.Rutgers.api.Request;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

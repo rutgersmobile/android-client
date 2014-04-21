@@ -26,6 +26,11 @@ import android.widget.TextView;
 import com.androidquery.util.AQUtility;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.Nextbus;
+import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.auxiliary.Prediction;
+
 public class MainActivity extends FragmentActivity {
 	
 	private JSONObject channels;

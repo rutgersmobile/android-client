@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.auxiliary;
 
 import java.util.ArrayList;
 
