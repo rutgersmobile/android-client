@@ -22,6 +22,18 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+/* Dining JSON structure
+location_name = "Brower Commons"
+meals (array) ->
+		meal_name = "Breakfast"
+		meal_avail - boolean
+		genres (array) ->
+			genre_name = "Breakfast Entrees"
+			items (array) ->
+					"Oatmeal"
+					"Pancake
+ */
+
 /**
  * A simple {@link android.support.v4.app.Fragment} subclass.
  * 
@@ -57,6 +69,11 @@ public class FoodMeal extends Fragment {
 		return v;
 	}
 	
+	/**
+	 * Grab data from dining API and fill up the list of menu items.
+	 * @param location Dining hall to get items from
+	 * @param meal Which meal is to be displayed
+	 */
 	private void setupList(final String location, final String meal) {
 		
 		mList.setAdapter(foodItemAdapter);
@@ -107,6 +124,12 @@ public class FoodMeal extends Fragment {
 	
 	}
 	
+	/**
+	 * Get the JSON Object for a specific dining hall
+	 * @param diningData JSONArray of all data from dining API
+	 * @param location Dining hall to get JSON object of
+	 * @return JSON Object containing data for a dining hall.
+	 */
 	private JSONObject getDiningLocation(JSONArray diningData, String location) {
 		if(diningData == null) {
 				Log.e(TAG, "null dining data jsonarray");
@@ -131,6 +154,13 @@ public class FoodMeal extends Fragment {
 		return null;
 	}
 	
+	/**
+	 * Get meal genres array for a meal at a specific dining hall. The "genre" is the category of food, its array is a set of strings describing
+	 * each food item in that category.
+	 * @param diningLocation JSON Object of the dining hall to get meal genres from
+	 * @param meal Name of the meal to get genres from
+	 * @return JSON Array containing categories of food, each category containing a list of food items.
+	 */
 	private JSONArray getMealGenres(JSONObject diningLocation, String meal) {
 		if(diningLocation == null) {
 			Log.e(TAG, "null dining location data");
