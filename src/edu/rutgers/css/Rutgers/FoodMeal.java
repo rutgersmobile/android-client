@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
 import android.os.Bundle;
@@ -59,11 +61,18 @@ public class FoodMeal extends Fragment {
 		mList.setAdapter(foodItemAdapter);
 		foodItemAdapter.add("Super Pancakes");
 		
-		Request.json("https://rumobile.rutgers.edu/1/rutgers-dining.txt").done(new DoneCallback<JSONObject>() {
+		Request.jsonArray("https://rumobile.rutgers.edu/1/rutgers-dining.txt").done(new DoneCallback<JSONArray>() {
 
 			@Override
-			public void onDone(JSONObject data) {
+			public void onDone(JSONArray data) {
 				Log.d(TAG, data.toString());
+			}
+			
+		}).fail(new FailCallback<AjaxStatus>() {
+		
+			@Override
+			public void onFail(AjaxStatus e) {
+				Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
 			}
 			
 		});	

@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers;
 
 import org.jdeferred.Promise;
 import org.jdeferred.impl.DeferredObject;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.androidquery.AQuery;
@@ -39,6 +40,25 @@ public class Request {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
 				if (json != null) deferred.resolve(json);
+				else deferred.reject(status);
+			}
+			
+		});
+		
+		
+		return deferred.promise();
+	}
+	
+	// gets arbitrary json array
+	public static Promise<JSONArray, AjaxStatus, Double> jsonArray (String resource) {
+		setup();
+		final DeferredObject<JSONArray, AjaxStatus, Double> deferred = new DeferredObject<JSONArray, AjaxStatus, Double>();
+		
+		aq.ajax(resource, JSONArray.class, new AjaxCallback<JSONArray>() {
+
+			@Override
+			public void callback(String url, JSONArray jsonArray, AjaxStatus status) {
+				if (jsonArray != null) deferred.resolve(jsonArray);
 				else deferred.reject(status);
 			}
 			

@@ -65,7 +65,7 @@ public class MainActivity extends FragmentActivity {
 		contentFrame.removeAllViews();
 		
 		Bundle args = new Bundle();
-		
+				
 		/*
 		args.putString("title", "News");
 		args.putString("component", "dtable");
@@ -74,6 +74,7 @@ public class MainActivity extends FragmentActivity {
 		//args.putString("api", "test");
 		 
 		//args.putString("component", "bus");
+		
 		
 		args.putString("component",  "food");
 		args.putString("location", "Brower Commons");
