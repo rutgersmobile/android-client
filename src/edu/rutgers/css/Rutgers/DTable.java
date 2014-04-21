@@ -119,7 +119,7 @@ public class DTable extends Fragment {
 					try {
 						Log.d("DTable", "Clicked \"" + c.getString("title") + "\", RSS feed: " + c.getString("rss"));
 						
-						FragmentManager fm = getFragmentManager();
+						FragmentManager fm = getActivity().getSupportFragmentManager();
 						
 						Bundle args = new Bundle();
 						args.putString("component", "rssreader");
