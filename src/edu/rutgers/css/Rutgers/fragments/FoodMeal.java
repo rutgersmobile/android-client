@@ -9,15 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxStatus;
-import com.androidquery.util.XmlDom;
-
-import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.R.id;
-import edu.rutgers.css.Rutgers.R.layout;
-import edu.rutgers.css.Rutgers.api.Request;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -26,6 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.androidquery.callback.AjaxStatus;
+
+import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.Dining;
+import edu.rutgers.css.Rutgers.api.Request;
 
 /* Dining JSON structure
 location_name = "Brower Commons"
@@ -88,18 +85,11 @@ public class FoodMeal extends Fragment {
 			return;
 		}
 		
-		// Get JSON array from dining API
-		Request.jsonArray("https://rumobile.rutgers.edu/1/rutgers-dining.txt").done(new DoneCallback<JSONArray>() {
+		Dining.getDiningLocation(location).done(new DoneCallback<JSONObject>() {
 
 			@Override
-			public void onDone(JSONArray data) {
-				Log.d(TAG, "Loaded dining data");
-				mData = data;
-				
-				// Successfully grabbed dining data, now get specific location & meal
-				JSONObject dinLoc = getDiningLocation(mData, location);
-				JSONArray mealGenres = null;
-				if(dinLoc != null) mealGenres = getMealGenres(dinLoc, meal);			
+			public void onDone(JSONObject dinLoc) {
+				JSONArray mealGenres = Dining.getMealGenres(dinLoc, meal);			
 				
 				// Populate list
 				if(mealGenres != null) {
@@ -115,88 +105,18 @@ public class FoodMeal extends Fragment {
 							Log.e(TAG, e.getMessage());
 						}
 					}
-				}
-			
+				}				
 			}
 			
-		}).fail(new FailCallback<AjaxStatus>() {
+		}).fail(new FailCallback<Exception>() {
 		
 			@Override
-			public void onFail(AjaxStatus e) {
-				Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
-				mData = null;
+			public void onFail(Exception e) {
+				Log.e(TAG, e.getMessage());
 			}
 			
-		});	
+		});
 	
 	}
 	
-	/**
-	 * Get the JSON Object for a specific dining hall
-	 * @param diningData JSONArray of all data from dining API
-	 * @param location Dining hall to get JSON object of
-	 * @return JSON Object containing data for a dining hall.
-	 */
-	private JSONObject getDiningLocation(JSONArray diningData, String location) {
-		if(diningData == null) {
-				Log.e(TAG, "null dining data jsonarray");
-				return null;
-		}
-		
-		// Find dining location in dining data
-		for(int i = 0; i < diningData.length(); i++) {
-			JSONObject curLoc;
-			try {
-				curLoc = (JSONObject) diningData.get(i);
-				if(curLoc.getString("location_name").equalsIgnoreCase(location)) {
-					return curLoc;
-				}
-			} catch (JSONException e) {
-				Log.e(TAG, "Could not read location: " + e.getMessage());
-				//return null;
-			}
-		}
-		
-		Log.e(TAG, "Dining hall location \""+location+"\" not found in Dining API output");
-		return null;
-	}
-	
-	/**
-	 * Get meal genres array for a meal at a specific dining hall. The "genre" is the category of food, its array is a set of strings describing
-	 * each food item in that category.
-	 * @param diningLocation JSON Object of the dining hall to get meal genres from
-	 * @param meal Name of the meal to get genres from
-	 * @return JSON Array containing categories of food, each category containing a list of food items.
-	 */
-	private JSONArray getMealGenres(JSONObject diningLocation, String meal) {
-		if(diningLocation == null) {
-			Log.e(TAG, "null dining location data");
-			return null;
-		}
-		
-		try {
-			JSONArray meals = diningLocation.getJSONArray("meals");
-			
-			// Find meal in dining hall data
-			for(int i = 0; i < meals.length(); i++) {
-				JSONObject curMeal = (JSONObject) meals.get(i);
-				
-				// Found meal - check if marked available & if so, return genres array
-				if(curMeal.getString("meal_name").equalsIgnoreCase(meal)) {
-					if(!curMeal.getBoolean("meal_avail")) {
-						return null;
-					}
-					
-					return curMeal.getJSONArray("genres");
-				}
-			}
-			
-		} catch (JSONException e) {
-			Log.e(TAG, e.getMessage());
-			return null;
-		}
-		
-		return null;
-	}
-
 }
