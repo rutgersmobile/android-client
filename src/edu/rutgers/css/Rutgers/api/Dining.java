@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers.api;
 
-import java.util.ArrayList;
-
 import org.jdeferred.Deferred;
 import org.jdeferred.DeferredManager;
 import org.jdeferred.DoneCallback;
@@ -9,15 +7,13 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.impl.DefaultDeferredManager;
 import org.jdeferred.impl.DeferredObject;
-import org.jdeferred.multiple.MultipleResults;
-import org.jdeferred.multiple.OneResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.androidquery.callback.AjaxStatus;
-
 import android.util.Log;
+
+import com.androidquery.callback.AjaxStatus;
 
 /**
  * Helper for getting data from dining API
@@ -36,6 +32,8 @@ public class Dining {
 	
 	/**
 	 * Grab the dining API data. Should update on day change.
+	 * TODO Caching
+	 * Current API only has New Brunswick data ; when multiple confs need to be read set this up like Nextbus.java
 	 */
 	private static void setup() {
 		if(!isSetup) {
@@ -54,19 +52,6 @@ public class Dining {
 					mNBDiningConf = (JSONArray) res;
 					isSetup = true;
 					confd.resolve(null);
-					/*try {
-						for(int i = 0; i < res.size(); i++) {
-							OneResult r = res.get(i);
-						
-							if(r.getPromise() == promiseNBDining) mNBDiningConf = (JSONArray) r.getResult();
-						}
-					
-						confd.resolve(null);
-					}
-					catch(Exception e) {
-						Log.e(TAG, Log.getStackTraceString(e));
-						confd.reject(e);
-					}*/
 				}
 				
 			}).fail(new FailCallback<AjaxStatus>() {
@@ -83,7 +68,7 @@ public class Dining {
 	/**
 	 * Get the JSON Object for a specific dining hall
 	 * @param location Dining hall to get JSON object of
-	 * @return JSON Object containing data for a dining hall.
+	 * @return Promise containing the JSON Object data for a dining hall.
 	 */
 	public static Promise<JSONObject, Exception, Double> getDiningLocation(final String location) {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
