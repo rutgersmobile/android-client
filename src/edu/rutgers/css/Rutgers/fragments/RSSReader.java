@@ -28,6 +28,10 @@ import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.RSSAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RSSItem;
 
+/**
+ * RSS Feed display fragment
+ * Displays items from an RSS feed.
+ */
 public class RSSReader extends Fragment implements OnItemClickListener {	
 	
 	private static final String TAG = "RSSReader";
@@ -76,6 +80,11 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		startActivity(i);
 	}
 
+	/**
+	 * Populate the list with items from a given RSS feed.
+	 * @param v Fragment view reference
+	 * @param rssUrl RSS feed to read from
+	 */
 	private void setupList(View v, String rssUrl) {
 		final ListView mList = (ListView) v.findViewById(R.id.rssreader_list);
 		
@@ -89,7 +98,6 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 				for(XmlDom item: items) {
 					RSSItem newItem = new RSSItem(item);
 					rssItemAdapter.add(newItem);
-					//Log.d(TAG,"Adding RSS item " + newItem);
 				}
 			}
 			

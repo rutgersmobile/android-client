@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 
 import org.jdeferred.DoneCallback;
@@ -14,16 +13,12 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.androidquery.util.AQUtility;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -79,7 +74,6 @@ public class MainActivity extends FragmentActivity {
 		//args.putString("api", "test");
 		 
 		//args.putString("component", "bus");
-		
 		
 		args.putString("component",  "food");
 		args.putString("location", "Brower Commons");

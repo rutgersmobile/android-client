@@ -11,6 +11,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import edu.rutgers.css.Rutgers.R;
 
+/**
+ * Array adapter extended for RSS items
+ *
+ */
 public class RSSAdapter extends ArrayAdapter<RSSItem> {
 
 	private int layoutResource;
@@ -40,7 +44,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 				convertView.setTag(mHolder);
 		}
 		else {	
-				mHolder = (RSSHolder)convertView.getTag();
+				mHolder = (RSSHolder) convertView.getTag();
 		}
 
 		/* Populate RSS row layout elements */

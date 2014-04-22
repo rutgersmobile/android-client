@@ -40,8 +40,8 @@ meals (array) ->
  */
 
 /**
- * A simple {@link android.support.v4.app.Fragment} subclass.
- * 
+ * Meal display fragment
+ * Displays all food items available for a specific meal at a specific dining location.
  */
 public class FoodMeal extends Fragment {
 

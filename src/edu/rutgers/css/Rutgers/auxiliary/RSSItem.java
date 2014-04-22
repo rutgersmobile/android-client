@@ -9,6 +9,10 @@ import android.util.Log;
 
 import com.androidquery.util.XmlDom;
 
+/**
+ * Class for holding RSS item data
+ *
+ */
 public class RSSItem {
 
 	private static final String TAG = "RSSItem";
@@ -20,6 +24,10 @@ public class RSSItem {
 	public String date;
 	public String imgUrl;
 	
+	/**
+	 * Default constructor
+	 * @param item RSS item in XML form
+	 */
 	public RSSItem(XmlDom item) {
 		if(item == null) return;
 		
@@ -61,6 +69,10 @@ public class RSSItem {
 		}
 	}
 	
+	/**
+	 * Returns RSS item title
+	 * @return RSS item title
+	 */
 	public String toString() {
 		return this.title;
 	}
