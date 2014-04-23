@@ -122,14 +122,15 @@ public class DTable extends Fragment {
 				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 					JSONObject c = (JSONObject) parent.getAdapter().getItem(position);
 					try {
-						Log.d("DTable", "Clicked \"" + c.getString("title") + "\", RSS feed: " + c.getString("rss"));
+						JSONObject channel = (JSONObject) c.getJSONObject("channel");
+						Log.d("DTable", "Clicked \"" + channel.getString("title") + "\", RSS feed: " + channel.getString("url"));
 						
 						FragmentManager fm = getActivity().getSupportFragmentManager();
 						
 						Bundle args = new Bundle();
 						args.putString("component", "rssreader");
-						args.putString("title",  c.getString("title"));
-						args.putString("rss",  c.getString("rss"));
+						args.putString("title",  channel.getString("title"));
+						args.putString("rss",  channel.getString("url"));
 						Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 						
 						fm.beginTransaction()
