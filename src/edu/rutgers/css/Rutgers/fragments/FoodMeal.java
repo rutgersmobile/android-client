@@ -62,7 +62,7 @@ public class FoodMeal extends Fragment {
 		Bundle args = getArguments();
 		mList = (ListView) v.findViewById(R.id.food_meal_list);
 		
-		getActivity().setTitle(args.getString("location"));
+		getActivity().setTitle(args.getString("location") + " - " + args.getString("meal"));
 		
 		Log.d(TAG, "Location: " + args.getString("location") + "; Meal: " + args.getString("meal"));
 		setupList(args.getString("location"), args.getString("meal"));

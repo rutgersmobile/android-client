@@ -27,54 +27,65 @@ import android.widget.ListView;
  * Displays dining halls. Selecting a hall goes to meal menu.
  *
  */
-public class FoodMain extends Fragment {
+public class FoodHall extends Fragment {
 
-	private static final String TAG = "FoodMain";
+	private static final String TAG = "FoodHall";
 	private ListView mList;
-	private List<String> diningHalls;
-	private ArrayAdapter<String> diningHallAdapter;
-
+	private List<String> menus;
+	private ArrayAdapter<String> menuAdapter;
+	private String diningHall;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		diningHalls= new ArrayList<String>();
-		diningHallAdapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, diningHalls);
+		Bundle args = getArguments();
 		
-		Dining.getDiningHalls().done(new DoneCallback<JSONArray>() {
+		menus = new ArrayList<String>();
+		menuAdapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, menus );
+
+		if(args.getString("location") == null) {
+			Log.e(TAG, "null location");
+			return;
+		}
+		
+		Dining.getDiningLocation(args.getString("location")).done(new DoneCallback<JSONObject>() {
 
 			@Override
-			public void onDone(JSONArray halls) {
+			public void onDone(JSONObject hall) {
 				try {
-					for(int i = 0; i < halls.length(); i++) {
-						JSONObject curHall = halls.getJSONObject(i);
-						diningHallAdapter.add(curHall.getString("location_name"));
-					}
+					JSONArray meals = hall.getJSONArray("meals");
+						
+					for(int j = 0; j < meals.length(); j++) {
+						JSONObject curMeal = meals.getJSONObject(j);
+						if(curMeal.getBoolean("meal_avail"))
+							menuAdapter.add(curMeal.getString("meal_name"));
+					}		
 				}
 				catch(JSONException e) {
+					
 					Log.e(TAG, e.getMessage());
+				
 				}
 			}
-
 			
 		});
 	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_foodmain, parent, false);
-		mList = (ListView) v.findViewById(R.id.dining_locations_list);
+		View v = inflater.inflate(R.layout.fragment_foodhall, parent, false);
+		mList = (ListView) v.findViewById(R.id.dining_menu_list);
 		
 		Bundle args = getArguments();
-		getActivity().setTitle(args.getString("title"));
-
-		setupList();
+		getActivity().setTitle(args.getString("location"));
+		setupList(args.getString("location"));
 		
 		return v;
 	}
 	
-	private void setupList() {
-		mList.setAdapter(diningHallAdapter);		
+	private void setupList(final String location) {
+		mList.setAdapter(menuAdapter);
+		
 		mList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -82,18 +93,17 @@ public class FoodMain extends Fragment {
 				FragmentManager fm = getActivity().getSupportFragmentManager();
 				
 				Bundle args = new Bundle();
-				args.putString("component", "foodhall");
-				args.putString("location", (String) parent.getAdapter().getItem(position));
+				args.putString("component", "foodmeal");
+				args.putString("location", location);
+				args.putString("meal", (String) parent.getAdapter().getItem(position));
 				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 				
 				fm.beginTransaction()
 					.replace(R.id.main_content_frame, fragment)
 					.addToBackStack(null)
 					.commit(); 
-				
 			}
 			
-		});	
+		});
 	}
-	
 }
