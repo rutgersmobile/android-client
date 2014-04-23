@@ -36,60 +36,24 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	
 	private static final String TAG = "RSSReader";
 	private List<RSSItem> rssItems;
+	private ListView mList;
 	private ArrayAdapter<RSSItem> rssItemAdapter;
-	private AQuery aq;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		Bundle args = getArguments();
+		
 		rssItems = new ArrayList<RSSItem>();
 		rssItemAdapter = new RSSAdapter(this.getActivity(), R.layout.rss_row, rssItems);
 
-		aq = new AQuery(this.getActivity());
-	}
-
-	@Override
-	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_rssreader, parent, false);
-		Bundle args = getArguments();
-		final ListView mList = (ListView) v.findViewById(R.id.rssreader_list);
-		
-		Log.d(TAG, "Fragment for RSS feed " + args.getString("rss"));
-		
-		// Sets title to name of the RSS feed being displayed
-		getActivity().setTitle(args.getString("title"));
-		
-		// Adapter & click listener for RSS list view
-		mList.setAdapter(rssItemAdapter);
-		mList.setOnItemClickListener(this);
-		
-		// Populate the list with given RSS feed
-		setupList(v, args.getString("rss"));
-		
-		return v;
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		// For now send URL to browser
-		RSSItem item = rssItemAdapter.getItem(position);
-		
-		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setData(Uri.parse(item.link));
-		startActivity(i);
-	}
-
-	/**
-	 * Populate the list with items from a given RSS feed.
-	 * @param v Fragment view reference
-	 * @param rssUrl RSS feed to read from
-	 */
-	private void setupList(View v, String rssUrl) {
-		final ListView mList = (ListView) v.findViewById(R.id.rssreader_list);
+		if(args.getString("rss") == null) {
+			Log.e(TAG, "null rss url");
+			return;
+		}
 		
 		// Get RSS feed XML and add items through the array adapter
-		Request.xml(rssUrl).done(new DoneCallback<XmlDom>() {
+		Request.xml(args.getString("rss")).done(new DoneCallback<XmlDom>() {
 			
 			@Override
 			public void onDone(XmlDom xml) {
@@ -109,9 +73,34 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 			}
 			
 		});
+	}
+
+	@Override
+	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+		View v = inflater.inflate(R.layout.fragment_rssreader, parent, false);
+		Bundle args = getArguments();
+		mList = (ListView) v.findViewById(R.id.rssreader_list);
 		
-		// Redraw list
-		mList.invalidate();
+		Log.d(TAG, "Fragment for RSS feed " + args.getString("rss"));
+		
+		// Sets title to name of the RSS feed being displayed
+		getActivity().setTitle(args.getString("title"));
+		
+		// Adapter & click listener for RSS list view
+		mList.setAdapter(rssItemAdapter);
+		mList.setOnItemClickListener(this);		
+		
+		return v;
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		// For now send URL to browser
+		RSSItem item = rssItemAdapter.getItem(position);
+		
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setData(Uri.parse(item.link));
+		startActivity(i);
 	}
 	
 }
