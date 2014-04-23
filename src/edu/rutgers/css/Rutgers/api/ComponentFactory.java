@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.api;
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.BusMain;
 import edu.rutgers.css.Rutgers.fragments.DTable;
+import edu.rutgers.css.Rutgers.fragments.FoodMain;
 import edu.rutgers.css.Rutgers.fragments.FoodMeal;
 import edu.rutgers.css.Rutgers.fragments.RSSReader;
 import android.app.Activity;
@@ -47,7 +48,7 @@ public class ComponentFactory {
 		}
 		
 		else if (options.getString("component").equals("food")) {
-			fragment = new FoodMeal();
+			fragment = new FoodMain();
 			Log.d(TAG, "creating a foodmeal");
 		}
 		

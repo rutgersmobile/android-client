@@ -20,7 +20,7 @@ import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
 
-import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers.api.Request;
 
@@ -44,7 +44,6 @@ public class FoodMeal extends Fragment {
 
 	private static final String TAG = "FoodMeal";
 	private ListView mList;
-	private JSONArray mData;
 	private List<String> foodItems;
 	private ArrayAdapter<String> foodItemAdapter;
 

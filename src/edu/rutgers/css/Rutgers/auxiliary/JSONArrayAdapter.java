@@ -6,9 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.R.id;
-
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.util.Log;
@@ -17,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import edu.rutgers.css.Rutgers2.R;
 
 public class JSONArrayAdapter implements ListAdapter {
 	

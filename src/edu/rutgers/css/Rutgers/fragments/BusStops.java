@@ -12,11 +12,9 @@ import android.widget.ListView;
 
 import com.androidquery.AQuery;
 
-import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.R.id;
-import edu.rutgers.css.Rutgers.R.layout;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.JSONArrayAdapter;
+import edu.rutgers.css.Rutgers2.R;
 
 public class BusStops extends Fragment {
 

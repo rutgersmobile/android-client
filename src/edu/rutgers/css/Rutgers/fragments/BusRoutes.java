@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.fragments;
 import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,11 +13,9 @@ import android.widget.ListView;
 
 import com.androidquery.AQuery;
 
-import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.R.id;
-import edu.rutgers.css.Rutgers.R.layout;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.JSONArrayAdapter;
+import edu.rutgers.css.Rutgers2.R;
 
 public class BusRoutes extends Fragment {
 	private AQuery aq;

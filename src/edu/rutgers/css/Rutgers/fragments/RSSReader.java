@@ -23,7 +23,7 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
-import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.RSSAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RSSItem;

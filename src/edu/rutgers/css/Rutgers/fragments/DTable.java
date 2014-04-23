@@ -6,7 +6,6 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,10 +22,8 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
-import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.R.id;
-import edu.rutgers.css.Rutgers.R.layout;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers2.R;
 
 public class DTable extends Fragment {
 	
@@ -170,7 +167,7 @@ public class DTable extends Fragment {
 		@Override
 		public long getItemId (int id) {
 			return id;
-		}
+		} 
 		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {

@@ -25,6 +25,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.Prediction;
+import edu.rutgers.css.Rutgers2.R;
 
 public class MainActivity extends FragmentActivity {
 	
@@ -66,7 +67,7 @@ public class MainActivity extends FragmentActivity {
 		
 		Bundle args = new Bundle();
 				
-
+		/*
 		args.putString("title", "News");
 		args.putString("component", "dtable");
 		args.putString(
@@ -77,17 +78,18 @@ public class MainActivity extends FragmentActivity {
 						"{\"title\": \"Rutgers Events\", \"channel\":{\"title\": \"Rutgers Events\",\"url\": \"http://ruevents.rutgers.edu/events/getEventsRss.xml\"}}" +
 						"]"
 		);
+		*/
 		//args.putString("url", "https://rumobile.rutgers.edu/1/news.txt");
+		
 		
 		//args.putString("api", "test");
 		 
 		//args.putString("component", "bus");
 		
-		/*
 		args.putString("component",  "food");
-		args.putString("location", "Brower Commons");
-		args.putString("meal", "Breakfast");
-		*/
+		args.putString("title", "Dining");
+		//args.putString("location", "Brower Commons");
+		//args.putString("meal", "Breakfast");
 		
 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {

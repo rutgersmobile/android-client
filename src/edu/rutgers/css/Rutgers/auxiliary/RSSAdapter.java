@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Array adapter extended for RSS items

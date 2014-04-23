@@ -65,6 +65,20 @@ public class Dining {
 		}
 	}
 	
+	public static Promise<JSONArray, Exception, Double> getDiningHalls() {
+		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
+		setup();
+		
+		configured.then(new DoneCallback<Object>() {
+			public void onDone(Object o) {
+				JSONArray conf = mNBDiningConf;
+				d.resolve(conf);
+			}
+		});
+		
+		return d.promise();
+	}
+	
 	/**
 	 * Get the JSON Object for a specific dining hall
 	 * @param location Dining hall to get JSON object of
