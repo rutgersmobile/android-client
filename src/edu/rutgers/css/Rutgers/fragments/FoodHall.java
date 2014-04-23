@@ -24,7 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 /**
- * Displays dining halls. Selecting a hall goes to meal menu.
+ * Displays available meal menus for a dining hall.
  *
  */
 public class FoodHall extends Fragment {

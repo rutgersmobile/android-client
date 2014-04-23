@@ -50,9 +50,54 @@ public class FoodMeal extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		final Bundle args = getArguments();
+		
 		foodItems = new ArrayList<String>();
 		foodItemAdapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, foodItems);
+		
+		if(args.getString("location") == null || args.getString("meal") == null) {
+			Log.e(TAG, "null location/meal");
+			return;
+		}
+		
+		Dining.getDiningLocation(args.getString("location")).done(new DoneCallback<JSONObject>() {
+
+			@Override
+			public void onDone(JSONObject dinLoc) {
+				JSONArray mealGenres = Dining.getMealGenres(dinLoc, args.getString("meal"));			
+				
+				// Populate list
+				if(mealGenres != null) {
+					
+					for(int i = 0; i < mealGenres.length(); i++) {
+						try {
+					
+							JSONObject curGenre = mealGenres.getJSONObject(i);
+							JSONArray mealItems = curGenre.getJSONArray("items");
+							foodItemAdapter.add("CATEGORY - " + curGenre.getString("genre_name")); // Category title placeholder
+							
+							for(int j = 0; j < mealItems.length(); j++) {
+								foodItemAdapter.add(mealItems.getString(j));
+							}
+							
+						} catch (JSONException e) {
+						
+							Log.e(TAG, e.getMessage());
+						
+						}
+					}
+					
+				}				
+			}
+			
+		}).fail(new FailCallback<Exception>() {
+		
+			@Override
+			public void onFail(Exception e) {
+				Log.e(TAG, e.getMessage());
+			}
+			
+		});
 	}
 	
 	@Override
@@ -70,51 +115,8 @@ public class FoodMeal extends Fragment {
 		return v;
 	}
 	
-	/**
-	 * Grab data from dining API and fill up the list of menu items.
-	 * @param location Dining hall to get items from
-	 * @param meal Which meal is to be displayed
-	 */
 	private void setupList(final String location, final String meal) {
-		
 		mList.setAdapter(foodItemAdapter);
-		
-		if(location == null || meal == null) {
-			Log.e(TAG, "null location/meal args to setupList");
-			return;
-		}
-		
-		Dining.getDiningLocation(location).done(new DoneCallback<JSONObject>() {
-
-			@Override
-			public void onDone(JSONObject dinLoc) {
-				JSONArray mealGenres = Dining.getMealGenres(dinLoc, meal);			
-				
-				// Populate list
-				if(mealGenres != null) {
-					for(int i = 0; i < mealGenres.length(); i++) {
-						try {
-							JSONObject curGenre = mealGenres.getJSONObject(i);
-							JSONArray mealItems = curGenre.getJSONArray("items");
-							foodItemAdapter.add("CATEGORY - " + curGenre.getString("genre_name")); // Category title placeholder
-							for(int j = 0; j < mealItems.length(); j++) {
-								foodItemAdapter.add(mealItems.getString(j));
-							}
-						} catch (JSONException e) {
-							Log.e(TAG, e.getMessage());
-						}
-					}
-				}				
-			}
-			
-		}).fail(new FailCallback<Exception>() {
-		
-			@Override
-			public void onFail(Exception e) {
-				Log.e(TAG, e.getMessage());
-			}
-			
-		});
 	
 	}
 	
