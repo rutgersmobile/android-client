@@ -47,6 +47,10 @@ public class FoodMeal extends Fragment {
 	private List<String> foodItems;
 	private ArrayAdapter<String> foodItemAdapter;
 
+	public FoodMeal() {
+		// Required empty public constructor
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

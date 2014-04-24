@@ -39,6 +39,10 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	private ListView mList;
 	private ArrayAdapter<RSSItem> rssItemAdapter;
 	
+	public RSSReader() {
+		// Required empty public constructor
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

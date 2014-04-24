@@ -22,6 +22,10 @@ public class BusRoutes extends Fragment {
 	private ListView mList;
 	private static final String TAG = "BusRoutes";
 
+	public BusRoutes() {
+		// Required empty public constructor
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

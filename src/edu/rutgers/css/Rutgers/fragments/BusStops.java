@@ -21,6 +21,10 @@ public class BusStops extends Fragment {
 	private AQuery aq;
 	private ListView mList;
 	
+	public BusStops() {
+		// Required empty public constructor
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

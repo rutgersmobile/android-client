@@ -41,6 +41,10 @@ public class DTable extends Fragment {
 	
 	private AQuery aq;
 
+	public DTable() {
+		// Required empty public constructor
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

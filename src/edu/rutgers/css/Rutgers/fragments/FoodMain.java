@@ -34,6 +34,10 @@ public class FoodMain extends Fragment {
 	private List<String> diningHalls;
 	private ArrayAdapter<String> diningHallAdapter;
 
+	public FoodMain() {
+		// Required empty public constructor
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

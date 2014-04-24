@@ -13,6 +13,10 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusAll extends Fragment {
 	private AQuery aq;
 
+	public BusAll() {
+		// Required empty public constructor
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

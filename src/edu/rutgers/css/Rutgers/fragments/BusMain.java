@@ -15,6 +15,10 @@ public class BusMain extends Fragment {
 	private AQuery aq;
 	private FragmentTabHost mTabHost;
 
+	public BusMain() {
+		// Required empty public constructor
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
