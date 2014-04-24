@@ -225,20 +225,31 @@ public class DTable extends Fragment {
 		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			// If we aren't given a view, inflate one
-			if (convertView == null) convertView = getActivity().getLayoutInflater().inflate(R.layout.dtable_row, null);
-			
 			// Configure the view for this crime
 			JSONObject c = (JSONObject) getItem(position);
+						
+			// If we aren't given a view, inflate one. Get special layout for category items.
+			if (convertView == null) {
+				if(c.has("children"))
+					convertView = getActivity().getLayoutInflater().inflate(R.layout.category_row, null);
+				else
+					convertView = getActivity().getLayoutInflater().inflate(R.layout.dtable_row, null);
+			}
 			
-			TextView titleTextView = (TextView)convertView.findViewById(R.id.text);
-			
+			String title;
 			try {
-				String title = getLocalTitle(c.get("title"));
-				if(c.has("children")) title += " >>";
-				titleTextView.setText(title);
+				title = getLocalTitle(c.get("title"));
 			} catch (JSONException e) {
-				titleTextView.setText("object does not have a title property");
+				title = "object does not have a title property";
+			}
+			
+			if(c.has("children")) {
+				TextView titleTextView = (TextView)convertView.findViewById(R.id.category_text);
+				titleTextView.setText(title);
+			}
+			else {
+				TextView titleTextView = (TextView)convertView.findViewById(R.id.text);
+				titleTextView.setText(title);
 			}
 				
 			return convertView;

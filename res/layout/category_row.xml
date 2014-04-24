@@ -4,11 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/text"
+	<TextView
+        android:id="@+id/category_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="10dp"
-        android:text="REPLACE" />
+        android:text="REPLACE"
+        android:textColor="@android:color/holo_red_dark"
+       	android:textStyle="bold" />
 
 </LinearLayout>
