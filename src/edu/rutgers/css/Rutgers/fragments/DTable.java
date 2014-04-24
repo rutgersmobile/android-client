@@ -128,25 +128,34 @@ public class DTable extends Fragment {
 		
 		/* Clicks on DTable item launch component in "view" field with arguments */
 		mList.setOnItemClickListener(new OnItemClickListener() {
-				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {				
 					JSONObject c = (JSONObject) parent.getAdapter().getItem(position);
-					try {
-						JSONObject channel = (JSONObject) c.getJSONObject("channel");
-						Log.d("DTable", "Clicked \"" + channel.getString("title") + "\"");
-						
-						FragmentManager fm = getActivity().getSupportFragmentManager();
-						
-						Bundle args = new Bundle();
-						
-						// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
-						// TODO Should ComponentFactory take "view" argument instead of "component" argument to avoid this?
-						args.putString("component", channel.getString("view"));
-						
-						Iterator<String> keys = channel.keys();
-						while(keys.hasNext()) {
-							String key = keys.next();
-							Log.d(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
-							args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
+					Bundle args = new Bundle();
+					FragmentManager fm = getActivity().getSupportFragmentManager();	
+
+					try {	
+						// This object has an array of more channels
+						if(c.has("children")) {							
+							Log.d("DTable", "Clicked \"" + c.getString("title") + "\"");
+							args.putString("component", "dtable");
+							args.putString("title", c.getString("title"));
+							args.putString("data", c.getJSONArray("children").toString());
+						}
+						// This object is a channel
+						else {
+							JSONObject channel = (JSONObject) c.getJSONObject("channel");
+							Log.d("DTable", "Clicked \"" + channel.getString("title") + "\"");
+							
+							// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
+							// TODO Should ComponentFactory take "view" argument instead of "component" argument to avoid this?
+							args.putString("component", channel.getString("view"));
+							
+							Iterator<String> keys = channel.keys();
+							while(keys.hasNext()) {
+								String key = keys.next();
+								Log.d(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
+								args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
+							}
 						}
 						
 						Fragment fragment = ComponentFactory.getInstance().createFragment(args);
