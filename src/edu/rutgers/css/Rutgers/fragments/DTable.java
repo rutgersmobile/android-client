@@ -200,7 +200,11 @@ public class DTable extends Fragment {
 			TextView titleTextView = (TextView)convertView.findViewById(R.id.text);
 			
 			try {
-				titleTextView.setText(c.getString("title"));
+				//TODO sub-menu items
+				if(c.has("children"))
+					titleTextView.setText(c.getString("title") + " >>");
+				else
+					titleTextView.setText(c.getString("title"));
 			} catch (JSONException e) {
 				titleTextView.setText("object does not have a title property");
 			}

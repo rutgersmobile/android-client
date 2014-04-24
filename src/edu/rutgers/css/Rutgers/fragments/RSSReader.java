@@ -81,7 +81,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		Bundle args = getArguments();
 		mList = (ListView) v.findViewById(R.id.rssreader_list);
 		
-		Log.d(TAG, "Fragment for RSS feed " + args.getString("rss"));
+		Log.d(TAG, "Fragment for RSS feed " + args.getString("url"));
 		
 		// Sets title to name of the RSS feed being displayed
 		getActivity().setTitle(args.getString("title"));
