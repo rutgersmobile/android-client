@@ -138,7 +138,7 @@ public class DTable extends Fragment {
 						if(c.has("children")) {							
 							Log.d("DTable", "Clicked \"" + c.getString("title") + "\"");
 							args.putString("component", "dtable");
-							args.putString("title", c.getString("title"));
+							args.putString("title", getLocalTitle(c.get("title")));
 							args.putString("data", c.getJSONArray("children").toString());
 						}
 						// This object is a channel
@@ -174,6 +174,27 @@ public class DTable extends Fragment {
 					
 				}
 		});
+	}
+
+	/**
+	 * In cases where multiple titles are specified ("homeTitle", "foreignTitle"), gets appropriate title
+	 * according to configuration.
+	 * TODO Update this when configuration by location is available. Just grabs "homeTitle" now when applicable.
+	 * @param title String or JSONObject returned by get("title") on channel JSONObject
+	 * @return Appropriate title to display
+	 */
+	private String getLocalTitle(Object title) {
+		if(title.getClass() == String.class) {
+			return (String) title;
+		}
+		else if(title.getClass() == JSONObject.class) {
+			try {
+				return ((JSONObject)title).getString("homeTitle");
+			} catch (JSONException e) {
+				return null;
+			}
+		}
+		return null;
 	}
 	
 	private class JSONAdapter extends BaseAdapter {
@@ -213,11 +234,9 @@ public class DTable extends Fragment {
 			TextView titleTextView = (TextView)convertView.findViewById(R.id.text);
 			
 			try {
-				//TODO sub-menu items
-				if(c.has("children"))
-					titleTextView.setText(c.getString("title") + " >>");
-				else
-					titleTextView.setText(c.getString("title"));
+				String title = getLocalTitle(c.get("title"));
+				if(c.has("children")) title += " >>";
+				titleTextView.setText(title);
 			} catch (JSONException e) {
 				titleTextView.setText("object does not have a title property");
 			}
