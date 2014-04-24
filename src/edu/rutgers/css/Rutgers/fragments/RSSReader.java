@@ -47,13 +47,13 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		rssItems = new ArrayList<RSSItem>();
 		rssItemAdapter = new RSSAdapter(this.getActivity(), R.layout.rss_row, rssItems);
 
-		if(args.getString("rss") == null) {
+		if(args.get("url") == null) {
 			Log.e(TAG, "null rss url");
 			return;
 		}
 		
 		// Get RSS feed XML and add items through the array adapter
-		Request.xml(args.getString("rss")).done(new DoneCallback<XmlDom>() {
+		Request.xml(args.getString("url")).done(new DoneCallback<XmlDom>() {
 			
 			@Override
 			public void onDone(XmlDom xml) {

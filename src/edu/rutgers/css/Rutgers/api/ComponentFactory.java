@@ -30,12 +30,17 @@ public class ComponentFactory {
 	}
 	
 	public Fragment createFragment (Bundle options) {
-		Log.d("ComponentFactory", "Attempting to create fragment");
+		Log.d(TAG, "Attempting to create fragment");
 		Fragment fragment = new Fragment();
+		
+		if(options.get("component") == null) {
+			Log.e(TAG, "Component argument not set");
+			return null;
+		}
 		
 		if (options.getString("component").equals("dtable")) {
 			fragment = new DTable();
-			Log.d("ComponentFactory", "Creating a dtable");
+			Log.d(TAG, "Creating a dtable");
 		}
 		
 		else if (options.getString("component").equals("bus")) {
@@ -43,7 +48,7 @@ public class ComponentFactory {
 			Log.d(TAG, "creating a busmain");
 		}
 		
-		else if (options.getString("component").equals("rssreader")) {
+		else if (options.getString("component").equalsIgnoreCase("reader")) {
 			fragment = new RSSReader();
 			Log.d(TAG, "creating an rssreader");
 		}

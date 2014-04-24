@@ -67,27 +67,27 @@ public class MainActivity extends FragmentActivity {
 		
 		Bundle args = new Bundle();
 				
-		/*
 		args.putString("title", "News");
 		args.putString("component", "dtable");
+		/*
 		args.putString(
 				"data", "[" +
-						"{\"title\":\"Rutgers Today\", \"channel\":{\"title\":\"Rutgers Today\", \"url\":\"http://news.rutgers.edu/rss/today\"}}," +
-						"{\"title\": \"Newark News\", \"channel\":{\"title\": \"Newark News\",\"url\":\"http://news.rutgers.edu/rss/newark\"}}, " +
-						"{\"title\": \"Camden News\", \"channel\":{\"title\": \"Camden News\",\"url\":\"http://news.rutgers.edu/rss/camden\"}}, " +
-						"{\"title\": \"Rutgers Events\", \"channel\":{\"title\": \"Rutgers Events\",\"url\": \"http://ruevents.rutgers.edu/events/getEventsRss.xml\"}}" +
+						"{\"title\":\"Rutgers Today\", \"channel\":{\"view\":\"Reader\",\"title\":\"Rutgers Today\", \"url\":\"http://news.rutgers.edu/rss/today\"}}," +
+						"{\"title\": \"Newark News\", \"channel\":{\"view\":\"Reader\",\"title\": \"Newark News\",\"url\":\"http://news.rutgers.edu/rss/newark\"}}, " +
+						"{\"title\": \"Camden News\", \"channel\":{\"view\":\"Reader\",\"title\": \"Camden News\",\"url\":\"http://news.rutgers.edu/rss/camden\"}}, " +
+						"{\"title\": \"Rutgers Events\", \"channel\":{\"view\":\"Reader\",\"title\": \"Rutgers Events\",\"url\": \"http://ruevents.rutgers.edu/events/getEventsRss.xml\"}}" +
 						"]"
 		);
 		*/
-		//args.putString("url", "https://rumobile.rutgers.edu/1/news.txt");
+		args.putString("url", "https://rumobile.rutgers.edu/1/news.txt");
 		
 		
 		//args.putString("api", "test");
 		 
 		//args.putString("component", "bus");
 		
-		args.putString("component",  "food");
-		args.putString("title", "Dining");
+		//args.putString("component",  "food");
+		//args.putString("title", "Dining");
 		//args.putString("location", "Brower Commons");
 		//args.putString("meal", "Breakfast");
 		

@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
+import java.util.Iterator;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +27,10 @@ import com.androidquery.callback.AjaxStatus;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers2.R;
 
+/**
+ * Dynamic Table
+ *
+ */
 public class DTable extends Fragment {
 	
 	private ListView mList;
@@ -49,7 +55,9 @@ public class DTable extends Fragment {
 		
 		Bundle args = getArguments();
 		
-		getActivity().setTitle(args.getString("title"));
+		if(args.get("title") != null) {
+			getActivity().setTitle(args.getString("title"));
+		}
 		
 		try {
 
@@ -114,29 +122,41 @@ public class DTable extends Fragment {
 		
 		mList.setAdapter(a);
 		
-		/* Clicks on the news list launch RSS reader activity from JSON 'rss' field */
+		/* Clicks on DTable item launch component in "view" field with arguments */
 		mList.setOnItemClickListener(new OnItemClickListener() {
 				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 					JSONObject c = (JSONObject) parent.getAdapter().getItem(position);
 					try {
 						JSONObject channel = (JSONObject) c.getJSONObject("channel");
-						Log.d("DTable", "Clicked \"" + channel.getString("title") + "\", RSS feed: " + channel.getString("url"));
+						Log.d("DTable", "Clicked \"" + channel.getString("title") + "\"");
 						
 						FragmentManager fm = getActivity().getSupportFragmentManager();
 						
 						Bundle args = new Bundle();
-						args.putString("component", "rssreader");
-						args.putString("title",  channel.getString("title"));
-						args.putString("rss",  channel.getString("url"));
-						Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 						
+						// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
+						// TODO Should ComponentFactory take "view" argument instead of "component" argument to avoid this?
+						args.putString("component", channel.getString("view"));
+						
+						Iterator<String> keys = channel.keys();
+						while(keys.hasNext()) {
+							String key = keys.next();
+							Log.d(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
+							args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
+						}
+						
+						Fragment fragment = ComponentFactory.getInstance().createFragment(args);
+						if(fragment == null) {
+							Log.e(TAG, "Failed to create component");
+							return;
+						}
 						fm.beginTransaction()
 							.replace(R.id.main_content_frame, fragment)
 							.addToBackStack(null)
 							.commit(); 
 						
 					} catch (JSONException e) {
-						Log.e("DTable", "Clicked item #" + position + " and failed to read JSON title/rss");
+						Log.e("DTable", "JSONException: " + e.getMessage());
 					}
 					
 				}

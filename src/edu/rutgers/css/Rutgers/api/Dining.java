@@ -21,7 +21,6 @@ import com.androidquery.callback.AjaxStatus;
  */
 public class Dining {
 	
-	// timestamps: remove last 3 digits for unix timestamp
 	private static boolean isSetup = false;
 	private static Promise<Object, Object, Object> configured;
 	private static final String TAG = "DiningAPI";
@@ -31,8 +30,9 @@ public class Dining {
 	private static final String API_URL = "https://rumobile.rutgers.edu/1/rutgers-dining.txt";
 	
 	/**
-	 * Grab the dining API data. Should update on day change.
-	 * TODO Caching
+	 * Grab the dining API data.
+	 * TODO Caching - only needs to update once per day
+	 * date fields: remove last 3 digits for unix timestamp
 	 * Current API only has New Brunswick data ; when multiple confs need to be read set this up like Nextbus.java
 	 */
 	private static void setup() {
@@ -65,6 +65,10 @@ public class Dining {
 		}
 	}
 	
+	/**
+	 * Get the JSONArray containing all of the dining hall JSON objects
+	 * @return JSONArray of dining hall JSONObjects
+	 */
 	public static Promise<JSONArray, Exception, Double> getDiningHalls() {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
@@ -82,7 +86,7 @@ public class Dining {
 	/**
 	 * Get the JSON Object for a specific dining hall
 	 * @param location Dining hall to get JSON object of
-	 * @return Promise containing the JSON Object data for a dining hall.
+	 * @return Promise containing the JSONObject data for a dining hall.
 	 */
 	public static Promise<JSONObject, Exception, Double> getDiningLocation(final String location) {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
