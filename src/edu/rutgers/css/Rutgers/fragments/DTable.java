@@ -136,7 +136,7 @@ public class DTable extends Fragment {
 					try {	
 						// This object has an array of more channels
 						if(c.has("children")) {							
-							Log.d("DTable", "Clicked \"" + c.getString("title") + "\"");
+							Log.d(TAG, "Clicked \"" + getLocalTitle(c.get("title")) + "\"");
 							args.putString("component", "dtable");
 							args.putString("title", getLocalTitle(c.get("title")));
 							args.putString("data", c.getJSONArray("children").toString());
@@ -144,7 +144,7 @@ public class DTable extends Fragment {
 						// This object is a channel
 						else {
 							JSONObject channel = (JSONObject) c.getJSONObject("channel");
-							Log.d("DTable", "Clicked \"" + channel.getString("title") + "\"");
+							Log.d(TAG, "Clicked \"" + getLocalTitle(channel.get("title")) + "\"");
 							
 							// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
 							// TODO Should ComponentFactory take "view" argument instead of "component" argument to avoid this?
@@ -169,7 +169,7 @@ public class DTable extends Fragment {
 							.commit(); 
 						
 					} catch (JSONException e) {
-						Log.e("DTable", "JSONException: " + e.getMessage());
+						Log.e(TAG, "JSONException: " + e.getMessage());
 					}
 					
 				}
