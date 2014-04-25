@@ -225,6 +225,9 @@ public class DTable extends Fragment {
 		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			TextView titleTextView;
+			String title;
+			
 			// Configure the view for this crime
 			JSONObject c = (JSONObject) getItem(position);
 						
@@ -236,21 +239,19 @@ public class DTable extends Fragment {
 					convertView = getActivity().getLayoutInflater().inflate(R.layout.dtable_row, null);
 			}
 			
-			String title;
 			try {
 				title = getLocalTitle(c.get("title"));
 			} catch (JSONException e) {
 				title = "object does not have a title property";
 			}
 			
-			if(c.has("children")) {
-				TextView titleTextView = (TextView)convertView.findViewById(R.id.category_text);
-				titleTextView.setText(title);
-			}
-			else {
-				TextView titleTextView = (TextView)convertView.findViewById(R.id.text);
-				titleTextView.setText(title);
-			}
+			
+			if(c.has("children"))
+				titleTextView = (TextView)convertView.findViewById(R.id.category_text);
+			else
+				titleTextView = (TextView)convertView.findViewById(R.id.text);
+			
+			titleTextView.setText(title);
 				
 			return convertView;
 		}
