@@ -6,6 +6,8 @@ import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.json.JSONObject;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -14,6 +16,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -25,6 +29,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.Prediction;
+import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
 public class MainActivity extends FragmentActivity {
@@ -52,13 +57,78 @@ public class MainActivity extends FragmentActivity {
         getActionBar().setHomeButtonEnabled(true);
         
         ListView list = (ListView) menu.getMenu().findViewById(R.id.left_menu);
-		
+
+        // Sliding menu setup
+        ArrayList<SlideMenuItem> menuArray = new ArrayList<SlideMenuItem>();
+        
+        // Menu items with optional/special arguments can be initialized with a custom bundle
+        Bundle newsMenuItem = new Bundle();
+        newsMenuItem.putString("title", "News");
+        newsMenuItem.putString("component", "dtable");
+        newsMenuItem.putString("url", "https://rumobile.rutgers.edu/1/news.txt");
+        
+        Bundle sakaiItem = new Bundle();
+        sakaiItem.putString("title", "Sakai");
+        sakaiItem.putString("component", "browser");
+        sakaiItem.putString("url", "http://sakai.rutgers.edu/");
+
+        Bundle myRUItem = new Bundle();
+        myRUItem.putString("title", "myRutgers");
+        myRUItem.putString("component", "browser");
+        myRUItem.putString("url", "http://my.rutgers.edu/");
+        
+        // Menu items that only need a title and component name can be initialized with two strings
+        menuArray.add(new SlideMenuItem("Bus", "bus"));
+        menuArray.add(new SlideMenuItem(newsMenuItem));
+        menuArray.add(new SlideMenuItem("Food", "food"));
+        menuArray.add(new SlideMenuItem(myRUItem));
+        menuArray.add(new SlideMenuItem(sakaiItem));
+        
+        ArrayAdapter<SlideMenuItem> menuAdapter = new ArrayAdapter<SlideMenuItem>(this, R.layout.main_drawer_item, menuArray);
+        
+        /*
 		ArrayList<String> ar = new ArrayList<String>();
 		ar.add("myRutgers");
 		ar.add("Sakai");
 		ArrayAdapter<String> a = new ArrayAdapter<String>(this, R.layout.main_drawer_item, ar);
 		
 		list.setAdapter(a);
+		*/
+		
+        list.setAdapter(menuAdapter);
+        list.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				SlideMenuItem clickedItem = (SlideMenuItem) parent.getAdapter().getItem(position);
+				if(clickedItem == null) {
+					Log.e("SlidingMenu", "Failed sliding menu click, index " + position);
+					return;
+				}
+				
+				Bundle clickedArgs = clickedItem.getArgs();
+				
+				// Launch browser
+				if(clickedArgs.getString("component").equalsIgnoreCase("browser"))	{
+					Intent i = new Intent(Intent.ACTION_VIEW);
+					i.setData(Uri.parse(clickedArgs.getString("url")));
+					startActivity(i);
+				}
+				// Launch channel component
+				else {
+					FragmentManager fm = MainActivity.this.getSupportFragmentManager();	
+					Fragment fragment = ComponentFactory.getInstance().createFragment(clickedArgs);
+					if(fragment == null) {
+						Log.e("SlidingMenu", "Failed to create component");
+						return;
+					}
+					fm.beginTransaction()
+						.replace(R.id.main_content_frame, fragment)
+						.commit(); 	
+				}
+			}
+        	
+        });
 		
 		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
 
@@ -66,9 +136,12 @@ public class MainActivity extends FragmentActivity {
 		contentFrame.removeAllViews();
 		
 		Bundle args = new Bundle();
-				
+		
+		/*
 		args.putString("title", "News");
 		args.putString("component", "dtable");
+		args.putString("url", "https://rumobile.rutgers.edu/1/news.txt");
+		*/
 		/*
 		args.putString(
 				"data", "[" +
@@ -79,17 +152,15 @@ public class MainActivity extends FragmentActivity {
 						"]"
 		);
 		*/
-		args.putString("url", "https://rumobile.rutgers.edu/1/news.txt");
-		
-		
+
 		//args.putString("api", "test");
 		 
 		//args.putString("component", "bus");
 		
-		//args.putString("component",  "food");
-		//args.putString("title", "Dining");
-		//args.putString("location", "Brower Commons");
-		//args.putString("meal", "Breakfast");
+		
+		args.putString("title", "Dining");
+		args.putString("component",  "food");
+
 		
 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {
