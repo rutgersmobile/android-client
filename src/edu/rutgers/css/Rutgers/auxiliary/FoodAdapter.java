@@ -25,7 +25,8 @@ public class FoodAdapter extends ArrayAdapter<FoodItem> {
 		this.layoutResource = itemResource;
 		this.categoryResource = categoryResource;
 	}
-	
+
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		FoodItem curItem = this.getItem(position);

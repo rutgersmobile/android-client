@@ -221,11 +221,23 @@ public class DTable extends Fragment {
 		@Override
 		public long getItemId (int id) {
 			return id;
-		} 
+		}
+		
+		@Override
+		public int getItemViewType(int position) {
+		    if(((JSONObject)getItem(position)).has("children"))
+		    	return 1;
+		    else
+		    	return 0;
+		}
+
+		@Override
+		public int getViewTypeCount() {
+		    return 2;
+		}
 		
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			TextView titleTextView;
 			String title;
 			
 			// Configure the view for this crime
@@ -233,7 +245,7 @@ public class DTable extends Fragment {
 						
 			// If we aren't given a view, inflate one. Get special layout for category items.
 			if (convertView == null) {
-				if(c.has("children"))
+				if(getItemViewType(position) == 1)
 					convertView = getActivity().getLayoutInflater().inflate(R.layout.category_row, null);
 				else
 					convertView = getActivity().getLayoutInflater().inflate(R.layout.dtable_row, null);
@@ -245,12 +257,7 @@ public class DTable extends Fragment {
 				title = "object does not have a title property";
 			}
 			
-			
-			if(c.has("children"))
-				titleTextView = (TextView)convertView.findViewById(R.id.category_text);
-			else
-				titleTextView = (TextView)convertView.findViewById(R.id.text);
-			
+			TextView titleTextView = (TextView)convertView.findViewById(R.id.text);
 			titleTextView.setText(title);
 				
 			return convertView;

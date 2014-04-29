@@ -32,6 +32,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		this.layoutResource = resource;
 	}
 	
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		RSSHolder mHolder = null;
@@ -59,5 +60,5 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		
 		return convertView;
 	}
-	
+
 }
