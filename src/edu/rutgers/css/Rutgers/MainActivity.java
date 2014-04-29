@@ -50,7 +50,8 @@ public class MainActivity extends FragmentActivity {
         menu.setFadeDegree(0.35f);
         menu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
         menu.setBehindOffset(200);
-        menu.setFadeEnabled(true);
+        menu.setShadowDrawable(R.drawable.shadow);
+        menu.setShadowWidth(30);
         menu.setMenu(R.layout.menu);
 		
         //false to disable <back arrow on title bar
