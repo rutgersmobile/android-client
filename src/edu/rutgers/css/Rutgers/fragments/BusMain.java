@@ -30,6 +30,9 @@ public class BusMain extends Fragment {
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_busmain, parent, false);
 		
+		Bundle args = getArguments();
+		getActivity().setTitle(args.getString("title"));
+		
         mTabHost = (FragmentTabHost) v.findViewById(R.id.bus_tabhost);
         mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
         
