@@ -31,7 +31,7 @@ public class BusMain extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_busmain, parent, false);
 		
         mTabHost = (FragmentTabHost) v.findViewById(R.id.bus_tabhost);
-        mTabHost.setup(getActivity(), getFragmentManager(), R.id.realtabcontent);
+        mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
         
         mTabHost.addTab(mTabHost.newTabSpec("busroutes").setIndicator("Routes"), BusRoutes.class, null);
         mTabHost.addTab(mTabHost.newTabSpec("busstops").setIndicator("Stops"), BusStops.class, null);
