@@ -23,6 +23,8 @@ import com.androidquery.callback.AjaxStatus;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.auxiliary.FoodAdapter;
+import edu.rutgers.css.Rutgers.auxiliary.FoodItem;
 
 /* Dining JSON structure
 location_name = "Brower Commons"
@@ -44,8 +46,8 @@ public class FoodMeal extends Fragment {
 
 	private static final String TAG = "FoodMeal";
 	private ListView mList;
-	private List<String> foodItems;
-	private ArrayAdapter<String> foodItemAdapter;
+	private List<FoodItem> foodItems;
+	private FoodAdapter foodItemAdapter;
 
 	public FoodMeal() {
 		// Required empty public constructor
@@ -56,8 +58,8 @@ public class FoodMeal extends Fragment {
 		super.onCreate(savedInstanceState);
 		final Bundle args = getArguments();
 		
-		foodItems = new ArrayList<String>();
-		foodItemAdapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, foodItems);
+		foodItems = new ArrayList<FoodItem>();
+		foodItemAdapter = new FoodAdapter(this.getActivity(), R.layout.title_row, R.layout.food_cat_row, foodItems);
 		
 		if(args.getString("location") == null || args.getString("meal") == null) {
 			Log.e(TAG, "null location/meal");
@@ -78,10 +80,10 @@ public class FoodMeal extends Fragment {
 					
 							JSONObject curGenre = mealGenres.getJSONObject(i);
 							JSONArray mealItems = curGenre.getJSONArray("items");
-							foodItemAdapter.add("CATEGORY - " + curGenre.getString("genre_name")); // Category title placeholder
+							foodItemAdapter.add(new FoodItem(curGenre.getString("genre_name"), true)); // Category title placeholder
 							
 							for(int j = 0; j < mealItems.length(); j++) {
-								foodItemAdapter.add(mealItems.getString(j));
+								foodItemAdapter.add(new FoodItem(mealItems.getString(j)));
 							}
 							
 						} catch (JSONException e) {
