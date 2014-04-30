@@ -7,5 +7,7 @@
     <string name="title_activity_single_fragment">SingleFragmentActivity</string>
     <string name="title_activity_rssreader">RSSReader</string>
     <string name="replace_me">REPLACE</string>
+    <string name="building_search">Building Search</string>
+    <string name="explain_building_search">Search for a building by typing a building name or abbreviation.</string>
 
 </resources>

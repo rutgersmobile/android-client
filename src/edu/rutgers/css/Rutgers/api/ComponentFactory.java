@@ -52,7 +52,7 @@ public class ComponentFactory {
 			return null;
 		}
 		
-		component = options.getString("component");
+		component = options.getString("component").toLowerCase();
 		Class compClass = fragmentTable.get(component);
 		if(compClass != null) {
 			try {

@@ -83,6 +83,7 @@ public class MainActivity extends FragmentActivity {
         menuArray.add(new SlideMenuItem("Bus", "bus"));
         menuArray.add(new SlideMenuItem(newsMenuItem));
         menuArray.add(new SlideMenuItem("Food", "food"));
+        menuArray.add(new SlideMenuItem("Places", "places"));
         menuArray.add(new SlideMenuItem(myRUItem));
         menuArray.add(new SlideMenuItem(sakaiItem));
         
