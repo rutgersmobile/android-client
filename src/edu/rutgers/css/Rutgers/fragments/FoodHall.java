@@ -45,7 +45,7 @@ public class FoodHall extends Fragment {
 		Bundle args = getArguments();
 		
 		menus = new ArrayList<String>();
-		menuAdapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, menus );
+		menuAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.dtable_row, R.id.text, menus );
 
 		if(args.getString("location") == null) {
 			Log.e(TAG, "null location");

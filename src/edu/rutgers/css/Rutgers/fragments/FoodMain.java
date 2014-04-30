@@ -43,7 +43,7 @@ public class FoodMain extends Fragment {
 		super.onCreate(savedInstanceState);
 
 		diningHalls= new ArrayList<String>();
-		diningHallAdapter = new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, diningHalls);
+		diningHallAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.dtable_row, R.id.text, diningHalls);
 		
 		Dining.getDiningHalls().done(new DoneCallback<JSONArray>() {
 
