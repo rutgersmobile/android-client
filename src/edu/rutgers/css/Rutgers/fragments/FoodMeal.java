@@ -15,16 +15,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import com.androidquery.callback.AjaxStatus;
-
-import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers.api.Dining;
-import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.FoodAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.FoodItem;
+import edu.rutgers.css.Rutgers2.R;
 
 /* Dining JSON structure
 location_name = "Brower Commons"
@@ -61,7 +56,7 @@ public class FoodMeal extends Fragment {
 		foodItems = new ArrayList<FoodItem>();
 		foodItemAdapter = new FoodAdapter(this.getActivity(), R.layout.title_row, R.layout.food_cat_row, foodItems);
 		
-		if(args.getString("location") == null || args.getString("meal") == null) {
+		if(args.get("location") == null || args.get("meal") == null) {
 			Log.e(TAG, "null location/meal");
 			return;
 		}
@@ -80,7 +75,7 @@ public class FoodMeal extends Fragment {
 					
 							JSONObject curGenre = mealGenres.getJSONObject(i);
 							JSONArray mealItems = curGenre.getJSONArray("items");
-							foodItemAdapter.add(new FoodItem(curGenre.getString("genre_name"), true)); // Category title placeholder
+							foodItemAdapter.add(new FoodItem(curGenre.getString("genre_name"), true)); // Add category header
 							
 							for(int j = 0; j < mealItems.length(); j++) {
 								foodItemAdapter.add(new FoodItem(mealItems.getString(j)));
@@ -104,6 +99,7 @@ public class FoodMeal extends Fragment {
 			}
 			
 		});
+		
 	}
 	
 	@Override
@@ -113,17 +109,13 @@ public class FoodMeal extends Fragment {
 		Bundle args = getArguments();
 		mList = (ListView) v.findViewById(R.id.food_meal_list);
 		
-		getActivity().setTitle(args.getString("location") + " - " + args.getString("meal"));
-		
-		Log.d(TAG, "Location: " + args.getString("location") + "; Meal: " + args.getString("meal"));
-		setupList(args.getString("location"), args.getString("meal"));
-		
-		return v;
-	}
-	
-	private void setupList(final String location, final String meal) {
+		// Set title
+		if(args.get("location") != null && args.get("meal") != null)
+			getActivity().setTitle(args.getString("location") + " - " + args.getString("meal"));
+
 		mList.setAdapter(foodItemAdapter);
-	
+
+		return v;
 	}
 	
 }

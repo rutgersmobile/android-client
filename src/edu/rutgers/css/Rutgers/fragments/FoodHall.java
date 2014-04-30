@@ -33,7 +33,6 @@ public class FoodHall extends Fragment {
 	private ListView mList;
 	private List<String> menus;
 	private ArrayAdapter<String> menuAdapter;
-	private String diningHall;
 	
 	public FoodHall() {
 		// Required empty public constructor
@@ -47,7 +46,7 @@ public class FoodHall extends Fragment {
 		menus = new ArrayList<String>();
 		menuAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.dtable_row, R.id.text, menus );
 
-		if(args.getString("location") == null) {
+		if(args.get("location") == null) {
 			Log.e(TAG, "null location");
 			return;
 		}
