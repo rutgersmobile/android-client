@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers2.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Dining;
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +21,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.Dining;
+import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Displays dining halls. Selecting a hall goes to meal menu.

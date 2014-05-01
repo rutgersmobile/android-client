@@ -21,48 +21,42 @@ import com.androidquery.callback.AjaxStatus;
  */
 public class Dining {
 	
-	private static boolean isSetup = false;
 	private static Promise<Object, Object, Object> configured;
 	private static final String TAG = "DiningAPI";
 	
 	private static JSONArray mNBDiningConf;
 	
-	private static final String API_URL = "https://rumobile.rutgers.edu/1/rutgers-dining.txt";
+	private static final String API_URL = "https://rumobile.rutgers.edu/1/rutgers-dining.txt";	
+	private static long expire = 1000 * 60 * 60; // Cache dining data for an hour
 	
 	/**
 	 * Grab the dining API data.
-	 * TODO Caching - only needs to update once per day
-	 * date fields: remove last 3 digits for unix timestamp
-	 * Current API only has New Brunswick data ; when multiple confs need to be read set this up like Nextbus.java
+	 * (Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)
 	 */
 	private static void setup() {
-		if(!isSetup) {
-			// Get JSON array from dining API
-			final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
-			configured = confd.promise();
-			
-			final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL);
-			
-			DeferredManager dm = new DefaultDeferredManager();
-			
-			dm.when(promiseNBDining).done(new DoneCallback<JSONArray>() {
+		// Get JSON array from dining API
+		final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
+		configured = confd.promise();
+		
+		final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
+		
+		DeferredManager dm = new DefaultDeferredManager();		
+		dm.when(promiseNBDining).done(new DoneCallback<JSONArray>() {
 
-				@Override
-				public void onDone(JSONArray res) {
-					mNBDiningConf = (JSONArray) res;
-					isSetup = true;
-					confd.resolve(null);
-				}
-				
-			}).fail(new FailCallback<AjaxStatus>() {
+			@Override
+			public void onDone(JSONArray res) {
+				mNBDiningConf = (JSONArray) res;
+				confd.resolve(null);
+			}
 			
-				@Override
-				public void onFail(AjaxStatus e) {
-					Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
-				}
-				
-			});	
-		}
+		}).fail(new FailCallback<AjaxStatus>() {
+		
+			@Override
+			public void onFail(AjaxStatus e) {
+				Log.e(TAG, e.getMessage() + "; Response code: " + e.getCode());
+			}
+			
+		});	
 	}
 	
 	/**

@@ -161,7 +161,7 @@ public class MainActivity extends FragmentActivity {
 		//args.putString("component", "bus");
 		
 		
-		args.putString("title", "Dining");
+		args.putString("title", "Food");
 		args.putString("component",  "food");
 
 		

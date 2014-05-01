@@ -5,6 +5,8 @@ import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
@@ -15,6 +17,7 @@ import edu.rutgers.css.Rutgers.MyApplication;
 // Convenience class for making requests
 public class Request {
 	
+	private static final String TAG = "Request";
 	private static final String API_BASE = "http://sauron.rutgers.edu/~rfranknj/newmobile/";
 	private static AQuery aq;
 	private static boolean mSetupDone = false;
@@ -51,17 +54,30 @@ public class Request {
 		return deferred.promise();
 	}
 	
-	// gets arbitrary json array
-	public static Promise<JSONArray, AjaxStatus, Double> jsonArray (String resource) {
+	/**
+	 * Gets arbitrary JSON array.
+	 * @param resource Link to JSON file
+	 * @param expire Cache time in milliseconds
+	 * @return Promise for JSONArray
+	 */
+	public static Promise<JSONArray, AjaxStatus, Double> jsonArray (String resource, long expire) {
 		setup();
 		final DeferredObject<JSONArray, AjaxStatus, Double> deferred = new DeferredObject<JSONArray, AjaxStatus, Double>();
 		
-		aq.ajax(resource, JSONArray.class, new AjaxCallback<JSONArray>() {
+		aq.ajax(resource, JSONArray.class, expire, new AjaxCallback<JSONArray>() {
 
 			@Override
 			public void callback(String url, JSONArray jsonArray, AjaxStatus status) {
-				if (jsonArray != null) deferred.resolve(jsonArray);
-				else deferred.reject(status);
+				if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+					status.invalidate();
+					deferred.reject(status);
+				}
+				else if(jsonArray != null){
+					deferred.resolve(jsonArray);
+				}
+				else {
+					deferred.reject(status);
+				}
 			}
 			
 		});

@@ -26,6 +26,10 @@ public class PlacesMain extends Fragment {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_places, parent, false);
+		Bundle args = getArguments();
+		
+		if(args.get("title") != null)
+			getActivity().setTitle(args.getString("title"));
 		
 		return v;
 	}
