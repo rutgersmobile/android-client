@@ -33,7 +33,7 @@ public class PlacesMain extends Fragment {
 	private JSONObject mData;
 	
 	public PlacesMain() {
-		// Required empty constructor
+		// Required empty public constructor
 	}
 	
 	@Override
@@ -75,8 +75,7 @@ public class PlacesMain extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_places, parent, false);
 		Bundle args = getArguments();
 		
-		if(args.get("title") != null)
-			getActivity().setTitle(args.getString("title"));
+		if(args.get("title") != null) getActivity().setTitle(args.getString("title"));
 
 		AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
 		autoComp.setAdapter(mAdapter);

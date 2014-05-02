@@ -9,5 +9,12 @@
     <string name="replace_me">REPLACE</string>
     <string name="building_search">Building Search</string>
     <string name="explain_building_search">Search for a building by typing a building name or abbreviation.</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="address_header">Address</string>
+    <string name="description_header">Description</string>
+    <string name="nearby_bus_header">Nearby Bus Stops</string>
+    <string name="offices_header">Offices</string>
+    <string name="building_no_header">Building Number</string>
+    <string name="campus_header">Campus</string>
 
 </resources>
