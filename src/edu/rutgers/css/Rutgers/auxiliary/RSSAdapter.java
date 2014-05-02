@@ -54,9 +54,9 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		mHolder.authordateTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorDateView);
 		mHolder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
 		
-		mHolder.titleTextView.setText(this.getItem(position).title);
-		mHolder.authordateTextView.setText(this.getItem(position).date);
-		mHolder.descriptionTextView.setText(this.getItem(position).description);
+		mHolder.titleTextView.setText(this.getItem(position).getTitle());
+		mHolder.authordateTextView.setText(this.getItem(position).getDate());
+		mHolder.descriptionTextView.setText(this.getItem(position).getDescription());
 		
 		return convertView;
 	}

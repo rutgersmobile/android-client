@@ -103,7 +103,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		RSSItem item = rssItemAdapter.getItem(position);
 		
 		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setData(Uri.parse(item.link));
+		i.setData(Uri.parse(item.getLink()));
 		startActivity(i);
 	}
 	
