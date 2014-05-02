@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.jdeferred.DoneCallback;
@@ -52,11 +53,13 @@ public class PlacesMain extends Fragment {
 				// Grab "all" field and add title from each object inside
 				try {
 					JSONObject all = json.getJSONObject("all");
+					@SuppressWarnings("unchecked")
 					Iterator<String> curKey = all.keys();
 					while(curKey.hasNext()) {
 						JSONObject curBuilding = all.getJSONObject(curKey.next());
 						mAdapter.add(curBuilding.getString("title"));
 					}
+					Collections.sort(mList);
 				} catch (JSONException e) {
 					Log.e(TAG, Log.getStackTraceString(e));
 				}
@@ -65,11 +68,6 @@ public class PlacesMain extends Fragment {
 			
 		});
 		
-		/*
-		mAdapter.add("Busch Campus Center");
-		mAdapter.add("Rutgers Campus Center");
-		mAdapter.add("Douglass Campus Center");
-		*/
 	}
 	
 	@Override
