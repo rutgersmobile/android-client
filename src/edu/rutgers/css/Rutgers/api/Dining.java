@@ -68,10 +68,13 @@ public class Dining {
 		setup();
 		
 		configured.then(new DoneCallback<Object>() {
+			
+			@Override
 			public void onDone(Object o) {
 				JSONArray conf = mNBDiningConf;
 				d.resolve(conf);
 			}
+			
 		});
 		
 		return d.promise();
@@ -87,6 +90,8 @@ public class Dining {
 		setup();
 		
 		configured.then(new DoneCallback<Object>() {
+			
+			@Override
 			public void onDone(Object o) {
 				JSONArray conf = mNBDiningConf;
 				boolean resret = false; //if resolve or reject was already called
@@ -112,6 +117,7 @@ public class Dining {
 					d.reject(new Exception("location not found"));
 				}
 			}
+			
 		});
 		
 		return d.promise();

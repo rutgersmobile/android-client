@@ -53,11 +53,10 @@ public class PlacesMain extends Fragment {
 				
 				// Grab "all" field and add title from each object inside
 				try {
-					JSONObject all = json.getJSONObject("all");
 					@SuppressWarnings("unchecked")
-					Iterator<String> curKey = all.keys();
+					Iterator<String> curKey = json.keys();
 					while(curKey.hasNext()) {
-						JSONObject curBuilding = all.getJSONObject(curKey.next());
+						JSONObject curBuilding = json.getJSONObject(curKey.next());
 						mAdapter.add(curBuilding.getString("title"));
 					}
 					Collections.sort(mList);

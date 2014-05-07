@@ -22,30 +22,29 @@ import com.androidquery.callback.AjaxStatus;
 public class Places {
 	
 	private static Promise<Object, Object, Object> configured;
-	private static final String TAG = "DiningAPI";
+	private static final String TAG = "PlacesAPI";
 	
-	private static JSONObject mNBPlacesConf;
+	private static JSONObject mPlacesConf;
 	
 	private static final String API_URL = "https://rumobile.rutgers.edu/1/places.txt";	
 	private static long expire = 1000 * 60 * 60; // Cache data for an hour
 	
 	/**
 	 * Grab the places API data.
-	 * (Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)
 	 */
 	private static void setup() {
 		// Get JSON object from places API
 		final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
 		configured = confd.promise();
 		
-		final Promise<JSONObject, AjaxStatus, Double> promiseNBDining = Request.json(API_URL, expire);
+		final Promise<JSONObject, AjaxStatus, Double> promisePlaces = Request.json(API_URL, expire);
 		
 		DeferredManager dm = new DefaultDeferredManager();		
-		dm.when(promiseNBDining).done(new DoneCallback<JSONObject>() {
+		dm.when(promisePlaces).done(new DoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject res) {
-				mNBPlacesConf = (JSONObject) res;
+				mPlacesConf = (JSONObject) res;
 				confd.resolve(null);
 			}
 			
@@ -60,18 +59,65 @@ public class Places {
 	}
 	
 	/**
-	 * Get the JSONObject containing all of the Places API data
-	 * @return JSONObject that contains all Places API data
+	 * Get the JSONObject containing all of the place information
+	 * @return JSONObject containing "all" field from Places API
 	 */
 	public static Promise<JSONObject, Exception, Double> getPlaces() {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
 		configured.then(new DoneCallback<Object>() {
+			
+			@Override
 			public void onDone(Object o) {
-				JSONObject conf = mNBPlacesConf;
-				d.resolve(conf);
+				JSONObject conf = mPlacesConf;
+				
+				try {
+					JSONObject allPlaces = conf.getJSONObject("all");
+					d.resolve(allPlaces);
+				}
+				catch(JSONException e) {
+					Log.e(TAG, Log.getStackTraceString(e));
+					d.fail(null);
+				}
+				
 			}
+			
+		});
+		
+		return d.promise();
+	}
+	
+	public static Promise<JSONObject, Exception, Double> getPlace(final String placeName) {
+		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
+		setup();
+		
+		configured.then(new DoneCallback<Object>() {
+			
+			@Override
+			public void onDone(Object o) {
+				JSONObject conf = mPlacesConf;
+				
+				try {
+					
+					JSONObject allPlaces = conf.getJSONObject("all");
+					if(allPlaces.has(placeName)) {
+						JSONObject gotPlace = allPlaces.getJSONObject(placeName);
+						d.resolve(gotPlace);
+					}
+					else {
+						Log.i(TAG, "Failed to get location " + placeName);
+						d.fail(null);
+					}
+					
+				} catch (JSONException e) {
+					
+					Log.e(TAG, Log.getStackTraceString(e));
+				
+				}
+				
+			}
+			
 		});
 		
 		return d.promise();

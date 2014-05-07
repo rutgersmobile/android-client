@@ -26,6 +26,7 @@ public class PlacesDisplay extends Fragment {
 		
 		if(args.get("title") != null) getActivity().setTitle(args.getString("title"));
 		
+		
 		return v;
 	}
 
