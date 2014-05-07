@@ -44,7 +44,11 @@ public class Request {
 
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (json != null) deferred.resolve(json);
+				if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+					status.invalidate();
+					deferred.reject(status);
+				}
+				else if (json != null) deferred.resolve(json);
 				else deferred.reject(status);
 			}
 			
@@ -72,12 +76,8 @@ public class Request {
 					status.invalidate();
 					deferred.reject(status);
 				}
-				else if(jsonArray != null){
-					deferred.resolve(jsonArray);
-				}
-				else {
-					deferred.reject(status);
-				}
+				else if(jsonArray != null) deferred.resolve(jsonArray);
+				else deferred.reject(status);
 			}
 			
 		});
@@ -95,7 +95,11 @@ public class Request {
 
 			@Override
 			public void callback(String url, XmlDom xml, AjaxStatus status) {
-				if (xml != null) deferred.resolve(xml);
+				if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+					status.invalidate();
+					deferred.reject(status);
+				}
+				else if (xml != null) deferred.resolve(xml);
 				else deferred.reject(status);
 			}
 			
