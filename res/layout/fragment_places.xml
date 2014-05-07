@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:hint="@string/building_search" >
+        android:hint="@string/building_search"
+        android:imeOptions="actionGo" >
 
         <requestFocus />
     </AutoCompleteTextView>

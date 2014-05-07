@@ -10,6 +10,7 @@ import edu.rutgers.css.Rutgers.fragments.DTable;
 import edu.rutgers.css.Rutgers.fragments.FoodHall;
 import edu.rutgers.css.Rutgers.fragments.FoodMain;
 import edu.rutgers.css.Rutgers.fragments.FoodMeal;
+import edu.rutgers.css.Rutgers.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.fragments.PlacesMain;
 import edu.rutgers.css.Rutgers.fragments.RSSReader;
 import android.app.Activity;
@@ -36,6 +37,7 @@ public class ComponentFactory {
 		fragmentTable.put("foodhall", FoodHall.class);
 		fragmentTable.put("foodmeal", FoodMeal.class);
 		fragmentTable.put("places", PlacesMain.class);
+		fragmentTable.put("placesdisplay", PlacesDisplay.class);
 	}
 	
 	public static ComponentFactory getInstance () {

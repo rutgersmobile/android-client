@@ -8,17 +8,24 @@ import org.jdeferred.DoneCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers2.R;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 /**
  * Places channel fragment.
@@ -79,7 +86,25 @@ public class PlacesMain extends Fragment {
 
 		AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
 		autoComp.setAdapter(mAdapter);
+		autoComp.setOnItemClickListener(new OnItemClickListener() {
 
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				FragmentManager fm = getActivity().getSupportFragmentManager();
+				Bundle args = new Bundle();
+				String placeName = (String) parent.getAdapter().getItem(position);
+				
+				args.putString("component", "placesdisplay");
+				args.putString("place", placeName);
+				
+				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
+				fm.beginTransaction()
+					.replace(R.id.main_content_frame, fragment)
+					.addToBackStack(null)
+					.commit(); 
+			}
+			
+		});
 		return v;
 	}
 	

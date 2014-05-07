@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.api;
 
+import java.util.Iterator;
+
 import org.jdeferred.Deferred;
 import org.jdeferred.DeferredManager;
 import org.jdeferred.DoneCallback;
@@ -99,16 +101,20 @@ public class Places {
 				JSONObject conf = mPlacesConf;
 				
 				try {
-					
+
+					/* TODO Fix this by passing actual name used in 'all' rather than 'title' field
+					 * at the moment it has to iterate through all entries because the text meant for display is
+					 * what's being sent over */
 					JSONObject allPlaces = conf.getJSONObject("all");
-					if(allPlaces.has(placeName)) {
-						JSONObject gotPlace = allPlaces.getJSONObject(placeName);
-						d.resolve(gotPlace);
+					for(Iterator<String> keys = allPlaces.keys(); keys.hasNext(); ) {
+						JSONObject curPlace = allPlaces.getJSONObject(keys.next());
+						if(curPlace.getString("title").equalsIgnoreCase(placeName)) {
+							d.resolve(curPlace);
+						}
 					}
-					else {
-						Log.i(TAG, "Failed to get location " + placeName);
-						d.fail(null);
-					}
+					
+					Log.i(TAG, "Failed to get location " + placeName);
+					d.fail(null);
 					
 				} catch (JSONException e) {
 					
