@@ -8,6 +8,7 @@ import org.jdeferred.DoneCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers2.R;
 import android.os.Bundle;
@@ -44,7 +45,7 @@ public class PlacesMain extends Fragment {
 		mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, mList);
 		
 		// Get places data
-		Request.json(API_URL, -1).done(new DoneCallback<JSONObject>() {
+		Places.getPlaces().done(new DoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject json) {

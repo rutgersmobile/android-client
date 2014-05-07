@@ -1,5 +1,7 @@
-package edu.rutgers.css.Rutgers2;
+package edu.rutgers.css.Rutgers.fragments;
 
+import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers2.R.layout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
