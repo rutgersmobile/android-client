@@ -44,7 +44,7 @@ public class MainActivity extends FragmentActivity {
 		
 		setContentView(R.layout.activity_main);
 		
-		SlidingMenu menu = new SlidingMenu(this);
+		final SlidingMenu menu = new SlidingMenu(this);
         menu.setMode(SlidingMenu.LEFT);
         menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
         menu.setFadeDegree(0.35f);
@@ -106,6 +106,7 @@ public class MainActivity extends FragmentActivity {
 				SlideMenuItem clickedItem = (SlideMenuItem) parent.getAdapter().getItem(position);
 				if(clickedItem == null) {
 					Log.e("SlidingMenu", "Failed sliding menu click, index " + position);
+					menu.toggle();
 					return;
 				}
 				
@@ -129,6 +130,8 @@ public class MainActivity extends FragmentActivity {
 						.replace(R.id.main_content_frame, fragment)
 						.commit(); 	
 				}
+				
+				menu.toggle(); // Close menu after a click
 			}
         	
         });
