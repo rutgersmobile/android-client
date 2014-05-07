@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.api;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
+import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.BusMain;
@@ -52,16 +53,16 @@ public class ComponentFactory {
 			return null;
 		}
 		
-		component = options.getString("component").toLowerCase();
+		component = options.getString("component").toLowerCase(Locale.US);
 		Class compClass = fragmentTable.get(component);
 		if(compClass != null) {
 			try {
-				fragment = (Fragment) compClass.getDeclaredConstructor().newInstance();
+				fragment = (Fragment) compClass.newInstance();
 				Log.d(TAG, "Creating a " + compClass.getSimpleName());
 			} catch (InstantiationException | IllegalAccessException
-					| IllegalArgumentException | InvocationTargetException
-					| NoSuchMethodException e) {
+					| IllegalArgumentException e) {
 				Log.e(TAG, Log.getStackTraceString(e));
+				return null;
 			}	
 		}
 		else {
