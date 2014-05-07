@@ -32,15 +32,15 @@ public class Request {
 	
 	// Makes a call against the api. Expects a JSON object
 	public static Promise<JSONObject, AjaxStatus, Double> api (String resource) {
-		return json(API_BASE + resource);
+		return json(API_BASE + resource, -1); // -1 means always refresh. change if desired later
 	}
 	
 	// gets arbitrary json
-	public static Promise<JSONObject, AjaxStatus, Double> json (String resource) {
+	public static Promise<JSONObject, AjaxStatus, Double> json (String resource, long expire) {
 		setup();
 		final DeferredObject<JSONObject, AjaxStatus, Double> deferred = new DeferredObject<JSONObject, AjaxStatus, Double>();
 		
-		aq.ajax(resource, JSONObject.class, new AjaxCallback<JSONObject>() {
+		aq.ajax(resource, JSONObject.class, expire, new AjaxCallback<JSONObject>() {
 
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -87,11 +87,11 @@ public class Request {
 	}
 	
 	// gets arbitrary xml
-	public static Promise<XmlDom, AjaxStatus, Double> xml (String resource) {
+	public static Promise<XmlDom, AjaxStatus, Double> xml (String resource, long expire) {
 		setup();
 		final DeferredObject<XmlDom, AjaxStatus, Double> deferred = new DeferredObject<XmlDom, AjaxStatus, Double>();
 		
-		aq.ajax(resource, XmlDom.class, new AjaxCallback<XmlDom>() {
+		aq.ajax(resource, XmlDom.class, expire, new AjaxCallback<XmlDom>() {
 
 			@Override
 			public void callback(String url, XmlDom xml, AjaxStatus status) {

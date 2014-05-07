@@ -38,6 +38,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	private List<RSSItem> rssItems;
 	private ListView mList;
 	private ArrayAdapter<RSSItem> rssItemAdapter;
+	private long expire = 60 * 1000; // cache feed for one minute
 	
 	public RSSReader() {
 		// Required empty public constructor
@@ -57,7 +58,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		}
 		
 		// Get RSS feed XML and add items through the array adapter
-		Request.xml(args.getString("url")).done(new DoneCallback<XmlDom>() {
+		Request.xml(args.getString("url"), expire).done(new DoneCallback<XmlDom>() {
 			
 			@Override
 			public void onDone(XmlDom xml) {

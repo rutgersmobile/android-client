@@ -44,7 +44,7 @@ public class PlacesMain extends Fragment {
 		mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, mList);
 		
 		// Get places data
-		Request.json(API_URL).done(new DoneCallback<JSONObject>() {
+		Request.json(API_URL, -1).done(new DoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject json) {

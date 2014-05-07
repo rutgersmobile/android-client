@@ -106,7 +106,7 @@ public class Nextbus {
 						queryString += "&stops=" + route + "|null|" + stops.getString(i);
 					}
 									
-					Request.xml(queryString).done(new DoneCallback<XmlDom>() {
+					Request.xml(queryString, -1).done(new DoneCallback<XmlDom>() {
 						@Override
 						public void onDone(XmlDom xml) {
 							ArrayList<Prediction> results = new ArrayList<Prediction>();
@@ -166,7 +166,7 @@ public class Nextbus {
 							queryString += "&stops=" + routes.getString(j) + "|null|" + tags.getString(i);
 					}
 					
-					Request.xml(queryString).done(new DoneCallback<XmlDom>() {
+					Request.xml(queryString, -1).done(new DoneCallback<XmlDom>() {
 						@Override
 						public void onDone(XmlDom xml) {
 							ArrayList<Prediction> results = new ArrayList<Prediction>();
