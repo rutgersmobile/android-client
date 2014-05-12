@@ -26,7 +26,7 @@ public class Dining {
 	
 	private static JSONArray mNBDiningConf;
 	
-	private static final String API_URL = "https://rumobile.rutgers.edu/1/rutgers-dining.txt";	
+	private static final String API_URL = "http://vps.rsopher.com/nutrition.json";	//using my own vps for now
 	private static long expire = 1000 * 60 * 60; // Cache dining data for an hour
 	
 	/**
@@ -143,9 +143,9 @@ public class Dining {
 			for(int i = 0; i < meals.length(); i++) {
 				JSONObject curMeal = (JSONObject) meals.get(i);
 				
-				// Found meal - check if marked available & if so, return genres array
+				// Found meal - check if available & if so, return genres array
 				if(curMeal.getString("meal_name").equalsIgnoreCase(meal)) {
-					if(!curMeal.getBoolean("meal_avail")) {
+					if(curMeal.getJSONArray("genres").length()==0) {
 						return null;
 					}
 					

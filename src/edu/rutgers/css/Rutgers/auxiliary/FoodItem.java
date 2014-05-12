@@ -9,13 +9,19 @@ public class FoodItem {
 
 	public String title;
 	public boolean isCategory;
+	public int calories;
+	public String serving;
+	public String[] ingredients;
 	
 	/**
 	 * Default constructor. Item is assumed to not be a category.
 	 * @param title Menu item title
 	 */
-	public FoodItem(String title) {
+	public FoodItem(String title, int calories, String serving, String[] ingredients) {
 		this.title = title;
+		this.calories = calories;
+		this.serving = serving;
+		this.ingredients = ingredients;
 		this.isCategory = false;
 	}
 
