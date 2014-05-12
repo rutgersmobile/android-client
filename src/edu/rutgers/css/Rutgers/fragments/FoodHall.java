@@ -60,7 +60,7 @@ public class FoodHall extends Fragment {
 						
 					for(int j = 0; j < meals.length(); j++) {
 						JSONObject curMeal = meals.getJSONObject(j);
-						if(curMeal.getBoolean("meal_avail"))
+						if(curMeal.getJSONArray("genres").length()>0)
 							menuAdapter.add(curMeal.getString("meal_name"));
 					}		
 				}

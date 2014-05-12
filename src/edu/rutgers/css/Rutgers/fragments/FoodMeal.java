@@ -78,7 +78,7 @@ public class FoodMeal extends Fragment {
 							foodItemAdapter.add(new FoodItem(curGenre.getString("genre_name"), true)); // Add category header
 							
 							for(int j = 0; j < mealItems.length(); j++) {
-								foodItemAdapter.add(new FoodItem(mealItems.getString(j)));
+								foodItemAdapter.add(new FoodItem(mealItems.getJSONObject(j).getString("name")));
 							}
 							
 						} catch (JSONException e) {
