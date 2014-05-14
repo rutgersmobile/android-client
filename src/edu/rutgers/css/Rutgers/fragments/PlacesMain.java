@@ -35,20 +35,48 @@ import android.widget.TextView.OnEditorActionListener;
 public class PlacesMain extends Fragment {
 
 	private static final String TAG = "PlacesMain";
-	private ArrayList<String> mList;
-	private ArrayAdapter<String> mAdapter;
+	private ArrayList<PlaceTuple> mList;
+	private ArrayAdapter<PlaceTuple> mAdapter;
 	private JSONObject mData;
 	
 	public PlacesMain() {
 		// Required empty public constructor
 	}
 	
+	private class PlaceTuple implements Comparable<PlaceTuple> {
+		public String key;
+		public String title;
+		
+		public PlaceTuple(String key, String title) {
+			this.key = key;
+			this.title = title;
+		}
+		
+		public String getKey() {
+			return this.key;
+		}
+		
+		public String getTitle() {
+			return this.title;
+		}
+		
+		@Override
+		public String toString() {
+			return this.title;
+		}
+
+		@Override
+		public int compareTo(PlaceTuple another) {
+			return title.compareTo(another.getTitle());
+		}
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		mList = new ArrayList<String>();
-		mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, mList);
+		mList = new ArrayList<PlaceTuple>();
+		mAdapter = new ArrayAdapter<PlaceTuple>(getActivity(), android.R.layout.simple_dropdown_item_1line, mList);
 		
 		// Get places data
 		Places.getPlaces().done(new DoneCallback<JSONObject>() {
@@ -62,8 +90,10 @@ public class PlacesMain extends Fragment {
 					@SuppressWarnings("unchecked")
 					Iterator<String> curKey = json.keys();
 					while(curKey.hasNext()) {
-						JSONObject curBuilding = json.getJSONObject(curKey.next());
-						mAdapter.add(curBuilding.getString("title"));
+						String key = curKey.next();
+						JSONObject curBuilding = json.getJSONObject(key);
+						PlaceTuple newPT = new PlaceTuple(key, curBuilding.getString("title"));
+						mAdapter.add(newPT);
 					}
 					Collections.sort(mList);
 				} catch (JSONException e) {
@@ -91,10 +121,11 @@ public class PlacesMain extends Fragment {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				FragmentManager fm = getActivity().getSupportFragmentManager();
 				Bundle args = new Bundle();
-				String placeName = (String) parent.getAdapter().getItem(position);
+				PlaceTuple placeTuple = (PlaceTuple) parent.getAdapter().getItem(position);
 				
 				args.putString("component", "placesdisplay");
-				args.putString("place", placeName);
+				args.putString("placeName", placeTuple.getTitle());
+				args.putString("placeKey", placeTuple.getKey());
 				
 				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 				fm.beginTransaction()

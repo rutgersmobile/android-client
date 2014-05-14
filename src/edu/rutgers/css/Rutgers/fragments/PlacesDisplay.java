@@ -55,10 +55,10 @@ public class PlacesDisplay extends Fragment {
 		final TextView descriptionTextView = (TextView) v.findViewById(R.id.descriptionTextView);
 		final TextView campusNameTextView = (TextView) v.findViewById(R.id.campusTextView);
 		
-		if(args.get("place") != null) {
-			getActivity().setTitle(args.getString("place"));
+		if(args.get("placeKey") != null) {
+			getActivity().setTitle(args.getString("placeName"));
 			
-			Places.getPlace(args.getString("place")).done(new DoneCallback<JSONObject>() {
+			Places.getPlace(args.getString("placeKey")).done(new DoneCallback<JSONObject>() {
 
 				@Override
 				public void onDone(JSONObject json) {

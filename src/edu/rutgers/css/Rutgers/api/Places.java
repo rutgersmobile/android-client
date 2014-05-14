@@ -89,7 +89,7 @@ public class Places {
 		return d.promise();
 	}
 	
-	public static Promise<JSONObject, Exception, Double> getPlace(final String placeName) {
+	public static Promise<JSONObject, Exception, Double> getPlace(final String placeKey) {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
@@ -100,20 +100,14 @@ public class Places {
 				JSONObject conf = mPlacesConf;
 				
 				try {
-
-					/* TODO Fix this by passing actual name used in 'all' rather than 'title' field
-					 * at the moment it has to iterate through all entries because the text meant for display is
-					 * what's being sent over */
-					JSONObject allPlaces = conf.getJSONObject("all");
-					for(Iterator<String> keys = allPlaces.keys(); keys.hasNext(); ) {
-						JSONObject curPlace = allPlaces.getJSONObject(keys.next());
-						if(curPlace.getString("title").equalsIgnoreCase(placeName)) {
-							d.resolve(curPlace);
-						}
-					}
 					
-					Log.i(TAG, "Failed to get location " + placeName);
-					d.fail(null);
+					JSONObject allPlaces = conf.getJSONObject("all");	
+					JSONObject place = allPlaces.getJSONObject(placeKey);
+					if(place != null) d.resolve(place);
+					else {
+						Log.i(TAG, "Failed to get location " + placeKey);
+						d.fail(null);
+					}
 					
 				} catch (JSONException e) {
 					
