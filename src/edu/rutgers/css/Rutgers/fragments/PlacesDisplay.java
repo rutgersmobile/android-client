@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
 import org.jdeferred.DoneCallback;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,19 +42,34 @@ public class PlacesDisplay extends Fragment {
 		return result;
 	}
 	
+	private static final String formatOffices(JSONArray offices) {
+		String result = "";
+		
+		for(int i = 0; i < offices.length(); i++) {
+			try {
+				result += offices.getString(i) + "\n";
+			} catch (JSONException e) {
+				Log.e(TAG, e.getMessage());
+			}
+		}
+		
+		return result;
+	}
+	
 	public PlacesDisplay() {
 		// Required empty public constructor
 	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_place_display, container, false);
+		final View v = inflater.inflate(R.layout.fragment_place_display, container, false);
 		Bundle args = getArguments();
 		
 		final TextView addressTextView = (TextView) v.findViewById(R.id.addressTextView);
 		final TextView buildingNoTextView = (TextView) v.findViewById(R.id.buildingNoTextView);
 		final TextView descriptionTextView = (TextView) v.findViewById(R.id.descriptionTextView);
 		final TextView campusNameTextView = (TextView) v.findViewById(R.id.campusTextView);
+		final TextView officesTextView = (TextView) v.findViewById(R.id.officesTextView);
 		
 		if(args.get("placeKey") != null) {
 			getActivity().setTitle(args.getString("placeName"));
@@ -69,6 +85,7 @@ public class PlacesDisplay extends Fragment {
 						if(json.has("building_number")) buildingNoTextView.setText(json.getString("building_number"));
 						if(json.has("campus_name")) campusNameTextView.setText(json.getString("campus_name"));
 						if(json.has("description")) descriptionTextView.setText(json.getString("description"));
+						if(json.has("offices")) officesTextView.setText(formatOffices(json.getJSONArray("offices")));
 						
 					} catch (JSONException e) {
 						Log.e(TAG, Log.getStackTraceString(e));
