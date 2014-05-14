@@ -63,29 +63,12 @@ public class MainActivity extends FragmentActivity {
         // Sliding menu setup
         ArrayList<SlideMenuItem> menuArray = new ArrayList<SlideMenuItem>();
         
-        // Menu items with optional/special arguments can be initialized with a custom bundle
-        Bundle newsMenuItem = new Bundle();
-        newsMenuItem.putString("title", "News");
-        newsMenuItem.putString("component", "dtable");
-        newsMenuItem.putString("url", "https://rumobile.rutgers.edu/1/news.txt");
-        
-        Bundle sakaiItem = new Bundle();
-        sakaiItem.putString("title", "Sakai");
-        sakaiItem.putString("component", "browser");
-        sakaiItem.putString("url", "http://sakai.rutgers.edu/");
-
-        Bundle myRUItem = new Bundle();
-        myRUItem.putString("title", "myRutgers");
-        myRUItem.putString("component", "browser");
-        myRUItem.putString("url", "http://my.rutgers.edu/");
-        
-        // Menu items that only need a title and component name can be initialized with two strings
         menuArray.add(new SlideMenuItem("Bus", "bus"));
-        menuArray.add(new SlideMenuItem(newsMenuItem));
+        menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt"));
         menuArray.add(new SlideMenuItem("Food", "food"));
         menuArray.add(new SlideMenuItem("Places", "places"));
-        menuArray.add(new SlideMenuItem(myRUItem));
-        menuArray.add(new SlideMenuItem(sakaiItem));
+        menuArray.add(new SlideMenuItem("myRutgers", "browser", "http://my.rutgers.edu/"));
+        menuArray.add(new SlideMenuItem("Sakai", "browser", "http://sakai.rutgers.edu/"));
         
         ArrayAdapter<SlideMenuItem> menuAdapter = new ArrayAdapter<SlideMenuItem>(this, R.layout.main_drawer_item, menuArray);
         
