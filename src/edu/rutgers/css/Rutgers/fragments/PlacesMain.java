@@ -35,7 +35,6 @@ import android.widget.TextView.OnEditorActionListener;
 public class PlacesMain extends Fragment {
 
 	private static final String TAG = "PlacesMain";
-	private static final String API_URL = "https://rumobile.rutgers.edu/1/places.txt";
 	private ArrayList<String> mList;
 	private ArrayAdapter<String> mAdapter;
 	private JSONObject mData;

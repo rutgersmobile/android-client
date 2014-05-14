@@ -22,6 +22,25 @@ public class PlacesDisplay extends Fragment {
 
 	private static final String TAG = "PlacesDisplay";
 	
+	/**
+	 * Put JSON address object into readable string form
+	 * @param address JSON address object from place data
+	 * @return Address as a multi-line human-readable string
+	 */
+	private static String formatAddress(JSONObject address) {
+		String result = "";
+		
+		try {
+			result += address.getString("name") + "\n";
+			result += address.getString("street") + "\n";
+			result += address.getString("city") + ", " + address.getString("state_abbr") + " " + address.getString("postal_code");
+		} catch (JSONException e) {
+			Log.e(TAG, e.getMessage());
+		}
+		
+		return result;
+	}
+	
 	public PlacesDisplay() {
 		// Required empty public constructor
 	}
@@ -34,6 +53,7 @@ public class PlacesDisplay extends Fragment {
 		final TextView addressTextView = (TextView) v.findViewById(R.id.addressTextView);
 		final TextView buildingNoTextView = (TextView) v.findViewById(R.id.buildingNoTextView);
 		final TextView descriptionTextView = (TextView) v.findViewById(R.id.descriptionTextView);
+		final TextView campusNameTextView = (TextView) v.findViewById(R.id.campusTextView);
 		
 		if(args.get("place") != null) {
 			getActivity().setTitle(args.getString("place"));
@@ -42,12 +62,18 @@ public class PlacesDisplay extends Fragment {
 
 				@Override
 				public void onDone(JSONObject json) {
+					
 					try {
-						if(json.has("location")) addressTextView.setText(json.getJSONObject("location").toString());
+						
+						if(json.has("location")) addressTextView.setText(formatAddress(json.getJSONObject("location")));
 						if(json.has("building_number")) buildingNoTextView.setText(json.getString("building_number"));
+						if(json.has("campus_name")) campusNameTextView.setText(json.getString("campus_name"));
+						if(json.has("description")) descriptionTextView.setText(json.getString("description"));
+						
 					} catch (JSONException e) {
 						Log.e(TAG, Log.getStackTraceString(e));
 					}
+					
 				}
 				
 			});

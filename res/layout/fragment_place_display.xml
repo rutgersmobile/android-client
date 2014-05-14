@@ -1,122 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
- <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-     android:layout_width="match_parent"
-     android:layout_height="wrap_content" >
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
 
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-         
- 		<TextView
-       		android:layout_width="wrap_content"
-	      	android:layout_height="wrap_content"
-	       	android:text="@string/address_header" />
-	           
-     </TableRow>
-
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-		 		
-		 <TextView
-	     	android:id="@+id/addressTextView"
-	       	android:layout_width="wrap_content"
-	      	android:layout_height="wrap_content"
-	       	android:text="ADDRESS"
-	       	android:textAppearance="?android:attr/textAppearanceMedium" />
-	           
-     </TableRow>
-
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-	    	
-  		<TextView
-       		android:layout_width="wrap_content"
-	       	android:layout_height="wrap_content"
-	       	android:text="@string/description_header" />
-	        
-     </TableRow>
-
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-
-	     <TextView
-	     	android:id="@+id/descriptionTextView"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="DESCRIPTION"
-	        android:textAppearance="?android:attr/textAppearanceSmall" />
-	         		           
-	     </TableRow>
-	     
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-    
-   		 <TextView
-       	    android:layout_width="wrap_content"
-       		android:layout_height="wrap_content"
-       		android:text="@string/nearby_bus_header" />
-           
-     </TableRow>
-     
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-   
-  		 <TextView
-       		android:layout_width="wrap_content"
-       		android:layout_height="wrap_content"
-       		android:text="@string/offices_header" />
-           		
-     </TableRow>
-     
-   	 <TableRow
+    <TableRow
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
-  
-		<TextView
-       		android:layout_width="wrap_content"
-       		android:layout_height="wrap_content"
-       		android:text="@string/building_no_header" />
-    
-	 </TableRow>
-    
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-   
-		 <TextView
-	       	android:id="@+id/buildingNoTextView"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="BUILDING NUMBER" />
-           		
-     </TableRow>
-     
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-  
-	  	 <TextView
-	       	android:layout_width="wrap_content"
-	     	android:layout_height="wrap_content"
-	      	android:text="@string/campus_header" />
-          		
-     </TableRow>
-     
-     <TableRow
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" >
-   
-	   	 <TextView
-	        android:id="@+id/campusTextView"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="CAMPUS NAME" />
-           		
-     </TableRow>
-     
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/address_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/addressTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ADDRESS"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/description_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/descriptionTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DESCRIPTION"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/nearby_bus_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offices_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/building_no_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/buildingNoTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BUILDING NUMBER"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/campus_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/campusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CAMPUS NAME"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </TableRow>
+
 </TableLayout>

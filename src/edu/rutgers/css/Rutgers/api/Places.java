@@ -9,7 +9,6 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.impl.DefaultDeferredManager;
 import org.jdeferred.impl.DeferredObject;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
