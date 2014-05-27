@@ -3,9 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
 
+    <!-- Address section -->
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+		style="@style/RowHeader" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -15,20 +15,16 @@
     </TableRow>
 
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        style="@style/RowContent" >
 
         <TextView
             android:id="@+id/addressTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ADDRESS"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            style="@style/RowContentText" />
     </TableRow>
 
+    <!-- Description Section -->
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+		style="@style/RowHeader" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -38,20 +34,16 @@
     </TableRow>
 
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        style="@style/RowContent" >
 
         <TextView
             android:id="@+id/descriptionTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DESCRIPTION"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            style="@style/RowContentText" />
     </TableRow>
 
+    <!-- Nearby Buses section -->
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+		style="@style/RowHeader" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -60,9 +52,9 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </TableRow>
 
+    <!-- Offices Section -->
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+		style="@style/RowHeader" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -72,20 +64,16 @@
     </TableRow>
     
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        style="@style/RowContent" >
 
         <TextView
             android:id="@+id/officesTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="OFFICES"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            style="@style/RowContentText" />
     </TableRow>
     
+    <!-- Building Number Section -->
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+		style="@style/RowHeader" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -95,20 +83,16 @@
     </TableRow>
 
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        style="@style/RowContent" >
 
         <TextView
             android:id="@+id/buildingNoTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BUILDING NUMBER"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            style="@style/RowContentText" />
     </TableRow>
 
+    <!-- Campus Section -->
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+		style="@style/RowHeader" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -118,15 +102,11 @@
     </TableRow>
 
     <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        style="@style/RowContent" >
 
         <TextView
             android:id="@+id/campusTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="CAMPUS NAME"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            style="@style/RowContentText" />
     </TableRow>
 
 </TableLayout>

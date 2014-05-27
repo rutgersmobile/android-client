@@ -44,6 +44,7 @@ public class MainActivity extends FragmentActivity {
 		
 		setContentView(R.layout.activity_main);
 		
+		/* Set up sliding menu */
 		final SlidingMenu menu = new SlidingMenu(this);
         menu.setMode(SlidingMenu.LEFT);
         menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
@@ -59,13 +60,14 @@ public class MainActivity extends FragmentActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         
-        ListView list = (ListView) menu.getMenu().findViewById(R.id.left_menu);
+        ListView channelList = (ListView) menu.getMenu().findViewById(R.id.left_menu);
 
         // Sliding menu setup
         ArrayList<SlideMenuItem> menuArray = new ArrayList<SlideMenuItem>();
         
         menuArray.add(new SlideMenuItem("Bus", "bus"));
         menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt"));
+        menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
         menuArray.add(new SlideMenuItem("Food", "food"));
         menuArray.add(new SlideMenuItem("Places", "places"));
         menuArray.add(new SlideMenuItem("myRutgers", "browser", "http://my.rutgers.edu/"));
@@ -73,17 +75,8 @@ public class MainActivity extends FragmentActivity {
         
         ArrayAdapter<SlideMenuItem> menuAdapter = new ArrayAdapter<SlideMenuItem>(this, R.layout.main_drawer_item, menuArray);
         
-        /*
-		ArrayList<String> ar = new ArrayList<String>();
-		ar.add("myRutgers");
-		ar.add("Sakai");
-		ArrayAdapter<String> a = new ArrayAdapter<String>(this, R.layout.main_drawer_item, ar);
-		
-		list.setAdapter(a);
-		*/
-		
-        list.setAdapter(menuAdapter);
-        list.setOnItemClickListener(new OnItemClickListener() {
+        channelList.setAdapter(menuAdapter);
+        channelList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -155,6 +148,7 @@ public class MainActivity extends FragmentActivity {
 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {
 				Log.d("MainActivity", "got app data " + result.toString());
+				System.out.println("API loaded: " + result.toString());
 			}
 		});
 		

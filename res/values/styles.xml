@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -17,4 +17,28 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
+    <!-- Styles for table content displays -->
+    <style name="RowHeader">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
+        <item name="android:layout_marginRight">@dimen/activity_horizontal_margin</item>
+        <item name="android:layout_marginTop">@dimen/activity_vertical_margin</item>
+    </style>
+    
+    <style name="RowContent">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
+        <item name="android:layout_marginRight">@dimen/activity_horizontal_margin</item>
+    </style>
+    
+    <style name="RowContentText">
+    	<item name="android:layout_gravity">left|top|fill_horizontal</item>
+    	<item name="android:layout_width">0dp</item>
+    	<item name="android:layout_weight">1</item>
+    	<item name="android:layout_height">wrap_content</item>
+    	<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+    
 </resources>
