@@ -53,6 +53,7 @@ public class MainActivity extends FragmentActivity {
         menu.setShadowDrawable(R.drawable.shadow);
         menu.setShadowWidth(30);
         menu.setMenu(R.layout.menu);
+        //setSlidingActionBarEnabled(false);
 		
         //false to disable <back arrow on title bar
         getActionBar().setDisplayHomeAsUpEnabled(true);

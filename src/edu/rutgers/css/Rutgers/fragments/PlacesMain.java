@@ -8,10 +8,7 @@ import org.jdeferred.DoneCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Places;
-import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers2.R;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,12 +17,17 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.Places;
+import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Places channel fragment.
@@ -115,6 +117,8 @@ public class PlacesMain extends Fragment {
 
 		AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
 		autoComp.setAdapter(mAdapter);
+		
+		/* Item selected from auto-complete list */
 		autoComp.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -135,6 +139,23 @@ public class PlacesMain extends Fragment {
 			}
 			
 		});
+		
+		/* Text selected from soft-keyboard/autocomplete (happens in landscape) */
+		autoComp.setOnEditorActionListener(new OnEditorActionListener() {
+
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if(actionId == EditorInfo.IME_ACTION_GO) {
+					InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					return true;
+				}
+				
+				return false;
+			}
+			
+		});
+		
 		return v;
 	}
 	
