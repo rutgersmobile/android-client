@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,7 +27,7 @@ public class RSSItem {
 	private String link;
 	private String author;
 	private String date;
-	private String imgUrl;
+	private URL imgUrl;
 	
 	/**
 	 * Default constructor takes RSS item as XML object
@@ -63,12 +65,14 @@ public class RSSItem {
 			}
 		}
 		
-		// Image may be in url field (enclosure url attribute in the rutgers feed)
-		if(item.child("enclosure") != null) {
-			this.imgUrl = item.child("enclosure").attr("url");
-		}
-		else {
-			this.imgUrl = item.text("url");
+		// Image may be in url field (enclosure url attribute in the Rutgers feed)
+		try {
+			if(item.child("enclosure") != null) this.imgUrl = new URL(item.child("enclosure").attr("url"));
+			else if(item.child("url") != null) this.imgUrl = new URL(item.text("url"));
+			else this.imgUrl = null;
+		} catch (MalformedURLException e) {
+			Log.e(TAG, e.getMessage());
+			this.imgUrl = null;
 		}
 	}
 	
@@ -116,7 +120,7 @@ public class RSSItem {
 	 * Get item image URL
 	 * @return Item image URL
 	 */
-	public String getImgUrl() {
+	public URL getImgUrl() {
 		return this.imgUrl;
 	}
 	
