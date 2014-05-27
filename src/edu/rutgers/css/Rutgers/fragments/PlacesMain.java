@@ -110,7 +110,7 @@ public class PlacesMain extends Fragment {
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_places, parent, false);
+		final View v = inflater.inflate(R.layout.fragment_places, parent, false);
 		Bundle args = getArguments();
 		
 		if(args.get("title") != null) getActivity().setTitle(args.getString("title"));
@@ -123,6 +123,11 @@ public class PlacesMain extends Fragment {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				/* Close soft keyboard */
+				InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+				
+				/* Launch Places display fragment */
 				FragmentManager fm = getActivity().getSupportFragmentManager();
 				Bundle args = new Bundle();
 				PlaceTuple placeTuple = (PlaceTuple) parent.getAdapter().getItem(position);
@@ -140,14 +145,15 @@ public class PlacesMain extends Fragment {
 			
 		});
 		
-		/* Text selected from soft-keyboard/autocomplete (happens in landscape) */
+		/* Text placed in field from soft-keyboard/autocomplete (may happen in landscape) */
 		autoComp.setOnEditorActionListener(new OnEditorActionListener() {
 
 			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+			public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
 				if(actionId == EditorInfo.IME_ACTION_GO) {
-					InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					/* Close soft keyboard */
+					InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 					return true;
 				}
 				

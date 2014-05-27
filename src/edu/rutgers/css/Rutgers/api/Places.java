@@ -1,6 +1,6 @@
 package edu.rutgers.css.Rutgers.api;
 
-import java.util.Iterator;
+import java.util.Hashtable;
 
 import org.jdeferred.Deferred;
 import org.jdeferred.DeferredManager;
@@ -26,6 +26,7 @@ public class Places {
 	private static final String TAG = "PlacesAPI";
 	
 	private static JSONObject mPlacesConf;
+	private static Hashtable<String, JSONObject> mPlacesHashtable;
 	
 	private static final String API_URL = "https://rumobile.rutgers.edu/1/places.txt";	
 	private static long expire = 1000 * 60 * 60; // Cache data for an hour
@@ -45,6 +46,12 @@ public class Places {
 
 			@Override
 			public void onDone(JSONObject res) {
+				
+				/* Build hashtable if result is new */
+				if(!res.equals(mPlacesConf)) {
+					Log.i(TAG, "Building places hashtable");
+				}
+				
 				mPlacesConf = (JSONObject) res;
 				confd.resolve(null);
 			}
