@@ -3,14 +3,19 @@ package edu.rutgers.css.Rutgers.fragments;
 import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.AdapterView.OnItemClickListener;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.JSONArrayAdapter;
 import edu.rutgers.css.Rutgers2.R;
@@ -56,6 +61,36 @@ public class BusStops extends Fragment {
 		
 		mList = (ListView) v.findViewById(R.id.list);
 		mList.setAdapter(mAdapter);
+		mList.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				JSONObject clicked = (JSONObject) parent.getAdapter().getItem(position);
+				
+				FragmentManager fm = getActivity().getSupportFragmentManager();
+				
+				try {
+					Bundle args = new Bundle();
+					args.putString("component", "busdisplay");
+					args.putString("mode", "stop");
+					args.putString("title", clicked.getString("title"));
+					args.putString("tag", clicked.getString("tag"));
+					
+					Fragment fragment = ComponentFactory.getInstance().createFragment(args);
+					
+					if(fragment != null) {
+						fm.beginTransaction()
+							.replace(R.id.main_content_frame, fragment)
+							.addToBackStack(null)
+							.commit();
+					}
+				} catch (JSONException e) {
+					Log.e(TAG, e.getMessage());
+				}
+				
+			}
+			
+		});
 		
 		return v;
 	}
