@@ -16,7 +16,7 @@ import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * A simple {@link android.support.v4.app.Fragment} subclass.
+ * Place information display component
  * 
  */
 public class PlacesDisplay extends Fragment {
@@ -26,7 +26,7 @@ public class PlacesDisplay extends Fragment {
 	/**
 	 * Put JSON address object into readable string form
 	 * @param address JSON address object from place data
-	 * @return Address as a multi-line human-readable string
+	 * @return Multi-line string containing address
 	 */
 	private static String formatAddress(JSONObject address) {
 		String result = "";
@@ -42,6 +42,11 @@ public class PlacesDisplay extends Fragment {
 		return result;
 	}
 	
+	/**
+	 * Add each value from the Offices array to a single string with line breaks
+	 * @param offices Offices JSON Array
+	 * @return Multi-line string listing offices
+	 */
 	private static final String formatOffices(JSONArray offices) {
 		String result = "";
 		

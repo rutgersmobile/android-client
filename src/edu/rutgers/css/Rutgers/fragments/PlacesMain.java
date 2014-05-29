@@ -30,9 +30,8 @@ import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Places channel fragment.
- * Displays a text field with auto-complete information from places database.
- * User enters a building name or abbreviation - fragment displays place information.
+ * Main Places component: displays a text field with auto-complete information from places database.
+ * User enters a building name and selects from list; selection sent to place display component.
  */
 public class PlacesMain extends Fragment {
 
