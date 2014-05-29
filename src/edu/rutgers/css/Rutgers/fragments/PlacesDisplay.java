@@ -71,30 +71,36 @@ public class PlacesDisplay extends Fragment {
 		final TextView campusNameTextView = (TextView) v.findViewById(R.id.campusTextView);
 		final TextView officesTextView = (TextView) v.findViewById(R.id.officesTextView);
 		
-		if(args.get("placeKey") != null) {
-			getActivity().setTitle(args.getString("placeName"));
+		if(args.get("placeJSON") != null) {
+			JSONObject placeJSON;
 			
-			Places.getPlace(args.getString("placeKey")).done(new DoneCallback<JSONObject>() {
-
-				@Override
-				public void onDone(JSONObject json) {
-					
-					try {
-						
-						if(json.has("location")) addressTextView.setText(formatAddress(json.getJSONObject("location")));
-						if(json.has("building_number")) buildingNoTextView.setText(json.getString("building_number"));
-						if(json.has("campus_name")) campusNameTextView.setText(json.getString("campus_name"));
-						if(json.has("description")) descriptionTextView.setText(json.getString("description"));
-						if(json.has("offices")) officesTextView.setText(formatOffices(json.getJSONArray("offices")));
-						
-					} catch (JSONException e) {
-						Log.e(TAG, Log.getStackTraceString(e));
-					}
-					
-				}
+			try {
+				placeJSON = new JSONObject(args.getString("placeJSON"));
+			} catch (JSONException e1) {
+				Log.e(TAG, e1.getMessage());
+				return v;
+			}
+			
+			try {
+				getActivity().setTitle(placeJSON.getString("placeName"));
+			} catch (JSONException e) {
+				getActivity().setTitle("Places");
+			}
 				
-			});
-		}
+
+			try {
+				
+				if(placeJSON.has("location")) addressTextView.setText(formatAddress(placeJSON.getJSONObject("location")));
+				if(placeJSON.has("building_number")) buildingNoTextView.setText(placeJSON.getString("building_number"));
+				if(placeJSON.has("campus_name")) campusNameTextView.setText(placeJSON.getString("campus_name"));
+				if(placeJSON.has("description")) descriptionTextView.setText(placeJSON.getString("description"));
+				if(placeJSON.has("offices")) officesTextView.setText(formatOffices(placeJSON.getJSONArray("offices")));
+				
+			} catch (JSONException e) {
+				Log.e(TAG, Log.getStackTraceString(e));
+			}
+			
+		}					
 		
 		return v;
 	}

@@ -46,30 +46,43 @@ public class PlacesMain extends Fragment {
 	}
 	
 	private class PlaceTuple implements Comparable<PlaceTuple> {
-		public String key;
-		public String title;
+		private String key;
+		private JSONObject placeJson;
 		
-		public PlaceTuple(String key, String title) {
+		public PlaceTuple(String key, JSONObject placeJson) {
 			this.key = key;
-			this.title = title;
+			this.placeJson = placeJson;
 		}
 		
 		public String getKey() {
 			return this.key;
 		}
 		
-		public String getTitle() {
-			return this.title;
+		public JSONObject getPlaceJSON() {
+			return this.placeJson;
 		}
 		
 		@Override
 		public String toString() {
-			return this.title;
+			try {
+				return placeJson.getString("title");
+			} catch (JSONException e) {
+				Log.e(TAG, e.getMessage());
+				return key;
+			}
 		}
 
 		@Override
 		public int compareTo(PlaceTuple another) {
-			return title.compareTo(another.getTitle());
+			// Order by 'title' field alphabetically (or by key if getting title string fails)
+			try {
+				String thisTitle = getPlaceJSON().getString("title");
+				String thatTitle = another.getPlaceJSON().getString("title");
+				return thisTitle.compareTo(thatTitle);
+			} catch (JSONException e) {
+				Log.e(TAG, e.getMessage());
+				return getKey().compareTo(another.getKey()); 
+			}
 		}
 	}
 	
@@ -94,7 +107,7 @@ public class PlacesMain extends Fragment {
 					while(curKey.hasNext()) {
 						String key = curKey.next();
 						JSONObject curBuilding = json.getJSONObject(key);
-						PlaceTuple newPT = new PlaceTuple(key, curBuilding.getString("title"));
+						PlaceTuple newPT = new PlaceTuple(key, curBuilding);
 						mAdapter.add(newPT);
 					}
 					Collections.sort(mList);
@@ -133,8 +146,8 @@ public class PlacesMain extends Fragment {
 				PlaceTuple placeTuple = (PlaceTuple) parent.getAdapter().getItem(position);
 				
 				args.putString("component", "placesdisplay");
-				args.putString("placeName", placeTuple.getTitle());
 				args.putString("placeKey", placeTuple.getKey());
+				args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
 				
 				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 				fm.beginTransaction()

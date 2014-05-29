@@ -59,7 +59,7 @@ public class Places {
 	}
 	
 	/**
-	 * Get the JSONObject containing all of the place information
+	 * Get the JSON containing all of the place information
 	 * @return JSONObject containing "all" field from Places API
 	 */
 	public static Promise<JSONObject, Exception, Double> getPlaces() {
@@ -88,6 +88,11 @@ public class Places {
 		return d.promise();
 	}
 	
+	/**
+	 * Get JSON for a specific place.
+	 * @param placeKey Place key (NOT title)
+	 * @return JSON for place
+	 */
 	public static Promise<JSONObject, Exception, Double> getPlace(final String placeKey) {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
