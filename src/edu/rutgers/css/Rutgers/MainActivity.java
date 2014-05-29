@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
@@ -23,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.androidquery.callback.AjaxStatus;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -30,11 +33,47 @@ import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.Prediction;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
+import edu.rutgers.css.Rutgers.fragments.DTable;
 import edu.rutgers.css.Rutgers2.R;
 
 public class MainActivity extends FragmentActivity {
 	
+	private static final String TAG = "MainActivity";
+	private static final String SC_API = "https://rumobile.rutgers.edu/1/shortcuts.txt";
 	private JSONObject channels;
+	
+	private void loadWebShortcuts(final ArrayList<SlideMenuItem> menuArray) {
+		
+		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new DoneCallback<JSONArray>() {
+
+			@Override
+			public void onDone(JSONArray shortcutsArray) {
+				
+				// Get each shortcut from array and add it to the sliding menu
+				for(int i = 0; i < shortcutsArray.length(); i++) {		
+					try {
+						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
+						String title = DTable.getLocalTitle(curShortcut.get("title"));
+						String url = curShortcut.getString("url");
+						menuArray.add(new SlideMenuItem(title, "browser", url));
+					} catch (JSONException e) {
+						Log.e(TAG, e.getMessage());
+						continue;
+					}
+				}
+				
+			}
+			
+		}).fail(new FailCallback<AjaxStatus>() {
+
+			@Override
+			public void onFail(AjaxStatus status) {
+				Log.e(TAG, status.getMessage());
+			}
+			
+		});
+		
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,16 +101,17 @@ public class MainActivity extends FragmentActivity {
         
         ListView channelList = (ListView) menu.getMenu().findViewById(R.id.left_menu);
 
-        // Sliding menu setup
+        // Sliding menu setup native items
         ArrayList<SlideMenuItem> menuArray = new ArrayList<SlideMenuItem>();
         
         menuArray.add(new SlideMenuItem("Bus", "bus"));
         menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt"));
-        menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
         menuArray.add(new SlideMenuItem("Food", "food"));
         menuArray.add(new SlideMenuItem("Places", "places"));
-        menuArray.add(new SlideMenuItem("myRutgers", "browser", "http://my.rutgers.edu/"));
-        menuArray.add(new SlideMenuItem("Sakai", "browser", "http://sakai.rutgers.edu/"));
+        menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
+        
+        // Sliding menu set up web shortcuts
+        loadWebShortcuts(menuArray);
         
         ArrayAdapter<SlideMenuItem> menuAdapter = new ArrayAdapter<SlideMenuItem>(this, R.layout.main_drawer_item, menuArray);
         

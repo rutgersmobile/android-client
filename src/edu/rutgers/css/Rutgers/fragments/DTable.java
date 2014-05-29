@@ -183,7 +183,7 @@ public class DTable extends Fragment {
 	 * @param title String or JSONObject returned by get("title") on channel JSONObject
 	 * @return Appropriate title to display
 	 */
-	private String getLocalTitle(Object title) {
+	public static String getLocalTitle(Object title) {
 		if(title.getClass() == String.class) {
 			return (String) title;
 		}
@@ -252,7 +252,7 @@ public class DTable extends Fragment {
 			}
 			
 			try {
-				title = getLocalTitle(c.get("title"));
+				title = DTable.getLocalTitle(c.get("title"));
 			} catch (JSONException e) {
 				title = "object does not have a title property";
 			}

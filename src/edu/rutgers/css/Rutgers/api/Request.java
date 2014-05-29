@@ -22,6 +22,9 @@ public class Request {
 	private static AQuery aq;
 	private static boolean mSetupDone = false;
 	
+	public static long EXPIRE_ALWAYS = -1; // -1 means always refresh -- never use cache
+	public static long EXPIRE_ONE_HOUR = 1000 * 60 * 60;
+	
 	private static void setup () {
 		if (!mSetupDone) {
 			aq = new AQuery(MyApplication.getAppContext());
@@ -32,7 +35,7 @@ public class Request {
 	
 	// Makes a call against the api. Expects a JSON object
 	public static Promise<JSONObject, AjaxStatus, Double> api (String resource) {
-		return json(API_BASE + resource, -1); // -1 means always refresh. change if desired later
+		return json(API_BASE + resource, EXPIRE_ALWAYS);
 	}
 	
 	// gets arbitrary json
@@ -60,7 +63,7 @@ public class Request {
 	
 	/**
 	 * Gets arbitrary JSON array.
-	 * @param resource Link to JSON file
+	 * @param resource JSON file URL
 	 * @param expire Cache time in milliseconds
 	 * @return Promise for JSONArray
 	 */
@@ -86,7 +89,12 @@ public class Request {
 		return deferred.promise();
 	}
 	
-	// gets arbitrary xml
+	/**
+	 * Get arbitrary XML.
+	 * @param resource XML file URL
+	 * @param expire Cache time in milliseconds
+	 * @return Promise for XmlDom
+	 */
 	public static Promise<XmlDom, AjaxStatus, Double> xml (String resource, long expire) {
 		setup();
 		final DeferredObject<XmlDom, AjaxStatus, Double> deferred = new DeferredObject<XmlDom, AjaxStatus, Double>();

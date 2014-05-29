@@ -26,7 +26,7 @@ public class Places {
 	private static JSONObject mPlacesConf;
 	
 	private static final String API_URL = "https://rumobile.rutgers.edu/1/places.txt";	
-	private static long expire = 1000 * 60 * 60; // Cache data for an hour
+	private static long expire = Request.EXPIRE_ONE_HOUR; // Cache data for an hour
 	
 	/**
 	 * Grab the places API data.
