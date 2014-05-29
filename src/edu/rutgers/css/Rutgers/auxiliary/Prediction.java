@@ -51,5 +51,10 @@ public class Prediction {
 	public void setMinutes(ArrayList<Integer> minutes) {
 		this.minutes = minutes;
 	}
+
+	@Override
+	public String toString() {
+		return this.title + "," + this.direction + "," + this.minutes.toString();
+	}
 	
 }

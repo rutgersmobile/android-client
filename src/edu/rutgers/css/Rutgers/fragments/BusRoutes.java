@@ -2,26 +2,31 @@ package edu.rutgers.css.Rutgers.fragments;
 
 import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-
-import com.androidquery.AQuery;
-
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.JSONArrayAdapter;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusRoutes extends Fragment {
-	private AQuery aq;
-	private ListView mList;
+	
 	private static final String TAG = "BusRoutes";
-
+	private ListView mList;
+	private JSONArrayAdapter mAdapter;
+	private JSONArray mData;
+	
 	public BusRoutes() {
 		// Required empty public constructor
 	}
@@ -29,8 +34,26 @@ public class BusRoutes extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		mData = new JSONArray();
+		mAdapter = new JSONArrayAdapter(getActivity(), mData, R.layout.title_row);
 		
-		aq = new AQuery(this.getActivity());
+		Nextbus.getRoutes("nb").then(new DoneCallback<JSONArray>() {
+			
+			@Override
+			public void onDone(JSONArray data) {
+				Log.d(TAG, "got data: " + mList);
+				for(int i = 0; i < data.length(); i++) {
+					try {
+						mData.put(data.get(i));
+					} catch (JSONException e) {
+						Log.e(TAG, e.getMessage());
+					}
+				}
+			}
+			
+		});
+
 	}
 	
 	@Override
@@ -38,16 +61,38 @@ public class BusRoutes extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_busstops, parent, false);
 		
 		mList = (ListView) v.findViewById(R.id.list);
-		Nextbus.getRoutes("nb").then(new DoneCallback<JSONArray>() {
-			
+		mList.setAdapter(mAdapter);
+		mList.setOnItemClickListener(new OnItemClickListener() {
+
 			@Override
-			public void onDone(JSONArray data) {
-				Log.d(TAG, "got data: " + mList);
-				JSONArrayAdapter adapter = new JSONArrayAdapter(getActivity(), data, R.layout.title_row);
-				mList.setAdapter(adapter);
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				JSONObject clicked = (JSONObject) parent.getAdapter().getItem(position);
+				
+				FragmentManager fm = getActivity().getSupportFragmentManager();
+				
+				try {
+					Bundle args = new Bundle();
+					args.putString("component", "busdisplay");
+					args.putString("mode", "route");
+					args.putString("title", clicked.getString("title"));
+					args.putString("tag", clicked.getString("tag"));
+					
+					Fragment fragment = ComponentFactory.getInstance().createFragment(args);
+					
+					if(fragment != null) {
+						fm.beginTransaction()
+							.replace(R.id.main_content_frame, fragment)
+							.addToBackStack(null)
+							.commit();
+					}
+				} catch (JSONException e) {
+					Log.e(TAG, e.getMessage());
+				}
+				
 			}
+			
 		});
-		
+				
 		return v;
 	}
 	

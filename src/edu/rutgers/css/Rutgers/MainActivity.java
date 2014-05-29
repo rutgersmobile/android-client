@@ -109,6 +109,7 @@ public class MainActivity extends FragmentActivity {
         menuArray.add(new SlideMenuItem("Food", "food"));
         menuArray.add(new SlideMenuItem("Places", "places"));
         menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
+        menuArray.add(new SlideMenuItem("TEST Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
         
         // Sliding menu set up web shortcuts
         loadWebShortcuts(menuArray);
@@ -180,11 +181,11 @@ public class MainActivity extends FragmentActivity {
 		 
 		//args.putString("component", "bus");
 		
-		
+		/* Default to Food screen until main screen is made */
 		args.putString("title", "Food");
 		args.putString("component",  "food");
 
-		
+		/* This loads list of native channels (not complete) */
 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {
 				Log.d("MainActivity", "got app data " + result.toString());

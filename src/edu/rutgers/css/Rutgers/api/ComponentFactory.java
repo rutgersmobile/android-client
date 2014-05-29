@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
+import edu.rutgers.css.Rutgers.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.BusMain;
 import edu.rutgers.css.Rutgers.fragments.DTable;
 import edu.rutgers.css.Rutgers.fragments.FoodHall;
@@ -38,6 +39,7 @@ public class ComponentFactory {
 		fragmentTable.put("foodmeal", FoodMeal.class);
 		fragmentTable.put("places", PlacesMain.class);
 		fragmentTable.put("placesdisplay", PlacesDisplay.class);
+		fragmentTable.put("busdisplay", BusDisplay.class);
 	}
 	
 	public static ComponentFactory getInstance () {
