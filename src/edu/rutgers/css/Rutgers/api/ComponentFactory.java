@@ -1,9 +1,14 @@
 package edu.rutgers.css.Rutgers.api;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.BusMain;
@@ -14,13 +19,11 @@ import edu.rutgers.css.Rutgers.fragments.FoodMeal;
 import edu.rutgers.css.Rutgers.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.fragments.PlacesMain;
 import edu.rutgers.css.Rutgers.fragments.RSSReader;
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 
+/**
+ * Singleton fragment builder
+ *
+ */
 public class ComponentFactory {
 
 	private static ComponentFactory instance = null;
@@ -42,11 +45,20 @@ public class ComponentFactory {
 		fragmentTable.put("busdisplay", BusDisplay.class);
 	}
 	
+	/**
+	 * Get singleton instance
+	 * @return Component factory singleton instance
+	 */
 	public static ComponentFactory getInstance () {
 		if (instance == null) instance = new ComponentFactory();
 		return instance;
 	}
 	
+	/**
+	 * Create component fragment
+	 * @param options Argument bundle with at least 'component' argument set to describe which component to build. All other arguments will be passed to the new fragment.
+	 * @return Built fragment
+	 */
 	public Fragment createFragment (Bundle options) {
 		Log.d(TAG, "Attempting to create fragment");
 		Fragment fragment = new Fragment();
@@ -78,10 +90,15 @@ public class ComponentFactory {
 		return fragment;
 	}
 	
-	public void launch (Context c, Bundle options) {
-		Intent i = new Intent(c, SingleFragmentActivity.class);
+	/**
+	 * Launch an activity
+	 * @param context
+	 * @param options Argument bundle
+	 */
+	public void launch (Context context, Bundle options) {
+		Intent i = new Intent(context, SingleFragmentActivity.class);
 		i.putExtras(options);
-		c.startActivity(i);
+		context.startActivity(i);
 	}
 	
 }
