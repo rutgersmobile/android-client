@@ -82,22 +82,22 @@ public class PlacesDisplay extends Fragment {
 			}
 			
 			try {
-				getActivity().setTitle(placeJSON.getString("placeName"));
+				getActivity().setTitle(placeJSON.getString("title"));
 			} catch (JSONException e) {
+				Log.w(TAG, e.getMessage());
 				getActivity().setTitle("Places");
 			}
-				
 
 			try {
 				
-				if(placeJSON.has("location")) addressTextView.setText(formatAddress(placeJSON.getJSONObject("location")));
-				if(placeJSON.has("building_number")) buildingNoTextView.setText(placeJSON.getString("building_number"));
-				if(placeJSON.has("campus_name")) campusNameTextView.setText(placeJSON.getString("campus_name"));
-				if(placeJSON.has("description")) descriptionTextView.setText(placeJSON.getString("description"));
-				if(placeJSON.has("offices")) officesTextView.setText(formatOffices(placeJSON.getJSONArray("offices")));
+				addressTextView.setText(formatAddress(placeJSON.getJSONObject("location")));
+				buildingNoTextView.setText(placeJSON.getString("building_number"));
+				campusNameTextView.setText(placeJSON.getString("campus_name"));
+				descriptionTextView.setText(placeJSON.getString("description"));
+				officesTextView.setText(formatOffices(placeJSON.getJSONArray("offices")));
 				
 			} catch (JSONException e) {
-				Log.e(TAG, Log.getStackTraceString(e));
+				Log.w(TAG, e.getMessage());
 			}
 			
 		}					
