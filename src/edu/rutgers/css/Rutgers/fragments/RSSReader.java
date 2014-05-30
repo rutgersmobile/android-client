@@ -16,17 +16,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
-import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.RSSAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RSSItem;
+import edu.rutgers.css.Rutgers2.R;
 
 /**
  * RSS Feed display fragment
@@ -37,7 +35,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	private static final String TAG = "RSSReader";
 	private List<RSSItem> rssItems;
 	private ListView mList;
-	private ArrayAdapter<RSSItem> rssItemAdapter;
+	private RSSAdapter rssItemAdapter;
 	private long expire = 60 * 1000; // cache feed for one minute
 	
 	public RSSReader() {

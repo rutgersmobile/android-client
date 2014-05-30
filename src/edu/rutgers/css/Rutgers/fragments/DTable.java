@@ -6,6 +6,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -146,9 +148,16 @@ public class DTable extends Fragment {
 							JSONObject channel = (JSONObject) c.getJSONObject("channel");
 							Log.d(TAG, "Clicked \"" + getLocalTitle(channel.get("title")) + "\"");
 							
+							// Launch browser
+							if(channel.getString("view").equalsIgnoreCase("www"))	{
+								Intent i = new Intent(Intent.ACTION_VIEW);
+								i.setData(Uri.parse(channel.getString("url")));
+								startActivity(i);
+								return;
+							}
+							
 							// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
-							// TODO Should ComponentFactory take "view" argument instead of "component" argument to avoid this?
-							args.putString("component", channel.getString("view"));
+							args.putString("component", channel.getString("view")); // TODO Should ComponentFactory take "view" argument instead of "component" argument to skip this?
 							
 							Iterator<String> keys = channel.keys();
 							while(keys.hasNext()) {
@@ -160,7 +169,7 @@ public class DTable extends Fragment {
 						
 						Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 						if(fragment == null) {
-							Log.e(TAG, "Failed to create component");
+							Log.e(TAG, "Failed to get component");
 							return;
 						}
 						fm.beginTransaction()

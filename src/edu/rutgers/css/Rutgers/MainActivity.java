@@ -55,7 +55,7 @@ public class MainActivity extends FragmentActivity {
 						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
 						String title = DTable.getLocalTitle(curShortcut.get("title"));
 						String url = curShortcut.getString("url");
-						menuArray.add(new SlideMenuItem(title, "browser", url));
+						menuArray.add(new SlideMenuItem(title, "www", url));
 					} catch (JSONException e) {
 						Log.e(TAG, e.getMessage());
 						continue;
@@ -131,7 +131,7 @@ public class MainActivity extends FragmentActivity {
 				Bundle clickedArgs = clickedItem.getArgs();
 				
 				// Launch browser
-				if(clickedArgs.getString("component").equalsIgnoreCase("browser"))	{
+				if(clickedArgs.getString("component").equalsIgnoreCase("www"))	{
 					Intent i = new Intent(Intent.ACTION_VIEW);
 					i.setData(Uri.parse(clickedArgs.getString("url")));
 					startActivity(i);

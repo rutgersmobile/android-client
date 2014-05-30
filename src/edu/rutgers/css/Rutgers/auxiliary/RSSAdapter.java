@@ -44,7 +44,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		/* Make new data holder or get existing one */
 /*		if(convertView == null) {
 				mHolder = new RSSHolder();
-				 Create new RSS Row view 
+				// Create new RSS Row view 
 				convertView = mLayoutInflater.inflate(this.layoutResource, null);
 				convertView.setTag(mHolder);
 		}

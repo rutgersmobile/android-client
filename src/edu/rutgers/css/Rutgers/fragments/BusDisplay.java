@@ -9,10 +9,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.Prediction;
+import edu.rutgers.css.Rutgers.auxiliary.PredictionAdapter;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusDisplay extends Fragment {
@@ -20,7 +20,7 @@ public class BusDisplay extends Fragment {
 	private static final String TAG = "BusDisplay";
 	
 	private ArrayList<Prediction> mData;
-	private ArrayAdapter<Prediction> mAdapter;
+	private PredictionAdapter mAdapter;
 	private ListView mList;
 	
 	public BusDisplay() {
@@ -32,7 +32,7 @@ public class BusDisplay extends Fragment {
 		super.onCreate(savedInstanceState);
 		
 		mData = new ArrayList<Prediction>();
-		mAdapter = new ArrayAdapter<Prediction>(getActivity(), R.layout.title_row, mData);
+		mAdapter = new PredictionAdapter(getActivity(), R.layout.bus_predict_row, mData);
 		
 		Bundle args = getArguments();
 		if(args.getString("title") != null) {
