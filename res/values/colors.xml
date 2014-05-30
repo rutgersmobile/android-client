@@ -4,4 +4,10 @@
     <color name="black">#000000</color>
     <color name="pantone186">#D21034</color>
     <color name="pantone431">#5F6A72</color>
+    
+    <!--  Colors used with bus arrival times -->
+    <color name="busSoonest">#CC0000</color>
+    <color name="busSoon">#FF6600</color>
+    <color name="busLater">#000099</color>
+
 </resources>

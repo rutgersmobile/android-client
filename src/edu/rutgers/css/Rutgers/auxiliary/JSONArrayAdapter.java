@@ -66,7 +66,6 @@ public class JSONArrayAdapter implements ListAdapter {
 		try {
 			JSONObject data = (JSONObject) getItem(position);
 			Iterator<?> keys = data.keys();
-			Log.d(TAG, "generatign a view");
 			// For each key in the json object, check if there's a resource in the view with the same id as the key.
 			// If so, try to set its data to the data in the key
 			while (keys.hasNext()) {
