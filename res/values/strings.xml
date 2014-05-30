@@ -16,5 +16,6 @@
     <string name="offices_header">Offices</string>
     <string name="building_no_header">Building Number</string>
     <string name="campus_header">Campus</string>
-
+    <string name="drawer_open">Open</string>
+	<string name="drawer_close">Close</string>
 </resources>

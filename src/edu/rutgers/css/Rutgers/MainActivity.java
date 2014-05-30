@@ -9,13 +9,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -26,7 +31,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
-import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
@@ -39,32 +43,16 @@ public class MainActivity extends FragmentActivity {
 	private static final String TAG = "MainActivity";
 	private static final String SC_API = "https://rumobile.rutgers.edu/1/shortcuts.txt";
 	
+	private DrawerLayout mDrawerLayout;
+	private ListView mDrawerList;
+	private ActionBarDrawerToggle mDrawerToggle;
+	private ArrayAdapter<SlideMenuItem> mDrawerAdapter;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-				
-		Log.d("MainActivity", "oncreate");
+		setContentView(R.layout.activity_main);				
 		
-		setContentView(R.layout.activity_main);
-		
-		/* Set up sliding menu */
-		final SlidingMenu menu = new SlidingMenu(this);
-        menu.setMode(SlidingMenu.LEFT);
-        menu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
-        menu.setFadeDegree(0.35f);
-        menu.attachToActivity(this, SlidingMenu.SLIDING_WINDOW);
-        menu.setBehindOffset(200);
-        menu.setShadowDrawable(R.drawable.shadow);
-        menu.setShadowWidth(30);
-        menu.setMenu(R.layout.menu);
-        //setSlidingActionBarEnabled(false);
-		
-        //false to disable <back arrow on title bar
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-        
-        ListView channelList = (ListView) menu.getMenu().findViewById(R.id.left_menu);
-
         // Sliding menu setup native items
         ArrayList<SlideMenuItem> menuArray = new ArrayList<SlideMenuItem>();
         
@@ -78,17 +66,49 @@ public class MainActivity extends FragmentActivity {
         // Sliding menu set up web shortcuts
         loadWebShortcuts(menuArray);
         
-        ArrayAdapter<SlideMenuItem> menuAdapter = new ArrayAdapter<SlideMenuItem>(this, R.layout.main_drawer_item, menuArray);
         
-        channelList.setAdapter(menuAdapter);
-        channelList.setOnItemClickListener(new OnItemClickListener() {
+		// Set up Navigation Drawer
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+                ) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                //getActionBar().setTitle(mTitle);
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                //getActionBar().setTitle(mDrawerTitle);
+            }
+        };
+        
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        
+        //false to disable <back arrow on title bar
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        
+        mDrawerAdapter = new ArrayAdapter<SlideMenuItem>(this, R.layout.main_drawer_item, menuArray);
+        mDrawerList.setAdapter(mDrawerAdapter);
+        mDrawerList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				SlideMenuItem clickedItem = (SlideMenuItem) parent.getAdapter().getItem(position);
 				if(clickedItem == null) {
 					Log.e("SlidingMenu", "Failed sliding menu click, index " + position);
-					menu.toggle();
+					mDrawerLayout.closeDrawer(mDrawerList);
 					return;
 				}
 				
@@ -113,7 +133,7 @@ public class MainActivity extends FragmentActivity {
 						.commit(); 	
 				}
 				
-				menu.toggle(); // Close menu after a click
+				mDrawerLayout.closeDrawer(mDrawerList); // Close menu after a click
 			}
         	
         });
@@ -164,6 +184,32 @@ public class MainActivity extends FragmentActivity {
 		*/
 
 	}
+	
+   @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        	Log.d(TAG,"");
+        	return true;
+        }
+        // Handle your other action bar items...
+
+        return super.onOptionsItemSelected(item);
+    }
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
