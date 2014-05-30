@@ -91,7 +91,7 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 		StringBuilder result = new StringBuilder("Arriving in ");
 		
 		for(int i = 0; i < minutes.size(); i++) {
-			if(i == minutes.size() - 1) result.append("and ");
+			if(i != 0 && i == minutes.size() - 1) result.append("and ");
 			if(minutes.get(i) < 1) result.append("<1");
 			else result.append(minutes.get(i));
 			if(i != minutes.size() - 1) result.append(", ");
