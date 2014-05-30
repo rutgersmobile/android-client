@@ -7,16 +7,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import edu.rutgers.css.Rutgers2.R;
 
-public class JSONArrayAdapter implements ListAdapter {
+public class JSONArrayAdapter extends BaseAdapter implements ListAdapter {
 	
 	private static final String TAG = "JSONArrayAdapter";
 	private JSONArray mSource;
@@ -27,19 +27,6 @@ public class JSONArrayAdapter implements ListAdapter {
 		mSource = source;
 		mResource = resource;
 		mContext = context;
-	}
-	
-	public int getCount () {
-		return mSource.length();
-	}
-	
-	public Object getItem (int position) {
-		try {
-			return mSource.getJSONObject(position);
-		} catch (JSONException e) {
-			Log.e(TAG, "JSONArrayAdapter requires that all items are objects");
-			return null;
-		}
 	}
 	
 	private boolean isTextView (View v) {
@@ -60,6 +47,27 @@ public class JSONArrayAdapter implements ListAdapter {
 		}
 	}
 	
+	public void add(Object array) {
+		mSource.put(array);
+		this.notifyDataSetChanged();
+	}
+
+	@Override
+	public int getCount () {
+		return mSource.length();
+	}
+	
+	@Override
+	public Object getItem (int position) {
+		try {
+			return mSource.getJSONObject(position);
+		} catch (JSONException e) {
+			Log.e(TAG, "JSONArrayAdapter requires that all items are objects");
+			return null;
+		}
+	}
+	
+	@Override
 	public View getView (int position, View view, ViewGroup parent) {
 		if (view == null) view = LayoutInflater.from(mContext).inflate(mResource, null);
 		
@@ -87,14 +95,38 @@ public class JSONArrayAdapter implements ListAdapter {
 		return view;
 	}
 	
-	public long getItemId (int position) { return (long) position; }
-	public int getItemViewType (int position) { return 1; }
-	public int getViewTypeCount () { return 1; }
-	public boolean hasStableIds () { return true; }
-	public boolean isEmpty () { return mSource.length() == 0; }
-	public boolean isEnabled (int position) { return true; }
-	public boolean areAllItemsEnabled () { return true; }
-	public void registerDataSetObserver (DataSetObserver o) {}
-	public void unregisterDataSetObserver (DataSetObserver o) {}
+	public long getItemId (int position) {
+		return (long) position;
+	}
 	
+	@Override
+	public int getItemViewType (int position) {
+		return 1;
+	}
+	
+	@Override
+	public int getViewTypeCount () { 
+		return 1;
+	}
+	
+	@Override
+	public boolean hasStableIds () { 
+		return false; 
+	}
+	
+	@Override
+	public boolean isEmpty () { 
+		return mSource.length() == 0; 
+	}
+	
+	@Override
+	public boolean isEnabled (int position) { 
+		return true; 
+	}
+	
+	@Override
+	public boolean areAllItemsEnabled () { 
+		return true; 
+	}
+		
 }

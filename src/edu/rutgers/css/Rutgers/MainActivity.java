@@ -29,9 +29,7 @@ import com.androidquery.callback.AjaxStatus;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.auxiliary.Prediction;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers.fragments.DTable;
 import edu.rutgers.css.Rutgers2.R;
@@ -40,40 +38,6 @@ public class MainActivity extends FragmentActivity {
 	
 	private static final String TAG = "MainActivity";
 	private static final String SC_API = "https://rumobile.rutgers.edu/1/shortcuts.txt";
-	private JSONObject channels;
-	
-	private void loadWebShortcuts(final ArrayList<SlideMenuItem> menuArray) {
-		
-		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new DoneCallback<JSONArray>() {
-
-			@Override
-			public void onDone(JSONArray shortcutsArray) {
-				
-				// Get each shortcut from array and add it to the sliding menu
-				for(int i = 0; i < shortcutsArray.length(); i++) {		
-					try {
-						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
-						String title = DTable.getLocalTitle(curShortcut.get("title"));
-						String url = curShortcut.getString("url");
-						menuArray.add(new SlideMenuItem(title, "www", url));
-					} catch (JSONException e) {
-						Log.e(TAG, e.getMessage());
-						continue;
-					}
-				}
-				
-			}
-			
-		}).fail(new FailCallback<AjaxStatus>() {
-
-			@Override
-			public void onFail(AjaxStatus status) {
-				Log.e(TAG, status.getMessage());
-			}
-			
-		});
-		
-	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -159,48 +123,37 @@ public class MainActivity extends FragmentActivity {
 		FrameLayout contentFrame = (FrameLayout) findViewById(R.id.main_content_frame);
 		contentFrame.removeAllViews();
 		
-		Bundle args = new Bundle();
-		
-		/*
-		args.putString("title", "News");
-		args.putString("component", "dtable");
-		args.putString("url", "https://rumobile.rutgers.edu/1/news.txt");
-		*/
-		/*
-		args.putString(
-				"data", "[" +
-						"{\"title\":\"Rutgers Today\", \"channel\":{\"view\":\"Reader\",\"title\":\"Rutgers Today\", \"url\":\"http://news.rutgers.edu/rss/today\"}}," +
-						"{\"title\": \"Newark News\", \"channel\":{\"view\":\"Reader\",\"title\": \"Newark News\",\"url\":\"http://news.rutgers.edu/rss/newark\"}}, " +
-						"{\"title\": \"Camden News\", \"channel\":{\"view\":\"Reader\",\"title\": \"Camden News\",\"url\":\"http://news.rutgers.edu/rss/camden\"}}, " +
-						"{\"title\": \"Rutgers Events\", \"channel\":{\"view\":\"Reader\",\"title\": \"Rutgers Events\",\"url\": \"http://ruevents.rutgers.edu/events/getEventsRss.xml\"}}" +
-						"]"
-		);
-		*/
-
-		//args.putString("api", "test");
-		 
-		//args.putString("component", "bus");
-		
 		/* Default to Food screen until main screen is made */
+		Bundle args = new Bundle();
 		args.putString("title", "Food");
 		args.putString("component",  "food");
 
+		Fragment fragment = ComponentFactory.getInstance().createFragment(args);		
+		fm.beginTransaction()
+			.replace(R.id.main_content_frame, fragment)
+			.commit(); 
+		
+		ComponentFactory.getInstance().mMainActivity = this; 
+
 		/* This loads list of native channels (not complete) */
-		Request.api("app").done(new DoneCallback<JSONObject>() {
+		/*		
+ 		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {
 				Log.d("MainActivity", "got app data " + result.toString());
 				System.out.println("API loaded: " + result.toString());
 			}
 		});
+		*/
 		
+		/*
 		Nextbus.stopPredict("nb", "Hill Center").done(new DoneCallback<ArrayList>() {
-			@Override
-			public void onDone(ArrayList predictions) {
-				for (Object o : predictions) {
-					Prediction p = (Prediction) o;
-					Log.d("Main", "title: " + p.getTitle() + " direction: " + p.getDirection() + " minutes: " + p.getMinutes());
-				}
+		@Override
+		public void onDone(ArrayList predictions) {
+			for (Object o : predictions) {
+				Prediction p = (Prediction) o;
+				Log.d("Main", "title: " + p.getTitle() + " direction: " + p.getDirection() + " minutes: " + p.getMinutes());
 			}
+		}
 		}).fail(new FailCallback<Exception>() {
 			
 			@Override
@@ -208,14 +161,7 @@ public class MainActivity extends FragmentActivity {
 				Log.d("Main", Log.getStackTraceString(e));
 			}
 		});
-		
-		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-		
-		fm.beginTransaction()
-			.replace(R.id.main_content_frame, fragment)
-			.commit(); 
-		
-		ComponentFactory.getInstance().mMainActivity = this; 
+		*/
 
 	}
 	
@@ -236,13 +182,48 @@ public class MainActivity extends FragmentActivity {
 			if (convertView == null) convertView = MainActivity.this.getLayoutInflater().inflate(R.layout.main_drawer_item, parent);
 			
 			String title = getItem(position);
-			
 			TextView titleTextView = (TextView) convertView.findViewById(R.id.main_drawer_title);
-			
 			titleTextView.setText(title);
 			
 			return convertView;
 		}
 	}
 
+	/**
+	 * Grab web links and add them to the menu.
+	 * @param menuArray Array that holds the menu objects
+	 */
+	private void loadWebShortcuts(final ArrayList<SlideMenuItem> menuArray) {
+		
+		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new DoneCallback<JSONArray>() {
+
+			@Override
+			public void onDone(JSONArray shortcutsArray) {
+				
+				// Get each shortcut from array and add it to the sliding menu
+				for(int i = 0; i < shortcutsArray.length(); i++) {		
+					try {
+						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
+						String title = DTable.getLocalTitle(curShortcut.get("title"));
+						String url = curShortcut.getString("url");
+						menuArray.add(new SlideMenuItem(title, "www", url));
+					} catch (JSONException e) {
+						Log.e(TAG, e.getMessage());
+						continue;
+					}
+				}
+				
+			}
+			
+		}).fail(new FailCallback<AjaxStatus>() {
+
+			@Override
+			public void onFail(AjaxStatus status) {
+				Log.e(TAG, status.getMessage());
+			}
+			
+		});
+		
+	}
+	
 }

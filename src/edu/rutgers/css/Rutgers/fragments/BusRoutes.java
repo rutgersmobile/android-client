@@ -42,14 +42,14 @@ public class BusRoutes extends Fragment {
 			
 			@Override
 			public void onDone(JSONArray data) {
-				Log.d(TAG, "got data: " + mList);
+				Log.d(TAG, "got data: " + data);
 				for(int i = 0; i < data.length(); i++) {
 					try {
-						mData.put(data.get(i));
+						mAdapter.add(data.get(i));
 					} catch (JSONException e) {
 						Log.e(TAG, e.getMessage());
 					}
-				}
+				} 
 			}
 			
 		});
