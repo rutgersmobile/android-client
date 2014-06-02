@@ -3,14 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp" >
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="10dp" >
 
 	<TextView
 		android:id="@+id/title"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:text="@string/replace_me"
-		android:textColor="#000000" />
+		android:textColor="#000000"
+		android:textStyle="bold"
+		android:textAllCaps="true" />
 	
 	<!-- Horizontal divider -->
 	<View

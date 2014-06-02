@@ -58,6 +58,7 @@ public class MainActivity extends FragmentActivity {
 		
         // Sliding menu setup native items
         ArrayList<RMenuPart> menuArray = new ArrayList<RMenuPart>();
+        mDrawerAdapter = new RMenuAdapter<RMenuPart>(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);
         
         menuArray.add(new SlideMenuHeader("Channels"));
         menuArray.add(new SlideMenuItem("Bus", "bus"));
@@ -68,9 +69,8 @@ public class MainActivity extends FragmentActivity {
         menuArray.add(new SlideMenuItem("Events*", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
         
         // Sliding menu set up web shortcuts
-        menuArray.add(new SlideMenuHeader("Shortcuts"));
-        loadWebShortcuts(menuArray);
-        
+        mDrawerAdapter.add(new SlideMenuHeader("Shortcuts"));
+        loadWebShortcuts(mDrawerAdapter);
         
 		// Set up Navigation Drawer
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -104,7 +104,6 @@ public class MainActivity extends FragmentActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         
-        mDrawerAdapter = new RMenuAdapter<RMenuPart>(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);
         mDrawerList.setAdapter(mDrawerAdapter);
         mDrawerList.setOnItemClickListener(new OnItemClickListener() {
 
@@ -144,7 +143,7 @@ public class MainActivity extends FragmentActivity {
 			}
         	
         });
-		
+        	
 		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
 
 		FrameLayout contentFrame = (FrameLayout) findViewById(R.id.main_content_frame);
@@ -246,7 +245,7 @@ public class MainActivity extends FragmentActivity {
 	 * Grab web links and add them to the menu.
 	 * @param menuArray Array that holds the menu objects
 	 */
-	private void loadWebShortcuts(final ArrayList<RMenuPart> menuArray) {
+	private void loadWebShortcuts(final RMenuAdapter<RMenuPart> menuAdapter) {
 		
 		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new DoneCallback<JSONArray>() {
 
@@ -259,7 +258,7 @@ public class MainActivity extends FragmentActivity {
 						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
 						String title = DTable.getLocalTitle(curShortcut.get("title"));
 						String url = curShortcut.getString("url");
-						menuArray.add(new SlideMenuItem(title, "www", url));
+						menuAdapter.add(new SlideMenuItem(title, "www", url));
 					} catch (JSONException e) {
 						Log.e(TAG, e.getMessage());
 						continue;
