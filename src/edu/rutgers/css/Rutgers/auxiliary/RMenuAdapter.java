@@ -11,31 +11,29 @@ import android.widget.TextView;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Array adapter extended for food menu items
+ * Array adapter extended for menus with items and section headers.
  *
  */
-public class FoodAdapter extends ArrayAdapter<FoodItem> {
+public class RMenuAdapter<E extends RMenuPart> extends ArrayAdapter<E> {
 
-	private int layoutResource;
+	private int itemResource;
 	private int categoryResource;
 	
-	public FoodAdapter(Context context, int itemResource, int categoryResource, List<FoodItem> objects) {
+	public RMenuAdapter(Context context, int itemResource, int categoryResource, List<E> objects) {
 		super(context, itemResource, objects);
 		
-		this.layoutResource = itemResource;
+		this.itemResource = itemResource;
 		this.categoryResource = categoryResource;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		FoodItem curItem = this.getItem(position);
+		E curItem = this.getItem(position);
 		
 		if(convertView == null) {
-				if(getItemViewType(position) == 1)
-					convertView = mLayoutInflater.inflate(this.categoryResource, null);
-				else
-					convertView = mLayoutInflater.inflate(this.layoutResource, null);
+			if(getItemViewType(position) == 1) convertView = mLayoutInflater.inflate(this.categoryResource, null);
+			else convertView = mLayoutInflater.inflate(this.itemResource, null);
 		}
 
 		TextView titleTextView = (TextView) convertView.findViewById(R.id.title);

@@ -9,7 +9,7 @@ import android.os.Bundle;
  * 	url			(optional)
  * 	data		(optional JSON object or array in string representation)
  */
-public class SlideMenuItem {
+public class SlideMenuItem extends RMenuPart {
 
 	public Bundle args;
 	
@@ -57,6 +57,16 @@ public class SlideMenuItem {
 	
 	public String toString() {
 		return args.getString("title");
+	}
+
+	@Override
+	public String getTitle() {
+		return this.args.getString("title");
+	}
+
+	@Override
+	public boolean getIsCategory() {
+		return false;
 	}
 	
 }

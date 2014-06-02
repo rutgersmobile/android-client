@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import edu.rutgers.css.Rutgers.api.Dining;
-import edu.rutgers.css.Rutgers.auxiliary.FoodAdapter;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.FoodItem;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -42,7 +42,7 @@ public class FoodMeal extends Fragment {
 	private static final String TAG = "FoodMeal";
 	private ListView mList;
 	private List<FoodItem> foodItems;
-	private FoodAdapter foodItemAdapter;
+	private RMenuAdapter<FoodItem> foodItemAdapter;
 
 	public FoodMeal() {
 		// Required empty public constructor
@@ -54,7 +54,7 @@ public class FoodMeal extends Fragment {
 		final Bundle args = getArguments();
 		
 		foodItems = new ArrayList<FoodItem>();
-		foodItemAdapter = new FoodAdapter(this.getActivity(), R.layout.title_row, R.layout.food_cat_row, foodItems);
+		foodItemAdapter = new RMenuAdapter<FoodItem>(this.getActivity(), R.layout.title_row, R.layout.food_cat_row, foodItems);
 		
 		if(args.get("location") == null || args.get("meal") == null) {
 			Log.e(TAG, "null location/meal");

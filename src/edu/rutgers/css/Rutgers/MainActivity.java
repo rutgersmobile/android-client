@@ -34,6 +34,9 @@ import com.androidquery.callback.AjaxStatus;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
+import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers.fragments.DTable;
 import edu.rutgers.css.Rutgers2.R;
@@ -46,7 +49,7 @@ public class MainActivity extends FragmentActivity {
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
-	private ArrayAdapter<SlideMenuItem> mDrawerAdapter;
+	private RMenuAdapter<RMenuPart> mDrawerAdapter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +57,9 @@ public class MainActivity extends FragmentActivity {
 		setContentView(R.layout.activity_main);				
 		
         // Sliding menu setup native items
-        ArrayList<SlideMenuItem> menuArray = new ArrayList<SlideMenuItem>();
+        ArrayList<RMenuPart> menuArray = new ArrayList<RMenuPart>();
         
+        menuArray.add(new SlideMenuHeader("Channels"));
         menuArray.add(new SlideMenuItem("Bus", "bus"));
         menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt"));
         menuArray.add(new SlideMenuItem("Food", "food"));
@@ -64,6 +68,7 @@ public class MainActivity extends FragmentActivity {
         menuArray.add(new SlideMenuItem("TEST Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
         
         // Sliding menu set up web shortcuts
+        menuArray.add(new SlideMenuHeader("Shortcuts"));
         loadWebShortcuts(menuArray);
         
         
@@ -99,7 +104,7 @@ public class MainActivity extends FragmentActivity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         
-        mDrawerAdapter = new ArrayAdapter<SlideMenuItem>(this, R.layout.main_drawer_item, menuArray);
+        mDrawerAdapter = new RMenuAdapter<RMenuPart>(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);
         mDrawerList.setAdapter(mDrawerAdapter);
         mDrawerList.setOnItemClickListener(new OnItemClickListener() {
 
@@ -228,7 +233,7 @@ public class MainActivity extends FragmentActivity {
 			if (convertView == null) convertView = MainActivity.this.getLayoutInflater().inflate(R.layout.main_drawer_item, parent);
 			
 			String title = getItem(position);
-			TextView titleTextView = (TextView) convertView.findViewById(R.id.main_drawer_title);
+			TextView titleTextView = (TextView) convertView.findViewById(R.id.title);
 			titleTextView.setText(title);
 			
 			return convertView;
@@ -239,7 +244,7 @@ public class MainActivity extends FragmentActivity {
 	 * Grab web links and add them to the menu.
 	 * @param menuArray Array that holds the menu objects
 	 */
-	private void loadWebShortcuts(final ArrayList<SlideMenuItem> menuArray) {
+	private void loadWebShortcuts(final ArrayList<RMenuPart> menuArray) {
 		
 		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new DoneCallback<JSONArray>() {
 
