@@ -54,6 +54,7 @@ public class Dining {
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, e.getMessage() + "; Response code: " + e.getCode());
+				confd.reject(e);
 			}
 			
 		});	
@@ -63,8 +64,8 @@ public class Dining {
 	 * Get the JSONArray containing all of the dining hall JSON objects
 	 * @return JSONArray of dining hall JSONObjects
 	 */
-	public static Promise<JSONArray, Exception, Double> getDiningHalls() {
-		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
+	public static Promise<JSONArray, AjaxStatus, Double> getDiningHalls() {
+		final Deferred<JSONArray, AjaxStatus, Double> d = new DeferredObject<JSONArray, AjaxStatus, Double>();
 		setup();
 		
 		configured.then(new DoneCallback<Object>() {
@@ -73,6 +74,13 @@ public class Dining {
 			public void onDone(Object o) {
 				JSONArray conf = mNBDiningConf;
 				d.resolve(conf);
+			}
+			
+		}).fail(new FailCallback<Object>() {
+
+			@Override
+			public void onFail(Object e) {
+				d.reject((AjaxStatus)e);
 			}
 			
 		});
@@ -106,15 +114,15 @@ public class Dining {
 							d.resolve(curLoc);
 						}
 					} catch (JSONException e) {
-						Log.e(TAG, "Could not read location: " + e.getMessage());
+						Log.e(TAG, e.getMessage());
 						resret = true;
 						d.reject(e);
 					}
 				}
 				
 				if(!resret) {
-					Log.e(TAG, "Dining hall location \""+location+"\" not found in Dining API output");
-					d.reject(new Exception("location not found"));
+					Log.e(TAG, "Dining hall location \""+location+"\" not found API");
+					d.reject(new IllegalArgumentException("Invalid dining location \"" + location +"\""));
 				}
 			}
 			
@@ -159,6 +167,31 @@ public class Dining {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Check whether a dining hall has any meals available.
+	 * Dining halls without any active meals shouldn't be displayed in the food menu.
+	 * @param diningHall Dining hall JSON data
+	 * @return True if there are any meals active, false if not.
+	 */
+	public static boolean hasActiveMeals(JSONObject diningHall) {
+		if(!diningHall.has("meals")) return false;
+		else {
+			try {
+				JSONArray meals = diningHall.getJSONArray("meals");
+				for(int i = 0; i < meals.length(); i++) {
+					JSONObject curMeal = meals.getJSONObject(i);
+					if(curMeal.getBoolean("meal_avail") == true) {
+						return true;
+					}
+				}
+			} catch (JSONException e) {
+				Log.e(TAG, e.getMessage());
+			}
+			
+			return false;
+		}
 	}
 
 }

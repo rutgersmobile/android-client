@@ -9,7 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
+import com.androidquery.callback.AjaxStatus;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +23,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import edu.rutgers.css.Rutgers.MyApplication;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers2.R;
@@ -48,14 +50,23 @@ public class FoodMain extends Fragment {
 		diningHalls= new ArrayList<String>();
 		diningHallAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.title_row, R.id.title, diningHalls);
 		
+		// Get dining hall data and populate the top-level menu with names of the dining halls
 		Dining.getDiningHalls().done(new DoneCallback<JSONArray>() {
 
 			@Override
 			public void onDone(JSONArray halls) {
 				try {
+					// Only add dining halls which have meals available
 					for(int i = 0; i < halls.length(); i++) {
 						JSONObject curHall = halls.getJSONObject(i);
-						diningHallAdapter.add(curHall.getString("location_name"));
+						if(Dining.hasActiveMeals(curHall)) {
+							diningHallAdapter.add(curHall.getString("location_name"));
+						}
+					}
+					
+					// Display a message if there no halls were listed
+					if(diningHallAdapter.getCount() == 0) {
+						Toast.makeText(MyApplication.getAppContext(), R.string.no_halls_available, Toast.LENGTH_SHORT).show();
 					}
 				}
 				catch(JSONException e) {
@@ -63,6 +74,13 @@ public class FoodMain extends Fragment {
 				}
 			}
 
+			
+		}).fail(new FailCallback<AjaxStatus>() {
+
+			@Override
+			public void onFail(AjaxStatus e) {
+				Toast.makeText(MyApplication.getAppContext(), R.string.failed_load, Toast.LENGTH_LONG).show();
+			}
 			
 		});
 	}
@@ -75,12 +93,6 @@ public class FoodMain extends Fragment {
 		Bundle args = getArguments();
 		getActivity().setTitle(args.getString("title"));
 
-		setupList();
-		
-		return v;
-	}
-	
-	private void setupList() {
 		mList.setAdapter(diningHallAdapter);		
 		mList.setOnItemClickListener(new OnItemClickListener() {
 
@@ -101,6 +113,8 @@ public class FoodMain extends Fragment {
 			}
 			
 		});	
+		
+		return v;
 	}
 	
 }
