@@ -19,6 +19,7 @@ import android.widget.ListView;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.FoodItem;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers2.R;
 
 /* Dining JSON structure
@@ -41,8 +42,8 @@ public class FoodMeal extends Fragment {
 
 	private static final String TAG = "FoodMeal";
 	private ListView mList;
-	private List<FoodItem> foodItems;
-	private RMenuAdapter<FoodItem> foodItemAdapter;
+	private List<RMenuPart> foodItems;
+	private RMenuAdapter foodItemAdapter;
 
 	public FoodMeal() {
 		// Required empty public constructor
@@ -53,8 +54,8 @@ public class FoodMeal extends Fragment {
 		super.onCreate(savedInstanceState);
 		final Bundle args = getArguments();
 		
-		foodItems = new ArrayList<FoodItem>();
-		foodItemAdapter = new RMenuAdapter<FoodItem>(this.getActivity(), R.layout.title_row, R.layout.food_cat_row, foodItems);
+		foodItems = new ArrayList<RMenuPart>();
+		foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.title_row, R.layout.food_cat_row, foodItems);
 		
 		if(args.get("location") == null || args.get("meal") == null) {
 			Log.e(TAG, "null location/meal");

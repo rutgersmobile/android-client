@@ -49,7 +49,7 @@ public class MainActivity extends FragmentActivity {
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
-	private RMenuAdapter<RMenuPart> mDrawerAdapter;
+	private RMenuAdapter mDrawerAdapter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,7 @@ public class MainActivity extends FragmentActivity {
 		
         // Sliding menu setup native items
         ArrayList<RMenuPart> menuArray = new ArrayList<RMenuPart>();
-        mDrawerAdapter = new RMenuAdapter<RMenuPart>(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);
+        mDrawerAdapter = new RMenuAdapter(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);
         
         menuArray.add(new SlideMenuHeader("Channels"));
         menuArray.add(new SlideMenuItem("Bus", "bus"));
@@ -245,7 +245,7 @@ public class MainActivity extends FragmentActivity {
 	 * Grab web links and add them to the menu.
 	 * @param menuArray Array that holds the menu objects
 	 */
-	private void loadWebShortcuts(final RMenuAdapter<RMenuPart> menuAdapter) {
+	private void loadWebShortcuts(final RMenuAdapter menuAdapter) {
 		
 		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new DoneCallback<JSONArray>() {
 

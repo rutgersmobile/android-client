@@ -18,7 +18,7 @@ import edu.rutgers.css.Rutgers2.R;
  * If the object is a category, the category resource will be used for its layout.
  * If the object is an item, the item resource will be used for its layout.
  */
-public class RMenuAdapter<E extends RMenuPart> extends ArrayAdapter<E> {
+public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 
 	private final static String TAG = "RMenuAdapter";
 	private int itemResource;
@@ -31,7 +31,7 @@ public class RMenuAdapter<E extends RMenuPart> extends ArrayAdapter<E> {
 	 * @param categoryResource Layout to use for section headers
 	 * @param objects List of menu objects to use
 	 */
-	public RMenuAdapter(Context context, int itemResource, int categoryResource, List<E> objects) {
+	public RMenuAdapter(Context context, int itemResource, int categoryResource, List<RMenuPart> objects) {
 		super(context, itemResource, objects);
 		
 		this.itemResource = itemResource;
@@ -41,7 +41,7 @@ public class RMenuAdapter<E extends RMenuPart> extends ArrayAdapter<E> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		E curItem = this.getItem(position);
+		RMenuPart curItem = this.getItem(position);
 		
 		// Choose appropriate layout
 		if(convertView == null) {
