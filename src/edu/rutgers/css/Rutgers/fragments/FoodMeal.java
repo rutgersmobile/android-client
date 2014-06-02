@@ -55,7 +55,7 @@ public class FoodMeal extends Fragment {
 		final Bundle args = getArguments();
 		
 		foodItems = new ArrayList<RMenuPart>();
-		foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.title_row, R.layout.food_cat_row, foodItems);
+		foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.title_row, R.layout.main_drawer_header, foodItems);
 		
 		if(args.get("location") == null || args.get("meal") == null) {
 			Log.e(TAG, "null location/meal");
