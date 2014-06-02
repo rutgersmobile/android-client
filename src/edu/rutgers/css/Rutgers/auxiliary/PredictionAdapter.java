@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,6 +73,9 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 			
 			holder.minutesTextView.setText(formatMinutes(prediction.getMinutes()));
 		}
+		else {
+			holder.minutesTextView.setText("No prediction data");
+		}
 		
 		/* If there's no direction string, don't let that text field take up space */
 		if(prediction.getDirection() == null || prediction.getDirection().equals("")) {
@@ -87,16 +91,29 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 		return convertView;
 	}
 
+	/**
+	 * Create "Arriving in..." string
+	 * e.g. Arriving in 2 minutes.
+	 * 		Arriving in 2 and 4 minutes.
+	 * 		Arriving in 2, 3, and 4 minutes.
+	 * 		Arriving in 1 minute.
+	 * @param minutes Array of arrival times in minutes
+	 * @return Formatted arrival time string
+	 */
 	private String formatMinutes(ArrayList<Integer> minutes) {
-		StringBuilder result = new StringBuilder("Arriving in ");
+		StringBuilder result = new StringBuilder("Arriving in");
 		
 		for(int i = 0; i < minutes.size(); i++) {
-			if(i != 0 && i == minutes.size() - 1) result.append("and ");
-			if(minutes.get(i) < 1) result.append("<1");
-			else result.append(minutes.get(i));
-			if(i != minutes.size() - 1) result.append(", ");
+			if(i != 0 && i == minutes.size() - 1) result.append(" and");
+			
+			if(minutes.get(i) < 1) result.append(" <1");
+			else result.append(" "+minutes.get(i));
+			
+			if(minutes.size() > 2 && i != minutes.size() - 1) result.append(",");
 		}
-		result.append(" minutes.");
+		
+		if(minutes.size() == 1 && minutes.get(0) == 1) result.append(" minute.");
+		else result.append(" minutes.");
 		
 		return result.toString();
 	}
