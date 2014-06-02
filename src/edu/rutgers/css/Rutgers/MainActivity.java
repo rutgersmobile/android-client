@@ -65,7 +65,7 @@ public class MainActivity extends FragmentActivity {
         menuArray.add(new SlideMenuItem("Food", "food"));
         menuArray.add(new SlideMenuItem("Places", "places"));
         menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
-        menuArray.add(new SlideMenuItem("TEST Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
+        menuArray.add(new SlideMenuItem("Events*", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
         
         // Sliding menu set up web shortcuts
         menuArray.add(new SlideMenuHeader("Shortcuts"));
@@ -110,6 +110,8 @@ public class MainActivity extends FragmentActivity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				if(view.isEnabled() == false) return;
+				
 				SlideMenuItem clickedItem = (SlideMenuItem) parent.getAdapter().getItem(position);
 				if(clickedItem == null) {
 					Log.e("SlidingMenu", "Failed sliding menu click, index " + position);

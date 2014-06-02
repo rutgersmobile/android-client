@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.auxiliary;
 import java.util.List;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +12,25 @@ import android.widget.TextView;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Array adapter extended for menus with items and section headers.
- *
+ * Array adapter for menus with items and section headers.
+ * Takes items which implement the RMenuPart interface. The text for the item
+ * is taken from getTitle(). Whether it's a section header is determined with getIsCategory().
+ * If the object is a category, the category resource will be used for its layout.
+ * If the object is an item, the item resource will be used for its layout.
  */
 public class RMenuAdapter<E extends RMenuPart> extends ArrayAdapter<E> {
 
+	private final static String TAG = "RMenuAdapter";
 	private int itemResource;
 	private int categoryResource;
 	
+	/**
+	 * 
+	 * @param context App context
+	 * @param itemResource Layout to use for menu items
+	 * @param categoryResource Layout to use for section headers
+	 * @param objects List of menu objects to use
+	 */
 	public RMenuAdapter(Context context, int itemResource, int categoryResource, List<E> objects) {
 		super(context, itemResource, objects);
 		
@@ -31,13 +43,25 @@ public class RMenuAdapter<E extends RMenuPart> extends ArrayAdapter<E> {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		E curItem = this.getItem(position);
 		
+		// Choose appropriate layout
 		if(convertView == null) {
-			if(getItemViewType(position) == 1) convertView = mLayoutInflater.inflate(this.categoryResource, null);
-			else convertView = mLayoutInflater.inflate(this.itemResource, null);
+			// Section headers
+			if(getItemViewType(position) == 1) {
+				convertView = mLayoutInflater.inflate(this.categoryResource, null);
+				// Make category headers unclickable
+				convertView.setEnabled(false);
+				convertView.setOnClickListener(null);
+			}
+			// Menu items
+			else {
+				convertView = mLayoutInflater.inflate(this.itemResource, null);
+			}
 		}
-
+		
+		// Set item text
 		TextView titleTextView = (TextView) convertView.findViewById(R.id.title);
-		titleTextView.setText(curItem.getTitle());
+		if(titleTextView != null) titleTextView.setText(curItem.getTitle());
+		else Log.e(TAG, "R.id.title not found");
 		
 		return convertView;
 	}
