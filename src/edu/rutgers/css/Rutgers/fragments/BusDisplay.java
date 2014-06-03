@@ -43,24 +43,24 @@ public class BusDisplay extends Fragment {
 		}
 	
 		if(args.getString("mode").equals("route")) {
-			Nextbus.routePredict("nb", args.getString("tag")).then(new DoneCallback<ArrayList>() {
+			Nextbus.routePredict("nb", args.getString("tag")).then(new DoneCallback<ArrayList<Prediction>>() {
 
 				@Override
-				public void onDone(ArrayList predictionArray) {
+				public void onDone(ArrayList<Prediction> predictionArray) {
 					for(int i = 0; i < predictionArray.size(); i++) {
-						mAdapter.add((Prediction) predictionArray.get(i));
+						mAdapter.add(predictionArray.get(i));
 					}
 				}
 				
 			});
 		}
 		else if(args.getString("mode").equals("stop")) {
-			Nextbus.stopPredict("nb", args.getString("tag")).then(new DoneCallback<ArrayList>() {
+			Nextbus.stopPredict("nb", args.getString("title")).then(new DoneCallback<ArrayList<Prediction>>() {
 
 				@Override
-				public void onDone(ArrayList predictionArray) {
+				public void onDone(ArrayList<Prediction> predictionArray) {
 					for(int i = 0; i < predictionArray.size(); i++) {
-						mAdapter.add((Prediction) predictionArray.get(i));
+						mAdapter.add(predictionArray.get(i));
 					}
 				}
 				

@@ -44,7 +44,7 @@ public class Nextbus {
 			isSetup = true;
 			
 			// This promise is used to notify the other objects that the object has been configured.
-			final Deferred confd = new DeferredObject<Object, Object, Object>();
+			final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
 			configured = confd.promise();
 			
 			final Promise promiseNBActive = Request.api("bus/active/nb");
@@ -87,8 +87,8 @@ public class Nextbus {
 		}
 	}
 	
-	public static Promise<ArrayList, Exception, Double> routePredict (final String agency, final String route) {
-		final Deferred<ArrayList, Exception, Double> d = new DeferredObject<ArrayList, Exception, Double>();
+	public static Promise<ArrayList<Prediction>, Exception, Double> routePredict (final String agency, final String route) {
+		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
 		
 		configured.then(new DoneCallback<Object>() {
@@ -145,8 +145,8 @@ public class Nextbus {
 		return d.promise();
 	}
 	
-	public static Promise<ArrayList, Exception, Double> stopPredict (final String agency, final String stop) {
-		final Deferred<ArrayList, Exception, Double> d = new DeferredObject<ArrayList, Exception, Double>();
+	public static Promise<ArrayList<Prediction>, Exception, Double> stopPredict (final String agency, final String stop) {
+		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
 		
 		configured.then(new DoneCallback<Object>() {

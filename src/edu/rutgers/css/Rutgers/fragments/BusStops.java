@@ -74,7 +74,7 @@ public class BusStops extends Fragment {
 					args.putString("component", "busdisplay");
 					args.putString("mode", "stop");
 					args.putString("title", clicked.getString("title"));
-					args.putString("tag", clicked.getString("tag"));
+					//args.putString("tag", clicked.getString("tag"));
 					
 					Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 					
