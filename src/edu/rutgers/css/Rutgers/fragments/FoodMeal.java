@@ -17,8 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import edu.rutgers.css.Rutgers.api.Dining;
-import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.FoodItem;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers2.R;
 

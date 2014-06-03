@@ -1,6 +1,6 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
-public class SlideMenuHeader extends RMenuPart {
+public class SlideMenuHeader implements RMenuPart {
 	
 	private String title;
 	

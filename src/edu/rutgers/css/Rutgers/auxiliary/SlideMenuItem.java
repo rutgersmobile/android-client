@@ -9,7 +9,7 @@ import android.os.Bundle;
  * 	url			(optional)
  * 	data		(optional JSON object or array in string representation)
  */
-public class SlideMenuItem extends RMenuPart {
+public class SlideMenuItem implements RMenuPart {
 
 	public Bundle args;
 	

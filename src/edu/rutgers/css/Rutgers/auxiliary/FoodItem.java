@@ -5,7 +5,7 @@ package edu.rutgers.css.Rutgers.auxiliary;
  * Class for holding food menu item/category data
  *
  */
-public class FoodItem extends RMenuPart {
+public class FoodItem implements RMenuPart {
 
 	public String title;
 	public boolean isCategory;
@@ -32,6 +32,7 @@ public class FoodItem extends RMenuPart {
 	/*
 	 * Getters & setters
 	 */
+	@Override
 	public String getTitle() {
 		return this.title;
 	}
@@ -40,6 +41,7 @@ public class FoodItem extends RMenuPart {
 		this.title = title; 
 	}
 	
+	@Override
 	public boolean getIsCategory() {
 		return this.isCategory;
 	}
@@ -52,6 +54,7 @@ public class FoodItem extends RMenuPart {
 	 * Returns food item title
 	 * @return Food item title
 	 */
+	@Override
 	public String toString() {
 		return this.title;
 	}
