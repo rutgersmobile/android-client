@@ -34,8 +34,8 @@ public class Request {
 	}
 	
 	// Makes a call against the api. Expects a JSON object
-	public static Promise<JSONObject, AjaxStatus, Double> api (String resource) {
-		return json(API_BASE + resource, EXPIRE_ALWAYS);
+	public static Promise<JSONObject, AjaxStatus, Double> api (String resource, long expire) {
+		return json(API_BASE + resource, expire);
 	}
 	
 	// gets arbitrary json

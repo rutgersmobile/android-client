@@ -33,9 +33,11 @@ public class Nextbus {
 	
 	private static JSONObject mNBConf;
 	private static JSONObject mNWKConf;
-	
 	private static JSONObject mNBActive;
 	private static JSONObject mNWKActive;
+	
+	private static long activeExpireTime = 1000 * 60 * 10; // active bus data cached ten minutes
+	private static long configExpireTime = 1000 * 60 * 60; // config data cached one hour
 	
 	private static final String BASE_URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=";
 	
@@ -47,10 +49,10 @@ public class Nextbus {
 			final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
 			configured = confd.promise();
 			
-			final Promise promiseNBActive = Request.api("bus/active/nb");
-			final Promise promiseNWKActive = Request.api("bus/active/nwk");
-			final Promise promiseNBConf = Request.api("bus/config/nb");
-			final Promise promiseNWKConf = Request.api("bus/config/nwk");
+			final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
+			final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
+			final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
+			final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
 			
 			DeferredManager dm = new DefaultDeferredManager();
 			
