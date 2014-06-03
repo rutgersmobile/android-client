@@ -23,8 +23,10 @@ import com.androidquery.util.XmlDom;
 
 import edu.rutgers.css.Rutgers.auxiliary.Prediction;
 
-// Singleton class that provides access to the nextbus api. Uses the json that nextbusjs generates to create requests
-// against the official nextbus api.
+/**
+ * Singleton class that provides access to the Nextbus API. Uses the JSON that nextbusjs generates to create requests
+ * against the official Nextbus API.
+ */
 public class Nextbus {
 
 	private static boolean isSetup = false;
@@ -41,6 +43,9 @@ public class Nextbus {
 	
 	private static final String BASE_URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=";
 	
+	/**
+	 * Load JSON data on active buses & the entire bus config.
+	 */
 	private static void setup () {
 		if (!isSetup) {
 			isSetup = true;
@@ -49,9 +54,12 @@ public class Nextbus {
 			final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
 			configured = confd.promise();
 			
-			final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
+			//final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
+			final Promise promiseNBActive = Request.json("https://rumobile.rutgers.edu/1/nbactivestops.txt", activeExpireTime);
 			final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
-			final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
+			
+			//final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
+			final Promise promiseNBConf = Request.json("https://rumobile.rutgers.edu/1/rutgersrouteconfig.txt", configExpireTime);
 			final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
 			
 			DeferredManager dm = new DefaultDeferredManager();
@@ -89,6 +97,12 @@ public class Nextbus {
 		}
 	}
 	
+	/**
+	 * Queries the Nextbus API for predictions for every stop in the given route.
+	 * @param agency Agency (campus) to get bus data for
+	 * @param route Route to get prediction data for
+	 * @return Promise for prediction data for each stop on the route
+	 */
 	public static Promise<ArrayList<Prediction>, Exception, Double> routePredict (final String agency, final String route) {
 		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
@@ -147,6 +161,12 @@ public class Nextbus {
 		return d.promise();
 	}
 	
+	/**
+	 * Queries the Nextbus API for prediction data for every route going through given stop.
+	 * @param agency Agency (campus) to get bus data for
+	 * @param stop Stop to get prediction data for
+	 * @return Promise for prediction data for each route arriving at the stop
+	 */
 	public static Promise<ArrayList<Prediction>, Exception, Double> stopPredict (final String agency, final String stop) {
 		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
@@ -212,6 +232,11 @@ public class Nextbus {
 		return d.promise();
 	}
 	
+	/**
+	 * Get all routes (preferably active) for given agency (campus).
+	 * @param agency Agency (campus) to get routes for
+	 * @return If there are active routes, a promise for a JSON array of active routes only. If there no active routes, a promise for a JSON array of all routes found in the agency config.
+	 */
 	public static Promise<JSONArray, Exception, Double> getRoutes (final String agency) {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
@@ -235,7 +260,12 @@ public class Nextbus {
 		
 		return d;
 	}
-	
+
+	/**
+	 * Get all stops (preferably active) for a given agency (campus).
+	 * @param agency Agency (campus) to get stops for
+	 * @return If there are active routes, a promise for a JSON array of active stops only. If there are no active routes, a promise for a JSON array of all stops found in the agency config.
+	 */
 	public static Promise<JSONArray, Exception, Double> getStops (final String agency) {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
