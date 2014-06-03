@@ -9,6 +9,7 @@ import org.jdeferred.DoneCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	private Handler mUpdateHandler;
 	private Runnable mUpdateRunnable;
 	private Timer mUpdateTimer;
+	private String mAgency;
 	
 	public BusDisplay() {
 		// Required empty public constructor
@@ -58,6 +60,11 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		else if(args.getString("mode").equalsIgnoreCase("stop")) {
 			mMode = Mode.STOP;
 			mTag = args.getString("title");
+		}
+		
+		mAgency = args.getString("agency");
+		if(mAgency == null) {
+			Log.e(TAG, "Null agency");
 		}
 
 		// Setup the timer stuff for updating the bus predictions
@@ -106,13 +113,15 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	 * Load prediction data
 	 */
 	private void loadPredictions() {
+		if(mAgency == null) return;
+		
 		mAdapter.clear();
 		
 		if(mMode == Mode.ROUTE) {
-			Nextbus.routePredict("nb", mTag).then(this);
+			Nextbus.routePredict(mAgency, mTag).then(this);
 		}
 		else if(mMode == Mode.STOP) {
-			Nextbus.stopPredict("nb", mTag).then(this);
+			Nextbus.stopPredict(mAgency, mTag).then(this);
 		}
 	}
 	

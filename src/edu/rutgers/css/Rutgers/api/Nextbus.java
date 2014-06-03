@@ -55,12 +55,14 @@ public class Nextbus {
 			configured = confd.promise();
 			
 			//final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
-			final Promise promiseNBActive = Request.json("https://rumobile.rutgers.edu/1/nbactivestops.txt", activeExpireTime);
-			final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
-			
+			//final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
 			//final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
+			//final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
+			
+			final Promise promiseNBActive = Request.json("https://rumobile.rutgers.edu/1/nbactivestops.txt", activeExpireTime);
+			final Promise promiseNWKActive = Request.json("https://rumobile.rutgers.edu/1/nwkactivestops.txt", activeExpireTime);
 			final Promise promiseNBConf = Request.json("https://rumobile.rutgers.edu/1/rutgersrouteconfig.txt", configExpireTime);
-			final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
+			final Promise promiseNWKConf = Request.json("https://rumobile.rutgers.edu/1/rutgers-newarkrouteconfig.txt", configExpireTime);
 			
 			DeferredManager dm = new DefaultDeferredManager();
 			
@@ -81,7 +83,7 @@ public class Nextbus {
 			
 						confd.resolve(null);
 					} catch (Exception e) {
-						Log.d(TAG, Log.getStackTraceString(e));
+						Log.e(TAG, Log.getStackTraceString(e));
 						confd.reject(e);
 					}
 				}
@@ -91,7 +93,7 @@ public class Nextbus {
 					
 					AjaxStatus r = (AjaxStatus) reject.getReject();
 					
-					Log.d(TAG, "stuff failed: " + r.getCode());
+					Log.e(TAG, r.getCode() + ": " + r.getMessage());
 				}
 			});
 		}

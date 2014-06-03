@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
+import java.util.ArrayList;
+
 import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,45 +15,38 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
-import edu.rutgers.css.Rutgers.auxiliary.JSONArrayAdapter;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
+import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
+import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusStops extends Fragment {
 
 	private static final String TAG = "BusStops";
 	private ListView mList;
-	private JSONArrayAdapter mAdapter;
-	private JSONArray mData;
+	private RMenuAdapter mAdapter;
+	private ArrayList<RMenuPart> mData;
 	
 	public BusStops() {
 		// Required empty public constructor
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		mData = new JSONArray();
-		mAdapter = new JSONArrayAdapter(getActivity(), mData, R.layout.title_row);
+		mData = new ArrayList<RMenuPart>();
+		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.main_drawer_header, mData);
 		
-		Nextbus.getStops("nb").then(new DoneCallback<JSONArray>() {
-			
-			@Override
-			public void onDone(JSONArray data) {
-				for(int i = 0; i < data.length(); i++) {
-					try {
-						mData.put(data.get(i));
-					} catch (JSONException e) {
-						Log.e(TAG, e.getMessage());
-					}
-				}
-			}
-			
-		});
+		//TODO Nearby stops!
+		
+		loadAgency("nb", "New Brunswick Active Stops");
+		loadAgency("nwk", "Newark Active Stops");
 		
 	}
 	
@@ -65,16 +60,19 @@ public class BusStops extends Fragment {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				JSONObject clicked = (JSONObject) parent.getAdapter().getItem(position);
-				
-				FragmentManager fm = getActivity().getSupportFragmentManager();
+				SlideMenuItem clickedItem = (SlideMenuItem) parent.getAdapter().getItem(position);
+				Bundle clickedArgs = clickedItem.getArgs();
 				
 				try {
+					JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
+				
+					FragmentManager fm = getActivity().getSupportFragmentManager();
+				
 					Bundle args = new Bundle();
 					args.putString("component", "busdisplay");
 					args.putString("mode", "stop");
-					args.putString("title", clicked.getString("title"));
-					//args.putString("tag", clicked.getString("tag"));
+					args.putString("title", clickedJSON.getString("title"));
+					args.putString("agency", clickedArgs.getString("agency"));
 					
 					Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 					
@@ -93,6 +91,37 @@ public class BusStops extends Fragment {
 		});
 		
 		return v;
+	}
+	
+	/**
+	 * Populate list with bus stops for agency, with a section header for that agency
+	 * @param agencyTag Agency tag for API request
+	 * @param agencyTitle Header title that goes above these stops
+	 */
+	private void loadAgency(final String agencyTag, final String agencyTitle) {
+		Nextbus.getStops(agencyTag).then(new DoneCallback<JSONArray>() {
+			
+			@Override
+			public void onDone(JSONArray data) {
+				Log.d(TAG, data.toString());
+				
+				mAdapter.add(new SlideMenuHeader(agencyTitle));
+				for(int i = 0; i < data.length(); i++) {
+					try {
+						JSONObject jsonObj = data.getJSONObject(i);
+						Bundle menuBundle = new Bundle();
+						menuBundle.putString("title", jsonObj.getString("title"));
+						menuBundle.putString("json", jsonObj.toString());
+						menuBundle.putString("agency", agencyTag);
+						SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
+						mAdapter.add(newMenuItem);
+					} catch (JSONException e) {
+						Log.e(TAG, e.getMessage());
+					}
+				}
+			}
+			
+		});
 	}
 	
 }
