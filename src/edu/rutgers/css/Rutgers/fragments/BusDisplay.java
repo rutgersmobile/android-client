@@ -30,6 +30,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	private String mTag;
 	private Handler mUpdateHandler;
 	private Runnable mUpdateRunnable;
+	private Timer mUpdateTimer;
 	
 	public BusDisplay() {
 		// Required empty public constructor
@@ -58,7 +59,9 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 			mMode = Mode.STOP;
 			mTag = args.getString("title");
 		}
-		
+
+		// Setup the timer stuff for updating the bus predictions
+		mUpdateTimer = new Timer();
 		mUpdateHandler = new Handler();
 		mUpdateRunnable = new Runnable() {
 			@Override
@@ -67,14 +70,27 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 			}
 		};
 		
-		Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		
+		// Stop the update thread from running when screen isn't active
+		mUpdateTimer.cancel();
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+		// Start the update thread when screen is active
+		mUpdateTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				mUpdateHandler.post(mUpdateRunnable);
 			}
 		}, 0, 1000 * 60);
-		
 	}
 	
 	@Override
@@ -100,6 +116,9 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		}
 	}
 	
+	/**
+	 * Callback function for when nextbus data is loaded
+	 */
 	@Override
 	public void onDone(ArrayList<Prediction> predictionArray) {
 		for(Prediction p: predictionArray) {
