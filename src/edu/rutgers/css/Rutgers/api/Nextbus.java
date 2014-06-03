@@ -109,7 +109,7 @@ public class Nextbus {
 		
 		configured.then(new DoneCallback<Object>() {
 			public void onDone(Object o) {
-				Log.d("Nextbus", "We're configured and returning results");
+				Log.d("Nextbus", "routePredict: " + agency + ", " + route);
 				JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
 				
 				String queryString = BASE_URL + "predictionsForMultiStops&a=" + (agency.equals("nb")? "rutgers" : "rutgers-newark");
@@ -173,7 +173,7 @@ public class Nextbus {
 		
 		configured.then(new DoneCallback<Object>() {
 			public void onDone(Object o) {
-				Log.d("Nextbus", "We're configured and returning results");
+				Log.d("Nextbus", "stopPredict: " + agency + ", " + stop);
 				JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
 				
 				String queryString = BASE_URL + "predictionsForMultiStops&a=" + (agency.equals("nb")? "rutgers" : "rutgers-newark");
