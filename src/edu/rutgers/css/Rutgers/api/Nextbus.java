@@ -299,7 +299,7 @@ public class Nextbus {
 	}
 	
 	/**
-	 * Get all bus stops near a specific location.
+	 * Get all bus stops (by title) near a specific location.
 	 * @param sourceLat Latitude of location
 	 * @param sourceLon Longitude of location
 	 * @return stopByTitle JSON objects
@@ -351,6 +351,45 @@ public class Nextbus {
 					return;
 				}
 			}
+		});
+		
+		return d;
+	}
+	
+	public static Promise<JSONObject, Exception, Double> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
+		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
+		Promise<JSONObject, Exception, Double> allNearStops = getStopsByTitleNear(agency, sourceLat, sourceLon);
+		
+		allNearStops.then(new DoneCallback<JSONObject>() {
+
+			public void onDone(JSONObject stopsByTitle) {
+				JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
+				JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
+				
+				JSONObject result = new JSONObject();
+				
+				try {
+					JSONArray activeStops = active.getJSONArray("stops");
+					
+					// Loop through ALL nearby stops returned by earlier call
+					Iterator<String> stopTitleIter = stopsByTitle.keys();
+					while(stopTitleIter.hasNext()) {
+						String curTitle = stopTitleIter.next();
+						
+						// Check to see if this stop is active
+						for(int i = 0; i < activeStops.length(); i++) {
+							JSONObject anActiveStop = activeStops.getJSONObject(i);
+							if(anActiveStop.getString("title").equals(curTitle)) {
+								result.put(curTitle, stopsByTitle.get(curTitle));	
+							}
+						}
+					}
+					
+				} catch(JSONException e) {
+					Log.e(TAG, e.getMessage());
+				}
+			}
+			
 		});
 		
 		return d;

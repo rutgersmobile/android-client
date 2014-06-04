@@ -8,11 +8,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.IntentSender.SendIntentException;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -22,15 +27,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
@@ -39,22 +45,57 @@ import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers.fragments.DTable;
+import edu.rutgers.css.Rutgers.location.LocationUtils;
 import edu.rutgers.css.Rutgers2.R;
 
-public class MainActivity extends FragmentActivity {
+/**
+ * RU Mobile main activity
+ *
+ */
+public class MainActivity extends FragmentActivity  implements
+		GooglePlayServicesClient.ConnectionCallbacks,
+		GooglePlayServicesClient.OnConnectionFailedListener {
 	
 	private static final String TAG = "MainActivity";
 	private static final String SC_API = "https://rumobile.rutgers.edu/1/shortcuts.txt";
+	
+	private LocationClient mLocationClient;
 	
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private RMenuAdapter mDrawerAdapter;
 	
+	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+	
+	public static class ErrorDialogFragment extends DialogFragment {
+		private Dialog mDialog;
+		public ErrorDialogFragment() {
+			super();
+			mDialog = null;
+		}
+		
+		public void setDialog(Dialog dialog) {
+			mDialog = dialog;
+		}
+		
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			return mDialog;
+		}
+	}
+	
+	public LocationClient getLocationClient() {
+		return mLocationClient;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);				
+		setContentView(R.layout.activity_main);
+		
+		// Connect to Google Play location service
+		mLocationClient = new LocationClient(this, this, this);
 		
         // Sliding menu setup native items
         ArrayList<RMenuPart> menuArray = new ArrayList<RMenuPart>();
@@ -191,7 +232,21 @@ public class MainActivity extends FragmentActivity {
 
 	}
 	
-   @Override
+	@Override
+	protected void onStart() {
+		super.onStart();
+		// Connect to location services when activity becomes visible
+		mLocationClient.connect();
+	}
+	
+	@Override
+	protected void onStop() {
+		// Disconnect from location services when activity is no longer visible
+		mLocationClient.disconnect();
+		super.onStop();
+	}
+	
+	@Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
@@ -224,23 +279,88 @@ public class MainActivity extends FragmentActivity {
 		return true;
 	}
 	
-	private class MainListAdapter extends ArrayAdapter<String> {
-		public MainListAdapter (ArrayList<String> items) {
-			super(MainActivity.this, 0, items);
+	@Override
+	public void onConnected(Bundle dataBundle) {
+		Log.d(LocationUtils.APPTAG, "Connected to Google Play services");
+		Location currentLocation = mLocationClient.getLastLocation();
+		Log.d(LocationUtils.APPTAG, currentLocation.toString());
+	}
+	
+	@Override
+	public void onDisconnected() {
+		Log.d(LocationUtils.APPTAG, "Disconnected from Google Play services");
+	}
+	
+	@Override
+	public void onConnectionFailed(ConnectionResult connectionResult) {
+		if(connectionResult.hasResolution()) {
+			try {
+				connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+			} catch (SendIntentException e) {
+				Log.e(LocationUtils.APPTAG, Log.getStackTraceString(e));
+			}
 		}
-		
-		@Override
-		public View getView (int position, View convertView, ViewGroup parent) {
-			if (convertView == null) convertView = MainActivity.this.getLayoutInflater().inflate(R.layout.main_drawer_item, parent);
-			
-			String title = getItem(position);
-			TextView titleTextView = (TextView) convertView.findViewById(R.id.title);
-			titleTextView.setText(title);
-			
-			return convertView;
+		else {
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0);
+            if (dialog != null) {
+                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                errorFragment.setDialog(dialog);
+                errorFragment.show(getSupportFragmentManager(), LocationUtils.APPTAG);
+            }
 		}
 	}
+	
+	@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
+        // Choose what to do based on the request code
+        switch (requestCode) {
+
+            // If the request code matches the code sent in onConnectionFailed
+            case LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST :
+
+                switch (resultCode) {
+                    // If Google Play services resolved the problem
+                    case Activity.RESULT_OK:
+                        Log.d(LocationUtils.APPTAG, "resolved by google play");
+                    break;
+
+                    // If any other result was returned by Google Play services
+                    default:
+                        Log.d(LocationUtils.APPTAG, "not resolved by google play");
+                    break;
+                }
+
+            // If any other request code was received
+            default:
+               // Report that this Activity received an unknown requestCode
+               Log.d(LocationUtils.APPTAG, "unknown request code " + requestCode);
+               break;
+        }
+    }
+    
+	/**
+	 * Check if Google Play services is connected.
+	 * @return True if connected, false if not.
+	 */
+	private boolean servicesConnected() {
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		
+		if(resultCode == ConnectionResult.SUCCESS) {
+			Log.d(TAG, "Google Play services available.");
+			return true;
+		}
+		else {
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
+            if (dialog != null) {
+                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                errorFragment.setDialog(dialog);
+                errorFragment.show(getSupportFragmentManager(), LocationUtils.APPTAG);
+            }
+            return false;
+		}
+	}
+	
 	/**
 	 * Grab web links and add them to the menu.
 	 * @param menuArray Array that holds the menu objects

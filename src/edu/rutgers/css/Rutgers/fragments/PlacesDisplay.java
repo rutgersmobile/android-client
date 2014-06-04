@@ -105,7 +105,8 @@ public class PlacesDisplay extends Fragment {
 		
 		if(!address.optString("name","").equals("")) result += address.optString("name");
 		if(!address.optString("street","").equals("")) result += "\n" + address.optString("street");
-		if(!address.optString("city","").equals("")) result += "\n" + address.optString("city") + ", " + address.optString("state_abbr") + " " + address.optString("postal_code");
+		if(!address.optString("city","").equals("")) result += "\n" + address.optString("city") + ", " +
+				address.optString("state_abbr") + " " + address.optString("postal_code");
 		
 		return result;
 	}

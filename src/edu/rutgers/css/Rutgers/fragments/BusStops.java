@@ -124,4 +124,15 @@ public class BusStops extends Fragment {
 		});
 	}
 	
+	private void loadNearbyStops(final String agencyTag) {
+/*		Nextbus.getActiveStopsByTitleNear(agencyTag, sourceLat, sourceLon).then(new DoneCallback<JSONObject>() {
+
+			public void onDone(JSONObject activeNearbyStops) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});*/
+	}
+	
 }
