@@ -298,41 +298,50 @@ public class Nextbus {
 		return d;
 	}
 	
-	public static Promise<ArrayList<JSONObject>, Exception, Double> getStopsNear (final float sourceLat, final float sourceLon) {
-		final Deferred<ArrayList<JSONObject>, Exception, Double> d = new DeferredObject<ArrayList<JSONObject>, Exception, Double>();
+	/**
+	 * Get all bus stops near a specific location.
+	 * @param sourceLat Latitude of location
+	 * @param sourceLon Longitude of location
+	 * @return stopByTitle JSON objects
+	 */
+	public static Promise<JSONObject, Exception, Double> getStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
+		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
-		//mNBConf and mNWKConf
 		configured.then(new DoneCallback<Object>() {
 			@Override
 			public void onDone(Object o) {
-				ArrayList<JSONObject> nearStops = new ArrayList<JSONObject>();
+				JSONObject nearStops = new JSONObject();
 				
 				try {
-					// Get all bus stops from all configs
-					JSONObject nbStops = mNBConf.getJSONObject("stops");
-					JSONObject nwkStops = mNWKConf.getJSONObject("stops");
-					JSONObject allStops = combineJSONObjs(nbStops, nwkStops);
-					if(allStops == null) {
-						d.reject(null);
-						return;
-					}
+					JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
+					JSONObject stopsByTitle = conf.getJSONObject("stopsByTitle");
 					
-					// Find all bus stops within range
-					Iterator<String> confIter = allStops.keys();
+					// Loop through stop titles
+					Iterator<String> confIter = stopsByTitle.keys();
 					while(confIter.hasNext()) {
-						JSONObject curStop = allStops.getJSONObject(confIter.next());
+						String curTitle = confIter.next();
+						JSONObject curStopByTitle = stopsByTitle.getJSONObject(curTitle);
+						JSONArray curStopTags = curStopByTitle.getJSONArray("tags");
 						
-						// Get distance between building and stop
-						float endLatitude = Float.parseFloat(curStop.getString("lat"));
-						float endLongitude = Float.parseFloat(curStop.getString("lon")); 
-						float[] results = new float[3];
-						Location.distanceBetween(sourceLat, sourceLon, endLatitude, endLongitude, results);
-						
-						// If the stop is within range, add it to the list
-						if(results[0] < NEARBY_MAX) {
-							nearStops.add(curStop);
+						// Loop through tags for the stop -- if any are within range, list this stop
+						for(int i = 0; i < curStopTags.length(); i++) {
+							JSONObject curStop = conf.getJSONObject("stops").getJSONObject(curStopTags.getString(i));
+							
+							// Get distance between building and stop
+							float endLatitude = Float.parseFloat(curStop.getString("lat"));
+							float endLongitude = Float.parseFloat(curStop.getString("lon")); 
+							float[] results = new float[3];
+							Location.distanceBetween(sourceLat, sourceLon, endLatitude, endLongitude, results);
+							
+							// If the stop is within range, add it to the list
+							if(results[0] < NEARBY_MAX) {
+								nearStops.put(curTitle, curStopByTitle);
+								break; // Skip to next stop title
+							}
+							
 						}
+						
 					}
 					
 					d.resolve(nearStops);

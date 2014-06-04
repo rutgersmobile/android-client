@@ -1,6 +1,6 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
@@ -75,19 +75,16 @@ public class PlacesDisplay extends Fragment {
 				float buildLon = Float.parseFloat(location.getString("longitude"));
 				float buildLat = Float.parseFloat(location.getString("latitude"));
 				
-				Nextbus.getStopsNear(buildLat, buildLon).then(new DoneCallback<ArrayList<JSONObject>>() {
+				Nextbus.getStopsByTitleNear("nb", buildLat, buildLon).then(new DoneCallback<JSONObject>() {
 
 					@Override
-					public void onDone(ArrayList<JSONObject> nearbyStops) {
-						for(JSONObject stop : nearbyStops) {
-							try {
-								TextView newStopTextView = new TextView(v.getContext());
-								String stopTitle = stop.getString("title");
-								newStopTextView.setText(stopTitle);
-								nearbyBusesLinearLayout.addView(newStopTextView);
-							} catch(JSONException e) {
-								Log.e(TAG, e.getMessage());
-							}
+					public void onDone(JSONObject nearbyStopsByTitle) {
+						Iterator<String> stopTitleIter = nearbyStopsByTitle.keys();
+						while(stopTitleIter.hasNext()) {
+							TextView newStopTextView = new TextView(v.getContext());
+							String stopTitle = stopTitleIter.next();
+							newStopTextView.setText(stopTitle);
+							nearbyBusesLinearLayout.addView(newStopTextView);
 						}
 					}
 					
@@ -96,14 +93,7 @@ public class PlacesDisplay extends Fragment {
 			} catch (JSONException e) {
 				Log.w(TAG, e.getMessage());
 			}
-						
-/*			TextView test = new TextView(this.getActivity());
-			test.setText("TEST");
-			TextView test2 = new TextView(this.getActivity());
-			test2.setText("TEST2");
-			nearbyBusesLinearLayout.addView(test);
-			nearbyBusesLinearLayout.addView(test2);*/
-			
+
 		}					
 		
 		return v;
