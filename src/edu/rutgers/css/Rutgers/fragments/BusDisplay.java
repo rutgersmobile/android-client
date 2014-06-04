@@ -85,6 +85,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		
 		// Stop the update thread from running when screen isn't active
 		mUpdateTimer.cancel();
+		mUpdateTimer = null;
 	}
 	
 	@Override
@@ -92,6 +93,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		super.onResume();
 		
 		// Start the update thread when screen is active
+		mUpdateTimer = new Timer();
 		mUpdateTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
