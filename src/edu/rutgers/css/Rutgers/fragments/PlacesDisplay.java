@@ -54,22 +54,17 @@ public class PlacesDisplay extends Fragment {
 			}
 			
 			// Set title
-			try {
-				getActivity().setTitle(placeJSON.getString("title"));
-			} catch (JSONException e) {
-				Log.w(TAG, e.getMessage());
-				getActivity().setTitle(getResources().getString(R.string.places_title));
-			}
+			getActivity().setTitle(placeJSON.optString("title", getResources().getString(R.string.places_title)));
 
 			// Display building info
-			try {
 				
-				addressTextView.setText(formatAddress(placeJSON.getJSONObject("location")));
-				buildingNoTextView.setText(placeJSON.getString("building_number"));
-				campusNameTextView.setText(placeJSON.getString("campus_name"));
-				descriptionTextView.setText(placeJSON.getString("description"));
-				officesTextView.setText(formatOffices(placeJSON.getJSONArray("offices")));
-				
+			addressTextView.setText(formatAddress(placeJSON.optJSONObject("location")));
+			buildingNoTextView.setText(placeJSON.optString("building_number"));
+			campusNameTextView.setText(placeJSON.optString("campus_name"));
+			descriptionTextView.setText(placeJSON.optString("description"));
+			officesTextView.setText(formatOffices(placeJSON.optJSONArray("offices")));
+
+			try {				
 				// Get & display nearby bus stops
 				JSONObject location = placeJSON.getJSONObject("location");
 				float buildLon = Float.parseFloat(location.getString("longitude"));
@@ -105,15 +100,12 @@ public class PlacesDisplay extends Fragment {
 	 * @return Multi-line string containing address
 	 */
 	private static String formatAddress(JSONObject address) {
+		if(address == null) return "";
 		String result = "";
 		
-		try {
-			result += address.getString("name") + "\n";
-			result += address.getString("street") + "\n";
-			result += address.getString("city") + ", " + address.getString("state_abbr") + " " + address.getString("postal_code");
-		} catch (JSONException e) {
-			Log.e(TAG, e.getMessage());
-		}
+		if(!address.optString("name","").equals("")) result += address.optString("name");
+		if(!address.optString("street","").equals("")) result += "\n" + address.optString("street");
+		if(!address.optString("city","").equals("")) result += "\n" + address.optString("city") + ", " + address.optString("state_abbr") + " " + address.optString("postal_code");
 		
 		return result;
 	}
@@ -124,11 +116,13 @@ public class PlacesDisplay extends Fragment {
 	 * @return Multi-line string listing offices
 	 */
 	private static final String formatOffices(JSONArray offices) {
+		if(offices == null) return "";
 		String result = "";
 		
 		for(int i = 0; i < offices.length(); i++) {
 			try {
-				result += offices.getString(i) + "\n";
+				result += offices.getString(i);
+				if(i != offices.length()-1) result += "\n";
 			} catch (JSONException e) {
 				Log.e(TAG, e.getMessage());
 			}
