@@ -30,16 +30,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="edu.rutgers.css.Rutgers.fragments.DTable"
-            android:label="@string/title_activity_dtable" >
-        </activity>
-        <activity
             android:name="edu.rutgers.css.Rutgers.SingleFragmentActivity"
             android:label="@string/title_activity_single_fragment" >
-        </activity>
-        <activity
-            android:name="edu.rutgers.css.Rutgers.fragments.RSSReader"
-            android:label="@string/title_activity_rssreader" >
         </activity>
     </application>
 

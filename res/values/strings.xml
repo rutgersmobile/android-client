@@ -3,9 +3,7 @@
 
     <string name="app_name">Rutgers</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_dtable">DTable</string>
     <string name="title_activity_single_fragment">SingleFragmentActivity</string>
-    <string name="title_activity_rssreader">RSS Reader</string>
     <string name="replace_me">REPLACE</string>
     
     <!-- Bus channel -->
@@ -26,6 +24,7 @@
     <string name="bus_minute_plural">" minutes."</string>
     
     <!-- Places channel -->
+    <string name="places_title">Places</string>
     <string name="building_search">Building Search</string>
     <string name="explain_building_search">Search for a building by typing a building name or abbreviation.</string>
     <string name="address_header">Address</string>

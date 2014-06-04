@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -90,7 +88,7 @@ public class PlacesDisplay extends Fragment {
 				getActivity().setTitle(placeJSON.getString("title"));
 			} catch (JSONException e) {
 				Log.w(TAG, e.getMessage());
-				getActivity().setTitle("Places");
+				getActivity().setTitle(getResources().getString(R.string.places_title));
 			}
 
 			try {
