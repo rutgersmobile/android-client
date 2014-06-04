@@ -65,9 +65,7 @@ public class MainActivity extends FragmentActivity  implements
 	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private RMenuAdapter mDrawerAdapter;
-	
-	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-	
+		
 	public static class ErrorDialogFragment extends DialogFragment {
 		private Dialog mDialog;
 		public ErrorDialogFragment() {
@@ -282,8 +280,13 @@ public class MainActivity extends FragmentActivity  implements
 	@Override
 	public void onConnected(Bundle dataBundle) {
 		Log.d(LocationUtils.APPTAG, "Connected to Google Play services");
-		Location currentLocation = mLocationClient.getLastLocation();
-		Log.d(LocationUtils.APPTAG, currentLocation.toString());
+		servicesConnected();
+		if(mLocationClient != null) {
+			Location currentLocation = mLocationClient.getLastLocation();
+			if(currentLocation != null) {
+				Log.d(LocationUtils.APPTAG, currentLocation.toString());
+			}
+		}
 	}
 	
 	@Override
@@ -295,7 +298,7 @@ public class MainActivity extends FragmentActivity  implements
 	public void onConnectionFailed(ConnectionResult connectionResult) {
 		if(connectionResult.hasResolution()) {
 			try {
-				connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+				connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
 			} catch (SendIntentException e) {
 				Log.e(LocationUtils.APPTAG, Log.getStackTraceString(e));
 			}
