@@ -46,27 +46,45 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		mAdapter = new PredictionAdapter(getActivity(), R.layout.bus_predict_row, mData);
 		
 		Bundle args = getArguments();
+		
+		// Get title
 		if(args.getString("title") != null) {
 			getActivity().setTitle(args.getString("title"));
 		}
 		else {
-			getActivity().setTitle("Bus Display");
+			Log.e(TAG, "title not set");
+			getActivity().setTitle(getResources().getString(R.string.bus_title));
 		}
 		
-		if(args.getString("mode").equalsIgnoreCase("route")) {
+		// Get agency
+		if(args.getString("agency") == null) {
+			Log.e(TAG, "agency was not set");
+			return;
+		}
+		else mAgency = args.getString("agency");
+		
+		// Get mode (route or stop display)
+		if(args.getString("mode") == null) {
+			Log.e(TAG, "mode was not set");
+			return;
+		}
+		else if(args.getString("mode").equalsIgnoreCase("route")) {
 			mMode = Mode.ROUTE;
 			mTag = args.getString("tag");
+			if(mTag == null) {
+				Log.e(TAG, "tag not set for route");
+				return;
+			}
 		}
 		else if(args.getString("mode").equalsIgnoreCase("stop")) {
 			mMode = Mode.STOP;
 			mTag = args.getString("title");
+			if(mTag == null) {
+				Log.e(TAG, "title tag not set for stop");
+				return;
+			}
 		}
 		
-		mAgency = args.getString("agency");
-		if(mAgency == null) {
-			Log.e(TAG, "Null agency");
-		}
-
 		// Setup the timer stuff for updating the bus predictions
 		mUpdateTimer = new Timer();
 		mUpdateHandler = new Handler();
@@ -84,6 +102,8 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		super.onPause();
 		
 		// Stop the update thread from running when screen isn't active
+		if(mUpdateTimer == null) return;
+		
 		mUpdateTimer.cancel();
 		mUpdateTimer = null;
 	}
@@ -91,6 +111,9 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	@Override
 	public void onResume() {
 		super.onResume();
+		
+		// Don't run if required args aren't loaded
+		if(mAgency == null || mTag == null) return;
 		
 		// Start the update thread when screen is active
 		mUpdateTimer = new Timer();
@@ -115,7 +138,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	 * Load prediction data
 	 */
 	private void loadPredictions() {
-		if(mAgency == null) return;
+		if(mAgency == null || mTag == null) return;
 		
 		mAdapter.clear();
 		

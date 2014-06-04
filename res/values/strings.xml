@@ -8,6 +8,23 @@
     <string name="title_activity_rssreader">RSS Reader</string>
     <string name="replace_me">REPLACE</string>
     
+    <!-- Bus channel -->
+    <string name="bus_title">Bus</string>
+    <string name="bus_all_tab">All</string>
+    <string name="bus_routes_tab">Routes</string>
+    <string name="bus_stops_tab">Stops</string>
+    
+    <string name="bus_nb_active_stops_header">New Brunswick Active Stops</string>
+    <string name="bus_nwk_active_stops_header">Newark Active Stops</string>
+    <string name="bus_nb_active_routes_header">New Brunswick Active Routes</string>
+    <string name="bus_nwk_active_routes_header">Newark Active Routes</string>
+    
+    <string name="bus_no_predictions">No predictions available.</string>
+    <string name="bus_prediction_begin">Arriving in</string>
+    <string name="bus_and">" and"</string>
+    <string name="bus_minute_singular">" minute."</string>
+    <string name="bus_minute_plural">" minutes."</string>
+    
     <!-- Places channel -->
     <string name="building_search">Building Search</string>
     <string name="explain_building_search">Search for a building by typing a building name or abbreviation.</string>

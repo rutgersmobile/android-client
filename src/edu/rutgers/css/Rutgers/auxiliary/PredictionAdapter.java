@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,7 +75,8 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 			holder.minutesTextView.setText(formatMinutes(prediction.getMinutes()));
 		}
 		else {
-			holder.minutesTextView.setText("No prediction data");
+			// No predictions loaded
+			holder.minutesTextView.setText(R.string.bus_no_predictions);
 		}
 		
 		/* If there's no direction string, don't let that text field take up space */
@@ -101,10 +103,11 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 	 * @return Formatted arrival time string
 	 */
 	private String formatMinutes(ArrayList<Integer> minutes) {
-		StringBuilder result = new StringBuilder("Arriving in");
+		Resources resources = getContext().getResources();
+		StringBuilder result = new StringBuilder(resources.getString(R.string.bus_prediction_begin));
 		
 		for(int i = 0; i < minutes.size(); i++) {
-			if(i != 0 && i == minutes.size() - 1) result.append(" and");
+			if(i != 0 && i == minutes.size() - 1) result.append(resources.getString(R.string.bus_and));
 			
 			if(minutes.get(i) < 1) result.append(" <1");
 			else result.append(" "+minutes.get(i));
@@ -112,8 +115,8 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 			if(minutes.size() > 2 && i != minutes.size() - 1) result.append(",");
 		}
 		
-		if(minutes.size() == 1 && minutes.get(0) == 1) result.append(" minute.");
-		else result.append(" minutes.");
+		if(minutes.size() == 1 && minutes.get(0) == 1) result.append(resources.getString(R.string.bus_minute_singular));
+		else result.append(resources.getString(R.string.bus_minute_plural));
 		
 		return result.toString();
 	}

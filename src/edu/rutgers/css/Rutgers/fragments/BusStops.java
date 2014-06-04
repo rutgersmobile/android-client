@@ -45,8 +45,8 @@ public class BusStops extends Fragment {
 		
 		//TODO Nearby stops!
 		
-		loadAgency("nb", "New Brunswick Active Stops");
-		loadAgency("nwk", "Newark Active Stops");
+		loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));
+		loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header));
 		
 	}
 	

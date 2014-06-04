@@ -36,11 +36,10 @@ public class BusMain extends Fragment {
         mTabHost = (FragmentTabHost) v.findViewById(R.id.bus_tabhost);
         mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
         
-        mTabHost.addTab(mTabHost.newTabSpec("busroutes").setIndicator("Routes"), BusRoutes.class, null);
-        mTabHost.addTab(mTabHost.newTabSpec("busstops").setIndicator("Stops"), BusStops.class, null);
-        mTabHost.addTab(mTabHost.newTabSpec("busall").setIndicator("All"), BusAll.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec("busroutes").setIndicator(getResources().getString(R.string.bus_routes_tab)), BusRoutes.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec("busstops").setIndicator(getResources().getString(R.string.bus_stops_tab)), BusStops.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec("busall").setIndicator(getResources().getString(R.string.bus_all_tab)), BusAll.class, null);
 
-		
 		return v;
 	}
 }

@@ -43,8 +43,8 @@ public class BusRoutes extends Fragment {
 		mData = new ArrayList<RMenuPart>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.main_drawer_header, mData);
 		
-		loadAgency("nb", "New Brunswick Active Routes");
-		loadAgency("nwk", "Newark Active Routes");
+		loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header));
+		loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header));
 
 	}
 	
