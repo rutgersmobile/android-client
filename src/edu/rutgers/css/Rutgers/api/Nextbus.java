@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.api;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jdeferred.Deferred;
@@ -14,8 +15,10 @@ import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
 import org.jdeferred.multiple.OneResult;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.location.Location;
 import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
@@ -42,6 +45,8 @@ public class Nextbus {
 	private static long configExpireTime = 1000 * 60 * 60; // config data cached one hour
 	
 	private static final String BASE_URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=";
+	
+	public static final float NEARBY_MAX = 300.0f; // Within 300 meters is considered "nearby"
 	
 	/**
 	 * Load JSON data on active buses & the entire bus config.
@@ -273,6 +278,7 @@ public class Nextbus {
 		setup();
 		
 		configured.then(new DoneCallback<Object>() {
+			@Override
 			public void onDone(Object o) {
 				try {
 					JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
@@ -290,5 +296,77 @@ public class Nextbus {
 		});
 		
 		return d;
+	}
+	
+	public static Promise<ArrayList<JSONObject>, Exception, Double> getStopsNear (final float sourceLat, final float sourceLon) {
+		final Deferred<ArrayList<JSONObject>, Exception, Double> d = new DeferredObject<ArrayList<JSONObject>, Exception, Double>();
+		setup();
+		
+		//mNBConf and mNWKConf
+		configured.then(new DoneCallback<Object>() {
+			@Override
+			public void onDone(Object o) {
+				ArrayList<JSONObject> nearStops = new ArrayList<JSONObject>();
+				
+				try {
+					// Get all bus stops from all configs
+					JSONObject nbStops = mNBConf.getJSONObject("stops");
+					JSONObject nwkStops = mNWKConf.getJSONObject("stops");
+					JSONObject allStops = combineJSONObjs(nbStops, nwkStops);
+					if(allStops == null) {
+						d.reject(null);
+						return;
+					}
+					
+					// Find all bus stops within range
+					Iterator<String> confIter = allStops.keys();
+					while(confIter.hasNext()) {
+						JSONObject curStop = allStops.getJSONObject(confIter.next());
+						
+						// Get distance between building and stop
+						float endLatitude = Float.parseFloat(curStop.getString("lat"));
+						float endLongitude = Float.parseFloat(curStop.getString("lon")); 
+						float[] results = new float[3];
+						Location.distanceBetween(sourceLat, sourceLon, endLatitude, endLongitude, results);
+						
+						// If the stop is within range, add it to the list
+						if(results[0] < NEARBY_MAX) {
+							nearStops.add(curStop);
+						}
+					}
+					
+					d.resolve(nearStops);
+				} catch(JSONException e) {
+					Log.e(TAG, e.getMessage());
+					d.reject(e);
+					return;
+				}
+			}
+		});
+		
+		return d;
+	}
+	
+	private static JSONObject combineJSONObjs(JSONObject conf1, JSONObject conf2) {
+		JSONObject result = new JSONObject();
+		ArrayList<JSONObject> confs = new ArrayList<JSONObject>();
+		confs.add(conf1);
+		confs.add(conf2);
+		
+		for(JSONObject curConf: confs) {
+			Iterator<String> confKeys = curConf.keys();
+			while(confKeys.hasNext()) {
+				try {
+					String curKey = confKeys.next();
+					Object curObj = curConf.get(curKey);
+					result.put(curKey, curObj);
+				} catch(JSONException e) {
+					Log.e(TAG, e.getMessage());
+					return null;
+				}
+			}
+		}
+		
+		return result;
 	}
 }
