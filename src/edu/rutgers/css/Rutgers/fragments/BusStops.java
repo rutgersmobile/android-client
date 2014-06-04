@@ -1,12 +1,15 @@
 package edu.rutgers.css.Rutgers.fragments;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,6 +22,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
+import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
@@ -31,9 +35,20 @@ public class BusStops extends Fragment {
 	private ListView mList;
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuPart> mData;
+	private LocationClientProvider mLocationClientProvider;
 	
 	public BusStops() {
 		// Required empty public constructor
+	}
+	
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		try {
+			mLocationClientProvider = (LocationClientProvider) activity;
+		} catch(ClassCastException e) {
+			mLocationClientProvider = null;
+			Log.e(TAG, e.getMessage());
+		}
 	}
 
 	@Override
@@ -43,8 +58,7 @@ public class BusStops extends Fragment {
 		mData = new ArrayList<RMenuPart>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.main_drawer_header, mData);
 		
-		//TODO Nearby stops!
-		
+		loadNearbyStops("nb");
 		loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));
 		loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header));
 		
@@ -103,7 +117,7 @@ public class BusStops extends Fragment {
 			
 			@Override
 			public void onDone(JSONArray data) {
-				Log.d(TAG, data.toString());
+				//Log.d(TAG, data.toString());
 				
 				mAdapter.add(new SlideMenuHeader(agencyTitle));
 				for(int i = 0; i < data.length(); i++) {
@@ -125,14 +139,46 @@ public class BusStops extends Fragment {
 	}
 	
 	private void loadNearbyStops(final String agencyTag) {
-/*		Nextbus.getActiveStopsByTitleNear(agencyTag, sourceLat, sourceLon).then(new DoneCallback<JSONObject>() {
+		// Get location & lookup nearby locations
+		if(mLocationClientProvider != null) {
+			if(mLocationClientProvider.servicesConnected()) {
+				Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
+				Log.d(TAG, "Current location: " + lastLoc.toString());
+				Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude()).then(new DoneCallback<JSONObject>() {
 
-			public void onDone(JSONObject activeNearbyStops) {
-				// TODO Auto-generated method stub
-				
+					@Override
+					public void onDone(JSONObject activeNearbyStops) {
+						if(activeNearbyStops.length() > 0) {
+							mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.bus_nearby_active_stops_header)));
+						}
+						
+						Iterator<String> stopTitleIter = activeNearbyStops.keys();
+						while(stopTitleIter.hasNext()) {
+							try {
+								String curTitle = stopTitleIter.next();
+								JSONObject curStop = activeNearbyStops.getJSONObject(curTitle);
+								
+								curStop.put("title", curTitle);
+								
+								Bundle menuBundle = new Bundle();
+								menuBundle.putString("title", curTitle);
+								menuBundle.putString("json", curStop.toString());
+								menuBundle.putString("agency", agencyTag);
+								SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
+								mAdapter.add(newMenuItem);
+							} catch(JSONException e) {
+								Log.e(TAG, e.getMessage());
+							}
+						}
+					}
+					
+				});
 			}
-			
-		});*/
+		}
+		else {
+			Log.e(TAG, "location client provider null");
+		}
+
 	}
 	
 }

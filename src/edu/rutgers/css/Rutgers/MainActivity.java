@@ -40,6 +40,7 @@ import com.google.android.gms.location.LocationClient;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
@@ -54,7 +55,8 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class MainActivity extends FragmentActivity  implements
 		GooglePlayServicesClient.ConnectionCallbacks,
-		GooglePlayServicesClient.OnConnectionFailedListener {
+		GooglePlayServicesClient.OnConnectionFailedListener,
+		LocationClientProvider {
 	
 	private static final String TAG = "MainActivity";
 	private static final String SC_API = "https://rumobile.rutgers.edu/1/shortcuts.txt";
@@ -83,6 +85,7 @@ public class MainActivity extends FragmentActivity  implements
 		}
 	}
 	
+	@Override
 	public LocationClient getLocationClient() {
 		return mLocationClient;
 	}
@@ -346,7 +349,7 @@ public class MainActivity extends FragmentActivity  implements
 	 * Check if Google Play services is connected.
 	 * @return True if connected, false if not.
 	 */
-	private boolean servicesConnected() {
+	public boolean servicesConnected() {
 		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 		
 		if(resultCode == ConnectionResult.SUCCESS) {

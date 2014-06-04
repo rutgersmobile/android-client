@@ -385,6 +385,7 @@ public class Nextbus {
 						}
 					}
 					
+					d.resolve(result);
 				} catch(JSONException e) {
 					Log.e(TAG, e.getMessage());
 				}
