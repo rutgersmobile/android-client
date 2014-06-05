@@ -29,6 +29,14 @@ public class RSSItem {
 	private String date;
 	private URL imgUrl;
 	
+	public final static DateFormat rssDf = new SimpleDateFormat("EEE, dd MMM yyyy ZZZZZ", Locale.US); // Mon, 26 May 2014 -0400
+	public final static DateFormat rssDf2 = new SimpleDateFormat("EEE, MMM dd, yyyy", Locale.US); // Monday, May 26, 2014
+	public final static DateFormat rssDf3 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"); // Mon, 26 May 2014 00:27:50 GMT
+	public final static DateFormat rssOutFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.US); // May 26, 2014
+	public final static DateFormat eventDf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
+	public final static DateFormat outDf = new SimpleDateFormat("E, MMM dd, h:mm a", Locale.US);
+	public final static DateFormat outEndDf = new SimpleDateFormat("h:mm a", Locale.US);
+	
 	/**
 	 * Default constructor takes RSS item as XML object
 	 * @param item RSS item in XML form
@@ -46,15 +54,44 @@ public class RSSItem {
 		
 		// Get date - check pubDate for news or event:xxxDateTime for events
 		if(item.text("pubDate") != null) {
-			this.date = item.text("pubDate");
+			// Try to parse the pubDate
+			Date parsed = null;
+			
+			// Try the standard pubDate format, as well as some variations seen in the feeds we read
+			try {
+				parsed = rssDf.parse(item.text("pubDate"));
+			} catch(ParseException e) {
+				//Log.d(TAG, "1st attempt to parse failed");
+			}
+			 
+			if(parsed == null) {
+				try {
+					parsed = rssDf2.parse(item.text("pubDate"));
+				}
+				catch(ParseException e) {
+					//Log.d(TAG, "2nd attempt to parse failed");
+				}
+			}
+			
+			if(parsed == null) {
+				try {
+					parsed = rssDf3.parse(item.text("pubDate"));
+				} catch(ParseException e) {
+					//Log.d(TAG, "3rd attempt to parse failed");
+				}
+			}
+			
+			if(parsed != null) {
+				this.date = rssOutFormat.format(parsed);
+			}
+			else {
+				// Couldn't parse the date, just display it as is
+				this.date = item.text("pubDate");
+			}
 		}
 		else if(item.text("event:beginDateTime") != null) {
 			// Event time - parse start & end timestamps and produce an output string that gives
 			// the date and beginning and end times, e.g. "Fri, Apr 18, 10:00 AM - 11:00 AM"
-			DateFormat eventDf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
-			DateFormat outDf = new SimpleDateFormat("E, MMM dd, h:mm a", Locale.US);
-			DateFormat outEndDf = new SimpleDateFormat("h:mm a", Locale.US);
-			
 			try {
 				Date parsedDate = eventDf.parse(item.text("event:beginDateTime"));
 				Date parsedEnd = eventDf.parse(item.text("event:endDateTime"));
