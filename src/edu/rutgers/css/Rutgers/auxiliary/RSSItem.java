@@ -31,7 +31,7 @@ public class RSSItem {
 	
 	public final static DateFormat rssDf = new SimpleDateFormat("EEE, dd MMM yyyy ZZZZZ", Locale.US); // Mon, 26 May 2014 -0400
 	public final static DateFormat rssDf2 = new SimpleDateFormat("EEE, MMM dd, yyyy", Locale.US); // Monday, May 26, 2014
-	public final static DateFormat rssDf3 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"); // Mon, 26 May 2014 00:27:50 GMT
+	public final static DateFormat rssDf3 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US); // Mon, 26 May 2014 00:27:50 GMT
 	public final static DateFormat rssOutFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.US); // May 26, 2014
 	public final static DateFormat eventDf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
 	public final static DateFormat outDf = new SimpleDateFormat("E, MMM dd, h:mm a", Locale.US);

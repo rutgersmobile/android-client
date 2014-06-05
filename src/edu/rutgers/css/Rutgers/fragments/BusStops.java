@@ -72,34 +72,29 @@ public class BusStops extends Fragment {
 		mList.setAdapter(mAdapter);
 		mList.setOnItemClickListener(new OnItemClickListener() {
 
+			/**
+			 * Clicking on one of the stops will launch the bus display in stop mode, which lists routes going through that stop.
+			 */
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				SlideMenuItem clickedItem = (SlideMenuItem) parent.getAdapter().getItem(position);
 				Bundle clickedArgs = clickedItem.getArgs();
+						
+				Bundle args = new Bundle();
+				args.putString("component", "busdisplay");
+				args.putString("mode", "stop");
+				args.putString("title", clickedArgs.getString("title"));
+				args.putString("agency", clickedArgs.getString("agency"));
 				
-				try {
-					JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
+				FragmentManager fm = getActivity().getSupportFragmentManager();
+				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 				
-					FragmentManager fm = getActivity().getSupportFragmentManager();
-				
-					Bundle args = new Bundle();
-					args.putString("component", "busdisplay");
-					args.putString("mode", "stop");
-					args.putString("title", clickedJSON.getString("title"));
-					args.putString("agency", clickedArgs.getString("agency"));
-					
-					Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-					
-					if(fragment != null) {
-						fm.beginTransaction()
-							.replace(R.id.main_content_frame, fragment)
-							.addToBackStack(null)
-							.commit();
-					}
-				} catch (JSONException e) {
-					Log.e(TAG, e.getMessage());
+				if(fragment != null) {
+					fm.beginTransaction()
+						.replace(R.id.main_content_frame, fragment)
+						.addToBackStack(null)
+						.commit();
 				}
-				
 			}
 			
 		});
@@ -108,7 +103,9 @@ public class BusStops extends Fragment {
 	}
 	
 	/**
-	 * Populate list with bus stops for agency, with a section header for that agency
+	 * Populate list with bus stops for agency, with a section header for that agency.
+	 * Resulting JSON array looks like this:
+	 * 	[{"geoHash":"dr5rb1qnk35gxur","title":"1 Washington Park"},{"geoHash":"dr5pzbvwhvpjst4","title":"225 Warren St"}]
 	 * @param agencyTag Agency tag for API request
 	 * @param agencyTitle Header title that goes above these stops
 	 */
@@ -117,20 +114,21 @@ public class BusStops extends Fragment {
 			
 			@Override
 			public void onDone(JSONArray data) {
-				//Log.d(TAG, data.toString());
+				//Log.d(TAG, "loadAgency(): " + data.toString());
 				
+				// Create an item in the list for each stop from the array
 				mAdapter.add(new SlideMenuHeader(agencyTitle));
 				for(int i = 0; i < data.length(); i++) {
 					try {
 						JSONObject jsonObj = data.getJSONObject(i);
 						Bundle menuBundle = new Bundle();
 						menuBundle.putString("title", jsonObj.getString("title"));
-						menuBundle.putString("json", jsonObj.toString());
+						//menuBundle.putString("json", jsonObj.toString());
 						menuBundle.putString("agency", agencyTag);
 						SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
 						mAdapter.add(newMenuItem);
 					} catch (JSONException e) {
-						Log.e(TAG, e.getMessage());
+						Log.e(TAG, "loadAgency(): " + e.getMessage());
 					}
 				}
 			}
@@ -138,45 +136,53 @@ public class BusStops extends Fragment {
 		});
 	}
 	
+	/**
+	 * Populate list with active nearby stops for an agency
+	 * @param agencyTag Agency tag for API request
+	 */
 	private void loadNearbyStops(final String agencyTag) {
-		// Get location & lookup nearby locations
-		if(mLocationClientProvider != null) {
-			if(mLocationClientProvider.servicesConnected()) {
-				Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
-				Log.d(TAG, "Current location: " + lastLoc.toString());
-				Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude()).then(new DoneCallback<JSONObject>() {
+		
+		// Check for location services
+		if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected()) {
+			// Get last location
+			Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
+			Log.d(TAG, "Current location: " + lastLoc.toString());
+			
+			// Look up nearby active bus stops
+			Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude()).then(new DoneCallback<JSONObject>() {
 
-					@Override
-					public void onDone(JSONObject activeNearbyStops) {
-						if(activeNearbyStops.length() > 0) {
-							mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.bus_nearby_active_stops_header)));
-						}
-						
-						Iterator<String> stopTitleIter = activeNearbyStops.keys();
-						while(stopTitleIter.hasNext()) {
-							try {
-								String curTitle = stopTitleIter.next();
-								JSONObject curStop = activeNearbyStops.getJSONObject(curTitle);
-								
-								curStop.put("title", curTitle);
-								
-								Bundle menuBundle = new Bundle();
-								menuBundle.putString("title", curTitle);
-								menuBundle.putString("json", curStop.toString());
-								menuBundle.putString("agency", agencyTag);
-								SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
-								mAdapter.add(newMenuItem);
-							} catch(JSONException e) {
-								Log.e(TAG, e.getMessage());
-							}
+				@Override
+				public void onDone(JSONObject activeNearbyStops) {
+					// If there aren't any results, don't do anything
+					if(activeNearbyStops.length() == 0) return;
+					
+					// Add section header
+					mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.bus_nearby_active_stops_header)));
+					
+					Iterator<String> stopTitleIter = activeNearbyStops.keys();
+					while(stopTitleIter.hasNext()) {
+						try {
+							String curTitle = stopTitleIter.next();
+							JSONObject curStop = activeNearbyStops.getJSONObject(curTitle);
+							
+							//curStop.put("title", curTitle); // title field required in the JSON for click events
+							
+							Bundle menuBundle = new Bundle();
+							menuBundle.putString("title", curTitle);
+							//menuBundle.putString("json", curStop.toString());
+							menuBundle.putString("agency", agencyTag);
+							SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
+							mAdapter.add(newMenuItem);
+						} catch(JSONException e) {
+							Log.e(TAG, "loadNearbyStops(): " + e.getMessage());
 						}
 					}
-					
-				});
-			}
+				}
+				
+			});
 		}
 		else {
-			Log.e(TAG, "location client provider null");
+			Log.e(TAG, "Could not get location provider, can't find nearby stops");
 		}
 
 	}
