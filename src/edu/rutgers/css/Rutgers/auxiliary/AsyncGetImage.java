@@ -45,7 +45,6 @@ public class AsyncGetImage extends AsyncTask<URL, Integer, Bitmap> {
 	
 	@Override
 	protected void onPostExecute(Bitmap result) {
-		targetImageView.setTag(result);
 		targetImageView.setImageBitmap(result);
 	}
 	

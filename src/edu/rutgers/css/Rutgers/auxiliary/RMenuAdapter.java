@@ -66,6 +66,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
 			convertView.setTag(holder);
 		}
+		else holder = (ViewHolder) convertView.getTag();
 		
 		// Set item text
 		if(holder.titleTextView != null) holder.titleTextView.setText(curItem.getTitle());

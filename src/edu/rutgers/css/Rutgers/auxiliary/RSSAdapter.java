@@ -62,16 +62,13 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		
 		/* Download image */
 		if(this.getItem(position).getImgUrl() == null) {
+			// No image - clear the image view
 			//TODO Don't draw blank ImageView and have it take up space
+			mHolder.iconImageView.setImageBitmap(null);
 		}
 		else {
-			if(mHolder.iconImageView.getTag() == null) {
-				new AsyncGetImage(mHolder.iconImageView).execute(this.getItem(position).getImgUrl());
-			}
-			else {
-				Bitmap savedBitmap = (Bitmap) mHolder.iconImageView.getTag();
-				mHolder.iconImageView.setImageBitmap(savedBitmap);
-			}
+			// Download the image
+			new AsyncGetImage(mHolder.iconImageView).execute(this.getItem(position).getImgUrl());
 		}
 		
 		return convertView;

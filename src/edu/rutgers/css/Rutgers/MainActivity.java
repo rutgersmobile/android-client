@@ -108,7 +108,8 @@ public class MainActivity extends FragmentActivity  implements
         menuArray.add(new SlideMenuItem("Food", "food"));
         menuArray.add(new SlideMenuItem("Places", "places"));
         menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
-        menuArray.add(new SlideMenuItem("Events*", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
+        menuArray.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
+        //menuArray.add(new SlideMenuItem("RU Today", "reader", "http://medrel.drupaldev.rutgers.edu/rss/today"));
         
         // Sliding menu set up web shortcuts
         mDrawerAdapter.add(new SlideMenuHeader("Shortcuts"));
