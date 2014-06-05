@@ -2,6 +2,10 @@ package edu.rutgers.css.Rutgers.auxiliary;
 
 import java.util.ArrayList;
 
+/**
+ * Bus arrival time prediction
+ *
+ */
 public class Prediction {
 	private String tag;
 	private String title;

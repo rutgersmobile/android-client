@@ -24,6 +24,10 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 	private int itemResource;
 	private int categoryResource;
 	
+	static class ViewHolder {
+		TextView titleTextView;
+	}
+	
 	/**
 	 * 
 	 * @param context App context
@@ -42,6 +46,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		RMenuPart curItem = this.getItem(position);
+		ViewHolder holder = null;
 		
 		// Choose appropriate layout
 		if(convertView == null) {
@@ -56,11 +61,14 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 			else {
 				convertView = mLayoutInflater.inflate(this.itemResource, null);
 			}
+			
+			holder = new ViewHolder();
+			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
+			convertView.setTag(holder);
 		}
 		
 		// Set item text
-		TextView titleTextView = (TextView) convertView.findViewById(R.id.title);
-		if(titleTextView != null) titleTextView.setText(curItem.getTitle());
+		if(holder.titleTextView != null) holder.titleTextView.setText(curItem.getTitle());
 		else Log.e(TAG, "R.id.title not found");
 		
 		return convertView;

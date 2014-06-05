@@ -23,7 +23,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 	private int layoutResource;
 	
 	/* Class to hold data for RSS list rows */
-	public final class RSSHolder {
+	static class ViewHolder {
 			ImageView iconImageView;
 			Bitmap iconImageBitmap;
 			TextView titleTextView;
@@ -39,32 +39,23 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		RSSHolder mHolder = null;
+		ViewHolder mHolder = null;
 		
 		/* Make new data holder or get existing one */
-/*		if(convertView == null) {
-				mHolder = new RSSHolder();
-				// Create new RSS Row view 
-				convertView = mLayoutInflater.inflate(this.layoutResource, null);
-				convertView.setTag(mHolder);
+		if(convertView == null) { 
+			convertView = mLayoutInflater.inflate(this.layoutResource, null);
+			mHolder = new ViewHolder();
+			mHolder.iconImageView = (ImageView) convertView.findViewById(R.id.rssRowIconView);
+			mHolder.titleTextView = (TextView) convertView.findViewById(R.id.rssRowTitleView);
+			mHolder.authordateTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorDateView);
+			mHolder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
+			convertView.setTag(mHolder);
 		}
 		else {	
-				mHolder = (RSSHolder) convertView.getTag();
+			mHolder = (ViewHolder) convertView.getTag();
 		}
-*/
-		/* Create new RSS Row view */
-		if(convertView == null) mHolder = new RSSHolder();
-		else mHolder = (RSSHolder) convertView.getTag();
-		
-		convertView = mLayoutInflater.inflate(this.layoutResource, null);
-		convertView.setTag(mHolder);
-		
+	
 		/* Populate RSS row layout elements */
-		mHolder.iconImageView = (ImageView) convertView.findViewById(R.id.rssRowIconView);
-		mHolder.titleTextView = (TextView) convertView.findViewById(R.id.rssRowTitleView);
-		mHolder.authordateTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorDateView);
-		mHolder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
-		
 		mHolder.titleTextView.setText(this.getItem(position).getTitle());
 		mHolder.authordateTextView.setText(this.getItem(position).getDate());
 		mHolder.descriptionTextView.setText(this.getItem(position).getDescription());

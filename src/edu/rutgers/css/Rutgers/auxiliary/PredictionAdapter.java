@@ -22,7 +22,7 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 	private static final String TAG = "PredictionAdapter";
 	private int layoutResource;
 	
-	public final class PredictionHolder {
+	static class ViewHolder {
 		TextView titleTextView;
 		TextView directionTextView;
 		TextView minutesTextView;
@@ -37,26 +37,22 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		Prediction prediction = this.getItem(position);
-		PredictionHolder holder = null;
+		ViewHolder holder = null;
 		
 		/* Make new data holder or get existing one */
 		if(convertView == null) {
-				holder = new PredictionHolder();
-				convertView = mLayoutInflater.inflate(this.layoutResource, null);
-				convertView.setTag(holder);
+			convertView = mLayoutInflater.inflate(this.layoutResource, null);
+			holder = new ViewHolder();
+			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
+			holder.directionTextView = (TextView) convertView.findViewById(R.id.direction);
+			holder.minutesTextView = (TextView) convertView.findViewById(R.id.minutes);
+			convertView.setTag(holder);
 		}
 		else {	
-				holder = (PredictionHolder) convertView.getTag();
+			holder = (ViewHolder) convertView.getTag();
 		}
 	
-		convertView = mLayoutInflater.inflate(this.layoutResource, null);
-		convertView.setTag(holder);
-		
 		/* Populate prediction row layout elements */
-		holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
-		holder.directionTextView = (TextView) convertView.findViewById(R.id.direction);
-		holder.minutesTextView = (TextView) convertView.findViewById(R.id.minutes);
-		
 		holder.titleTextView.setText(prediction.getTitle());
 		
 		/* Change color of text based on how much time is remaining before the first bus arrives */
