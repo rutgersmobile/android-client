@@ -3,22 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="5dp"
-    android:background="@color/drawer_section_header_bg" >
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="10dp" >
 
 	<TextView
 		android:id="@+id/title"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:text="@string/replace_me"
-		android:textColor="@color/drawer_section_header_text"
-		android:textAllCaps="false" />
+		android:textColor="@color/black"
+		android:textStyle="bold"
+		android:textAllCaps="true" />
 	
 	<!-- Horizontal divider -->
-	<!--
 	<View
 	    android:layout_width="fill_parent"
 		android:layout_height="1dp"
 		android:background="@android:color/darker_gray"/>
-	-->
+
 </LinearLayout>

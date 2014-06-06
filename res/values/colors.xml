@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Basic colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="pantone186">#D21034</color>
     <color name="pantone431">#5F6A72</color>
     
     <!--  Colors used with bus arrival times -->
-    <color name="busSoonest">#CC0000</color>
-    <color name="busSoon">#FF6600</color>
-    <color name="busLater">#000099</color>
+    <color name="bus_soonest">#CC0000</color>
+    <color name="bus_soon">#FF6600</color>
+    <color name="bus_later">#000099</color>
+    
+    <!-- Nav drawer colors -->
+    <color name="drawer_selected">#EB4B4B</color>
+    <color name="drawer_section_header_bg">#3E4A51</color>
+    <color name="drawer_section_header_text">#92A6B1</color>
+    <color name="drawer_item_bg">#394247</color>
+    <color name="drawer_item_text">#FFFFFF</color>
+    <color name="drawer_divider">#455259</color>
 
 </resources>

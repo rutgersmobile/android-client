@@ -56,7 +56,7 @@ public class BusStops extends Fragment {
 		super.onCreate(savedInstanceState);
 		
 		mData = new ArrayList<RMenuPart>();
-		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.main_drawer_header, mData);
+		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
 		
 		loadNearbyStops("nb");
 		loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));

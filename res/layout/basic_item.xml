@@ -4,10 +4,5 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:text="@string/replace_me"
-	android:background="@color/drawer_item_bg"
-	android:textColor="@color/drawer_item_text"
-	android:fontFamily="DroidSans"
-	android:paddingTop="10dp"
-	android:paddingBottom="10dp"
-	android:paddingLeft="30dp"
-	android:paddingRight="10dp" />
+	android:textColor="@color/black"
+	android:padding="10dp" />

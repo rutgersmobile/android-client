@@ -59,13 +59,13 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 		if(prediction.getMinutes().size() > 0) {
 			int first = prediction.getMinutes().get(0);
 			if(first < 2) {
-				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.busSoonest));
+				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.bus_soonest));
 			}
 			else if(first < 6) {
-				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.busSoon));
+				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.bus_soon));
 			}
 			else {
-				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.busLater));
+				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.bus_later));
 			}
 			
 			holder.minutesTextView.setText(formatMinutes(prediction.getMinutes()));

@@ -101,6 +101,7 @@ public class MainActivity extends FragmentActivity  implements
         // Sliding menu setup native items
         ArrayList<RMenuPart> menuArray = new ArrayList<RMenuPart>();
         mDrawerAdapter = new RMenuAdapter(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);
+        mDrawerAdapter.setSelectColor(getResources().getColor(R.color.drawer_selected));
         
         menuArray.add(new SlideMenuHeader("Channels"));
         menuArray.add(new SlideMenuItem("Bus", "bus"));
@@ -182,6 +183,8 @@ public class MainActivity extends FragmentActivity  implements
 						.commit(); 	
 				}
 				
+				mDrawerAdapter.setSelectedPos(position);
+				mDrawerList.invalidateViews();
 				mDrawerLayout.closeDrawer(mDrawerList); // Close menu after a click
 			}
         	
@@ -266,7 +269,7 @@ public class MainActivity extends FragmentActivity  implements
         // Pass the event to ActionBarDrawerToggle, if it returns
         // true, then it has handled the app icon touch event
         if (mDrawerToggle.onOptionsItemSelected(item)) {
-        	Log.d(TAG,"");
+        	//Log.d(TAG,"");
         	return true;
         }
         // Handle your other action bar items...
