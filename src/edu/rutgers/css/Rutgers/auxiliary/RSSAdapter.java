@@ -27,8 +27,9 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 			ImageView iconImageView;
 			Bitmap iconImageBitmap;
 			TextView titleTextView;
-			TextView authordateTextView;
+			TextView dateTextView;
 			TextView descriptionTextView;
+			TextView authorTextView;
 	}
 	
 	public RSSAdapter(Context context, int resource, List<RSSItem> objects) {
@@ -47,28 +48,32 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 			mHolder = new ViewHolder();
 			mHolder.iconImageView = (ImageView) convertView.findViewById(R.id.rssRowIconView);
 			mHolder.titleTextView = (TextView) convertView.findViewById(R.id.rssRowTitleView);
-			mHolder.authordateTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorDateView);
+			mHolder.dateTextView = (TextView) convertView.findViewById(R.id.rssRowDateView);
 			mHolder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
+			mHolder.authorTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorView);
 			convertView.setTag(mHolder);
 		}
 		else {	
 			mHolder = (ViewHolder) convertView.getTag();
 		}
 	
+		RSSItem curItem = this.getItem(position);
+		
 		/* Populate RSS row layout elements */
-		mHolder.titleTextView.setText(this.getItem(position).getTitle());
-		mHolder.authordateTextView.setText(this.getItem(position).getDate());
-		mHolder.descriptionTextView.setText(this.getItem(position).getDescription());
+		mHolder.titleTextView.setText(curItem.getTitle());
+		mHolder.dateTextView.setText(curItem.getDate());
+		mHolder.descriptionTextView.setText(curItem.getDescription());
+		mHolder.authorTextView.setText(curItem.getAuthor());
 		
 		/* Download image */
-		if(this.getItem(position).getImgUrl() == null) {
+		if(curItem.getImgUrl() == null) {
 			// No image - clear the image view
 			//TODO Don't draw blank ImageView and have it take up space
 			mHolder.iconImageView.setImageBitmap(null);
 		}
 		else {
 			// Download the image
-			new AsyncGetImage(mHolder.iconImageView).execute(this.getItem(position).getImgUrl());
+			new AsyncGetImage(mHolder.iconImageView).execute(curItem.getImgUrl());
 		}
 		
 		return convertView;

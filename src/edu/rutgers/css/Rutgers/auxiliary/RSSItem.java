@@ -50,7 +50,7 @@ public class RSSItem {
 		this.link = item.text("link");
 		
 		// Non-required fields
-		this.author = item.text("author");
+		this.author = item.text("author") != null ? item.text("author") : "";
 		
 		// Get date - check pubDate for news or event:xxxDateTime for events
 		if(item.text("pubDate") != null) {

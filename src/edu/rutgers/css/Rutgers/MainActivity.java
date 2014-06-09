@@ -190,8 +190,6 @@ public class MainActivity extends FragmentActivity  implements
         	
         });
         	
-		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
-
 		FrameLayout contentFrame = (FrameLayout) findViewById(R.id.main_content_frame);
 		contentFrame.removeAllViews();
 		
@@ -200,7 +198,9 @@ public class MainActivity extends FragmentActivity  implements
 		args.putString("title", "Food");
 		args.putString("component",  "food");
 
-		Fragment fragment = ComponentFactory.getInstance().createFragment(args);		
+		
+		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
+		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
 		fm.beginTransaction()
 			.replace(R.id.main_content_frame, fragment)
 			.commit(); 
@@ -262,6 +262,16 @@ public class MainActivity extends FragmentActivity  implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+    
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+    	super.onSaveInstanceState(outState);
+    }
+    
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+    	super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override

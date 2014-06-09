@@ -32,7 +32,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusStops extends Fragment {
 
 	private static final String TAG = "BusStops";
-	private ListView mList;
+	private ListView mListView;
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuPart> mData;
 	private LocationClientProvider mLocationClientProvider;
@@ -68,9 +68,9 @@ public class BusStops extends Fragment {
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_busstops, parent, false);
 		
-		mList = (ListView) v.findViewById(R.id.list);
-		mList.setAdapter(mAdapter);
-		mList.setOnItemClickListener(new OnItemClickListener() {
+		mListView = (ListView) v.findViewById(R.id.list);
+		mListView.setAdapter(mAdapter);
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			/**
 			 * Clicking on one of the stops will launch the bus display in stop mode, which lists routes going through that stop.
@@ -164,12 +164,9 @@ public class BusStops extends Fragment {
 						try {
 							String curTitle = stopTitleIter.next();
 							JSONObject curStop = activeNearbyStops.getJSONObject(curTitle);
-							
-							//curStop.put("title", curTitle); // title field required in the JSON for click events
-							
+														
 							Bundle menuBundle = new Bundle();
 							menuBundle.putString("title", curTitle);
-							//menuBundle.putString("json", curStop.toString());
 							menuBundle.putString("agency", agencyTag);
 							SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
 							mAdapter.add(newMenuItem);

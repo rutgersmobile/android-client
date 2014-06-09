@@ -265,7 +265,7 @@ public class Nextbus {
 			}
 		});
 		
-		return d;
+		return d.promise();
 	}
 
 	/**
@@ -295,7 +295,7 @@ public class Nextbus {
 			}
 		});
 		
-		return d;
+		return d.promise();
 	}
 	
 	/**
@@ -353,7 +353,7 @@ public class Nextbus {
 			}
 		});
 		
-		return d;
+		return d.promise();
 	}
 	
 	public static Promise<JSONObject, Exception, Double> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
@@ -393,7 +393,7 @@ public class Nextbus {
 			
 		});
 		
-		return d;
+		return d.promise();
 	}
 	
 	private static JSONObject combineJSONObjs(JSONObject conf1, JSONObject conf2) {

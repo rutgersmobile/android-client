@@ -4,43 +4,53 @@
     android:layout_height="wrap_content"
     android:padding="10dp"
     android:columnCount="2" >
-
+ 
     <ImageView
         android:id="@+id/rssRowIconView"
-        android:layout_width="79dp"
-        android:layout_height="49dp"
-        android:layout_column="0"
-        android:layout_gravity="left|top|fill_horizontal"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_column="1"
         android:layout_row="1"
+        android:layout_gravity="right|top"
         android:layout_rowSpan="2"
-        android:paddingRight="5dp"
+        android:paddingLeft="5dp"
        	android:contentDescription="article icon" />
-
+ 
     <TextView
         android:id="@+id/rssRowTitleView"
-        android:layout_column="1"
+        android:layout_width="240dp"
+        android:layout_column="0"
         android:layout_gravity="left|top|fill_horizontal"
-        android:layout_width="0dp"
         android:layout_row="1"
         android:text="Article Title"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <TextView
-        android:id="@+id/rssRowAuthorDateView"
-        android:layout_column="1"
-        android:layout_gravity="left|top"
-        android:layout_row="2"
-        android:text="Author - Date"
-        android:textColor="@color/bus_later"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
 	<TextView
         android:id="@+id/rssRowDescView"
         android:layout_column="0"
+        android:layout_row="2"
         android:layout_width="0dp"
         android:layout_gravity="left|top|fill_horizontal"
-        android:layout_row="3"
         android:layout_columnSpan="2"
         android:text="Description"
         android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/rssRowDateView"
+        android:layout_column="0"
+        android:layout_row="3"
+        android:layout_gravity="left|top"
+        android:text="Date"
+        android:textColor="@color/bus_later"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+    
+    <TextView
+        android:id="@+id/rssRowAuthorView"
+        android:layout_column="1"
+        android:layout_row="3"
+        android:layout_gravity="left|bottom"
+        android:text="Author"
+        android:textColor="@color/bus_later"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+		
 </GridLayout>
