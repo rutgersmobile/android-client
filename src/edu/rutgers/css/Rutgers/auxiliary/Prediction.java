@@ -61,4 +61,25 @@ public class Prediction {
 		return this.title + "," + this.direction + "," + this.minutes.toString();
 	}
 	
+	@Override
+	public boolean equals(Object other) {
+		if(other == null) return false;
+		
+		if(other instanceof Prediction) {
+			Prediction otherPrediction = (Prediction) other;
+			if(otherPrediction.getTag().equals(this.getTag()) &&
+					((otherPrediction.getDirection() == null && this.getDirection() == null) ||
+							(otherPrediction.getDirection() != null && this.getDirection() != null && otherPrediction.getDirection().equals(this.getDirection()))) &&
+					otherPrediction.getTitle().equals(this.getTitle())) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+	
 }

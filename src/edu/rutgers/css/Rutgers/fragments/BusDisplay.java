@@ -24,6 +24,8 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	private static final String TAG = "BusDisplay";
 	private enum Mode {ROUTE, STOP};
 	
+	private static final int REFRESH_INTERVAL = 60; // refresh interval in seconds
+	
 	private ArrayList<Prediction> mData;
 	private PredictionAdapter mAdapter;
 	private ListView mList;
@@ -122,7 +124,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 			public void run() {
 				mUpdateHandler.post(mUpdateRunnable);
 			}
-		}, 0, 1000 * 60);
+		}, 0, 1000 * REFRESH_INTERVAL);
 	}
 	
 	@Override
@@ -139,9 +141,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	 */
 	private void loadPredictions() {
 		if(mAgency == null || mTag == null) return;
-		
-		mAdapter.clear();
-		
+			
 		if(mMode == Mode.ROUTE) {
 			Nextbus.routePredict(mAgency, mTag).then(this);
 		}
@@ -155,8 +155,36 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	 */
 	@Override
 	public void onDone(ArrayList<Prediction> predictionArray) {
-		for(Prediction p: predictionArray) {
-			mAdapter.add(p);
+		/* Add items if the list is being newly populated, or
+		 * the updated JSON doesn't seem to match and the list should be
+		 * cleared and repopulated.
+		 */
+		if(mAdapter.getCount() != predictionArray.size()) {
+			if(mAdapter.getCount() != 0) {
+				Log.e(TAG, "Size of updated list did not match original");
+				mAdapter.clear();
+			}
+			
+			for(Prediction p: predictionArray) {
+				mAdapter.add(p);
+			}
+		}
+		/* Update items individually if the list is already populated
+		 * and the returned JSON seems valid (matches in size).
+		 */
+		else {
+			for(int i = 0; i < mAdapter.getCount(); i++) {	
+				Prediction newPrediction = predictionArray.get(i);
+				Prediction oldPrediction = mAdapter.getItem(i);
+				if(!newPrediction.equals(oldPrediction)) {
+					Log.e(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());
+					oldPrediction.setTitle(newPrediction.getTitle());
+					oldPrediction.setTag(newPrediction.getTag());
+				}
+				
+				oldPrediction.setMinutes(newPrediction.getMinutes());
+				mAdapter.notifyDataSetChanged();
+			}
 		}
 	}
 	
