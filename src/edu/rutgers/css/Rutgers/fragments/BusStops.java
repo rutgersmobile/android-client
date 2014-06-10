@@ -160,8 +160,14 @@ public class BusStops extends Fragment {
 			public void onDone(JSONArray data) {
 				//Log.d(TAG, "loadAgency(): " + data.toString());
 				
-				// Create an item in the list for each stop from the array
 				mAdapter.add(new SlideMenuHeader(agencyTitle));
+				
+				if(data.length() == 0) {
+					mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_active_stops)));
+					return;
+				}
+				
+				// Create an item in the list for each stop from the array
 				for(int i = 0; i < data.length(); i++) {
 					try {
 						JSONObject jsonObj = data.getJSONObject(i);

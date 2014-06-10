@@ -105,6 +105,12 @@ public class BusRoutes extends Fragment {
 				Log.d(TAG, data.toString());
 				
 				mAdapter.add(new SlideMenuHeader(agencyTitle));
+				
+				if(data.length() == 0) {
+					mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_active_routes)));
+					return;
+				}
+				
 				for(int i = 0; i < data.length(); i++) {
 					try {
 						JSONObject jsonObj = data.getJSONObject(i);
