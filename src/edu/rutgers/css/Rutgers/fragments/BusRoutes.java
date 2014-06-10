@@ -28,7 +28,8 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusRoutes extends Fragment {
 	
 	private static final String TAG = "BusRoutes";
-	private ListView mList;
+	
+	private ListView mListView;
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuPart> mData;
 	
@@ -50,11 +51,11 @@ public class BusRoutes extends Fragment {
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_busstops, parent, false);
+		View v = inflater.inflate(R.layout.fragment_busroutes, parent, false);
 		
-		mList = (ListView) v.findViewById(R.id.list);
-		mList.setAdapter(mAdapter);
-		mList.setOnItemClickListener(new OnItemClickListener() {
+		mListView = (ListView) v.findViewById(R.id.list);
+		mListView.setAdapter(mAdapter);
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -63,8 +64,6 @@ public class BusRoutes extends Fragment {
 				
 				try {
 					JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
-				
-					FragmentManager fm = getActivity().getSupportFragmentManager();
 				
 					Bundle args = new Bundle();
 					args.putString("component", "busdisplay");
@@ -76,6 +75,7 @@ public class BusRoutes extends Fragment {
 					Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 					
 					if(fragment != null) {
+						FragmentManager fm = getActivity().getSupportFragmentManager();
 						fm.beginTransaction()
 							.replace(R.id.main_content_frame, fragment)
 							.addToBackStack(null)
@@ -98,7 +98,7 @@ public class BusRoutes extends Fragment {
 	 * @param agencyTitle Header title that goes above these routes
 	 */
 	private void loadAgency(final String agencyTag, final String agencyTitle) {
-		Nextbus.getRoutes(agencyTag).then(new DoneCallback<JSONArray>() {
+		Nextbus.getActiveRoutes(agencyTag).then(new DoneCallback<JSONArray>() {
 			
 			@Override
 			public void onDone(JSONArray data) {

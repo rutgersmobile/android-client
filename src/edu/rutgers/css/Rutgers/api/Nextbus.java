@@ -32,20 +32,19 @@ import edu.rutgers.css.Rutgers.auxiliary.Prediction;
  */
 public class Nextbus {
 
-	private static boolean isSetup = false;
-	private static Promise<Object, Object, Object> configured;
 	private static final String TAG = "Nextbus";
 	
+	private static boolean isSetup = false;
+	private static Promise<Object, Object, Object> configured;
 	private static JSONObject mNBConf;
 	private static JSONObject mNWKConf;
 	private static JSONObject mNBActive;
 	private static JSONObject mNWKActive;
 	
-	private static long activeExpireTime = 1000 * 60 * 10; // active bus data cached ten minutes
-	private static long configExpireTime = 1000 * 60 * 60; // config data cached one hour
-	
 	private static final String BASE_URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=";
-	
+	private static final long activeExpireTime = 1000 * 60 * 10; // active bus data cached ten minutes
+	private static final long configExpireTime = 1000 * 60 * 60; // config data cached one hour
+
 	public static final float NEARBY_MAX = 300.0f; // Within 300 meters is considered "nearby"
 	
 	/**
@@ -110,7 +109,7 @@ public class Nextbus {
 	 * @param route Route to get prediction data for
 	 * @return Promise for prediction data for each stop on the route
 	 */
-	public static Promise<ArrayList<Prediction>, Exception, Double> routePredict (final String agency, final String route) {
+	public static Promise<ArrayList<Prediction>, Exception, Double> routePredict(final String agency, final String route) {
 		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
 		
@@ -174,7 +173,7 @@ public class Nextbus {
 	 * @param stop Stop to get prediction data for
 	 * @return Promise for prediction data for each route arriving at the stop
 	 */
-	public static Promise<ArrayList<Prediction>, Exception, Double> stopPredict (final String agency, final String stop) {
+	public static Promise<ArrayList<Prediction>, Exception, Double> stopPredict(final String agency, final String stop) {
 		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
 		
@@ -240,11 +239,39 @@ public class Nextbus {
 	}
 	
 	/**
-	 * Get all routes (preferably active) for given agency (campus).
+	 * Get active routes for given agency (campus).
 	 * @param agency Agency (campus) to get routes for
-	 * @return If there are active routes, a promise for a JSON array of active routes only. If there no active routes, a promise for a JSON array of all routes found in the agency config.
+	 * @return Promise for a JSON array of active routes.
 	 */
-	public static Promise<JSONArray, Exception, Double> getRoutes (final String agency) {
+	public static Promise<JSONArray, Exception, Double> getActiveRoutes(final String agency) {
+		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
+		setup();
+		
+		configured.then(new DoneCallback<Object>() {
+			public void onDone(Object o) {
+				try {
+					JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
+					if(active != null) d.resolve(active.getJSONArray("routes"));
+					else {
+						Log.e(TAG, "active null");
+						d.reject(null);
+					}
+				} catch (JSONException e) {
+					Log.e(TAG, "getActiveRoutes(): " + e.getMessage());
+					d.reject(e);
+				}
+			}
+		});
+		
+		return d.promise();
+	}
+	
+	/**
+	 * Get all configured routes for given agency (campus).
+	 * @param agency Agency (campus) to get routes for
+	 * @return Promise for a JSON array of all configured routes.
+	 */
+	public static Promise<JSONArray, Exception, Double> getAllRoutes(final String agency) {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
@@ -252,14 +279,13 @@ public class Nextbus {
 			public void onDone(Object o) {
 				try {
 					JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
-					JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
-					
-					JSONArray routes;
-					if (active != null) routes = active.getJSONArray("routes");
-					else routes = conf.getJSONArray("sortedRoutes");
-					
-					d.resolve(routes);
-				} catch (Exception e) {
+					if(conf != null) d.resolve(conf.getJSONArray("sortedRoutes"));
+					else {
+						Log.e(TAG, "conf null");
+						d.reject(null);
+					}
+				} catch (JSONException e) {
+					Log.e(TAG, "getAllRoutes(): " + e.getMessage());
 					d.reject(e);
 				}
 			}
@@ -269,11 +295,36 @@ public class Nextbus {
 	}
 
 	/**
-	 * Get all stops (preferably active) for a given agency (campus).
+	 * Get active stops for a given agency (campus).
 	 * @param agency Agency (campus) to get stops for
-	 * @return If there are active routes, a promise for a JSON array of active stops only. If there are no active routes, a promise for a JSON array of all stops found in the agency config.
+	 * @return A promise for a JSON array of active stops.
 	 */
-	public static Promise<JSONArray, Exception, Double> getStops (final String agency) {
+	public static Promise<JSONArray, Exception, Double> getActiveStops(final String agency) {
+		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
+		setup();
+		
+		configured.then(new DoneCallback<Object>() {
+			@Override
+			public void onDone(Object o) {
+				try {
+					JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
+					if(active != null) d.resolve(active.getJSONArray("stops"));
+					else d.reject(null);
+				} catch (JSONException e) {
+					d.reject(e);
+				}
+			}
+		});
+		
+		return d.promise();
+	}
+	
+	/**
+	 * Get all configured stops for a given agency (campus).
+	 * @param agency Agency (campus) to get stops for
+	 * @return A promise for a JSON array of all stops found in the agency config.
+	 */
+	public static Promise<JSONArray, Exception, Double> getAllStops(final String agency) {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
@@ -282,14 +333,9 @@ public class Nextbus {
 			public void onDone(Object o) {
 				try {
 					JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
-					JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
-					
-					JSONArray stops;
-					if (active != null) stops = active.getJSONArray("stops");
-					else stops = conf.getJSONArray("sortedStops");
-					
-					d.resolve(stops);
-				} catch (Exception e) {
+					if(conf != null) d.resolve(conf.getJSONArray("sortedStops"));
+					else d.reject(null);
+				} catch (JSONException e) {
 					d.reject(e);
 				}
 			}

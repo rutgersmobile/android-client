@@ -100,10 +100,9 @@ public class BusStops extends Fragment {
 				args.putString("title", clickedArgs.getString("title"));
 				args.putString("agency", clickedArgs.getString("agency"));
 				
-				FragmentManager fm = getActivity().getSupportFragmentManager();
 				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-				
 				if(fragment != null) {
+					FragmentManager fm = getActivity().getSupportFragmentManager();
 					fm.beginTransaction()
 						.replace(R.id.main_content_frame, fragment)
 						.addToBackStack(null)
@@ -154,7 +153,7 @@ public class BusStops extends Fragment {
 	 * @param agencyTitle Header title that goes above these stops
 	 */
 	private void loadAgency(final String agencyTag, final String agencyTitle) {
-		Nextbus.getStops(agencyTag).then(new DoneCallback<JSONArray>() {
+		Nextbus.getActiveStops(agencyTag).then(new DoneCallback<JSONArray>() {
 			
 			@Override
 			public void onDone(JSONArray data) {
