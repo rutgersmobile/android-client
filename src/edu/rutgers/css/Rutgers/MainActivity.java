@@ -299,10 +299,11 @@ public class MainActivity extends FragmentActivity  implements
 		Log.d(LocationUtils.APPTAG, "Connected to Google Play services");
 		servicesConnected();
 		if(mLocationClient != null) {
-			Location currentLocation = mLocationClient.getLastLocation();
+			//mLocationClient.setMockMode(false); // FOR TESTING ONLY
+/*			Location currentLocation = mLocationClient.getLastLocation();
 			if(currentLocation != null) {
 				Log.d(LocationUtils.APPTAG, currentLocation.toString());
-			}
+			}*/
 		}
 	}
 	

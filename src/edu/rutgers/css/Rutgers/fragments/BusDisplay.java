@@ -24,7 +24,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	private static final String TAG = "BusDisplay";
 	private enum Mode {ROUTE, STOP};
 	
-	private static final int REFRESH_INTERVAL = 60; // refresh interval in seconds
+	private static final int REFRESH_INTERVAL = 30; // refresh interval in seconds
 	
 	private ArrayList<Prediction> mData;
 	private PredictionAdapter mAdapter;
@@ -32,7 +32,6 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	private Mode mMode;
 	private String mTag;
 	private Handler mUpdateHandler;
-	private Runnable mUpdateRunnable;
 	private Timer mUpdateTimer;
 	private String mAgency;
 	
@@ -90,24 +89,15 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		// Setup the timer stuff for updating the bus predictions
 		mUpdateTimer = new Timer();
 		mUpdateHandler = new Handler();
-		mUpdateRunnable = new Runnable() {
-			@Override
-			public void run() {
-				loadPredictions();
-			}
-		};
-		
 	}
 	
 	@Override
-	public void onPause() {
-		super.onPause();
-		
-		// Stop the update thread from running when screen isn't active
-		if(mUpdateTimer == null) return;
-		
-		mUpdateTimer.cancel();
-		mUpdateTimer = null;
+	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+		View v = inflater.inflate(R.layout.fragment_busdisplay, parent, false);
+		mList = (ListView) v.findViewById(R.id.busDisplayList);
+		mList.setAdapter(mAdapter);
+
+		return v;
 	}
 	
 	@Override
@@ -122,20 +112,27 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		mUpdateTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				mUpdateHandler.post(mUpdateRunnable);
+				mUpdateHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						loadPredictions();
+					}
+				});
 			}
 		}, 0, 1000 * REFRESH_INTERVAL);
 	}
 	
 	@Override
-	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_busdisplay, parent, false);
-		mList = (ListView) v.findViewById(R.id.busDisplayList);
-		mList.setAdapter(mAdapter);
-
-		return v;
+	public void onPause() {
+		super.onPause();
+		
+		// Stop the update thread from running when screen isn't active
+		if(mUpdateTimer == null) return;
+		
+		mUpdateTimer.cancel();
+		mUpdateTimer = null;
 	}
-	
+
 	/**
 	 * Load prediction data
 	 */

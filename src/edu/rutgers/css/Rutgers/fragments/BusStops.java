@@ -2,6 +2,8 @@ package edu.rutgers.css.Rutgers.fragments;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.jdeferred.DoneCallback;
 import org.json.JSONArray;
@@ -11,6 +13,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -32,10 +35,15 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusStops extends Fragment {
 
 	private static final String TAG = "BusStops";
+	private static final int REFRESH_INTERVAL = 60; // nearby stop refresh interval in seconds
+	
 	private ListView mListView;
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuPart> mData;
 	private LocationClientProvider mLocationClientProvider;
+	private int mNearbyStopCount; // Keep track of number of nearby stops displayed
+	private Timer mUpdateTimer;
+	private Handler mUpdateHandler;
 	
 	public BusStops() {
 		// Required empty public constructor
@@ -55,13 +63,19 @@ public class BusStops extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		mNearbyStopCount = 0;
 		mData = new ArrayList<RMenuPart>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
 		
-		loadNearbyStops("nb");
+		// Setup the timer stuff for updating the nearby stops
+		mUpdateTimer = new Timer();
+		mUpdateHandler = new Handler();
+		
+		// Add "nearby stops" header
+		mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.bus_nearby_active_stops_header)));
+		
 		loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));
 		loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header));
-		
 	}
 	
 	@Override
@@ -102,6 +116,36 @@ public class BusStops extends Fragment {
 		return v;
 	}
 	
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+		// Start the update thread when screen is active
+		mUpdateTimer = new Timer();
+		mUpdateTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				mUpdateHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						loadNearbyStops("nb");
+					}
+				});
+			}
+		}, 0, 1000 * REFRESH_INTERVAL);
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		
+		// Stop the update thread from running when screen isn't active
+		if(mUpdateTimer == null) return;
+		
+		mUpdateTimer.cancel();
+		mUpdateTimer = null;
+	}
+	
 	/**
 	 * Populate list with bus stops for agency, with a section header for that agency.
 	 * Resulting JSON array looks like this:
@@ -123,7 +167,6 @@ public class BusStops extends Fragment {
 						JSONObject jsonObj = data.getJSONObject(i);
 						Bundle menuBundle = new Bundle();
 						menuBundle.putString("title", jsonObj.getString("title"));
-						//menuBundle.putString("json", jsonObj.toString());
 						menuBundle.putString("agency", agencyTag);
 						SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
 						mAdapter.add(newMenuItem);
@@ -137,41 +180,70 @@ public class BusStops extends Fragment {
 	}
 	
 	/**
+	 * Remove rows related to nearby stops
+	 */
+	private void clearNearbyRows() {
+		for(int i = 0; i < mNearbyStopCount; i++) {
+			mData.remove(1);
+			mAdapter.notifyDataSetChanged();
+		}
+		mNearbyStopCount = 0;
+	}
+	
+	private void addNearbyRow(int pos, RMenuPart row) {
+		mData.add(pos, row);
+		mNearbyStopCount++;
+		mAdapter.notifyDataSetChanged();
+	}
+	
+	/**
 	 * Populate list with active nearby stops for an agency
 	 * @param agencyTag Agency tag for API request
 	 */
 	private void loadNearbyStops(final String agencyTag) {
 		
 		// Check for location services
-		if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected()) {
+		if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
 			// Get last location
 			Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
+			if(lastLoc == null) {
+				Log.e(TAG, "Could not get location");
+				clearNearbyRows();
+				addNearbyRow(1, new SlideMenuItem(getActivity().getResources().getString(R.string.failed_location)));
+				return;
+			}
 			Log.d(TAG, "Current location: " + lastLoc.toString());
 			
 			// Look up nearby active bus stops
 			Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude()).then(new DoneCallback<JSONObject>() {
 
 				@Override
-				public void onDone(JSONObject activeNearbyStops) {
-					// If there aren't any results, don't do anything
-					if(activeNearbyStops.length() == 0) return;
+				public void onDone(JSONObject activeNearbyStops) {				
+					// Clear previous rows
+					clearNearbyRows();
 					
-					// Add section header
-					mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.bus_nearby_active_stops_header)));
-					
-					Iterator<String> stopTitleIter = activeNearbyStops.keys();
-					while(stopTitleIter.hasNext()) {
-						try {
-							String curTitle = stopTitleIter.next();
-							JSONObject curStop = activeNearbyStops.getJSONObject(curTitle);
-														
-							Bundle menuBundle = new Bundle();
-							menuBundle.putString("title", curTitle);
-							menuBundle.putString("agency", agencyTag);
-							SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
-							mAdapter.add(newMenuItem);
-						} catch(JSONException e) {
-							Log.e(TAG, "loadNearbyStops(): " + e.getMessage());
+					// If there aren't any results, put a "no stops nearby" message
+					if(activeNearbyStops.length() == 0) {
+						addNearbyRow(1, new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_nearby_stops)));
+					}
+					// If there are new results, add them
+					else {
+						int j = 1;
+						Iterator<String> stopTitleIter = activeNearbyStops.keys();
+						while(stopTitleIter.hasNext()) {
+							try {
+								String curTitle = stopTitleIter.next();
+								JSONObject curStop = activeNearbyStops.getJSONObject(curTitle);
+															
+								Bundle menuBundle = new Bundle();
+								menuBundle.putString("title", curTitle);
+								menuBundle.putString("agency", agencyTag);
+								SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
+								
+								addNearbyRow(j++, newMenuItem);
+							} catch(JSONException e) {
+								Log.e(TAG, "loadNearbyStops(): " + e.getMessage());
+							}
 						}
 					}
 				}
