@@ -50,6 +50,11 @@ public class FoodItem implements RMenuPart {
 		this.isCategory = isCategory;
 	}
 	
+	@Override
+	public boolean getClickable() {
+		return false;
+	}
+	
 	/**
 	 * Returns food item title
 	 * @return Food item title

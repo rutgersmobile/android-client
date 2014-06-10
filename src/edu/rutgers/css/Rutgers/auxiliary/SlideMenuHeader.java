@@ -18,4 +18,9 @@ public class SlideMenuHeader implements RMenuPart {
 		return true;
 	}
 
+	@Override
+	public boolean getClickable() {
+		return false;
+	}
+	
 }

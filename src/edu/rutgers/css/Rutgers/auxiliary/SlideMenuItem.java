@@ -11,7 +11,8 @@ import android.os.Bundle;
  */
 public class SlideMenuItem implements RMenuPart {
 
-	public Bundle args;
+	private Bundle args;
+	private boolean clickable;
 	
 	/**
 	 * Initialize menu item with a custom argument bundle.
@@ -19,6 +20,7 @@ public class SlideMenuItem implements RMenuPart {
 	 */
 	public SlideMenuItem(Bundle args) {
 		this.setArgs(args);
+		this.setClickable(true);
 	}
 	
 	/**
@@ -31,6 +33,7 @@ public class SlideMenuItem implements RMenuPart {
 		args.putString("title", title);
 		args.putString("component", component);
 		this.setArgs(args);
+		this.setClickable(true);
 	}
 	
 	/**
@@ -45,6 +48,27 @@ public class SlideMenuItem implements RMenuPart {
 		args.putString("component", component);
 		args.putString("url", url);
 		this.setArgs(args);
+		this.setClickable(true);
+	}
+	
+	/**
+	 * Create an unclickable menu item with text
+	 * @param title Item text
+	 */
+	public SlideMenuItem(String title) {
+		Bundle args = new Bundle();
+		args.putString("title", title);
+		this.setArgs(args);
+		this.setClickable(false);
+	}
+	
+	public void setClickable(boolean b) {
+		this.clickable = b;
+	}
+	
+	@Override
+	public boolean getClickable() {
+		return this.clickable;
 	}
 
 	public void setArgs(Bundle args) {

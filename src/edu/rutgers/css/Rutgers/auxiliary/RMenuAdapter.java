@@ -81,13 +81,17 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 			// Section headers
 			if(getItemViewType(position) == 1) {
 				convertView = mLayoutInflater.inflate(this.categoryResource, null);
-				// Make category headers unclickable
-				convertView.setEnabled(false);
-				convertView.setOnClickListener(null);
 			}
 			// Menu items
 			else {
 				convertView = mLayoutInflater.inflate(this.itemResource, null);
+			}
+			
+			// Determine if item should not be clickable
+			if(!curItem.getClickable()) {
+				convertView.setEnabled(false);
+				convertView.setClickable(false);
+				convertView.setOnClickListener(null);
 			}
 			
 			holder = new ViewHolder();
