@@ -49,6 +49,7 @@
         android:layout_column="1"
         android:layout_row="3"
         android:layout_gravity="left|bottom"
+        android:paddingRight="5dp"
         android:text="Author"
         android:textColor="@color/bus_later"
         android:textAppearance="?android:attr/textAppearanceSmall" />

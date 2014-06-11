@@ -29,7 +29,6 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 	/* Class to hold data for RSS list rows */
 	static class ViewHolder {
 			ImageView iconImageView;
-			Bitmap iconImageBitmap;
 			TextView titleTextView;
 			TextView dateTextView;
 			TextView descriptionTextView;
@@ -77,6 +76,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 			// No image - clear the image view
 			//TODO Don't draw blank ImageView and have it take up space
 			mHolder.iconImageView.setImageBitmap(null);
+			mHolder.iconImageView.setVisibility(View.GONE);
 		}
 		else {
 			// Download the image

@@ -9,8 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.androidquery.callback.AjaxStatus;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,7 +20,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.androidquery.callback.AjaxStatus;
+
 import edu.rutgers.css.Rutgers.MyApplication;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
@@ -35,7 +37,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class FoodMain extends Fragment {
 
 	private static final String TAG = "FoodMain";
-	private ListView mList;
+	private ListView mListView;
 	private List<String> diningHalls;
 	private ArrayAdapter<String> diningHallAdapter;
 
@@ -46,7 +48,7 @@ public class FoodMain extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		diningHalls= new ArrayList<String>();
 		diningHallAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.title_row, R.id.title, diningHalls);
 		
@@ -66,7 +68,7 @@ public class FoodMain extends Fragment {
 					
 					// Display a message if there no halls were listed
 					if(diningHallAdapter.getCount() == 0) {
-						Toast.makeText(MyApplication.getAppContext(), R.string.no_halls_available, Toast.LENGTH_SHORT).show();
+						Toast.makeText(getActivity().getApplicationContext(), R.string.no_halls_available, Toast.LENGTH_SHORT).show();
 					}
 				}
 				catch(JSONException e) {
@@ -79,7 +81,7 @@ public class FoodMain extends Fragment {
 
 			@Override
 			public void onFail(AjaxStatus e) {
-				Toast.makeText(MyApplication.getAppContext(), R.string.failed_load, Toast.LENGTH_LONG).show();
+				Toast.makeText(getActivity().getApplicationContext(), R.string.failed_load, Toast.LENGTH_LONG).show();
 			}
 			
 		});
@@ -88,13 +90,13 @@ public class FoodMain extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_foodmain, parent, false);
-		mList = (ListView) v.findViewById(R.id.dining_locations_list);
+		mListView = (ListView) v.findViewById(R.id.dining_locations_list);
 		
 		Bundle args = getArguments();
 		getActivity().setTitle(args.getString("title"));
 
-		mList.setAdapter(diningHallAdapter);		
-		mList.setOnItemClickListener(new OnItemClickListener() {
+		mListView.setAdapter(diningHallAdapter);		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
