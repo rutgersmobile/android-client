@@ -5,11 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jdeferred.Deferred;
-import org.jdeferred.DeferredManager;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
-import org.jdeferred.impl.DefaultDeferredManager;
+import org.jdeferred.android.AndroidDeferredManager;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.impl.DeferredObject;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
@@ -68,9 +68,10 @@ public class Nextbus {
 			final Promise promiseNBConf = Request.json("https://rumobile.rutgers.edu/1/rutgersrouteconfig.txt", configExpireTime);
 			final Promise promiseNWKConf = Request.json("https://rumobile.rutgers.edu/1/rutgers-newarkrouteconfig.txt", configExpireTime);
 			
-			DeferredManager dm = new DefaultDeferredManager();
+			AndroidDeferredManager dm = new AndroidDeferredManager();
 			
-			dm.when(promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new DoneCallback<MultipleResults>() {
+			dm.when(promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new AndroidDoneCallback<MultipleResults>() {
+				
 				@Override
 				public void onDone(MultipleResults res) {
 					
@@ -90,8 +91,16 @@ public class Nextbus {
 						Log.e(TAG, Log.getStackTraceString(e));
 						confd.reject(e);
 					}
+					
 				}
-			}).fail(new FailCallback<OneReject>() {
+				
+				@Override
+				public AndroidExecutionScope getExecutionScope() {
+					return AndroidExecutionScope.BACKGROUND;
+				}
+				
+			}).fail(new AndroidFailCallback<OneReject>() {
+				
 				@Override
 				public void onFail(OneReject reject) {
 					
@@ -99,6 +108,12 @@ public class Nextbus {
 					
 					Log.e(TAG, r.getCode() + ": " + r.getMessage());
 				}
+				
+				@Override
+				public AndroidExecutionScope getExecutionScope() {
+					return AndroidExecutionScope.BACKGROUND;
+				}
+				
 			});
 		}
 	}
@@ -113,7 +128,8 @@ public class Nextbus {
 		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
+			
 			public void onDone(Object o) {
 				Log.d("Nextbus", "routePredict: " + agency + ", " + route);
 				JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
@@ -128,7 +144,8 @@ public class Nextbus {
 						queryString += "&stops=" + route + "|null|" + stops.getString(i);
 					}
 									
-					Request.xml(queryString, -1).done(new DoneCallback<XmlDom>() {
+					Request.xml(queryString, -1).done(new AndroidDoneCallback<XmlDom>() {
+						
 						@Override
 						public void onDone(XmlDom xml) {
 							ArrayList<Prediction> results = new ArrayList<Prediction>();
@@ -150,11 +167,24 @@ public class Nextbus {
 							
 							d.resolve(results);
 						}
-					}).fail(new FailCallback<AjaxStatus>() {
+						
+						@Override
+						public AndroidExecutionScope getExecutionScope() {
+							return AndroidExecutionScope.BACKGROUND;
+						}
+						
+					}).fail(new AndroidFailCallback<AjaxStatus>() {
+						
 						@Override
 						public void onFail(AjaxStatus e) {
 							d.reject(new Exception(e.toString()));
 						}
+						
+						@Override
+						public AndroidExecutionScope getExecutionScope() {
+							return AndroidExecutionScope.BACKGROUND;
+						}
+						
 					});
 	
 				} catch (Exception e) {
@@ -162,6 +192,12 @@ public class Nextbus {
 				}
 
 			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
 		});
 		
 		return d.promise();
@@ -177,7 +213,8 @@ public class Nextbus {
 		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
+			
 			public void onDone(Object o) {
 				Log.d("Nextbus", "stopPredict: " + agency + ", " + stop);
 				JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
@@ -194,7 +231,8 @@ public class Nextbus {
 							queryString += "&stops=" + routes.getString(j) + "|null|" + tags.getString(i);
 					}
 					
-					Request.xml(queryString, -1).done(new DoneCallback<XmlDom>() {
+					Request.xml(queryString, -1).done(new AndroidDoneCallback<XmlDom>() {
+						
 						@Override
 						public void onDone(XmlDom xml) {
 							ArrayList<Prediction> results = new ArrayList<Prediction>();
@@ -221,11 +259,24 @@ public class Nextbus {
 							
 							d.resolve(results);
 						}
-					}).fail(new FailCallback<AjaxStatus>() {
+						
+						@Override
+						public AndroidExecutionScope getExecutionScope() {
+							return AndroidExecutionScope.BACKGROUND;
+						}
+						
+					}).fail(new AndroidFailCallback<AjaxStatus>() {
+						
 						@Override
 						public void onFail(AjaxStatus e) {
 							d.reject(new Exception(e.toString()));
 						}
+						
+						@Override
+						public AndroidExecutionScope getExecutionScope() {
+							return AndroidExecutionScope.BACKGROUND;
+						}
+						
 					});
 	
 				} catch (Exception e) {
@@ -233,6 +284,12 @@ public class Nextbus {
 				}
 
 			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
 		});
 		
 		return d.promise();
@@ -247,7 +304,8 @@ public class Nextbus {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
+			
 			public void onDone(Object o) {
 				try {
 					JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
@@ -261,6 +319,12 @@ public class Nextbus {
 					d.reject(e);
 				}
 			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
 		});
 		
 		return d.promise();
@@ -275,7 +339,8 @@ public class Nextbus {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
+			
 			public void onDone(Object o) {
 				try {
 					JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
@@ -289,6 +354,12 @@ public class Nextbus {
 					d.reject(e);
 				}
 			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
 		});
 		
 		return d.promise();
@@ -303,7 +374,8 @@ public class Nextbus {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
+			
 			@Override
 			public void onDone(Object o) {
 				try {
@@ -314,6 +386,12 @@ public class Nextbus {
 					d.reject(e);
 				}
 			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
 		});
 		
 		return d.promise();
@@ -328,7 +406,8 @@ public class Nextbus {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
+			
 			@Override
 			public void onDone(Object o) {
 				try {
@@ -339,6 +418,12 @@ public class Nextbus {
 					d.reject(e);
 				}
 			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
 		});
 		
 		return d.promise();
@@ -354,7 +439,8 @@ public class Nextbus {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
+			
 			@Override
 			public void onDone(Object o) {
 				JSONObject nearStops = new JSONObject();
@@ -397,6 +483,12 @@ public class Nextbus {
 					return;
 				}
 			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
 		});
 		
 		return d.promise();
@@ -406,7 +498,7 @@ public class Nextbus {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		Promise<JSONObject, Exception, Double> allNearStops = getStopsByTitleNear(agency, sourceLat, sourceLon);
 		
-		allNearStops.then(new DoneCallback<JSONObject>() {
+		allNearStops.then(new AndroidDoneCallback<JSONObject>() {
 
 			public void onDone(JSONObject stopsByTitle) {
 				JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
@@ -435,6 +527,11 @@ public class Nextbus {
 				} catch(JSONException e) {
 					Log.e(TAG, e.getMessage());
 				}
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
 			}
 			
 		});

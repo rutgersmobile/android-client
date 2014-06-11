@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.jdeferred.DoneCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +20,7 @@ import edu.rutgers.css.Rutgers.auxiliary.Prediction;
 import edu.rutgers.css.Rutgers.auxiliary.PredictionAdapter;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Prediction>> {
+public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayList<Prediction>> {
 
 	private static final String TAG = "BusDisplay";
 	private enum Mode {ROUTE, STOP};
@@ -183,6 +184,11 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 				mAdapter.notifyDataSetChanged();
 			}
 		}
+	}
+	
+	@Override
+	public AndroidExecutionScope getExecutionScope() {
+		return AndroidExecutionScope.UI;
 	}
 	
 }

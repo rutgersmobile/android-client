@@ -2,7 +2,8 @@ package edu.rutgers.css.Rutgers.fragments;
 
 import java.util.ArrayList;
 
-import org.jdeferred.DoneCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,7 +99,7 @@ public class BusRoutes extends Fragment {
 	 * @param agencyTitle Header title that goes above these routes
 	 */
 	private void loadAgency(final String agencyTag, final String agencyTitle) {
-		Nextbus.getActiveRoutes(agencyTag).then(new DoneCallback<JSONArray>() {
+		Nextbus.getActiveRoutes(agencyTag).then(new AndroidDoneCallback<JSONArray>() {
 			
 			@Override
 			public void onDone(JSONArray data) {
@@ -124,6 +125,11 @@ public class BusRoutes extends Fragment {
 						Log.e(TAG, e.getMessage());
 					}
 				}
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
 			}
 			
 		});

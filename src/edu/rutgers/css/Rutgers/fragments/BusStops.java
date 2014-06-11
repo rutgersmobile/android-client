@@ -5,7 +5,8 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.jdeferred.DoneCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -153,7 +154,7 @@ public class BusStops extends Fragment {
 	 * @param agencyTitle Header title that goes above these stops
 	 */
 	private void loadAgency(final String agencyTag, final String agencyTitle) {
-		Nextbus.getActiveStops(agencyTag).then(new DoneCallback<JSONArray>() {
+		Nextbus.getActiveStops(agencyTag).then(new AndroidDoneCallback<JSONArray>() {
 			
 			@Override
 			public void onDone(JSONArray data) {
@@ -179,6 +180,11 @@ public class BusStops extends Fragment {
 						Log.e(TAG, "loadAgency(): " + e.getMessage());
 					}
 				}
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
 			}
 			
 		});
@@ -220,7 +226,10 @@ public class BusStops extends Fragment {
 			Log.d(TAG, "Current location: " + lastLoc.toString());
 			
 			// Look up nearby active bus stops
-			Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude()).then(new DoneCallback<JSONObject>() {
+			Nextbus.getActiveStopsByTitleNear(agencyTag, 
+					(float) lastLoc.getLatitude(), 
+					(float) lastLoc.getLongitude()
+					).then(new AndroidDoneCallback<JSONObject>() {
 
 				@Override
 				public void onDone(JSONObject activeNearbyStops) {				
@@ -251,6 +260,11 @@ public class BusStops extends Fragment {
 							}
 						}
 					}
+				}
+				
+				@Override
+				public AndroidExecutionScope getExecutionScope() {
+					return AndroidExecutionScope.UI;
 				}
 				
 			});

@@ -3,8 +3,9 @@ package edu.rutgers.css.Rutgers.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -56,7 +57,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		}
 		
 		// Get RSS feed XML and add items through the array adapter
-		Request.xml(args.getString("url"), expire).done(new DoneCallback<XmlDom>() {
+		Request.xml(args.getString("url"), expire).done(new AndroidDoneCallback<XmlDom>() {
 			
 			@Override
 			public void onDone(XmlDom xml) {
@@ -68,11 +69,21 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 				}
 			}
 			
-		}).fail(new FailCallback<AjaxStatus>() {
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
+			}
+			
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
 		
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
 			}
 			
 		});

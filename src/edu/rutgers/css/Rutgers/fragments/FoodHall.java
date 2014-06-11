@@ -3,14 +3,12 @@ package edu.rutgers.css.Rutgers.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jdeferred.DoneCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers2.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Dining;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +20,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.Dining;
+import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Displays available meal menus for a dining hall.
@@ -51,7 +52,7 @@ public class FoodHall extends Fragment {
 			return;
 		}
 		
-		Dining.getDiningLocation(args.getString("location")).done(new DoneCallback<JSONObject>() {
+		Dining.getDiningLocation(args.getString("location")).done(new AndroidDoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject hall) {
@@ -69,6 +70,11 @@ public class FoodHall extends Fragment {
 					Log.e(TAG, e.getMessage());
 				
 				}
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
 			}
 			
 		});

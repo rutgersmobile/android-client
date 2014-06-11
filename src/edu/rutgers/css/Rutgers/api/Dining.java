@@ -1,11 +1,11 @@
 package edu.rutgers.css.Rutgers.api;
 
 import org.jdeferred.Deferred;
-import org.jdeferred.DeferredManager;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
-import org.jdeferred.impl.DefaultDeferredManager;
+import org.jdeferred.android.AndroidDeferredManager;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,21 +40,31 @@ public class Dining {
 		
 		final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
 		
-		DeferredManager dm = new DefaultDeferredManager();		
-		dm.when(promiseNBDining).done(new DoneCallback<JSONArray>() {
+		AndroidDeferredManager dm = new AndroidDeferredManager();		
+		dm.when(promiseNBDining).done(new AndroidDoneCallback<JSONArray>() {
 
 			@Override
 			public void onDone(JSONArray res) {
 				mNBDiningConf = (JSONArray) res;
 				confd.resolve(null);
 			}
+
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
 			
-		}).fail(new FailCallback<AjaxStatus>() {
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
 		
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, e.getMessage() + "; Response code: " + e.getCode());
 				confd.reject(e);
+			}
+
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
 			}
 			
 		});	
@@ -68,7 +78,7 @@ public class Dining {
 		final Deferred<JSONArray, AjaxStatus, Double> d = new DeferredObject<JSONArray, AjaxStatus, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -76,11 +86,21 @@ public class Dining {
 				d.resolve(conf);
 			}
 			
-		}).fail(new FailCallback<Object>() {
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
+		}).fail(new AndroidFailCallback<Object>() {
 
 			@Override
 			public void onFail(Object e) {
 				d.reject((AjaxStatus)e);
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
 			}
 			
 		});
@@ -97,7 +117,7 @@ public class Dining {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -124,6 +144,11 @@ public class Dining {
 					Log.e(TAG, "Dining hall location \""+location+"\" not found API");
 					d.reject(new IllegalArgumentException("Invalid dining location \"" + location +"\""));
 				}
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
 			}
 			
 		});

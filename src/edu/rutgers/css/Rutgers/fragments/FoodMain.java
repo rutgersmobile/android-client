@@ -3,8 +3,9 @@ package edu.rutgers.css.Rutgers.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,12 +21,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
-import edu.rutgers.css.Rutgers.MyApplication;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers2.R;
@@ -38,8 +37,8 @@ public class FoodMain extends Fragment {
 
 	private static final String TAG = "FoodMain";
 	private ListView mListView;
-	private List<String> diningHalls;
-	private ArrayAdapter<String> diningHallAdapter;
+	private List<String> mDiningHalls;
+	private ArrayAdapter<String> mDiningHallAdapter;
 
 	public FoodMain() {
 		// Required empty public constructor
@@ -49,11 +48,11 @@ public class FoodMain extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		diningHalls= new ArrayList<String>();
-		diningHallAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.title_row, R.id.title, diningHalls);
+		mDiningHalls= new ArrayList<String>();
+		mDiningHallAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.title_row, R.id.title, mDiningHalls);
 		
 		// Get dining hall data and populate the top-level menu with names of the dining halls
-		Dining.getDiningHalls().done(new DoneCallback<JSONArray>() {
+		Dining.getDiningHalls().done(new AndroidDoneCallback<JSONArray>() {
 
 			@Override
 			public void onDone(JSONArray halls) {
@@ -62,12 +61,12 @@ public class FoodMain extends Fragment {
 					for(int i = 0; i < halls.length(); i++) {
 						JSONObject curHall = halls.getJSONObject(i);
 						if(Dining.hasActiveMeals(curHall)) {
-							diningHallAdapter.add(curHall.getString("location_name"));
+							mDiningHallAdapter.add(curHall.getString("location_name"));
 						}
 					}
 					
 					// Display a message if there no halls were listed
-					if(diningHallAdapter.getCount() == 0) {
+					if(mDiningHallAdapter.getCount() == 0) {
 						Toast.makeText(getActivity().getApplicationContext(), R.string.no_halls_available, Toast.LENGTH_SHORT).show();
 					}
 				}
@@ -75,13 +74,22 @@ public class FoodMain extends Fragment {
 					Log.e(TAG, e.getMessage());
 				}
 			}
-
 			
-		}).fail(new FailCallback<AjaxStatus>() {
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
+			}
+			
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
 
 			@Override
 			public void onFail(AjaxStatus e) {
 				Toast.makeText(getActivity().getApplicationContext(), R.string.failed_load, Toast.LENGTH_LONG).show();
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
 			}
 			
 		});
@@ -95,7 +103,7 @@ public class FoodMain extends Fragment {
 		Bundle args = getArguments();
 		getActivity().setTitle(args.getString("title"));
 
-		mListView.setAdapter(diningHallAdapter);		
+		mListView.setAdapter(mDiningHallAdapter);		
 		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override

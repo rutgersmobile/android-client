@@ -1,11 +1,11 @@
 package edu.rutgers.css.Rutgers.api;
 
 import org.jdeferred.Deferred;
-import org.jdeferred.DeferredManager;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
-import org.jdeferred.impl.DefaultDeferredManager;
+import org.jdeferred.android.AndroidDeferredManager;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,8 +38,8 @@ public class Places {
 		
 		final Promise<JSONObject, AjaxStatus, Double> promisePlaces = Request.json(API_URL, expire);
 		
-		DeferredManager dm = new DefaultDeferredManager();		
-		dm.when(promisePlaces).done(new DoneCallback<JSONObject>() {
+		AndroidDeferredManager dm = new AndroidDeferredManager();		
+		dm.when(promisePlaces).done(new AndroidDoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject res) {
@@ -48,11 +48,21 @@ public class Places {
 				confd.resolve(null);
 			}
 			
-		}).fail(new FailCallback<AjaxStatus>() {
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
 		
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, e.getMessage() + "; Response code: " + e.getCode());
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
 			}
 			
 		});	
@@ -66,7 +76,7 @@ public class Places {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -83,6 +93,11 @@ public class Places {
 				
 			}
 			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
 		});
 		
 		return d.promise();
@@ -97,7 +112,7 @@ public class Places {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		configured.then(new AndroidDoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -119,6 +134,11 @@ public class Places {
 				
 				}
 				
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
 			}
 			
 		});

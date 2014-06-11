@@ -1,8 +1,9 @@
 package edu.rutgers.css.Rutgers.fragments;
 import java.util.ArrayList;
 
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,8 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
@@ -101,7 +102,7 @@ public class BusAll extends Fragment {
 	 * @param agencyHeader Header title that goes above these routes
 	 */
 	private void loadAllRoutes(final String agencyTag, final String agencyHeader) {
-		Nextbus.getAllRoutes(agencyTag).then(new DoneCallback<JSONArray>() {
+		Nextbus.getAllRoutes(agencyTag).then(new AndroidDoneCallback<JSONArray>() {
 			
 			@Override
 			public void onDone(JSONArray data) {				
@@ -128,11 +129,16 @@ public class BusAll extends Fragment {
 				}
 			}
 			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
+			}
+			
 		});
 	}
 	
 	private void loadAllStops(final String agencyTag, final String agencyHeader) {
-		Nextbus.getAllStops(agencyTag).then(new DoneCallback<JSONArray>() {
+		Nextbus.getAllStops(agencyTag).then(new AndroidDoneCallback<JSONArray>() {
 			
 			@Override
 			public void onDone(JSONArray data) {				
@@ -159,12 +165,22 @@ public class BusAll extends Fragment {
 				}
 			}
 			
-		}).fail(new FailCallback<Exception>() {
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
+			}
+			
+		}).fail(new AndroidFailCallback<Exception>() {
 
 			@Override
 			public void onFail(Exception e) {
 				mAdapter.add(new SlideMenuHeader(agencyHeader));
 				mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_stops)));
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
 			}
 			
 		});		

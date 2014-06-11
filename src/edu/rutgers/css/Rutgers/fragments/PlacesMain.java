@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.jdeferred.DoneCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -93,7 +94,7 @@ public class PlacesMain extends Fragment {
 		mAdapter = new ArrayAdapter<PlaceTuple>(getActivity(), android.R.layout.simple_dropdown_item_1line, mList);
 		
 		// Get places data
-		Places.getPlaces().done(new DoneCallback<JSONObject>() {
+		Places.getPlaces().done(new AndroidDoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject json) {
@@ -114,6 +115,11 @@ public class PlacesMain extends Fragment {
 					Log.e(TAG, Log.getStackTraceString(e));
 				}
 				
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
 			}
 			
 		});

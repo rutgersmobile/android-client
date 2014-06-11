@@ -2,7 +2,8 @@ package edu.rutgers.css.Rutgers.fragments;
 
 import java.util.Iterator;
 
-import org.jdeferred.DoneCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,7 +71,7 @@ public class PlacesDisplay extends Fragment {
 				float buildLon = Float.parseFloat(location.getString("longitude"));
 				float buildLat = Float.parseFloat(location.getString("latitude"));
 				
-				Nextbus.getStopsByTitleNear("nb", buildLat, buildLon).then(new DoneCallback<JSONObject>() {
+				Nextbus.getStopsByTitleNear("nb", buildLat, buildLon).then(new AndroidDoneCallback<JSONObject>() {
 
 					@Override
 					public void onDone(JSONObject nearbyStopsByTitle) {
@@ -81,6 +82,11 @@ public class PlacesDisplay extends Fragment {
 							newStopTextView.setText(stopTitle);
 							nearbyBusesLinearLayout.addView(newStopTextView);
 						}
+					}
+					
+					@Override
+					public AndroidExecutionScope getExecutionScope() {
+						return AndroidExecutionScope.UI;
 					}
 					
 				});
