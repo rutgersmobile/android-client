@@ -4,13 +4,15 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.androidquery.AQuery;
+
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -20,7 +22,9 @@ import edu.rutgers.css.Rutgers2.R;
 public class RSSAdapter extends ArrayAdapter<RSSItem> {
 	
 	private static final String TAG = "RSSAdapter";
-	private int layoutResource;
+	private int mLayoutResource;
+	private int mTargetWidth;
+	private AQuery aq;
 	
 	/* Class to hold data for RSS list rows */
 	static class ViewHolder {
@@ -34,7 +38,10 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 	
 	public RSSAdapter(Context context, int resource, List<RSSItem> objects) {
 		super(context, resource, objects);
-		this.layoutResource = resource;
+		this.mLayoutResource = resource;
+		this.aq = new AQuery(context);
+		
+		this.mTargetWidth = (int) getContext().getResources().getDimension(R.dimen.rss_image_width);
 	}
 	
 	@Override
@@ -44,7 +51,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		
 		/* Make new data holder or get existing one */
 		if(convertView == null) { 
-			convertView = mLayoutInflater.inflate(this.layoutResource, null);
+			convertView = mLayoutInflater.inflate(this.mLayoutResource, null);
 			mHolder = new ViewHolder();
 			mHolder.iconImageView = (ImageView) convertView.findViewById(R.id.rssRowIconView);
 			mHolder.titleTextView = (TextView) convertView.findViewById(R.id.rssRowTitleView);
@@ -73,7 +80,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		}
 		else {
 			// Download the image
-			new AsyncGetImage(mHolder.iconImageView).execute(curItem.getImgUrl());
+			aq.id(mHolder.iconImageView).image(curItem.getImgUrl().toString(), true, true, mTargetWidth, 0, null, AQuery.FADE_IN_NETWORK, 1.0f);
 		}
 		
 		return convertView;
