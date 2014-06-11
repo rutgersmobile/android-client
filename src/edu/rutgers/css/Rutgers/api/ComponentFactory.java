@@ -19,6 +19,7 @@ import edu.rutgers.css.Rutgers.fragments.FoodMeal;
 import edu.rutgers.css.Rutgers.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.fragments.PlacesMain;
 import edu.rutgers.css.Rutgers.fragments.RSSReader;
+import edu.rutgers.css.Rutgers.fragments.RecreationMain;
 
 /**
  * Singleton fragment builder
@@ -43,6 +44,7 @@ public class ComponentFactory {
 		fragmentTable.put("places", PlacesMain.class);
 		fragmentTable.put("placesdisplay", PlacesDisplay.class);
 		fragmentTable.put("busdisplay", BusDisplay.class);
+		fragmentTable.put("recreation", RecreationMain.class);
 	}
 	
 	/**
