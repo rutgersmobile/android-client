@@ -98,18 +98,21 @@ public class FoodMain extends Fragment {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				FragmentManager fm = getActivity().getSupportFragmentManager();
-				
 				Bundle args = new Bundle();
 				args.putString("component", "foodhall");
 				args.putString("location", (String) parent.getAdapter().getItem(position));
 				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 				
-				fm.beginTransaction()
-					.replace(R.id.main_content_frame, fragment)
-					.addToBackStack(null)
-					.commit(); 
-				
+				if(fragment != null) {
+					FragmentManager fm = getActivity().getSupportFragmentManager();
+					fm.beginTransaction()
+						.replace(R.id.main_content_frame, fragment)
+						.addToBackStack(null)
+						.commit();
+				}
+				else {
+					Log.e(TAG, "Couldn't launch submenu");
+				}
 			}
 			
 		});	
