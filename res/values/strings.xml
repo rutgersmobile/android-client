@@ -54,4 +54,12 @@
     
     <string name="drawer_open">Open</string>
 	<string name="drawer_close">Close</string>
+	
+	<!-- Recreation channel -->
+	<string name="rec_info_desk_header">Information Desk</string>
+	<string name="rec_business_office_header">Business Office</string>
+	<string name="rec_hours_header">Hours</string>
+	<string name="rec_description_header">Description</string>
+	<string name="rec_address_header">Address</string>
+	
 </resources>

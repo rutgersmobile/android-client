@@ -57,7 +57,6 @@ public class Request {
 			
 		});
 		
-		
 		return deferred.promise();
 	}
 	
@@ -85,7 +84,6 @@ public class Request {
 			
 		});
 		
-		
 		return deferred.promise();
 	}
 	
@@ -112,7 +110,6 @@ public class Request {
 			}
 			
 		});
-		
 		
 		return deferred.promise();
 	}

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:scrollbars="none"
+    android:layout_weight="1">
+    
+<TableLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <!-- Hours section -->
+    <TableRow
+		style="@style/RowHeader" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rec_hours_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        style="@style/RowContent" >
+
+
+    </TableRow>
+    
+    <!-- Address section -->
+    <TableRow
+		style="@style/RowHeader" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/address_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        style="@style/RowContent" >
+
+        <TextView
+            android:id="@+id/addressTextView"
+            style="@style/RowContentText" />
+    </TableRow>
+
+    <!-- Information Desk Section -->
+    <TableRow
+		style="@style/RowHeader" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rec_info_desk_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        style="@style/RowContent" >
+
+        <TextView
+            android:id="@+id/infoDeskNumberTextView"
+            style="@style/RowContentText" />
+    </TableRow>
+    
+    <!-- Business Office Section -->
+    <TableRow
+		style="@style/RowHeader" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rec_business_office_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        style="@style/RowContent" >
+
+        <TextView
+            android:id="@+id/businessOfficeNumberTextView"
+            style="@style/RowContentText" />
+    </TableRow>
+    
+    <!-- Description Section -->
+    <TableRow
+		style="@style/RowHeader" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/description_header"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </TableRow>
+
+    <TableRow
+        style="@style/RowContent" >
+
+        <TextView
+            android:id="@+id/descriptionTextView"
+            style="@style/RowContentText" />
+    </TableRow>
+
+</TableLayout>
+
+</ScrollView>

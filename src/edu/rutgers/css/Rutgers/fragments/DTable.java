@@ -133,7 +133,6 @@ public class DTable extends Fragment {
 				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {				
 					JSONObject c = (JSONObject) parent.getAdapter().getItem(position);
 					Bundle args = new Bundle();
-					FragmentManager fm = getActivity().getSupportFragmentManager();	
 
 					try {	
 						// This object has an array of more channels
@@ -172,11 +171,13 @@ public class DTable extends Fragment {
 							Log.e(TAG, "Failed to get component");
 							return;
 						}
-						fm.beginTransaction()
-							.replace(R.id.main_content_frame, fragment)
-							.addToBackStack(null)
-							.commit(); 
-						
+						else {
+							FragmentManager fm = getActivity().getSupportFragmentManager();	
+							fm.beginTransaction()
+								.replace(R.id.main_content_frame, fragment)
+								.addToBackStack(null)
+								.commit(); 
+						}
 					} catch (JSONException e) {
 						Log.e(TAG, "JSONException: " + e.getMessage());
 					}
