@@ -45,9 +45,8 @@ public class RecreationDisplay extends Fragment {
 
 	private ViewPager mPager;
 	private PagerAdapter mPagerAdapter;
-	private ArrayList<JSONObject> mDailyData;
 	private ArrayList<String> mDayKeys;
-	private JSONObject mDailyTemp;
+	private JSONObject mDailyData;
 	
 	public RecreationDisplay() {
 		// Required empty public constructor
@@ -56,8 +55,7 @@ public class RecreationDisplay extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mDailyData = new ArrayList<JSONObject>();
-		mDailyTemp = new JSONObject();
+		mDailyData = new JSONObject();
 		mDayKeys = new ArrayList<String>();
 	}
 	
@@ -73,6 +71,8 @@ public class RecreationDisplay extends Fragment {
 			// TODO Display data fail
 			return v;
 		}
+		
+		getActivity().setTitle(args.getString("location"));
 		
 		// Set up pager for hours displays
 		mPager = (ViewPager) v.findViewById(R.id.hoursViewPager);
@@ -109,12 +109,15 @@ public class RecreationDisplay extends Fragment {
 						String curAreaKey = areaKeys.next();
 						JSONObject curAreaData = areaHours.getJSONObject(curAreaKey);
 						addLocationHours(curAreaKey, curAreaData);
+						mPagerAdapter.notifyDataSetChanged();
 					}
 					
 					sortDayKeys();
-					for(String key: mDayKeys) {
-						Log.v(TAG, key);
-					}
+					
+					// Set swipe page to current date
+					String todayString = dateFormat.format(new Date());
+					int pos = mDayKeys.indexOf(todayString);
+					mPager.setCurrentItem(pos, true);
 					
 				} catch (JSONException e) {
 					Log.w(TAG, "onCreateView(): " + e.getMessage());
@@ -152,13 +155,21 @@ public class RecreationDisplay extends Fragment {
 
 		@Override
 		public Fragment getItem(int position) {
-			return null;
+			String date = mDayKeys.get(position);
+			JSONObject hours = mDailyData.optJSONObject(date);
+			if(hours == null) return null;
+			return HourSwiperFragment.newInstance(date, hours);
 		}
 
 		@Override
 		public int getCount() {
-			return 0;
+			return mDayKeys.size();
 		}
+		
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mDayKeys.get(position);
+        }
 		
 	}
 	
@@ -170,20 +181,20 @@ public class RecreationDisplay extends Fragment {
 	 * 
 	 * {
 	 *		"5/17/2014":{
-     * 			"Multisports Bay 1 (Badminton)":"CLOSED",
-     *			"Multisports Bay 4 (Basketball)":"CLOSED",
-     * 			...
-   	 * 		},
-   	 * 		"6\/5\/2014":{
-     *			"Multisports Bay 1 (Badminton)":"7:00AM - 9:00PM",
-     *			"Multisports Bay 4 (Basketball)":"7:00AM - 9:00PM",
-     *			...
-     *	 	},
-     *		...
-     * }
-     * 
-     * Note that the keys are NOT SORTED. The keys are stored in a separate list and sorted
-     * with {@link #sortDayKeys()}.
+	 * 			"Multisports Bay 1 (Badminton)":"CLOSED",
+	 *			"Multisports Bay 4 (Basketball)":"CLOSED",
+	 * 			...
+	 * 		},
+	 * 		"6\/5\/2014":{
+	 *			"Multisports Bay 1 (Badminton)":"7:00AM - 9:00PM",
+	 *			"Multisports Bay 4 (Basketball)":"7:00AM - 9:00PM",
+	 *			...
+	 *	 	},
+	 *		...
+	 * }
+	 * 
+	 * Note that the keys are NOT SORTED. The keys are stored in a separate list and sorted
+	 * with {@link #sortDayKeys()}.
 	 * 
 	 * @param curAreaKey Sub-location name
 	 * @param curAreaData Daily hours for sub-location
@@ -206,7 +217,7 @@ public class RecreationDisplay extends Fragment {
 				String hours = curAreaData.getString(curDayKey);
 			
 				// Try to find date in table
-				JSONObject findDate = mDailyTemp.optJSONObject(curDayKey);
+				JSONObject findDate = mDailyData.optJSONObject(curDayKey);
 				
 				// Not found - make a new one
 				if(findDate == null) {
@@ -216,7 +227,7 @@ public class RecreationDisplay extends Fragment {
 					newDay.put(curAreaKey, hours);
 					
 					// Add new date object to table
-					mDailyTemp.put(curDayKey, newDay);
+					mDailyData.put(curDayKey, newDay);
 				}
 				// Found - tack on new location:hours entry
 				else {
