@@ -13,12 +13,5 @@
 		android:text="@string/replace_me"
 		android:textColor="@color/drawer_section_header_text"
 		android:textAllCaps="false" />
-	
-	<!-- Horizontal divider -->
-	<!--
-	<View
-	    android:layout_width="fill_parent"
-		android:layout_height="1dp"
-		android:background="@android:color/darker_gray"/>
-	-->
+
 </LinearLayout>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/hourSwiperLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <!-- Date view -->
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:text="DAY"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+        
+        <!-- Horizontal divider -->
+		<View
+		    android:layout_width="match_parent"
+			android:layout_height="1px"
+			android:background="@android:color/darker_gray"/>
+		
+		<!-- Rows of hours per section will be filled in here -->
+	
+    </LinearLayout>
+    
+
+</ScrollView>
