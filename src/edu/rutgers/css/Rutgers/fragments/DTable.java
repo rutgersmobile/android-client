@@ -109,7 +109,7 @@ public class DTable extends Fragment {
                 		setupList();
                 	} catch (Exception e) {
                 		e.printStackTrace();
-                		Toast.makeText(getActivity(), "Getting data failed. Please try again later.", Toast.LENGTH_LONG).show();
+                		Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
                 	}
                 }
                 

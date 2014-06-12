@@ -15,18 +15,17 @@ import android.util.Log;
 import com.androidquery.callback.AjaxStatus;
 
 /**
- * Helper for getting data from places API
- *
+ * Helper for getting data from places API.
+ * 
  */
 public class Places {
 	
-	private static Promise<Object, Object, Object> configured;
 	private static final String TAG = "PlacesAPI";
-	
-	private static JSONObject mPlacesConf;
-	
 	private static final String API_URL = "https://rumobile.rutgers.edu/1/places.txt";	
-	private static long expire = Request.EXPIRE_ONE_HOUR; // Cache data for an hour
+	private static final long expire = Request.EXPIRE_ONE_HOUR; // Cache data for an hour
+	
+	private static Promise<Object, Object, Object> configured;
+	private static JSONObject mPlacesConf;
 	
 	/**
 	 * Grab the places API data.

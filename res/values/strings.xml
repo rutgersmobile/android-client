@@ -49,8 +49,8 @@
     <!-- Dining channel -->
     <string name="no_halls_available">No dining halls available.</string>
     
-    <string name="failed_load">Failed to load data.</string>
-    <string name="failed_location">Could not get current location.</string>
+    <string name="failed_load">Getting data failed. Please try again later.</string>
+    <string name="failed_location">Getting location failed.</string>
     
     <string name="drawer_open">Open</string>
 	<string name="drawer_close">Close</string>

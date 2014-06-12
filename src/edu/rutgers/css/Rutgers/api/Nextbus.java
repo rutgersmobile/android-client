@@ -51,71 +51,66 @@ public class Nextbus {
 	 * Load JSON data on active buses & the entire bus config.
 	 */
 	private static void setup () {
-		if (!isSetup) {
-			isSetup = true;
+		// This promise is used to notify the other objects that the object has been configured.
+		final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
+		configured = confd.promise();
+		
+		//final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
+		//final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
+		//final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
+		//final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
+		
+		final Promise promiseNBActive = Request.json("https://rumobile.rutgers.edu/1/nbactivestops.txt", activeExpireTime);
+		final Promise promiseNWKActive = Request.json("https://rumobile.rutgers.edu/1/nwkactivestops.txt", activeExpireTime);
+		final Promise promiseNBConf = Request.json("https://rumobile.rutgers.edu/1/rutgersrouteconfig.txt", configExpireTime);
+		final Promise promiseNWKConf = Request.json("https://rumobile.rutgers.edu/1/rutgers-newarkrouteconfig.txt", configExpireTime);
+		
+		AndroidDeferredManager dm = new AndroidDeferredManager();
+		
+		dm.when(promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new AndroidDoneCallback<MultipleResults>() {
 			
-			// This promise is used to notify the other objects that the object has been configured.
-			final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
-			configured = confd.promise();
-			
-			//final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
-			//final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
-			//final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
-			//final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
-			
-			final Promise promiseNBActive = Request.json("https://rumobile.rutgers.edu/1/nbactivestops.txt", activeExpireTime);
-			final Promise promiseNWKActive = Request.json("https://rumobile.rutgers.edu/1/nwkactivestops.txt", activeExpireTime);
-			final Promise promiseNBConf = Request.json("https://rumobile.rutgers.edu/1/rutgersrouteconfig.txt", configExpireTime);
-			final Promise promiseNWKConf = Request.json("https://rumobile.rutgers.edu/1/rutgers-newarkrouteconfig.txt", configExpireTime);
-			
-			AndroidDeferredManager dm = new AndroidDeferredManager();
-			
-			dm.when(promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new AndroidDoneCallback<MultipleResults>() {
+			@Override
+			public void onDone(MultipleResults res) {
 				
-				@Override
-				public void onDone(MultipleResults res) {
-					
-					try {
-					
-						for (int i = 0; i < res.size(); i++) {
-							OneResult r = res.get(i);
-							
-							if (r.getPromise() == promiseNBActive) mNBActive = (JSONObject) r.getResult();
-							else if (r.getPromise() == promiseNWKActive) mNWKActive = (JSONObject) r.getResult();
-							else if (r.getPromise() == promiseNBConf) mNBConf = (JSONObject) r.getResult();
-							else if (r.getPromise() == promiseNWKConf) mNWKConf = (JSONObject) r.getResult();
-						}
-			
-						confd.resolve(null);
-					} catch (Exception e) {
-						Log.e(TAG, Log.getStackTraceString(e));
-						confd.reject(e);
+				try {
+				
+					for (int i = 0; i < res.size(); i++) {
+						OneResult r = res.get(i);
+						
+						if (r.getPromise() == promiseNBActive) mNBActive = (JSONObject) r.getResult();
+						else if (r.getPromise() == promiseNWKActive) mNWKActive = (JSONObject) r.getResult();
+						else if (r.getPromise() == promiseNBConf) mNBConf = (JSONObject) r.getResult();
+						else if (r.getPromise() == promiseNWKConf) mNWKConf = (JSONObject) r.getResult();
 					}
-					
+		
+					confd.resolve(null);
+				} catch (Exception e) {
+					Log.e(TAG, Log.getStackTraceString(e));
+					confd.reject(e);
 				}
 				
-				@Override
-				public AndroidExecutionScope getExecutionScope() {
-					return AndroidExecutionScope.BACKGROUND;
-				}
-				
-			}).fail(new AndroidFailCallback<OneReject>() {
-				
-				@Override
-				public void onFail(OneReject reject) {
-					
-					AjaxStatus r = (AjaxStatus) reject.getReject();
-					
-					Log.e(TAG, r.getCode() + ": " + r.getMessage());
-				}
-				
-				@Override
-				public AndroidExecutionScope getExecutionScope() {
-					return AndroidExecutionScope.BACKGROUND;
-				}
-				
-			});
-		}
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
+		}).fail(new AndroidFailCallback<OneReject>() {
+			
+			@Override
+			public void onFail(OneReject reject) {
+				AjaxStatus r = (AjaxStatus) reject.getReject();
+				Log.e(TAG, r.getCode() + ": " + r.getMessage());
+				confd.reject(r);
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.BACKGROUND;
+			}
+			
+		});
 	}
 	
 	/**

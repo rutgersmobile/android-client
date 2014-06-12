@@ -33,6 +33,7 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
+import com.androidquery.util.AQUtility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -207,7 +208,7 @@ public class MainActivity extends FragmentActivity  implements
 		
 		ComponentFactory.getInstance().mMainActivity = this; 
 
-		/* This loads list of native channels (not complete) */
+		/* This loads list of native channels (API is incomplete) */
 		/*		
  		Request.api("app").done(new DoneCallback<JSONObject>() {
 			public void onDone(JSONObject result) {
@@ -238,8 +239,19 @@ public class MainActivity extends FragmentActivity  implements
 	}
 	
 	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		// Clear AQuery cache on exit
+		if(isTaskRoot()) {
+			AQUtility.cleanCacheAsync(this);
+		}
+	}
+	
+	@Override
 	protected void onStart() {
 		super.onStart();
+		
 		// Connect to location services when activity becomes visible
 		mLocationClient.connect();
 	}
@@ -248,12 +260,14 @@ public class MainActivity extends FragmentActivity  implements
 	protected void onStop() {
 		// Disconnect from location services when activity is no longer visible
 		mLocationClient.disconnect();
+		
 		super.onStop();
 	}
 	
 	@Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        
         // Sync the toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
     }
@@ -261,14 +275,17 @@ public class MainActivity extends FragmentActivity  implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
     
+    //TODO Save state
     @Override
     public void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
     }
     
+    //TODO Restore state
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
     	super.onRestoreInstanceState(savedInstanceState);
