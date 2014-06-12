@@ -38,9 +38,8 @@ public class HourSwiperFragment extends Fragment {
 		Bundle args = getArguments();
 		
 		LinearLayout hourSwiperLinearLayout = (LinearLayout) rootView.findViewById(R.id.hourSwiperLinearLayout);
-		TextView dateTextView = (TextView) rootView.findViewById(R.id.dateTextView);
-		dateTextView.setText(args.getString("date"));
 		
+		// Add hours rows here
 		try {
 			JSONObject hours = new JSONObject(args.getString("hours"));
 			Iterator<String> keys = hours.keys();

@@ -10,7 +10,7 @@
         android:layout_gravity="center_horizontal"
         android:orientation="vertical" >
 
-        <!-- Date view -->
+        <!--
         <TextView
             android:id="@+id/dateTextView"
             android:layout_width="wrap_content"
@@ -20,12 +20,11 @@
             android:text="DAY"
             android:textAppearance="?android:attr/textAppearanceLarge" />
         
-        <!-- Horizontal divider -->
 		<View
 		    android:layout_width="match_parent"
 			android:layout_height="1px"
 			android:background="@android:color/darker_gray"/>
-		
+		-->
 		<!-- Rows of hours per section will be filled in here -->
 	
     </LinearLayout>
