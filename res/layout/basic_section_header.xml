@@ -17,9 +17,10 @@
 		android:textAllCaps="true" />
 	
 	<!-- Horizontal divider -->
+	<!-- for height: 1dp may be rounded down to 0px on some screens -->
 	<View
 	    android:layout_width="fill_parent"
-		android:layout_height="1dp"
+		android:layout_height="2dp"
 		android:background="@android:color/darker_gray"/>
 
 </LinearLayout>
