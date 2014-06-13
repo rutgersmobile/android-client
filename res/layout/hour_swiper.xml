@@ -3,31 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <LinearLayout
-        android:id="@+id/hourSwiperLinearLayout"
+    <TableLayout
+        android:id="@+id/hourSwiperTableLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="vertical" >
-
-        <!--
-        <TextView
-            android:id="@+id/dateTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center"
-            android:text="DAY"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-        
-		<View
-		    android:layout_width="match_parent"
-			android:layout_height="1px"
-			android:background="@android:color/darker_gray"/>
-		-->
-		<!-- Rows of hours per section will be filled in here -->
-	
-    </LinearLayout>
-    
+        android:layout_height="wrap_content" />
 
 </ScrollView>

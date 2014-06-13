@@ -1,123 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <!-- Hours section -->
-    <TableRow
-		style="@style/RowHeader" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rec_hours_header"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
         
-    </TableRow>
-
-    <TableRow
-        style="@style/RowContent" >
+	<TableLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:id="@+id/recTableLayout">
+	
+	    <!-- Hours section -->
+	    <TableRow
+	        android:id="@+id/hoursHeadRow"
+			style="@style/RowHeader" >
+	
+	        <TextView
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/rec_hours_header"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	        
+	    </TableRow>
+	
+	    <TableRow
+	        android:id="@+id/hoursContentRow"
+	        style="@style/RowContent" >
+			    
+	        <!-- Hours display pager -->
+			<android.support.v4.view.ViewPager
+			    android:id="@+id/hoursViewPager"
+			    android:layout_width="match_parent"
+			    android:layout_height="250dp"
+			    android:layout_weight="1">
+			    
+	    	    <!-- Hours display title strip -->
+			    <android.support.v4.view.PagerTitleStrip
+			        android:id="@+id/hoursPagerTitleStrip"
+			        android:layout_width="match_parent"
+			        android:layout_height="wrap_content"
+			        android:layout_gravity="top"
+			        android:background="@color/drawer_item_bg"
+			        android:textColor="@color/white"
+			        android:paddingTop="4dp"
+			        android:paddingBottom="4dp" />
 		    
-        <!-- Hours display pager -->
-		<android.support.v4.view.ViewPager
-		    android:id="@+id/hoursViewPager"
-		    android:layout_width="match_parent"
-		    android:layout_height="250dp"
-		    android:layout_weight="1">
-		    
-    	    <!-- Hours display title strip -->
-		    <android.support.v4.view.PagerTitleStrip
-		        android:id="@+id/hoursPagerTitleStrip"
-		        android:layout_width="match_parent"
-		        android:layout_height="wrap_content"
-		        android:layout_gravity="top"
-		        android:background="@color/drawer_item_bg"
-		        android:textColor="@color/white"
-		        android:paddingTop="4dp"
-		        android:paddingBottom="4dp" />
+		    </android.support.v4.view.ViewPager>
+			
+	    </TableRow>
 	    
-	    </android.support.v4.view.ViewPager>
-		
-    </TableRow>
-    
-    <!-- Address section -->
-    <TableRow
-		style="@style/RowHeader" >
+	    <!-- Address section -->
+	    <TableRow
+			style="@style/RowHeader" >
+	
+	        <TextView
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/address_header"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	        
+	    </TableRow>
+	
+	    <TableRow
+	        style="@style/RowContent" >
+	
+	        <TextView
+	            android:id="@+id/addressTextView"
+	            style="@style/RowContentText" />
+	    </TableRow>
+	
+	    <!-- Information Desk Section -->
+	    <TableRow
+	        android:id="@+id/infoRowHead"
+			style="@style/RowHeader" >
+	
+	        <TextView
+	            android:id="@+id/infoRowTitle"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/rec_info_desk_header"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	        
+	    </TableRow>
+	
+	    <TableRow
+	        android:id="@+id/infoRowContent"
+	        style="@style/RowContent" >
+	
+	        <TextView
+	            android:id="@+id/infoDeskNumberTextView"
+	            style="@style/RowContentText" />
+	    </TableRow>
+	    
+	    <!-- Business Office Section -->
+	    <TableRow
+	        android:id="@+id/businessRowHead"
+			style="@style/RowHeader" >
+	
+	        <TextView
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/rec_business_office_header"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	        
+	    </TableRow>
+	
+	    <TableRow
+	        android:id="@+id/businessRowContent"
+	        style="@style/RowContent" >
+	
+	        <TextView
+	            android:id="@+id/businessOfficeNumberTextView"
+	            style="@style/RowContentText" />
+	    </TableRow>
+	    
+	    <!-- Description Section -->
+	    <TableRow
+			style="@style/RowHeader" >
+	
+	        <TextView
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/description_header"
+	            android:textAppearance="?android:attr/textAppearanceMedium" />
+	        
+	    </TableRow>
+	
+	    <TableRow
+	        style="@style/RowContent" >
+	
+	        <TextView
+	            android:id="@+id/descriptionTextView"
+	            style="@style/RowContentText" />
+	    </TableRow>
+	
+	</TableLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/address_header"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        
-    </TableRow>
-
-    <TableRow
-        style="@style/RowContent" >
-
-        <TextView
-            android:id="@+id/addressTextView"
-            style="@style/RowContentText" />
-    </TableRow>
-
-    <!-- Information Desk Section -->
-    <TableRow
-		style="@style/RowHeader" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rec_info_desk_header"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        
-    </TableRow>
-
-    <TableRow
-        style="@style/RowContent" >
-
-        <TextView
-            android:id="@+id/infoDeskNumberTextView"
-            style="@style/RowContentText" />
-    </TableRow>
-    
-    <!-- Business Office Section -->
-    <TableRow
-		style="@style/RowHeader" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rec_business_office_header"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        
-    </TableRow>
-
-    <TableRow
-        style="@style/RowContent" >
-
-        <TextView
-            android:id="@+id/businessOfficeNumberTextView"
-            style="@style/RowContentText" />
-    </TableRow>
-    
-    <!-- Description Section -->
-    <TableRow
-		style="@style/RowHeader" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/description_header"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-        
-    </TableRow>
-
-    <TableRow
-        style="@style/RowContent" >
-
-        <TextView
-            android:id="@+id/descriptionTextView"
-            style="@style/RowContentText" />
-    </TableRow>
-
-</TableLayout>
+</ScrollView>

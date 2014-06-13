@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -37,7 +38,7 @@ public class HourSwiperFragment extends Fragment {
 		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.hour_swiper, container, false);
 		Bundle args = getArguments();
 		
-		LinearLayout hourSwiperLinearLayout = (LinearLayout) rootView.findViewById(R.id.hourSwiperLinearLayout);
+		LinearLayout hourSwiperTableLayout = (LinearLayout) rootView.findViewById(R.id.hourSwiperTableLayout);
 		
 		// Add hours rows here
 		try {
@@ -45,9 +46,12 @@ public class HourSwiperFragment extends Fragment {
 			Iterator<String> keys = hours.keys();
 			while(keys.hasNext()) {
 				String curKey = keys.next();
-				TextView newTV = new TextView(getActivity());
-				newTV.setText(curKey + "\t" + hours.getString(curKey));
-				hourSwiperLinearLayout.addView(newTV);
+				TableRow newTR = (TableRow) inflater.inflate(R.layout.hour_row, container, false);
+				TextView sublocTextView = (TextView) newTR.findViewById(R.id.sublocTextView);
+				TextView hoursTextView = (TextView) newTR.findViewById(R.id.hoursTextView);
+				sublocTextView.setText(curKey);
+				hoursTextView.setText(hours.getString(curKey));
+				hourSwiperTableLayout.addView(newTR);
 			}
 		} catch(JSONException e) {
 			Log.w(TAG, "onCreateView(): " + e.getMessage());
