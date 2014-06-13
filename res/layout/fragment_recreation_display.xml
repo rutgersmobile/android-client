@@ -15,7 +15,6 @@
         
     </TableRow>
 
-
     <TableRow
         style="@style/RowContent" >
 		    
@@ -23,7 +22,7 @@
 		<android.support.v4.view.ViewPager
 		    android:id="@+id/hoursViewPager"
 		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content"
+		    android:layout_height="250dp"
 		    android:layout_weight="1">
 		    
     	    <!-- Hours display title strip -->
