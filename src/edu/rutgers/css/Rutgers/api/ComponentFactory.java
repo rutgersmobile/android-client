@@ -21,6 +21,7 @@ import edu.rutgers.css.Rutgers.fragments.PlacesMain;
 import edu.rutgers.css.Rutgers.fragments.RSSReader;
 import edu.rutgers.css.Rutgers.fragments.RecreationDisplay;
 import edu.rutgers.css.Rutgers.fragments.RecreationMain;
+import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 
 /**
  * Singleton fragment builder
@@ -31,11 +32,11 @@ public class ComponentFactory {
 	private static ComponentFactory instance = null;
 	public Activity mMainActivity;
 	private static final String TAG = "ComponentFactory";
-	private Hashtable<String, Class> fragmentTable;
+	private Hashtable<String, Class<? extends Fragment>> fragmentTable;
 	
 	protected ComponentFactory() {
 		// Set up table of fragments that can be launched
-		fragmentTable = new Hashtable<String, Class>();
+		fragmentTable = new Hashtable<String, Class<? extends Fragment>>();
 		fragmentTable.put("dtable", DTable.class);
 		fragmentTable.put("bus", BusMain.class);
 		fragmentTable.put("reader", RSSReader.class);
@@ -47,6 +48,7 @@ public class ComponentFactory {
 		fragmentTable.put("busdisplay", BusDisplay.class);
 		fragmentTable.put("recreation", RecreationMain.class);
 		fragmentTable.put("recdisplay", RecreationDisplay.class);
+		fragmentTable.put("www", WebDisplay.class);
 	}
 	
 	/**
@@ -74,7 +76,7 @@ public class ComponentFactory {
 		}
 		
 		component = options.getString("component").toLowerCase(Locale.US);
-		Class compClass = fragmentTable.get(component);
+		Class<? extends Fragment> compClass = fragmentTable.get(component);
 		if(compClass != null) {
 			try {
 				fragment = (Fragment) compClass.newInstance();

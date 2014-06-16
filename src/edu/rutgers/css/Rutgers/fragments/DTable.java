@@ -147,13 +147,13 @@ public class DTable extends Fragment {
 							JSONObject channel = (JSONObject) c.getJSONObject("channel");
 							Log.d(TAG, "Clicked \"" + getLocalTitle(channel.get("title")) + "\"");
 							
-							// Launch browser
+/*							// Launch browser
 							if(channel.getString("view").equalsIgnoreCase("www"))	{
 								Intent i = new Intent(Intent.ACTION_VIEW);
 								i.setData(Uri.parse(channel.getString("url")));
 								startActivity(i);
 								return;
-							}
+							}*/
 							
 							// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
 							args.putString("component", channel.getString("view")); // TODO Should ComponentFactory take "view" argument instead of "component" argument to skip this?

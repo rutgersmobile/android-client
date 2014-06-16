@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
@@ -94,6 +95,9 @@ public class MainActivity extends FragmentActivity  implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		getWindow().requestFeature(Window.FEATURE_PROGRESS);
+		
 		setContentView(R.layout.activity_main);
 		
 		// Connect to Google Play location service
@@ -163,25 +167,17 @@ public class MainActivity extends FragmentActivity  implements
 				
 				Bundle clickedArgs = clickedItem.getArgs();
 				
-				// Launch browser
-				if(clickedArgs.getString("component").equalsIgnoreCase("www"))	{
-					Intent i = new Intent(Intent.ACTION_VIEW);
-					i.setData(Uri.parse(clickedArgs.getString("url")));
-					startActivity(i);
+				// Launch component
+				Fragment fragment = ComponentFactory.getInstance().createFragment(clickedArgs);
+				if(fragment != null) {
+					FragmentManager fm = MainActivity.this.getSupportFragmentManager();	
+					fm.beginTransaction()
+						.replace(R.id.main_content_frame, fragment)
+						.commit();
 				}
-				// Launch channel component
 				else {
-					Fragment fragment = ComponentFactory.getInstance().createFragment(clickedArgs);
-					if(fragment != null) {
-						FragmentManager fm = MainActivity.this.getSupportFragmentManager();	
-						fm.beginTransaction()
-							.replace(R.id.main_content_frame, fragment)
-							.commit();
-					}
-					else {
-						Log.e("SlidingMenu", "Failed to create component");
-						return;
-					}
+					Log.e("SlidingMenu", "Failed to create component");
+					return;
 				}
 				
 				//mDrawerAdapter.setSelectedPos(position);
