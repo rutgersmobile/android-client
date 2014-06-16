@@ -111,29 +111,23 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		// For now send URL to browser
 		RSSItem item = rssItemAdapter.getItem(position);
-		
-		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setData(Uri.parse(item.getLink()));
-		startActivity(i);
-		
+
+		// Open web display fragment
 		Bundle args = new Bundle();
 		args.putString("component", "www");
 		args.putString("url", item.getLink());
 						
 		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-		if(fragment == null) {
-			Log.e(TAG, "Failed to get component");
-			return;
-		}
-		else {
+		if(fragment != null) {
 			FragmentManager fm = getActivity().getSupportFragmentManager();	
 			fm.beginTransaction()
 				.replace(R.id.main_content_frame, fragment)
 				.addToBackStack(null)
 				.commit(); 
 		}
+		
+		// TODO Error message for user
 	}
 	
 }

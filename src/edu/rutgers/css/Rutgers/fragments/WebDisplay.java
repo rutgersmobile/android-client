@@ -22,6 +22,7 @@ public class WebDisplay extends Fragment {
 	private static final String TAG = "WebDisplay";
 	
 	private ShareActionProvider mShareActionProvider;
+	private String mCurrentURL;
 	
 	public WebDisplay() {
 		// Required empty public constructor
@@ -51,6 +52,8 @@ public class WebDisplay extends Fragment {
 			return v;
 		}
 		
+		mCurrentURL = args.getString("url");
+		
 		webView.getSettings().setJavaScriptEnabled(true); // XSS Warning
 		final Activity mainActivity = getActivity();
 		
@@ -66,39 +69,51 @@ public class WebDisplay extends Fragment {
 		webView.setWebViewClient(new WebViewClient() {
 		    @Override
 		    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-		        webView.loadUrl(url);
+		    	mCurrentURL = url;
+		        webView.loadUrl(mCurrentURL);
 		        return true;
 		    }
 		});
 		
-		setShareIntent(args.getString("url"));
-		webView.loadUrl(args.getString("url"));
+		webView.loadUrl(mCurrentURL);
 		
 		return v;
 	}
 	
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
 		getActivity().getMenuInflater().inflate(R.menu.web_menu, menu);
 		
 		MenuItem shareItem = menu.findItem(R.id.action_share);
 		mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
+		super.onCreateOptionsMenu(menu, inflater);
 	}
+	
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	
+    	if (item.getItemId() == R.id.action_share) {
+    		setShareIntent(mCurrentURL);
+    		return false;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 	
 	/**
 	 * Create intent for sharing a link
 	 * @param url URL string
 	 */
 	private void setShareIntent(String url) {
-		if(mShareActionProvider != null) {	
+		if(mShareActionProvider != null && mCurrentURL != null) {	
 			Intent intent = new Intent(android.content.Intent.ACTION_SEND);
 			intent.setType("text/plain");
 			intent.putExtra(Intent.EXTRA_TEXT, url);
 			mShareActionProvider.setShareIntent(intent);
 		}
 		else {
-			Log.w(TAG, "Tried to set intent before action provider");
+			if(mCurrentURL == null) Log.w(TAG, "No URL set");
+			if(mShareActionProvider == null) Log.w(TAG, "Tried to set intent before action provider was set");
 		}
 	}
 	
