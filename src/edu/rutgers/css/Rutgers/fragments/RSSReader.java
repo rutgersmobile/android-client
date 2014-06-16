@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ import android.widget.ListView;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.RSSAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RSSItem;
@@ -115,6 +117,23 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		Intent i = new Intent(Intent.ACTION_VIEW);
 		i.setData(Uri.parse(item.getLink()));
 		startActivity(i);
+		
+		Bundle args = new Bundle();
+		args.putString("component", "www");
+		args.putString("url", item.getLink());
+						
+		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
+		if(fragment == null) {
+			Log.e(TAG, "Failed to get component");
+			return;
+		}
+		else {
+			FragmentManager fm = getActivity().getSupportFragmentManager();	
+			fm.beginTransaction()
+				.replace(R.id.main_content_frame, fragment)
+				.addToBackStack(null)
+				.commit(); 
+		}
 	}
 	
 }
