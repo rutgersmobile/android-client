@@ -29,6 +29,10 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 	private int selectedPos;
 	private int lastPos;
 	
+	private static enum ViewTypes {
+		HEADER, CLICKABLE, UNCLICKABLE;
+	}
+	
 	static class ViewHolder {
 		TextView titleTextView;
 	}
@@ -79,7 +83,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 		// Choose appropriate layout
 		if(convertView == null) {
 			// Section headers
-			if(getItemViewType(position) == 1) {
+			if(getItemViewType(position) == ViewTypes.HEADER.ordinal()) {
 				convertView = mLayoutInflater.inflate(this.categoryResource, null);
 			}
 			// Menu items
@@ -116,17 +120,22 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 		return convertView;
 	}
 	
-	@Override
-	public int getItemViewType(int position) {
-	    if(getItem(position).getIsCategory())
-	    	return 1;
-	    else
-	    	return 0;
-	}
-
+	/**
+	 * Types of row items:
+	 * 1. Category headers
+	 * 2. Unclickable items
+	 * 3. Clickable items
+	 */
 	@Override
 	public int getViewTypeCount() {
-	    return 2;
+	    return ViewTypes.values().length;
+	}
+	
+	@Override
+	public int getItemViewType(int position) {
+	    if(getItem(position).getIsCategory()) return ViewTypes.HEADER.ordinal();
+	    else if(getItem(position).getClickable()) return ViewTypes.CLICKABLE.ordinal();
+	    else return ViewTypes.UNCLICKABLE.ordinal();
 	}
 	
 }
