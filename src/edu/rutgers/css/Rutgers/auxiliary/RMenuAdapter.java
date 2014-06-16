@@ -24,10 +24,12 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 	private final static String TAG = "RMenuAdapter";
 	private int itemResource;
 	private int categoryResource;
-	private int itemBgColor;
+	
+	/*private int itemBgColor;
 	private int selectColor;
 	private int selectedPos;
 	private int lastPos;
+	*/
 	
 	private static enum ViewTypes {
 		HEADER, CLICKABLE, UNCLICKABLE;
@@ -53,12 +55,12 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 		Log.d(TAG, "get layout = " + context.getResources().getLayout(itemResource).toString());
 		Log.d(TAG, "get attr = " + itemBgRes);
 		if(itemBgRes != 0) this.itemBgColor = context.getResources().getColor(itemBgRes);*/
-		this.selectColor = 0;
+/*		this.selectColor = 0;
 		this.selectedPos = -1;
-		this.lastPos = -1;
+		this.lastPos = -1;*/
 	}
 	
-	public void setSelectColor(int id) {
+/*	public void setSelectColor(int id) {
 		this.selectColor = id;
 	}
 	
@@ -72,7 +74,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 	
 	public int getSelectedPos() {
 		return this.selectedPos;
-	}
+	}*/
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {

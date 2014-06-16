@@ -101,9 +101,7 @@ public class MainActivity extends FragmentActivity  implements
 		
         // Sliding menu setup native items
         ArrayList<RMenuPart> menuArray = new ArrayList<RMenuPart>();
-        mDrawerAdapter = new RMenuAdapter(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);
-        mDrawerAdapter.setSelectColor(getResources().getColor(R.color.drawer_selected));
-        
+        mDrawerAdapter = new RMenuAdapter(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);        
         menuArray.add(new SlideMenuHeader("Channels"));
         menuArray.add(new SlideMenuItem("Bus", "bus"));
         menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt"));
@@ -173,18 +171,20 @@ public class MainActivity extends FragmentActivity  implements
 				}
 				// Launch channel component
 				else {
-					FragmentManager fm = MainActivity.this.getSupportFragmentManager();	
 					Fragment fragment = ComponentFactory.getInstance().createFragment(clickedArgs);
-					if(fragment == null) {
+					if(fragment != null) {
+						FragmentManager fm = MainActivity.this.getSupportFragmentManager();	
+						fm.beginTransaction()
+							.replace(R.id.main_content_frame, fragment)
+							.commit();
+					}
+					else {
 						Log.e("SlidingMenu", "Failed to create component");
 						return;
 					}
-					fm.beginTransaction()
-						.replace(R.id.main_content_frame, fragment)
-						.commit(); 	
 				}
 				
-				mDrawerAdapter.setSelectedPos(position);
+				//mDrawerAdapter.setSelectedPos(position);
 				mDrawerList.invalidateViews();
 				mDrawerLayout.closeDrawer(mDrawerList); // Close menu after a click
 			}

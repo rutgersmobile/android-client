@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Main app theme -->
     <style name="RutgersActionBarTheme"
            parent="@android:style/Theme.Holo.Light.DarkActionBar">
    
         <item name="android:actionBarStyle">@style/RutgersActionBar</item>
         <item name="android:actionMenuTextColor">@color/white</item>
-    
+          
     </style>
     
     <!-- ActionBar styles -->
