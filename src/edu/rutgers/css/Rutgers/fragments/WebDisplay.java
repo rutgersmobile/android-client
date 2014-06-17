@@ -23,6 +23,7 @@ public class WebDisplay extends Fragment {
 	
 	private ShareActionProvider mShareActionProvider;
 	private String mCurrentURL;
+	private WebView mWebView;
 
 	public WebDisplay() {
 		// Required empty public constructor
@@ -38,7 +39,7 @@ public class WebDisplay extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View v = inflater.inflate(R.layout.fragment_web_display, container, false);
-		final WebView webView = (WebView) v.findViewById(R.id.webView);
+		mWebView = (WebView) v.findViewById(R.id.webView);
 		
 		Bundle args = getArguments();
 		if(args.getString("title") != null) {
@@ -49,17 +50,17 @@ public class WebDisplay extends Fragment {
 			Log.w(TAG, "No URL supplied");
 			// TODO Display failed load message
 			String msg = getActivity().getResources().getString(R.string.failed_load);
-			webView.loadData(msg, "text/plain", null);
+			mWebView.loadData(msg, "text/plain", null);
 			return v;
 		}
 		
 		mCurrentURL = args.getString("url");
 		
-		webView.getSettings().setJavaScriptEnabled(true); // XSS Warning
+		mWebView.getSettings().setJavaScriptEnabled(true); // XSS Warning
 		final Activity mainActivity = getActivity();
 		
 		// Progress bar
-		webView.setWebChromeClient(new WebChromeClient() {
+		mWebView.setWebChromeClient(new WebChromeClient() {
 			@Override
 			public void onProgressChanged(WebView view, int progress) {
 				mainActivity.setProgress(progress * 1000);
@@ -67,17 +68,17 @@ public class WebDisplay extends Fragment {
 		});
 		
 		// Intercept URL loads so it doesn't pop to external browser
-		webView.setWebViewClient(new WebViewClient() {
+		mWebView.setWebViewClient(new WebViewClient() {
 		    @Override
 		    public boolean shouldOverrideUrlLoading(WebView view, String url) {
 		    	mCurrentURL = url;
-		        webView.loadUrl(mCurrentURL);
+		        mWebView.loadUrl(mCurrentURL);
 		        setShareIntent(mCurrentURL);
 		        return true;
 		    }
 		});
 		
-		webView.loadUrl(mCurrentURL);
+		mWebView.loadUrl(mCurrentURL);
 		
 		return v;
 	}
@@ -111,6 +112,18 @@ public class WebDisplay extends Fragment {
 			if(mCurrentURL == null) Log.w(TAG, "No URL set");
 			if(mShareActionProvider == null) Log.w(TAG, "Tried to set intent before action provider was set");
 		}
+	}
+	/**
+	 * This is called by MainActivity when back button is hit. Use it to go back in browser
+	 * history if possible.
+	 */
+	public boolean backPress() {
+		if(mWebView != null && mWebView.canGoBack()) {
+			mWebView.goBack();
+			return true;
+		}
+		
+		return false;
 	}
 	
 }

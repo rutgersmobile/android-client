@@ -46,6 +46,7 @@ import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers.fragments.DTable;
+import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.location.LocationUtils;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -170,7 +171,7 @@ public class MainActivity extends FragmentActivity  implements
 				if(fragment != null) {
 					FragmentManager fm = MainActivity.this.getSupportFragmentManager();	
 					fm.beginTransaction()
-						.replace(R.id.main_content_frame, fragment)
+						.replace(R.id.main_content_frame, fragment, clickedArgs.getString("component"))
 						.commit();
 				}
 				else {
@@ -233,16 +234,6 @@ public class MainActivity extends FragmentActivity  implements
 	}
 	
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		
-		// Clear AQuery cache on exit
-		if(isTaskRoot()) {
-			AQUtility.cleanCacheAsync(this);
-		}
-	}
-	
-	@Override
 	protected void onStart() {
 		super.onStart();
 		
@@ -256,6 +247,25 @@ public class MainActivity extends FragmentActivity  implements
 		mLocationClient.disconnect();
 		
 		super.onStop();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		
+		// Clear AQuery cache on exit
+		if(isTaskRoot()) {
+			AQUtility.cleanCacheAsync(this);
+		}
+	}
+	
+	@Override
+	public void onBackPressed() {
+		Fragment webView = getSupportFragmentManager().findFragmentByTag("www");
+		if (webView != null) {
+			if(((WebDisplay) webView).backPress() == false) super.onBackPressed();
+		}
+		else super.onBackPressed();
 	}
 	
 	@Override
@@ -293,8 +303,8 @@ public class MainActivity extends FragmentActivity  implements
         	//Log.d(TAG,"");
         	return true;
         }
+        
         // Handle your other action bar items...
-
         return super.onOptionsItemSelected(item);
     }
 	
@@ -305,12 +315,17 @@ public class MainActivity extends FragmentActivity  implements
 		return true;
 	}
 	
+	/*
+	 * Location service stuff
+	 */
+	
 	@Override
 	public void onConnected(Bundle dataBundle) {
 		Log.d(LocationUtils.APPTAG, "Connected to Google Play services");
 		servicesConnected();
 		if(mLocationClient != null) {
-			//mLocationClient.setMockMode(false); // FOR TESTING ONLY
+			// Mock location testing
+			//mLocationClient.setMockMode(false);
 /*			Location currentLocation = mLocationClient.getLastLocation();
 			if(currentLocation != null) {
 				Log.d(LocationUtils.APPTAG, currentLocation.toString());
@@ -392,6 +407,10 @@ public class MainActivity extends FragmentActivity  implements
             return false;
 		}
 	}
+	
+	/*
+	 * Nav drawer helpers
+	 */
 	
 	/**
 	 * Grab web links and add them to the menu.
