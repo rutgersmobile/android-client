@@ -17,6 +17,14 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -30,6 +38,11 @@ public class PlacesDisplay extends Fragment {
 
 	public PlacesDisplay() {
 		// Required empty public constructor
+	}
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 	}
 	
 	@Override
@@ -57,16 +70,33 @@ public class PlacesDisplay extends Fragment {
 			// Read JSON data for building
 			try {
 				placeJSON = new JSONObject(args.getString("placeJSON"));
-			} catch (JSONException e1) {
-				Log.e(TAG, e1.getMessage());
+			} catch (JSONException e) {
+				Log.w(TAG, "onCreateView(): " + e.getMessage());
 				return v;
 			}
 			
 			// Set title
 			getActivity().setTitle(placeJSON.optString("title", getResources().getString(R.string.places_title)));
 
+			// Set up map
+/*			if(mGoogleMap != null && placeJSON.optJSONObject("location") != null) {
+				JSONObject locationJson = placeJSON.optJSONObject("location");
+				if(!locationJson.optString("latitude").equals("") && !locationJson.optString("longitude").equals("")) {
+					double lon = Double.parseDouble(locationJson.optString("longitude"));
+					double lat = Double.parseDouble(locationJson.optString("latitude"));
+					LatLng position = new LatLng(lat, lon);
+					mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 17));
+					mGoogleMap.addMarker(new MarkerOptions()
+							.title(placeJSON.optString("title"))
+							.snippet("Test")
+							.position(position));
+				}
+			}
+			else {
+				if(mGoogleMap == null) Log.w(TAG, "mGoogleMap is null");
+			}*/
+			
 			// Display building info
-				
 			addressTextView.setText(formatAddress(placeJSON.optJSONObject("location")));
 			buildingNoTextView.setText(placeJSON.optString("building_number"));
 			campusNameTextView.setText(placeJSON.optString("campus_name"));
