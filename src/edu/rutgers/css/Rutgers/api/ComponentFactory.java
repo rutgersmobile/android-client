@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.BusDisplay;
@@ -22,6 +24,7 @@ import edu.rutgers.css.Rutgers.fragments.RSSReader;
 import edu.rutgers.css.Rutgers.fragments.RecreationDisplay;
 import edu.rutgers.css.Rutgers.fragments.RecreationMain;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
+import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Singleton fragment builder
@@ -30,7 +33,7 @@ import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 public class ComponentFactory {
 
 	private static ComponentFactory instance = null;
-	public Activity mMainActivity;
+	public FragmentActivity mMainActivity;
 	private static final String TAG = "ComponentFactory";
 	private Hashtable<String, Class<? extends Fragment>> fragmentTable;
 	
@@ -105,6 +108,18 @@ public class ComponentFactory {
 		Intent i = new Intent(context, SingleFragmentActivity.class);
 		i.putExtras(options);
 		context.startActivity(i);
+	}
+	
+	public boolean switchFragments(Bundle args) {
+		Fragment fragment = createFragment(args);
+		if(fragment == null) return false;
+		
+		FragmentManager fm = mMainActivity.getSupportFragmentManager();
+		fm.beginTransaction()
+			.replace(R.id.main_content_frame, fragment, args.getString("component"))
+			.addToBackStack(null)
+			.commit();
+		return true;
 	}
 	
 }

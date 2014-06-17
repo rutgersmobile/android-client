@@ -166,18 +166,7 @@ public class DTable extends Fragment {
 							}
 						}
 						
-						Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-						if(fragment == null) {
-							Log.e(TAG, "Failed to get component");
-							return;
-						}
-						else {
-							FragmentManager fm = getActivity().getSupportFragmentManager();	
-							fm.beginTransaction()
-								.replace(R.id.main_content_frame, fragment)
-								.addToBackStack(null)
-								.commit(); 
-						}
+						ComponentFactory.getInstance().switchFragments(args);
 					} catch (JSONException e) {
 						Log.e(TAG, "JSONException: " + e.getMessage());
 					}

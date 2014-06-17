@@ -144,18 +144,7 @@ public class MainActivity extends FragmentActivity  implements
 				Bundle clickedArgs = clickedItem.getArgs();
 				
 				// Launch component
-				Fragment fragment = ComponentFactory.getInstance().createFragment(clickedArgs);
-				if(fragment != null) {
-					FragmentManager fm = MainActivity.this.getSupportFragmentManager();	
-					fm.beginTransaction()
-						.replace(R.id.main_content_frame, fragment, clickedArgs.getString("component"))
-						.addToBackStack(null)
-						.commit();
-				}
-				else {
-					Log.e("SlidingMenu", "Failed to create component");
-					return;
-				}
+				ComponentFactory.getInstance().switchFragments(clickedArgs);
 				
 				//mDrawerAdapter.setSelectedPos(position);
 				mDrawerListView.invalidateViews();

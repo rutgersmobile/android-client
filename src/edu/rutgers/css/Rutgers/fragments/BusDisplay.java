@@ -49,15 +49,6 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 		
 		Bundle args = getArguments();
 		
-		// Get title
-		if(args.getString("title") != null) {
-			getActivity().setTitle(args.getString("title"));
-		}
-		else {
-			Log.e(TAG, "title not set");
-			getActivity().setTitle(getResources().getString(R.string.bus_title));
-		}
-		
 		// Get agency
 		if(args.getString("agency") == null) {
 			Log.e(TAG, "agency was not set");
@@ -98,6 +89,16 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 		mList = (ListView) v.findViewById(R.id.busDisplayList);
 		mList.setAdapter(mAdapter);
 
+		Bundle args = getArguments();
+		// Get title
+		if(args.getString("title") != null) {
+			getActivity().setTitle(args.getString("title"));
+		}
+		else {
+			Log.e(TAG, "title not set");
+			getActivity().setTitle(getResources().getString(R.string.bus_title));
+		}
+		
 		return v;
 	}
 	

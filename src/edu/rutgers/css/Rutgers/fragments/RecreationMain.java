@@ -118,18 +118,10 @@ public class RecreationMain extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				SlideMenuItem clicked = (SlideMenuItem) parent.getItemAtPosition(position);
-				Bundle clickedArgs = clicked.getArgs();
+				Bundle args = clicked.getArgs();
+				args.putString("component", "recdisplay");
 				
-				clickedArgs.putString("component", "recdisplay");
-				
-				Fragment fragment = ComponentFactory.getInstance().createFragment(clickedArgs);
-				if(fragment != null) {
-					FragmentManager fm = getActivity().getSupportFragmentManager();	
-					fm.beginTransaction()
-						.replace(R.id.main_content_frame, fragment)
-						.addToBackStack(null)
-						.commit(); 
-				}
+				ComponentFactory.getInstance().switchFragments(args);
 			}
 			
 		});

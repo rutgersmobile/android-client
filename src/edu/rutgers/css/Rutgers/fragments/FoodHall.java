@@ -103,18 +103,8 @@ public class FoodHall extends Fragment {
 				args.putString("component", "foodmeal");
 				args.putString("location", location);
 				args.putString("meal", (String) parent.getAdapter().getItem(position));
-				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 				
-				if(fragment != null) {
-					FragmentManager fm = getActivity().getSupportFragmentManager();
-					fm.beginTransaction()
-						.replace(R.id.main_content_frame, fragment)
-						.addToBackStack(null)
-						.commit(); 
-				}
-				else {
-					Log.e(TAG, "Couldn't launch submenu");
-				}
+				ComponentFactory.getInstance().switchFragments(args);
 			}
 			
 		});

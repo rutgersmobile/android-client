@@ -77,14 +77,7 @@ public class BusAll extends Fragment {
 					args.putString("title", clickedJSON.getString("title"));
 					if(clickedArgs.getString("mode").equalsIgnoreCase("route")) args.putString("tag", clickedJSON.getString("tag"));
 					
-					Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-					if(fragment != null) {
-						FragmentManager fm = getActivity().getSupportFragmentManager();
-						fm.beginTransaction()
-							.replace(R.id.main_content_frame, fragment)
-							.addToBackStack(null)
-							.commit();
-					}
+					ComponentFactory.getInstance().switchFragments(args);
 				} catch (JSONException e) {
 					Log.e(TAG, "onCreateView()" + e.getMessage());
 				}

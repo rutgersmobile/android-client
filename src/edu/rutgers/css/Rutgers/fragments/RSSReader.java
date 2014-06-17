@@ -118,15 +118,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		args.putString("component", "www");
 		args.putString("url", item.getLink());
 						
-		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-		if(fragment != null) {
-			FragmentManager fm = getActivity().getSupportFragmentManager();	
-			fm.beginTransaction()
-				.replace(R.id.main_content_frame, fragment, args.getString("component"))
-				.addToBackStack(null)
-				.commit(); 
-		}
-		
+		ComponentFactory.getInstance().switchFragments(args);
 		// TODO Error message for user
 	}
 	

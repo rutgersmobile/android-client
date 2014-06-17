@@ -146,7 +146,6 @@ public class PlacesMain extends Fragment {
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 				
 				/* Launch Places display fragment */
-				FragmentManager fm = getActivity().getSupportFragmentManager();
 				Bundle args = new Bundle();
 				PlaceTuple placeTuple = (PlaceTuple) parent.getAdapter().getItem(position);
 				
@@ -154,11 +153,7 @@ public class PlacesMain extends Fragment {
 				args.putString("placeKey", placeTuple.getKey());
 				args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
 				
-				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-				fm.beginTransaction()
-					.replace(R.id.main_content_frame, fragment)
-					.addToBackStack(null)
-					.commit(); 
+				ComponentFactory.getInstance().switchFragments(args);
 			}
 			
 		});
