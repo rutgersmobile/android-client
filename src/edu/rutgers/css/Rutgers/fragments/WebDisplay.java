@@ -24,6 +24,7 @@ public class WebDisplay extends Fragment {
 	private ShareActionProvider mShareActionProvider;
 	private String mCurrentURL;
 	private WebView mWebView;
+	private int setupCount = 0;
 
 	public WebDisplay() {
 		// Required empty public constructor
@@ -32,14 +33,7 @@ public class WebDisplay extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		setHasOptionsMenu(true);
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		final View v = inflater.inflate(R.layout.fragment_web_display, container, false);
-		mWebView = (WebView) v.findViewById(R.id.webView);
 		
 		Bundle args = getArguments();
 		if(args.getString("title") != null) {
@@ -49,12 +43,24 @@ public class WebDisplay extends Fragment {
 		if(args.getString("url") == null) {
 			Log.w(TAG, "No URL supplied");
 			// TODO Display failed load message
+		}
+		else {
+			mCurrentURL = args.getString("url");
+			initialIntent();
+		}
+		
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		final View v = inflater.inflate(R.layout.fragment_web_display, container, false);
+		mWebView = (WebView) v.findViewById(R.id.webView);
+		
+		if(mCurrentURL == null) {
 			String msg = getActivity().getResources().getString(R.string.failed_load);
 			mWebView.loadData(msg, "text/plain", null);
 			return v;
 		}
-		
-		mCurrentURL = args.getString("url");
 		
 		mWebView.getSettings().setJavaScriptEnabled(true); // XSS Warning
 		final Activity mainActivity = getActivity();
@@ -90,10 +96,20 @@ public class WebDisplay extends Fragment {
 		MenuItem shareItem = menu.findItem(R.id.action_share);
 		if(shareItem != null) {
 			mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
-			setShareIntent(mCurrentURL);
+			initialIntent();
 		}
 		else {
 			Log.w(TAG, "Could not find Share menu item");
+		}
+	}
+	
+	/**
+	 * Set up the first Share intent only after the URL and share handler have been set.
+	 */
+	private synchronized void initialIntent() {
+		setupCount++;
+		if(setupCount == 2) {
+			setShareIntent(mCurrentURL);
 		}
 	}
 	
