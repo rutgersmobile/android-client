@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers2.R;
@@ -41,6 +42,13 @@ public class PlacesDisplay extends Fragment {
 		final TextView descriptionTextView = (TextView) v.findViewById(R.id.descriptionTextView);
 		final TextView campusNameTextView = (TextView) v.findViewById(R.id.campusTextView);
 		final TextView officesTextView = (TextView) v.findViewById(R.id.officesTextView);
+		
+		final TableRow descriptionHeaderRow = (TableRow) v.findViewById(R.id.descriptionHeaderRow);
+		final TableRow descriptionContentRow = (TableRow) v.findViewById(R.id.descriptionContentRow);
+		final TableRow officesHeaderRow = (TableRow) v.findViewById(R.id.officesHeaderRow);
+		final TableRow officesContentRow = (TableRow) v.findViewById(R.id.officesContentRow);
+		final TableRow nearbyBusesHeaderRow = (TableRow) v.findViewById(R.id.nearbyBusesHeaderRow);
+		final TableRow nearbyBusesContentRow = (TableRow) v.findViewById(R.id.nearbyBusesContentRow);
 		final LinearLayout nearbyBusesLinearLayout = (LinearLayout) v.findViewById(R.id.nearbyBusesLinearLayout);
 		
 		if(args.get("placeJSON") != null) {
@@ -62,8 +70,18 @@ public class PlacesDisplay extends Fragment {
 			addressTextView.setText(formatAddress(placeJSON.optJSONObject("location")));
 			buildingNoTextView.setText(placeJSON.optString("building_number"));
 			campusNameTextView.setText(placeJSON.optString("campus_name"));
-			descriptionTextView.setText(placeJSON.optString("description"));
-			officesTextView.setText(formatOffices(placeJSON.optJSONArray("offices")));
+			
+			if(placeJSON.optString("description").equals("")) {
+				descriptionHeaderRow.setVisibility(View.GONE);
+				descriptionContentRow.setVisibility(View.GONE);
+			}
+			else descriptionTextView.setText(placeJSON.optString("description"));
+			
+			if(placeJSON.optString("offices").equals("")) {
+				officesHeaderRow.setVisibility(View.GONE);
+				officesContentRow.setVisibility(View.GONE);
+			}
+			else officesTextView.setText(formatOffices(placeJSON.optJSONArray("offices")));
 
 			try {				
 				// Get & display nearby bus stops
@@ -75,6 +93,13 @@ public class PlacesDisplay extends Fragment {
 
 					@Override
 					public void onDone(JSONObject nearbyStopsByTitle) {
+						// Hide nearby bus view if there aren't any to display
+						if(nearbyStopsByTitle.length() == 0) {
+							nearbyBusesHeaderRow.setVisibility(View.GONE);
+							nearbyBusesContentRow.setVisibility(View.GONE);
+							return;
+						}
+						
 						Iterator<String> stopTitleIter = nearbyStopsByTitle.keys();
 						while(stopTitleIter.hasNext()) {
 							TextView newStopTextView = new TextView(v.getContext());

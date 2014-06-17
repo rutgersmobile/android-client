@@ -30,6 +30,7 @@
 
     <!-- Description Section -->
     <TableRow
+        android:id="@+id/descriptionHeaderRow"
 		style="@style/RowHeader" >
 
         <TextView
@@ -40,6 +41,7 @@
     </TableRow>
 
     <TableRow
+        android:id="@+id/descriptionContentRow"
         style="@style/RowContent" >
 
         <TextView
@@ -49,6 +51,7 @@
 
     <!-- Nearby Buses section -->
     <TableRow
+        android:id="@+id/nearbyBusesHeaderRow"
 		style="@style/RowHeader" >
 
         <TextView
@@ -59,6 +62,7 @@
     </TableRow>
     
     <TableRow
+        android:id="@+id/nearbyBusesContentRow"
         style="@style/RowContent">
 
         <LinearLayout
@@ -72,6 +76,7 @@
 
     <!-- Offices Section -->
     <TableRow
+        android:id="@+id/officesHeaderRow"
 		style="@style/RowHeader" >
 
         <TextView
@@ -82,6 +87,7 @@
     </TableRow>
     
     <TableRow
+        android:id="@+id/officesContentRow"
         style="@style/RowContent" >
 
         <TextView
