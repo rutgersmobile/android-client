@@ -111,8 +111,8 @@ public class FoodMain extends Fragment {
 				Bundle args = new Bundle();
 				args.putString("component", "foodhall");
 				args.putString("location", (String) parent.getAdapter().getItem(position));
-				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 				
+				Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 				if(fragment != null) {
 					FragmentManager fm = getActivity().getSupportFragmentManager();
 					fm.beginTransaction()

@@ -149,6 +149,7 @@ public class MainActivity extends FragmentActivity  implements
 					FragmentManager fm = MainActivity.this.getSupportFragmentManager();	
 					fm.beginTransaction()
 						.replace(R.id.main_content_frame, fragment, clickedArgs.getString("component"))
+						.addToBackStack(null)
 						.commit();
 				}
 				else {
@@ -205,7 +206,6 @@ public class MainActivity extends FragmentActivity  implements
 		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
 		fm.beginTransaction()
 			.replace(R.id.main_content_frame, fragment)
-			.addToBackStack(null)
 			.commit(); 
 
 	}
