@@ -2,8 +2,9 @@ package edu.rutgers.css.Rutgers;
 
 import java.util.ArrayList;
 
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,27 +66,13 @@ public class MainActivity extends FragmentActivity  implements
 	private LocationClient mLocationClient;
 	
 	private DrawerLayout mDrawerLayout;
-	private ListView mDrawerList;
+	private ListView mDrawerListView;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private RMenuAdapter mDrawerAdapter;
-		
-	public static class ErrorDialogFragment extends DialogFragment {
-		private Dialog mDialog;
-		public ErrorDialogFragment() {
-			super();
-			mDialog = null;
-		}
-		
-		public void setDialog(Dialog dialog) {
-			mDialog = dialog;
-		}
-		
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return mDialog;
-		}
-	}
 	
+	/**
+	 * For providing the location client to fragments
+	 */
 	@Override
 	public LocationClient getLocationClient() {
 		return mLocationClient;
@@ -96,33 +83,27 @@ public class MainActivity extends FragmentActivity  implements
 		super.onCreate(savedInstanceState);
 		
 		getWindow().requestFeature(Window.FEATURE_PROGRESS);
-		
+	   
 		setContentView(R.layout.activity_main);
 		
-		// Connect to Google Play location service
+		/*
+		 * Connect to Google Play location services
+		 */
 		mLocationClient = new LocationClient(this, this, this);
-		
-        // Sliding menu setup native items
+
+		/*
+		 * Set up nav drawer
+		 */
+		//Enable drawer icon
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+        
         ArrayList<RMenuPart> menuArray = new ArrayList<RMenuPart>();
         mDrawerAdapter = new RMenuAdapter(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);        
-        menuArray.add(new SlideMenuHeader("Channels"));
-        menuArray.add(new SlideMenuItem("Bus", "bus"));
-        menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt"));
-        menuArray.add(new SlideMenuItem("Food", "food"));
-        menuArray.add(new SlideMenuItem("Places", "places"));
-        menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
-        menuArray.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
-        //menuArray.add(new SlideMenuItem("RU Today", "reader", "http://medrel.drupaldev.rutgers.edu/rss/today"));
+        mDrawerListView = (ListView) findViewById(R.id.left_drawer);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         
-        // Sliding menu set up web shortcuts
-        mDrawerAdapter.add(new SlideMenuHeader("Shortcuts"));
-        loadWebShortcuts(mDrawerAdapter);
-        
-		// Set up Navigation Drawer
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        
-        mDrawerToggle = new ActionBarDrawerToggle(
+        mDrawerToggle = new ActionBarDrawerToggle(        
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
                 R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
@@ -146,12 +127,8 @@ public class MainActivity extends FragmentActivity  implements
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         
-        //false to disable <back arrow on title bar
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-        
-        mDrawerList.setAdapter(mDrawerAdapter);
-        mDrawerList.setOnItemClickListener(new OnItemClickListener() {
+        mDrawerListView.setAdapter(mDrawerAdapter);
+        mDrawerListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -160,7 +137,7 @@ public class MainActivity extends FragmentActivity  implements
 				SlideMenuItem clickedItem = (SlideMenuItem) parent.getAdapter().getItem(position);
 				if(clickedItem == null) {
 					Log.e("SlidingMenu", "Failed sliding menu click, index " + position);
-					mDrawerLayout.closeDrawer(mDrawerList);
+					mDrawerLayout.closeDrawer(mDrawerListView);
 					return;
 				}
 				
@@ -180,56 +157,56 @@ public class MainActivity extends FragmentActivity  implements
 				}
 				
 				//mDrawerAdapter.setSelectedPos(position);
-				mDrawerList.invalidateViews();
-				mDrawerLayout.closeDrawer(mDrawerList); // Close menu after a click
+				mDrawerListView.invalidateViews();
+				mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
 			}
         	
         });
-        	
+        
+        /*
+         * Load nav drawer items
+         */
+		
+        // This loads list of native channels (API is incomplete)
+		/*		
+ 		Request.api("app").done(new DoneCallback<JSONObject>() {
+			public void onDone(JSONObject result) {
+				Log.d("MainActivity", "got app data " + result.toString());
+			}
+		});
+		*/
+        
+        menuArray.add(new SlideMenuHeader("Channels"));
+        menuArray.add(new SlideMenuItem("Bus", "bus"));
+        menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt"));
+        menuArray.add(new SlideMenuItem("Food", "food"));
+        menuArray.add(new SlideMenuItem("Places", "places"));
+        menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
+        menuArray.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
+        //menuArray.add(new SlideMenuItem("RU Today", "reader", "http://medrel.drupaldev.rutgers.edu/rss/today"));
+        
+        // Sliding menu set up web shortcuts
+        mDrawerAdapter.add(new SlideMenuHeader("Shortcuts"));
+        loadWebShortcuts(mDrawerAdapter);
+        
+        /*
+         * Set up main screen
+         */
+        ComponentFactory.getInstance().mMainActivity = this;
 		FrameLayout contentFrame = (FrameLayout) findViewById(R.id.main_content_frame);
 		contentFrame.removeAllViews();
 		
-		/* Default to Food screen until main screen is made */
+		// Default to Food screen until main screen is made
 		Bundle args = new Bundle();
 		args.putString("title", "Food");
 		args.putString("component",  "food");
-
 		
 		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
 		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
 		fm.beginTransaction()
 			.replace(R.id.main_content_frame, fragment)
+			.addToBackStack(null)
 			.commit(); 
-		
-		ComponentFactory.getInstance().mMainActivity = this; 
-
-		/* This loads list of native channels (API is incomplete) */
-		/*		
- 		Request.api("app").done(new DoneCallback<JSONObject>() {
-			public void onDone(JSONObject result) {
-				Log.d("MainActivity", "got app data " + result.toString());
-				System.out.println("API loaded: " + result.toString());
-			}
-		});
-		*/
-		
-		/*
-		Nextbus.stopPredict("nb", "Hill Center").done(new DoneCallback<ArrayList>() {
-		@Override
-		public void onDone(ArrayList predictions) {
-			for (Object o : predictions) {
-				Prediction p = (Prediction) o;
-				Log.d("Main", "title: " + p.getTitle() + " direction: " + p.getDirection() + " minutes: " + p.getMinutes());
-			}
-		}
-		}).fail(new FailCallback<Exception>() {
-			
-			@Override
-			public void onFail(Exception e) {
-				Log.d("Main", Log.getStackTraceString(e));
-			}
-		});
-		*/
 
 	}
 	
@@ -266,6 +243,7 @@ public class MainActivity extends FragmentActivity  implements
 		if (webView != null) {
 			if(((WebDisplay) webView).backPress() == false) super.onBackPressed();
 		}
+		
 		else super.onBackPressed();
 	}
 	
@@ -317,21 +295,20 @@ public class MainActivity extends FragmentActivity  implements
 	}
 	
 	/*
-	 * Location service stuff
+	 * Location service calls
 	 */
-	
 	@Override
 	public void onConnected(Bundle dataBundle) {
 		Log.d(LocationUtils.APPTAG, "Connected to Google Play services");
 		servicesConnected();
-		if(mLocationClient != null) {
+/*		if(mLocationClient != null) {
 			// Mock location testing
 			//mLocationClient.setMockMode(false);
-/*			Location currentLocation = mLocationClient.getLastLocation();
+			Location currentLocation = mLocationClient.getLastLocation();
 			if(currentLocation != null) {
 				Log.d(LocationUtils.APPTAG, currentLocation.toString());
-			}*/
-		}
+			}
+		}*/
 	}
 	
 	@Override
@@ -371,12 +348,12 @@ public class MainActivity extends FragmentActivity  implements
                     // If Google Play services resolved the problem
                     case Activity.RESULT_OK:
                         Log.d(LocationUtils.APPTAG, "resolved by google play");
-                    break;
+                        break;
 
                     // If any other result was returned by Google Play services
                     default:
                         Log.d(LocationUtils.APPTAG, "not resolved by google play");
-                    break;
+                        break;
                 }
 
             // If any other request code was received
@@ -409,6 +386,23 @@ public class MainActivity extends FragmentActivity  implements
 		}
 	}
 	
+	public static class ErrorDialogFragment extends DialogFragment {
+		private Dialog mDialog;
+		public ErrorDialogFragment() {
+			super();
+			mDialog = null;
+		}
+		
+		public void setDialog(Dialog dialog) {
+			mDialog = dialog;
+		}
+		
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			return mDialog;
+		}
+	}
+	
 	/*
 	 * Nav drawer helpers
 	 */
@@ -419,7 +413,7 @@ public class MainActivity extends FragmentActivity  implements
 	 */
 	private void loadWebShortcuts(final RMenuAdapter menuAdapter) {
 		
-		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new DoneCallback<JSONArray>() {
+		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new AndroidDoneCallback<JSONArray>() {
 
 			@Override
 			public void onDone(JSONArray shortcutsArray) {
@@ -438,12 +432,22 @@ public class MainActivity extends FragmentActivity  implements
 				}
 				
 			}
+
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
+			}
 			
-		}).fail(new FailCallback<AjaxStatus>() {
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
 
 			@Override
 			public void onFail(AjaxStatus status) {
-				Log.e(TAG, status.getMessage());
+				Log.e(TAG, "loadWebShortcuts(): " + status.getMessage());
+			}
+			
+			@Override
+			public AndroidExecutionScope getExecutionScope() {
+				return AndroidExecutionScope.UI;
 			}
 			
 		});
