@@ -122,7 +122,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		if(fragment != null) {
 			FragmentManager fm = getActivity().getSupportFragmentManager();	
 			fm.beginTransaction()
-				.replace(R.id.main_content_frame, fragment)
+				.replace(R.id.main_content_frame, fragment, args.getString("component"))
 				.addToBackStack(null)
 				.commit(); 
 		}

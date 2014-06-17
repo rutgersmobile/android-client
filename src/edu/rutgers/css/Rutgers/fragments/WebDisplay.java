@@ -116,6 +116,7 @@ public class WebDisplay extends Fragment {
 	/**
 	 * This is called by MainActivity when back button is hit. Use it to go back in browser
 	 * history if possible.
+	 * Fragment must be added with "www" tag for this to be called.
 	 */
 	public boolean backPress() {
 		if(mWebView != null && mWebView.canGoBack()) {

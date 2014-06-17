@@ -261,6 +261,7 @@ public class MainActivity extends FragmentActivity  implements
 	
 	@Override
 	public void onBackPressed() {
+		// If web display is active, send back button presses to it for navigating browser history
 		Fragment webView = getSupportFragmentManager().findFragmentByTag("www");
 		if (webView != null) {
 			if(((WebDisplay) webView).backPress() == false) super.onBackPressed();
