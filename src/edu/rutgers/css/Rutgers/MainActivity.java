@@ -13,8 +13,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.res.Configuration;
-import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;

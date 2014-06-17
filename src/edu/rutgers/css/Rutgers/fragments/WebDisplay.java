@@ -23,7 +23,7 @@ public class WebDisplay extends Fragment {
 	
 	private ShareActionProvider mShareActionProvider;
 	private String mCurrentURL;
-	
+
 	public WebDisplay() {
 		// Required empty public constructor
 	}
@@ -31,6 +31,7 @@ public class WebDisplay extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setHasOptionsMenu(true);
 	}
 	
@@ -71,6 +72,7 @@ public class WebDisplay extends Fragment {
 		    public boolean shouldOverrideUrlLoading(WebView view, String url) {
 		    	mCurrentURL = url;
 		        webView.loadUrl(mCurrentURL);
+		        setShareIntent(mCurrentURL);
 		        return true;
 		    }
 		});
@@ -82,30 +84,24 @@ public class WebDisplay extends Fragment {
 	
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		getActivity().getMenuInflater().inflate(R.menu.web_menu, menu);
-		
-		MenuItem shareItem = menu.findItem(R.id.action_share);
-		mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
-		super.onCreateOptionsMenu(menu, inflater);
-	}
-	
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-    	
-    	if (item.getItemId() == R.id.action_share) {
-    		setShareIntent(mCurrentURL);
-    		return false;
-        }
+		inflater.inflate(R.menu.web_menu, menu);
 
-        return super.onOptionsItemSelected(item);
-    }
+		MenuItem shareItem = menu.findItem(R.id.action_share);
+		if(shareItem != null) {
+			mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
+			setShareIntent(mCurrentURL);
+		}
+		else {
+			Log.w(TAG, "Could not find Share menu item");
+		}
+	}
 	
 	/**
 	 * Create intent for sharing a link
 	 * @param url URL string
 	 */
 	private void setShareIntent(String url) {
-		if(mShareActionProvider != null && mCurrentURL != null) {	
+		if(mShareActionProvider != null && mCurrentURL != null) {
 			Intent intent = new Intent(android.content.Intent.ACTION_SEND);
 			intent.setType("text/plain");
 			intent.putExtra(Intent.EXTRA_TEXT, url);
