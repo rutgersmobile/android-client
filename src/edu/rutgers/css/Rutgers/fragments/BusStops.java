@@ -101,7 +101,7 @@ public class BusStops extends Fragment {
 				args.putString("title", clickedArgs.getString("title"));
 				args.putString("agency", clickedArgs.getString("agency"));
 				
-				ComponentFactory.getInstance().switchFragments(clickedArgs);
+				ComponentFactory.getInstance().switchFragments(args);
 			}
 			
 		});

@@ -110,6 +110,12 @@ public class ComponentFactory {
 		context.startActivity(i);
 	}
 	
+	/**
+	 * Add current fragment to the backstack and switch to the new one defined
+	 * by given arguments.
+	 * @param args Argument bundle with at least 'component' argument set to describe which component to build. All other arguments will be passed to the new fragment.
+	 * @return True if the new fragment was successfully created, false if not.
+	 */
 	public boolean switchFragments(Bundle args) {
 		Fragment fragment = createFragment(args);
 		if(fragment == null) return false;

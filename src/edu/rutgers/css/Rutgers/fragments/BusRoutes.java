@@ -73,7 +73,7 @@ public class BusRoutes extends Fragment {
 					args.putString("tag", clickedJSON.getString("tag"));
 					args.putString("agency", clickedArgs.getString("agency"));
 					
-					ComponentFactory.getInstance().switchFragments(clickedArgs);
+					ComponentFactory.getInstance().switchFragments(args);
 				} catch (JSONException e) {
 					Log.e(TAG, e.getMessage());
 				}
