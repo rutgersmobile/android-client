@@ -23,5 +23,21 @@
     <color name="bus_icon_color">#FF00FF00</color>
     <color name="news_icon_color">#FFFFFF00</color>
     <color name="food_icon_color">#FFFF0000</color>
+    <color name="soc_icon_color">#FFFFFFFF</color>
+    <color name="places_icon_color">#FFFFFFFF</color>
+    <color name="rec_icon_color">#FFFFFFFF</color>
+    <color name="emergency_icon_color">#FFFFFFFF</color>
+    <color name="events_icon_color">#FFFFFFFF</color>
+    <color name="feedback_icon_color">#FFFFFFFF</color>
+    <color name="careers_icon_color">#FFFFFFFF</color>
+    <color name="ruinfo_icon_color">#FFFFFFFF</color>
+    <color name="housing_icon_color">#FFFFFFFF</color>
+    <color name="kiosk_icon_color">#FFFFFFFF</color>
+    <color name="library_icon_color">#FF00FF00</color>
+    <color name="myru_icon_color">#FFFFFFFF</color>
+    <color name="ecollege_icon_color">#FFFFFFFF</color>
+    <color name="rualumni_icon_color">#FFFFFFFF</color>
+    <color name="sakai_icon_color">#FFFFFFFF</color>
+    <color name="studlife_icon_color">#FFFFFFFF</color>
     
 </resources>

@@ -439,10 +439,14 @@ public class MainActivity extends FragmentActivity  implements
 						String url = curShortcut.getString("url");
 						String iconName = removeNumbers(curShortcut.getString("icon"));
 						int iconRes = 0;
+						int colorRes = 0;
 						try {
 							iconRes = getResources().getIdentifier(iconName, "drawable", "edu.rutgers.css.Rutgers2");
 						} catch(NotFoundException e) {}
-						menuAdapter.add(new SlideMenuItem(title, "www", url, getIcon(iconRes)));
+						try {
+							colorRes = getResources().getIdentifier(iconName+"_icon_color", "color", "edu.rutgers.css.Rutgers2");
+						} catch(NotFoundException e) {}
+						menuAdapter.add(new SlideMenuItem(title, "www", url, getIcon(iconRes, colorRes)));
 					} catch (JSONException e) {
 						Log.e(TAG, e.getMessage());
 						continue;
