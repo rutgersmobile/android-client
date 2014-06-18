@@ -14,6 +14,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.res.Configuration;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -80,16 +81,20 @@ public class MainActivity extends FragmentActivity  implements
 		return mLocationClient;
 	}
 	
-	private Drawable getIcon(int resource) {
-		return getIcon(resource, 0xffffffff);
+	private Drawable getIcon(int drawableResource) {
+		return getIcon(drawableResource, R.color.white);
 	}
 	
-	private Drawable getIcon(int resource, int color) {
-		Drawable drawable = getResources().getDrawable(resource);
-		if(drawable == null) return null;
-		
-		drawable.setColorFilter(color, Mode.SRC_IN);
-		return drawable;
+	private Drawable getIcon(int drawableResource, int colorResource) {
+		try {
+			Drawable drawable = getResources().getDrawable(drawableResource);
+			int color = getResources().getColor(colorResource);
+			drawable.setColorFilter(color, Mode.SRC_IN);
+			return drawable;
+		} catch(NotFoundException e) {
+			Log.w(TAG, "getIcon(): " + e.getMessage());
+			return null;
+		}
 	}
 	
 	@Override
@@ -180,17 +185,10 @@ public class MainActivity extends FragmentActivity  implements
 		});
 		*/
         
-        menuArray.add(new SlideMenuHeader("Channels"));
-        menuArray.add(new SlideMenuItem("Bus", "bus", getIcon(R.drawable.careers, 0xff00ff00)));
-        menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt", getIcon(R.drawable.news, 0xffff0000)));
-        menuArray.add(new SlideMenuItem("Food", "food", getIcon(R.drawable.food, 0xffffff00)));
-        menuArray.add(new SlideMenuItem("Places", "places", getIcon(R.drawable.places)));
-        menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt", getIcon(R.drawable.rec)));
-        menuArray.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events2)));
-        //menuArray.add(new SlideMenuItem("RU Today", "reader", "http://medrel.drupaldev.rutgers.edu/rss/today"));
+        // Set up channel items in drawer
+        loadChannels(mDrawerAdapter);
         
-        // Sliding menu set up web shortcuts
-        mDrawerAdapter.add(new SlideMenuHeader("Shortcuts"));
+        // Set up web shortcut items in drawer
         loadWebShortcuts(mDrawerAdapter);
         
         /*
@@ -410,12 +408,24 @@ public class MainActivity extends FragmentActivity  implements
 	 * Nav drawer helpers
 	 */
 	
+	private void loadChannels(final RMenuAdapter menuAdapter) {
+		menuAdapter.add(new SlideMenuHeader(getResources().getString(R.string.drawer_channels)));
+	    menuAdapter.add(new SlideMenuItem("Bus", "bus", getIcon(R.drawable.careers, R.color.bus_icon_color)));
+	    menuAdapter.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt", getIcon(R.drawable.news, R.color.news_icon_color)));
+	    menuAdapter.add(new SlideMenuItem("Food", "food", getIcon(R.drawable.food, R.color.food_icon_color)));
+	    menuAdapter.add(new SlideMenuItem("Places", "places", getIcon(R.drawable.places)));
+	    menuAdapter.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt", getIcon(R.drawable.rec)));
+	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events2)));
+	    //menuAdapter.add(new SlideMenuItem("RU Today", "reader", "http://medrel.drupaldev.rutgers.edu/rss/today"));	
+	}
+	
 	/**
 	 * Grab web links and add them to the menu.
 	 * @param menuArray Array that holds the menu objects
 	 */
 	private void loadWebShortcuts(final RMenuAdapter menuAdapter) {
-		
+        menuAdapter.add(new SlideMenuHeader(getResources().getString(R.string.drawer_shortcuts)));
+        
 		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new AndroidDoneCallback<JSONArray>() {
 
 			@Override
@@ -427,7 +437,12 @@ public class MainActivity extends FragmentActivity  implements
 						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
 						String title = DTable.getLocalTitle(curShortcut.get("title"));
 						String url = curShortcut.getString("url");
-						menuAdapter.add(new SlideMenuItem(title, "www", url));
+						String iconName = removeNumbers(curShortcut.getString("icon"));
+						int iconRes = 0;
+						try {
+							iconRes = getResources().getIdentifier(iconName, "drawable", "edu.rutgers.css.Rutgers2");
+						} catch(NotFoundException e) {}
+						menuAdapter.add(new SlideMenuItem(title, "www", url, getIcon(iconRes)));
 					} catch (JSONException e) {
 						Log.e(TAG, e.getMessage());
 						continue;
@@ -455,6 +470,14 @@ public class MainActivity extends FragmentActivity  implements
 			
 		});
 		
+	}
+	
+	private String removeNumbers(String annoyingString) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < annoyingString.length(); i++) {
+			if(!Character.isDigit(annoyingString.charAt(i))) sb.append(annoyingString.charAt(i));
+		}
+		return sb.toString();
 	}
 	
 }

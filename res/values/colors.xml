@@ -19,4 +19,9 @@
     <color name="drawer_item_text">#FFFFFF</color>
     <color name="drawer_divider">#455259</color>
 
+    <!-- Drawer icon colors -->
+    <color name="bus_icon_color">#FF00FF00</color>
+    <color name="news_icon_color">#FFFFFF00</color>
+    <color name="food_icon_color">#FFFF0000</color>
+    
 </resources>

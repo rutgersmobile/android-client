@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- App-wide strings -->
     <string name="app_name">Rutgers</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_single_fragment">SingleFragmentActivity</string>
     <string name="replace_me">REPLACE</string>
     <string name="share">Share</string>
+    <string name="drawer_open">Open</string>
+	<string name="drawer_close">Close</string>
+	<string name="drawer_channels">Channels</string>
+	<string name="drawer_shortcuts">Shortcuts</string>
+    
+	<!-- Error messages -->
+    <string name="failed_load">Getting data failed. Please try again later.</string>
+    <string name="failed_location">Getting location failed.</string>
     
     <!-- Bus channel -->
     <string name="bus_title">Bus</string>
@@ -49,12 +58,6 @@
 
     <!-- Dining channel -->
     <string name="no_halls_available">No dining halls available.</string>
-    
-    <string name="failed_load">Getting data failed. Please try again later.</string>
-    <string name="failed_location">Getting location failed.</string>
-    
-    <string name="drawer_open">Open</string>
-	<string name="drawer_close">Close</string>
 	
 	<!-- Recreation channel -->
 	<string name="rec_info_desk_header">Information Desk</string>
