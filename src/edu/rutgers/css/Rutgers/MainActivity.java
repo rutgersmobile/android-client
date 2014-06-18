@@ -408,20 +408,24 @@ public class MainActivity extends FragmentActivity  implements
 	 * Nav drawer helpers
 	 */
 	
+	/**
+	 * Add native channel items to the menu.
+	 * @param menuAdapter Menu drawer adapter
+	 */
 	private void loadChannels(final RMenuAdapter menuAdapter) {
 		menuAdapter.add(new SlideMenuHeader(getResources().getString(R.string.drawer_channels)));
 	    menuAdapter.add(new SlideMenuItem("Bus", "bus", getIcon(R.drawable.careers, R.color.bus_icon_color)));
 	    menuAdapter.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt", getIcon(R.drawable.news, R.color.news_icon_color)));
 	    menuAdapter.add(new SlideMenuItem("Food", "food", getIcon(R.drawable.food, R.color.food_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("Places", "places", getIcon(R.drawable.places)));
-	    menuAdapter.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt", getIcon(R.drawable.rec)));
-	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events2)));
+	    menuAdapter.add(new SlideMenuItem("Places", "places", getIcon(R.drawable.places, R.color.places_icon_color)));
+	    menuAdapter.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt", getIcon(R.drawable.rec, R.color.rec_icon_color)));
+	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events, R.color.events_icon_color)));
 	    //menuAdapter.add(new SlideMenuItem("RU Today", "reader", "http://medrel.drupaldev.rutgers.edu/rss/today"));	
 	}
 	
 	/**
 	 * Grab web links and add them to the menu.
-	 * @param menuArray Array that holds the menu objects
+	 * @param menuAdapter Menu drawer adapter
 	 */
 	private void loadWebShortcuts(final RMenuAdapter menuAdapter) {
         menuAdapter.add(new SlideMenuHeader(getResources().getString(R.string.drawer_shortcuts)));
@@ -448,7 +452,7 @@ public class MainActivity extends FragmentActivity  implements
 						} catch(NotFoundException e) {}
 						menuAdapter.add(new SlideMenuItem(title, "www", url, getIcon(iconRes, colorRes)));
 					} catch (JSONException e) {
-						Log.e(TAG, e.getMessage());
+						Log.e(TAG, "loadWebShortcuts(): " + e.getMessage());
 						continue;
 					}
 				}
