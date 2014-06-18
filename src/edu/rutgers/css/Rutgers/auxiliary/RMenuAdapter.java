@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -37,6 +38,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 	
 	static class ViewHolder {
 		TextView titleTextView;
+		ImageView iconImageView;
 	}
 	
 	/**
@@ -94,7 +96,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 			}
 			
 			// Determine if item should not be clickable
-			if(!curItem.getClickable()) {
+			if(!curItem.getIsClickable()) {
 				convertView.setEnabled(false);
 				convertView.setClickable(false);
 				convertView.setOnClickListener(null);
@@ -102,6 +104,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 			
 			holder = new ViewHolder();
 			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
+			holder.iconImageView = (ImageView) convertView.findViewById(R.id.icon);
 			convertView.setTag(holder);
 		}
 		else holder = (ViewHolder) convertView.getTag();
@@ -109,6 +112,17 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 		// Set item text
 		if(holder.titleTextView != null) holder.titleTextView.setText(curItem.getTitle());
 		else Log.e(TAG, "R.id.title not found");
+		
+		// Set icon
+		if(holder.iconImageView != null){
+			if(curItem.getDrawable() != null) {
+				holder.iconImageView.setImageDrawable(curItem.getDrawable());
+				holder.iconImageView.setVisibility(View.VISIBLE);
+			}
+			else {
+				holder.iconImageView.setVisibility(View.GONE);
+			}
+		}
 		
 /*		if(getSelectColor() != 0 && getItemViewType(position) == 0) {
 			if(getSelectedPos() == position) {
@@ -136,7 +150,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 	@Override
 	public int getItemViewType(int position) {
 	    if(getItem(position).getIsCategory()) return ViewTypes.HEADER.ordinal();
-	    else if(getItem(position).getClickable()) return ViewTypes.CLICKABLE.ordinal();
+	    else if(getItem(position).getIsClickable()) return ViewTypes.CLICKABLE.ordinal();
 	    else return ViewTypes.UNCLICKABLE.ordinal();
 	}
 	

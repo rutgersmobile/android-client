@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 /**
@@ -13,6 +14,7 @@ public class SlideMenuItem implements RMenuPart {
 
 	private Bundle args;
 	private boolean clickable;
+	private Drawable drawable;
 	
 	/**
 	 * Initialize menu item with a custom argument bundle.
@@ -52,6 +54,38 @@ public class SlideMenuItem implements RMenuPart {
 	}
 	
 	/**
+	 * Initialize menu item with a channel title and component ID.
+	 * @param title Title of the channel/item
+	 * @param component Component identifier
+	 * @param drawable Item icon
+	 */
+	public SlideMenuItem(String title, String component, Drawable drawable) {
+		Bundle args = new Bundle();
+		args.putString("title", title);
+		args.putString("component", component);
+		this.setArgs(args);
+		this.setClickable(true);
+		this.setDrawable(drawable);
+	}
+	
+	/**
+	 * Initialize menu item with channel title, component ID, and a URL argument.
+	 * @param title Title of the channel/item
+	 * @param component Component identifier
+	 * @param url URL argument passed to component
+	 * @param drawable Item icon
+	 */
+	public SlideMenuItem(String title, String component, String url, Drawable drawable) {
+		Bundle args = new Bundle();
+		args.putString("title", title);
+		args.putString("component", component);
+		args.putString("url", url);
+		this.setArgs(args);
+		this.setClickable(true);
+		this.setDrawable(drawable);
+	}
+	
+	/**
 	 * Create an unclickable menu item with text
 	 * @param title Item text
 	 */
@@ -67,7 +101,7 @@ public class SlideMenuItem implements RMenuPart {
 	}
 	
 	@Override
-	public boolean getClickable() {
+	public boolean getIsClickable() {
 		return this.clickable;
 	}
 
@@ -77,6 +111,14 @@ public class SlideMenuItem implements RMenuPart {
 	
 	public Bundle getArgs() {
 		return this.args;
+	}
+	
+	public void setDrawable(Drawable drawable) {
+		this.drawable = drawable;
+	}
+	
+	public Drawable getDrawable() {
+		return this.drawable;
 	}
 	
 	public String toString() {

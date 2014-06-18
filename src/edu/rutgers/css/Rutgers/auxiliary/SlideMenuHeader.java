@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
+import android.graphics.drawable.Drawable;
+
 public class SlideMenuHeader implements RMenuPart {
 	
 	private String title;
@@ -19,8 +21,13 @@ public class SlideMenuHeader implements RMenuPart {
 	}
 
 	@Override
-	public boolean getClickable() {
+	public boolean getIsClickable() {
 		return false;
+	}
+	
+	@Override
+	public Drawable getDrawable() {
+		return null;
 	}
 	
 }

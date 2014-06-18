@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
+import android.graphics.drawable.Drawable;
+
 
 /**
  * Class for holding food menu item/category data
@@ -51,8 +53,13 @@ public class FoodItem implements RMenuPart {
 	}
 	
 	@Override
-	public boolean getClickable() {
+	public boolean getIsClickable() {
 		return false;
+	}
+	
+	@Override
+	public Drawable getDrawable() {
+		return null;
 	}
 	
 	/**

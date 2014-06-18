@@ -14,6 +14,8 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.res.Configuration;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
@@ -78,12 +80,24 @@ public class MainActivity extends FragmentActivity  implements
 		return mLocationClient;
 	}
 	
+	private Drawable getIcon(int resource) {
+		return getIcon(resource, 0xffffffff);
+	}
+	
+	private Drawable getIcon(int resource, int color) {
+		Drawable drawable = getResources().getDrawable(resource);
+		if(drawable == null) return null;
+		
+		drawable.setColorFilter(color, Mode.SRC_IN);
+		return drawable;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		getWindow().requestFeature(Window.FEATURE_PROGRESS);
-	   
+		
 		setContentView(R.layout.activity_main);
 		
 		/*
@@ -167,12 +181,12 @@ public class MainActivity extends FragmentActivity  implements
 		*/
         
         menuArray.add(new SlideMenuHeader("Channels"));
-        menuArray.add(new SlideMenuItem("Bus", "bus"));
-        menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt"));
-        menuArray.add(new SlideMenuItem("Food", "food"));
-        menuArray.add(new SlideMenuItem("Places", "places"));
-        menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt"));
-        menuArray.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml"));
+        menuArray.add(new SlideMenuItem("Bus", "bus", getIcon(R.drawable.careers, 0xff00ff00)));
+        menuArray.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt", getIcon(R.drawable.news, 0xffff0000)));
+        menuArray.add(new SlideMenuItem("Food", "food", getIcon(R.drawable.food, 0xffffff00)));
+        menuArray.add(new SlideMenuItem("Places", "places", getIcon(R.drawable.places)));
+        menuArray.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt", getIcon(R.drawable.rec)));
+        menuArray.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events2)));
         //menuArray.add(new SlideMenuItem("RU Today", "reader", "http://medrel.drupaldev.rutgers.edu/rss/today"));
         
         // Sliding menu set up web shortcuts
