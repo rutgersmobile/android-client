@@ -57,6 +57,7 @@ public class Places {
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, e.getMessage() + "; Response code: " + e.getCode());
+				confd.reject(null);
 			}
 			
 			@Override
