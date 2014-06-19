@@ -1,0 +1,51 @@
+<resources>
+
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+    <string name="pref_header_user">User Information</string>
+    
+	<string name="pref_campus_title">Home Campus</string>
+	<string-array name="pref_campus_strings">
+	    <item>New Brunswick</item>
+	    <item>Newark</item>
+	    <item>Camden</item>
+	    <item>RBHS</item>
+	    <item>Other</item>
+	</string-array>
+	<string-array name="pref_campus_values">
+	    <item>nb</item>
+	    <item>nwk</item>
+	    <item>cam</item>
+	    <item>rbhs</item>
+	    <item>other</item>
+	</string-array>
+		
+	<string name="pref_user_type_title">User Type</string>
+	<string-array name="pref_user_type_strings">
+	    <item>Undergraduate Student</item>
+	    <item>Graduate Student</item>
+	    <item>Prospective Student</item>
+	    <item>Faculty/Staff</item>
+	    <item>Parent</item>
+	    <item>Alumni</item>
+	    <item>Friend</item>
+	</string-array>
+	<string-array name="pref_user_type_values">
+	    <item>undergrad</item>
+	    <item>grad</item>
+	    <item>prospective</item>
+	    <item>facstaff</item>
+	    <item>parent</item>
+	    <item>alumni</item>
+	    <item>friend</item>
+	</string-array>
+
+    <!-- Notification settings -->
+    <string name="pref_header_notifications">Notifications</string>
+    <string name="pref_title_new_message_notifications">Receive push notifications</string>
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+    <string name="pref_title_vibrate">Vibrate</string>
+
+</resources>

@@ -264,15 +264,25 @@ public class MainActivity extends FragmentActivity  implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Pass the event to ActionBarDrawerToggle, if it returns
-        // true, then it has handled the app icon touch event
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-        	//Log.d(TAG,"");
+        // See if ActionBarDrawerToggle will handle event
+    	if (mDrawerToggle.onOptionsItemSelected(item)) {
         	return true;
         }
         
-        // Handle your other action bar items...
-        return super.onOptionsItemSelected(item);
+    	// Handle event here or pass it on
+        switch(item.getItemId()) {
+        
+        	// Start the Settings activity
+	        case R.id.action_settings:
+	        	Intent intent = new Intent(this, SettingsActivity.class);
+	        	startActivity(intent);
+	        	return true;
+	        
+	        default:
+	        	return super.onOptionsItemSelected(item);
+	        	
+        }
+        
     }
 	
 	@Override
