@@ -18,6 +18,7 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -105,6 +106,11 @@ public class MainActivity extends FragmentActivity  implements
 		getWindow().requestFeature(Window.FEATURE_PROGRESS);
 		
 		setContentView(R.layout.activity_main);
+		
+		/*
+		 * Set default settings the first time the app is run
+		 */
+		PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 		
 		/*
 		 * Connect to Google Play location services
