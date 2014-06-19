@@ -32,7 +32,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 			TextView titleTextView;
 			TextView dateTextView;
 			TextView descriptionTextView;
-			TextView authorTextView;
+			//TextView authorTextView;
 	}
 	
 	public RSSAdapter(Context context, int resource, List<RSSItem> objects) {
@@ -56,7 +56,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 			mHolder.titleTextView = (TextView) convertView.findViewById(R.id.rssRowTitleView);
 			mHolder.dateTextView = (TextView) convertView.findViewById(R.id.rssRowDateView);
 			mHolder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
-			mHolder.authorTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorView);
+			//mHolder.authorTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorView);
 			convertView.setTag(mHolder);
 		}
 		else {	
@@ -69,7 +69,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		mHolder.titleTextView.setText(curItem.getTitle());
 		mHolder.dateTextView.setText(curItem.getDate());
 		mHolder.descriptionTextView.setText(curItem.getDescription());
-		mHolder.authorTextView.setText(curItem.getAuthor());
+		//mHolder.authorTextView.setText(curItem.getAuthor());
 		
 		/* Download image */
 		if(curItem.getImgUrl() == null) {

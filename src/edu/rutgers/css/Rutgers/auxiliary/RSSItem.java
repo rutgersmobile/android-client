@@ -46,7 +46,7 @@ public class RSSItem {
 
 		// RSS 2.0 required fields
 		this.title = item.text("title");
-		this.description = item.text("description");
+		this.description = removeTrailingNewline(item.text("description"));
 		this.link = item.text("link");
 		
 		// Non-required fields
@@ -167,6 +167,22 @@ public class RSSItem {
 	 */
 	public String toString() {
 		return StringEscapeUtils.unescapeHtml4(this.title);
+	}
+	
+	/**
+	 * Get rid of the trailing newline present in some description fields.
+	 * @param string String to cleanse
+	 * @return Cleansed string
+	 */
+	private String removeTrailingNewline(String string) {
+		if(string == null) return null;
+		
+		if(string.charAt(string.length()-1) == '\n') {
+			return string.substring(0, string.length()-1);
+		}
+		else {
+			return string;
+		}
 	}
 	
 }
