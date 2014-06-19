@@ -22,7 +22,6 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -196,19 +195,7 @@ public class MainActivity extends FragmentActivity  implements
          */
         ComponentFactory.getInstance().mMainActivity = this;
 		FrameLayout contentFrame = (FrameLayout) findViewById(R.id.main_content_frame);
-		contentFrame.removeAllViews();
-		
-		// Default to Food screen until main screen is made
-		Bundle args = new Bundle();
-		args.putString("title", "Food");
-		args.putString("component",  "food");
-		
-		Fragment fragment = ComponentFactory.getInstance().createFragment(args);
-		FragmentManager fm = MainActivity.this.getSupportFragmentManager();
-		fm.beginTransaction()
-			.replace(R.id.main_content_frame, fragment)
-			.commit(); 
-
+		//contentFrame.removeAllViews();
 	}
 	
 	@Override
@@ -419,8 +406,7 @@ public class MainActivity extends FragmentActivity  implements
 	    menuAdapter.add(new SlideMenuItem("Food", "food", getIcon(R.drawable.food, R.color.food_icon_color)));
 	    menuAdapter.add(new SlideMenuItem("Places", "places", getIcon(R.drawable.places, R.color.places_icon_color)));
 	    menuAdapter.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt", getIcon(R.drawable.rec, R.color.rec_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events, R.color.events_icon_color)));
-	    //menuAdapter.add(new SlideMenuItem("RU Today", "reader", "http://medrel.drupaldev.rutgers.edu/rss/today"));	
+	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events, R.color.events_icon_color)));	
 	}
 	
 	/**
