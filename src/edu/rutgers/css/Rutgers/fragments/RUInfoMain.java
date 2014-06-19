@@ -13,6 +13,13 @@ import edu.rutgers.css.Rutgers2.R;
 
 public class RUInfoMain extends Fragment {
 
+	private static final String TAG = "RUInfoMain";
+	
+	// Can possibly grab these from a resources file or API later on
+	private String mPhoneNumber = "tel:7324454636";
+	private String mTextNumber = "66746";
+	private String mEmailAddress = "colhenry@rci.rutgers.edu";
+	
 	public RUInfoMain() {
 		// Required empty public constructor
 	}
@@ -28,69 +35,59 @@ public class RUInfoMain extends Fragment {
 		final Button textButton2 = (Button) v.findViewById(R.id.button3);
 		final Button emailButton = (Button) v.findViewById(R.id.button4);
 		
+		// "Call RU-info"
 		callButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				callIntent(v);
+				Intent intent = new Intent(Intent.ACTION_DIAL);
+				intent.setData(Uri.parse(mPhoneNumber));
+				startActivity(intent);
 			}
 			
 		});
 		
+		// "Text Rutgers to 66746"
 		textButton1.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				textIntent(v);
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setType("vnd.android-dir/mms-sms");
+				intent.putExtra("address", mTextNumber);
+				intent.putExtra("sms_body", "Rutgers");
+				startActivity(intent);
 			}
 			
 		});
 
+		// "Text RU-info"
 		textButton2.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				textIntent(v);
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setType("vnd.android-dir/mms-sms");
+				intent.putExtra("address", mTextNumber);
+				startActivity(intent);
 			}
 			
 		});
 		
+		// "Email Colonel Henry"
 		emailButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				emailIntent(v);
+				Intent intent = new Intent(Intent.ACTION_SEND);
+				intent.setType("message/rfc822");
+				intent.putExtra(Intent.EXTRA_EMAIL, new String[]{mEmailAddress});
+				startActivity(intent);
 			}
 			
 		});
 		
 		return v;
-	}
-	
-	public void callIntent(View v) {
-		Intent intent = new Intent(Intent.ACTION_DIAL);
-		intent.setData(Uri.parse("tel:7324454636"));
-		startActivity(intent);
-	}
-
-	public void textIntent(View v) {
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setType("vnd.android-dir/mms-sms");
-		intent.putExtra("address", "66746");
-		
-		// Clicked "text Rutgers to..."
-		if(v.getId() == R.id.button2) {
-			intent.putExtra("sms_body", "Rutgers");
-		}
-		
-		startActivity(intent);
-	}
-	
-	public void emailIntent(View v) {
-		Intent intent = new Intent(Intent.ACTION_SEND);
-		intent.setType("message/rfc822");
-		intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"colhenry@rci.rutgers.edu"});
-		startActivity(intent);
 	}
 	
 }
