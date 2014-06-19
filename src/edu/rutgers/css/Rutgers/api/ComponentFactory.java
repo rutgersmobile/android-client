@@ -69,7 +69,7 @@ public class ComponentFactory {
 	 * @return Built fragment
 	 */
 	public Fragment createFragment (Bundle options) {
-		Log.d(TAG, "Attempting to create fragment");
+		Log.v(TAG, "Attempting to create fragment");
 		Fragment fragment = new Fragment();
 		String component;
 		
@@ -83,7 +83,7 @@ public class ComponentFactory {
 		if(compClass != null) {
 			try {
 				fragment = (Fragment) compClass.newInstance();
-				Log.d(TAG, "Creating a " + compClass.getSimpleName());
+				Log.v(TAG, "Creating a " + compClass.getSimpleName());
 			} catch (InstantiationException | IllegalAccessException
 					| IllegalArgumentException e) {
 				Log.e(TAG, Log.getStackTraceString(e));

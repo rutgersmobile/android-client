@@ -22,6 +22,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -49,6 +50,7 @@ import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers.fragments.DTable;
+import edu.rutgers.css.Rutgers.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.location.LocationUtils;
 import edu.rutgers.css.Rutgers2.R;
@@ -160,6 +162,7 @@ public class MainActivity extends FragmentActivity  implements
 				}
 				
 				Bundle clickedArgs = clickedItem.getArgs();
+				clickedArgs.putBoolean("topLevel", true); // This is a top level menu press
 				
 				// Launch component
 				ComponentFactory.getInstance().switchFragments(clickedArgs);
@@ -196,6 +199,13 @@ public class MainActivity extends FragmentActivity  implements
         ComponentFactory.getInstance().mMainActivity = this;
 		FrameLayout contentFrame = (FrameLayout) findViewById(R.id.main_content_frame);
 		//contentFrame.removeAllViews();
+		
+		FragmentManager fm = getSupportFragmentManager();
+		if(fm.getBackStackEntryCount() == 0) {
+			fm.beginTransaction()
+				.replace(R.id.main_content_frame, new MainScreen(), "mainfrag")
+				.commit();
+		}
 	}
 	
 	@Override
