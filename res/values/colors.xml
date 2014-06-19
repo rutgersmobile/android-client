@@ -5,6 +5,7 @@
     <color name="black">#000000</color>
     <color name="pantone186">#D21034</color>
     <color name="pantone431">#5F6A72</color>
+    <color name="faded">#7A7A62</color>
     
     <!--  Colors used with bus arrival times -->
     <color name="bus_soonest">#CC0000</color>

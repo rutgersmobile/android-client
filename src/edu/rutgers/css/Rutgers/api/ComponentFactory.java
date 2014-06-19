@@ -21,6 +21,7 @@ import edu.rutgers.css.Rutgers.fragments.FoodMeal;
 import edu.rutgers.css.Rutgers.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.fragments.PlacesMain;
 import edu.rutgers.css.Rutgers.fragments.RSSReader;
+import edu.rutgers.css.Rutgers.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.fragments.RecreationDisplay;
 import edu.rutgers.css.Rutgers.fragments.RecreationMain;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
@@ -52,6 +53,7 @@ public class ComponentFactory {
 		fragmentTable.put("recreation", RecreationMain.class);
 		fragmentTable.put("recdisplay", RecreationDisplay.class);
 		fragmentTable.put("www", WebDisplay.class);
+		fragmentTable.put("ruinfo", RUInfoMain.class);
 	}
 	
 	/**

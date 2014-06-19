@@ -66,4 +66,18 @@
 	<string name="rec_description_header">Description</string>
 	<string name="rec_address_header">Address</string>
 	
+	<!-- RU-info channel -->
+	<string name="ruinfo_title">RU-info</string>
+	<string name="ruinfo_main_text">You can contact a helpful information assistant at RU-info with your Rutgers questions by phone, text, or email.</string>
+	<string name="ruinfo_call_button">Call RU-info</string>
+	<string name="ruinfo_phone_number">732&#8211;445&#8211;INFO (4636)</string>
+	<string name="ruinfo_text_header">Text RU-info with your questions:</string>
+	<string name="ruinfo_text_desc">To sign up for RU-info TEXT:</string>
+	<string name="ruinfo_text_button">Text \'Rutgers\' to 66746</string>
+	<string name="ruinfo_text_already">Or, if you have already signed up:</string>
+	<string name="ruinfo_text_ruinfo">Text RU-info</string>
+	<string name="ruinfo_email_desc">Email RU-info with your question:</string>
+	<string name="ruinfo_email_button">Email Colonel Henry</string>
+	<string name="ruinfo_email_address">colhenry@rci.rutgers.edu</string>
+	
 </resources>

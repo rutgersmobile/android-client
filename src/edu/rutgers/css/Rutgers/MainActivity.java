@@ -426,7 +426,8 @@ public class MainActivity extends FragmentActivity  implements
 	    menuAdapter.add(new SlideMenuItem("Food", "food", getIcon(R.drawable.food, R.color.food_icon_color)));
 	    menuAdapter.add(new SlideMenuItem("Places", "places", getIcon(R.drawable.places, R.color.places_icon_color)));
 	    menuAdapter.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt", getIcon(R.drawable.rec, R.color.rec_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events, R.color.events_icon_color)));	
+	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events, R.color.events_icon_color)));
+	    menuAdapter.add(new SlideMenuItem("RU-info", "ruinfo", getIcon(R.drawable.ruinfo)));
 	}
 	
 	/**
