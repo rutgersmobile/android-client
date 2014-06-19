@@ -111,20 +111,37 @@ public class ComponentFactory {
 	}
 	
 	/**
-	 * Add current fragment to the backstack and switch to the new one defined
-	 * by given arguments.
+	 * Add current fragment to the backstack and switch to the new one defined by given arguments.
+	 * For calls from the nav drawer, this will attempt to pop all backstack history until the last 
+	 * time the desired channel was launched.
 	 * @param args Argument bundle with at least 'component' argument set to describe which component to build. All other arguments will be passed to the new fragment.
 	 * @return True if the new fragment was successfully created, false if not.
 	 */
 	public boolean switchFragments(Bundle args) {
+		if(args == null) {
+			Log.e(TAG, "switchFragments(): null args");
+			return false;
+		}
+		
 		Fragment fragment = createFragment(args);
 		if(fragment == null) return false;
 		
+		String componentTag = args.getString("component");
+		boolean isTopLevel = args.getBoolean("topLevel");
+		
 		FragmentManager fm = mMainActivity.getSupportFragmentManager();
+		
+		// If this is a top level (nav drawer) press, find the last time this channel was launched and pop backstack to it
+		if(isTopLevel && fm.findFragmentByTag(componentTag) != null) {
+			fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+		}
+				
+		// Switch the main content fragment
 		fm.beginTransaction()
-			.replace(R.id.main_content_frame, fragment, args.getString("component"))
-			.addToBackStack(null)
+			.replace(R.id.main_content_frame, fragment, componentTag)
+			.addToBackStack(componentTag)
 			.commit();
+
 		return true;
 	}
 	
