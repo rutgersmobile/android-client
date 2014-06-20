@@ -80,4 +80,23 @@
 	<string name="ruinfo_email_button">Email Colonel Henry</string>
 	<string name="ruinfo_email_address">colhenry@rci.rutgers.edu</string>
 	
+	<!-- Feedback channel -->
+	<string name="feedback_title">Feedback</string>
+	<string name="feedback_select_subject">Subject:</string>
+	<string name="feedback_want_response">Want a response?</string>
+	<string name="feedback_hint">Type your message</string>
+	<string name="feedback_general">General Questions</string>
+	<string name="feedback_help_use">Help Using Application</string>
+	<string name="feedback_channel_feedback">App Channel Feedback</string>
+	<string name="feedback_feature_request">App Feature Request</string>
+	<string name="feedback_report_bug">Report a Bug</string>
+	
+	<string-array name="feedback_subjects">
+		<item>@string/feedback_help_use</item>
+		<item>@string/feedback_channel_feedback</item>
+		<item>@string/feedback_feature_request</item>
+		<item>@string/feedback_report_bug</item>
+		<item>@string/feedback_general</item>
+	</string-array>
+	
 </resources>

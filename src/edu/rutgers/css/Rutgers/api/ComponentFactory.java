@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.api;
 import java.util.Hashtable;
 import java.util.Locale;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +14,7 @@ import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.BusMain;
 import edu.rutgers.css.Rutgers.fragments.DTable;
+import edu.rutgers.css.Rutgers.fragments.FeedbackMain;
 import edu.rutgers.css.Rutgers.fragments.FoodHall;
 import edu.rutgers.css.Rutgers.fragments.FoodMain;
 import edu.rutgers.css.Rutgers.fragments.FoodMeal;
@@ -54,6 +54,7 @@ public class ComponentFactory {
 		fragmentTable.put("recdisplay", RecreationDisplay.class);
 		fragmentTable.put("www", WebDisplay.class);
 		fragmentTable.put("ruinfo", RUInfoMain.class);
+		fragmentTable.put("feedback", FeedbackMain.class);
 	}
 	
 	/**
