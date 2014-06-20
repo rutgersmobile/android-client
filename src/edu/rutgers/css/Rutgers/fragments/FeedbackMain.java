@@ -1,5 +1,10 @@
 package edu.rutgers.css.Rutgers.fragments;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.json.JSONObject;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,12 +16,24 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+
+import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
+
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers2.R;
 
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 
 	private static final String TAG = "FeedbackMain";
+	private static final String API = "https://rumobile.rutgers.edu/1/feedback.php";
+	private static final String OSNAME = "android";
+	private static final String BETAMODE = "dev";
+	
+	private Spinner mSubjectSpinner;
+	private EditText mMessageEditText;
+	private CheckBox mResponseCheckBox;
 	
 	public FeedbackMain() {
 		// Required empty public constructor
@@ -28,13 +45,40 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		
 		getActivity().setTitle(getActivity().getResources().getString(R.string.feedback_title));
 		
-		final Spinner subjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
-		final EditText messageEditText = (EditText) v.findViewById(R.id.messageEditText);
-		final CheckBox responseCheckBox = (CheckBox) v.findViewById(R.id.responseCheckBox);
+		mSubjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
+		mMessageEditText = (EditText) v.findViewById(R.id.messageEditText);
+		mResponseCheckBox = (CheckBox) v.findViewById(R.id.responseCheckBox);
 		
-		subjectSpinner.setOnItemSelectedListener(this);
+		mSubjectSpinner.setOnItemSelectedListener(this);
 		
 		return v;
+	}
+	
+	/**
+	 * Submit the feedback
+	 */
+	private void sendFeedback() {
+		// Build POST request
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("subject", mSubjectSpinner.getSelectedItem());
+		params.put("email", "user@domain.com");
+		params.put("message", mMessageEditText.getText());
+		params.put("wants_response", mResponseCheckBox.isChecked());
+		params.put("channel", null);
+		params.put("debuglog", null);
+		params.put("version", null);
+		params.put("osname", OSNAME);
+		params.put("betamode", BETAMODE);
+		
+		AQuery aq = new AQuery(getActivity().getApplicationContext());
+		aq.ajax(API, params, JSONObject.class, new AjaxCallback<JSONObject>() {
+			
+			@Override
+			public void callback(String url, JSONObject json, AjaxStatus status) {
+				Log.v(TAG, "Response: " + status.getCode() + " / " + json != null ? json.toString() : "null");
+			}
+			
+		});
 	}
 
 	@Override
