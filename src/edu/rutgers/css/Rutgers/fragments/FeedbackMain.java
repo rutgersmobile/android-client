@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ShareActionProvider;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -100,7 +101,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	 * Submit the feedback
 	 */
 	private void sendFeedback() {
-		Resources res = getActivity().getResources();
+		final Resources res = getActivity().getResources();
 		
 		// Empty message - do nothing
 		if(mMessageEditText.getText().equals("")) {
@@ -131,33 +132,25 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 				// Unlock send button
 				mLockSend = false;
 				
-				if(status != null) Log.v(TAG, "Response: " + status.getCode() + " - " + status.getMessage());
-				else Log.e(TAG, "No AJAX status");
-				
 				// Check the response JSON
 				if(json != null) {
-					Log.v(TAG, "json: " + json.toString());
-					
 					// Errors - invalid input
 					if(json.optJSONArray("errors") != null) {
 						JSONArray response = json.optJSONArray("errors");
-						
-						Log.v(TAG, "Feedback POST failed:");
-						for(int i = 0; i < response.length(); i++) {
-							Log.v(TAG, "   "+response.optString(i));
-						}
+						Toast.makeText(getActivity().getApplicationContext(), response.optString(0, res.getString(R.string.feedback_error)), Toast.LENGTH_LONG).show();
 					}
 					// Success - input went through
 					else if(json.optString("success") != null) {
-						String response = json.optString("success");
-						
-						Log.v(TAG, "Feedback POST success:");
-						Log.v(TAG, "   " + response);
+						String response = json.optString("success", res.getString(R.string.feedback_success));
+						Toast.makeText(getActivity().getApplicationContext(), response, Toast.LENGTH_LONG).show();
 						
 						// Only reset forms after message has gone through
 						resetForm();
 					}
-					
+				}
+				// Didn't get JSON response
+				else {
+					Log.w(TAG, "Response: " + status.getCode() + " - " + status.getMessage());
 				}
 				
 			}
@@ -177,7 +170,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position,
 			long id) {
-		Resources res = getActivity().getResources();
+		final Resources res = getActivity().getResources();
 
 		if(parent.getId() == R.id.subjectSpinner) {
 			String selection = (String) parent.getItemAtPosition(position);

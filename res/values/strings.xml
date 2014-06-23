@@ -94,6 +94,8 @@
 	<string name="feedback_channel_feedback">App Channel Feedback</string>
 	<string name="feedback_feature_request">App Feature Request</string>
 	<string name="feedback_report_bug">Report a Bug</string>
+	<string name="feedback_error">Error</string>
+	<string name="feedback_success">Success</string>
 	
 	<string-array name="feedback_subjects">
 		<item>@string/feedback_help_use</item>
