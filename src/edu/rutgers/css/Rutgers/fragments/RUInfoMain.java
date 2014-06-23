@@ -15,7 +15,7 @@ public class RUInfoMain extends Fragment {
 
 	private static final String TAG = "RUInfoMain";
 	
-	// Can possibly grab these from a resources file or API later on
+	// Can possibly grab these from a resource file or API later on
 	private String mPhoneNumber = "tel:7324454636";
 	private String mTextNumber = "66746";
 	private String mEmailAddress = "colhenry@rci.rutgers.edu";
