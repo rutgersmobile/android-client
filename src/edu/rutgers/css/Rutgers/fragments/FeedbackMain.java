@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.androidquery.AQuery;
@@ -34,6 +36,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	private Spinner mSubjectSpinner;
 	private EditText mMessageEditText;
 	private CheckBox mResponseCheckBox;
+	private LinearLayout mSelectChannelLayout;
 	
 	public FeedbackMain() {
 		// Required empty public constructor
@@ -48,6 +51,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		mSubjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
 		mMessageEditText = (EditText) v.findViewById(R.id.messageEditText);
 		mResponseCheckBox = (CheckBox) v.findViewById(R.id.responseCheckBox);
+		mSelectChannelLayout = (LinearLayout) v.findViewById(R.id.selectChannelLayout);
 		
 		mSubjectSpinner.setOnItemSelectedListener(this);
 		
@@ -84,11 +88,20 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position,
 			long id) {
+		Resources res = getActivity().getResources();
 
 		if(parent.getId() == R.id.subjectSpinner) {
 			String selection = (String) parent.getItemAtPosition(position);
 			
 			Log.v(TAG, "Selection " + position + ": " + selection);
+
+			// Channel feedback allows user to select a specific channel
+			if(selection.equals(res.getString(R.string.feedback_channel_feedback))) {
+				mSelectChannelLayout.setVisibility(View.VISIBLE);
+			}
+			else {
+				mSelectChannelLayout.setVisibility(View.GONE);
+			}
 			
 			// "General questions" boots you to RU-info
 			if(selection.equals(getActivity().getResources().getString(R.string.feedback_general))) {
@@ -98,9 +111,10 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 				// Launch RU-info channel
 				Bundle args = new Bundle();
 				args.putString("component", "ruinfo");
-				args.putString("title", getActivity().getResources().getString(R.string.ruinfo_title));
+				args.putString("title", res.getString(R.string.ruinfo_title));
 				ComponentFactory.getInstance().switchFragments(args);
 			}
+
 		}
 		
 	}

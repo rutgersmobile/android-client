@@ -28,6 +28,29 @@
 	    
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/selectChannelLayout"
+        android:visibility="gone" >
+    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/feedback_select_channel"
+	        android:textSize="16sp" />
+	
+	    <Spinner
+	        android:id="@+id/channelSpinner"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:entries="@array/feedback_channels"
+	        android:gravity="fill_horizontal"
+	        android:spinnerMode="dropdown"
+	        tools:listitem="@android:layout/simple_spinner_dropdown_item" />
+	    
+    </LinearLayout>
+    
     <CheckBox
         android:id="@+id/responseCheckBox"
         android:layout_width="wrap_content"

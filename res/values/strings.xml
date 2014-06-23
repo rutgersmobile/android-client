@@ -85,6 +85,7 @@
 	<!-- Feedback channel -->
 	<string name="feedback_title">Feedback</string>
 	<string name="feedback_select_subject">Subject:</string>
+	<string name="feedback_select_channel">Channel:</string>
 	<string name="feedback_want_response">Want a response?</string>
 	<string name="feedback_hint">Type your message</string>
 	<string name="feedback_general">General Questions</string>
@@ -102,12 +103,42 @@
 	</string-array>
 	
 	<string-array name="feedback_channels">
+	    <item>@string/app_logs_title</item>
 	    <item>@string/bus_title</item>
+	    <item>@string/careers_title</item>
+	    <item>@string/campus_status_title</item>
+	    <item>@string/events_title</item>
+	    <item>@string/feedback_title</item>
 	    <item>@string/dining_title</item>
+	    <item>@string/housing_title</item>
+	    <item>@string/libraries_title</item>
+	    <item>@string/myrutgers_title</item>
+	    <item>@string/kiosk_title</item>
+	    <item>@string/news_title</item>
+	    <item>@string/ecollege_title</item>
 	    <item>@string/places_title</item>
+	    <item>@string/ralumni_title</item>
 	    <item>@string/rec_title</item>
 	    <item>@string/ruinfo_title</item>
-	    <item>@string/feedback_title</item>
+	    <item>@string/sakai_title</item>
+	    <item>@string/soc_title</item>
+	    <item>@string/stud_life_title</item>
 	</string-array>
+	
+	<!-- Other channel titles -->
+	<string name="news_title">News</string>
+	<string name="events_title">Events</string>
+	<string name="careers_title">Career Services</string>
+	<string name="soc_title">Schedule of Classes</string>
+	<string name="app_logs_title">App Logs</string>
+	<string name="campus_status_title">Emergency Services</string>
+	<string name="housing_title">Housing &amp; Res Life</string>
+	<string name="kiosk_title">NB Kiosk</string>
+	<string name="libraries_title">Libraries</string>
+	<string name="myrutgers_title">myRutgers</string>
+	<string name="ecollege_title">Pearson eCollege</string>
+	<string name="ralumni_title">R Alumni</string>
+	<string name="sakai_title">Sakai</string>
+	<string name="stud_life_title">Student Life</string>
 	
 </resources>
