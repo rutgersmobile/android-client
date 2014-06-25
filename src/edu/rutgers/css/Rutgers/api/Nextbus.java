@@ -182,7 +182,8 @@ public class Nextbus {
 						
 					});
 	
-				} catch (Exception e) {
+				} catch (JSONException e) {
+					Log.e(TAG, "routePredict(): " + e.getMessage());
 					d.reject(e);
 				}
 
@@ -274,7 +275,8 @@ public class Nextbus {
 						
 					});
 	
-				} catch (Exception e) {
+				} catch (JSONException e) {
+					Log.e(TAG, "stopPredict(): " + e.getMessage());
 					d.reject(e);
 				}
 
@@ -306,8 +308,8 @@ public class Nextbus {
 					JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
 					if(active != null) d.resolve(active.getJSONArray("routes"));
 					else {
-						Log.e(TAG, "active null");
-						d.reject(null);
+						Log.e(TAG, "active buses null for agency " + agency);
+						d.reject(new Exception("Active bus data was null"));
 					}
 				} catch (JSONException e) {
 					Log.e(TAG, "getActiveRoutes(): " + e.getMessage());
@@ -341,8 +343,8 @@ public class Nextbus {
 					JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
 					if(conf != null) d.resolve(conf.getJSONArray("sortedRoutes"));
 					else {
-						Log.e(TAG, "conf null");
-						d.reject(null);
+						Log.e(TAG, "conf null for agency " + agency);
+						d.reject(new Exception("Bus config data was null"));
 					}
 				} catch (JSONException e) {
 					Log.e(TAG, "getAllRoutes(): " + e.getMessage());
@@ -376,8 +378,12 @@ public class Nextbus {
 				try {
 					JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
 					if(active != null) d.resolve(active.getJSONArray("stops"));
-					else d.reject(null);
+					else {
+						Log.e(TAG, "active buses null for agency " + agency);
+						d.reject(new Exception("Active bus data is null"));
+					}
 				} catch (JSONException e) {
+					Log.e(TAG, "getActiveStops(): " + e.getMessage());
 					d.reject(e);
 				}
 			}
@@ -408,8 +414,12 @@ public class Nextbus {
 				try {
 					JSONObject conf = agency.equals("nb") ? mNBConf : mNWKConf;
 					if(conf != null) d.resolve(conf.getJSONArray("sortedStops"));
-					else d.reject(null);
+					else {
+						Log.e(TAG, "conf null for agency " + agency);
+						d.reject(new Exception("Bus config data was null"));
+					}
 				} catch (JSONException e) {
+					Log.e(TAG, "getAllStops(): " + e.getMessage());
 					d.reject(e);
 				}
 			}
@@ -473,9 +483,8 @@ public class Nextbus {
 					
 					d.resolve(nearStops);
 				} catch(JSONException e) {
-					Log.e(TAG, e.getMessage());
+					Log.e(TAG, "getStopsByTitleNear(): " + e.getMessage());
 					d.reject(e);
-					return;
 				}
 			}
 			
@@ -520,7 +529,8 @@ public class Nextbus {
 					
 					d.resolve(result);
 				} catch(JSONException e) {
-					Log.e(TAG, e.getMessage());
+					Log.e(TAG, "getActiveStopsByTitleNear(): " + e.getMessage());
+					d.reject(e);
 				}
 			}
 			
@@ -548,7 +558,7 @@ public class Nextbus {
 					Object curObj = curConf.get(curKey);
 					result.put(curKey, curObj);
 				} catch(JSONException e) {
-					Log.e(TAG, e.getMessage());
+					Log.e(TAG, "combineJSONObjs(): " + e.getMessage());
 					return null;
 				}
 			}

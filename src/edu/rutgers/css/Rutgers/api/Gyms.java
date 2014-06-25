@@ -74,7 +74,7 @@ public class Gyms {
 	 *			"Multisports Bay 4 (Basketball)":"CLOSED",
 	 * 			...
 	 * 		},
-	 * 		"6\/5\/2014":{
+	 * 		"6/5/2014":{
 	 *			"Multisports Bay 1 (Badminton)":"7:00AM - 9:00PM",
 	 *			"Multisports Bay 4 (Basketball)":"7:00AM - 9:00PM",
 	 *			...
@@ -82,9 +82,11 @@ public class Gyms {
 	 *		...
 	 * }
 	 * 
-	 * Note that the keys are NOT SORTED. The keys are stored in a separate list and sorted
+	 * Note that JSON object keys are NOT SORTED. The keys are stored in a separate list and sorted
 	 * with {@link #sortDayKeys()}.
 	 * 
+	 * @param dayKeys List of strings to hold the sorted date keys
+	 * @param dailyData JSON object to hold the resulting JSON
 	 * @param curAreaKey Sub-location name
 	 * @param curAreaData Daily hours for sub-location
 	 */

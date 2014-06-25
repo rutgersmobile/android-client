@@ -57,7 +57,7 @@ public class Places {
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, e.getMessage() + "; Response code: " + e.getCode());
-				confd.reject(null);
+				confd.reject(e);
 			}
 			
 			@Override
@@ -88,7 +88,7 @@ public class Places {
 				}
 				catch(JSONException e) {
 					Log.e(TAG, Log.getStackTraceString(e));
-					d.fail(null);
+					d.reject(e);
 				}
 				
 			}
@@ -119,19 +119,12 @@ public class Places {
 				JSONObject conf = mPlacesConf;
 				
 				try {
-					
 					JSONObject allPlaces = conf.getJSONObject("all");	
 					JSONObject place = allPlaces.getJSONObject(placeKey);
-					if(place != null) d.resolve(place);
-					else {
-						Log.i(TAG, "Failed to get location " + placeKey);
-						d.fail(null);
-					}
-					
+					d.resolve(place);
 				} catch (JSONException e) {
-					
-					Log.e(TAG, Log.getStackTraceString(e));
-				
+					Log.w(TAG, "getPlace(): " + e.getMessage());
+					d.reject(e);
 				}
 				
 			}

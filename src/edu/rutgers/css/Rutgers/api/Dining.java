@@ -21,7 +21,7 @@ import com.androidquery.callback.AjaxStatus;
  */
 public class Dining {
 	
-	private static Promise<Object, Object, Object> configured;
+	private static Promise<Object, AjaxStatus, Object> configured;
 	private static final String TAG = "DiningAPI";
 	
 	private static JSONArray mNBDiningConf;
@@ -35,7 +35,7 @@ public class Dining {
 	 */
 	private static void setup() {
 		// Get JSON array from dining API
-		final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
+		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
 		
 		final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
@@ -91,11 +91,11 @@ public class Dining {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		}).fail(new AndroidFailCallback<Object>() {
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
 
 			@Override
-			public void onFail(Object e) {
-				d.reject((AjaxStatus)e);
+			public void onFail(AjaxStatus e) {
+				d.reject(e);
 			}
 			
 			@Override
@@ -134,7 +134,7 @@ public class Dining {
 							d.resolve(curLoc);
 						}
 					} catch (JSONException e) {
-						Log.e(TAG, e.getMessage());
+						Log.e(TAG, "getDiningLocation(): " + e.getMessage());
 						resret = true;
 						d.reject(e);
 					}
