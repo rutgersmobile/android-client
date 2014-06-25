@@ -66,46 +66,17 @@ public class DTable extends Fragment {
 		}
 		
 		try {
-
 			if (args.get("data") != null) mData = new JSONArray(args.getString("data"));
 			else if (args.get("url") != null) mURL = args.getString("url");
 			else if (args.get("api") != null) mAPI = args.getString("api");
 			else throw new IllegalStateException("DTable must have either a url or data in its arguments bundle");
-
-			/*
-			AsyncHttpClient client = new AsyncHttpClient();
-			// If there's a URL, make a request
-			if (mURL != null) client.get(mURL, new AsyncHttpResponseHandler() {
-				
-				@Override
-				public void onSuccess (int status, Header[] headers, byte[] bytes) {
-					String r = new String(bytes);
-					try {
-						mData = new JSONArray(r);
-						setupList();
-					} catch (JSONException e) {
-						onFailure(-1, null, null, e);
-					}
-				}
-				
-				@Override
-				public void onFailure (int arg0, Header[] arg1, byte[] arg2, Throwable arg3) {
-					// TODO Auto-generated method stub
-					Log.d(TAG, "Request failed, making toast");
-					Toast.makeText(getActivity(), "Getting data failed. Please try again later.", Toast.LENGTH_LONG).show();
-				}
-			});
-			
-			// Otherwise just setup the table
-			else setupList();
-			*/
 			
 			if (mURL != null) aq.ajax(mURL, JSONObject.class, new AjaxCallback<JSONObject>() {
 
                 @Override
                 public void callback(String url, JSONObject json, AjaxStatus status) {
                 	try {
-                		DTable.this.mData = json.getJSONArray("children");
+                		mData = json.getJSONArray("children");
                 		setupList();
                 	} catch (Exception e) {
                 		e.printStackTrace();
@@ -118,60 +89,55 @@ public class DTable extends Fragment {
 			else setupList();
 			
 		} catch (JSONException e) {
-			Log.e(TAG, "Bad json passed to dtable in data argument");
+			Log.e(TAG, "onCreateView(): " + e.getMessage());
 		}
 		return v;
 	}
 	
 	private void setupList () {
-		JSONAdapter a = new JSONAdapter(mData);
+		JSONAdapter jsonAdapter = new JSONAdapter(mData);
 		
-		mList.setAdapter(a);
+		mList.setAdapter(jsonAdapter);
 		
 		/* Clicks on DTable item launch component in "view" field with arguments */
 		mList.setOnItemClickListener(new OnItemClickListener() {
-				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {				
-					JSONObject c = (JSONObject) parent.getAdapter().getItem(position);
-					Bundle args = new Bundle();
+			
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {				
+				JSONObject clickedJson = (JSONObject) parent.getAdapter().getItem(position);
+				Bundle args = new Bundle();
 
-					try {	
-						// This object has an array of more channels
-						if(c.has("children")) {							
-							Log.d(TAG, "Clicked \"" + getLocalTitle(c.get("title")) + "\"");
-							args.putString("component", "dtable");
-							args.putString("title", getLocalTitle(c.get("title")));
-							args.putString("data", c.getJSONArray("children").toString());
-						}
-						// This object is a channel
-						else {
-							JSONObject channel = (JSONObject) c.getJSONObject("channel");
-							Log.d(TAG, "Clicked \"" + getLocalTitle(channel.get("title")) + "\"");
-							
-/*							// Launch browser
-							if(channel.getString("view").equalsIgnoreCase("www"))	{
-								Intent i = new Intent(Intent.ACTION_VIEW);
-								i.setData(Uri.parse(channel.getString("url")));
-								startActivity(i);
-								return;
-							}*/
-							
-							// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
-							args.putString("component", channel.getString("view")); // TODO Should ComponentFactory take "view" argument instead of "component" argument to skip this?
-							
-							Iterator<String> keys = channel.keys();
-							while(keys.hasNext()) {
-								String key = keys.next();
-								Log.d(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
-								args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
-							}
-						}
+				try {	
+					// This object has an array of more channels
+					if(clickedJson.has("children")) {							
+						Log.v(TAG, "Clicked \"" + getLocalTitle(clickedJson.get("title")) + "\"");
+						args.putString("component", "dtable");
+						args.putString("title", getLocalTitle(clickedJson.get("title")));
+						args.putString("data", clickedJson.getJSONArray("children").toString());
+					}
+					// This object is a channel
+					else {
+						JSONObject channel = (JSONObject) clickedJson.getJSONObject("channel");
+						Log.v(TAG, "Clicked \"" + getLocalTitle(channel.get("title")) + "\"");
 						
-						ComponentFactory.getInstance().switchFragments(args);
-					} catch (JSONException e) {
-						Log.e(TAG, "JSONException: " + e.getMessage());
+						// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
+						args.putString("component", channel.getString("view"));
+						
+						Iterator<String> keys = channel.keys();
+						while(keys.hasNext()) {
+							String key = keys.next();
+							Log.v(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
+							args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
+						}
 					}
 					
+					ComponentFactory.getInstance().switchFragments(args);
+				} catch (JSONException e) {
+					Log.w(TAG, "onItemClick(): " + e.getMessage());
 				}
+				
+			}
+			
 		});
 	}
 
@@ -196,6 +162,10 @@ public class DTable extends Fragment {
 		return null;
 	}
 	
+	static class ViewHolder {
+		TextView titleTextView;
+	}
+	
 	private class JSONAdapter extends BaseAdapter {
 		private JSONArray mItems;
 		
@@ -204,10 +174,11 @@ public class DTable extends Fragment {
 		}
 		
 		@Override
-		public Object getItem (int pos) {
+		public Object getItem (int pos) {			
 			try {
 				return mItems.get(pos);
-			} catch (JSONException e) { 
+			} catch (JSONException e) {
+				Log.w(TAG, "getItem(): " + e.getMessage());
 				return null;
 			}
 		}
@@ -224,6 +195,7 @@ public class DTable extends Fragment {
 		
 		@Override
 		public int getItemViewType(int position) {
+			// Sub-menu row
 		    if(((JSONObject)getItem(position)).has("children"))
 		    	return 1;
 		    else
@@ -238,26 +210,28 @@ public class DTable extends Fragment {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			String title;
-			
-			// Configure the view for this crime
-			JSONObject c = (JSONObject) getItem(position);
+			ViewHolder holder;
 						
-			// If we aren't given a view, inflate one. Get special layout for category items.
+			// If we aren't given a view, inflate one. Get special layout for sub-menu items.
 			if (convertView == null) {
-				if(getItemViewType(position) == 1)
-					convertView = getActivity().getLayoutInflater().inflate(R.layout.category_row, null);
-				else
-					convertView = getActivity().getLayoutInflater().inflate(R.layout.dtable_row, null);
+				int res;
+				
+				if(getItemViewType(position) == 1) res = R.layout.category_row;
+				else res = R.layout.dtable_row; 
+
+				convertView = getActivity().getLayoutInflater().inflate(res, null);
+				holder = new ViewHolder();
+				holder.titleTextView = (TextView) convertView.findViewById(R.id.text);
+				convertView.setTag(holder);
 			}
-			
-			try {
-				title = DTable.getLocalTitle(c.get("title"));
-			} catch (JSONException e) {
-				title = "object does not have a title property";
+			else {
+				holder = (ViewHolder) convertView.getTag();
 			}
+
+			JSONObject c = (JSONObject) getItem(position);
+			title = DTable.getLocalTitle(c.optString("title", "title not set"));
 			
-			TextView titleTextView = (TextView)convertView.findViewById(R.id.text);
-			titleTextView.setText(title);
+			holder.titleTextView.setText(title);
 				
 			return convertView;
 		}

@@ -435,6 +435,31 @@ public class MainActivity extends FragmentActivity  implements
 	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events, R.color.events_icon_color)));
 	    menuAdapter.add(new SlideMenuItem("RU-info", "ruinfo", getIcon(R.drawable.ruinfo)));
 	    menuAdapter.add(new SlideMenuItem("Feedback", "feedback", getIcon(R.drawable.feedback, R.color.bus_icon_color)));
+	    
+	    Bundle eSrvcs = new Bundle();
+	    eSrvcs.putString("title", "Emergency Services");
+	    eSrvcs.putString("component", "dtable");
+	    eSrvcs.putString("data", "["
+	    		+ "{"
+	    		+ "\"title\": \"Emergency Alerts\","
+	    		+ "\"channel\": {"
+	    		+ "\"view\": \"www\","
+	    		+ "\"url\": \"http://halflife.rutgers.edu/ec/notices.php\","
+	    		+ "\"title\": \"Emergency Alerts\""
+	    		+ "}"
+	    		+ "},"
+	    		+ "{"
+	    		+ "\"title\": \"Emergency Action Plans\","
+	    		+ "\"channel\": {"
+	    		+ "\"view\": \"www\","
+	    		+ "\"url\": \"http://eap.oit-nbcs.rutgers.edu/mobile.php\","
+	    		+ "\"title\": \"Emergency Action Plans\""
+	    		+ "}"
+	    		+ "}"
+	    		+ "]");
+	    SlideMenuItem eSrvcsItem = new SlideMenuItem(eSrvcs);
+	    eSrvcsItem.setDrawable(getIcon(R.drawable.emergency));
+	    menuAdapter.add(eSrvcsItem);
 	}
 	
 	/**
