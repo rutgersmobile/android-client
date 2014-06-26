@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.res.Configuration;
@@ -107,8 +108,8 @@ public class MainActivity extends FragmentActivity  implements
 		super.onCreate(savedInstanceState);
 		
 		getWindow().requestFeature(Window.FEATURE_PROGRESS);
-		
 		setContentView(R.layout.activity_main);
+		Log.v(TAG, "UUID: " + AppUtil.getUUID(this));
 		
 		/*
 		 * Set default settings the first time the app is run
@@ -462,7 +463,8 @@ public class MainActivity extends FragmentActivity  implements
 	 * @param menuAdapter Menu drawer adapter
 	 */
 	private void loadWebShortcuts(final RMenuAdapter menuAdapter) {
-        menuAdapter.add(new SlideMenuHeader(getResources().getString(R.string.drawer_shortcuts)));
+        final Context context = this;
+		menuAdapter.add(new SlideMenuHeader(getResources().getString(R.string.drawer_shortcuts)));
         
 		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new AndroidDoneCallback<JSONArray>() {
 
@@ -473,7 +475,7 @@ public class MainActivity extends FragmentActivity  implements
 				for(int i = 0; i < shortcutsArray.length(); i++) {		
 					try {
 						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
-						String title = AppUtil.getLocalTitle(getApplicationContext(), curShortcut.get("title"));
+						String title = AppUtil.getLocalTitle(context, curShortcut.get("title"));
 						String url = curShortcut.getString("url");
 						String iconName = curShortcut.getString("handle"); // Handle is used to figure out icon & color
 						int iconRes = 0;

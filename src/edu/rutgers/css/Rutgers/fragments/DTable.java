@@ -52,7 +52,7 @@ public class DTable extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mContext = getActivity().getApplicationContext();
+		mContext = getActivity();
 		aq = new AQuery(mContext);
 		mData = new JSONArray();
 		mAdapter = new JSONAdapter(mData);

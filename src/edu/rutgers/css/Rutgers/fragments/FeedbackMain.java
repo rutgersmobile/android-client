@@ -102,9 +102,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	 */
 	private void sendFeedback() {
 		final Resources res = getActivity().getResources();
-		
-		Log.v(TAG, "User " + AppUtil.getUUID(getActivity().getApplicationContext()) + " sends POST");
-		
+				
 		// Empty message - do nothing
 		if(mMessageEditText.getText().toString().equals("")) {
 			return;
