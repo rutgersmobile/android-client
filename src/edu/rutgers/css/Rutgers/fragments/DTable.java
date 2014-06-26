@@ -6,9 +6,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -26,6 +29,7 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -106,15 +110,15 @@ public class DTable extends Fragment {
 				try {	
 					// This object has an array of more channels
 					if(clickedJson.has("children")) {							
-						Log.v(TAG, "Clicked \"" + getLocalTitle(clickedJson.get("title")) + "\"");
+						Log.v(TAG, "Clicked \"" + getLocalTitle(getActivity().getApplicationContext(), clickedJson.get("title")) + "\"");
 						args.putString("component", "dtable");
-						args.putString("title", getLocalTitle(clickedJson.get("title")));
+						args.putString("title", getLocalTitle(getActivity().getApplicationContext(), clickedJson.get("title")));
 						args.putString("data", clickedJson.getJSONArray("children").toString());
 					}
 					// This object is a channel
 					else {
 						JSONObject channel = (JSONObject) clickedJson.getJSONObject("channel");
-						Log.v(TAG, "Clicked \"" + getLocalTitle(channel.get("title")) + "\"");
+						Log.v(TAG, "Clicked \"" + getLocalTitle(getActivity().getApplicationContext(), channel.get("title")) + "\"");
 						
 						// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
 						args.putString("component", channel.getString("view"));
@@ -146,21 +150,38 @@ public class DTable extends Fragment {
 	 * @param title String or JSONObject returned by get("title") on channel JSONObject
 	 * @return Appropriate title to display
 	 */
-	public static String getLocalTitle(Object title) {
+	public static String getLocalTitle(Context context, Object title) {
 		if(title == null) {
-			return "title not set";
+			return "(No title)";
 		}
+		// "title" is just a string - nothing to do
 		else if(title.getClass() == String.class) {
 			return (String) title;
 		}
+		// "title" is a JSON Object - figure out which string to display
 		else if(title.getClass() == JSONObject.class) {
+			JSONObject titles = (JSONObject) title;
+			
+			// Get the full name of the user's home campus from their settings
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+			String userHome = AppUtil.getFullCampusTitle(context, sharedPref.getString("campus_list", context.getResources().getString(R.string.campus_nb_tag)));
+			Log.v(TAG, "User home: " + userHome);
+			
 			try {
-				return ((JSONObject)title).getString("homeTitle");
+				String titleHome = titles.getString("homeCampus");
+				if(titleHome.equalsIgnoreCase(userHome)) {
+					return titles.getString("homeTitle");
+				}
+				else {
+					return titles.getString("foreignTitle");
+				}
 			} catch (JSONException e) {
 				Log.w(TAG, "getLocalTitle(): " + e.getMessage());
-				return null;
+				Log.w(TAG, "title JSON: " + title.toString());
+				return title.toString();
 			}
 		}
+		
 		return null;
 	}
 	
@@ -253,7 +274,7 @@ public class DTable extends Fragment {
 			}
 
 			JSONObject c = (JSONObject) getItem(position);
-			title = DTable.getLocalTitle(c.opt("title"));
+			title = DTable.getLocalTitle(getActivity().getApplicationContext(), c.opt("title"));
 			
 			holder.titleTextView.setText(title);
 				

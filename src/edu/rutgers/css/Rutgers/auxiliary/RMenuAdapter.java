@@ -21,7 +21,6 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 
-	private final String androidns = "http://schemas.android.com/apk/res/android";
 	private final static String TAG = "RMenuAdapter";
 	private int itemResource;
 	private int categoryResource;

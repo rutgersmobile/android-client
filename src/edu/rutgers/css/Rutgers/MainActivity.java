@@ -481,7 +481,7 @@ public class MainActivity extends FragmentActivity  implements
 				for(int i = 0; i < shortcutsArray.length(); i++) {		
 					try {
 						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
-						String title = DTable.getLocalTitle(curShortcut.get("title"));
+						String title = DTable.getLocalTitle(getApplicationContext(), curShortcut.get("title"));
 						String url = curShortcut.getString("url");
 						String iconName = removeNumbers(curShortcut.getString("icon"));
 						int iconRes = 0;

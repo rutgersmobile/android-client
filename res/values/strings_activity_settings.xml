@@ -5,20 +5,31 @@
     <!-- Strings related to Settings -->
     <string name="pref_header_user">User Information</string>
     
+    <string name="campus_nb_full">New Brunswick</string>
+    <string name="campus_nb_tag">nb</string>
+    <string name="campus_nwk_full">Newark</string>
+    <string name="campus_nwk_tag">nwk</string>
+    <string name="campus_cam_full">Camden</string>
+    <string name="campus_cam_tag">cam</string>
+    <string name="campus_rbhs_full">RBHS</string>
+    <string name="campus_rbhs_tag">rbhs</string>
+    <string name="campus_other_full">Other</string>
+    <string name="campus_other_tag">other</string>
+    
 	<string name="pref_campus_title">Home Campus</string>
 	<string-array name="pref_campus_strings">
-	    <item>New Brunswick</item>
-	    <item>Newark</item>
-	    <item>Camden</item>
-	    <item>RBHS</item>
-	    <item>Other</item>
+	    <item>@string/campus_nb_full</item>
+	    <item>@string/campus_nwk_full</item>
+	    <item>@string/campus_cam_full</item>
+	    <item>@string/campus_rbhs_full</item>
+	    <item>@string/campus_other_full</item>
 	</string-array>
 	<string-array name="pref_campus_values">
-	    <item>nb</item>
-	    <item>nwk</item>
-	    <item>cam</item>
-	    <item>rbhs</item>
-	    <item>other</item>
+	    <item>@string/campus_nb_tag</item>
+	    <item>@string/campus_nwk_tag</item>
+	    <item>@string/campus_cam_tag</item>
+	    <item>@string/campus_rbhs_tag</item>
+	    <item>@string/campus_other_tag</item>
 	</string-array>
 		
 	<string name="pref_user_type_title">User Type</string>
