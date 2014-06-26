@@ -88,6 +88,9 @@ public class MainActivity extends FragmentActivity  implements
 	}
 	
 	private Drawable getIcon(int drawableResource, int colorResource) {
+		if(drawableResource == 0) return null;
+		if(colorResource == 0) colorResource = R.color.white;
+		
 		try {
 			Drawable drawable = getResources().getDrawable(drawableResource);
 			int color = getResources().getColor(colorResource);
@@ -485,10 +488,14 @@ public class MainActivity extends FragmentActivity  implements
 						int colorRes = 0;
 						try {
 							iconRes = getResources().getIdentifier(iconName, "drawable", "edu.rutgers.css.Rutgers2");
-						} catch(NotFoundException e) {}
+						} catch(NotFoundException e) {
+							Log.i(TAG, "loadWebShortcuts(): " + e.getMessage());
+						}
 						try {
 							colorRes = getResources().getIdentifier(iconName+"_icon_color", "color", "edu.rutgers.css.Rutgers2");
-						} catch(NotFoundException e) {}
+						} catch(NotFoundException e) {
+							Log.i(TAG, "loadWebShortcuts(): " + e.getMessage());
+						}
 						menuAdapter.add(new SlideMenuItem(title, "www", url, getIcon(iconRes, colorRes)));
 					} catch (JSONException e) {
 						Log.e(TAG, "loadWebShortcuts(): " + e.getMessage());
