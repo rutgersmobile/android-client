@@ -21,7 +21,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ShareActionProvider;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -29,6 +28,7 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -103,17 +103,20 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	private void sendFeedback() {
 		final Resources res = getActivity().getResources();
 		
+		Log.v(TAG, "User " + AppUtil.getUUID(getActivity().getApplicationContext()) + " sends POST");
+		
 		// Empty message - do nothing
-		if(mMessageEditText.getText().equals("")) {
+		if(mMessageEditText.getText().toString().equals("")) {
 			return;
 		}
 		
 		// Build POST request
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("subject", mSubjectSpinner.getSelectedItem());
-		params.put("email", "appuser@nowhere.null");
+		params.put("email", AppUtil.getUUID(getActivity().getApplicationContext()) + "@android");
 		params.put("message", mMessageEditText.getText());
 		params.put("wants_response", mResponseCheckBox.isChecked());
+		// Post the selected channel if this is channel feedback
 		if(mSubjectSpinner.getSelectedItem().equals(res.getString(R.string.feedback_channel_feedback))) {
 			params.put("channel", mChannelSpinner.getSelectedItem());	
 		}
@@ -159,8 +162,10 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 
 	}
 	
+	/**
+	 * Reset the feedback forms.
+	 */
 	private void resetForm() {
-		// Reset the form
 		mSubjectSpinner.setSelection(0);
 		mChannelSpinner.setSelection(0);
 		mResponseCheckBox.setChecked(false);
@@ -192,7 +197,6 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 				// Launch RU-info channel
 				Bundle args = new Bundle();
 				args.putString("component", "ruinfo");
-				args.putString("title", res.getString(R.string.ruinfo_title));
 				ComponentFactory.getInstance().switchFragments(args);
 			}
 

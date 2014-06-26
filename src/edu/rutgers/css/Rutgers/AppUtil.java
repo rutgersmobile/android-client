@@ -1,5 +1,11 @@
 package edu.rutgers.css.Rutgers;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.UUID;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,7 +20,46 @@ import edu.rutgers.css.Rutgers2.R;
 public class AppUtil {
 
 	private static final String TAG = "AppUtil";
+	private static final String INSTALLATION = "INSTALLATION";
+	private static String installID = null;
 	
+	/**
+	 * Get (or create) UUID for the installation of this app.
+	 * @param context App context
+	 * @return UUID string
+	 */
+	public synchronized static String getUUID(Context context) {
+		if(installID == null) {
+			File installation = new File(context.getFilesDir(), INSTALLATION);
+			try {
+				if(!installation.exists()) {
+					FileOutputStream out = new FileOutputStream(installation);
+					out.write(UUID.randomUUID().toString().getBytes());
+					out.close();
+				}
+				installID = readInstallationFile(installation);
+			} catch (Exception e) {
+				Log.e(TAG, Log.getStackTraceString(e));
+				throw new RuntimeException(e);
+			}
+		}
+		return installID;
+	}
+	
+	private static String readInstallationFile(File installation) throws IOException {
+		RandomAccessFile f = new RandomAccessFile(installation, "r");
+		byte[] bytes = new byte[(int) f.length()];
+		f.readFully(bytes);
+		f.close();
+		return new String(bytes);
+	}
+	
+	/**
+	 * Get full campus title from campus tag.
+	 * @param context App context
+	 * @param campusTag Campus tag
+	 * @return Full campus title
+	 */
 	public static String getFullCampusTitle(Context context, String campusTag) {
 		if(campusTag == null) return null;
 		
