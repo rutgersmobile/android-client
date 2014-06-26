@@ -35,9 +35,11 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class DTable extends Fragment {
 	
-	private ListView mList;
 	private static final String TAG = "DTable";
+	
+	private ListView mList;
 	private JSONArray mData;
+	private JSONAdapter mAdapter;
 	private String mURL;
 	private String mAPI;
 	
@@ -50,56 +52,50 @@ public class DTable extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		aq = new AQuery(getActivity().getApplicationContext());
+		mData = new JSONArray();
+		mAdapter = new JSONAdapter(mData);
 		
-		aq = new AQuery(this.getActivity());
+		Bundle args = getArguments();
+		if (args.get("data") != null) {
+			try {
+				loadArray(new JSONArray(args.getString("data")));
+			} catch (JSONException e) {
+				Log.e(TAG, "onCreateView(): " + e.getMessage());
+			}
+		}
+		else if (args.get("url") != null) mURL = args.getString("url");
+		else if (args.get("api") != null) mAPI = args.getString("api");
+		else throw new IllegalStateException("DTable must have either a url or data in its arguments bundle");
+		
+		if (mURL != null) aq.ajax(mURL, JSONObject.class, new AjaxCallback<JSONObject>() {
+
+            @Override
+            public void callback(String url, JSONObject json, AjaxStatus status) {
+            	try {
+            		loadArray(json.getJSONArray("children"));
+            	} catch (JSONException e) {
+            		Log.w(TAG, "onCreateView(): " + e.getMessage());
+            		Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
+            	}
+            }
+            
+		});
 	}
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
 		mList = (ListView) v.findViewById(R.id.dtable_list);
-		
+
 		Bundle args = getArguments();
-		
-		if(args.get("title") != null) {
+		if(args.getString("title") != null) {
 			getActivity().setTitle(args.getString("title"));
 		}
 		
-		try {
-			if (args.get("data") != null) mData = new JSONArray(args.getString("data"));
-			else if (args.get("url") != null) mURL = args.getString("url");
-			else if (args.get("api") != null) mAPI = args.getString("api");
-			else throw new IllegalStateException("DTable must have either a url or data in its arguments bundle");
-			
-			if (mURL != null) aq.ajax(mURL, JSONObject.class, new AjaxCallback<JSONObject>() {
-
-                @Override
-                public void callback(String url, JSONObject json, AjaxStatus status) {
-                	try {
-                		mData = json.getJSONArray("children");
-                		setupList();
-                	} catch (Exception e) {
-                		e.printStackTrace();
-                		Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
-                	}
-                }
-                
-			});
-			
-			else setupList();
-			
-		} catch (JSONException e) {
-			Log.e(TAG, "onCreateView(): " + e.getMessage());
-		}
-		return v;
-	}
-	
-	private void setupList () {
-		JSONAdapter jsonAdapter = new JSONAdapter(mData);
+		mList.setAdapter(mAdapter);
 		
-		mList.setAdapter(jsonAdapter);
-		
-		/* Clicks on DTable item launch component in "view" field with arguments */
+		// Clicks on DTable item launch component in "view" field with arguments
 		mList.setOnItemClickListener(new OnItemClickListener() {
 			
 			@Override
@@ -139,8 +135,10 @@ public class DTable extends Fragment {
 			}
 			
 		});
+		
+		return v;
 	}
-
+	
 	/**
 	 * In cases where multiple titles are specified ("homeTitle", "foreignTitle"), gets appropriate title
 	 * according to configuration.
@@ -149,17 +147,37 @@ public class DTable extends Fragment {
 	 * @return Appropriate title to display
 	 */
 	public static String getLocalTitle(Object title) {
-		if(title.getClass() == String.class) {
+		if(title == null) {
+			return "title not set";
+		}
+		else if(title.getClass() == String.class) {
 			return (String) title;
 		}
 		else if(title.getClass() == JSONObject.class) {
 			try {
 				return ((JSONObject)title).getString("homeTitle");
 			} catch (JSONException e) {
+				Log.w(TAG, "getLocalTitle(): " + e.getMessage());
 				return null;
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Copy a JSON array to the member array
+	 * @param in JSON array to copy
+	 */
+	private void loadArray(JSONArray in) {
+		if(in == null) return;
+		
+		for(int i = 0; i < in.length(); i++) {
+			try {
+				mAdapter.add(in.get(i));
+			} catch (JSONException e) {
+				Log.w(TAG, "loadArray(): " + e.getMessage());
+			}
+		}
 	}
 	
 	static class ViewHolder {
@@ -171,6 +189,11 @@ public class DTable extends Fragment {
 		
 		public JSONAdapter(JSONArray rows) {
 			mItems = rows;
+		}
+		
+		public void add(Object o) {
+			mItems.put(o);
+			this.notifyDataSetChanged();
 		}
 		
 		@Override
@@ -185,7 +208,8 @@ public class DTable extends Fragment {
 		
 		@Override
 		public int getCount () {
-			return mItems.length();
+			if(mItems == null) return 0;
+			else return mItems.length();
 		}
 		
 		@Override
@@ -229,7 +253,7 @@ public class DTable extends Fragment {
 			}
 
 			JSONObject c = (JSONObject) getItem(position);
-			title = DTable.getLocalTitle(c.optString("title", "title not set"));
+			title = DTable.getLocalTitle(c.opt("title"));
 			
 			holder.titleTextView.setText(title);
 				
