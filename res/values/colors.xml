@@ -27,14 +27,14 @@
     <color name="soc_icon_color">#FFFFFFFF</color>
     <color name="places_icon_color">#FFFEAC74</color>
     <color name="rec_icon_color">#FFE56D6E</color>
-    <color name="emergency_icon_color">#FFFFFFFF</color>
+    <color name="campus_status_color">#FFFFFFFF</color>
     <color name="events_icon_color">#FFE577BB</color>
     <color name="feedback_icon_color">#FFFFFFFF</color>
     <color name="careers_icon_color">#FFFFFFFF</color>
     <color name="ruinfo_icon_color">#FFFFFFFF</color>
     <color name="housing_icon_color">#FFFFFFFF</color>
     <color name="kiosk_icon_color">#FFFFFFFF</color>
-    <color name="library_icon_color">#FF00FF00</color>
+    <color name="libraries_icon_color">#FF00FF00</color>
     <color name="myru_icon_color">#FFFFFFFF</color>
     <color name="ecollege_icon_color">#FFFFFFFF</color>
     <color name="rualumni_icon_color">#FFFFFFFF</color>

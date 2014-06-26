@@ -7,13 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +41,7 @@ public class DTable extends Fragment {
 	private JSONAdapter mAdapter;
 	private String mURL;
 	private String mAPI;
+	private Context mContext;
 	
 	private AQuery aq;
 
@@ -56,7 +52,8 @@ public class DTable extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		aq = new AQuery(getActivity().getApplicationContext());
+		mContext = getActivity().getApplicationContext();
+		aq = new AQuery(mContext);
 		mData = new JSONArray();
 		mAdapter = new JSONAdapter(mData);
 		
@@ -110,15 +107,15 @@ public class DTable extends Fragment {
 				try {	
 					// This object has an array of more channels
 					if(clickedJson.has("children")) {							
-						Log.v(TAG, "Clicked \"" + getLocalTitle(getActivity().getApplicationContext(), clickedJson.get("title")) + "\"");
+						Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
 						args.putString("component", "dtable");
-						args.putString("title", getLocalTitle(getActivity().getApplicationContext(), clickedJson.get("title")));
+						args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
 						args.putString("data", clickedJson.getJSONArray("children").toString());
 					}
 					// This object is a channel
 					else {
 						JSONObject channel = (JSONObject) clickedJson.getJSONObject("channel");
-						Log.v(TAG, "Clicked \"" + getLocalTitle(getActivity().getApplicationContext(), channel.get("title")) + "\"");
+						Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, channel.get("title")) + "\"");
 						
 						// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
 						args.putString("component", channel.getString("view"));
@@ -142,49 +139,7 @@ public class DTable extends Fragment {
 		
 		return v;
 	}
-	
-	/**
-	 * In cases where multiple titles are specified ("homeTitle", "foreignTitle"), gets appropriate title
-	 * according to configuration.
-	 * TODO Update this when configuration by location is available. Just grabs "homeTitle" now when applicable.
-	 * @param title String or JSONObject returned by get("title") on channel JSONObject
-	 * @return Appropriate title to display
-	 */
-	public static String getLocalTitle(Context context, Object title) {
-		if(title == null) {
-			return "(No title)";
-		}
-		// "title" is just a string - nothing to do
-		else if(title.getClass() == String.class) {
-			return (String) title;
-		}
-		// "title" is a JSON Object - figure out which string to display
-		else if(title.getClass() == JSONObject.class) {
-			JSONObject titles = (JSONObject) title;
-			
-			// Get the full name of the user's home campus from their settings
-			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-			String userHome = AppUtil.getFullCampusTitle(context, sharedPref.getString("campus_list", context.getResources().getString(R.string.campus_nb_tag)));
-			Log.v(TAG, "User home: " + userHome);
-			
-			try {
-				String titleHome = titles.getString("homeCampus");
-				if(titleHome.equalsIgnoreCase(userHome)) {
-					return titles.getString("homeTitle");
-				}
-				else {
-					return titles.getString("foreignTitle");
-				}
-			} catch (JSONException e) {
-				Log.w(TAG, "getLocalTitle(): " + e.getMessage());
-				Log.w(TAG, "title JSON: " + title.toString());
-				return title.toString();
-			}
-		}
-		
-		return null;
-	}
-	
+
 	/**
 	 * Copy a JSON array to the member array
 	 * @param in JSON array to copy
@@ -201,12 +156,15 @@ public class DTable extends Fragment {
 		}
 	}
 	
-	static class ViewHolder {
-		TextView titleTextView;
-	}
-	
+	/**
+	 * Private adapter to make menus from JSON data
+	 */
 	private class JSONAdapter extends BaseAdapter {
 		private JSONArray mItems;
+	
+		private class ViewHolder {
+			TextView titleTextView;
+		}
 		
 		public JSONAdapter(JSONArray rows) {
 			mItems = rows;
@@ -274,7 +232,7 @@ public class DTable extends Fragment {
 			}
 
 			JSONObject c = (JSONObject) getItem(position);
-			title = DTable.getLocalTitle(getActivity().getApplicationContext(), c.opt("title"));
+			title = AppUtil.getLocalTitle(mContext, c.opt("title"));
 			
 			holder.titleTextView.setText(title);
 				

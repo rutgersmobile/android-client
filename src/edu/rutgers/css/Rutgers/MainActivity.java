@@ -186,16 +186,7 @@ public class MainActivity extends FragmentActivity  implements
         /*
          * Load nav drawer items
          */
-		
-        // This loads list of native channels (API is incomplete)
-		/*		
- 		Request.api("app").done(new DoneCallback<JSONObject>() {
-			public void onDone(JSONObject result) {
-				Log.d("MainActivity", "got app data " + result.toString());
-			}
-		});
-		*/
-        
+
         // Set up channel items in drawer
         loadChannels(mDrawerAdapter);
         
@@ -389,7 +380,7 @@ public class MainActivity extends FragmentActivity  implements
 		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 		
 		if(resultCode == ConnectionResult.SUCCESS) {
-			Log.d(TAG, "Google Play services available.");
+			Log.v(TAG, "Google Play services available.");
 			return true;
 		}
 		else {
@@ -442,26 +433,27 @@ public class MainActivity extends FragmentActivity  implements
 	    Bundle eSrvcs = new Bundle();
 	    eSrvcs.putString("title", "Emergency Services");
 	    eSrvcs.putString("component", "dtable");
-	    eSrvcs.putString("data", "["
+	    eSrvcs.putString("data",
+	    		  "["
 	    		+ "{"
 	    		+ "\"title\": \"Emergency Alerts\","
-	    		+ "\"channel\": {"
-	    		+ "\"view\": \"www\","
-	    		+ "\"url\": \"http://halflife.rutgers.edu/ec/notices.php\","
-	    		+ "\"title\": \"Emergency Alerts\""
-	    		+ "}"
+		    		+ "\"channel\": {"
+		    		+ "\"view\": \"www\","
+		    		+ "\"url\": \"http://halflife.rutgers.edu/ec/notices.php\","
+		    		+ "\"title\": \"Emergency Alerts\""
+		    		+ "}"
 	    		+ "},"
 	    		+ "{"
 	    		+ "\"title\": \"Emergency Action Plans\","
-	    		+ "\"channel\": {"
-	    		+ "\"view\": \"www\","
-	    		+ "\"url\": \"http://eap.oit-nbcs.rutgers.edu/mobile.php\","
-	    		+ "\"title\": \"Emergency Action Plans\""
-	    		+ "}"
+		    		+ "\"channel\": {"
+		    		+ "\"view\": \"www\","
+		    		+ "\"url\": \"http://eap.oit-nbcs.rutgers.edu/mobile.php\","
+		    		+ "\"title\": \"Emergency Action Plans\""
+		    		+ "}"
 	    		+ "}"
 	    		+ "]");
 	    SlideMenuItem eSrvcsItem = new SlideMenuItem(eSrvcs);
-	    eSrvcsItem.setDrawable(getIcon(R.drawable.emergency));
+	    eSrvcsItem.setDrawable(getIcon(R.drawable.campus_status));
 	    menuAdapter.add(eSrvcsItem);
 	}
 	
@@ -481,9 +473,9 @@ public class MainActivity extends FragmentActivity  implements
 				for(int i = 0; i < shortcutsArray.length(); i++) {		
 					try {
 						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
-						String title = DTable.getLocalTitle(getApplicationContext(), curShortcut.get("title"));
+						String title = AppUtil.getLocalTitle(getApplicationContext(), curShortcut.get("title"));
 						String url = curShortcut.getString("url");
-						String iconName = removeNumbers(curShortcut.getString("icon"));
+						String iconName = curShortcut.getString("handle"); // Handle is used to figure out icon & color
 						int iconRes = 0;
 						int colorRes = 0;
 						try {
@@ -525,13 +517,5 @@ public class MainActivity extends FragmentActivity  implements
 		});
 		
 	}
-	
-	private String removeNumbers(String annoyingString) {
-		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < annoyingString.length(); i++) {
-			if(!Character.isDigit(annoyingString.charAt(i))) sb.append(annoyingString.charAt(i));
-		}
-		return sb.toString();
-	}
-	
+
 }
