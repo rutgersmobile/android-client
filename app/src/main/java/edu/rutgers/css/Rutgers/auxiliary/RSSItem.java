@@ -5,8 +5,10 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -60,25 +62,19 @@ public class RSSItem {
 			// Try the standard pubDate format, as well as some variations seen in the feeds we read
 			try {
 				parsed = rssDf.parse(item.text("pubDate"));
-			} catch(ParseException e) {
-				//Log.d(TAG, "1st attempt to parse failed");
-			}
+			} catch(ParseException e) {}
 			 
 			if(parsed == null) {
 				try {
 					parsed = rssDf2.parse(item.text("pubDate"));
 				}
-				catch(ParseException e) {
-					//Log.d(TAG, "2nd attempt to parse failed");
-				}
+				catch(ParseException e) {}
 			}
 			
 			if(parsed == null) {
 				try {
 					parsed = rssDf3.parse(item.text("pubDate"));
-				} catch(ParseException e) {
-					//Log.d(TAG, "3rd attempt to parse failed");
-				}
+				} catch(ParseException e) {}
 			}
 			
 			if(parsed != null) {
@@ -92,10 +88,15 @@ public class RSSItem {
 		else if(item.text("event:beginDateTime") != null) {
 			// Event time - parse start & end timestamps and produce an output string that gives
 			// the date and beginning and end times, e.g. "Fri, Apr 18, 10:00 AM - 11:00 AM"
+            // Events feed dates are in Eastern time
 			try {
-				Date parsedDate = eventDf.parse(item.text("event:beginDateTime"));
-				Date parsedEnd = eventDf.parse(item.text("event:endDateTime"));
-				this.date = outDf.format(parsedDate) + " - " + outEndDf.format(parsedEnd);
+				Date eventBegin = eventDf.parse(item.text("event:beginDateTime"));
+				Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
+
+                // If days match show day with start & end hours
+                if(isSameDay(eventBegin, eventEnd)) this.date = outDf.format(eventBegin) + " - " + outEndDf.format(eventEnd);
+                // Otherwise show start and end dates
+                else this.date = outDf.format(eventBegin) + " - " + outDf.format(eventEnd);
 			} catch (ParseException e) {
 				Log.e(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
 				this.date = item.text("event:beginDateTime");
@@ -184,5 +185,15 @@ public class RSSItem {
 			return string;
 		}
 	}
-	
+
+    private boolean isSameDay(Date d1, Date d2) {
+        Calendar cal1 = Calendar.getInstance(Locale.US);
+        Calendar cal2 = Calendar.getInstance(Locale.US);
+        cal1.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        cal2.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        cal1.setTime(d1);
+        cal2.setTime(d2);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+
 }
