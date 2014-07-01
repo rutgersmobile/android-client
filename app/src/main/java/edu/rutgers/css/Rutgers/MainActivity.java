@@ -461,7 +461,7 @@ public class MainActivity extends FragmentActivity  implements
                 itemArgs.putString("title", AppUtil.getLocalTitle(this, cur.get("title")));
 
                 // Set component to launch. Default to WWW for web shortcuts
-                if(cur.optString("component").isEmpty() && !cur.optString("url").isEmpty()) {
+                if(cur.optString("view").isEmpty() && !cur.optString("url").isEmpty()) {
                     itemArgs.putString("component", "www");
                 }
                 else {
