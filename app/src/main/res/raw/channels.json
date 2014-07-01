@@ -1,0 +1,85 @@
+[
+    {
+        "category": "main",
+        "title": "Bus",
+        "handle": "bus",
+        "view": "bus"
+    },
+
+    {
+        "category": "main",
+        "title": "News",
+        "handle": "news",
+        "view": "dtable",
+        "url": "https://rumobile.rutgers.edu/1/news.txt"
+    },
+
+    {
+        "category": "main",
+        "title": "Food",
+        "handle": "food",
+        "view": "food"
+    },
+
+    {
+        "category": "main",
+        "title": "Places",
+        "handle": "places",
+        "view": "places"
+    },
+
+    {
+        "category": "main",
+        "title": "Recreation",
+        "handle": "rec",
+        "view": "dtable",
+        "url": "https://rumobile.rutgers.edu/1/rec.txt"
+    },
+
+    {
+        "category": "main",
+        "title": "Events",
+        "handle": "events",
+        "view": "reader",
+        "url": "http://ruevents.rutgers.edu/events/getEventsRss.xml"
+    },
+
+    {
+        "category": "main",
+        "title": "RU-info",
+        "handle": "ruinfo",
+        "view": "ruinfo"
+    },
+
+    {
+        "category": "main",
+        "title": "Feedback",
+        "handle": "feedback",
+        "view": "feedback"
+    },
+    
+    {
+        "category": "main",
+        "title": "Emergency Services",
+        "handle": "campus_status",
+        "view": "dtable",
+        "data": [
+            {
+                "title": "Emergency Alerts",
+                "channel": {
+                    "view": "www",
+                    "url": "http://halflife.rutgers.edu/ec/notices.php",
+                    "title": "Emergency Alerts"
+                }
+            },
+            {
+                "title": "Emergency Action Plans",
+                "channel": {
+                    "view": "www",
+                    "url": "http://eap.oit-nbcs.rutgers.edu/mobile.php",
+                    "title": "Emergency Action Plans"
+                }
+            }
+        ]
+    }
+]

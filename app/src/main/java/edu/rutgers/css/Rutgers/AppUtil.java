@@ -13,6 +13,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import edu.rutgers.css.Rutgers2.R;
@@ -22,7 +24,7 @@ public class AppUtil {
 	private static final String TAG = "AppUtil";
 	private static final String INSTALLATION = "INSTALLATION";
 	private static String installID = null;
-	
+
 	/**
 	 * Get (or create) UUID for the installation of this app.
 	 * @param context App context
@@ -115,5 +117,60 @@ public class AppUtil {
 		
 		return null;
 	}
+
+    /**
+     * Get icon by resource ID, colored white
+     * @param resources Application Resources
+     * @param drawableResource Icon resource ID
+     * @return Icon drawable
+     */
+    public static Drawable getIcon(Resources resources, int drawableResource) {
+        return getIcon(resources, drawableResource, R.color.white);
+    }
+
+    /**
+     * Get icon by resource ID with specified color
+     * @param resources Application Resources
+     * @param drawableResource Icon resource ID
+     * @param colorResource Color to be applied to icon
+     * @return Icon drawable
+     */
+    public static Drawable getIcon(Resources resources, int drawableResource, int colorResource) {
+        if(drawableResource == 0) return null;
+        if(colorResource == 0) colorResource = R.color.white;
+
+        try {
+            Drawable drawable = resources.getDrawable(drawableResource);
+            int color = resources.getColor(colorResource);
+            drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            return drawable;
+        } catch(NotFoundException e) {
+            Log.w(TAG, "getIcon(): " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get icon by channel handle
+     * @param resources Application Resources
+     * @param handle Channel handle
+     * @return Icon drawable for channel
+     */
+    public static Drawable getIcon(Resources resources, String handle) {
+        int iconRes = 0;
+        int colorRes = 0;
+        try {
+            iconRes = resources.getIdentifier(handle, "drawable", "edu.rutgers.css.Rutgers2");
+        } catch(NotFoundException e) {
+            Log.i(TAG, "getIcon(): " + e.getMessage());
+        }
+        try {
+            colorRes = resources.getIdentifier(handle+"_icon_color", "color", "edu.rutgers.css.Rutgers2");
+        } catch(NotFoundException e) {
+            Log.i(TAG, "getIcon(): " + e.getMessage());
+        }
+
+        return getIcon(resources, iconRes, colorRes);
+    }
 
 }

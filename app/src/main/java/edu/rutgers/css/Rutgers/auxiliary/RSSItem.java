@@ -31,13 +31,13 @@ public class RSSItem {
 	private String date;
 	private URL imgUrl;
 	
-	public final static DateFormat rssDf = new SimpleDateFormat("EEE, dd MMM yyyy ZZZZZ", Locale.US); // Mon, 26 May 2014 -0400
-	public final static DateFormat rssDf2 = new SimpleDateFormat("EEE, MMM dd, yyyy", Locale.US); // Monday, May 26, 2014
-	public final static DateFormat rssDf3 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US); // Mon, 26 May 2014 00:27:50 GMT
-	public final static DateFormat rssOutFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.US); // May 26, 2014
-	public final static DateFormat eventDf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
-	public final static DateFormat outDf = new SimpleDateFormat("E, MMM dd, h:mm a", Locale.US);
-	public final static DateFormat outEndDf = new SimpleDateFormat("h:mm a", Locale.US);
+	private final static DateFormat rssDf = new SimpleDateFormat("EEE, dd MMM yyyy ZZZZZ", Locale.US); // Mon, 26 May 2014 -0400
+	private final static DateFormat rssDf2 = new SimpleDateFormat("EEE, MMM dd, yyyy", Locale.US); // Monday, May 26, 2014
+    private final static DateFormat rssDf3 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US); // Mon, 26 May 2014 00:27:50 GMT
+    private final static DateFormat rssOutFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.US); // May 26, 2014
+    private final static DateFormat eventDf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
+    private final static DateFormat outDf = new SimpleDateFormat("E, MMM dd, h:mm a", Locale.US);
+    private final static DateFormat outEndDf = new SimpleDateFormat("h:mm a", Locale.US);
 	
 	/**
 	 * Default constructor takes RSS item as XML object
@@ -98,7 +98,7 @@ public class RSSItem {
                 // Otherwise show start and end dates
                 else this.date = outDf.format(eventBegin) + " - " + outDf.format(eventEnd);
 			} catch (ParseException e) {
-				Log.e(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
+				Log.w(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
 				this.date = item.text("event:beginDateTime");
 			}
 		}

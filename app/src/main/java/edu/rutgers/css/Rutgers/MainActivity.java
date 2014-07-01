@@ -44,6 +44,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 
+import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
@@ -68,9 +69,9 @@ public class MainActivity extends FragmentActivity  implements
 	
 	private static final String TAG = "MainActivity";
 	private static final String SC_API = "https://rumobile.rutgers.edu/1/shortcuts.txt";
-	
+
+    private ChannelManager mChannelManager;
 	private LocationClient mLocationClient;
-	
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerListView;
 	private ActionBarDrawerToggle mDrawerToggle;
@@ -83,26 +84,7 @@ public class MainActivity extends FragmentActivity  implements
 	public LocationClient getLocationClient() {
 		return mLocationClient;
 	}
-	
-	private Drawable getIcon(int drawableResource) {
-		return getIcon(drawableResource, R.color.white);
-	}
-	
-	private Drawable getIcon(int drawableResource, int colorResource) {
-		if(drawableResource == 0) return null;
-		if(colorResource == 0) colorResource = R.color.white;
-		
-		try {
-			Drawable drawable = getResources().getDrawable(drawableResource);
-			int color = getResources().getColor(colorResource);
-			drawable.setColorFilter(color, Mode.SRC_IN);
-			return drawable;
-		} catch(NotFoundException e) {
-			Log.w(TAG, "getIcon(): " + e.getMessage());
-			return null;
-		}
-	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -120,6 +102,11 @@ public class MainActivity extends FragmentActivity  implements
 		 * Connect to Google Play location services
 		 */
 		mLocationClient = new LocationClient(this, this, this);
+
+        /*
+         * Set up channel manager
+         */
+        mChannelManager = new ChannelManager();
 
 		/*
 		 * Set up nav drawer
@@ -189,10 +176,10 @@ public class MainActivity extends FragmentActivity  implements
          */
 
         // Set up channel items in drawer
-        loadChannels(mDrawerAdapter);
+        loadChannels();
         
         // Set up web shortcut items in drawer
-        loadWebShortcuts(mDrawerAdapter);
+        loadWebShortcuts();
         
         /*
          * Set up main screen
@@ -418,85 +405,22 @@ public class MainActivity extends FragmentActivity  implements
 	
 	/**
 	 * Add native channel items to the menu.
-	 * @param menuAdapter Menu drawer adapter
 	 */
-	private void loadChannels(final RMenuAdapter menuAdapter) {
-		menuAdapter.add(new SlideMenuHeader(getResources().getString(R.string.drawer_channels)));
-	    menuAdapter.add(new SlideMenuItem("Bus", "bus", getIcon(R.drawable.careers, R.color.bus_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("News", "dtable", "https://rumobile.rutgers.edu/1/news.txt", getIcon(R.drawable.news, R.color.news_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("Food", "food", getIcon(R.drawable.food, R.color.food_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("Places", "places", getIcon(R.drawable.places, R.color.places_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("Recreation", "dtable", "https://rumobile.rutgers.edu/1/rec.txt", getIcon(R.drawable.rec, R.color.rec_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("Events", "reader", "http://ruevents.rutgers.edu/events/getEventsRss.xml", getIcon(R.drawable.events, R.color.events_icon_color)));
-	    menuAdapter.add(new SlideMenuItem("RU-info", "ruinfo", getIcon(R.drawable.ruinfo)));
-	    menuAdapter.add(new SlideMenuItem("Feedback", "feedback", getIcon(R.drawable.feedback, R.color.bus_icon_color)));
-	    
-	    Bundle eSrvcs = new Bundle();
-	    eSrvcs.putString("title", "Emergency Services");
-	    eSrvcs.putString("component", "dtable");
-	    eSrvcs.putString("data",
-	    		  "["
-	    		+ "{"
-	    		+ "\"title\": \"Emergency Alerts\","
-		    		+ "\"channel\": {"
-		    		+ "\"view\": \"www\","
-		    		+ "\"url\": \"http://halflife.rutgers.edu/ec/notices.php\","
-		    		+ "\"title\": \"Emergency Alerts\""
-		    		+ "}"
-	    		+ "},"
-	    		+ "{"
-	    		+ "\"title\": \"Emergency Action Plans\","
-		    		+ "\"channel\": {"
-		    		+ "\"view\": \"www\","
-		    		+ "\"url\": \"http://eap.oit-nbcs.rutgers.edu/mobile.php\","
-		    		+ "\"title\": \"Emergency Action Plans\""
-		    		+ "}"
-	    		+ "}"
-	    		+ "]");
-	    SlideMenuItem eSrvcsItem = new SlideMenuItem(eSrvcs);
-	    eSrvcsItem.setDrawable(getIcon(R.drawable.campus_status));
-	    menuAdapter.add(eSrvcsItem);
+	private void loadChannels() {
+        mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
+        addMenuSection(getResources().getString(R.string.drawer_channels), mChannelManager.getChannels("main"));
 	}
 	
 	/**
 	 * Grab web links and add them to the menu.
-	 * @param menuAdapter Menu drawer adapter
 	 */
-	private void loadWebShortcuts(final RMenuAdapter menuAdapter) {
-        final Context context = this;
-		menuAdapter.add(new SlideMenuHeader(getResources().getString(R.string.drawer_shortcuts)));
-        
+	private void loadWebShortcuts() {
 		Request.jsonArray(SC_API, Request.EXPIRE_ONE_HOUR).done(new AndroidDoneCallback<JSONArray>() {
 
 			@Override
 			public void onDone(JSONArray shortcutsArray) {
-				
-				// Get each shortcut from array and add it to the sliding menu
-				for(int i = 0; i < shortcutsArray.length(); i++) {		
-					try {
-						JSONObject curShortcut = shortcutsArray.getJSONObject(i);
-						String title = AppUtil.getLocalTitle(context, curShortcut.get("title"));
-						String url = curShortcut.getString("url");
-						String iconName = curShortcut.getString("handle"); // Handle is used to figure out icon & color
-						int iconRes = 0;
-						int colorRes = 0;
-						try {
-							iconRes = getResources().getIdentifier(iconName, "drawable", "edu.rutgers.css.Rutgers2");
-						} catch(NotFoundException e) {
-							Log.i(TAG, "loadWebShortcuts(): " + e.getMessage());
-						}
-						try {
-							colorRes = getResources().getIdentifier(iconName+"_icon_color", "color", "edu.rutgers.css.Rutgers2");
-						} catch(NotFoundException e) {
-							Log.i(TAG, "loadWebShortcuts(): " + e.getMessage());
-						}
-						menuAdapter.add(new SlideMenuItem(title, "www", url, getIcon(iconRes, colorRes)));
-					} catch (JSONException e) {
-						Log.e(TAG, "loadWebShortcuts(): " + e.getMessage());
-						continue;
-					}
-				}
-				
+				mChannelManager.loadChannelsFromJSONArray(shortcutsArray, "shortcuts");
+                addMenuSection(getResources().getString(R.string.drawer_shortcuts), mChannelManager.getChannels("shortcuts"));
 			}
 
 			@Override
@@ -519,5 +443,49 @@ public class MainActivity extends FragmentActivity  implements
 		});
 		
 	}
+
+    /**
+     * Create section header and load menu items from JSON.
+     * @param category Section title
+     * @param items Menu items JSON
+     */
+    private void addMenuSection(String category, JSONArray items) {
+        mDrawerAdapter.add(new SlideMenuHeader(category));
+        for(int i = 0; i < items.length(); i++) {
+            try {
+                // Create menu item
+                JSONObject cur = items.getJSONObject(i);
+                Bundle itemArgs = new Bundle();
+
+                // Set title - may be a multi-title object
+                itemArgs.putString("title", AppUtil.getLocalTitle(this, cur.get("title")));
+
+                // Set component to launch. Default to WWW for web shortcuts
+                if(cur.optString("component").isEmpty() && !cur.optString("url").isEmpty()) {
+                    itemArgs.putString("component", "www");
+                }
+                else {
+                    itemArgs.putString("component", cur.getString("view"));
+                }
+
+                // Set URL if available
+                if(!cur.optString("url").isEmpty()) itemArgs.putString("url", cur.getString("url"));
+
+                // Set data (JSON Array) if available
+                if(cur.optJSONArray("data") != null) itemArgs.putString("data", cur.getJSONArray("data").toString());
+
+                SlideMenuItem newSMI = new SlideMenuItem(itemArgs);
+                // Try to find icon for this item and set it
+                if(!cur.optString("handle").isEmpty()) {
+                    newSMI.setDrawable(AppUtil.getIcon(getResources(), cur.getString("handle")));
+                }
+
+                // Add the item to the drawer
+                mDrawerAdapter.add(newSMI);
+            } catch (JSONException e) {
+                Log.w(TAG, "loadChannels(): " + e.getMessage());
+            }
+        }
+    }
 
 }
