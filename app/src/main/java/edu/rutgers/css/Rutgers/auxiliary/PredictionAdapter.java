@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
@@ -35,13 +36,13 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		Prediction prediction = this.getItem(position);
 		ViewHolder holder = null;
 		
-		/* Make new data holder or get existing one */
+		// Make new data holder or get existing one
 		if(convertView == null) {
-			convertView = mLayoutInflater.inflate(this.layoutResource, null);
+			convertView = layoutInflater.inflate(this.layoutResource, null);
 			holder = new ViewHolder();
 			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
 			holder.directionTextView = (TextView) convertView.findViewById(R.id.direction);
@@ -51,11 +52,11 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 		else {	
 			holder = (ViewHolder) convertView.getTag();
 		}
-	
-		/* Populate prediction row layout elements */
+
+		// Populate prediction row layout elements
 		holder.titleTextView.setText(prediction.getTitle());
 		
-		/* Change color of text based on how much time is remaining before the first bus arrives */
+		// Change color of text based on how much time is remaining before the first bus arrives
 		if(prediction.getMinutes().size() > 0) {
 			int first = prediction.getMinutes().get(0);
 			if(first < 2) {
@@ -75,14 +76,12 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 			holder.minutesTextView.setText(R.string.bus_no_predictions);
 		}
 		
-		/* If there's no direction string, don't let that text field take up space */
+		// If there's no direction string, don't let that text field take up space
 		if(prediction.getDirection() == null || prediction.getDirection().equals("")) {
-			holder.directionTextView.setVisibility(View.INVISIBLE);
-			holder.directionTextView.setMaxLines(0);
+			holder.directionTextView.setVisibility(View.GONE);
 		}
 		else {
 			holder.directionTextView.setVisibility(View.VISIBLE);
-			holder.directionTextView.setMaxLines(1);
 			holder.directionTextView.setText(prediction.getDirection());
 		}
 		

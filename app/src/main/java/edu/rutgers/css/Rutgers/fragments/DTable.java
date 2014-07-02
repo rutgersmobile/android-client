@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,8 +36,12 @@ import edu.rutgers.css.Rutgers2.R;
 public class DTable extends Fragment {
 	
 	private static final String TAG = "DTable";
-	
-	private ListView mList;
+
+    private static final int FAQ_TYPE = 2;
+    private static final int CAT_TYPE = 1;
+    private static final int DEF_TYPE = 0;
+
+	private ListView mListView;
 	private JSONArray mData;
 	private JSONAdapter mAdapter;
 	private String mURL;
@@ -87,61 +92,63 @@ public class DTable extends Fragment {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
-		mList = (ListView) v.findViewById(R.id.dtable_list);
+		mListView = (ListView) v.findViewById(R.id.dtable_list);
 
 		Bundle args = getArguments();
 		if(args.getString("title") != null) {
 			getActivity().setTitle(args.getString("title"));
 		}
 		
-		mList.setAdapter(mAdapter);
+		mListView.setAdapter(mAdapter);
 		
 		// Clicks on DTable item launch component in "view" field with arguments
-		mList.setOnItemClickListener(new OnItemClickListener() {
-			
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {				
-				JSONObject clickedJson = (JSONObject) parent.getAdapter().getItem(position);
-				Bundle args = new Bundle();
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
-				try {	
-					// This object has an array of more channels
-					if(clickedJson.has("children") && clickedJson.get("children") instanceof JSONArray) {
-						Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
-						args.putString("component", "dtable");
-						args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
-						args.putString("data", clickedJson.getJSONArray("children").toString());
-					}
-                    // This is a FAQ button
-                    else if(clickedJson.has("answer")) {
-                        Log.v(TAG, "Clicked FAQ button " + clickedJson.getString("title"));
-                        args.putString("data", clickedJson.getString("answer"));
-                        args.putString("component", "text");
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                JSONObject clickedJson = (JSONObject) parent.getAdapter().getItem(position);
+                Bundle args = new Bundle();
+
+                try {
+                    // This object has an array of more channels
+                    if (mAdapter.getItemViewType(position) == CAT_TYPE) {
+                        Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
+                        args.putString("component", "dtable");
+                        args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
+                        args.putString("data", clickedJson.getJSONArray("children").toString());
                     }
-					// This object is a channel
-					else {
-						JSONObject channel = (JSONObject) clickedJson.getJSONObject("channel");
-						Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, channel.get("title")) + "\"");
-						
-						// Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
-						args.putString("component", channel.getString("view"));
-						
-						Iterator<String> keys = channel.keys();
-						while(keys.hasNext()) {
-							String key = keys.next();
-							Log.v(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
-							args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
-						}
-					}
-					
-					ComponentFactory.getInstance().switchFragments(args);
-				} catch (JSONException e) {
-					Log.w(TAG, "onItemClick(): " + e.getMessage());
-				}
-				
-			}
-			
-		});
+                    // This is a FAQ button
+                    else if (mAdapter.getItemViewType(position) == FAQ_TYPE) {
+                        // Toggle pop-down visibility
+                        View popdownLayout = view.findViewById(R.id.popdownLayout);
+                        if(popdownLayout.getVisibility() == View.VISIBLE) popdownLayout.setVisibility(View.GONE);
+                        else popdownLayout.setVisibility(View.VISIBLE);
+                        return;
+                    }
+                    // This object is a channel
+                    else {
+                        JSONObject channel = clickedJson.getJSONObject("channel");
+                        Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, channel.get("title")) + "\"");
+
+                        // Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
+                        args.putString("component", channel.getString("view"));
+
+                        Iterator<String> keys = channel.keys();
+                        while (keys.hasNext()) {
+                            String key = keys.next();
+                            Log.v(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
+                            args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
+                        }
+                    }
+
+                    ComponentFactory.getInstance().switchFragments(args);
+                } catch (JSONException e) {
+                    Log.w(TAG, "onItemClick(): " + e.getMessage());
+                }
+
+            }
+
+        });
 		
 		return v;
 	}
@@ -170,6 +177,7 @@ public class DTable extends Fragment {
 	
 		private class ViewHolder {
 			TextView titleTextView;
+            TextView popdownTextView;
 		}
 		
 		public JSONAdapter(JSONArray rows) {
@@ -204,16 +212,19 @@ public class DTable extends Fragment {
 		
 		@Override
 		public int getItemViewType(int position) {
+			JSONObject json = (JSONObject) getItem(position);
+
+			// FAQ row
+            if(json.has("answer")) return FAQ_TYPE;
 			// Sub-menu row
-		    if(((JSONObject)getItem(position)).has("children"))
-		    	return 1;
-		    else
-		    	return 0;
+		    else if(json.has("children") && json.opt("children") instanceof JSONArray) return CAT_TYPE;
+            // Regular text thing
+		    else return DEF_TYPE;
 		}
 
 		@Override
 		public int getViewTypeCount() {
-		    return 2;
+		    return 3;
 		}
 		
 		@Override
@@ -224,13 +235,28 @@ public class DTable extends Fragment {
 			// If we aren't given a view, inflate one. Get special layout for sub-menu items.
 			if (convertView == null) {
 				int res;
-				
-				if(getItemViewType(position) == 1) res = R.layout.category_row;
-				else res = R.layout.dtable_row; 
+
+                switch(getItemViewType(position)) {
+                    case FAQ_TYPE:
+                        res = R.layout.popdown_row;
+                        break;
+                    case CAT_TYPE:
+                        res = R.layout.category_row;
+                        break;
+                    case DEF_TYPE:
+                    default:
+                        res = R.layout.dtable_row;
+                }
 
 				convertView = getActivity().getLayoutInflater().inflate(res, null);
 				holder = new ViewHolder();
-				holder.titleTextView = (TextView) convertView.findViewById(R.id.text);
+				if(getItemViewType(position) == FAQ_TYPE) {
+                    holder.titleTextView = (TextView) convertView.findViewById(R.id.mainTextView);
+                    holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
+                }
+                else {
+                    holder.titleTextView = (TextView) convertView.findViewById(R.id.text);
+                }
 				convertView.setTag(holder);
 			}
 			else {
@@ -239,9 +265,12 @@ public class DTable extends Fragment {
 
 			JSONObject c = (JSONObject) getItem(position);
 			title = AppUtil.getLocalTitle(mContext, c.opt("title"));
-			
-			holder.titleTextView.setText(title);
-				
+
+            holder.titleTextView.setText(title);
+			if(getItemViewType(position) == FAQ_TYPE) {
+                holder.popdownTextView.setText(c.optString("answer"));
+            }
+
 			return convertView;
 		}
 	}
