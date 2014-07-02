@@ -58,15 +58,15 @@ public class DTable extends Fragment {
 		mAdapter = new JSONAdapter(mData);
 		
 		Bundle args = getArguments();
-		if (args.get("data") != null) {
+		if (args.getString("data") != null) {
 			try {
 				loadArray(new JSONArray(args.getString("data")));
 			} catch (JSONException e) {
 				Log.e(TAG, "onCreateView(): " + e.getMessage());
 			}
 		}
-		else if (args.get("url") != null) mURL = args.getString("url");
-		else if (args.get("api") != null) mAPI = args.getString("api");
+		else if (args.getString("url") != null) mURL = args.getString("url");
+		else if (args.getString("api") != null) mAPI = args.getString("api");
 		else throw new IllegalStateException("DTable must have either a url or data in its arguments bundle");
 		
 		if (mURL != null) aq.ajax(mURL, JSONObject.class, new AjaxCallback<JSONObject>() {
@@ -106,12 +106,18 @@ public class DTable extends Fragment {
 
 				try {	
 					// This object has an array of more channels
-					if(clickedJson.has("children")) {							
+					if(clickedJson.has("children") && clickedJson.get("children") instanceof JSONArray) {
 						Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
 						args.putString("component", "dtable");
 						args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
 						args.putString("data", clickedJson.getJSONArray("children").toString());
 					}
+                    // This is a FAQ button
+                    else if(clickedJson.has("answer")) {
+                        Log.v(TAG, "Clicked FAQ button " + clickedJson.getString("title"));
+                        args.putString("data", clickedJson.getString("answer"));
+                        args.putString("component", "text");
+                    }
 					// This object is a channel
 					else {
 						JSONObject channel = (JSONObject) clickedJson.getJSONObject("channel");

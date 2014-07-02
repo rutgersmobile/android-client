@@ -25,6 +25,7 @@ import edu.rutgers.css.Rutgers.fragments.RSSReader;
 import edu.rutgers.css.Rutgers.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.fragments.RecreationDisplay;
 import edu.rutgers.css.Rutgers.fragments.RecreationMain;
+import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -56,6 +57,7 @@ public class ComponentFactory {
 		fragmentTable.put("www", WebDisplay.class);
 		fragmentTable.put("ruinfo", RUInfoMain.class);
 		fragmentTable.put("feedback", FeedbackMain.class);
+        fragmentTable.put("text", TextDisplay.class);
 	}
 	
 	/**

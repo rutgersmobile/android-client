@@ -69,7 +69,7 @@
                 "channel": {
                     "view": "www",
                     "url": "http://halflife.rutgers.edu/ec/notices.php",
-                    "title": "Emergency Alerts"
+                    "title": "Emergency Alertshttps://rumobile.rutgers.edu/1/csfaq.txt"
                 }
             },
             {
@@ -81,5 +81,13 @@
                 }
             }
         ]
+    },
+
+    {
+        "category": "main",
+        "title": "Career Services",
+        "handle": "careers",
+        "view": "dtable",
+        "url": "https://rumobile.rutgers.edu/1/csfaq.txt"
     }
 ]
