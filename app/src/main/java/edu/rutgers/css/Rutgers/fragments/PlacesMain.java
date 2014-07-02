@@ -37,6 +37,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class PlacesMain extends Fragment {
 
 	private static final String TAG = "PlacesMain";
+
 	private ArrayList<PlaceTuple> mList;
 	private ArrayAdapter<PlaceTuple> mAdapter;
 	private JSONObject mData;
@@ -67,7 +68,7 @@ public class PlacesMain extends Fragment {
 			try {
 				return placeJson.getString("title");
 			} catch (JSONException e) {
-				Log.e(TAG, e.getMessage());
+				Log.w(TAG, "toString(): " + e.getMessage());
 				return key;
 			}
 		}
@@ -80,7 +81,7 @@ public class PlacesMain extends Fragment {
 				String thatTitle = another.getPlaceJSON().getString("title");
 				return thisTitle.compareTo(thatTitle);
 			} catch (JSONException e) {
-				Log.e(TAG, e.getMessage());
+				Log.w(TAG, "compareTo(): " + e.getMessage());
 				return getKey().compareTo(another.getKey()); 
 			}
 		}
@@ -89,7 +90,7 @@ public class PlacesMain extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		mList = new ArrayList<PlaceTuple>();
 		mAdapter = new ArrayAdapter<PlaceTuple>(getActivity(), android.R.layout.simple_dropdown_item_1line, mList);
 		
@@ -101,20 +102,20 @@ public class PlacesMain extends Fragment {
 				mData = json;
 				
 				// Grab "all" field and add title from each object inside
-				try {
-					@SuppressWarnings("unchecked")
-					Iterator<String> curKey = json.keys();
-					while(curKey.hasNext()) {
-						String key = curKey.next();
-						JSONObject curBuilding = json.getJSONObject(key);
-						PlaceTuple newPT = new PlaceTuple(key, curBuilding);
-						mAdapter.add(newPT);
-					}
-					Collections.sort(mList);
-				} catch (JSONException e) {
-					Log.e(TAG, Log.getStackTraceString(e));
-				}
-				
+                @SuppressWarnings("unchecked")
+                Iterator<String> curKey = json.keys();
+                while(curKey.hasNext()) {
+                    String key = curKey.next();
+                    try {
+                        JSONObject curBuilding = json.getJSONObject(key);
+                        PlaceTuple newPT = new PlaceTuple(key, curBuilding);
+                        mAdapter.add(newPT);
+                    } catch (JSONException e) {
+                        Log.w(TAG, "getPlaces().done: " + e.getMessage());
+                    }
+                }
+                Collections.sort(mList);
+
 			}
 			
 			@Override
@@ -131,7 +132,7 @@ public class PlacesMain extends Fragment {
 		final View v = inflater.inflate(R.layout.fragment_places, parent, false);
 		Bundle args = getArguments();
 		
-		if(args.get("title") != null) getActivity().setTitle(args.getString("title"));
+		getActivity().setTitle(getActivity().getResources().getString(R.string.places_title));
 
 		AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
 		autoComp.setAdapter(mAdapter);
@@ -165,8 +166,8 @@ public class PlacesMain extends Fragment {
 			public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
 				if(actionId == EditorInfo.IME_ACTION_GO) {
 					/* Close soft keyboard */
-					InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+					InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					return true;
 				}
 				

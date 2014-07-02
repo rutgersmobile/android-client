@@ -88,6 +88,8 @@
 	<string name="feedback_select_subject">Subject:</string>
 	<string name="feedback_select_channel">Channel:</string>
 	<string name="feedback_want_response">Want a response?</string>
+    <string name="feedback_email_caption">Reply to:</string>
+    <string name="feedback_email_hint">your email (optional)</string>
 	<string name="feedback_hint">Type your message</string>
 	<string name="feedback_general">General Questions</string>
 	<string name="feedback_help_use">Help Using Application</string>
@@ -143,5 +145,5 @@
 	<string name="ralumni_title">R Alumni</string>
 	<string name="sakai_title">Sakai</string>
 	<string name="stud_life_title">Student Life</string>
-	
+
 </resources>

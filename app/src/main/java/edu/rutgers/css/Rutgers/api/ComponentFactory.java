@@ -68,7 +68,7 @@ public class ComponentFactory {
 	
 	/**
 	 * Create component fragment
-	 * @param options Argument bundle with at least 'component' argument set to describe which component to build. All other arguments will be passed to the new fragment.
+	 * @param options Argument bundle with at least 'component' argument set to describe which component to build. The options bundle will be passed to the new fragment.
 	 * @return Built fragment
 	 */
 	public Fragment createFragment (Bundle options) {

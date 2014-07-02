@@ -25,6 +25,11 @@ public class AppUtil {
 	private static final String INSTALLATION = "INSTALLATION";
 	private static String installID = null;
 
+    public static final String APPTAG = "Rutgers";
+    public static final String VERSION = "0.0";
+    public static final String OSNAME = "android";
+    public static final String BETAMODE = "dev";
+
 	/**
 	 * Get (or create) UUID for the installation of this app.
 	 * @param context App context

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CheckBox;
@@ -37,13 +39,11 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	private static final String TAG = "FeedbackMain";
 	//private static final String API = "https://rumobile.rutgers.edu/1/feedback.php";
 	private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php";
-	private static final String OSNAME = "android";
-	private static final String BETAMODE = "dev";
 	
 	private Spinner mSubjectSpinner;
 	private Spinner mChannelSpinner;
 	private EditText mMessageEditText;
-	private CheckBox mResponseCheckBox;
+    private EditText mEmailEditText;
 	private LinearLayout mSelectChannelLayout;
 	private boolean mLockSend;
 	
@@ -72,7 +72,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		mSubjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
 		mChannelSpinner = (Spinner) v.findViewById(R.id.channelSpinner);
 		mMessageEditText = (EditText) v.findViewById(R.id.messageEditText);
-		mResponseCheckBox = (CheckBox) v.findViewById(R.id.responseCheckBox);
+        mEmailEditText = (EditText) v.findViewById(R.id.emailEditText);
 		mSelectChannelLayout = (LinearLayout) v.findViewById(R.id.selectChannelLayout);
 		
 		mSubjectSpinner.setOnItemSelectedListener(this);
@@ -104,24 +104,25 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		final Resources res = getActivity().getResources();
 				
 		// Empty message - do nothing
-		if(mMessageEditText.getText().toString().equals("")) {
+		if(mMessageEditText.getText().toString().trim().isEmpty()) {
 			return;
 		}
 		
 		// Build POST request
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("subject", mSubjectSpinner.getSelectedItem());
-		params.put("email", AppUtil.getUUID(getActivity().getApplicationContext()) + "@android");
-		params.put("message", mMessageEditText.getText());
-		params.put("wants_response", mResponseCheckBox.isChecked());
+        params.put("email", mEmailEditText.getText().toString());
+		params.put("uuid", AppUtil.getUUID(getActivity().getApplicationContext()) + "@android");
+		params.put("message", mMessageEditText.getText().toString().trim());
+		params.put("wants_response", !mEmailEditText.getText().toString().isEmpty());
 		// Post the selected channel if this is channel feedback
 		if(mSubjectSpinner.getSelectedItem().equals(res.getString(R.string.feedback_channel_feedback))) {
 			params.put("channel", mChannelSpinner.getSelectedItem());	
 		}
-		params.put("debuglog", null);
-		params.put("version", "0.0");
-		params.put("osname", OSNAME);
-		params.put("betamode", BETAMODE);
+		params.put("debuglog", "");
+		params.put("version", AppUtil.VERSION);
+		params.put("osname", AppUtil.OSNAME);
+		params.put("betamode", AppUtil.BETAMODE);
 		
 		// Lock send button until POST request goes through
 		mLockSend = true;
@@ -166,8 +167,12 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	private void resetForm() {
 		mSubjectSpinner.setSelection(0);
 		mChannelSpinner.setSelection(0);
-		mResponseCheckBox.setChecked(false);
+		mEmailEditText.setText("");
 		mMessageEditText.setText("");
+
+        // Close soft keyboard
+        InputMethodManager imm = (InputMethodManager) mMessageEditText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mMessageEditText.getWindowToken(), 0);
 	}
 
 	@Override
