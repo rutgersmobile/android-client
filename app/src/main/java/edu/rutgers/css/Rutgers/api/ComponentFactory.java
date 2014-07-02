@@ -1,8 +1,5 @@
 package edu.rutgers.css.Rutgers.api;
 
-import java.util.Hashtable;
-import java.util.Locale;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +7,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+
+import java.util.Hashtable;
+import java.util.Locale;
+
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.BusMain;

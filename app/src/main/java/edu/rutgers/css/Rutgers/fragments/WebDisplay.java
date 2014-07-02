@@ -15,6 +15,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ShareActionProvider;
+
 import edu.rutgers.css.Rutgers2.R;
 
 public class WebDisplay extends Fragment {

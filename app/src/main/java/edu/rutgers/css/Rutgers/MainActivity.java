@@ -1,23 +1,10 @@
 package edu.rutgers.css.Rutgers;
 
-import java.util.ArrayList;
-
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.res.Configuration;
-import android.content.res.Resources.NotFoundException;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -44,6 +31,15 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
@@ -52,7 +48,6 @@ import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
-import edu.rutgers.css.Rutgers.fragments.DTable;
 import edu.rutgers.css.Rutgers.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.location.LocationUtils;
@@ -295,21 +290,23 @@ public class MainActivity extends FragmentActivity  implements
 	 */
 	@Override
 	public void onConnected(Bundle dataBundle) {
-		Log.d(LocationUtils.APPTAG, "Connected to Google Play services");
+		Log.v(LocationUtils.APPTAG, "Connected to Google Play services");
 		servicesConnected();
-/*		if(mLocationClient != null) {
+        /*
+        if(mLocationClient != null) {
 			// Mock location testing
 			//mLocationClient.setMockMode(false);
 			Location currentLocation = mLocationClient.getLastLocation();
 			if(currentLocation != null) {
 				Log.d(LocationUtils.APPTAG, currentLocation.toString());
 			}
-		}*/
+		}
+		*/
 	}
 	
 	@Override
 	public void onDisconnected() {
-		Log.d(LocationUtils.APPTAG, "Disconnected from Google Play services");
+		Log.v(LocationUtils.APPTAG, "Disconnected from Google Play services");
 	}
 	
 	@Override

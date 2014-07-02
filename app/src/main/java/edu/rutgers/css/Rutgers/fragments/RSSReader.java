@@ -1,17 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
-
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +12,13 @@ import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
+
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;

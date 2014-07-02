@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+
 import edu.rutgers.css.Rutgers2.R;
 
 public class RUInfoMain extends Fragment {

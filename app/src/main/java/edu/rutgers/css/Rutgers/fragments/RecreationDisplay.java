@@ -1,15 +1,5 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import java.util.Date;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,6 +14,16 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Date;
 
 import edu.rutgers.css.Rutgers.api.Gyms;
 import edu.rutgers.css.Rutgers2.R;

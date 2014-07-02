@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
-import java.util.List;
-
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.List;
+
 import edu.rutgers.css.Rutgers2.R;
 
 /**

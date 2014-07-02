@@ -1,14 +1,8 @@
 package edu.rutgers.css.Rutgers.api;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
+import android.util.Log;
+
+import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.Deferred;
 import org.jdeferred.Promise;
@@ -18,9 +12,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
-import com.androidquery.callback.AjaxStatus;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Locale;
 
 public class Gyms {
 	

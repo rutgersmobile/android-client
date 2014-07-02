@@ -1,5 +1,11 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
+import android.util.Log;
+
+import com.androidquery.util.XmlDom;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -9,12 +15,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-
-import android.util.Log;
-
-import com.androidquery.util.XmlDom;
 
 /**
  * Class for holding RSS item data

@@ -1,16 +1,14 @@
 package edu.rutgers.css.Rutgers.api;
 
-import org.jdeferred.Promise;
-import org.jdeferred.impl.DeferredObject;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import android.util.Log;
-
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
+
+import org.jdeferred.Promise;
+import org.jdeferred.impl.DeferredObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import edu.rutgers.css.Rutgers.MyApplication;
 

@@ -16,9 +16,10 @@
 
 package edu.rutgers.css.Rutgers.location;
 
-import com.google.android.gms.common.ConnectionResult;
 import android.content.Context;
 import android.content.res.Resources;
+
+import com.google.android.gms.common.ConnectionResult;
 
 import edu.rutgers.css.Rutgers2.R;
 

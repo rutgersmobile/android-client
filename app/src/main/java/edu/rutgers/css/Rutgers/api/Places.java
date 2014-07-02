@@ -1,5 +1,9 @@
 package edu.rutgers.css.Rutgers.api;
 
+import android.util.Log;
+
+import com.androidquery.callback.AjaxStatus;
+
 import org.jdeferred.Deferred;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
@@ -9,10 +13,6 @@ import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.util.Log;
-
-import com.androidquery.callback.AjaxStatus;
 
 /**
  * Helper for getting data from places API.

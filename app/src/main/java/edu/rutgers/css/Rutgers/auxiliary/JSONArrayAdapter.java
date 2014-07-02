@@ -1,11 +1,5 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
-import java.util.Iterator;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +8,13 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
+
 import edu.rutgers.css.Rutgers2.R;
 
 public class JSONArrayAdapter extends BaseAdapter implements ListAdapter {

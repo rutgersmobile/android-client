@@ -1,8 +1,10 @@
 package edu.rutgers.css.Rutgers.api;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import android.location.Location;
+import android.util.Log;
+
+import com.androidquery.callback.AjaxStatus;
+import com.androidquery.util.XmlDom;
 
 import org.jdeferred.Deferred;
 import org.jdeferred.Promise;
@@ -18,11 +20,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.location.Location;
-import android.util.Log;
-
-import com.androidquery.callback.AjaxStatus;
-import com.androidquery.util.XmlDom;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.auxiliary.Prediction;
 
