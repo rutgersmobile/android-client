@@ -27,6 +27,7 @@ public class AppUtil {
 	private static String installID = null;
 
     public static final String APPTAG = "Rutgers";
+    public static final String PACKAGE_NAME = "edu.rutgers.css.Rutgers2";
     public static final String VERSION = "0.0";
     public static final String OSNAME = "android";
     public static final String BETAMODE = "dev";
@@ -74,7 +75,7 @@ public class AppUtil {
 		Resources res = context.getResources();
 		
 		try {
-			int id = res.getIdentifier("campus_"+campusTag+"_full", "string", "edu.rutgers.css.Rutgers2");
+			int id = res.getIdentifier("campus_"+campusTag+"_full", "string", AppUtil.PACKAGE_NAME);
 			return res.getString(id);
 		} catch (NotFoundException e) {
 			return null;
@@ -166,12 +167,12 @@ public class AppUtil {
         int iconRes = 0;
         int colorRes = 0;
         try {
-            iconRes = resources.getIdentifier(handle, "drawable", "edu.rutgers.css.Rutgers2");
+            iconRes = resources.getIdentifier(handle, "drawable", AppUtil.PACKAGE_NAME);
         } catch(NotFoundException e) {
             Log.i(TAG, "getIcon(): " + e.getMessage());
         }
         try {
-            colorRes = resources.getIdentifier(handle+"_icon_color", "color", "edu.rutgers.css.Rutgers2");
+            colorRes = resources.getIdentifier(handle+"_icon_color", "color", AppUtil.PACKAGE_NAME);
         } catch(NotFoundException e) {
             Log.i(TAG, "getIcon(): " + e.getMessage());
         }

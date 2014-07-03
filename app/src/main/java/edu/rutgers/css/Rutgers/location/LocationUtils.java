@@ -16,9 +16,18 @@
 
 package edu.rutgers.css.Rutgers.location;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.location.Location;
+import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -26,16 +35,30 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public final class LocationUtils {
 
-    // Debugging tag for the application
-    public static final String APPTAG = "Rutgers";
+    public static class ErrorDialogFragment extends DialogFragment {
+        private Dialog mDialog;
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
+        }
+
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return mDialog;
+        }
+    }
 
     // Name of shared preferences repository that stores persistent state
     public static final String SHARED_PREFERENCES =
-            "com.example.android.location.SHARED_PREFERENCES";
+            AppUtil.PACKAGE_NAME + ".SHARED_PREFERENCES";
 
     // Key for storing the "updates requested" flag in shared preferences
     public static final String KEY_UPDATES_REQUESTED =
-            "com.example.android.location.KEY_UPDATES_REQUESTED";
+            AppUtil.PACKAGE_NAME + ".KEY_UPDATES_REQUESTED";
 
     /*
      * Define a request code to send to Google Play services
@@ -65,6 +88,28 @@ public final class LocationUtils {
 
     // Create an empty string for initializing strings
     public static final String EMPTY_STRING = new String();
+
+    /**
+     * Check if Google Play services is connected.
+     * @return True if connected, false if not.
+     */
+    public static boolean servicesConnected(FragmentActivity activity) {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
+
+        if(resultCode == ConnectionResult.SUCCESS) {
+            Log.v(AppUtil.APPTAG, "Google Play services available.");
+            return true;
+        }
+        else {
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, activity, 0);
+            if (dialog != null) {
+                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                errorFragment.setDialog(dialog);
+                errorFragment.show(activity.getSupportFragmentManager(), AppUtil.APPTAG);
+            }
+            return false;
+        }
+    }
 
     /**
      * Get the latitude and longitude from the Location object returned by

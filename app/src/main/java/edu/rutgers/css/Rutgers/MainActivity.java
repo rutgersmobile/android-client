@@ -8,7 +8,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -290,7 +289,7 @@ public class MainActivity extends FragmentActivity  implements
 	 */
 	@Override
 	public void onConnected(Bundle dataBundle) {
-		Log.v(LocationUtils.APPTAG, "Connected to Google Play services");
+		Log.v(AppUtil.APPTAG, "Connected to Google Play services");
 		servicesConnected();
         /*
         if(mLocationClient != null) {
@@ -298,7 +297,7 @@ public class MainActivity extends FragmentActivity  implements
 			//mLocationClient.setMockMode(false);
 			Location currentLocation = mLocationClient.getLastLocation();
 			if(currentLocation != null) {
-				Log.d(LocationUtils.APPTAG, currentLocation.toString());
+				Log.d(AppUtil.APPTAG, currentLocation.toString());
 			}
 		}
 		*/
@@ -306,7 +305,7 @@ public class MainActivity extends FragmentActivity  implements
 	
 	@Override
 	public void onDisconnected() {
-		Log.v(LocationUtils.APPTAG, "Disconnected from Google Play services");
+		Log.v(AppUtil.APPTAG, "Disconnected from Google Play services");
 	}
 	
 	@Override
@@ -315,15 +314,15 @@ public class MainActivity extends FragmentActivity  implements
 			try {
 				connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
 			} catch (SendIntentException e) {
-				Log.e(LocationUtils.APPTAG, Log.getStackTraceString(e));
+				Log.e(AppUtil.APPTAG, Log.getStackTraceString(e));
 			}
 		}
 		else {
             Dialog dialog = GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0);
             if (dialog != null) {
-                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                LocationUtils.ErrorDialogFragment errorFragment = new LocationUtils.ErrorDialogFragment();
                 errorFragment.setDialog(dialog);
-                errorFragment.show(getSupportFragmentManager(), LocationUtils.APPTAG);
+                errorFragment.show(getSupportFragmentManager(), AppUtil.APPTAG);
             }
 		}
 	}
@@ -340,62 +339,28 @@ public class MainActivity extends FragmentActivity  implements
                 switch (resultCode) {
                     // If Google Play services resolved the problem
                     case Activity.RESULT_OK:
-                        Log.d(LocationUtils.APPTAG, "resolved by google play");
+                        Log.d(AppUtil.APPTAG, "resolved by google play");
                         break;
 
                     // If any other result was returned by Google Play services
                     default:
-                        Log.d(LocationUtils.APPTAG, "not resolved by google play");
+                        Log.d(AppUtil.APPTAG, "not resolved by google play");
                         break;
                 }
 
             // If any other request code was received
             default:
                // Report that this Activity received an unknown requestCode
-               Log.d(LocationUtils.APPTAG, "unknown request code " + requestCode);
+               Log.d(AppUtil.APPTAG, "unknown request code " + requestCode);
                break;
         }
     }
-    
-	/**
-	 * Check if Google Play services is connected.
-	 * @return True if connected, false if not.
-	 */
-	public boolean servicesConnected() {
-		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-		
-		if(resultCode == ConnectionResult.SUCCESS) {
-			Log.v(TAG, "Google Play services available.");
-			return true;
-		}
-		else {
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
-            if (dialog != null) {
-                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-                errorFragment.setDialog(dialog);
-                errorFragment.show(getSupportFragmentManager(), LocationUtils.APPTAG);
-            }
-            return false;
-		}
-	}
-	
-	public static class ErrorDialogFragment extends DialogFragment {
-		private Dialog mDialog;
-		public ErrorDialogFragment() {
-			super();
-			mDialog = null;
-		}
-		
-		public void setDialog(Dialog dialog) {
-			mDialog = dialog;
-		}
-		
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			return mDialog;
-		}
-	}
-	
+
+    @Override
+    public boolean servicesConnected() {
+        return LocationUtils.servicesConnected(this);
+    }
+
 	/*
 	 * Nav drawer helpers
 	 */
