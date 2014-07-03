@@ -82,8 +82,7 @@ public class MainActivity extends FragmentActivity  implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		getWindow().requestFeature(Window.FEATURE_PROGRESS);
+
 		setContentView(R.layout.activity_main);
 		Log.v(TAG, "UUID: " + AppUtil.getUUID(this));
 		

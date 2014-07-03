@@ -14,7 +14,10 @@ import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 import android.widget.ShareActionProvider;
+
+import com.androidquery.util.Progress;
 
 import edu.rutgers.css.Rutgers2.R;
 
@@ -55,7 +58,8 @@ public class WebDisplay extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View v = inflater.inflate(R.layout.fragment_web_display, container, false);
-		mWebView = (WebView) v.findViewById(R.id.webView);
+        final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
+        mWebView = (WebView) v.findViewById(R.id.webView);
 		
 		if(mCurrentURL == null) {
 			String msg = getActivity().getResources().getString(R.string.failed_load);
@@ -64,13 +68,14 @@ public class WebDisplay extends Fragment {
 		}
 		
 		mWebView.getSettings().setJavaScriptEnabled(true); // XSS Warning
-		final Activity mainActivity = getActivity();
-		
+
 		// Progress bar
 		mWebView.setWebChromeClient(new WebChromeClient() {
 			@Override
 			public void onProgressChanged(WebView view, int progress) {
-				mainActivity.setProgress(progress * 1000);
+                progressBar.setProgress(progress);
+                if(progress != 100 && progressBar.getVisibility() == View.GONE) progressBar.setVisibility(View.VISIBLE);
+                else if(progress == 100) progressBar.setVisibility(View.GONE);
 			}
 		});
 		
@@ -78,10 +83,10 @@ public class WebDisplay extends Fragment {
 		mWebView.setWebViewClient(new WebViewClient() {
 		    @Override
 		    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-		    	mCurrentURL = url;
-		        mWebView.loadUrl(mCurrentURL);
-		        setShareIntent(mCurrentURL);
-		        return true;
+            mCurrentURL = url;
+            mWebView.loadUrl(mCurrentURL);
+            setShareIntent(mCurrentURL);
+            return true;
 		    }
 		});
 		
