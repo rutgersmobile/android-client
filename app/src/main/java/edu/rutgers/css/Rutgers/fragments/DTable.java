@@ -23,7 +23,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -61,7 +64,18 @@ public class DTable extends Fragment {
 		aq = new AQuery(mContext);
 		mData = new JSONArray();
 		mAdapter = new JSONAdapter(mData);
-		
+
+        if(savedInstanceState != null && savedInstanceState.getString("mData") != null) {
+            Log.v(TAG, "Restoring mData");
+            try {
+                mData = new JSONArray(savedInstanceState.getString("mData"));
+                loadArray(mData);
+                return;
+            } catch (JSONException e) {
+                Log.w(TAG, "onCreate(): " + e.getMessage());
+            }
+        }
+
 		Bundle args = getArguments();
 		if (args.getString("data") != null) {
 			try {
@@ -120,9 +134,7 @@ public class DTable extends Fragment {
                     // This is a FAQ button
                     else if (mAdapter.getItemViewType(position) == FAQ_TYPE) {
                         // Toggle pop-down visibility
-                        View popdownLayout = view.findViewById(R.id.popdownLayout);
-                        if(popdownLayout.getVisibility() == View.VISIBLE) popdownLayout.setVisibility(View.GONE);
-                        else popdownLayout.setVisibility(View.VISIBLE);
+                        mAdapter.togglePopdown(position);
                         return;
                     }
                     // This object is a channel
@@ -153,6 +165,12 @@ public class DTable extends Fragment {
 		return v;
 	}
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString("mData", mData.toString());
+        super.onSaveInstanceState(outState);
+    }
+
 	/**
 	 * Copy a JSON array to the member array
 	 * @param in JSON array to copy
@@ -174,20 +192,37 @@ public class DTable extends Fragment {
 	 */
 	private class JSONAdapter extends BaseAdapter {
 		private JSONArray mItems;
-	
+
 		private class ViewHolder {
 			TextView titleTextView;
             TextView popdownTextView;
+            LinearLayout popdownLayout;
 		}
 		
 		public JSONAdapter(JSONArray rows) {
-			mItems = rows;
+            mItems = rows;
 		}
 		
 		public void add(Object o) {
 			mItems.put(o);
 			this.notifyDataSetChanged();
 		}
+
+        public void togglePopdown(int position) {
+            if(getItemViewType(position) != FAQ_TYPE) return;
+
+            JSONObject selected = mItems.optJSONObject(position);
+            if(selected != null) {
+                try {
+                    if(selected.optBoolean("popped") == false) selected.put("popped", true);
+                    else selected.put("popped", false);
+                    notifyDataSetChanged();
+                } catch (JSONException e) {
+                    Log.w(TAG, "togglePopdown(): " + e.getMessage());
+                }
+            }
+
+        }
 		
 		@Override
 		public Object getItem (int pos) {			
@@ -253,6 +288,7 @@ public class DTable extends Fragment {
 				if(getItemViewType(position) == FAQ_TYPE) {
                     holder.titleTextView = (TextView) convertView.findViewById(R.id.mainTextView);
                     holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
+                    holder.popdownLayout = (LinearLayout) convertView.findViewById(R.id.popdownLayout);
                 }
                 else {
                     holder.titleTextView = (TextView) convertView.findViewById(R.id.text);
@@ -267,8 +303,14 @@ public class DTable extends Fragment {
 			title = AppUtil.getLocalTitle(mContext, c.opt("title"));
 
             holder.titleTextView.setText(title);
+
 			if(getItemViewType(position) == FAQ_TYPE) {
+                // Set pop-down contents
                 holder.popdownTextView.setText(c.optString("answer"));
+
+                // Toggle pop-down visibility
+                if(c.optBoolean("popped")) holder.popdownLayout.setVisibility(View.VISIBLE);
+                else holder.popdownLayout.setVisibility(View.GONE);
             }
 
 			return convertView;
