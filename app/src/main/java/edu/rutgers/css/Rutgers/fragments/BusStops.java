@@ -1,9 +1,11 @@
 package edu.rutgers.css.Rutgers.fragments;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +26,7 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
@@ -45,11 +48,13 @@ public class BusStops extends Fragment {
 	private int mNearbyStopCount; // Keep track of number of nearby stops displayed
 	private Timer mUpdateTimer;
 	private Handler mUpdateHandler;
+    private String mCurrentCampus;
 	
 	public BusStops() {
 		// Required empty public constructor
 	}
-	
+
+    @Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		try {
@@ -77,6 +82,10 @@ public class BusStops extends Fragment {
 		
 		loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));
 		loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header));
+
+        // Determine current campus
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mCurrentCampus = sharedPref.getString("campus_list", getActivity().getResources().getString(R.string.campus_nb_tag));
 	}
 	
 	@Override
@@ -121,7 +130,7 @@ public class BusStops extends Fragment {
 				mUpdateHandler.post(new Runnable() {
 					@Override
 					public void run() {
-						loadNearbyStops("nb");
+						loadNearbyStops(mCurrentCampus);
 					}
 				});
 			}
@@ -211,7 +220,7 @@ public class BusStops extends Fragment {
 			// Get last location
 			Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
 			if(lastLoc == null) {
-				Log.e(TAG, "Could not get location");
+				Log.w(TAG, "Could not get location");
 				clearNearbyRows();
 				addNearbyRow(1, new SlideMenuItem(getActivity().getResources().getString(R.string.failed_location)));
 				return;

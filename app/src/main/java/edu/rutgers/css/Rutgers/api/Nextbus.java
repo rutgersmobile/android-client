@@ -436,6 +436,7 @@ public class Nextbus {
 	
 	/**
 	 * Get all bus stops (by title) near a specific location.
+     * @param agency Agency (campus) to get stops for
 	 * @param sourceLat Latitude of location
 	 * @param sourceLon Longitude of location
 	 * @return stopByTitle JSON objects
