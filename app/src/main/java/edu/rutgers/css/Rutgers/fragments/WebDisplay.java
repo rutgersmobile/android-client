@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
@@ -21,19 +20,49 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.ShareActionProvider;
 
-import com.androidquery.util.Progress;
+import java.util.Date;
 
 import edu.rutgers.css.Rutgers2.R;
 
 public class WebDisplay extends Fragment {
 
 	private static final String TAG = "WebDisplay";
-    private static final String[] DOC_TYPES = {".pdf", ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx", ".mp4", ".mp3", ".mov", ".wav", ".zip", ".tar.gz", ".tgz"};
+
+    // Could add to this from JSON when more extensions come up
+    private static final String[] DOC_TYPES = {".pdf",
+            ".doc", ".docx", ".dot", ".xml", ".rtf",
+            ".odt", ".ott", ".oth", ".odm",
+            ".ppt", ".pptx", ".xls", ".xlsx", ".csv",
+            ".mp4", ".mp3", ".mov", ".wav",
+            ".zip", ".tar.gz", ".tgz"};
 
 	private ShareActionProvider mShareActionProvider;
 	private String mCurrentURL;
 	private WebView mWebView;
 	private int setupCount = 0;
+    private LastDownload mLastDownload;
+
+    /**
+     * A class to keep track of the last download to prevent the stupid bug where
+     * clicks on PDFs get sent twice so we don't do a duplicate download :|
+     */
+    private class LastDownload {
+        private String url;
+        private long time;
+
+        public LastDownload(String url) {
+            this.url = url;
+            this.time = new Date().getTime();
+        }
+
+        public String getURL() {
+            return this.url;
+        }
+
+        public long getTime() {
+            return this.time;
+        }
+    }
 
 	public WebDisplay() {
 		// Required empty public constructor
@@ -107,6 +136,16 @@ public class WebDisplay extends Fragment {
                 }
                 // Documents will be downloaded with the Download Manager
                 else {
+                    //Avoid duplicate download requests made within 1 second
+                    if(mLastDownload != null && url.equals(mLastDownload.getURL())) {
+                        long curTime = new Date().getTime();
+                        if(curTime - mLastDownload.getTime() < 1000) {
+                            Log.i(TAG, "Preventing duplicate download of " + url);
+                            return false;
+                        }
+                    }
+                    mLastDownload = new LastDownload(url);
+
                     Log.i(TAG, "Downloading document: " + url);
 
                     // Add cookies from current page to download request to maintain session
@@ -129,7 +168,7 @@ public class WebDisplay extends Fragment {
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                Log.w(TAG, "WebViewClient erro: code " + errorCode + ": " + description + " @ " + failingUrl);
+                Log.w(TAG, "WebViewClient error: code " + errorCode + ": " + description + " @ " + failingUrl);
             }
 
 		});
