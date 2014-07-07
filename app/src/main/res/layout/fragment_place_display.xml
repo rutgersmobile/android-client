@@ -99,7 +99,8 @@
     
     <!-- Building Number Section -->
     <TableRow
-		style="@style/RowHeader" >
+		style="@style/RowHeader"
+        android:id="@+id/buildingNoHeaderRow">
 
         <TextView
             android:layout_width="wrap_content"
@@ -109,7 +110,8 @@
     </TableRow>
 
     <TableRow
-        style="@style/RowContent" >
+        style="@style/RowContent"
+        android:id="@+id/buildingNoContentRow">
 
         <TextView
             android:id="@+id/buildingNoTextView"

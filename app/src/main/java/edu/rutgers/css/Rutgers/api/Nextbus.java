@@ -469,7 +469,7 @@ public class Nextbus {
 							// Get distance between building and stop
 							float endLatitude = Float.parseFloat(curStop.getString("lat"));
 							float endLongitude = Float.parseFloat(curStop.getString("lon")); 
-							float[] results = new float[3];
+							float[] results = new float[1];
 							Location.distanceBetween(sourceLat, sourceLon, endLatitude, endLongitude, results);
 							
 							// If the stop is within range, add it to the list

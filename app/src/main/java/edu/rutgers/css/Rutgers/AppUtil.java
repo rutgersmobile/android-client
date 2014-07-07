@@ -81,7 +81,7 @@ public class AppUtil {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * In cases where multiple titles are specified ("homeTitle", "foreignTitle"), gets appropriate title
 	 * according to user configuration.
