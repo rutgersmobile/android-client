@@ -19,6 +19,8 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +29,7 @@ import java.util.Iterator;
 
 import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -83,7 +86,7 @@ public class DTable extends Fragment {
 		}
 		else if (args.getString("url") != null) mURL = args.getString("url");
 		else if (args.getString("api") != null) mAPI = args.getString("api");
-		else throw new IllegalStateException("DTable must have either a url or data in its arguments bundle");
+		else throw new IllegalStateException("DTable must have URL, API, or data in its arguments bundle");
 		
 		if (mURL != null) aq.ajax(mURL, JSONObject.class, new AjaxCallback<JSONObject>() {
 
@@ -98,6 +101,25 @@ public class DTable extends Fragment {
             }
             
 		});
+        else if(mAPI != null) {
+            Request.api(mAPI, 0).done(new AndroidDoneCallback<JSONObject>() {
+                @Override
+                public AndroidExecutionScope getExecutionScope() {
+                    return AndroidExecutionScope.UI;
+                }
+
+                @Override
+                public void onDone(JSONObject result) {
+                    try {
+                        loadArray(result.getJSONArray("children"));
+                    }
+                    catch (JSONException e) {
+                        Log.w(TAG, "onCreateView(): " + e.getMessage());
+                        Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
 	}
 	
 	@Override
@@ -141,10 +163,13 @@ public class DTable extends Fragment {
 
                         // Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
                         args.putString("component", channel.getString("view"));
+                        args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
 
+                        // Add the rest of the JSON fields to the arg bundle
                         Iterator<String> keys = channel.keys();
                         while (keys.hasNext()) {
                             String key = keys.next();
+                            if(key.equalsIgnoreCase("title")) continue; // title was already handled above
                             Log.v(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
                             args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
                         }

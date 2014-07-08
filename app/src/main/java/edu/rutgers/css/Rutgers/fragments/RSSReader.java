@@ -20,6 +20,7 @@ import org.jdeferred.android.AndroidFailCallback;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.RSSAdapter;
@@ -50,7 +51,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		rssItems = new ArrayList<RSSItem>();
 		rssItemAdapter = new RSSAdapter(this.getActivity(), R.layout.rss_row, rssItems);
 
-		if(args.get("url") == null) {
+		if(args.getString("url") == null) {
 			Log.e(TAG, "null rss url");
 			return;
 		}
@@ -91,14 +92,16 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_rssreader, parent, false);
-		Bundle args = getArguments();
 		mList = (ListView) v.findViewById(R.id.rssreader_list);
+        Bundle args = getArguments();
 		
-		Log.d(TAG, "Fragment for RSS feed " + args.getString("url"));
+		Log.v(TAG, "RSS Reader launched for " + args.getString("url"));
 		
 		// Sets title to name of the RSS feed being displayed
-		getActivity().setTitle(args.getString("title"));
-		
+        if(args.getString("title") != null) {
+            getActivity().setTitle(args.getString("title"));
+        }
+
 		// Adapter & click listener for RSS list view
 		mList.setAdapter(rssItemAdapter);
 		mList.setOnItemClickListener(this);		

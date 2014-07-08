@@ -88,15 +88,23 @@ public class RSSItem {
 		else if(item.text("event:beginDateTime") != null) {
 			// Event time - parse start & end timestamps and produce an output string that gives
 			// the date and beginning and end times, e.g. "Fri, Apr 18, 10:00 AM - 11:00 AM"
-            // Events feed dates are in Eastern time
+            // Events feed dates are in Eastern time.
 			try {
 				Date eventBegin = eventDf.parse(item.text("event:beginDateTime"));
-				Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
 
-                // If days match show day with start & end hours
-                if(isSameDay(eventBegin, eventEnd)) this.date = outDf.format(eventBegin) + " - " + outEndDf.format(eventEnd);
-                // Otherwise show start and end dates
-                else this.date = outDf.format(eventBegin) + " - " + outDf.format(eventEnd);
+                // Not all feeds supply endDateTime ¯\_(ツ)_/¯
+                if(item.text("event:endDateTime") != null) {
+                    Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
+
+                    // If days match show day with start & end hours
+                    if(isSameDay(eventBegin, eventEnd)) this.date = outDf.format(eventBegin) + " - " + outEndDf.format(eventEnd);
+                    // Otherwise show start and end dates
+                    else this.date = outDf.format(eventBegin) + " - " + outDf.format(eventEnd);
+                }
+                else {
+                    this.date = outDf.format(eventBegin);
+                }
+
 			} catch (ParseException e) {
 				Log.w(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
 				this.date = item.text("event:beginDateTime");

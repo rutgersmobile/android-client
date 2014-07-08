@@ -16,7 +16,8 @@ import edu.rutgers.css.Rutgers.MyApplication;
 public class Request {
 	
 	private static final String TAG = "Request";
-	private static final String API_BASE = "http://sauron.rutgers.edu/~rfranknj/newmobile/";
+	//private static final String API_BASE = "http://sauron.rutgers.edu/~rfranknj/newmobile/";
+    private static final String API_BASE = "https://rumobile.rutgers.edu/1/";
 	private static AQuery aq;
 	private static boolean mSetupDone = false;
 	

@@ -11,7 +11,7 @@
         "title": "News",
         "handle": "news",
         "view": "dtable",
-        "url": "https://rumobile.rutgers.edu/1/news.txt"
+        "api": "news.txt"
     },
 
     {
@@ -33,15 +33,15 @@
         "title": "Recreation",
         "handle": "rec",
         "view": "dtable",
-        "url": "https://rumobile.rutgers.edu/1/rec.txt"
+        "api": "rec.txt"
     },
 
     {
         "category": "main",
         "title": "Events",
         "handle": "events",
-        "view": "reader",
-        "url": "http://ruevents.rutgers.edu/events/getEventsRss.xml"
+        "view": "dtable",
+        "api": "events.txt"
     },
 
     {
@@ -53,11 +53,12 @@
 
     {
         "category": "main",
-        "title": "Feedback",
-        "handle": "feedback",
-        "view": "feedback"
+        "title": "Career Services",
+        "handle": "careers",
+        "view": "dtable",
+        "api": "csfaq.txt"
     },
-    
+
     {
         "category": "main",
         "title": "Emergency Services",
@@ -85,9 +86,9 @@
 
     {
         "category": "main",
-        "title": "Career Services",
-        "handle": "careers",
-        "view": "dtable",
-        "url": "https://rumobile.rutgers.edu/1/csfaq.txt"
+        "title": "Feedback",
+        "handle": "feedback",
+        "view": "feedback"
     }
+
 ]

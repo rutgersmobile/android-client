@@ -84,7 +84,7 @@ public class MainActivity extends FragmentActivity  implements
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
-		Log.v(TAG, "UUID: " + AppUtil.getUUID(this));
+		Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
 		
 		/*
 		 * Set default settings the first time the app is run
@@ -431,6 +431,9 @@ public class MainActivity extends FragmentActivity  implements
 
                 // Set URL if available
                 if(!cur.optString("url").isEmpty()) itemArgs.putString("url", cur.getString("url"));
+
+                // Set API if available
+                if(!cur.optString("api").isEmpty()) itemArgs.putString("api", cur.getString("api"));
 
                 // Set data (JSON Array) if available
                 if(cur.optJSONArray("data") != null) itemArgs.putString("data", cur.getJSONArray("data").toString());
