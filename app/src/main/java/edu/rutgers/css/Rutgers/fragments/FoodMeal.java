@@ -43,7 +43,7 @@ meals (array) ->
 public class FoodMeal extends Fragment {
 
 	private static final String TAG = "FoodMeal";
-	private ListView mList;
+	private ListView mListView;
 	private List<RMenuPart> foodItems;
 	private RMenuAdapter foodItemAdapter;
 
@@ -120,13 +120,13 @@ public class FoodMeal extends Fragment {
 		// Inflate the layout for this fragment
 		View v = inflater.inflate(R.layout.fragment_food_meal, container, false);
 		Bundle args = getArguments();
-		mList = (ListView) v.findViewById(R.id.food_meal_list);
+		mListView = (ListView) v.findViewById(R.id.food_meal_list);
 		
 		// Set title
 		if(args.get("location") != null && args.get("meal") != null)
 			getActivity().setTitle(args.getString("location") + " - " + args.getString("meal"));
 
-		mList.setAdapter(foodItemAdapter);
+		mListView.setAdapter(foodItemAdapter);
 
 		return v;
 	}

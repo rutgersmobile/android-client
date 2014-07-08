@@ -31,7 +31,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class FoodHall extends Fragment {
 
 	private static final String TAG = "FoodHall";
-	private ListView mList;
+	private ListView mListView;
 	private List<String> menus;
 	private ArrayAdapter<String> menuAdapter;
 	
@@ -83,7 +83,7 @@ public class FoodHall extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_foodhall, parent, false);
-		mList = (ListView) v.findViewById(R.id.dining_menu_list);
+		mListView = (ListView) v.findViewById(R.id.dining_menu_list);
 		
 		Bundle args = getArguments();
 		getActivity().setTitle(args.getString("location"));
@@ -93,20 +93,20 @@ public class FoodHall extends Fragment {
 	}
 	
 	private void setupList(final String location) {
-		mList.setAdapter(menuAdapter);
+		mListView.setAdapter(menuAdapter);
 		
-		mList.setOnItemClickListener(new OnItemClickListener() {
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Bundle args = new Bundle();
-				args.putString("component", "foodmeal");
-				args.putString("location", location);
-				args.putString("meal", (String) parent.getAdapter().getItem(position));
-				
-				ComponentFactory.getInstance().switchFragments(args);
-			}
-			
-		});
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Bundle args = new Bundle();
+                args.putString("component", "foodmeal");
+                args.putString("location", location);
+                args.putString("meal", (String) parent.getAdapter().getItem(position));
+
+                ComponentFactory.getInstance().switchFragments(args);
+            }
+
+        });
 	}
 }
