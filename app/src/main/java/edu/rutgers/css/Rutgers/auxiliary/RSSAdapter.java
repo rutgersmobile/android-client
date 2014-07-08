@@ -25,7 +25,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 	private int mTargetWidth;
 	private AQuery aq;
 	
-	/* Class to hold data for RSS list rows */
+	// Class to hold data for RSS list rows
 	static class ViewHolder {
 			ImageView iconImageView;
 			TextView titleTextView;
@@ -64,22 +64,23 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 	
 		RSSItem curItem = this.getItem(position);
 		
-		/* Populate RSS row layout elements */
+		// Populate RSS row layout elements
 		mHolder.titleTextView.setText(curItem.getTitle());
 		mHolder.dateTextView.setText(curItem.getDate());
 		mHolder.descriptionTextView.setText(curItem.getDescription());
 		//mHolder.authorTextView.setText(curItem.getAuthor());
 		
-		/* Download image */
+		// Download image
 		if(curItem.getImgUrl() == null) {
 			// No image - clear the image view
-			//TODO Don't draw blank ImageView and have it take up space
 			mHolder.iconImageView.setImageBitmap(null);
 			mHolder.iconImageView.setVisibility(View.GONE);
 		}
 		else {
+            mHolder.iconImageView.setVisibility(View.VISIBLE);
 			// Download the image
-			aq.id(mHolder.iconImageView).image(curItem.getImgUrl().toString(), true, true, mTargetWidth, 0, null, AQuery.FADE_IN_NETWORK, 1.0f);
+            AQuery cvAq = aq.recycle(convertView);
+			cvAq.id(mHolder.iconImageView).image(curItem.getImgUrl().toString(), true, true, mTargetWidth, 0, null, AQuery.FADE_IN_NETWORK, 1.0f);
 		}
 		
 		return convertView;
