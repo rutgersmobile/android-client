@@ -6,6 +6,7 @@ import com.androidquery.util.XmlDom;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -20,7 +21,7 @@ import java.util.TimeZone;
  * Class for holding RSS item data
  *
  */
-public class RSSItem {
+public class RSSItem implements Serializable {
 
 	private static final String TAG = "RSSItem";
 	

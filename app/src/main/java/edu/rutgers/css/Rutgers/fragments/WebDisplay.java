@@ -192,9 +192,9 @@ public class WebDisplay extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putString("mCurrentURL", mCurrentURL);
         mWebView.saveState(outState);
-        super.onSaveInstanceState(outState);
     }
 
 	/**

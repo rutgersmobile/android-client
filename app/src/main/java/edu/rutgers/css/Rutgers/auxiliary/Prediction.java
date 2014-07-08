@@ -1,12 +1,13 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Bus arrival time prediction
  *
  */
-public class Prediction {
+public class Prediction implements Serializable {
 	private String tag;
 	private String title;
 	private String direction;

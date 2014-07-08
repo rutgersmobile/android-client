@@ -162,6 +162,7 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         mAdapter.saveState(outState);
         outState.putString("mAgency", mAgency);
         outState.putString("mTag", mTag);

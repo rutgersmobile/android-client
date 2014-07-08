@@ -189,8 +189,8 @@ public class DTable extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putString("mData", mData.toString());
         super.onSaveInstanceState(outState);
+        outState.putString("mData", mData.toString());
     }
 
 	/**
