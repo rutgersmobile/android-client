@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import org.jdeferred.android.AndroidDoneCallback;
@@ -30,7 +32,7 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 	
 	private ArrayList<Prediction> mData;
 	private PredictionAdapter mAdapter;
-	private ListView mList;
+	private ListView mListView;
 	private Mode mMode;
 	private String mTag;
 	private Handler mUpdateHandler;
@@ -44,12 +46,28 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		mData = new ArrayList<Prediction>();
+
+        mData = new ArrayList<Prediction>();
 		mAdapter = new PredictionAdapter(getActivity(), R.layout.bus_predict_row, mData);
-		
+
+        // Setup the timer stuff for updating the bus predictions
+        mUpdateTimer = new Timer();
+        mUpdateHandler = new Handler();
+
+        // Attempt to restore state
+        if(savedInstanceState != null) {
+            mAgency = savedInstanceState.getString("mAgency");
+            mTag = savedInstanceState.getString("mTag");
+            mMode = (Mode) savedInstanceState.getSerializable("mMode");
+            mData.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable("mData"));
+            mAdapter.restoreState(savedInstanceState);
+            mAdapter.notifyDataSetChanged();
+            return;
+        }
+
+        // Load arguments anew
 		Bundle args = getArguments();
-		
+
 		// Get agency
 		if(args.getString("agency") == null) {
 			Log.e(TAG, "agency was not set");
@@ -78,17 +96,12 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 				return;
 			}
 		}
-		
-		// Setup the timer stuff for updating the bus predictions
-		mUpdateTimer = new Timer();
-		mUpdateHandler = new Handler();
+
 	}
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_busdisplay, parent, false);
-		mList = (ListView) v.findViewById(R.id.busDisplayList);
-		mList.setAdapter(mAdapter);
 
 		Bundle args = getArguments();
 		// Get title
@@ -99,7 +112,18 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 			Log.e(TAG, "title not set");
 			getActivity().setTitle(getResources().getString(R.string.bus_title));
 		}
-		
+
+        mListView = (ListView) v.findViewById(R.id.busDisplayList);
+        mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mAdapter.togglePopped(position);
+            }
+
+        });
+
 		return v;
 	}
 	
@@ -136,6 +160,15 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 		mUpdateTimer = null;
 	}
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        mAdapter.saveState(outState);
+        outState.putString("mAgency", mAgency);
+        outState.putString("mTag", mTag);
+        outState.putSerializable("mMode", mMode);
+        outState.putSerializable("mData", mData);
+    }
+
 	/**
 	 * Load prediction data
 	 */
@@ -161,7 +194,7 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 		 */
 		if(mAdapter.getCount() != predictionArray.size()) {
 			if(mAdapter.getCount() != 0) {
-				Log.e(TAG, "Size of updated list did not match original");
+				Log.w(TAG, "Size of updated list did not match original");
 				mAdapter.clear();
 			}
 			
@@ -177,7 +210,7 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 				Prediction newPrediction = predictionArray.get(i);
 				Prediction oldPrediction = mAdapter.getItem(i);
 				if(!newPrediction.equals(oldPrediction)) {
-					Log.e(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());
+					Log.d(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());
 					oldPrediction.setTitle(newPrediction.getTitle());
 					oldPrediction.setTag(newPrediction.getTag());
 				}

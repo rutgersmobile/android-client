@@ -5,9 +5,9 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:padding="10dp">
 
         <TextView
@@ -19,32 +19,8 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:background="#C0C0C0"
-        android:id="@+id/popdownLayout"
-        android:visibility="gone">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:id="@+id/imageView"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/shadow_vertical" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="10dp"
-            android:text="@string/replace_me"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:id="@+id/popdownTextView" />
-
-    </LinearLayout>
+    <include
+        android:visibility="gone"
+        layout="@layout/popdown"/>
 
 </LinearLayout>

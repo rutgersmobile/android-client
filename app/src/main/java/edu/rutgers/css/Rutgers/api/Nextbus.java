@@ -55,11 +55,13 @@ public class Nextbus {
 		final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
 		configured = confd.promise();
 		
-		//final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
-		//final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
-		//final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
-		//final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
-		
+/*
+		final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
+		final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
+		final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
+		final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
+*/
+
 		final Promise promiseNBActive = Request.json("https://rumobile.rutgers.edu/1/nbactivestops.txt", activeExpireTime);
 		final Promise promiseNWKActive = Request.json("https://rumobile.rutgers.edu/1/nwkactivestops.txt", activeExpireTime);
 		final Promise promiseNBConf = Request.json("https://rumobile.rutgers.edu/1/rutgersrouteconfig.txt", configExpireTime);

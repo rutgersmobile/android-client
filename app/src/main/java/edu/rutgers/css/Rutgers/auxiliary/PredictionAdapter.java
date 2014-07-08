@@ -2,11 +2,13 @@ package edu.rutgers.css.Rutgers.auxiliary;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -22,22 +24,57 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 
 	private static final String TAG = "PredictionAdapter";
 	private int layoutResource;
+    private ArrayList<Integer> poppedRows;
 	
 	static class ViewHolder {
 		TextView titleTextView;
 		TextView directionTextView;
 		TextView minutesTextView;
+        TextView popdownTextView;
+        LinearLayout popdownLayout;
 	}
 	
 	public PredictionAdapter(Context context, int resource, List<Prediction> objects) {
 		super(context, resource, objects);
-		this.layoutResource = resource;
+		layoutResource = resource;
+        poppedRows = new ArrayList<Integer>();
 	}
-	
+
+    /**
+     * Toggle pop-down on a row.
+     * @param position Position of the row to toggle
+     */
+    public void togglePopped(int position) {
+        if(!poppedRows.remove(new Integer(position))) {
+            poppedRows.add(new Integer(position));
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Check if row's pop-down is open.
+     * @param position Position of the row to check
+     * @return True if the row's pop-down is open, false if not.
+     */
+    public boolean isPopped(int position) {
+        return poppedRows.contains(new Integer(position));
+    }
+
+    public void saveState(Bundle outState) {
+        outState.putSerializable("paPoppedRows", poppedRows);
+    }
+
+    public void restoreState(Bundle inState) {
+        if(inState.getSerializable("paPoppedRows") != null) {
+            poppedRows = (ArrayList<Integer>) inState.getSerializable("paPoppedRows");
+        }
+    }
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		Prediction prediction = this.getItem(position);
+        Resources res = getContext().getResources();
 		ViewHolder holder = null;
 		
 		// Make new data holder or get existing one
@@ -47,44 +84,61 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
 			holder.directionTextView = (TextView) convertView.findViewById(R.id.direction);
 			holder.minutesTextView = (TextView) convertView.findViewById(R.id.minutes);
+            holder.popdownLayout = (LinearLayout) convertView.findViewById(R.id.popdownLayout);
+            holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
 			convertView.setTag(holder);
 		}
 		else {	
 			holder = (ViewHolder) convertView.getTag();
 		}
 
-		// Populate prediction row layout elements
+		// Set title
 		holder.titleTextView.setText(prediction.getTitle());
-		
-		// Change color of text based on how much time is remaining before the first bus arrives
+
+        // Set prediction minutes
 		if(prediction.getMinutes().size() > 0) {
+            // Change color of text based on how much time is remaining before the first bus arrives
 			int first = prediction.getMinutes().get(0);
+
 			if(first < 2) {
-				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.bus_soonest));
+				holder.minutesTextView.setTextColor(res.getColor(R.color.bus_soonest));
 			}
 			else if(first < 6) {
-				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.bus_soon));
+				holder.minutesTextView.setTextColor(res.getColor(R.color.bus_soon));
 			}
 			else {
-				holder.minutesTextView.setTextColor(getContext().getResources().getColor(R.color.bus_later));
+				holder.minutesTextView.setTextColor(res.getColor(R.color.bus_later));
 			}
-			
+
 			holder.minutesTextView.setText(formatMinutes(prediction.getMinutes()));
+
+            // Set pop-down contents
+            holder.popdownTextView.setText(formatMinutes(prediction.getMinutes()));
 		}
 		else {
 			// No predictions loaded
 			holder.minutesTextView.setText(R.string.bus_no_predictions);
+            //TODO set all text gray
 		}
-		
-		// If there's no direction string, don't let that text field take up space
-		if(prediction.getDirection() == null || prediction.getDirection().equals("")) {
+
+        // Set direction
+		if(prediction.getDirection() == null || prediction.getDirection().isEmpty()) {
+            // If there's no direction string, don't let that text field take up space
 			holder.directionTextView.setVisibility(View.GONE);
 		}
 		else {
+            holder.directionTextView.setText(prediction.getDirection());
 			holder.directionTextView.setVisibility(View.VISIBLE);
-			holder.directionTextView.setText(prediction.getDirection());
 		}
-		
+
+        // Show pop-down if it is opened on this row
+        if(isPopped(position)) {
+            holder.popdownLayout.setVisibility(View.VISIBLE);
+        }
+        else {
+            holder.popdownLayout.setVisibility(View.GONE);
+        }
+
 		return convertView;
 	}
 

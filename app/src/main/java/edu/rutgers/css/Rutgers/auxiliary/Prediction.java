@@ -60,7 +60,12 @@ public class Prediction {
 	public String toString() {
 		return this.title + "," + this.direction + "," + this.minutes.toString();
 	}
-	
+
+    /**
+     * Compares two predictions by the route or stop they represent, but not the minute values.
+     * @param other Prediction to be compared to
+     * @return True if tag, title, and direction match. False if not.
+     */
 	@Override
 	public boolean equals(Object other) {
 		if(other == null) return false;
@@ -68,9 +73,9 @@ public class Prediction {
 		if(other instanceof Prediction) {
 			Prediction otherPrediction = (Prediction) other;
 			if(otherPrediction.getTag().equals(this.getTag()) &&
-					((otherPrediction.getDirection() == null && this.getDirection() == null) ||
-							(otherPrediction.getDirection() != null && this.getDirection() != null && otherPrediction.getDirection().equals(this.getDirection()))) &&
-					otherPrediction.getTitle().equals(this.getTitle())) {
+               otherPrediction.getTitle().equals(this.getTitle()) &&
+               ((otherPrediction.getDirection() == null && this.getDirection() == null) ||
+			    (this.getDirection() != null && this.getDirection().equals(otherPrediction.getDirection())))) {
 				return true;
 			}
 			else {
