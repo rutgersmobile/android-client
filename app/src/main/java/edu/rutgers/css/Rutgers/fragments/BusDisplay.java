@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
@@ -189,6 +190,11 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 	 */
 	@Override
 	public void onDone(ArrayList<Prediction> predictionArray) {
+        // If no routes are running through this stop right now, show message
+        if(mMode == Mode.STOP && predictionArray.isEmpty()) {
+            Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_LONG).show();
+        }
+
 		/* Add items if the list is being newly populated, or
 		 * the updated JSON doesn't seem to match and the list should be
 		 * cleared and repopulated.
