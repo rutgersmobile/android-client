@@ -3,6 +3,10 @@ package edu.rutgers.css.Rutgers.auxiliary;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +15,14 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
+import edu.rutgers.css.Rutgers.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -23,6 +32,8 @@ import edu.rutgers.css.Rutgers2.R;
 public class PredictionAdapter extends ArrayAdapter<Prediction> {
 
 	private static final String TAG = "PredictionAdapter";
+    private static final SimpleDateFormat arriveDf = new SimpleDateFormat("HH:mm");
+
 	private int layoutResource;
     private ArrayList<Integer> poppedRows;
 	
@@ -117,7 +128,8 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 			holder.minutesTextView.setText(formatMinutes(prediction.getMinutes()));
 
             // Set pop-down contents
-            holder.popdownTextView.setText(formatMinutes(prediction.getMinutes()));
+            holder.popdownTextView.setText(formatMinutesDetails(prediction.getMinutes()));
+            holder.popdownTextView.setGravity(Gravity.RIGHT);
 		}
 		else {
 			// No predictions loaded - gray out all text
@@ -178,5 +190,37 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 		
 		return result.toString();
 	}
+
+    /**
+     * Create pop-down details string<br/>
+     * e.g. <b>10</b> minutes at <b>12:30</b>
+     * @param minutes Array of arrival times in minutes
+     * @return Formatted and stylized arrival time details string
+     */
+    private CharSequence formatMinutesDetails(ArrayList<Integer> minutes) {
+        Resources resources = getContext().getResources();
+        SpannableStringBuilder result = new SpannableStringBuilder();
+
+        for(int i = 0; i < minutes.size(); i++) {
+            // Hack so that it displays "<1 minute" instead of "0 minutes"
+            int mins = minutes.get(i) == 0 ? 1 : minutes.get(i);
+            String minString = minutes.get(i) < 1 ? "&lt;1" : new Integer(mins).toString();
+
+            // Determine bus arrival time
+            Date date = new Date();
+            Calendar cal = Calendar.getInstance(Locale.US);
+            cal.setTime(date);
+            cal.add(Calendar.MINUTE, minutes.get(i));
+            String arrivalTime = PredictionAdapter.arriveDf.format(cal.getTime());
+
+            // Get appropriate string & format, stylize
+            String line = resources.getQuantityString(R.plurals.bus_minute_details, mins, minString, arrivalTime);
+            CharSequence styledLine = Html.fromHtml(line);
+            result.append(styledLine);
+            if(i != minutes.size() - 1) result.append("\n");
+        }
+
+        return result;
+    }
 	
 }

@@ -295,7 +295,7 @@ public class DTable extends Fragment {
 
                 switch(getItemViewType(position)) {
                     case FAQ_TYPE:
-                        res = R.layout.popdown_row;
+                        res = R.layout.dtable_popdown_row;
                         break;
                     case CAT_TYPE:
                         res = R.layout.category_row;

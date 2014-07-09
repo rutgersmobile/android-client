@@ -42,6 +42,10 @@
     <string name="bus_and">" and"</string>
     <string name="bus_minute_singular">" minute."</string>
     <string name="bus_minute_plural">" minutes."</string>
+    <plurals name="bus_minute_details">
+        <item quantity="one">&lt;b>%1$s&lt;/b> minute at &lt;b>%2$s&lt;/b></item>
+        <item quantity="other">&lt;b>%1$s&lt;/b> minutes at &lt;b>%2$s&lt;/b></item>
+    </plurals>
 
     <!-- Places channel -->
     <string name="places_title">Places</string>
