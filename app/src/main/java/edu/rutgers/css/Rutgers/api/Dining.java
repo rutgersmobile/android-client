@@ -15,6 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.AppUtil;
+
 /**
  * Helper for getting data from dining API
  *
@@ -26,7 +28,7 @@ public class Dining {
 	
 	private static JSONArray mNBDiningConf;
 	
-	private static final String API_URL = "https://rumobile.rutgers.edu/1/rutgers-dining.txt";	
+	private static final String API_URL = AppUtil.API_BASE + "rutgers-dining.txt";
 	private static long expire = Request.EXPIRE_ONE_HOUR; // Cache dining data for an hour
 	
 	/**

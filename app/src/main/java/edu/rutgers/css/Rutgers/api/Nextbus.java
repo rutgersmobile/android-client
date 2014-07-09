@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.auxiliary.Prediction;
 
 /**
@@ -62,10 +63,10 @@ public class Nextbus {
 		final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
 */
 
-		final Promise promiseNBActive = Request.json("https://rumobile.rutgers.edu/1/nbactivestops.txt", activeExpireTime);
-		final Promise promiseNWKActive = Request.json("https://rumobile.rutgers.edu/1/nwkactivestops.txt", activeExpireTime);
-		final Promise promiseNBConf = Request.json("https://rumobile.rutgers.edu/1/rutgersrouteconfig.txt", configExpireTime);
-		final Promise promiseNWKConf = Request.json("https://rumobile.rutgers.edu/1/rutgers-newarkrouteconfig.txt", configExpireTime);
+		final Promise promiseNBActive = Request.json(AppUtil.API_BASE + "nbactivestops.txt", activeExpireTime);
+		final Promise promiseNWKActive = Request.json(AppUtil.API_BASE + "nwkactivestops.txt", activeExpireTime);
+		final Promise promiseNBConf = Request.json(AppUtil.API_BASE + "rutgersrouteconfig.txt", configExpireTime);
+		final Promise promiseNWKConf = Request.json(AppUtil.API_BASE + "rutgers-newarkrouteconfig.txt", configExpireTime);
 		
 		AndroidDeferredManager dm = new AndroidDeferredManager();
 		

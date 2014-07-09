@@ -32,6 +32,8 @@ public class AppUtil {
     public static final String OSNAME = "android";
     public static final String BETAMODE = "dev";
 
+    public static final String API_BASE = "https://rumobile.rutgers.edu/1/";
+
 	/**
 	 * Get (or create) UUID for the installation of this app.
 	 * @param context App context

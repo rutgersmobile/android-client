@@ -22,10 +22,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
+import edu.rutgers.css.Rutgers.AppUtil;
+
 public class Gyms {
 	
 	private static final String TAG = "Gyms";
-	private static final String API_URL = "https://rumobile.rutgers.edu/1/gyms.txt";
+	private static final String API_URL = AppUtil.API_BASE + "gyms.txt";
 	
 	public static final DateFormat GYM_DATE_FORMAT = new SimpleDateFormat("M/d/yyyy", Locale.US);
 	

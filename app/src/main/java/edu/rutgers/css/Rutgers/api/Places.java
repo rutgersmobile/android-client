@@ -14,6 +14,8 @@ import org.jdeferred.impl.DeferredObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.AppUtil;
+
 /**
  * Helper for getting data from places API.
  * 
@@ -21,7 +23,7 @@ import org.json.JSONObject;
 public class Places {
 	
 	private static final String TAG = "PlacesAPI";
-	private static final String API_URL = "https://rumobile.rutgers.edu/1/places.txt";	
+	private static final String API_URL = AppUtil.API_BASE + "places.txt";
 	private static final long expire = Request.EXPIRE_ONE_HOUR; // Cache data for an hour
 	
 	private static Promise<Object, Object, Object> configured;

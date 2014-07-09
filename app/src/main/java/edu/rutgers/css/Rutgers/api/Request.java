@@ -10,6 +10,7 @@ import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.MyApplication;
 
 // Convenience class for making requests
@@ -17,7 +18,6 @@ public class Request {
 	
 	private static final String TAG = "Request";
 	//private static final String API_BASE = "http://sauron.rutgers.edu/~rfranknj/newmobile/";
-    private static final String API_BASE = "https://rumobile.rutgers.edu/1/";
 	private static AQuery aq;
 	private static boolean mSetupDone = false;
 	
@@ -34,7 +34,7 @@ public class Request {
 	
 	// Makes a call against the api. Expects a JSON object
 	public static Promise<JSONObject, AjaxStatus, Double> api (String resource, long expire) {
-		return json(API_BASE + resource, expire);
+		return json(AppUtil.API_BASE + resource, expire);
 	}
 	
 	// gets arbitrary json

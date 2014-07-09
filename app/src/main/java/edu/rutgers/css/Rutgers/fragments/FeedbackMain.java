@@ -36,7 +36,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 
 	private static final String TAG = "FeedbackMain";
-	//private static final String API = "https://rumobile.rutgers.edu/1/feedback.php";
+	//private static final String API = AppUtil.API_BASE + "feedback.php";
 	private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php";
 	
 	private Spinner mSubjectSpinner;
