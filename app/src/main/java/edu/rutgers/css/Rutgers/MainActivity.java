@@ -217,12 +217,19 @@ public class MainActivity extends FragmentActivity  implements
 	
 	@Override
 	public void onBackPressed() {
+        // If drawer is open, intercept back press to close drawer
+        if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
+            mDrawerLayout.closeDrawer(mDrawerListView);
+            return;
+        }
+
 		// If web display is active, send back button presses to it for navigating browser history
 		Fragment webView = getSupportFragmentManager().findFragmentByTag("www");
-		if (webView != null) {
+		if (webView != null && webView.isVisible()) {
 			if(((WebDisplay) webView).backPress() == false) super.onBackPressed();
 		}
-		
+
+        // Default back press behavior (go back in fragments, etc.)
 		else super.onBackPressed();
 	}
 	

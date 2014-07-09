@@ -72,12 +72,6 @@ public class WebDisplay extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setHasOptionsMenu(true);
-		
-		Bundle args = getArguments();
-		if(args.getString("title") != null) {
-			getActivity().setTitle(args.getString("title"));
-		}
-
 	}
 	
 	@Override
@@ -86,6 +80,10 @@ public class WebDisplay extends Fragment {
         final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
         mWebView = (WebView) v.findViewById(R.id.webView);
         Bundle args = getArguments();
+
+        if(args.getString("title") != null) {
+            getActivity().setTitle(args.getString("title"));
+        }
 
         // Check for saved web view state first
         if(savedInstanceState != null) {
