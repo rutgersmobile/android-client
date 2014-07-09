@@ -32,7 +32,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class PredictionAdapter extends ArrayAdapter<Prediction> {
 
 	private static final String TAG = "PredictionAdapter";
-    private static final SimpleDateFormat arriveDf = new SimpleDateFormat("HH:mm");
+    private static final SimpleDateFormat arriveDf = new SimpleDateFormat("h:mm a", Locale.US);
 
 	private int layoutResource;
     private ArrayList<Integer> poppedRows;
