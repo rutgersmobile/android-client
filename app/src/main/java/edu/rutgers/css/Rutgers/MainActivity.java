@@ -226,11 +226,11 @@ public class MainActivity extends FragmentActivity  implements
 		// If web display is active, send back button presses to it for navigating browser history
 		Fragment webView = getSupportFragmentManager().findFragmentByTag("www");
 		if (webView != null && webView.isVisible()) {
-			if(((WebDisplay) webView).backPress() == false) super.onBackPressed();
+			if(((WebDisplay) webView).backPress()) return;
 		}
 
         // Default back press behavior (go back in fragments, etc.)
-		else super.onBackPressed();
+		super.onBackPressed();
 	}
 	
 	@Override
