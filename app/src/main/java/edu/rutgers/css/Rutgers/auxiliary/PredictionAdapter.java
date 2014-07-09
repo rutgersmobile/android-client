@@ -96,7 +96,11 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 		holder.titleTextView.setText(prediction.getTitle());
 
         // Set prediction minutes
-		if(prediction.getMinutes().size() > 0) {
+		if(!prediction.getMinutes().isEmpty()) {
+            // Reset title color to default
+            holder.titleTextView.setTextColor(res.getColor(R.color.black));
+            holder.directionTextView.setTextColor(res.getColor(R.color.black));
+
             // Change color of text based on how much time is remaining before the first bus arrives
 			int first = prediction.getMinutes().get(0);
 
@@ -116,9 +120,11 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
             holder.popdownTextView.setText(formatMinutes(prediction.getMinutes()));
 		}
 		else {
-			// No predictions loaded
+			// No predictions loaded - gray out all text
+            holder.titleTextView.setTextColor(res.getColor(R.color.light_gray));
+            holder.minutesTextView.setTextColor(res.getColor(R.color.light_gray));
 			holder.minutesTextView.setText(R.string.bus_no_predictions);
-            //TODO set all text gray
+            holder.popdownTextView.setText("");
 		}
 
         // Set direction
@@ -131,11 +137,14 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 			holder.directionTextView.setVisibility(View.VISIBLE);
 		}
 
-        // Show pop-down if it is opened on this row
-        if(isPopped(position)) {
+        // Show pop-down if it is opened on this row (and there are minutes available)
+        if(!prediction.getMinutes().isEmpty() && isPopped(position)) {
             holder.popdownLayout.setVisibility(View.VISIBLE);
         }
         else {
+            // Toggle pop-down off if prediction updated with no data available
+            if(isPopped(position)) togglePopped(position);
+
             holder.popdownLayout.setVisibility(View.GONE);
         }
 

@@ -119,7 +119,7 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mAdapter.togglePopped(position);
+                if(!mAdapter.getItem(position).getMinutes().isEmpty()) mAdapter.togglePopped(position);
             }
 
         });

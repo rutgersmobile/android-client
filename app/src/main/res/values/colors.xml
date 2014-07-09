@@ -3,6 +3,8 @@
     <!-- Basic colors -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="light_gray">#C0C0C0</color>
+    <color name="dark_gray">#505050</color>
     <color name="pantone186">#D21034</color>
     <color name="pantone431">#5F6A72</color>
     <color name="faded">#7A7A62</color>
