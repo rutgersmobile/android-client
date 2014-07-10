@@ -159,11 +159,20 @@ public class DTable extends Fragment {
                     // This object is a channel
                     else {
                         JSONObject channel = clickedJson.getJSONObject("channel");
-                        Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, channel.get("title")) + "\"");
+                        Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
 
                         // Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
                         args.putString("component", channel.getString("view"));
-                        args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
+
+                        // First, attempt to get 'title' for the channel. If it's not set, fall back
+                        // to the title set for the clickable item here. (They often match, but
+                        // see rec.txt for an example of where they differ.)
+                        Object title;
+                        if(channel.has("title")) title = channel.get("title");
+                        else if(clickedJson.has("title")) title = clickedJson.get("title");
+                        else title = null;
+
+                        if(title != null) args.putString("title", AppUtil.getLocalTitle(mContext, title));
 
                         // Add the rest of the JSON fields to the arg bundle
                         Iterator<String> keys = channel.keys();

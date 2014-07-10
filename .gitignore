@@ -15,6 +15,7 @@ import-summary.txt
 *.so
 
 # generated files
+build/
 app/build
 .idea/libraries
 

@@ -109,7 +109,10 @@ public class RecreationMain extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		super.onCreateView(inflater, parent, savedInstanceState);
 		final View v = inflater.inflate(R.layout.fragment_recreation_main, parent, false);
-		
+        Bundle args = getArguments();
+
+        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+
 		mListView = (ListView) v.findViewById(R.id.list);
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(new OnItemClickListener() {
