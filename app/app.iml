@@ -62,10 +62,10 @@
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="slf4j-api-1.7.7" level="project" />
-    <orderEntry type="library" exported="" name="play-services-4.4.52" level="project" />
     <orderEntry type="library" exported="" name="jdeferred-android-aar-1.2.1" level="project" />
     <orderEntry type="library" exported="" name="android-query-full.0.26.8" level="project" />
     <orderEntry type="library" exported="" name="jdeferred-core-1.2.1" level="project" />
+    <orderEntry type="library" exported="" name="play-services-5.0.77" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="slf4j-android-1.7.7" level="project" />
