@@ -33,6 +33,11 @@ import edu.rutgers.css.Rutgers2.R;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends PreferenceActivity {
+
+    public static final String KEY_PREF_HOME_CAMPUS = "campus_list";
+    public static final String KEY_PREF_USER_TYPE = "user_type_list";
+    public static final String KEY_PREF_NOTIFICATIONS = "notifications_new_message_ringtone";
+
 	/**
 	 * Determines whether to always show the simplified settings UI, where
 	 * settings are presented in a single list. When false, settings are shown
@@ -63,9 +68,6 @@ public class SettingsActivity extends PreferenceActivity {
 		// use the older PreferenceActivity APIs.
 
 		// Add 'general' preferences.
-/*		PreferenceCategory userHeader = new PreferenceCategory(this);
-		userHeader.setTitle(R.string.pref_header_user);
-		getPreferenceScreen().addPreference(userHeader);*/
 		addPreferencesFromResource(R.xml.pref_general);
 
 		// Add 'notifications' preferences, and a corresponding header.
@@ -77,9 +79,9 @@ public class SettingsActivity extends PreferenceActivity {
 		// Bind the summaries of EditText/List/Dialog/Ringtone preferences to
 		// their values. When their values change, their summaries are updated
 		// to reflect the new value, per the Android Design guidelines.
-		bindPreferenceSummaryToValue(findPreference("campus_list"));
-		bindPreferenceSummaryToValue(findPreference("user_type_list"));
-		bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+		bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_HOME_CAMPUS));
+		bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_USER_TYPE));
+		bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_NOTIFICATIONS));
 	}
 
 	/** {@inheritDoc} */
@@ -208,8 +210,8 @@ public class SettingsActivity extends PreferenceActivity {
 			// to their values. When their values change, their summaries are
 			// updated to reflect the new value, per the Android Design
 			// guidelines.
-			bindPreferenceSummaryToValue(findPreference("campus_list"));
-			bindPreferenceSummaryToValue(findPreference("user_type_list"));
+			bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_HOME_CAMPUS));
+			bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_USER_TYPE));
 		}
 	}
 
@@ -229,7 +231,7 @@ public class SettingsActivity extends PreferenceActivity {
 			// to their values. When their values change, their summaries are
 			// updated to reflect the new value, per the Android Design
 			// guidelines.
-			bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+			bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_NOTIFICATIONS));
 		}
 	}
 

@@ -35,6 +35,8 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public final class LocationUtils {
 
+    public static final String TAG = "LocationUtils";
+
     public static class ErrorDialogFragment extends DialogFragment {
         private Dialog mDialog;
         public ErrorDialogFragment() {

@@ -27,6 +27,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.SettingsActivity;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
@@ -82,10 +83,6 @@ public class BusStops extends Fragment {
 		
 		loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));
 		loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header));
-
-        // Determine current campus
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mCurrentCampus = sharedPref.getString("campus_list", getActivity().getResources().getString(R.string.campus_nb_tag));
 	}
 	
 	@Override
@@ -121,7 +118,12 @@ public class BusStops extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+
+        // Get current campus tag (default to "nb")
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
+                getActivity().getResources().getString(R.string.campus_nb_tag));
+
 		// Start the update thread when screen is active
 		mUpdateTimer = new Timer();
 		mUpdateTimer.schedule(new TimerTask() {
@@ -140,7 +142,7 @@ public class BusStops extends Fragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		
+
 		// Stop the update thread from running when screen isn't active
 		if(mUpdateTimer == null) return;
 		
