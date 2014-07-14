@@ -48,12 +48,12 @@ public class RSSItem implements Serializable {
 		if(item == null) return;
 
 		// RSS 2.0 required fields
-		this.title = item.text("title");
-		this.description = removeTrailingNewline(item.text("description"));
+		this.title = StringEscapeUtils.unescapeHtml4(item.text("title"));
+		this.description = StringEscapeUtils.unescapeHtml4(removeTrailingNewline(item.text("description")));
 		this.link = item.text("link");
 		
 		// Non-required fields
-		this.author = item.text("author") != null ? item.text("author") : "";
+		this.author = item.text("author") != null ? StringEscapeUtils.unescapeHtml4(item.text("author")) : "";
 		
 		// Get date - check pubDate for news or event:xxxDateTime for events
 		if(item.text("pubDate") != null) {
@@ -128,7 +128,7 @@ public class RSSItem implements Serializable {
 	 * @return HTML escaped item title
 	 */
 	public String getTitle() {
-		return StringEscapeUtils.unescapeHtml4(this.title);
+		return this.title;
 	}
 	
 	/**
@@ -136,7 +136,7 @@ public class RSSItem implements Serializable {
 	 * @return HTML escaped item description
 	 */
 	public String getDescription() {
-		return StringEscapeUtils.unescapeHtml4(this.description);
+		return this.description;
 	}
 	
 	/**
@@ -152,7 +152,7 @@ public class RSSItem implements Serializable {
 	 * @return HTML escaped item author
 	 */
 	public String getAuthor() {
-		return StringEscapeUtils.unescapeHtml4(this.author);
+		return this.author;
 	}
 	
 	/**
@@ -176,7 +176,7 @@ public class RSSItem implements Serializable {
 	 * @return RSS item title
 	 */
 	public String toString() {
-		return StringEscapeUtils.unescapeHtml4(this.title);
+		return this.title;
 	}
 	
 	/**

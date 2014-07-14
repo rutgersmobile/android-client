@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONArray;
@@ -120,7 +121,7 @@ public class PlacesDisplay extends Fragment {
 				descriptionHeaderRow.setVisibility(View.GONE);
 				descriptionContentRow.setVisibility(View.GONE);
 			}
-			else descriptionTextView.setText(placeJSON.optString("description"));
+			else descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(placeJSON.optString("description")));
 			
 			if(placeJSON.optString("offices").equals("")) {
 				officesHeaderRow.setVisibility(View.GONE);
