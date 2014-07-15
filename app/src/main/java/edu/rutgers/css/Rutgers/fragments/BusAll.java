@@ -2,12 +2,17 @@ package edu.rutgers.css.Rutgers.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import org.jdeferred.android.AndroidDoneCallback;
@@ -35,6 +40,7 @@ public class BusAll extends Fragment {
 	private ListView mListView;
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuPart> mData;
+    private EditText mFilterEditText;
 	
 	public BusAll() {
 		// Required empty public constructor
@@ -57,7 +63,46 @@ public class BusAll extends Fragment {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_bus_all, parent, false);
-		
+
+        // Get the filter field and add a listener to it
+        mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        mFilterEditText.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Set filter for list adapter
+                mAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+
+        });
+
+        // Get clear button and set listener
+        ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
+        filterClearButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mFilterEditText.setText("");
+            }
+        });
+
+/*
+        // Restore filter text when possible
+        if(savedInstanceState != null) {
+            mFilterEditText.setText(savedInstanceState.getString("filter"));
+        }
+        else {
+            mFilterEditText.setText("");
+        }
+*/
+
 		// Set up list to accept clicks on route or stop rows
 		mListView = (ListView) v.findViewById(R.id.list);
 		mListView.setAdapter(mAdapter);
@@ -89,6 +134,12 @@ public class BusAll extends Fragment {
 		
 		return v;
 	}
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("filter", mFilterEditText.getText().toString());
+    }
 	
 	/**
 	 * Populate list with all configured bus routes for agency, with a section header for that agency
@@ -128,7 +179,21 @@ public class BusAll extends Fragment {
 				return AndroidExecutionScope.UI;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<Exception>() {
+
+            @Override
+            public void onFail(Exception e) {
+                Log.w(TAG, e.getMessage());
+                mAdapter.add(new SlideMenuHeader(agencyHeader));
+                mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_routes)));
+            }
+
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+        });
 	}
 	
 	private void loadAllStops(final String agencyTag, final String agencyHeader) {
@@ -168,6 +233,7 @@ public class BusAll extends Fragment {
 
 			@Override
 			public void onFail(Exception e) {
+                Log.w(TAG, e.getMessage());
 				mAdapter.add(new SlideMenuHeader(agencyHeader));
 				mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_stops)));
 			}

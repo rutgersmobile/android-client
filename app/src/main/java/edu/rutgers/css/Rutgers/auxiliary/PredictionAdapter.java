@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import edu.rutgers.css.Rutgers.MainActivity;
 import edu.rutgers.css.Rutgers.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -32,7 +33,8 @@ import edu.rutgers.css.Rutgers2.R;
 public class PredictionAdapter extends ArrayAdapter<Prediction> {
 
 	private static final String TAG = "PredictionAdapter";
-    private static final SimpleDateFormat arriveDf = new SimpleDateFormat("h:mm a", Locale.US);
+    private static final SimpleDateFormat arriveDf12 = new SimpleDateFormat("h:mm a", Locale.US);
+    private static final SimpleDateFormat arriveDf24 = new SimpleDateFormat("H:mm", Locale.US);
 
 	private int layoutResource;
     private ArrayList<Integer> poppedRows;
@@ -211,7 +213,9 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
             Calendar cal = Calendar.getInstance(Locale.US);
             cal.setTime(date);
             cal.add(Calendar.MINUTE, minutes.get(i));
-            String arrivalTime = PredictionAdapter.arriveDf.format(cal.getTime());
+            String arrivalTime = android.text.format.DateFormat.is24HourFormat(getContext()) ?
+                    PredictionAdapter.arriveDf24.format(cal.getTime()) :
+                    PredictionAdapter.arriveDf12.format(cal.getTime());
 
             // Get appropriate string & format, stylize
             String line = resources.getQuantityString(R.plurals.bus_minute_details, mins, minString, arrivalTime);
