@@ -25,7 +25,9 @@
             android:inputType="textEmailAddress"
             android:ems="10"
             android:id="@+id/emailEditText"
-            android:hint="@string/feedback_email_hint"/>
+            android:hint="@string/feedback_email_hint">
+            <requestFocus />
+        </EditText>
 
     </LinearLayout>
 
@@ -81,7 +83,6 @@
         android:hint="@string/feedback_hint"
         android:inputType="textMultiLine" >
 
-        <requestFocus />
     </EditText>
 
 </LinearLayout>

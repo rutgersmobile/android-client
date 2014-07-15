@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import android.content.Context;
+import android.app.Activity;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -9,26 +10,34 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
-import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
+import edu.rutgers.css.Rutgers.api.Places.PlaceTuple;
+import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
+import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
+import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -39,27 +48,42 @@ public class PlacesMain extends Fragment {
 
 	private static final String TAG = "PlacesMain";
 
-	private ArrayList<PlaceTuple> mList;
-	private ArrayAdapter<PlaceTuple> mAdapter;
-	private JSONObject mData;
-	
+	private ArrayList<PlaceTuple> mSearchList;
+	private ArrayAdapter<PlaceTuple> mSearchAdapter;
+	private ArrayList<RMenuPart> mData;
+    private RMenuAdapter mAdapter;
+    private ListView mListView;
+    private JSONObject mPlaceDatabase;
+    private LocationClientProvider mLocationClientProvider;
+
 	public PlacesMain() {
 		// Required empty public constructor
 	}
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mLocationClientProvider = (LocationClientProvider) activity;
+        } catch(ClassCastException e) {
+            mLocationClientProvider = null;
+            Log.e(TAG, e.getMessage());
+        }
+    }
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mList = new ArrayList<PlaceTuple>();
-		mAdapter = new ArrayAdapter<PlaceTuple>(getActivity(), android.R.layout.simple_dropdown_item_1line, mList);
-		
-		// Get places data
+		mSearchList = new ArrayList<PlaceTuple>();
+		mSearchAdapter = new ArrayAdapter<PlaceTuple>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSearchList);
+
+        // Populate search list & list of nearby places
 		Places.getPlaces().done(new AndroidDoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject json) {
-				mData = json;
+				mPlaceDatabase = json;
 				
 				// Grab "all" field and add title from each object inside
                 @SuppressWarnings("unchecked")
@@ -69,12 +93,12 @@ public class PlacesMain extends Fragment {
                     try {
                         JSONObject curBuilding = json.getJSONObject(key);
                         PlaceTuple newPT = new PlaceTuple(key, curBuilding);
-                        mAdapter.add(newPT);
+                        mSearchAdapter.add(newPT);
                     } catch (JSONException e) {
                         Log.w(TAG, "getPlaces().done: " + e.getMessage());
                     }
                 }
-                Collections.sort(mList);
+                Collections.sort(mSearchList);
 
 			}
 			
@@ -84,8 +108,11 @@ public class PlacesMain extends Fragment {
 			}
 			
 		});
-		
-	}
+
+        // Get nearby places & populate nearby places list
+        mData = new ArrayList<RMenuPart>();
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
+    }
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -94,9 +121,12 @@ public class PlacesMain extends Fragment {
 
 		getActivity().setTitle(getActivity().getResources().getString(R.string.places_title));
 
-		AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
-		autoComp.setAdapter(mAdapter);
-		
+        mListView = (ListView) v.findViewById(R.id.listView);
+        mListView.setAdapter(mAdapter);
+
+		final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
+		autoComp.setAdapter(mSearchAdapter);
+
 		// Item selected from auto-complete list
 		autoComp.setOnItemClickListener(new OnItemClickListener() {
 
@@ -128,49 +158,101 @@ public class PlacesMain extends Fragment {
 			}
 			
 		});
-		
-		return v;
+
+        // Clear search bar
+        ImageButton clearSearchButton = (ImageButton) v.findViewById(R.id.filterClearButton);
+        clearSearchButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                autoComp.setText("");
+            }
+
+        });
+
+        // Click listener for nearby places list
+        mListView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SlideMenuItem clickedItem = (SlideMenuItem) parent.getItemAtPosition(position);
+                ComponentFactory.getInstance().switchFragments(clickedItem.getArgs());
+            }
+        });
+
+        return v;
 	}
 
-    private class PlaceTuple implements Comparable<PlaceTuple> {
-        private String key;
-        private JSONObject placeJson;
+    @Override
+    public void onResume() {
+        super.onResume();
 
-        public PlaceTuple(String key, JSONObject placeJson) {
-            this.key = key;
-            this.placeJson = placeJson;
-        }
+        // Check for location services
+        if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
 
-        public String getKey() {
-            return this.key;
-        }
-
-        public JSONObject getPlaceJSON() {
-            return this.placeJson;
-        }
-
-        @Override
-        public String toString() {
-            try {
-                return placeJson.getString("title");
-            } catch (JSONException e) {
-                Log.w(TAG, "toString(): " + e.getMessage());
-                return key;
+            // Get last location
+            final Location lastLoc = mLocationClientProvider != null ?
+                    mLocationClientProvider.getLocationClient().getLastLocation() :
+                    null;
+            if (lastLoc == null) {
+                Log.w(TAG, "Couldn't get location");
+                getLocationFail();
+                return;
             }
+
+            Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new AndroidDoneCallback<List<PlaceTuple>>() {
+
+                @Override
+                public AndroidExecutionScope getExecutionScope() {
+                    return AndroidExecutionScope.UI;
+                }
+
+                @Override
+                public void onDone(List<PlaceTuple> result) {
+                    mAdapter.clear();
+                    mAdapter.add(new SlideMenuHeader("Nearby Places"));
+
+                    if (result.isEmpty()) mAdapter.add(new SlideMenuItem("No nearby places."));
+                    else {
+                        for (PlaceTuple placeTuple : result) {
+                            Bundle args = new Bundle();
+                            args.putString("title", placeTuple.getPlaceJSON().optString("title"));
+                            args.putString("component", "placesdisplay");
+                            args.putString("placeKey", placeTuple.getKey());
+                            args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
+                            mAdapter.add(new SlideMenuItem(args));
+                        }
+                    }
+
+                }
+
+            }).fail(new AndroidFailCallback<Exception>() {
+
+                @Override
+                public AndroidExecutionScope getExecutionScope() {
+                    return AndroidExecutionScope.UI;
+                }
+
+                @Override
+                public void onFail(Exception result) {
+                    mAdapter.clear();
+                    mAdapter.add(new SlideMenuHeader("Nearby Places"));
+                    mAdapter.add(new SlideMenuItem("Error while finding places"));
+                }
+
+            });
+
+        }
+        else {
+            Log.w(TAG, "Location services not connected");
+            getLocationFail();
         }
 
-        @Override
-        public int compareTo(PlaceTuple another) {
-            // Order by 'title' field alphabetically (or by key if getting title string fails)
-            try {
-                String thisTitle = getPlaceJSON().getString("title");
-                String thatTitle = another.getPlaceJSON().getString("title");
-                return thisTitle.compareTo(thatTitle);
-            } catch (JSONException e) {
-                Log.w(TAG, "compareTo(): " + e.getMessage());
-                return getKey().compareTo(another.getKey());
-            }
-        }
+    }
+
+    private void getLocationFail() {
+        mAdapter.clear();
+        mAdapter.add(new SlideMenuHeader("Nearby Places"));
+        mAdapter.add(new SlideMenuItem("Couldn't get location"));
     }
 
 }

@@ -37,6 +37,8 @@ public class AppUtil {
 
     public static final String API_BASE = "https://rumobile.rutgers.edu/1/";
 
+    public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
+
 	/**
 	 * Get (or create) UUID for the installation of this app.
 	 * @param context App context

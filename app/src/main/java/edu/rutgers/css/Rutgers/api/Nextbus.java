@@ -46,7 +46,6 @@ public class Nextbus {
 	private static final long activeExpireTime = 1000 * 60 * 10; // active bus data cached ten minutes
 	private static final long configExpireTime = 1000 * 60 * 60; // config data cached one hour
 
-	public static final float NEARBY_MAX = 300.0f; // Within 300 meters is considered "nearby"
 	
 	/**
 	 * Load JSON data on active buses & the entire bus config.
@@ -444,7 +443,7 @@ public class Nextbus {
 	 * @param sourceLon Longitude of location
 	 * @return stopByTitle JSON objects
 	 */
-	public static Promise<JSONObject, Exception, Double> getStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
+	public static Promise<JSONObject, Exception, Double> getStopsByTitleNear(final String agency, final double sourceLat, final double sourceLon) {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
@@ -470,13 +469,13 @@ public class Nextbus {
 							JSONObject curStop = conf.getJSONObject("stops").getJSONObject(curStopTags.getString(i));
 							
 							// Get distance between building and stop
-							float endLatitude = Float.parseFloat(curStop.getString("lat"));
-							float endLongitude = Float.parseFloat(curStop.getString("lon")); 
+							double endLatitude = Double.parseDouble(curStop.getString("lat"));
+							double endLongitude = Double.parseDouble(curStop.getString("lon"));
 							float[] results = new float[1];
 							Location.distanceBetween(sourceLat, sourceLon, endLatitude, endLongitude, results);
 							
 							// If the stop is within range, add it to the list
-							if(results[0] < NEARBY_MAX) {
+							if(results[0] < AppUtil.NEARBY_RANGE) {
 								nearStops.put(curTitle, curStopByTitle);
 								break; // Skip to next stop title
 							}

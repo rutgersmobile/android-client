@@ -17,13 +17,14 @@
                 android:id="@+id/filterEditText" />
 
             <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="46dp"
+                android:layout_height="38dp"
                 android:id="@+id/filterClearButton"
                 android:layout_weight="0"
                 android:clickable="true"
                 android:src="@android:drawable/ic_input_delete"
-                android:layout_marginRight="8dp" />
+                android:layout_marginRight="8dp"
+                android:scaleType="centerCrop" />
 
     </LinearLayout>
 
