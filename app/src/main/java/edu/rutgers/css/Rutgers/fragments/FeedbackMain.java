@@ -170,8 +170,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		mMessageEditText.setText("");
 
         // Close soft keyboard
-        InputMethodManager imm = (InputMethodManager) mMessageEditText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mMessageEditText.getWindowToken(), 0);
+        AppUtil.closeKeyboard(getActivity());
 	}
 
 	@Override

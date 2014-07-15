@@ -102,9 +102,6 @@ public class PlacesMain extends Fragment {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				// Close soft keyboard
-                AppUtil.closeKeyboard(v);
-				
 				// Launch Places display fragment
 				Bundle args = new Bundle();
 				PlaceTuple placeTuple = (PlaceTuple) parent.getAdapter().getItem(position);
@@ -124,8 +121,6 @@ public class PlacesMain extends Fragment {
 			@Override
 			public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
 				if(actionId == EditorInfo.IME_ACTION_GO) {
-                    // Close soft keyboard
-					AppUtil.closeKeyboard(v);
 					return true;
 				}
 				

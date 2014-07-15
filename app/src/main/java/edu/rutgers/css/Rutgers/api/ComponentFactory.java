@@ -13,6 +13,7 @@ import android.util.Log;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.BusMain;
@@ -146,7 +147,9 @@ public class ComponentFactory {
 		
 		String componentTag = args.getString("component");
 		boolean isTopLevel = args.getBoolean("topLevel");
-		
+
+        AppUtil.closeKeyboard(mMainActivity);
+
 		FragmentManager fm = mMainActivity.getSupportFragmentManager();
 		
 		// If this is a top level (nav drawer) press, find the last time this channel was launched and pop backstack to it
