@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.transition.Transition;
 import android.util.Log;
 
 import java.util.Hashtable;
@@ -75,11 +77,10 @@ public class ComponentFactory {
 	 * @return Built fragment
 	 */
 	public Fragment createFragment (Bundle options) {
-		Log.v(TAG, "Attempting to create fragment");
-		Fragment fragment = new Fragment();
+		Fragment fragment;
 		String component;
 		
-		if(options.get("component") == null) {
+		if(options.getString("component") == null || options.getString("component").isEmpty()) {
 			Log.e(TAG, "Component argument not set");
 			return null;
 		}
@@ -87,16 +88,16 @@ public class ComponentFactory {
 		component = options.getString("component").toLowerCase(Locale.US);
 		Class<? extends Fragment> compClass = fragmentTable.get(component);
 		if(compClass != null) {
+            Log.v(TAG, "Creating a " + compClass.getSimpleName());
 			try {
-				fragment = (Fragment) compClass.newInstance();
-				Log.v(TAG, "Creating a " + compClass.getSimpleName());
+				fragment = compClass.newInstance();
 			} catch (Exception e) {
 				Log.e(TAG, Log.getStackTraceString(e));
 				return null;
 			}	
 		}
 		else {
-			Log.e(TAG, "Failed to create component " + component);
+			Log.e(TAG, "Component \"" + component + "\" is undefined");
 			return null;
 		}
 		
@@ -143,6 +144,7 @@ public class ComponentFactory {
 				
 		// Switch the main content fragment
 		fm.beginTransaction()
+            .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left, R.animator.slide_in_left, R.animator.slide_out_right)
 			.replace(R.id.main_content_frame, fragment, componentTag)
 			.addToBackStack(componentTag)
 			.commit();
