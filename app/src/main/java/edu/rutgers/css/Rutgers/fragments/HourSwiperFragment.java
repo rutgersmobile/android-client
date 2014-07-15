@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.fragments;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,7 +53,10 @@ public class HourSwiperFragment extends Fragment {
 				TextView sublocTextView = (TextView) newTR.findViewById(R.id.sublocTextView);
 				TextView hoursTextView = (TextView) newTR.findViewById(R.id.hoursTextView);
 				sublocTextView.setText(curKey);
-				hoursTextView.setText(hours.getString(curKey));
+                sublocTextView.setGravity(Gravity.LEFT);
+				hoursTextView.setText(hours.getString(curKey).replace(",", "\n"));
+                hoursTextView.setMaxLines(1 + StringUtils.countMatches(hours.getString(curKey), ","));
+                hoursTextView.setGravity(Gravity.RIGHT);
 				hourSwiperTableLayout.addView(newTR);
 			}
 		} catch(JSONException e) {

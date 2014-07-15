@@ -96,7 +96,7 @@ public class FoodMain extends Fragment {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_foodmain, parent, false);
+		View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
 		mListView = (ListView) v.findViewById(R.id.dining_locations_list);
 		
 		Bundle args = getArguments();

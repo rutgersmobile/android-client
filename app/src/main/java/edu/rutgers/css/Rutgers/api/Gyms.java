@@ -66,7 +66,7 @@ public class Gyms {
 	
 	/**
 	 * The point of this function is to convert the given JSON data into a set that is organized by date
-	 * rather than sub-location name, because we will be displaying the hours by DAY, not by location.
+	 * rather than sub-location name, because we will be displaying the hours by DAY, not by sub-location.
 	 * 
 	 * The resulting JSON object (mDailyTemp) looks something like this:
 	 * 

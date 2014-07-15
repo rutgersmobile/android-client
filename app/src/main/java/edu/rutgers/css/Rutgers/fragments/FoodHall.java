@@ -82,7 +82,7 @@ public class FoodHall extends Fragment {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_foodhall, parent, false);
+		View v = inflater.inflate(R.layout.fragment_food_hall, parent, false);
 		mListView = (ListView) v.findViewById(R.id.dining_menu_list);
 		
 		Bundle args = getArguments();

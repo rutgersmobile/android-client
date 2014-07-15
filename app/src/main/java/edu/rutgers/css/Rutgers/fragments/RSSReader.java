@@ -99,7 +99,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_rssreader, parent, false);
+		View v = inflater.inflate(R.layout.fragment_rss_reader, parent, false);
 		mListView = (ListView) v.findViewById(R.id.rssreader_list);
         Bundle args = getArguments();
 		

@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.SettingsActivity;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
@@ -87,7 +86,7 @@ public class BusStops extends Fragment {
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_busstops, parent, false);
+		View v = inflater.inflate(R.layout.fragment_bus_stops, parent, false);
 		
 		mListView = (ListView) v.findViewById(R.id.list);
 		mListView.setAdapter(mAdapter);

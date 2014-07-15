@@ -28,7 +28,7 @@ public class BusMain extends Fragment {
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_busmain, parent, false);
+		View v = inflater.inflate(R.layout.fragment_bus_main, parent, false);
 		
 		Bundle args = getArguments();
 		getActivity().setTitle(args.getString("title"));

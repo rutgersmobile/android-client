@@ -102,7 +102,7 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_busdisplay, parent, false);
+		View v = inflater.inflate(R.layout.fragment_bus_display, parent, false);
 
 		Bundle args = getArguments();
 		// Get title

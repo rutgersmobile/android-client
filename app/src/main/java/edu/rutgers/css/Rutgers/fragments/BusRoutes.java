@@ -52,7 +52,7 @@ public class BusRoutes extends Fragment {
 	
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_busroutes, parent, false);
+		View v = inflater.inflate(R.layout.fragment_bus_routes, parent, false);
 		
 		mListView = (ListView) v.findViewById(R.id.list);
 		mListView.setAdapter(mAdapter);
