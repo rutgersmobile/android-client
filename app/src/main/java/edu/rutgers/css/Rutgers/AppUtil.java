@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -8,6 +9,8 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -180,6 +183,15 @@ public class AppUtil {
         }
 
         return getIcon(resources, iconRes, colorRes);
+    }
+
+    /**
+     * Close soft keyboard
+     * @param view
+     */
+    public static void closeKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
 }
