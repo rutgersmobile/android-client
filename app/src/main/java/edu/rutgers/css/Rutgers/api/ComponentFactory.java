@@ -45,21 +45,33 @@ public class ComponentFactory {
 	protected ComponentFactory() {
 		// Set up table of fragments that can be launched
 		fragmentTable = new Hashtable<String, Class<? extends Fragment>>();
+
+        // General views
 		fragmentTable.put("dtable", DTable.class);
-		fragmentTable.put("bus", BusMain.class);
-		fragmentTable.put("reader", RSSReader.class);
-		fragmentTable.put("food", FoodMain.class);
+        fragmentTable.put("reader", RSSReader.class);
+        fragmentTable.put("text", TextDisplay.class);
+        fragmentTable.put("www", WebDisplay.class);
+
+        // Bus views
+        fragmentTable.put("bus", BusMain.class);
+        fragmentTable.put("busdisplay", BusDisplay.class);
+
+        // Food views
+        fragmentTable.put("food", FoodMain.class);
 		fragmentTable.put("foodhall", FoodHall.class);
 		fragmentTable.put("foodmeal", FoodMeal.class);
+
+        // Places views
 		fragmentTable.put("places", PlacesMain.class);
 		fragmentTable.put("placesdisplay", PlacesDisplay.class);
-		fragmentTable.put("busdisplay", BusDisplay.class);
+
+        // Recreation views
 		fragmentTable.put("recreation", RecreationMain.class);
 		fragmentTable.put("recdisplay", RecreationDisplay.class);
-		fragmentTable.put("www", WebDisplay.class);
+
+        // Other views
 		fragmentTable.put("ruinfo", RUInfoMain.class);
 		fragmentTable.put("feedback", FeedbackMain.class);
-        fragmentTable.put("text", TextDisplay.class);
 	}
 	
 	/**
