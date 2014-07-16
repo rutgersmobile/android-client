@@ -10,13 +10,28 @@ import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osmdroid.DefaultResourceProxyImpl;
+import org.osmdroid.tileprovider.MapTile;
+import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.util.ResourceProxyImpl;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.ItemizedOverlay;
+import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.OverlayItem;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -33,7 +48,8 @@ public class PlacesDisplay extends Fragment {
 	private static final String TAG = "PlacesDisplay";
 
     private static Map<String, String> mAgencyMap;
-
+    private MapView mMapView;
+    private ItemizedOverlay<OverlayItem> mLocationOverlays;
 
     public PlacesDisplay() {
 		// Required empty public constructor
@@ -87,22 +103,35 @@ public class PlacesDisplay extends Fragment {
 			getActivity().setTitle(placeJSON.optString("title", getResources().getString(R.string.places_title)));
 
 			// Set up map
-/*			if(mGoogleMap != null && placeJSON.optJSONObject("location") != null) {
+            mMapView = (MapView) v.findViewById(R.id.mapview);
+            mMapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // disable hardware acceleration
+
+			if(mMapView != null && placeJSON.optJSONObject("location") != null) {
 				JSONObject locationJson = placeJSON.optJSONObject("location");
-				if(!locationJson.optString("latitude").equals("") && !locationJson.optString("longitude").equals("")) {
+				if(!locationJson.optString("latitude").isEmpty() && !locationJson.optString("longitude").isEmpty()) {
+                    // Get latitude & longitude of location
 					double lon = Double.parseDouble(locationJson.optString("longitude"));
 					double lat = Double.parseDouble(locationJson.optString("latitude"));
-					LatLng position = new LatLng(lat, lon);
-					mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 17));
-					mGoogleMap.addMarker(new MarkerOptions()
-							.title(placeJSON.optString("title"))
-							.snippet("Test")
-							.position(position));
+                    GeoPoint position = new GeoPoint(lat, lon);
+
+                    // Create map icon for location
+                    final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
+                    items.add(new OverlayItem(placeJSON.optString("title"), "", position));
+                    mLocationOverlays = new ItemizedIconOverlay<OverlayItem>(items, null, new DefaultResourceProxyImpl(getActivity()));
+
+                    // Add the icon and center the map of the location
+                    mMapView.getOverlays().add(mLocationOverlays);
+                    mMapView.getController().setZoom(18);
+                    mMapView.getController().setCenter(position);
 				}
+                else {
+                    // No location set
+                    mMapView.setVisibility(View.GONE);
+                }
 			}
 			else {
-				if(mGoogleMap == null) Log.w(TAG, "mGoogleMap is null");
-			}*/
+				if(mMapView == null) Log.e(TAG, "mMapView is null");
+			}
 			
 			// Display building info
 			addressTextView.setText(formatAddress(placeJSON.optJSONObject("location")));
