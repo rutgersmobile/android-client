@@ -106,6 +106,8 @@ public class PlacesDisplay extends Fragment {
 			// Set up map
             mMapView = (MapView) v.findViewById(R.id.mapview);
             mMapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // disable hardware acceleration
+            mMapView.setBuiltInZoomControls(false);
+            mMapView.setMultiTouchControls(false);
 
 			if(mMapView != null && placeJSON.optJSONObject("location") != null) {
 				JSONObject locationJson = placeJSON.optJSONObject("location");
