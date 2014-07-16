@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -112,7 +113,7 @@ public class PlacesDisplay extends Fragment {
                     // Get latitude & longitude of location
 					double lon = Double.parseDouble(locationJson.optString("longitude"));
 					double lat = Double.parseDouble(locationJson.optString("latitude"));
-                    GeoPoint position = new GeoPoint(lat, lon);
+                    final GeoPoint position = new GeoPoint(lat, lon);
 
                     // Create map icon for location
                     final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
@@ -121,8 +122,15 @@ public class PlacesDisplay extends Fragment {
 
                     // Add the icon and center the map of the location
                     mMapView.getOverlays().add(mLocationOverlays);
-                    mMapView.getController().setZoom(18);
-                    mMapView.getController().setCenter(position);
+
+                    // This delays the center & zoom until after layout is set up
+                    v.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            mMapView.getController().setZoom(18);
+                            mMapView.getController().setCenter(position);
+                        }
+                    });
 				}
                 else {
                     // No location set
