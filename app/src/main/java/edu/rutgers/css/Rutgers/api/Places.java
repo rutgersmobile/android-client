@@ -34,7 +34,7 @@ public class Places {
 	private static final String API_URL = AppUtil.API_BASE + "places.txt";
 	private static final long expire = Request.EXPIRE_ONE_HOUR * 24; // Cache data for a day
 	
-	private static Promise<Object, Object, Object> configured;
+	private static Promise<Object, AjaxStatus, Object> configured;
 	private static JSONObject mPlacesConf;
 
 
@@ -84,7 +84,7 @@ public class Places {
 	 */
 	private static void setup() {
 		// Get JSON object from places API
-		final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
+		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
 		
 		final Promise<JSONObject, AjaxStatus, Double> promisePlaces = Request.json(API_URL, expire);
@@ -108,7 +108,7 @@ public class Places {
 		
 			@Override
 			public void onFail(AjaxStatus e) {
-				Log.e(TAG, e.getMessage() + "; Response code: " + e.getCode());
+				Log.e(TAG, AppUtil.formatAjaxStatus(e));
 				confd.reject(e);
 			}
 			
@@ -150,7 +150,17 @@ public class Places {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -186,7 +196,17 @@ public class Places {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -244,6 +264,16 @@ public class Places {
                 return AndroidExecutionScope.BACKGROUND;
             }
 
+        }).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
         });
 
         return d.promise();

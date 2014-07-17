@@ -18,6 +18,7 @@
     <string name="failed_load_short">Network error.</string>
     <string name="failed_location">Getting location failed.</string>
     <string name="failed_no_url">No URL supplied.</string>
+    <string name="failed_internal">Internal error.</string>
 
     <!-- Bus channel -->
     <string name="bus_title">Bus</string>
@@ -50,6 +51,8 @@
 
     <!-- Places channel -->
     <string name="places_title">Places</string>
+    <string name="places_nearby">Nearby Places</string>
+    <string name="places_none_nearby">No nearby places.</string>
     <string name="building_search">Building Search</string>
     <string name="explain_building_search">Search for a building by typing a building name or abbreviation.</string>
     <string name="address_header">Address</string>

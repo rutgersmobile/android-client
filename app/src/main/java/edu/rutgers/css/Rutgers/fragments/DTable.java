@@ -21,10 +21,12 @@ import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.Iterator;
 
 import edu.rutgers.css.Rutgers.AppUtil;
@@ -57,61 +59,94 @@ public class DTable extends Fragment {
 	public DTable() {
 		// Required empty public constructor
 	}
+
+    /**
+     * Get descriptive DTable tag to use for logging.
+     * @return DTable tag combined with current handle, if possible
+     */
+    private String dTag() {
+        if(mHandle != null) return TAG + "_" + mHandle;
+        else return TAG;
+    }
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = getActivity();
 		aq = new AQuery(mContext);
-		mData = new JSONArray();
-		mAdapter = new JSONAdapter(mData);
 
         if(savedInstanceState != null && savedInstanceState.getString("mData") != null) {
             mHandle = savedInstanceState.getString("mHandle");
-            Log.v(TAG + "_" + mHandle, "Restoring mData");
+            Log.v(dTag(), "Restoring mData");
             try {
                 mData = new JSONArray(savedInstanceState.getString("mData"));
-                loadArray(mData);
+                mAdapter = new JSONAdapter(mData);
                 return;
             } catch (JSONException e) {
-                Log.w(TAG + "_" + mHandle, "onCreate(): " + e.getMessage());
+                Log.w(dTag(), "onCreate(): " + e.getMessage());
             }
         }
 
+        // Didn't restore adapter & data from state; initialize here
+        mData = new JSONArray();
+        mAdapter = new JSONAdapter(mData);
+
 		Bundle args = getArguments();
 
+        // Get handle for this DTable instance
         if(args.getString("handle") != null) mHandle = args.getString("handle");
         else if(args.getString("api") != null) mHandle = args.getString("api").replace(".txt","");
         else if(args.getString("title") != null) mHandle = args.getString("title");
         else mHandle = "null";
 
+        // If a JSON array was provided in "data" field, load it
 		if (args.getString("data") != null) {
 			try {
 				loadArray(new JSONArray(args.getString("data")));
 			} catch (JSONException e) {
-				Log.e(TAG + "_" + mHandle, "onCreateView(): " + e.getMessage());
+				Log.e(dTag(), "onCreateView(): " + e.getMessage());
 			}
 		}
+
+        // Otherwise, check for URL or API argument
 		else if (args.getString("url") != null) mURL = args.getString("url");
 		else if (args.getString("api") != null) mAPI = args.getString("api");
-		else throw new IllegalStateException("DTable must have URL, API, or data in its arguments bundle");
+		else {
+            Log.e(dTag(), "DTable must have URL, API, or data in its arguments bundle");
+            Toast.makeText(mContext, R.string.failed_internal, Toast.LENGTH_LONG).show();
+        }
 		
-		if (mURL != null) aq.ajax(mURL, JSONObject.class, new AjaxCallback<JSONObject>() {
+		if (mURL != null) {
+            Request.json(mURL, -1).done(new AndroidDoneCallback<JSONObject>() {
+                @Override
+                public AndroidExecutionScope getExecutionScope() {
+                    return AndroidExecutionScope.UI;
+                }
 
-            @Override
-            public void callback(String url, JSONObject json, AjaxStatus status) {
-            	try {
-            		loadArray(json.getJSONArray("children"));
-            	} catch (JSONException e) {
-            		Log.w(TAG + "_" + mHandle, "onCreateView(): " + e.getMessage());
-            		Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
-            	}
-            }
-            
-		});
+                @Override
+                public void onDone(JSONObject result) {
+                    try {
+                        loadArray(result.getJSONArray("children"));
+                    } catch (JSONException e) {
+                        Log.w(dTag(), "onCreateView(): " + e.getMessage());
+                        Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
+                    }
+                }
+            }).fail(new AndroidFailCallback<AjaxStatus>() {
+                @Override
+                public AndroidExecutionScope getExecutionScope() {
+                    return AndroidExecutionScope.UI;
+                }
 
+                @Override
+                public void onFail(AjaxStatus status) {
+                    Log.w(dTag(), AppUtil.formatAjaxStatus(status));
+                    Toast.makeText(mContext, R.string.failed_load, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
         else if(mAPI != null) {
-            Request.api(mAPI, 0).done(new AndroidDoneCallback<JSONObject>() {
+            Request.api(mAPI, -1).done(new AndroidDoneCallback<JSONObject>() {
                 @Override
                 public AndroidExecutionScope getExecutionScope() {
                     return AndroidExecutionScope.UI;
@@ -123,9 +158,20 @@ public class DTable extends Fragment {
                         loadArray(result.getJSONArray("children"));
                     }
                     catch (JSONException e) {
-                        Log.w(TAG + "_" + mHandle, "onCreateView(): " + e.getMessage());
+                        Log.w(dTag(), "onCreateView(): " + e.getMessage());
                         Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
                     }
+                }
+            }).fail(new AndroidFailCallback<AjaxStatus>() {
+                @Override
+                public AndroidExecutionScope getExecutionScope() {
+                    return AndroidExecutionScope.UI;
+                }
+
+                @Override
+                public void onFail(AjaxStatus status) {
+                    Log.w(dTag(), AppUtil.formatAjaxStatus(status));
+                    Toast.makeText(mContext, R.string.failed_load, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -154,7 +200,7 @@ public class DTable extends Fragment {
                 try {
                     // This object has an array of more channels
                     if (mAdapter.getItemViewType(position) == CAT_TYPE) {
-                        Log.v(TAG + "_" + mHandle, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
+                        Log.v(dTag(), "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
                         args.putString("component", "dtable");
                         args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
                         args.putString("data", clickedJson.getJSONArray("children").toString());
@@ -168,7 +214,7 @@ public class DTable extends Fragment {
                     // This object is a channel
                     else {
                         JSONObject channel = clickedJson.getJSONObject("channel");
-                        Log.v(TAG + "_" + mHandle, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
+                        Log.v(dTag(), "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
 
                         // Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
                         args.putString("component", channel.getString("view"));
@@ -188,14 +234,14 @@ public class DTable extends Fragment {
                         while (keys.hasNext()) {
                             String key = keys.next();
                             if(key.equalsIgnoreCase("title")) continue; // title was already handled above
-                            Log.v(TAG + "_" + mHandle, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
+                            Log.v(dTag(), "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
                             args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
                         }
                     }
 
                     ComponentFactory.getInstance().switchFragments(args);
                 } catch (JSONException e) {
-                    Log.w(TAG + "_" + mHandle, "onItemClick(): " + e.getMessage());
+                    Log.w(dTag(), "onItemClick(): " + e.getMessage());
                 }
 
             }
@@ -208,8 +254,12 @@ public class DTable extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("mData", mData.toString());
-        outState.putString("mHandle", mHandle);
+
+        // If any data was actually loaded, save it in state
+        if(mData != null && mData.length() > 0) {
+            outState.putString("mData", mData.toString());
+            outState.putString("mHandle", mHandle);
+        }
     }
 
 	/**
@@ -223,7 +273,7 @@ public class DTable extends Fragment {
 			try {
 				mAdapter.add(in.get(i));
 			} catch (JSONException e) {
-				Log.w(TAG + "_" + mHandle, "loadArray(): " + e.getMessage());
+				Log.w(dTag(), "loadArray(): " + e.getMessage());
 			}
 		}
 	}
@@ -259,7 +309,7 @@ public class DTable extends Fragment {
                     else selected.put("popped", false);
                     notifyDataSetChanged();
                 } catch (JSONException e) {
-                    Log.w(TAG + "_" + mHandle, "togglePopdown(): " + e.getMessage());
+                    Log.w(dTag(), "togglePopdown(): " + e.getMessage());
                 }
             }
 
@@ -270,7 +320,7 @@ public class DTable extends Fragment {
 			try {
 				return mItems.get(pos);
 			} catch (JSONException e) {
-				Log.w(TAG + "_" + mHandle, "getItem(): " + e.getMessage());
+				Log.w(dTag(), "getItem(): " + e.getMessage());
 				return null;
 			}
 		}

@@ -400,7 +400,7 @@ public class MainActivity extends FragmentActivity  implements
 
 			@Override
 			public void onFail(AjaxStatus status) {
-				Log.e(TAG, "loadWebShortcuts(): " + status.getMessage());
+				Log.e(TAG, "loadWebShortcuts(): " + AppUtil.formatAjaxStatus(status));
 			}
 			
 			@Override

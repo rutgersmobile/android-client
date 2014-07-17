@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
@@ -107,7 +109,19 @@ public class PlacesMain extends Fragment {
 				return AndroidExecutionScope.UI;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<Exception>() {
+
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onFail(Exception result) {
+                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+            }
+
+        });
 
         // Get nearby places & populate nearby places list
         mData = new ArrayList<RMenuPart>();
@@ -186,6 +200,8 @@ public class PlacesMain extends Fragment {
     public void onResume() {
         super.onResume();
 
+        final Resources res = getActivity().getResources();
+
         // Check for location services
         if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
 
@@ -209,9 +225,9 @@ public class PlacesMain extends Fragment {
                 @Override
                 public void onDone(List<PlaceTuple> result) {
                     mAdapter.clear();
-                    mAdapter.add(new SlideMenuHeader("Nearby Places"));
+                    mAdapter.add(new SlideMenuHeader(res.getString(R.string.places_nearby)));
 
-                    if (result.isEmpty()) mAdapter.add(new SlideMenuItem("No nearby places."));
+                    if (result.isEmpty()) mAdapter.add(new SlideMenuItem(res.getString(R.string.places_none_nearby)));
                     else {
                         for (PlaceTuple placeTuple : result) {
                             Bundle args = new Bundle();
@@ -235,8 +251,8 @@ public class PlacesMain extends Fragment {
                 @Override
                 public void onFail(Exception result) {
                     mAdapter.clear();
-                    mAdapter.add(new SlideMenuHeader("Nearby Places"));
-                    mAdapter.add(new SlideMenuItem("Error while finding places"));
+                    mAdapter.add(new SlideMenuHeader(res.getString(R.string.places_nearby)));
+                    mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
                 }
 
             });
@@ -251,8 +267,8 @@ public class PlacesMain extends Fragment {
 
     private void getLocationFail() {
         mAdapter.clear();
-        mAdapter.add(new SlideMenuHeader("Nearby Places"));
-        mAdapter.add(new SlideMenuItem("Couldn't get location"));
+        mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.places_nearby)));
+        mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_location)));
     }
 
 }

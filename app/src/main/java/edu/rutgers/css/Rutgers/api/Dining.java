@@ -60,7 +60,7 @@ public class Dining {
 		
 			@Override
 			public void onFail(AjaxStatus e) {
-				Log.e(TAG, e.getMessage() + "; Response code: " + e.getCode());
+				Log.e(TAG, AppUtil.formatAjaxStatus(e));
 				confd.reject(e);
 			}
 
