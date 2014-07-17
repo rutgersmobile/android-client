@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
@@ -39,6 +40,7 @@ public class RecreationDisplay extends Fragment {
 	private ViewPager mPager;
 	private PagerAdapter mPagerAdapter;
 	private JSONArray mLocationHours;
+    private JSONObject mLocationJSON;
 	
 	public RecreationDisplay() {
 		// Required empty public constructor
@@ -47,6 +49,19 @@ public class RecreationDisplay extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+        if(savedInstanceState != null) {
+            String jsonString, hoursString;
+            jsonString = savedInstanceState.getString("mLocationJSON");
+            hoursString = savedInstanceState.getString("mLocationHours");
+
+            try {
+                if(jsonString != null) mLocationJSON = new JSONObject(jsonString);
+                if(hoursString != null) mLocationHours = new JSONArray(hoursString);
+            } catch (JSONException e) {
+                Log.w(TAG, "onCreate(): " + e.getMessage());
+            }
+        }
 	}
 	
 	@Override
@@ -58,7 +73,7 @@ public class RecreationDisplay extends Fragment {
 		Bundle args = getArguments();
 		if(args.getString("campus") == null || args.getString("location") == null) {
 			Log.w(TAG, "Missing campus/location arg");
-			// TODO Display data fail
+			Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
 			return v;
 		}
 		
@@ -68,63 +83,24 @@ public class RecreationDisplay extends Fragment {
 		mPager = (ViewPager) v.findViewById(R.id.hoursViewPager);
 		mPagerAdapter = new HoursSlidePagerAdapter(getChildFragmentManager());
 		mPager.setAdapter(mPagerAdapter);
-		
-		// Get view IDs
-		final TextView addressTextView = (TextView) v.findViewById(R.id.addressTextView);
-		final TextView infoDeskNumberTextView = (TextView) v.findViewById(R.id.infoDeskNumberTextView);
-		final TextView businessOfficeNumberTextView = (TextView) v.findViewById(R.id.businessOfficeNumberTextView);
-		final TextView descriptionTextView = (TextView) v.findViewById(R.id.descriptionTextView);
-		
-		final TableRow infoHeadRow = (TableRow) v.findViewById(R.id.infoRowHead);
-		final TableRow infoContentRow = (TableRow) v.findViewById(R.id.infoRowContent);
-		final TableRow businessHeadRow = (TableRow) v.findViewById(R.id.businessRowHead);
-		final TableRow businessContentRow = (TableRow) v.findViewById(R.id.businessRowContent);
-		final TableRow hoursHeadRow = (TableRow) v.findViewById(R.id.hoursHeadRow);
-		final TableRow hoursContentRow = (TableRow) v.findViewById(R.id.hoursContentRow);
-		
-		// Read gym location info and plug it in to the display
+
+        // If location JSON was saved in state, display info now.
+        if(mLocationJSON != null) {
+            displayInfo(v);
+            return v;
+        }
+
+        // Don't have JSON yet - do request
 		final String location = args.getString("location");
-		final String campus = args.getString("campus");	
+		final String campus = args.getString("campus");
 		Gyms.getGyms().done(new AndroidDoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject gymsJson) {
 				try {
 					// Get location JSON
-					JSONObject locationJson = gymsJson.getJSONObject(campus).getJSONObject(location);
-					
-					// Fill in location info
-					String infoDesk = locationJson.optString("FacilityInformation");
-					String businessOffice = locationJson.optString("FacilityBusiness");
-					
-					addressTextView.setText(locationJson.optString("FacilityAddress"));
-					
-					if(infoDesk != null && !infoDesk.equals("")) {
-						infoDeskNumberTextView.setText(infoDesk);
-					}
-					else {
-						infoHeadRow.setVisibility(View.GONE);
-						infoContentRow.setVisibility(View.GONE);
-					}
-					
-					if(businessOffice != null && !businessOffice.equals("")) {
-						businessOfficeNumberTextView.setText(businessOffice);
-					}
-					else {
-						businessHeadRow.setVisibility(View.GONE);
-						businessContentRow.setVisibility(View.GONE);
-					}
-					
-					descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(locationJson.optString("FacilityBody")));
-					
-					// Get hours data for sub-locations & create fragments
-					mLocationHours = Gyms.getGymHours(locationJson);
-					mPagerAdapter.notifyDataSetChanged();
-					
-					// Set swipe page to current date
-					int pos = getCurrentPos(mLocationHours);
-					mPager.setCurrentItem(pos, true);
-					
+					mLocationJSON = gymsJson.getJSONObject(campus).getJSONObject(location);
+                    displayInfo(v);
 				} catch (JSONException e) {
 					Log.w(TAG, "onCreateView(): " + e.getMessage());
 				}
@@ -140,7 +116,8 @@ public class RecreationDisplay extends Fragment {
 
 			@Override
 			public void onFail(AjaxStatus status) {
-				Log.w(TAG, status.getMessage());
+				Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                Log.w(TAG, status.getMessage());
 			}
 
 			@Override
@@ -152,7 +129,69 @@ public class RecreationDisplay extends Fragment {
 
 		return v;
 	}
-	
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mLocationJSON != null) outState.putString("mLocationJSON", mLocationJSON.toString());
+        if(mLocationHours != null) outState.putString("mLocationHours", mLocationHours.toString());
+    }
+
+    private void displayInfo(View v) {
+
+        // Get view IDs
+        final TextView addressTextView = (TextView) v.findViewById(R.id.addressTextView);
+        final TextView infoDeskNumberTextView = (TextView) v.findViewById(R.id.infoDeskNumberTextView);
+        final TextView businessOfficeNumberTextView = (TextView) v.findViewById(R.id.businessOfficeNumberTextView);
+        final TextView descriptionTextView = (TextView) v.findViewById(R.id.descriptionTextView);
+
+        final TableRow infoHeadRow = (TableRow) v.findViewById(R.id.infoRowHead);
+        final TableRow infoContentRow = (TableRow) v.findViewById(R.id.infoRowContent);
+        final TableRow businessHeadRow = (TableRow) v.findViewById(R.id.businessRowHead);
+        final TableRow businessContentRow = (TableRow) v.findViewById(R.id.businessRowContent);
+
+
+        // Fill in location info
+        String infoDesk = mLocationJSON.optString("FacilityInformation");
+        String businessOffice = mLocationJSON.optString("FacilityBusiness");
+
+        addressTextView.setText(mLocationJSON.optString("FacilityAddress"));
+
+        if(infoDesk != null && !infoDesk.equals("")) {
+            infoDeskNumberTextView.setText(infoDesk);
+        }
+        else {
+            infoHeadRow.setVisibility(View.GONE);
+            infoContentRow.setVisibility(View.GONE);
+        }
+
+        if(businessOffice != null && !businessOffice.equals("")) {
+            businessOfficeNumberTextView.setText(businessOffice);
+        }
+        else {
+            businessHeadRow.setVisibility(View.GONE);
+            businessContentRow.setVisibility(View.GONE);
+        }
+
+        descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("FacilityBody")));
+
+        try {
+            // Generate hours array if it wasn't restored
+            if(mLocationHours == null) {
+                // Get hours data for sub-locations & create fragments
+                mLocationHours = Gyms.getGymHours(mLocationJSON);
+                mPagerAdapter.notifyDataSetChanged();
+            }
+
+            // Set swipe page to current date
+            int pos = getCurrentPos(mLocationHours);
+            mPager.setCurrentItem(pos, true);
+        } catch (JSONException e) {
+            Log.w(TAG, "displayInfo(): " + e.getMessage());
+        }
+
+    }
+
 	private class HoursSlidePagerAdapter extends FragmentStatePagerAdapter {
 		
 		public HoursSlidePagerAdapter(FragmentManager fm) {
