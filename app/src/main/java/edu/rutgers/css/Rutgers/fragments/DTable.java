@@ -30,6 +30,7 @@ import java.util.Iterator;
 import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.auxiliary.JSONAdapter;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -39,10 +40,6 @@ import edu.rutgers.css.Rutgers2.R;
 public class DTable extends Fragment {
 	
 	private static final String TAG = "DTable";
-
-    private static final int FAQ_TYPE = 2;
-    private static final int CAT_TYPE = 1;
-    private static final int DEF_TYPE = 0;
 
 	private ListView mListView;
 	private JSONArray mData;
@@ -78,7 +75,7 @@ public class DTable extends Fragment {
             Log.v(dTag(), "Restoring mData");
             try {
                 mData = new JSONArray(savedInstanceState.getString("mData"));
-                mAdapter = new JSONAdapter(mData);
+                mAdapter = new JSONAdapter(getActivity(), mData);
                 return;
             } catch (JSONException e) {
                 Log.w(dTag(), "onCreate(): " + e.getMessage());
@@ -87,7 +84,7 @@ public class DTable extends Fragment {
 
         // Didn't restore adapter & data from state; initialize here
         mData = new JSONArray();
-        mAdapter = new JSONAdapter(mData);
+        mAdapter = new JSONAdapter(getActivity(), mData);
 
 		Bundle args = getArguments();
 
@@ -197,14 +194,14 @@ public class DTable extends Fragment {
 
                 try {
                     // This object has an array of more channels
-                    if (mAdapter.getItemViewType(position) == CAT_TYPE) {
+                    if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.CAT_TYPE.ordinal()) {
                         Log.v(dTag(), "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
                         args.putString("component", "dtable");
                         args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
                         args.putString("data", clickedJson.getJSONArray("children").toString());
                     }
                     // This is a FAQ button
-                    else if (mAdapter.getItemViewType(position) == FAQ_TYPE) {
+                    else if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
                         // Toggle pop-down visibility
                         mAdapter.togglePopdown(position);
                         return;
@@ -273,136 +270,6 @@ public class DTable extends Fragment {
 			} catch (JSONException e) {
 				Log.w(dTag(), "loadArray(): " + e.getMessage());
 			}
-		}
-	}
-	
-	/**
-	 * Private adapter to make menus from JSON data
-	 */
-	private class JSONAdapter extends BaseAdapter {
-		private JSONArray mItems;
-
-		private class ViewHolder {
-			TextView titleTextView;
-            TextView popdownTextView;
-            LinearLayout popdownLayout;
-		}
-		
-		public JSONAdapter(JSONArray rows) {
-            mItems = rows;
-		}
-		
-		public void add(Object o) {
-			mItems.put(o);
-			this.notifyDataSetChanged();
-		}
-
-        public void togglePopdown(int position) {
-            if(getItemViewType(position) != FAQ_TYPE) return;
-
-            JSONObject selected = mItems.optJSONObject(position);
-            if(selected != null) {
-                try {
-                    if(selected.optBoolean("popped") == false) selected.put("popped", true);
-                    else selected.put("popped", false);
-                    notifyDataSetChanged();
-                } catch (JSONException e) {
-                    Log.w(dTag(), "togglePopdown(): " + e.getMessage());
-                }
-            }
-
-        }
-		
-		@Override
-		public Object getItem (int pos) {			
-			try {
-				return mItems.get(pos);
-			} catch (JSONException e) {
-				Log.w(dTag(), "getItem(): " + e.getMessage());
-				return null;
-			}
-		}
-		
-		@Override
-		public int getCount () {
-			if(mItems == null) return 0;
-			else return mItems.length();
-		}
-		
-		@Override
-		public long getItemId (int id) {
-			return id;
-		}
-		
-		@Override
-		public int getItemViewType(int position) {
-			JSONObject json = (JSONObject) getItem(position);
-
-			// FAQ row
-            if(json.has("answer")) return FAQ_TYPE;
-			// Sub-menu row
-		    else if(json.has("children") && json.opt("children") instanceof JSONArray) return CAT_TYPE;
-            // Regular text thing
-		    else return DEF_TYPE;
-		}
-
-		@Override
-		public int getViewTypeCount() {
-		    return 3;
-		}
-		
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			String title;
-			ViewHolder holder;
-						
-			// If we aren't given a view, inflate one. Get special layout for sub-menu items.
-			if (convertView == null) {
-				int res;
-
-                switch(getItemViewType(position)) {
-                    case FAQ_TYPE:
-                        res = R.layout.dtable_popdown_row;
-                        break;
-                    case CAT_TYPE:
-                        res = R.layout.category_row;
-                        break;
-                    case DEF_TYPE:
-                    default:
-                        res = R.layout.dtable_row;
-                }
-
-				convertView = getActivity().getLayoutInflater().inflate(res, null);
-				holder = new ViewHolder();
-				if(getItemViewType(position) == FAQ_TYPE) {
-                    holder.titleTextView = (TextView) convertView.findViewById(R.id.mainTextView);
-                    holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
-                    holder.popdownLayout = (LinearLayout) convertView.findViewById(R.id.popdownLayout);
-                }
-                else {
-                    holder.titleTextView = (TextView) convertView.findViewById(R.id.text);
-                }
-				convertView.setTag(holder);
-			}
-			else {
-				holder = (ViewHolder) convertView.getTag();
-			}
-
-			JSONObject c = (JSONObject) getItem(position);
-			title = AppUtil.getLocalTitle(mContext, c.opt("title"));
-
-            holder.titleTextView.setText(title);
-
-			if(getItemViewType(position) == FAQ_TYPE) {
-                // Set pop-down contents
-                holder.popdownTextView.setText(c.optString("answer"));
-
-                // Toggle pop-down visibility
-                if(c.optBoolean("popped")) holder.popdownLayout.setVisibility(View.VISIBLE);
-                else holder.popdownLayout.setVisibility(View.GONE);
-            }
-
-			return convertView;
 		}
 	}
 
