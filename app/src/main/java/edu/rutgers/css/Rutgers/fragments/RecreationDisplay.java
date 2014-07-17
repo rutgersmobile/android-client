@@ -157,7 +157,7 @@ public class RecreationDisplay extends Fragment {
 
         addressTextView.setText(mLocationJSON.optString("FacilityAddress"));
 
-        if(infoDesk != null && !infoDesk.equals("")) {
+        if(infoDesk != null && !infoDesk.isEmpty()) {
             infoDeskNumberTextView.setText(infoDesk);
         }
         else {
@@ -165,7 +165,7 @@ public class RecreationDisplay extends Fragment {
             infoContentRow.setVisibility(View.GONE);
         }
 
-        if(businessOffice != null && !businessOffice.equals("")) {
+        if(businessOffice != null && !businessOffice.isEmpty()) {
             businessOfficeNumberTextView.setText(businessOffice);
         }
         else {
@@ -181,11 +181,11 @@ public class RecreationDisplay extends Fragment {
                 // Get hours data for sub-locations & create fragments
                 mLocationHours = Gyms.getGymHours(mLocationJSON);
                 mPagerAdapter.notifyDataSetChanged();
-            }
 
-            // Set swipe page to current date
-            int pos = getCurrentPos(mLocationHours);
-            mPager.setCurrentItem(pos, true);
+                // Set swipe page to today's date
+                int pos = getCurrentPos(mLocationHours);
+                mPager.setCurrentItem(pos, true);
+            }
         } catch (JSONException e) {
             Log.w(TAG, "displayInfo(): " + e.getMessage());
         }

@@ -15,6 +15,7 @@
 
     <!-- Error messages -->
     <string name="failed_load">Getting data failed. Please try again later.</string>
+    <string name="failed_load_short">Network error.</string>
     <string name="failed_location">Getting location failed.</string>
     <string name="failed_no_url">No URL supplied.</string>
 

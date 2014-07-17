@@ -14,9 +14,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -190,7 +192,19 @@ public class BusStops extends Fragment {
 				return AndroidExecutionScope.UI;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<Exception>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onFail(Exception result) {
+                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                mAdapter.add(new SlideMenuHeader(agencyTitle));
+                mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+            }
+        });
 	}
 	
 	/**
@@ -270,7 +284,17 @@ public class BusStops extends Fragment {
 					return AndroidExecutionScope.UI;
 				}
 				
-			});
+			}).fail(new AndroidFailCallback<Exception>() {
+                @Override
+                public AndroidExecutionScope getExecutionScope() {
+                    return AndroidExecutionScope.UI;
+                }
+
+                @Override
+                public void onFail(Exception result) {
+                    addNearbyRow(1, new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+                }
+            });
 		}
 		else {
 			Log.e(TAG, "Could not get location provider, can't find nearby stops");

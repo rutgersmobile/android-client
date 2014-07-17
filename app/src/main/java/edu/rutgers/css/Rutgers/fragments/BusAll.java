@@ -183,9 +183,8 @@ public class BusAll extends Fragment {
 
             @Override
             public void onFail(Exception e) {
-                Log.w(TAG, e.getMessage());
                 mAdapter.add(new SlideMenuHeader(agencyHeader));
-                mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_routes)));
+                mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
             }
 
             @Override
@@ -233,9 +232,8 @@ public class BusAll extends Fragment {
 
 			@Override
 			public void onFail(Exception e) {
-                Log.w(TAG, e.getMessage());
 				mAdapter.add(new SlideMenuHeader(agencyHeader));
-				mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_stops)));
+				mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
 			}
 			
 			@Override

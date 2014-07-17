@@ -156,13 +156,13 @@ public class PlacesDisplay extends Fragment {
 
             campusNameTextView.setText(placeJSON.optString("campus_name"));
 			
-			if(placeJSON.optString("description").equals("")) {
+			if(placeJSON.optString("description").isEmpty()) {
 				descriptionHeaderRow.setVisibility(View.GONE);
 				descriptionContentRow.setVisibility(View.GONE);
 			}
 			else descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(placeJSON.optString("description")));
 			
-			if(placeJSON.optString("offices").equals("")) {
+			if(placeJSON.optString("offices").isEmpty()) {
 				officesHeaderRow.setVisibility(View.GONE);
 				officesContentRow.setVisibility(View.GONE);
 			}
@@ -229,9 +229,9 @@ public class PlacesDisplay extends Fragment {
 		if(address == null) return "";
 		String result = "";
 		
-		if(!address.optString("name","").equals("")) result += address.optString("name");
-		if(!address.optString("street","").equals("")) result += "\n" + address.optString("street");
-		if(!address.optString("city","").equals("")) result += "\n" + address.optString("city") + ", " +
+		if(!address.optString("name").isEmpty()) result += address.optString("name");
+		if(!address.optString("street").isEmpty()) result += "\n" + address.optString("street");
+		if(!address.optString("city").isEmpty()) result += "\n" + address.optString("city") + ", " +
 				address.optString("state_abbr") + " " + address.optString("postal_code");
 		
 		return result;

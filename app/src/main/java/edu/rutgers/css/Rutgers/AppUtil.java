@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import com.androidquery.callback.AjaxStatus;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -194,6 +196,15 @@ public class AppUtil {
     public static void closeKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+    }
+
+    /**
+     * Create custom string from Ajax Status object.
+     * @param status AjaxStatus object
+     * @return Custom string describing status
+     */
+    public static String formatAjaxStatus(AjaxStatus status) {
+        return "AJAX Response: " + status.getMessage() + " (" + status.getCode() + ")";
     }
 
 }

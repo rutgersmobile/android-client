@@ -7,6 +7,7 @@ import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
 import org.jdeferred.Deferred;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
@@ -36,7 +37,7 @@ public class Nextbus {
 	private static final String TAG = "Nextbus";
 	
 	private static boolean isSetup = false;
-	private static Promise<Object, Object, Object> configured;
+	private static Promise<Object, AjaxStatus, Object> configured;
 	private static JSONObject mNBConf;
 	private static JSONObject mNWKConf;
 	private static JSONObject mNBActive;
@@ -52,20 +53,13 @@ public class Nextbus {
 	 */
 	private static void setup () {
 		// This promise is used to notify the other objects that the object has been configured.
-		final Deferred<Object, Object, Object> confd = new DeferredObject<Object, Object, Object>();
+		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
-		
-/*
-		final Promise promiseNBActive = Request.api("bus/active/nb", activeExpireTime);
-		final Promise promiseNWKActive = Request.api("bus/active/nwk", activeExpireTime);
-		final Promise promiseNBConf = Request.api("bus/config/nb", configExpireTime);
-		final Promise promiseNWKConf = Request.api("bus/config/nwk", configExpireTime);
-*/
 
-		final Promise promiseNBActive = Request.json(AppUtil.API_BASE + "nbactivestops.txt", activeExpireTime);
-		final Promise promiseNWKActive = Request.json(AppUtil.API_BASE + "nwkactivestops.txt", activeExpireTime);
-		final Promise promiseNBConf = Request.json(AppUtil.API_BASE + "rutgersrouteconfig.txt", configExpireTime);
-		final Promise promiseNWKConf = Request.json(AppUtil.API_BASE + "rutgers-newarkrouteconfig.txt", configExpireTime);
+		final Promise promiseNBActive = Request.api("nbactivestops.txt", activeExpireTime);
+		final Promise promiseNWKActive = Request.api("nwkactivestops.txt", activeExpireTime);
+		final Promise promiseNBConf = Request.api("rutgersrouteconfig.txt", configExpireTime);
+		final Promise promiseNWKConf = Request.api("rutgers-newarkrouteconfig.txt", configExpireTime);
 		
 		AndroidDeferredManager dm = new AndroidDeferredManager();
 		
@@ -73,24 +67,18 @@ public class Nextbus {
 			
 			@Override
 			public void onDone(MultipleResults res) {
-				
-				try {
-				
-					for (int i = 0; i < res.size(); i++) {
-						OneResult r = res.get(i);
-						
-						if (r.getPromise() == promiseNBActive) mNBActive = (JSONObject) r.getResult();
-						else if (r.getPromise() == promiseNWKActive) mNWKActive = (JSONObject) r.getResult();
-						else if (r.getPromise() == promiseNBConf) mNBConf = (JSONObject) r.getResult();
-						else if (r.getPromise() == promiseNWKConf) mNWKConf = (JSONObject) r.getResult();
-					}
-		
-					confd.resolve(null);
-				} catch (Exception e) {
-					Log.e(TAG, Log.getStackTraceString(e));
-					confd.reject(e);
-				}
-				
+
+                for (int i = 0; i < res.size(); i++) {
+                    OneResult r = res.get(i);
+
+                    if (r.getPromise() == promiseNBActive) mNBActive = (JSONObject) r.getResult();
+                    else if (r.getPromise() == promiseNWKActive) mNWKActive = (JSONObject) r.getResult();
+                    else if (r.getPromise() == promiseNBConf) mNBConf = (JSONObject) r.getResult();
+                    else if (r.getPromise() == promiseNWKConf) mNWKConf = (JSONObject) r.getResult();
+                }
+
+                confd.resolve(null);
+
 			}
 			
 			@Override
@@ -103,7 +91,7 @@ public class Nextbus {
 			@Override
 			public void onFail(OneReject reject) {
 				AjaxStatus r = (AjaxStatus) reject.getReject();
-				Log.e(TAG, r.getCode() + ": " + r.getMessage());
+				Log.e(TAG, AppUtil.formatAjaxStatus(r));
 				confd.reject(r);
 			}
 			
@@ -196,7 +184,17 @@ public class Nextbus {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -289,7 +287,17 @@ public class Nextbus {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -324,7 +332,17 @@ public class Nextbus {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -359,7 +377,17 @@ public class Nextbus {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -395,7 +423,17 @@ public class Nextbus {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -431,7 +469,17 @@ public class Nextbus {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -496,7 +544,17 @@ public class Nextbus {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.BACKGROUND;
+            }
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
 		
 		return d.promise();
 	}
@@ -542,7 +600,12 @@ public class Nextbus {
 				return AndroidExecutionScope.BACKGROUND;
 			}
 			
-		});
+		}).fail(new FailCallback<Exception>() {
+            @Override
+            public void onFail(Exception result) {
+                d.reject(result);
+            }
+        });
 		
 		return d.promise();
 	}
