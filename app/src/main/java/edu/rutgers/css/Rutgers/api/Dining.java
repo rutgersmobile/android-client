@@ -29,7 +29,7 @@ public class Dining {
 	private static JSONArray mNBDiningConf;
 	
 	private static final String API_URL = AppUtil.API_BASE + "rutgers-dining.txt";
-	private static long expire = Request.EXPIRE_ONE_HOUR; // Cache dining data for an hour
+	private static long expire = Request.CACHE_ONE_HOUR; // Cache dining data for an hour
 	
 	/**
 	 * Grab the dining API data.

@@ -21,8 +21,8 @@ public class Request {
 	private static AQuery aq;
 	private static boolean mSetupDone = false;
 	
-	public static long EXPIRE_ALWAYS = -1; // -1 means always refresh -- never use cache
-	public static long EXPIRE_ONE_HOUR = 1000 * 60 * 60;
+	public static long CACHE_NEVER = -1; // -1 means always refresh -- never use cache
+	public static long CACHE_ONE_HOUR = 1000 * 60 * 60;
 	
 	private static void setup () {
 		if (!mSetupDone) {

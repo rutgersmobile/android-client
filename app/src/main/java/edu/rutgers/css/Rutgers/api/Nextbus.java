@@ -129,7 +129,7 @@ public class Nextbus {
 						queryString += "&stops=" + route + "|null|" + stops.getString(i);
 					}
 									
-					Request.xml(queryString, -1).done(new AndroidDoneCallback<XmlDom>() {
+					Request.xml(queryString, Request.CACHE_NEVER).done(new AndroidDoneCallback<XmlDom>() {
 						
 						@Override
 						public void onDone(XmlDom xml) {
@@ -227,7 +227,7 @@ public class Nextbus {
 							queryString += "&stops=" + routes.getString(j) + "|null|" + tags.getString(i);
 					}
 					
-					Request.xml(queryString, -1).done(new AndroidDoneCallback<XmlDom>() {
+					Request.xml(queryString, Request.CACHE_NEVER).done(new AndroidDoneCallback<XmlDom>() {
 						
 						@Override
 						public void onDone(XmlDom xml) {

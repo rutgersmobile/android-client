@@ -115,7 +115,7 @@ public class DTable extends Fragment {
         }
 		
 		if (mURL != null) {
-            Request.json(mURL, -1).done(new AndroidDoneCallback<JSONObject>() {
+            Request.json(mURL, Request.CACHE_NEVER).done(new AndroidDoneCallback<JSONObject>() {
                 @Override
                 public AndroidExecutionScope getExecutionScope() {
                     return AndroidExecutionScope.UI;
@@ -144,7 +144,7 @@ public class DTable extends Fragment {
             });
         }
         else if(mAPI != null) {
-            Request.api(mAPI, -1).done(new AndroidDoneCallback<JSONObject>() {
+            Request.api(mAPI, Request.CACHE_NEVER).done(new AndroidDoneCallback<JSONObject>() {
                 @Override
                 public AndroidExecutionScope getExecutionScope() {
                     return AndroidExecutionScope.UI;

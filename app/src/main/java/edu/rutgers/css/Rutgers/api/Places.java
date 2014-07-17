@@ -31,7 +31,7 @@ public class Places {
 	
 	private static final String TAG = "PlacesAPI";
 	private static final String API_URL = AppUtil.API_BASE + "places.txt";
-	private static final long expire = Request.EXPIRE_ONE_HOUR * 24; // Cache data for a day
+	private static final long expire = Request.CACHE_ONE_HOUR * 24; // Cache data for a day
 	
 	private static Promise<Object, AjaxStatus, Object> configured;
 	private static JSONObject mPlacesConf;
