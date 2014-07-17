@@ -4,6 +4,7 @@ import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.Promise;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Created by jamchamb on 7/17/14.
@@ -21,6 +22,11 @@ public class Classes {
     public static Promise<JSONArray, AjaxStatus, Double> getCourses(String campus, String level, String semester, String subjectCode) {
         String reqUrl = BASE_URL + "courses.json?semester=" + semester + "&campus=" + campus + "&level=" + level + "&subject=" + subjectCode;
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_HOUR);
+    }
+
+    public static Promise<JSONObject, AjaxStatus, Double> getCourse(String campus, String semester, String subjectCode, String courseCode) {
+        String reqUrl = BASE_URL + "course.json?semester=" + semester + "&campus=" + campus + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+        return Request.json(reqUrl, Request.CACHE_ONE_HOUR);
     }
 
 }
