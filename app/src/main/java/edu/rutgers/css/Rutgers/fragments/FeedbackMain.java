@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -149,7 +150,10 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 				}
 				// Didn't get JSON response
 				else {
-					Log.w(TAG, "Response: " + status.getCode() + " - " + status.getMessage());
+					Log.w(TAG, AppUtil.formatAjaxStatus(status));
+                    Toast toast = Toast.makeText(getActivity(), R.string.failed_load_short, Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.TOP, 0, 125);
+                    toast.show();
 				}
 				
 			}
