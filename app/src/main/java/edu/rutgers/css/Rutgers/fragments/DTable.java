@@ -16,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.android.AndroidDoneCallback;
@@ -26,7 +25,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
 import java.util.Iterator;
 
 import edu.rutgers.css.Rutgers.AppUtil;

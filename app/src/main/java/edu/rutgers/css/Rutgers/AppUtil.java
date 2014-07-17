@@ -9,7 +9,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.androidquery.callback.AjaxStatus;

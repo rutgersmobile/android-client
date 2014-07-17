@@ -5,12 +5,10 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,8 +20,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import edu.rutgers.css.Rutgers.MainActivity;
-import edu.rutgers.css.Rutgers.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
