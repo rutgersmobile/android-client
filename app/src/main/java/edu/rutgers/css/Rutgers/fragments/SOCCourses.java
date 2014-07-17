@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,17 +7,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
@@ -29,14 +25,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.api.Classes;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.auxiliary.JSONAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
-public class SOCMain extends Fragment {
+public class SOCCourses extends Fragment {
 
     private static final String TAG = "SOCDisplay";
 
@@ -44,22 +38,24 @@ public class SOCMain extends Fragment {
     private RMenuAdapter mAdapter;
     private ListView mListView;
 
-    private String mCampus = "NB";
-    private String mSemester = "72014";
-    private String mLevel = "U";
-
-    public SOCMain() {
+    public SOCCourses() {
         // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle args = getArguments();
 
         mData = new ArrayList<RMenuPart>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
 
-        Classes.getSubjects(mCampus, mLevel, mSemester).done(new AndroidDoneCallback<JSONArray>() {
+        final String campus = args.getString("campus");
+        final String level = args.getString("level");
+        final String semester = args.getString("semester");
+        final String subjectCode = args.getString("subjectCode");
+
+        Classes.getCourses(campus, level, semester, subjectCode).done(new AndroidDoneCallback<JSONArray>() {
 
             @Override
             public AndroidExecutionScope getExecutionScope() {
@@ -70,12 +66,14 @@ public class SOCMain extends Fragment {
             public void onDone(JSONArray result) {
                 for (int i = 0; i < result.length(); i++) {
                     try {
-                        JSONObject subject = result.getJSONObject(i);
-                        Bundle subItem = new Bundle();
-                        subItem.putString("title", subject.getString("description") + " (" + subject.getString("code") + ")");
-                        subItem.putString("description", subject.getString("description"));
-                        subItem.putString("code", subject.getString("code"));
-                        mAdapter.add(new SlideMenuItem(subItem));
+                        JSONObject course = result.getJSONObject(i);
+                        Bundle courseItem = new Bundle();
+                        courseItem.putString("title", course.getString("courseNumber") + ": " + course.getString("title"));
+                        courseItem.putString("subjectCode", course.getString("subject"));
+                        courseItem.putString("courseNumber", course.getString("courseNumber"));
+                        courseItem.putString("campus", course.getString("campusCode"));
+                        courseItem.putString("semester", semester);
+                        mAdapter.add(new SlideMenuItem(courseItem));
                     } catch (JSONException e) {
                         Log.w(TAG, "getSubjects(): " + e.getMessage());
                     }
@@ -103,33 +101,15 @@ public class SOCMain extends Fragment {
         Resources res = getActivity().getResources();
         Bundle args = getArguments();
 
-        getActivity().setTitle(res.getString(R.string.soc_title));
+        if(args.getString("subject") != null) getActivity().setTitle(args.getString("subject"));
 
         EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
         ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
 
         mListView = (ListView) v.findViewById(R.id.list);
         mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Bundle clicked = ((SlideMenuItem)(parent.getItemAtPosition(position))).getArgs();
-
-                Bundle args = new Bundle();
-                args.putString("component", "soccourses");
-                args.putString("campus", mCampus);
-                args.putString("semester", mSemester);
-                args.putString("level", mLevel);
-                args.putString("subject", clicked.getString("descripition"));
-                args.putString("subjectCode", clicked.getString("code"));
-
-                ComponentFactory.getInstance().switchFragments(args);
-            }
-
-        });
 
         return v;
     }
-
+    
 }

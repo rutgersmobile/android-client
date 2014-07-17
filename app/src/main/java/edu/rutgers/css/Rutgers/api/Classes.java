@@ -18,4 +18,9 @@ public class Classes {
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_HOUR);
     }
 
+    public static Promise<JSONArray, AjaxStatus, Double> getCourses(String campus, String level, String semester, String subjectCode) {
+        String reqUrl = BASE_URL + "courses.json?semester=" + semester + "&campus=" + campus + "&level=" + level + "&subject=" + subjectCode;
+        return Request.jsonArray(reqUrl, Request.CACHE_ONE_HOUR);
+    }
+
 }
