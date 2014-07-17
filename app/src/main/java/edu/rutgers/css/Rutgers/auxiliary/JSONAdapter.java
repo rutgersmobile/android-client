@@ -41,6 +41,23 @@ public class JSONAdapter extends BaseAdapter {
         mItems = items;
     }
 
+
+    /**
+     * Copy a JSON array to the member array
+     * @param in JSON array to copy
+     */
+    public void loadArray(JSONArray in) {
+        if(in == null) return;
+
+        for(int i = 0; i < in.length(); i++) {
+            try {
+                this.add(in.get(i));
+            } catch (JSONException e) {
+                Log.w(TAG, "loadArray(): " + e.getMessage());
+            }
+        }
+    }
+
     /**
      * Add an object to the JSON array.
      * @param o JSON Object to add

@@ -134,11 +134,14 @@
         <item>@string/stud_life_title</item>
     </string-array>
 
+    <!-- Schedule of Classes -->
+    <string name="soc_title">Schedule of Classes</string>
+
+
     <!-- Other channel titles -->
     <string name="news_title">News</string>
     <string name="events_title">Events</string>
     <string name="careers_title">Career Services</string>
-    <string name="soc_title">Schedule of Classes</string>
     <string name="app_logs_title">App Logs</string>
     <string name="campus_status_title">Emergency Services</string>
     <string name="housing_title">Housing &amp; Res Life</string>

@@ -9,10 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidquery.AQuery;
@@ -97,7 +94,7 @@ public class DTable extends Fragment {
         // If a JSON array was provided in "data" field, load it
 		if (args.getString("data") != null) {
 			try {
-				loadArray(new JSONArray(args.getString("data")));
+				mAdapter.loadArray(new JSONArray(args.getString("data")));
 			} catch (JSONException e) {
 				Log.e(dTag(), "onCreateView(): " + e.getMessage());
 			}
@@ -121,7 +118,7 @@ public class DTable extends Fragment {
                 @Override
                 public void onDone(JSONObject result) {
                     try {
-                        loadArray(result.getJSONArray("children"));
+                        mAdapter.loadArray(result.getJSONArray("children"));
                     } catch (JSONException e) {
                         Log.w(dTag(), "onCreateView(): " + e.getMessage());
                         Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
@@ -150,7 +147,7 @@ public class DTable extends Fragment {
                 @Override
                 public void onDone(JSONObject result) {
                     try {
-                        loadArray(result.getJSONArray("children"));
+                        mAdapter.loadArray(result.getJSONArray("children"));
                     }
                     catch (JSONException e) {
                         Log.w(dTag(), "onCreateView(): " + e.getMessage());
@@ -256,21 +253,5 @@ public class DTable extends Fragment {
             outState.putString("mHandle", mHandle);
         }
     }
-
-	/**
-	 * Copy a JSON array to the member array
-	 * @param in JSON array to copy
-	 */
-	private void loadArray(JSONArray in) {
-		if(in == null) return;
-		
-		for(int i = 0; i < in.length(); i++) {
-			try {
-				mAdapter.add(in.get(i));
-			} catch (JSONException e) {
-				Log.w(dTag(), "loadArray(): " + e.getMessage());
-			}
-		}
-	}
 
 }

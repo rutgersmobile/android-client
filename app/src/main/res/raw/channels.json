@@ -46,6 +46,13 @@
 
     {
         "category": "main",
+        "title": "Schedule of Classes",
+        "handle": "soc",
+        "view": "soc"
+    },
+
+    {
+        "category": "main",
         "title": "RU-info",
         "handle": "ruinfo",
         "view": "ruinfo"
