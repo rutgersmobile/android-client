@@ -50,6 +50,7 @@ public class DTable extends Fragment {
 	private String mURL;
 	private String mAPI;
 	private Context mContext;
+    private String mHandle;
 	
 	private AQuery aq;
 
@@ -66,22 +67,29 @@ public class DTable extends Fragment {
 		mAdapter = new JSONAdapter(mData);
 
         if(savedInstanceState != null && savedInstanceState.getString("mData") != null) {
-            Log.v(TAG, "Restoring mData");
+            mHandle = savedInstanceState.getString("mHandle");
+            Log.v(TAG + "_" + mHandle, "Restoring mData");
             try {
                 mData = new JSONArray(savedInstanceState.getString("mData"));
                 loadArray(mData);
                 return;
             } catch (JSONException e) {
-                Log.w(TAG, "onCreate(): " + e.getMessage());
+                Log.w(TAG + "_" + mHandle, "onCreate(): " + e.getMessage());
             }
         }
 
 		Bundle args = getArguments();
+
+        if(args.getString("handle") != null) mHandle = args.getString("handle");
+        else if(args.getString("api") != null) mHandle = args.getString("api").replace(".txt","");
+        else if(args.getString("title") != null) mHandle = args.getString("title");
+        else mHandle = "null";
+
 		if (args.getString("data") != null) {
 			try {
 				loadArray(new JSONArray(args.getString("data")));
 			} catch (JSONException e) {
-				Log.e(TAG, "onCreateView(): " + e.getMessage());
+				Log.e(TAG + "_" + mHandle, "onCreateView(): " + e.getMessage());
 			}
 		}
 		else if (args.getString("url") != null) mURL = args.getString("url");
@@ -95,12 +103,13 @@ public class DTable extends Fragment {
             	try {
             		loadArray(json.getJSONArray("children"));
             	} catch (JSONException e) {
-            		Log.w(TAG, "onCreateView(): " + e.getMessage());
+            		Log.w(TAG + "_" + mHandle, "onCreateView(): " + e.getMessage());
             		Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
             	}
             }
             
 		});
+
         else if(mAPI != null) {
             Request.api(mAPI, 0).done(new AndroidDoneCallback<JSONObject>() {
                 @Override
@@ -114,7 +123,7 @@ public class DTable extends Fragment {
                         loadArray(result.getJSONArray("children"));
                     }
                     catch (JSONException e) {
-                        Log.w(TAG, "onCreateView(): " + e.getMessage());
+                        Log.w(TAG + "_" + mHandle, "onCreateView(): " + e.getMessage());
                         Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
                     }
                 }
@@ -145,7 +154,7 @@ public class DTable extends Fragment {
                 try {
                     // This object has an array of more channels
                     if (mAdapter.getItemViewType(position) == CAT_TYPE) {
-                        Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
+                        Log.v(TAG + "_" + mHandle, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
                         args.putString("component", "dtable");
                         args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
                         args.putString("data", clickedJson.getJSONArray("children").toString());
@@ -159,7 +168,7 @@ public class DTable extends Fragment {
                     // This object is a channel
                     else {
                         JSONObject channel = clickedJson.getJSONObject("channel");
-                        Log.v(TAG, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
+                        Log.v(TAG + "_" + mHandle, "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
 
                         // Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
                         args.putString("component", channel.getString("view"));
@@ -179,14 +188,14 @@ public class DTable extends Fragment {
                         while (keys.hasNext()) {
                             String key = keys.next();
                             if(key.equalsIgnoreCase("title")) continue; // title was already handled above
-                            Log.v(TAG, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
+                            Log.v(TAG + "_" + mHandle, "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
                             args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
                         }
                     }
 
                     ComponentFactory.getInstance().switchFragments(args);
                 } catch (JSONException e) {
-                    Log.w(TAG, "onItemClick(): " + e.getMessage());
+                    Log.w(TAG + "_" + mHandle, "onItemClick(): " + e.getMessage());
                 }
 
             }
@@ -200,6 +209,7 @@ public class DTable extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("mData", mData.toString());
+        outState.putString("mHandle", mHandle);
     }
 
 	/**
@@ -213,7 +223,7 @@ public class DTable extends Fragment {
 			try {
 				mAdapter.add(in.get(i));
 			} catch (JSONException e) {
-				Log.w(TAG, "loadArray(): " + e.getMessage());
+				Log.w(TAG + "_" + mHandle, "loadArray(): " + e.getMessage());
 			}
 		}
 	}
@@ -249,7 +259,7 @@ public class DTable extends Fragment {
                     else selected.put("popped", false);
                     notifyDataSetChanged();
                 } catch (JSONException e) {
-                    Log.w(TAG, "togglePopdown(): " + e.getMessage());
+                    Log.w(TAG + "_" + mHandle, "togglePopdown(): " + e.getMessage());
                 }
             }
 
@@ -260,7 +270,7 @@ public class DTable extends Fragment {
 			try {
 				return mItems.get(pos);
 			} catch (JSONException e) {
-				Log.w(TAG, "getItem(): " + e.getMessage());
+				Log.w(TAG + "_" + mHandle, "getItem(): " + e.getMessage());
 				return null;
 			}
 		}
