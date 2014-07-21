@@ -1,5 +1,8 @@
 package edu.rutgers.css.Rutgers.fragments;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -7,11 +10,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.json.JSONArray;
@@ -43,6 +48,8 @@ public class PlacesDisplay extends Fragment {
     private static Map<String, String> mAgencyMap;
     private MapView mMapView;
     private ItemizedOverlay<OverlayItem> mLocationOverlays;
+    private JSONObject mPlaceJSON;
+    private JSONObject mLocationJSON;
 
     public PlacesDisplay() {
 		// Required empty public constructor
@@ -80,20 +87,20 @@ public class PlacesDisplay extends Fragment {
 		final TableRow nearbyBusesHeaderRow = (TableRow) v.findViewById(R.id.nearbyBusesHeaderRow);
 		final TableRow nearbyBusesContentRow = (TableRow) v.findViewById(R.id.nearbyBusesContentRow);
 		final LinearLayout nearbyBusesLinearLayout = (LinearLayout) v.findViewById(R.id.nearbyBusesLinearLayout);
+
+        final ImageButton mapLaunchButton = (ImageButton) v.findViewById(R.id.launchMapButton);
 		
-		if(args.get("placeJSON") != null) {
-			JSONObject placeJSON;
-			
+		if(args.getString("placeJSON") != null) {
 			// Read JSON data for building
 			try {
-				placeJSON = new JSONObject(args.getString("placeJSON"));
+				mPlaceJSON = new JSONObject(args.getString("placeJSON"));
 			} catch (JSONException e) {
 				Log.w(TAG, "onCreateView(): " + e.getMessage());
 				return v;
 			}
 			
 			// Set title
-			getActivity().setTitle(placeJSON.optString("title", getResources().getString(R.string.places_title)));
+			getActivity().setTitle(mPlaceJSON.optString("title", getResources().getString(R.string.places_title)));
 
 			// Set up map
             mMapView = (MapView) v.findViewById(R.id.mapview);
@@ -101,17 +108,28 @@ public class PlacesDisplay extends Fragment {
             mMapView.setBuiltInZoomControls(false);
             mMapView.setMultiTouchControls(false);
 
-			if(mMapView != null && placeJSON.optJSONObject("location") != null) {
-				JSONObject locationJson = placeJSON.optJSONObject("location");
-				if(!locationJson.optString("latitude").isEmpty() && !locationJson.optString("longitude").isEmpty()) {
+            mLocationJSON = mPlaceJSON.optJSONObject("location");
+
+			if(mMapView != null && mLocationJSON != null) {
+
+				if(!mLocationJSON.optString("latitude").isEmpty() && !mLocationJSON.optString("longitude").isEmpty()) {
+                    // Enable launch map activity button
+                    mapLaunchButton.setVisibility(View.VISIBLE);
+                    mapLaunchButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            launchMap();
+                        }
+                    });
+
                     // Get latitude & longitude of location
-					double lon = Double.parseDouble(locationJson.optString("longitude"));
-					double lat = Double.parseDouble(locationJson.optString("latitude"));
+					double lon = Double.parseDouble(mLocationJSON.optString("longitude"));
+					double lat = Double.parseDouble(mLocationJSON.optString("latitude"));
                     final GeoPoint position = new GeoPoint(lat, lon);
 
                     // Create map icon for location
                     final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
-                    items.add(new OverlayItem(placeJSON.optString("title"), "", position));
+                    items.add(new OverlayItem(mPlaceJSON.optString("title"), "", position));
                     mLocationOverlays = new ItemizedIconOverlay<OverlayItem>(items, null, new DefaultResourceProxyImpl(getActivity()));
 
                     // Add the icon and center the map of the location
@@ -135,83 +153,111 @@ public class PlacesDisplay extends Fragment {
 				if(mMapView == null) Log.e(TAG, "mMapView is null");
 			}
 			
-			// Display building info
-			addressTextView.setText(formatAddress(placeJSON.optJSONObject("location")));
+			// Display address
+			addressTextView.setText(formatAddress(mLocationJSON));
 
-            if(!placeJSON.optString("building_number").equals("null")) {
-                buildingNoTextView.setText(placeJSON.optString("building_number"));
+            // Display building number
+            if(!mPlaceJSON.optString("building_number").equals("null")) {
+                buildingNoTextView.setText(mPlaceJSON.optString("building_number"));
             }
             else {
                 v.findViewById(R.id.buildingNoHeaderRow).setVisibility(View.GONE);
                 v.findViewById(R.id.buildingNoContentRow).setVisibility(View.GONE);
             }
 
-            campusNameTextView.setText(placeJSON.optString("campus_name"));
-			
-			if(placeJSON.optString("description").isEmpty()) {
+            // Display campus
+            campusNameTextView.setText(mPlaceJSON.optString("campus_name"));
+
+            // Display building description
+			if(mPlaceJSON.optString("description").isEmpty()) {
 				descriptionHeaderRow.setVisibility(View.GONE);
 				descriptionContentRow.setVisibility(View.GONE);
 			}
-			else descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(placeJSON.optString("description")));
-			
-			if(placeJSON.optString("offices").isEmpty()) {
+			else descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(mPlaceJSON.optString("description")));
+
+            // Display offices housed in this building
+			if(mPlaceJSON.optString("offices").isEmpty()) {
 				officesHeaderRow.setVisibility(View.GONE);
 				officesContentRow.setVisibility(View.GONE);
 			}
-			else officesTextView.setText(formatOffices(placeJSON.optJSONArray("offices")));
+			else officesTextView.setText(formatOffices(mPlaceJSON.optJSONArray("offices")));
 
-			try {				
-				// Get & display nearby bus stops
-				JSONObject location = placeJSON.getJSONObject("location");
-				float buildLon = Float.parseFloat(location.getString("longitude"));
-				float buildLat = Float.parseFloat(location.getString("latitude"));
+            // Get & display nearby bus stops
+			if(mLocationJSON != null) {
+                try {
+                    double buildLon = Double.parseDouble(mLocationJSON.getString("longitude"));
+                    double buildLat = Double.parseDouble(mLocationJSON.getString("latitude"));
 
-                if(!placeJSON.optString("campus_name").isEmpty()) {
-                    String campus_name = placeJSON.optString("campus_name");
-                    String agency = mAgencyMap.get(campus_name);
+                    if(!mPlaceJSON.optString("campus_name").isEmpty()) {
+                        String campus_name = mPlaceJSON.optString("campus_name");
+                        String agency = mAgencyMap.get(campus_name);
 
-                    if(agency != null) {
-                        Nextbus.getStopsByTitleNear(agency, buildLat, buildLon).then(new AndroidDoneCallback<JSONObject>() {
+                        if(agency != null) {
+                            Nextbus.getStopsByTitleNear(agency, buildLat, buildLon).then(new AndroidDoneCallback<JSONObject>() {
 
-                            @Override
-                            public void onDone(JSONObject nearbyStopsByTitle) {
-                                // Hide nearby bus view if there aren't any to display
-                                if (nearbyStopsByTitle.length() == 0) {
-                                    nearbyBusesHeaderRow.setVisibility(View.GONE);
-                                    nearbyBusesContentRow.setVisibility(View.GONE);
-                                    return;
+                                @Override
+                                public void onDone(JSONObject nearbyStopsByTitle) {
+                                    // Hide nearby bus view if there aren't any to display
+                                    if (nearbyStopsByTitle.length() == 0) {
+                                        nearbyBusesHeaderRow.setVisibility(View.GONE);
+                                        nearbyBusesContentRow.setVisibility(View.GONE);
+                                        return;
+                                    }
+
+                                    Iterator<String> stopTitleIter = nearbyStopsByTitle.keys();
+                                    while (stopTitleIter.hasNext()) {
+                                        TextView newStopTextView = new TextView(v.getContext());
+                                        String stopTitle = stopTitleIter.next();
+                                        newStopTextView.setText(stopTitle);
+                                        nearbyBusesLinearLayout.addView(newStopTextView);
+                                    }
                                 }
 
-                                Iterator<String> stopTitleIter = nearbyStopsByTitle.keys();
-                                while (stopTitleIter.hasNext()) {
-                                    TextView newStopTextView = new TextView(v.getContext());
-                                    String stopTitle = stopTitleIter.next();
-                                    newStopTextView.setText(stopTitle);
-                                    nearbyBusesLinearLayout.addView(newStopTextView);
+                                @Override
+                                public AndroidExecutionScope getExecutionScope() {
+                                    return AndroidExecutionScope.UI;
                                 }
-                            }
 
-                            @Override
-                            public AndroidExecutionScope getExecutionScope() {
-                                return AndroidExecutionScope.UI;
-                            }
-
-                        });
+                            });
+                        }
+                        else {
+                            nearbyBusesHeaderRow.setVisibility(View.GONE);
+                            nearbyBusesContentRow.setVisibility(View.GONE);
+                        }
                     }
-                    else {
-                        nearbyBusesHeaderRow.setVisibility(View.GONE);
-                        nearbyBusesContentRow.setVisibility(View.GONE);
-                    }
+                } catch (JSONException e) {
+                    Log.w(TAG, "onCreateView(): " + e.getMessage());
                 }
-			} catch (JSONException e) {
-				Log.w(TAG, "onCreateView(): " + e.getMessage());
-			}
+            }
 
 		}					
 		
 		return v;
 	}
-	
+
+    public void launchMap() {
+        if(mLocationJSON == null) return;
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+        // Prefer address for user readability
+        if(!mLocationJSON.optString("street").isEmpty() && !mLocationJSON.optString("street").isEmpty() && !mLocationJSON.optString("state").isEmpty()) {
+            String addr = mLocationJSON.optString("street") + ", " + mLocationJSON.optString("city") + ", " + mLocationJSON.optString("state");
+            intent.setData(Uri.parse("geo:0,0?q=" + addr));
+        }
+        // Fallback to longitude & latitude
+        else {
+            intent.setData(Uri.parse("geo:0,0?q=" + mLocationJSON.optString("latitude") + ", " + mLocationJSON.optString("longitude")));
+        }
+
+        // Try to launch a map activity
+        try {
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "No activity found to handle geolocation");
+        }
+    }
+
 	/**
 	 * Put JSON address object into readable string form
 	 * @param address JSON address object from place data
@@ -219,14 +265,14 @@ public class PlacesDisplay extends Fragment {
 	 */
 	private static String formatAddress(JSONObject address) {
 		if(address == null) return "";
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		
-		if(!address.optString("name").isEmpty()) result += address.optString("name");
-		if(!address.optString("street").isEmpty()) result += "\n" + address.optString("street");
-		if(!address.optString("city").isEmpty()) result += "\n" + address.optString("city") + ", " +
-				address.optString("state_abbr") + " " + address.optString("postal_code");
-		
-		return result;
+		if(!address.optString("name").isEmpty()) result.append(address.optString("name") + "\n");
+		if(!address.optString("street").isEmpty()) result.append(address.optString("street") + "\n");
+		if(!address.optString("city").isEmpty()) result.append(address.optString("city") + ", " +
+				address.optString("state_abbr") + " " + address.optString("postal_code"));
+
+		return StringUtils.trim(result.toString());
 	}
 	
 	/**

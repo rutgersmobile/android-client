@@ -240,7 +240,7 @@ public class Places {
 
                             // If the place is within range, add it to the list
                             if (results[0] < AppUtil.NEARBY_RANGE) {
-                                Log.d(TAG, "Found nearby place " + curPlaceKey);
+                                Log.v(TAG, "Found nearby place " + curPlaceKey);
                                 curPlace.put("distance", ""+results[0]);
                                 result.add(new PlaceTuple(curPlaceKey, curPlace));
                             }
@@ -284,8 +284,8 @@ public class Places {
             String distString1 = pt1.getPlaceJSON().optString("distance");
             String distString2 = pt2.getPlaceJSON().optString("distance");
 
-            Double dist1 = Double.parseDouble(distString1);
-            Double dist2 = Double.parseDouble(distString2);
+            Float dist1 = Float.parseFloat(distString1);
+            Float dist2 = Float.parseFloat(distString2);
 
             return dist1.compareTo(dist2);
         }

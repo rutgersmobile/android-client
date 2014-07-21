@@ -294,6 +294,10 @@ public class MainActivity extends FragmentActivity  implements
 
     @Override
     public void registerListener(LocationClientReceiver listener) {
+        if(mLocationListeners == null) {
+            mLocationListeners = new ArrayList<LocationClientReceiver>();
+        }
+
         mLocationListeners.add(listener);
     }
 

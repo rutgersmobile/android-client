@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
@@ -17,10 +18,14 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import org.jdeferred.ProgressCallback;
+import org.jdeferred.Promise;
+import org.jdeferred.android.AndroidAlwaysCallback;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
@@ -57,6 +62,8 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     private RMenuAdapter mAdapter;
     private ListView mListView;
     private JSONObject mPlaceDatabase;
+    private ProgressBar mProgressCircle;
+    private View mProgressFade;
     private LocationClientProvider mLocationClientProvider;
 
 	public PlacesMain() {
@@ -136,6 +143,9 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
 		Bundle args = getArguments();
 
 		getActivity().setTitle(getActivity().getResources().getString(R.string.places_title));
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        mProgressFade = v.findViewById(R.id.progressFade);
 
         mListView = (ListView) v.findViewById(R.id.listView);
         mListView.setAdapter(mAdapter);
@@ -217,6 +227,8 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
                 return;
             }
 
+            showProgressCircle();
+
             Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new AndroidDoneCallback<List<PlaceTuple>>() {
 
                 @Override
@@ -229,7 +241,8 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
                     mAdapter.clear();
                     mAdapter.add(new SlideMenuHeader(res.getString(R.string.places_nearby)));
 
-                    if (result.isEmpty()) mAdapter.add(new SlideMenuItem(res.getString(R.string.places_none_nearby)));
+                    if (result.isEmpty())
+                        mAdapter.add(new SlideMenuItem(res.getString(R.string.places_none_nearby)));
                     else {
                         for (PlaceTuple placeTuple : result) {
                             Bundle args = new Bundle();
@@ -257,6 +270,16 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
                     mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
                 }
 
+            }).always(new AndroidAlwaysCallback<List<PlaceTuple>, Exception>() {
+                @Override
+                public void onAlways(Promise.State state, List<PlaceTuple> resolved, Exception rejected) {
+                    hideProgressCircle();
+                }
+
+                @Override
+                public AndroidExecutionScope getExecutionScope() {
+                    return AndroidExecutionScope.UI;
+                }
             });
 
         }
@@ -280,6 +303,16 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     @Override
     public void onDisconnected() {
 
+    }
+
+    private void showProgressCircle() {
+        mProgressCircle.setVisibility(View.VISIBLE);
+        //mProgressFade.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        mProgressCircle.setVisibility(View.GONE);
+        //mProgressFade.setVisibility(View.GONE);
     }
 
 }
