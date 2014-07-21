@@ -20,6 +20,7 @@
     <string name="failed_no_url">No URL supplied.</string>
     <string name="failed_internal">Internal error.</string>
     <string name="location_updates">Location Updates</string>
+    <string name="location_connecting">Getting location...</string>
 
     <!-- Bus channel -->
     <string name="bus_title">Bus</string>

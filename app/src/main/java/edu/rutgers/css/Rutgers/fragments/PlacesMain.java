@@ -36,6 +36,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers.api.Places.PlaceTuple;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
+import edu.rutgers.css.Rutgers.auxiliary.LocationClientReceiver;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
@@ -46,7 +47,7 @@ import edu.rutgers.css.Rutgers2.R;
  * Main Places component: displays a text field with auto-complete information from places database.
  * User enters a building name and selects from list; selection sent to place display component.
  */
-public class PlacesMain extends Fragment {
+public class PlacesMain extends Fragment implements LocationClientReceiver {
 
 	private static final String TAG = "PlacesMain";
 
@@ -67,6 +68,7 @@ public class PlacesMain extends Fragment {
         super.onAttach(activity);
         try {
             mLocationClientProvider = (LocationClientProvider) activity;
+            mLocationClientProvider.registerListener(this);
         } catch(ClassCastException e) {
             mLocationClientProvider = null;
             Log.e(TAG, e.getMessage());
@@ -206,12 +208,12 @@ public class PlacesMain extends Fragment {
         if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
 
             // Get last location
-            final Location lastLoc = mLocationClientProvider != null ?
-                    mLocationClientProvider.getLocationClient().getLastLocation() :
-                    null;
+            final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
             if (lastLoc == null) {
                 Log.w(TAG, "Couldn't get location");
-                getLocationFail();
+                mAdapter.clear();
+                mAdapter.add(new SlideMenuHeader(res.getString(R.string.places_nearby)));
+                mAdapter.add(new SlideMenuItem(res.getString(R.string.failed_location)));
                 return;
             }
 
@@ -260,15 +262,24 @@ public class PlacesMain extends Fragment {
         }
         else {
             Log.w(TAG, "Location services not connected");
-            getLocationFail();
+
+            // We're still waiting for location services to connect
+            mAdapter.clear();
+            mAdapter.add(new SlideMenuHeader(res.getString(R.string.places_nearby)));
+            mAdapter.add(new SlideMenuItem(res.getString(R.string.location_connecting)));
         }
 
     }
 
-    private void getLocationFail() {
-        mAdapter.clear();
-        mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.places_nearby)));
-        mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_location)));
+    @Override
+    public void onConnected(Bundle dataBundle) {
+        // When location services are restored, retry loading nearby places
+        this.onResume();
+    }
+
+    @Override
+    public void onDisconnected() {
+
     }
 
 }
