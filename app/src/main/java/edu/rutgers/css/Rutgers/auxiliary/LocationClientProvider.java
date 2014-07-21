@@ -6,5 +6,6 @@ public interface LocationClientProvider {
 
 	public LocationClient getLocationClient();
 	public boolean servicesConnected();
+    public void registerListener(LocationClientReceiver listener);
 	
 }

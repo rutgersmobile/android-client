@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.res.Configuration;
@@ -26,7 +25,6 @@ import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 
 import org.jdeferred.android.AndroidDoneCallback;
@@ -42,6 +40,7 @@ import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
+import edu.rutgers.css.Rutgers.auxiliary.LocationClientReceiver;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
@@ -69,6 +68,8 @@ public class MainActivity extends FragmentActivity  implements
 	private ListView mDrawerListView;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private RMenuAdapter mDrawerAdapter;
+
+    private ArrayList<LocationClientReceiver> mLocationListeners;
 	
 	/**
 	 * For providing the location client to fragments
@@ -84,7 +85,9 @@ public class MainActivity extends FragmentActivity  implements
 
 		setContentView(R.layout.activity_main);
 		Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
-		
+
+        mLocationListeners = new ArrayList<LocationClientReceiver>();
+
 		/*
 		 * Set default settings the first time the app is run
 		 */
@@ -288,33 +291,35 @@ public class MainActivity extends FragmentActivity  implements
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
-	/*
-	 * Location service calls
-	 */
+
+    @Override
+    public void registerListener(LocationClientReceiver listener) {
+        mLocationListeners.add(listener);
+    }
+
+    /**
+     * Play services connected - notify listeners
+     * @param dataBundle
+     */
 	@Override
 	public void onConnected(Bundle dataBundle) {
-		Log.v(AppUtil.APPTAG, "Connected to Google Play services");
-		servicesConnected();
-        /*
-        if(mLocationClient != null) {
-			// Mock location testing
-			//mLocationClient.setMockMode(false);
-			Location currentLocation = mLocationClient.getLastLocation();
-			if(currentLocation != null) {
-				Log.d(AppUtil.APPTAG, currentLocation.toString());
-			}
-		}
-		*/
+		Log.i(AppUtil.APPTAG, "Connected to Google Play services.");
+		for(LocationClientReceiver listener: mLocationListeners) {
+            listener.onConnected(dataBundle);
+        }
 	}
 	
 	@Override
 	public void onDisconnected() {
-		Log.v(AppUtil.APPTAG, "Disconnected from Google Play services");
+		Log.i(AppUtil.APPTAG, "Disconnected from Google Play services");
+        for(LocationClientReceiver listener: mLocationListeners) {
+            listener.onDisconnected();
+        }
 	}
 	
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.v(TAG, "Attempting to resolve Play Services connection failure");
 		if(connectionResult.hasResolution()) {
 			try {
 				connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
@@ -323,15 +328,13 @@ public class MainActivity extends FragmentActivity  implements
 			}
 		}
 		else {
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0);
-            if (dialog != null) {
-                LocationUtils.ErrorDialogFragment errorFragment = new LocationUtils.ErrorDialogFragment();
-                errorFragment.setDialog(dialog);
-                errorFragment.show(getSupportFragmentManager(), AppUtil.APPTAG);
-            }
+            LocationUtils.showErrorDialog(this, connectionResult.getErrorCode());
 		}
 	}
-	
+
+    /**
+     * Handle results from Google Play Services
+     */
 	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 

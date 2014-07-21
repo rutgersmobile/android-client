@@ -203,7 +203,7 @@ public class DTable extends Fragment {
                         mAdapter.togglePopdown(position);
                         return;
                     }
-                    // This object is a channel
+                    // This object has a channel
                     else {
                         JSONObject channel = clickedJson.getJSONObject("channel");
                         Log.v(dTag(), "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
@@ -214,10 +214,9 @@ public class DTable extends Fragment {
                         // First, attempt to get 'title' for the channel. If it's not set, fall back
                         // to the title set for the clickable item here. (They often match, but
                         // see rec.txt for an example of where they differ.)
-                        Object title;
+                        Object title = null;
                         if(channel.has("title")) title = channel.get("title");
                         else if(clickedJson.has("title")) title = clickedJson.get("title");
-                        else title = null;
 
                         if(title != null) args.putString("title", AppUtil.getLocalTitle(mContext, title));
 

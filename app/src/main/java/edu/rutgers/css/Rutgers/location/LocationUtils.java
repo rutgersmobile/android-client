@@ -16,6 +16,7 @@
 
 package edu.rutgers.css.Rutgers.location;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.location.Location;
@@ -103,12 +104,7 @@ public final class LocationUtils {
             return true;
         }
         else {
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, activity, 0);
-            if (dialog != null) {
-                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-                errorFragment.setDialog(dialog);
-                errorFragment.show(activity.getSupportFragmentManager(), AppUtil.APPTAG);
-            }
+            showErrorDialog(activity, resultCode);
             return false;
         }
     }
@@ -136,4 +132,27 @@ public final class LocationUtils {
             return EMPTY_STRING;
         }
     }
+
+    /**
+     * Show Play Services error dialog.
+     * @param activity Activity to display dialog for
+     * @param errorCode Error code
+     */
+    public static void showErrorDialog(FragmentActivity activity, int errorCode) {
+        Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
+                errorCode,
+                activity,
+                CONNECTION_FAILURE_RESOLUTION_REQUEST
+        );
+
+        if(errorDialog != null) {
+            ErrorDialogFragment errorDialogFragment = new ErrorDialogFragment();
+            errorDialogFragment.setDialog(errorDialog);
+            errorDialogFragment.show(
+                    activity.getSupportFragmentManager(),
+                    activity.getResources().getString(R.string.location_updates)
+            );
+        }
+    }
+
 }

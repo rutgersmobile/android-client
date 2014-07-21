@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.fragments;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,13 +33,14 @@ import edu.rutgers.css.Rutgers.SettingsActivity;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
+import edu.rutgers.css.Rutgers.auxiliary.LocationClientReceiver;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusStops extends Fragment {
+public class BusStops extends Fragment implements LocationClientReceiver {
 
 	private static final String TAG = "BusStops";
 	private static final int REFRESH_INTERVAL = 60; // nearby stop refresh interval in seconds
@@ -47,7 +49,7 @@ public class BusStops extends Fragment {
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuPart> mData;
 	private LocationClientProvider mLocationClientProvider;
-	private int mNearbyStopCount; // Keep track of number of nearby stops displayed
+	private int mNearbyRowCount; // Keep track of number of nearby stops displayed
 	private Timer mUpdateTimer;
 	private Handler mUpdateHandler;
     private String mCurrentCampus;
@@ -61,6 +63,7 @@ public class BusStops extends Fragment {
 		super.onAttach(activity);
 		try {
 			mLocationClientProvider = (LocationClientProvider) activity;
+            mLocationClientProvider.registerListener(this);
 		} catch(ClassCastException e) {
 			mLocationClientProvider = null;
 			Log.e(TAG, e.getMessage());
@@ -71,19 +74,13 @@ public class BusStops extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		mNearbyStopCount = 0;
+		mNearbyRowCount = 0;
 		mData = new ArrayList<RMenuPart>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
 		
 		// Setup the timer stuff for updating the nearby stops
 		mUpdateTimer = new Timer();
 		mUpdateHandler = new Handler();
-		
-		// Add "nearby stops" header
-		mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.bus_nearby_active_stops_header)));
-		
-		loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));
-		loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header));
 	}
 	
 	@Override
@@ -125,7 +122,13 @@ public class BusStops extends Fragment {
         mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
                 getActivity().getResources().getString(R.string.campus_nb_tag));
 
-		// Start the update thread when screen is active
+        mAdapter.clear();
+        mNearbyRowCount = 0;
+
+        // Add "nearby stops" header
+        mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.bus_nearby_active_stops_header)));
+
+        // Start the update thread when screen is active
 		mUpdateTimer = new Timer();
 		mUpdateTimer.schedule(new TimerTask() {
 			@Override
@@ -138,6 +141,10 @@ public class BusStops extends Fragment {
 				});
 			}
 		}, 0, 1000 * REFRESH_INTERVAL);
+
+        // Load active stops
+        loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));
+        loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header));
 	}
 	
 	@Override
@@ -150,7 +157,20 @@ public class BusStops extends Fragment {
 		mUpdateTimer.cancel();
 		mUpdateTimer = null;
 	}
-	
+
+    @Override
+    public void onConnected(Bundle dataBundle) {
+        Log.v(TAG, "Received onConnected");
+
+        // Location services reconnected - retry loading nearby stops
+        loadNearbyStops(mCurrentCampus);
+    }
+
+    @Override
+    public void onDisconnected() {
+
+    }
+
 	/**
 	 * Populate list with bus stops for agency, with a section header for that agency.
 	 * Resulting JSON array looks like this:
@@ -211,16 +231,16 @@ public class BusStops extends Fragment {
 	 * Remove rows related to nearby stops
 	 */
 	private void clearNearbyRows() {
-		for(int i = 0; i < mNearbyStopCount; i++) {
+		for(int i = 0; i < mNearbyRowCount; i++) {
 			mData.remove(1);
 			mAdapter.notifyDataSetChanged();
 		}
-		mNearbyStopCount = 0;
+		mNearbyRowCount = 0;
 	}
 	
 	private void addNearbyRow(int pos, RMenuPart row) {
 		mData.add(pos, row);
-		mNearbyStopCount++;
+		mNearbyRowCount++;
 		mAdapter.notifyDataSetChanged();
 	}
 	
@@ -229,7 +249,8 @@ public class BusStops extends Fragment {
 	 * @param agencyTag Agency tag for API request
 	 */
 	private void loadNearbyStops(final String agencyTag) {
-		
+        final Resources res = getActivity().getResources();
+
 		// Check for location services
 		if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
 			// Get last location
@@ -237,7 +258,7 @@ public class BusStops extends Fragment {
 			if(lastLoc == null) {
 				Log.w(TAG, "Could not get location");
 				clearNearbyRows();
-				addNearbyRow(1, new SlideMenuItem(getActivity().getResources().getString(R.string.failed_location)));
+				addNearbyRow(1, new SlideMenuItem(res.getString(R.string.failed_location)));
 				return;
 			}
 			Log.d(TAG, "Current location: " + lastLoc.toString());
@@ -255,7 +276,7 @@ public class BusStops extends Fragment {
 					
 					// If there aren't any results, put a "no stops nearby" message
 					if(activeNearbyStops.length() == 0) {
-						addNearbyRow(1, new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_nearby_stops)));
+						addNearbyRow(1, new SlideMenuItem(res.getString(R.string.bus_no_nearby_stops)));
 					}
 					// If there are new results, add them
 					else {
@@ -292,12 +313,13 @@ public class BusStops extends Fragment {
 
                 @Override
                 public void onFail(Exception result) {
-                    addNearbyRow(1, new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+                    addNearbyRow(1, new SlideMenuItem(res.getString(R.string.failed_load_short)));
                 }
             });
 		}
 		else {
-			Log.e(TAG, "Could not get location provider, can't find nearby stops");
+			Log.w(TAG, "Could not get location provider, can't find nearby stops");
+            addNearbyRow(1, new SlideMenuItem(res.getString(R.string.failed_location)));
 		}
 
 	}

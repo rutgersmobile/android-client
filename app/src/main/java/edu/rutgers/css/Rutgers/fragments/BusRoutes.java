@@ -46,10 +46,6 @@ public class BusRoutes extends Fragment {
 
 		mData = new ArrayList<RMenuPart>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
-		
-		loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header));
-		loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header));
-
 	}
 	
 	@Override
@@ -77,7 +73,7 @@ public class BusRoutes extends Fragment {
 					
 					ComponentFactory.getInstance().switchFragments(args);
 				} catch (JSONException e) {
-					Log.e(TAG, e.getMessage());
+					Log.e(TAG, "onItemClick(): " + e.getMessage());
 				}
 				
 			}
@@ -86,6 +82,16 @@ public class BusRoutes extends Fragment {
 				
 		return v;
 	}
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Update active routes
+        mAdapter.clear();
+        loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header));
+        loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header));
+    }
 	
 	/**
 	 * Populate list with bus routes for agency, with a section header for that agency
@@ -116,7 +122,7 @@ public class BusRoutes extends Fragment {
 						SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
 						mAdapter.add(newMenuItem);
 					} catch (JSONException e) {
-						Log.e(TAG, e.getMessage());
+						Log.w(TAG, "loadAgency(): " + e.getMessage());
 					}
 				}
 			}
