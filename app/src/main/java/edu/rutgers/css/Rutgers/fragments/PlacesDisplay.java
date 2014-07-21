@@ -235,6 +235,9 @@ public class PlacesDisplay extends Fragment {
 		return v;
 	}
 
+    /**
+     * Start a map activity intent for this address/location
+     */
     public void launchMap() {
         if(mLocationJSON == null) return;
 

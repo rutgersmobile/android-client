@@ -43,7 +43,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusStops extends Fragment implements LocationClientReceiver {
 
 	private static final String TAG = "BusStops";
-	private static final int REFRESH_INTERVAL = 60; // nearby stop refresh interval in seconds
+	private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
 	
 	private ListView mListView;
 	private RMenuAdapter mAdapter;
@@ -183,7 +183,7 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 			
 			@Override
 			public void onDone(JSONArray data) {
-				//Log.d(TAG, "loadAgency(): " + data.toString());
+				//Log.d(TAG, agencyTag + ": " + data.toString());
 				
 				mAdapter.add(new SlideMenuHeader(agencyTitle));
 				

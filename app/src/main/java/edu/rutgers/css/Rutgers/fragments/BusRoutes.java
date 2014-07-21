@@ -103,7 +103,7 @@ public class BusRoutes extends Fragment {
 			
 			@Override
 			public void onDone(JSONArray data) {
-				Log.d(TAG, data.toString());
+				//Log.d(TAG, agencyTag + ": " +data.toString());
 				
 				mAdapter.add(new SlideMenuHeader(agencyTitle));
 				
