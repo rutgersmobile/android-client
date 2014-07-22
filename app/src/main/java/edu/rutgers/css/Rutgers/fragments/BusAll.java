@@ -79,8 +79,6 @@ public class BusAll extends Fragment {
 
             @Override
             public void onDone(MultipleResults results) {
-                Log.v(TAG, "# Results: " + results.size());
-
                 for(OneResult result: results) {
                     if(result.getPromise() == nbRoutes) loadArray("nb", resources.getString(R.string.bus_nb_all_routes_header), "route", (JSONArray) result.getResult());
                     else if(result.getPromise() == nwkRoutes) loadArray("nwk", resources.getString(R.string.bus_nwk_all_routes_header), "route", (JSONArray)result.getResult());

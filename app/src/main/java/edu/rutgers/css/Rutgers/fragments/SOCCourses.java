@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
@@ -24,7 +23,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import edu.rutgers.css.Rutgers.api.Classes;
+import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
@@ -55,7 +55,7 @@ public class SOCCourses extends Fragment {
         final String semester = args.getString("semester");
         final String subjectCode = args.getString("subjectCode");
 
-        Classes.getCourses(campus, level, semester, subjectCode).done(new AndroidDoneCallback<JSONArray>() {
+        Schedule.getCourses(campus, level, semester, subjectCode).done(new AndroidDoneCallback<JSONArray>() {
 
             @Override
             public AndroidExecutionScope getExecutionScope() {
@@ -89,7 +89,7 @@ public class SOCCourses extends Fragment {
 
             @Override
             public void onFail(AjaxStatus result) {
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                AppUtil.showFailedLoadToast(getActivity());
             }
 
         });

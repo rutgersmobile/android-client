@@ -1,20 +1,18 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
@@ -28,9 +26,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import edu.rutgers.css.Rutgers.api.Classes;
+import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.auxiliary.JSONAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
@@ -48,6 +46,8 @@ public class SOCMain extends Fragment {
     private String mSemester = "72014";
     private String mLevel = "U";
 
+    private JSONArray mSemesters;
+
     public SOCMain() {
         // Required empty public constructor
     }
@@ -59,7 +59,44 @@ public class SOCMain extends Fragment {
         mData = new ArrayList<RMenuPart>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
 
-        Classes.getSubjects(mCampus, mLevel, mSemester).done(new AndroidDoneCallback<JSONArray>() {
+        Schedule.getSemesters().done(new AndroidDoneCallback<JSONObject>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onDone(JSONObject result) {
+
+                try {
+                    JSONArray semesters = result.getJSONArray("semesters");
+                    int defaultSemester = result.getInt("defaultSemester");
+
+                    mSemester = semesters.getString(defaultSemester);
+                    mSemesters = semesters;
+
+                    for (int i = 0; i < semesters.length(); i++) {
+                        Log.v(TAG, "Got semester: " + Schedule.translateSemester(semesters.getString(i)));
+                    }
+                    Log.v(TAG, "Default semester: " + Schedule.translateSemester(semesters.getString(defaultSemester)));
+
+                } catch (JSONException e) {
+                    Log.w(TAG, "getSemesters(): " + e.getMessage());
+                }
+            }
+        }).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onFail(AjaxStatus result) {
+                AppUtil.showFailedLoadToast(getActivity());
+            }
+        });
+
+        Schedule.getSubjects(mCampus, mLevel, mSemester).done(new AndroidDoneCallback<JSONArray>() {
 
             @Override
             public AndroidExecutionScope getExecutionScope() {
@@ -91,7 +128,7 @@ public class SOCMain extends Fragment {
 
             @Override
             public void onFail(AjaxStatus result) {
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                AppUtil.showFailedLoadToast(getActivity());
             }
 
         });
@@ -105,8 +142,8 @@ public class SOCMain extends Fragment {
 
         getActivity().setTitle(res.getString(R.string.soc_title));
 
-        EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
-        ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
+        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
 
         mListView = (ListView) v.findViewById(R.id.list);
         mListView.setAdapter(mAdapter);
@@ -127,6 +164,33 @@ public class SOCMain extends Fragment {
                 ComponentFactory.getInstance().switchFragments(args);
             }
 
+        });
+
+        // Search text listener
+        filterEditText.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Set filter for list adapter
+                mAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+
+        });
+
+        // Search clear button listener
+        filterClearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filterEditText.setText("");
+            }
         });
 
         return v;
