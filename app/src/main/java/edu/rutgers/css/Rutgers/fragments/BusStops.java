@@ -147,10 +147,11 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 			}
 		}, 0, 1000 * REFRESH_INTERVAL);
 
-        // Load active stops
+        // Get promises for active stops
         final Promise nbActiveStops = Nextbus.getActiveStops("nb");
         final Promise nwkActiveStops = Nextbus.getActiveStops("nwk");
 
+        // Synchronized load of active stops
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(nbActiveStops, nwkActiveStops).done(new AndroidDoneCallback<MultipleResults>() {
 
@@ -176,7 +177,9 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 
             @Override
             public void onFail(OneReject result) {
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_SHORT).show();
+                Exception e = (Exception) result.getReject();
+                Log.w(TAG, e.getMessage());
             }
 
         });
@@ -219,6 +222,7 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 
         if(data == null) {
             mAdapter.add(new SlideMenuItem(getResources().getString(R.string.failed_load_short)));
+            return;
         }
 		else if(data.length() == 0) {
             mAdapter.add(new SlideMenuItem(getResources().getString(R.string.bus_no_active_stops)));

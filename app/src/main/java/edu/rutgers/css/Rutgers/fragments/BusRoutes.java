@@ -11,9 +11,14 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.jdeferred.Promise;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.multiple.MultipleResults;
+import org.jdeferred.multiple.OneReject;
+import org.jdeferred.multiple.OneResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,7 +68,7 @@ public class BusRoutes extends Fragment {
 				
 				try {
 					JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
-				
+
 					Bundle args = new Bundle();
 					args.putString("component", "busdisplay");
 					args.putString("mode", "route");
@@ -89,8 +94,44 @@ public class BusRoutes extends Fragment {
 
         // Update active routes
         mAdapter.clear();
-        loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header));
-        loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header));
+
+        // Get promises for active routes
+        final Promise nbActiveRoutes = Nextbus.getActiveRoutes("nb");
+        final Promise nwkActiveRoutes = Nextbus.getActiveRoutes("nwk");
+
+        // Synchronized load of active routes
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(nbActiveRoutes, nwkActiveRoutes).done(new AndroidDoneCallback<MultipleResults>() {
+
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onDone(MultipleResults results) {
+                for (OneResult result : results) {
+                    if(result.getPromise() == nbActiveRoutes) loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header), (JSONArray) result.getResult());
+                    else if(result.getPromise() == nwkActiveRoutes)  loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header), (JSONArray) result.getResult());
+                }
+            }
+
+        }).fail(new AndroidFailCallback<OneReject>() {
+
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onFail(OneReject result) {
+                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_SHORT).show();
+                Exception e = (Exception) result.getReject();
+                Log.w(TAG, e.getMessage());
+            }
+
+        });
+
     }
 	
 	/**
@@ -98,53 +139,32 @@ public class BusRoutes extends Fragment {
 	 * @param agencyTag Agency tag for API request
 	 * @param agencyTitle Header title that goes above these routes
 	 */
-	private void loadAgency(final String agencyTag, final String agencyTitle) {
-		Nextbus.getActiveRoutes(agencyTag).then(new AndroidDoneCallback<JSONArray>() {
-			
-			@Override
-			public void onDone(JSONArray data) {
-				//Log.d(TAG, agencyTag + ": " +data.toString());
-				
-				mAdapter.add(new SlideMenuHeader(agencyTitle));
-				
-				if(data.length() == 0) {
-					mAdapter.add(new SlideMenuItem(getResources().getString(R.string.bus_no_active_routes)));
-					return;
-				}
-				
-				for(int i = 0; i < data.length(); i++) {
-					try {
-						JSONObject jsonObj = data.getJSONObject(i);
-						Bundle menuBundle = new Bundle();
-						menuBundle.putString("title", jsonObj.getString("title"));
-						menuBundle.putString("json", jsonObj.toString());
-						menuBundle.putString("agency", agencyTag);
-						SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
-						mAdapter.add(newMenuItem);
-					} catch (JSONException e) {
-						Log.w(TAG, "loadAgency(): " + e.getMessage());
-					}
-				}
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<Exception>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+	private void loadAgency(final String agencyTag, final String agencyTitle, final JSONArray data) {
+        mAdapter.add(new SlideMenuHeader(agencyTitle));
 
-            @Override
-            public void onFail(Exception result) {
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
-                mAdapter.add(new SlideMenuHeader(agencyTitle));
-                mAdapter.add(new SlideMenuItem(getResources().getString(R.string.failed_load_short)));
+        if(data == null) {
+            mAdapter.add(new SlideMenuItem(getResources().getString(R.string.failed_load_short)));
+            return;
+        }
+        else if (data.length() == 0) {
+            mAdapter.add(new SlideMenuItem(getResources().getString(R.string.bus_no_active_routes)));
+            return;
+        }
+
+        for (int i = 0; i < data.length(); i++) {
+            try {
+                JSONObject jsonObj = data.getJSONObject(i);
+                Bundle menuBundle = new Bundle();
+                menuBundle.putString("title", jsonObj.getString("title"));
+                menuBundle.putString("json", jsonObj.toString());
+                menuBundle.putString("agency", agencyTag);
+                SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
+                mAdapter.add(newMenuItem);
+            } catch (JSONException e) {
+                Log.w(TAG, "loadAgency(): " + e.getMessage());
             }
-        });
-	}
+        }
+
+    }
 	
 }
