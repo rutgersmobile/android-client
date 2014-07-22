@@ -142,7 +142,7 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
 		final View v = inflater.inflate(R.layout.fragment_places, parent, false);
 		Bundle args = getArguments();
 
-		getActivity().setTitle(getActivity().getResources().getString(R.string.places_title));
+		getActivity().setTitle(getResources().getString(R.string.places_title));
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         mProgressFade = v.findViewById(R.id.progressFade);
@@ -212,7 +212,7 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     public void onResume() {
         super.onResume();
 
-        final Resources res = getActivity().getResources();
+        final Resources res = getResources();
 
         // Check for location services
         if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
@@ -267,7 +267,7 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
                 public void onFail(Exception result) {
                     mAdapter.clear();
                     mAdapter.add(new SlideMenuHeader(res.getString(R.string.places_nearby)));
-                    mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+                    mAdapter.add(new SlideMenuItem(getResources().getString(R.string.failed_load_short)));
                 }
 
             }).always(new AndroidAlwaysCallback<List<PlaceTuple>, Exception>() {

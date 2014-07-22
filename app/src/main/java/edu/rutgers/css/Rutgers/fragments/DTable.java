@@ -121,7 +121,7 @@ public class DTable extends Fragment {
                         mAdapter.loadArray(result.getJSONArray("children"));
                     } catch (JSONException e) {
                         Log.w(dTag(), "onCreateView(): " + e.getMessage());
-                        Toast.makeText(getActivity(), getActivity().getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
                     }
                 }
             }).fail(new AndroidFailCallback<AjaxStatus>() {

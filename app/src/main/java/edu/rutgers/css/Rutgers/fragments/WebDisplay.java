@@ -103,7 +103,7 @@ public class WebDisplay extends Fragment {
         }
 
         if(mCurrentURL == null) {
-			String msg = getActivity().getResources().getString(R.string.failed_no_url);
+			String msg = getResources().getString(R.string.failed_no_url);
 			mWebView.loadData(msg, "text/plain", null);
 			return v;
 		}

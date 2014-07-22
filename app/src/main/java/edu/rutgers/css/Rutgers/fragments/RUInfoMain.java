@@ -29,7 +29,7 @@ public class RUInfoMain extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_ruinfo_main, container, false);
 		
-		getActivity().setTitle(getActivity().getResources().getString(R.string.ruinfo_title));
+		getActivity().setTitle(getResources().getString(R.string.ruinfo_title));
 		
 		final Button callButton = (Button) v.findViewById(R.id.button1);
 		final Button textButton1 = (Button) v.findViewById(R.id.button2);

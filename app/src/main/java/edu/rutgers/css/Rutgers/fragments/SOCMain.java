@@ -100,7 +100,7 @@ public class SOCMain extends Fragment {
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_soc_main, parent, false);
-        Resources res = getActivity().getResources();
+        Resources res = getResources();
         Bundle args = getArguments();
 
         getActivity().setTitle(res.getString(R.string.soc_title));

@@ -63,7 +63,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_feedback_main, container, false);
 		
-		getActivity().setTitle(getActivity().getResources().getString(R.string.feedback_title));
+		getActivity().setTitle(getResources().getString(R.string.feedback_title));
 		
 		mLockSend = false;
 		
@@ -99,7 +99,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	 * Submit the feedback
 	 */
 	private void sendFeedback() {
-		final Resources res = getActivity().getResources();
+		final Resources res = getResources();
 				
 		// Empty message - do nothing
 		if(mMessageEditText.getText().toString().trim().isEmpty()) {
@@ -178,7 +178,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position,
 			long id) {
-		final Resources res = getActivity().getResources();
+		final Resources res = getResources();
 
 		if(parent.getId() == R.id.subjectSpinner) {
 			String selection = (String) parent.getItemAtPosition(position);

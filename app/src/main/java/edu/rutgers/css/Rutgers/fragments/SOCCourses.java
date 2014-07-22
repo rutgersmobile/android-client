@@ -98,7 +98,7 @@ public class SOCCourses extends Fragment {
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_soc_main, parent, false);
-        Resources res = getActivity().getResources();
+        Resources res = getResources();
         Bundle args = getArguments();
 
         if(args.getString("subject") != null) getActivity().setTitle(args.getString("subject"));
