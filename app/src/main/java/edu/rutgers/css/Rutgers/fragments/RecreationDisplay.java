@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.util.Date;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.Gyms;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -73,7 +74,7 @@ public class RecreationDisplay extends Fragment {
 		Bundle args = getArguments();
 		if(args.getString("campus") == null || args.getString("location") == null) {
 			Log.w(TAG, "Missing campus/location arg");
-			Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+			AppUtil.showFailedLoadToast(getActivity());
 			return v;
 		}
 		
@@ -116,7 +117,7 @@ public class RecreationDisplay extends Fragment {
 
 			@Override
 			public void onFail(AjaxStatus status) {
-				Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+				AppUtil.showFailedLoadToast(getActivity());
                 Log.w(TAG, status.getMessage());
 			}
 

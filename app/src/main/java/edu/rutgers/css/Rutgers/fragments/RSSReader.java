@@ -21,6 +21,7 @@ import org.jdeferred.android.AndroidFailCallback;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.RSSAdapter;
@@ -60,7 +61,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 
 		if(args.getString("url") == null) {
 			Log.e(TAG, "RSS feed URL was not set");
-            Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.failed_no_url, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		
@@ -87,7 +88,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                AppUtil.showFailedLoadToast(getActivity());
 			}
 			
 			@Override

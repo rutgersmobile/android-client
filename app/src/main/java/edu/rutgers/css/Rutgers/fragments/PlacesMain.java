@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers.api.Places.PlaceTuple;
@@ -126,7 +127,7 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
 
             @Override
             public void onFail(Exception result) {
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                AppUtil.showFailedLoadToast(getActivity());
             }
 
         });

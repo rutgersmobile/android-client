@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers2.R;
@@ -83,7 +84,7 @@ public class FoodMain extends Fragment {
 
 			@Override
 			public void onFail(AjaxStatus e) {
-				Toast.makeText(getActivity().getApplicationContext(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                AppUtil.showFailedLoadToast(getActivity());
 			}
 			
 			@Override

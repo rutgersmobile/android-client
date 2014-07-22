@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -10,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
@@ -190,7 +192,7 @@ public class AppUtil {
 
     /**
      * Close soft keyboard
-     * @param view
+     * @param activity App activity
      */
     public static void closeKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -204,6 +206,14 @@ public class AppUtil {
      */
     public static String formatAjaxStatus(AjaxStatus status) {
         return "AJAX Response: " + status.getMessage() + " (" + status.getCode() + ")";
+    }
+
+    /**
+     * Show a pop-up message saying that the attempt to get data has failed.
+     * @param context App's context (activity)
+     */
+    public static void showFailedLoadToast(Context context) {
+        Toast.makeText(context, R.string.failed_load, Toast.LENGTH_SHORT).show();
     }
 
 }

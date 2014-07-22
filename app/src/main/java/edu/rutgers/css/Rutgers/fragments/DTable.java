@@ -121,7 +121,7 @@ public class DTable extends Fragment {
                         mAdapter.loadArray(result.getJSONArray("children"));
                     } catch (JSONException e) {
                         Log.w(dTag(), "onCreateView(): " + e.getMessage());
-                        Toast.makeText(getActivity(), getResources().getString(R.string.failed_load), Toast.LENGTH_LONG).show();
+                        AppUtil.showFailedLoadToast(getActivity());
                     }
                 }
             }).fail(new AndroidFailCallback<AjaxStatus>() {
@@ -133,7 +133,7 @@ public class DTable extends Fragment {
                 @Override
                 public void onFail(AjaxStatus status) {
                     Log.w(dTag(), AppUtil.formatAjaxStatus(status));
-                    Toast.makeText(mContext, R.string.failed_load, Toast.LENGTH_LONG).show();
+                    AppUtil.showFailedLoadToast(mContext);
                 }
             });
         }
@@ -151,7 +151,7 @@ public class DTable extends Fragment {
                     }
                     catch (JSONException e) {
                         Log.w(dTag(), "onCreateView(): " + e.getMessage());
-                        Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+                        AppUtil.showFailedLoadToast(getActivity());
                     }
                 }
             }).fail(new AndroidFailCallback<AjaxStatus>() {
@@ -163,7 +163,7 @@ public class DTable extends Fragment {
                 @Override
                 public void onFail(AjaxStatus status) {
                     Log.w(dTag(), AppUtil.formatAjaxStatus(status));
-                    Toast.makeText(mContext, R.string.failed_load, Toast.LENGTH_LONG).show();
+                    AppUtil.showFailedLoadToast(mContext);
                 }
             });
         }

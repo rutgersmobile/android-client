@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
@@ -125,7 +126,7 @@ public class BusRoutes extends Fragment {
 
             @Override
             public void onFail(OneReject result) {
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_SHORT).show();
+                AppUtil.showFailedLoadToast(getActivity());
                 Exception e = (Exception) result.getReject();
                 Log.w(TAG, e.getMessage());
             }

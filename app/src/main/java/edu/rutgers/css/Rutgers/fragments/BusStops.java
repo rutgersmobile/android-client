@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.SettingsActivity;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
@@ -162,9 +163,11 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 
             @Override
             public void onDone(MultipleResults results) {
-                for(OneResult result: results) {
-                    if(result.getPromise() == nbActiveStops) loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header), (JSONArray) result.getResult());
-                    else if(result.getPromise() == nwkActiveStops) loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header), (JSONArray) result.getResult());
+                for (OneResult result : results) {
+                    if (result.getPromise() == nbActiveStops)
+                        loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header), (JSONArray) result.getResult());
+                    else if (result.getPromise() == nwkActiveStops)
+                        loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header), (JSONArray) result.getResult());
                 }
             }
 
@@ -177,7 +180,7 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 
             @Override
             public void onFail(OneReject result) {
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_SHORT).show();
+                AppUtil.showFailedLoadToast(getActivity());
                 Exception e = (Exception) result.getReject();
                 Log.w(TAG, e.getMessage());
             }
