@@ -163,7 +163,7 @@ public class MainActivity extends FragmentActivity  implements
 				mDrawerListView.invalidateViews();
 				mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
 			}
-        	
+
         });
         
         /*

@@ -111,7 +111,7 @@ public class AppUtil {
 			// Get the full name of the user's home campus (default to NB if there's no config)
 			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
 			String userHome = AppUtil.getFullCampusTitle(context, sharedPref.getString("campus_list", context.getResources().getString(R.string.campus_nb_tag)));
-			Log.v(TAG, "User home: " + userHome);
+			//Log.v(TAG, "User home: " + userHome);
 			
 			try {
 				String titleHome = titles.getString("homeCampus");

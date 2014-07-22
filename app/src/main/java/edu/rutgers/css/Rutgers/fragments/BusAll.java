@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.fragments;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -14,10 +15,16 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import org.jdeferred.Promise;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.multiple.MultipleResults;
+import org.jdeferred.multiple.OneReject;
+import org.jdeferred.multiple.OneResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,17 +54,58 @@ public class BusAll extends Fragment {
 	}
 	
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
+        final Resources resources = getActivity().getResources();
+
 		mData = new ArrayList<RMenuPart>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
-		
-		loadAllRoutes("nb", getActivity().getResources().getString(R.string.bus_nb_all_routes_header));
-		loadAllStops("nb", getActivity().getResources().getString(R.string.bus_nb_all_stops_header));
-		loadAllRoutes("nwk", getActivity().getResources().getString(R.string.bus_nwk_all_routes_header));
-		loadAllStops("nwk", getActivity().getResources().getString(R.string.bus_nwk_all_stops_header));
-		
+
+        // Get promises for all route & stop information
+        final Promise nbRoutes = Nextbus.getAllRoutes("nb");
+        final Promise nbStops = Nextbus.getAllStops("nb");
+        final Promise nwkRoutes = Nextbus.getAllRoutes("nwk");
+        final Promise nwkStops = Nextbus.getAllStops("nwk");
+
+        // Synchronized load of all route & stop information
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new AndroidDoneCallback<MultipleResults>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onDone(MultipleResults results) {
+                Log.v(TAG, "# Results: " + results.size());
+
+                for(OneResult result: results) {
+                    if(result.getPromise() == nbRoutes) loadArray("nb", resources.getString(R.string.bus_nb_all_routes_header), "route", (JSONArray) result.getResult());
+                    else if(result.getPromise() == nwkRoutes) loadArray("nwk", resources.getString(R.string.bus_nwk_all_routes_header), "route", (JSONArray)result.getResult());
+                    else if(result.getPromise() == nbStops) loadArray("nb", resources.getString(R.string.bus_nb_all_stops_header), "stop", (JSONArray) result.getResult());
+                    else if(result.getPromise() == nwkStops) loadArray("nwk", resources.getString(R.string.bus_nwk_all_stops_header), "stop", (JSONArray) result.getResult());
+                }
+
+                // Set filter after info is re-loaded
+                if(savedInstanceState != null && savedInstanceState.getString("filter") != null) {
+                    mAdapter.getFilter().filter(savedInstanceState.getString("filter"));
+                }
+
+            }
+        }).fail(new AndroidFailCallback<OneReject>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onFail(OneReject result) {
+                Exception e = (Exception) result.getReject();
+                Log.w(TAG, e.getMessage());
+                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_SHORT).show();
+            }
+        });
 	}
 	
 	@Override
@@ -92,16 +140,6 @@ public class BusAll extends Fragment {
                 mFilterEditText.setText("");
             }
         });
-
-/*
-        // Restore filter text when possible
-        if(savedInstanceState != null) {
-            mFilterEditText.setText(savedInstanceState.getString("filter"));
-        }
-        else {
-            mFilterEditText.setText("");
-        }
-*/
 
 		// Set up list to accept clicks on route or stop rows
 		mListView = (ListView) v.findViewById(R.id.list);
@@ -140,108 +178,54 @@ public class BusAll extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putString("filter", mFilterEditText.getText().toString());
     }
-	
-	/**
-	 * Populate list with all configured bus routes for agency, with a section header for that agency
-	 * @param agencyTag Agency tag for API request
-	 * @param agencyHeader Header title that goes above these routes
-	 */
-	private void loadAllRoutes(final String agencyTag, final String agencyHeader) {
-		Nextbus.getAllRoutes(agencyTag).then(new AndroidDoneCallback<JSONArray>() {
-			
-			@Override
-			public void onDone(JSONArray data) {				
-				mAdapter.add(new SlideMenuHeader(agencyHeader));
-				
-				if(data.length() == 0) {
-					mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_routes)));
-					return;
-				}
-				
-				for(int i = 0; i < data.length(); i++) {
-					try {
-						JSONObject jsonObj = data.getJSONObject(i);
-						Bundle menuBundle = new Bundle();
-						menuBundle.putString("title", jsonObj.getString("title"));
-						menuBundle.putString("mode", "route");
-						menuBundle.putString("json", jsonObj.toString());
-						menuBundle.putString("agency", agencyTag);
-						SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
-						mAdapter.add(newMenuItem);
-					} catch (JSONException e) {
-						Log.e(TAG, "loadAllRoutes(): " + e.getMessage());
-					}
-				}
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<Exception>() {
 
-            @Override
-            public void onFail(Exception e) {
-                mAdapter.add(new SlideMenuHeader(agencyHeader));
-                mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+    /**
+     * Load array of bus stop or route info into the list.
+     * @param agencyTag Agency tag for API request
+     * @param agencyHeader Header title that goes above these stops/routes
+     * @param mode Specify "route" or "stop" mode
+     * @param data JSON array of bus info
+     */
+    private void loadArray(final String agencyTag, final String agencyHeader, final String mode, final JSONArray data) {
+        mAdapter.add(new SlideMenuHeader(agencyHeader));
+
+        if(data == null) {
+            mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+            return;
+        }
+        else if(data.length() == 0) {
+            if(mode.equalsIgnoreCase("stop")) mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_stops)));
+            else if(mode.equalsIgnoreCase("route")) mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_routes)));
+            return;
+        }
+
+        for(int i = 0; i < data.length(); i++) {
+            try {
+                loadItem(data.getJSONObject(i), agencyTag, mode);
+            } catch (JSONException e) {
+                Log.e(TAG, "loadAllStops() " + e.getMessage());
             }
+        }
+    }
 
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
-
-        });
-	}
-	
-	private void loadAllStops(final String agencyTag, final String agencyHeader) {
-		Nextbus.getAllStops(agencyTag).then(new AndroidDoneCallback<JSONArray>() {
-			
-			@Override
-			public void onDone(JSONArray data) {				
-				mAdapter.add(new SlideMenuHeader(agencyHeader));
-				
-				if(data.length() == 0) {
-					mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_stops)));
-					return;
-				}
-				
-				for(int i = 0; i < data.length(); i++) {
-					try {
-						JSONObject jsonObj = data.getJSONObject(i);
-						Bundle menuBundle = new Bundle();
-						menuBundle.putString("title", jsonObj.getString("title"));
-						menuBundle.putString("mode", "stop");
-						menuBundle.putString("json", jsonObj.toString());
-						menuBundle.putString("agency", agencyTag);
-						SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
-						mAdapter.add(newMenuItem);
-					} catch (JSONException e) {
-						Log.e(TAG, "loadAllStops() " + e.getMessage());
-					}
-				}
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<Exception>() {
-
-			@Override
-			public void onFail(Exception e) {
-				mAdapter.add(new SlideMenuHeader(agencyHeader));
-				mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		});		
-	}
+    /**
+     * Load a single JSON item into the list
+     * @param jsonObj JSON object
+     * @param agencyTag Agency tag for API request
+     * @param mode Specify "route" or "stop" mode
+     */
+    private void loadItem(JSONObject jsonObj, String agencyTag, String mode) {
+        try {
+            Bundle menuBundle = new Bundle();
+            menuBundle.putString("title", jsonObj.getString("title"));
+            menuBundle.putString("mode", mode);
+            menuBundle.putString("json", jsonObj.toString());
+            menuBundle.putString("agency", agencyTag);
+            SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
+            mAdapter.add(newMenuItem);
+        } catch (JSONException e) {
+            Log.w(TAG, "loadItem(): " + e.getMessage());
+        }
+    }
 	
 }
