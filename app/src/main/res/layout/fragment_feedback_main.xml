@@ -15,6 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingRight="2dp"
+            android:visibility="gone"
             android:text="@string/feedback_email_caption"
             android:textSize="16sp" />
 
@@ -39,6 +40,7 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="@string/feedback_select_subject"
+            android:visibility="gone"
 	        android:textSize="16sp" />
 	
 	    <Spinner
@@ -62,6 +64,7 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="@string/feedback_select_channel"
+            android:visibility="gone"
 	        android:textSize="16sp" />
 	
 	    <Spinner
