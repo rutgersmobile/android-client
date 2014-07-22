@@ -17,9 +17,14 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.jdeferred.Promise;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.multiple.MultipleResults;
+import org.jdeferred.multiple.OneReject;
+import org.jdeferred.multiple.OneResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,13 +125,13 @@ public class BusStops extends Fragment implements LocationClientReceiver {
         // Get current campus tag (default to "nb")
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
-                getActivity().getResources().getString(R.string.campus_nb_tag));
+                getResources().getString(R.string.campus_nb_tag));
 
         mAdapter.clear();
         mNearbyRowCount = 0;
 
         // Add "nearby stops" header
-        mAdapter.add(new SlideMenuHeader(getActivity().getResources().getString(R.string.bus_nearby_active_stops_header)));
+        mAdapter.add(new SlideMenuHeader(getResources().getString(R.string.bus_nearby_active_stops_header)));
 
         // Start the update thread when screen is active
 		mUpdateTimer = new Timer();
@@ -143,8 +148,39 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 		}, 0, 1000 * REFRESH_INTERVAL);
 
         // Load active stops
-        loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header));
-        loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header));
+        final Promise nbActiveStops = Nextbus.getActiveStops("nb");
+        final Promise nwkActiveStops = Nextbus.getActiveStops("nwk");
+
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(nbActiveStops, nwkActiveStops).done(new AndroidDoneCallback<MultipleResults>() {
+
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onDone(MultipleResults results) {
+                for(OneResult result: results) {
+                    if(result.getPromise() == nbActiveStops) loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header), (JSONArray) result.getResult());
+                    else if(result.getPromise() == nwkActiveStops) loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header), (JSONArray) result.getResult());
+                }
+            }
+
+        }).fail(new AndroidFailCallback<OneReject>() {
+
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+            @Override
+            public void onFail(OneReject result) {
+                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
+            }
+
+        });
+
 	}
 	
 	@Override
@@ -178,53 +214,31 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 	 * @param agencyTag Agency tag for API request
 	 * @param agencyTitle Header title that goes above these stops
 	 */
-	private void loadAgency(final String agencyTag, final String agencyTitle) {
-		Nextbus.getActiveStops(agencyTag).then(new AndroidDoneCallback<JSONArray>() {
-			
-			@Override
-			public void onDone(JSONArray data) {
-				//Log.d(TAG, agencyTag + ": " + data.toString());
-				
-				mAdapter.add(new SlideMenuHeader(agencyTitle));
-				
-				if(data.length() == 0) {
-					mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_active_stops)));
-					return;
-				}
-				
-				// Create an item in the list for each stop from the array
-				for(int i = 0; i < data.length(); i++) {
-					try {
-						JSONObject jsonObj = data.getJSONObject(i);
-						Bundle menuBundle = new Bundle();
-						menuBundle.putString("title", jsonObj.getString("title"));
-						menuBundle.putString("agency", agencyTag);
-						SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
-						mAdapter.add(newMenuItem);
-					} catch (JSONException e) {
-						Log.e(TAG, "loadAgency(): " + e.getMessage());
-					}
-				}
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<Exception>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+	private void loadAgency(final String agencyTag, final String agencyTitle, final JSONArray data) {
+        mAdapter.add(new SlideMenuHeader(agencyTitle));
 
-            @Override
-            public void onFail(Exception result) {
-                Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
-                mAdapter.add(new SlideMenuHeader(agencyTitle));
-                mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+        if(data == null) {
+            mAdapter.add(new SlideMenuItem(getResources().getString(R.string.failed_load_short)));
+        }
+		else if(data.length() == 0) {
+            mAdapter.add(new SlideMenuItem(getResources().getString(R.string.bus_no_active_stops)));
+            return;
+        }
+
+        // Create an item in the list for each stop from the array
+        for(int i = 0; i < data.length(); i++) {
+            try {
+                JSONObject jsonObj = data.getJSONObject(i);
+                Bundle menuBundle = new Bundle();
+                menuBundle.putString("title", jsonObj.getString("title"));
+                menuBundle.putString("agency", agencyTag);
+                SlideMenuItem newMenuItem = new SlideMenuItem(menuBundle);
+                mAdapter.add(newMenuItem);
+            } catch (JSONException e) {
+                Log.e(TAG, "loadAgency(): " + e.getMessage());
             }
-        });
+        }
+
 	}
 	
 	/**
@@ -249,7 +263,7 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 	 * @param agencyTag Agency tag for API request
 	 */
 	private void loadNearbyStops(final String agencyTag) {
-        final Resources res = getActivity().getResources();
+        final Resources res = getResources();
 
 		// Check for location services
 		if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {

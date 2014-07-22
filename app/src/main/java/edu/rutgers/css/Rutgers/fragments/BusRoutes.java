@@ -108,7 +108,7 @@ public class BusRoutes extends Fragment {
 				mAdapter.add(new SlideMenuHeader(agencyTitle));
 				
 				if(data.length() == 0) {
-					mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_active_routes)));
+					mAdapter.add(new SlideMenuItem(getResources().getString(R.string.bus_no_active_routes)));
 					return;
 				}
 				
@@ -142,7 +142,7 @@ public class BusRoutes extends Fragment {
             public void onFail(Exception result) {
                 Toast.makeText(getActivity(), R.string.failed_load, Toast.LENGTH_LONG).show();
                 mAdapter.add(new SlideMenuHeader(agencyTitle));
-                mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+                mAdapter.add(new SlideMenuItem(getResources().getString(R.string.failed_load_short)));
             }
         });
 	}

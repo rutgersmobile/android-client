@@ -57,7 +57,7 @@ public class BusAll extends Fragment {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        final Resources resources = getActivity().getResources();
+        final Resources resources = getResources();
 
 		mData = new ArrayList<RMenuPart>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
@@ -190,12 +190,12 @@ public class BusAll extends Fragment {
         mAdapter.add(new SlideMenuHeader(agencyHeader));
 
         if(data == null) {
-            mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.failed_load_short)));
+            mAdapter.add(new SlideMenuItem(getResources().getString(R.string.failed_load_short)));
             return;
         }
         else if(data.length() == 0) {
-            if(mode.equalsIgnoreCase("stop")) mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_stops)));
-            else if(mode.equalsIgnoreCase("route")) mAdapter.add(new SlideMenuItem(getActivity().getResources().getString(R.string.bus_no_configured_routes)));
+            if(mode.equalsIgnoreCase("stop")) mAdapter.add(new SlideMenuItem(getResources().getString(R.string.bus_no_configured_stops)));
+            else if(mode.equalsIgnoreCase("route")) mAdapter.add(new SlideMenuItem(getResources().getString(R.string.bus_no_configured_routes)));
             return;
         }
 
