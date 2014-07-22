@@ -63,7 +63,6 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     private ListView mListView;
     private JSONObject mPlaceDatabase;
     private ProgressBar mProgressCircle;
-    private View mProgressFade;
     private LocationClientProvider mLocationClientProvider;
 
 	public PlacesMain() {
@@ -145,7 +144,6 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
 		getActivity().setTitle(getResources().getString(R.string.places_title));
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        mProgressFade = v.findViewById(R.id.progressFade);
 
         mListView = (ListView) v.findViewById(R.id.listView);
         mListView.setAdapter(mAdapter);
@@ -212,6 +210,22 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     public void onResume() {
         super.onResume();
 
+        // Reload nearby places
+        loadNearbyPlaces();
+    }
+
+    @Override
+    public void onConnected(Bundle dataBundle) {
+        // When location services are restored, retry loading nearby places
+        loadNearbyPlaces();
+    }
+
+    @Override
+    public void onDisconnected() {
+
+    }
+
+    private void loadNearbyPlaces() {
         final Resources res = getResources();
 
         // Check for location services
@@ -294,25 +308,12 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
 
     }
 
-    @Override
-    public void onConnected(Bundle dataBundle) {
-        // When location services are restored, retry loading nearby places
-        this.onResume();
-    }
-
-    @Override
-    public void onDisconnected() {
-
-    }
-
     private void showProgressCircle() {
         mProgressCircle.setVisibility(View.VISIBLE);
-        //mProgressFade.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
         mProgressCircle.setVisibility(View.GONE);
-        //mProgressFade.setVisibility(View.GONE);
     }
 
 }

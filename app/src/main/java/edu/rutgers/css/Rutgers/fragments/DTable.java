@@ -32,7 +32,7 @@ import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Dynamic Table
- *
+ * Use {@link #dTag()} instead of TAG when logging
  */
 public class DTable extends Fragment {
 	

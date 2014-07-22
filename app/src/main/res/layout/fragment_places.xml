@@ -52,14 +52,6 @@
             android:indeterminateOnly="true"
             android:visibility="gone"
             android:id="@+id/progressCircle"/>
-        
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/light_gray"
-            android:alpha="0.4"
-            android:visibility="gone"
-            android:id="@+id/progressFade"/>
 
     </FrameLayout>
 

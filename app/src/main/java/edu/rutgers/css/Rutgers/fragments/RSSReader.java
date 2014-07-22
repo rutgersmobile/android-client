@@ -51,7 +51,8 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		mData = new ArrayList<RSSItem>();
 		mAdapter = new RSSAdapter(this.getActivity(), R.layout.rss_row, mData);
 
-        if(savedInstanceState != null) {
+        if(savedInstanceState != null && savedInstanceState.getSerializable("mData") != null) {
+            Log.v(TAG, "Restoring mData");
             mData.addAll((ArrayList<RSSItem>) savedInstanceState.getSerializable("mData"));
             mAdapter.notifyDataSetChanged();
             return;
@@ -120,7 +121,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("mData", mData);
+        if(!mData.isEmpty()) outState.putSerializable("mData", mData);
     }
 
 	@Override
