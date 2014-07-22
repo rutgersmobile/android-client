@@ -16,11 +16,11 @@
     <!-- Error messages -->
     <string name="failed_load">Getting data failed. Please try again later.</string>
     <string name="failed_load_short">Network error.</string>
-    <string name="failed_location">Getting location failed.</string>
+    <string name="failed_location">Couldn\'t get location.</string>
     <string name="failed_no_url">No URL supplied.</string>
     <string name="failed_internal">Internal error.</string>
     <string name="location_updates">Location Updates</string>
-    <string name="location_connecting">Getting location...</string>
+    <string name="location_connecting">Getting location&#8230;</string>
 
     <!-- Bus channel -->
     <string name="bus_title">Bus</string>

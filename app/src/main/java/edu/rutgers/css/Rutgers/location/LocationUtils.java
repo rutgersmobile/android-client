@@ -100,11 +100,12 @@ public final class LocationUtils {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
 
         if(resultCode == ConnectionResult.SUCCESS) {
-            Log.v(AppUtil.APPTAG, "Google Play services available.");
+            Log.v(TAG, "Google Play services available.");
             return true;
         }
         else {
             showErrorDialog(activity, resultCode);
+            Log.w(TAG, LocationServiceErrorMessages.getErrorString(activity, resultCode));
             return false;
         }
     }
