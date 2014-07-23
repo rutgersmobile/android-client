@@ -347,23 +347,23 @@ public class MainActivity extends FragmentActivity  implements
 
             // If the request code matches the code sent in onConnectionFailed
             case LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST :
-
                 switch (resultCode) {
                     // If Google Play services resolved the problem
                     case Activity.RESULT_OK:
-                        Log.d(AppUtil.APPTAG, "resolved by google play");
+                        Log.w(AppUtil.APPTAG, "Connection failure resolved by Google Play");
                         break;
 
                     // If any other result was returned by Google Play services
                     default:
-                        Log.d(AppUtil.APPTAG, "not resolved by google play");
+                        Log.w(AppUtil.APPTAG, "Connection failure not resolved by Google Play ("+resultCode+")");
                         break;
                 }
+                break;
 
             // If any other request code was received
             default:
                // Report that this Activity received an unknown requestCode
-               Log.d(AppUtil.APPTAG, "unknown request code " + requestCode);
+               Log.w(AppUtil.APPTAG, "Unknown request code: " + requestCode);
                break;
         }
     }
