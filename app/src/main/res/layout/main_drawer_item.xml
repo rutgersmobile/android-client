@@ -23,7 +23,6 @@
 			android:layout_toRightOf="@+id/icon"
 			android:text="@string/replace_me"
 			android:textSize="18sp"
-			android:textColor="@color/drawer_item_text"
-			android:fontFamily="DroidSans" />
+			android:textColor="@color/drawer_item_text"/>
     
 </RelativeLayout>

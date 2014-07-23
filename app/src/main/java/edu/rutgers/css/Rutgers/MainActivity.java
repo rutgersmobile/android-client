@@ -60,7 +60,7 @@ public class MainActivity extends FragmentActivity  implements
 		LocationClientProvider {
 	
 	private static final String TAG = "MainActivity";
-	private static final String SC_API = "https://rumobile.rutgers.edu/1/shortcuts.txt";
+	private static final String SC_API = AppUtil.API_BASE + "shortcuts.txt";
 
     private ChannelManager mChannelManager;
 	private LocationClient mLocationClient;
