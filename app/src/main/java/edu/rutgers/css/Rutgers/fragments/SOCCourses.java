@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
@@ -22,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.Schedule;
@@ -66,12 +69,12 @@ public class SOCCourses extends Fragment {
             public void onDone(JSONArray result) {
                 for (int i = 0; i < result.length(); i++) {
                     try {
-                        JSONObject course = result.getJSONObject(i);
+                        JSONObject courseJSON = result.getJSONObject(i);
                         Bundle courseItem = new Bundle();
-                        courseItem.putString("title", course.getString("courseNumber") + ": " + course.getString("title"));
-                        courseItem.putString("subjectCode", course.getString("subject"));
-                        courseItem.putString("courseNumber", course.getString("courseNumber"));
-                        courseItem.putString("campus", course.getString("campusCode"));
+                        courseItem.putString("title", courseJSON.getString("courseNumber") + ": " + courseJSON.getString("title"));
+                        courseItem.putString("subjectCode", courseJSON.getString("subject"));
+                        courseItem.putString("courseNumber", courseJSON.getString("courseNumber"));
+                        courseItem.putString("campus", courseJSON.getString("campusCode"));
                         courseItem.putString("semester", semester);
                         mAdapter.add(new SlideMenuItem(courseItem));
                     } catch (JSONException e) {
@@ -101,7 +104,7 @@ public class SOCCourses extends Fragment {
         Resources res = getResources();
         Bundle args = getArguments();
 
-        if(args.getString("subject") != null) getActivity().setTitle(args.getString("subject"));
+        if(args.getString("title") != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString("title")));
 
         EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
         ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);

@@ -31,7 +31,15 @@
 	    <item>@string/campus_rbhs_tag</item>
 	    <item>@string/campus_other_tag</item>
 	</string-array>
-		
+
+    <string name="role_undergrad_tag">undergrad</string>
+    <string name="role_grad_tag">grad</string>
+    <string name="role_prospect_tag">prospective</string>
+    <string name="role_facstaff_tag">facstaff</string>
+    <string name="role_parent_tag">parent</string>
+    <string name="role_alumni_tag">alumni</string>
+    <string name="role_friend_tag">friend</string>
+
 	<string name="pref_user_type_title">User Type</string>
 	<string-array name="pref_user_type_strings">
 	    <item>Undergraduate Student</item>
@@ -43,13 +51,13 @@
 	    <item>Friend</item>
 	</string-array>
 	<string-array name="pref_user_type_values">
-	    <item>undergrad</item>
-	    <item>grad</item>
-	    <item>prospective</item>
-	    <item>facstaff</item>
-	    <item>parent</item>
-	    <item>alumni</item>
-	    <item>friend</item>
+	    <item>@string/role_undergrad_tag</item>
+	    <item>@string/role_grad_tag</item>
+	    <item>@string/role_prospect_tag</item>
+	    <item>@string/role_facstaff_tag</item>
+	    <item>@string/role_parent_tag</item>
+	    <item>@string/role_alumni_tag</item>
+	    <item>@string/role_friend_tag</item>
 	</string-array>
 
     <!-- Notification settings -->
