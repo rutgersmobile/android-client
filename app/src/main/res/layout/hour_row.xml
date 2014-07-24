@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="wrap_content"
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/sublocTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"/>
+        android:layout_column="0"
+        android:maxLines="2"
+        android:paddingRight="10dp"
+        android:text="@string/replace_me"/>
 
     <TextView
         android:id="@+id/hoursTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"/>
+        android:layout_column="1"
+        android:text="@string/replace_me"/>
 
 </TableRow>
 

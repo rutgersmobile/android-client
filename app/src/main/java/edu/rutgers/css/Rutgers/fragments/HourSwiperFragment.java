@@ -12,10 +12,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.rutgers.css.Rutgers2.R;
 
@@ -50,13 +53,46 @@ public class HourSwiperFragment extends Fragment {
 			while(keys.hasNext()) {
 				String curKey = keys.next();
 				TableRow newTR = (TableRow) inflater.inflate(R.layout.hour_row, container, false);
-				TextView sublocTextView = (TextView) newTR.findViewById(R.id.sublocTextView);
-				TextView hoursTextView = (TextView) newTR.findViewById(R.id.hoursTextView);
-				sublocTextView.setText(curKey);
-                sublocTextView.setGravity(Gravity.LEFT);
-				hoursTextView.setText(hours.getString(curKey).replace(",", "\n"));
-                hoursTextView.setMaxLines(1 + StringUtils.countMatches(hours.getString(curKey), ","));
-                hoursTextView.setGravity(Gravity.RIGHT);
+
+                TextView sublocTextView = (TextView) newTR.findViewById(R.id.sublocTextView);
+                sublocTextView.setText(WordUtils.wrap(curKey,18));
+                sublocTextView.setMaxLines(2);
+
+                TextView hoursTextView = (TextView) newTR.findViewById(R.id.hoursTextView);
+
+                // Sometimes these are comma separated, sometimes not  ¯\_(ツ)_/¯
+                String hoursString = hours.getString(curKey);
+                if(StringUtils.startsWithIgnoreCase(hoursString, "closed")) {
+                    hoursTextView.setText(hoursString);
+                    hoursTextView.setMaxLines(1);
+                }
+                else if(StringUtils.countMatches(hoursString, ",") > 0) {
+                    hoursTextView.setText(hoursString.replace(",", "\n"));
+                    hoursTextView.setMaxLines(1 + StringUtils.countMatches(hoursString, ","));
+                }
+                else {
+                    StringBuilder builder = new StringBuilder();
+                    int matches = 0;
+
+                    // Here we go...
+                    Pattern pattern = Pattern.compile("\\d{1,2}(\\:\\d{2})?\\s?((A|P)M)? - \\d{1,2}(\\:\\d{2})?\\s?(A|P)M"); // Why? Because "9:30 - 11:30AM/7 - 10PM"
+                    Matcher matcher = pattern.matcher(hoursString);
+                    while(matcher.find()) {
+                        //Log.v(TAG, "Found " + matcher.group() + " at ("+matcher.start()+","+matcher.end()+")");
+                        builder.append(matcher.group() + "\n");
+                        matches++;
+                    }
+
+                    if(matches > 0) {
+                        hoursTextView.setText(StringUtils.chomp(builder.toString()));
+                        hoursTextView.setMaxLines(matches);
+                    }
+                    else {
+                        // ಥ_ಥ
+                        hoursTextView.setText(hoursString);
+                    }
+                }
+
 				hourSwiperTableLayout.addView(newTR);
 			}
 		} catch(JSONException e) {

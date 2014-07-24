@@ -187,6 +187,9 @@ public class RecreationDisplay extends Fragment {
                 int pos = getCurrentPos(mLocationHours);
                 mPager.setCurrentItem(pos, true);
             }
+
+            // Hide hours pager if there's nothing to display
+            if(mLocationHours.length() == 0) mPager.setVisibility(View.GONE);
         } catch (JSONException e) {
             Log.w(TAG, "displayInfo(): " + e.getMessage());
         }

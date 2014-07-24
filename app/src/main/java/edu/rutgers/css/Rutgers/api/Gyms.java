@@ -33,11 +33,21 @@ public class Gyms {
 	
 	private static final long expire = 1000 * 60 * 60 * 24; // Cache gym info for a day
 
+    /**
+     * Get the Gyms API.
+     * @return Gyms API JSON object
+     */
 	public static Promise<JSONObject, AjaxStatus, Double> getGyms() {
 		final Deferred<JSONObject, AjaxStatus, Double> d = new AndroidDeferredObject<JSONObject, AjaxStatus, Double>(Request.json(API_URL, expire), AndroidExecutionScope.BACKGROUND);
 		return d.promise();
 	}
-	
+
+    /**
+     * Get array of hours for sub-locations by date.
+     * @param locationJson Gym JSON from API
+     * @return JSON array of dates with hours by sub-location
+     * @throws JSONException
+     */
 	public static JSONArray getGymHours(JSONObject locationJson) throws JSONException {
 		ArrayList<String> dayKeys = new ArrayList<String>();
 		JSONObject dailyData = new JSONObject();
@@ -85,7 +95,7 @@ public class Gyms {
 	 * }
 	 * 
 	 * Note that JSON object keys are NOT SORTED. The keys are stored in a separate list and sorted
-	 * with {@link #sortDayKeys()}.
+	 * with {@link #sortDayKeys(ArrayList<String>)}. The sub-location names are NOT SORTED.
 	 * 
 	 * @param dayKeys List of strings to hold the sorted date keys
 	 * @param dailyData JSON object to hold the resulting JSON
