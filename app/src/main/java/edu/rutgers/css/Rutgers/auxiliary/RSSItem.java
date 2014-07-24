@@ -5,6 +5,7 @@ import android.util.Log;
 import com.androidquery.util.XmlDom;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -185,14 +186,7 @@ public class RSSItem implements Serializable {
 	 * @return Cleansed string
 	 */
 	private String removeTrailingNewline(String string) {
-		if(string == null) return null;
-		
-		if(string.charAt(string.length()-1) == '\n') {
-			return string.substring(0, string.length()-1);
-		}
-		else {
-			return string;
-		}
+		return StringUtils.chomp(string);
 	}
 
     private boolean isSameDay(Date d1, Date d2) {
