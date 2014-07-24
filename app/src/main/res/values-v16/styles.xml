@@ -5,6 +5,7 @@
     <style name="RutgersBaseTheme" parent="android:Theme.Holo.Light.DarkActionBar">
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
         <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
+        <item name="android:editTextStyle">@style/RobotoEditTextStyle</item>
     </style>
 
     <style name="RobotoTextViewStyle" parent="android:Widget.TextView">
@@ -12,6 +13,10 @@
     </style>
 
     <style name="RobotoButtonStyle" parent="android:Widget.Holo.Button">
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="RobotoEditTextStyle" parent="@android:style/Widget.EditText">
         <item name="android:fontFamily">sans-serif-light</item>
     </style>
 
