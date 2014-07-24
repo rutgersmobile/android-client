@@ -218,7 +218,8 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     @Override
     public void onConnected(Bundle dataBundle) {
         // When location services are restored, retry loading nearby places
-        loadNearbyPlaces();
+        // isAdded() is called to make sure the activity is attached first
+        if(isAdded()) loadNearbyPlaces();
     }
 
     @Override
