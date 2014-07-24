@@ -2,22 +2,31 @@
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:layout_weight="1">
 
     <TextView
         android:id="@+id/sublocTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_column="0"
-        android:maxLines="2"
+        android:layout_gravity="left"
+        android:layout_weight="1"
         android:paddingRight="10dp"
-        android:text="@string/replace_me"/>
+        android:text="@string/replace_me"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif"/>
 
     <TextView
         android:id="@+id/hoursTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_column="1"
+        android:layout_gravity="left"
+        android:layout_weight="1"
         android:text="@string/replace_me"/>
 
 </TableRow>

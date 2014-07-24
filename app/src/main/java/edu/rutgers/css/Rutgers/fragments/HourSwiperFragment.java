@@ -1,9 +1,9 @@
 package edu.rutgers.css.Rutgers.fragments;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,34 +41,41 @@ public class HourSwiperFragment extends Fragment {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.hour_swiper, container, false);
+		View v = inflater.inflate(R.layout.hour_swiper, container, false);
 		Bundle args = getArguments();
 		
-		LinearLayout hourSwiperTableLayout = (LinearLayout) rootView.findViewById(R.id.hourSwiperTableLayout);
+		LinearLayout hourSwiperTableLayout = (LinearLayout) v.findViewById(R.id.hourSwiperTableLayout);
 		
 		// Add hours rows here
 		try {
 			JSONObject hours = new JSONObject(args.getString("hours"));
 			Iterator<String> keys = hours.keys();
 			while(keys.hasNext()) {
-				String curKey = keys.next();
+				String curLocationKey = keys.next();
 				TableRow newTR = (TableRow) inflater.inflate(R.layout.hour_row, container, false);
 
+                // Set the sub-location title. Wrap at ~18 chars in portrait mode.
                 TextView sublocTextView = (TextView) newTR.findViewById(R.id.sublocTextView);
-                sublocTextView.setText(WordUtils.wrap(curKey,18));
-                sublocTextView.setMaxLines(2);
+                switch(getResources().getConfiguration().orientation) {
+                    case Configuration.ORIENTATION_PORTRAIT:
+                        sublocTextView.setText(WordUtils.wrap(curLocationKey,18));
+                        break;
+                    default:
+                        // The word wrap is unnecessary in landscape mode
+                        sublocTextView.setText(curLocationKey);
+                        break;
+                }
 
+                // Set the hours list for sub-location.
                 TextView hoursTextView = (TextView) newTR.findViewById(R.id.hoursTextView);
 
                 // Sometimes these are comma separated, sometimes not  ¯\_(ツ)_/¯
-                String hoursString = hours.getString(curKey);
+                String hoursString = StringUtils.trim(hours.getString(curLocationKey));
                 if(StringUtils.startsWithIgnoreCase(hoursString, "closed")) {
                     hoursTextView.setText(hoursString);
-                    hoursTextView.setMaxLines(1);
                 }
                 else if(StringUtils.countMatches(hoursString, ",") > 0) {
                     hoursTextView.setText(hoursString.replace(",", "\n"));
-                    hoursTextView.setMaxLines(1 + StringUtils.countMatches(hoursString, ","));
                 }
                 else {
                     StringBuilder builder = new StringBuilder();
@@ -79,13 +86,12 @@ public class HourSwiperFragment extends Fragment {
                     Matcher matcher = pattern.matcher(hoursString);
                     while(matcher.find()) {
                         //Log.v(TAG, "Found " + matcher.group() + " at ("+matcher.start()+","+matcher.end()+")");
-                        builder.append(matcher.group() + "\n");
+                        builder.append(StringUtils.trim(matcher.group()) + "\n");
                         matches++;
                     }
 
                     if(matches > 0) {
                         hoursTextView.setText(StringUtils.chomp(builder.toString()));
-                        hoursTextView.setMaxLines(matches);
                     }
                     else {
                         // ಥ_ಥ
@@ -99,7 +105,7 @@ public class HourSwiperFragment extends Fragment {
 			Log.w(TAG, "onCreateView(): " + e.getMessage());
 		}
 		
-		return rootView;
+		return v;
 	}
 	
 }
