@@ -75,7 +75,7 @@ public class HourSwiperFragment extends Fragment {
                     int matches = 0;
 
                     // Here we go...
-                    Pattern pattern = Pattern.compile("\\d{1,2}(\\:\\d{2})?\\s?((A|P)M)? - \\d{1,2}(\\:\\d{2})?\\s?(A|P)M"); // Why? Because "9:30 - 11:30AM/7 - 10PM"
+                    Pattern pattern = Pattern.compile("\\d{1,2}(\\:\\d{2})?\\s?((A|P)M)?\\s?-\\s?\\d{1,2}(\\:\\d{2})?\\s?(A|P)M"); // Why? Because "9:30 - 11:30AM/7 - 10PM"
                     Matcher matcher = pattern.matcher(hoursString);
                     while(matcher.find()) {
                         //Log.v(TAG, "Found " + matcher.group() + " at ("+matcher.start()+","+matcher.end()+")");
