@@ -7,4 +7,5 @@ public interface RMenuPart {
 	public abstract boolean getIsCategory();
 	public abstract boolean getIsClickable();
 	public abstract Drawable getDrawable();
+    public abstract int getColorResId();
 }

@@ -70,5 +70,10 @@ public class FoodItem implements RMenuPart {
 	public String toString() {
 		return this.title;
 	}
+
+    @Override
+    public int getColorResId() {
+        return 0;
+    }
 	
 }

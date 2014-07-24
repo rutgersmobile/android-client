@@ -27,6 +27,10 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
+import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
+import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
+import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -37,8 +41,8 @@ public class FoodMain extends Fragment {
 
 	private static final String TAG = "FoodMain";
 	private ListView mListView;
-	private List<String> mDiningHalls;
-	private ArrayAdapter<String> mDiningHallAdapter;
+    private ArrayList<RMenuPart> mData;
+    private RMenuAdapter mAdapter;
 
 	public FoodMain() {
 		// Required empty public constructor
@@ -47,52 +51,60 @@ public class FoodMain extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		mDiningHalls= new ArrayList<String>();
-		mDiningHallAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.title_row, R.id.title, mDiningHalls);
+
+        mData = new ArrayList<RMenuPart>(4);
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.basic_item, R.layout.basic_section_header, mData);
 		
 		// Get dining hall data and populate the top-level menu with names of the dining halls
 		Dining.getDiningHalls().done(new AndroidDoneCallback<JSONArray>() {
 
-			@Override
-			public void onDone(JSONArray halls) {
-				try {
-					// Only add dining halls which have meals available
-					for(int i = 0; i < halls.length(); i++) {
-						JSONObject curHall = halls.getJSONObject(i);
-						if(Dining.hasActiveMeals(curHall)) {
-							mDiningHallAdapter.add(curHall.getString("location_name"));
-						}
-					}
-					
-					// Display a message if there no halls were listed
-					if(mDiningHallAdapter.getCount() == 0) {
-						Toast.makeText(getActivity().getApplicationContext(), R.string.no_halls_available, Toast.LENGTH_SHORT).show();
-					}
-				}
-				catch(JSONException e) {
-					Log.e(TAG, e.getMessage());
-				}
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public void onDone(JSONArray halls) {
+                try {
+                    mAdapter.add(new SlideMenuHeader(getResources().getString(R.string.campus_nb_full)));
 
-			@Override
-			public void onFail(AjaxStatus e) {
+                    // Add dining halls - if they have no active meals, make them unclickable
+                    for (int i = 0; i < halls.length(); i++) {
+                        JSONObject curHall = halls.getJSONObject(i);
+                        Bundle hallBundle = new Bundle();
+                        hallBundle.putString("title", curHall.getString("location_name"));
+                        hallBundle.putString("location", curHall.getString("location_name"));
+
+                        if (Dining.hasActiveMeals(curHall)) {
+                            mAdapter.add(new SlideMenuItem(hallBundle));
+                        } else {
+                            SlideMenuItem inactiveHallItem = new SlideMenuItem(hallBundle);
+                            inactiveHallItem.setClickable(false);
+                            inactiveHallItem.setColorResId(R.color.light_gray);
+                            mAdapter.add(inactiveHallItem);
+                        }
+                    }
+
+                    loadStaticHalls();
+                } catch (JSONException e) {
+                    Log.w(TAG, e.getMessage());
+                    Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+        }).fail(new AndroidFailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus e) {
                 AppUtil.showFailedLoadToast(getActivity());
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		});
+            }
+
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+        });
 	}
 	
 	@Override
@@ -103,14 +115,15 @@ public class FoodMain extends Fragment {
 		Bundle args = getArguments();
 		getActivity().setTitle(args.getString("title"));
 
-		mListView.setAdapter(mDiningHallAdapter);		
+		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Bundle args = new Bundle();
-				args.putString("component", "foodhall");
-				args.putString("location", (String) parent.getAdapter().getItem(position));
+                Bundle clickedArgs = ((SlideMenuItem) parent.getAdapter().getItem(position)).getArgs();
+
+				Bundle args = new Bundle(clickedArgs);
+				if(args.getString("component") == null) args.putString("component", "foodhall");
 				
 				ComponentFactory.getInstance().switchFragments(args);
 			}
@@ -119,5 +132,22 @@ public class FoodMain extends Fragment {
 		
 		return v;
 	}
+
+    private void loadStaticHalls() {
+        Bundle nwk = new Bundle();
+        nwk.putString("component", "text");
+        nwk.putString("title", "Stonsby Commons & Eatery");
+        nwk.putString("data", "Students enjoy all-you-care-to-eat dining in a contemporary setting. This exciting location offers fresh made menu items, cutting-edge American entrees, ethnically-inspired foods, vegetarian selections and lots more... \n\nThe Commons also features upscale Premium entrees and fresh baked goods from our in house bakery or local vendors.");
+
+        Bundle cam = new Bundle();
+        cam.putString("component", "text");
+        cam.putString("title", "Gateway Cafe");
+        cam.putString("data", "The Camden Dining Hall, the Gateway Cafe, is located at the Camden Campus Center.\n\nIt offers a variety of eateries in one convenient location.");
+
+        mAdapter.add(new SlideMenuHeader(getResources().getString(R.string.campus_nwk_full)));
+        mAdapter.add(new SlideMenuItem(nwk));
+        mAdapter.add(new SlideMenuHeader(getResources().getString(R.string.campus_cam_full)));
+        mAdapter.add(new SlideMenuItem(cam));
+    }
 	
 }

@@ -49,6 +49,11 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
         poppedRows = new ArrayList<Integer>();
 	}
 
+    @Override
+    public boolean areAllItemsEnabled() {
+        return false;
+    }
+
     /**
      * Toggle pop-down on a row.
      * @param position Position of the row to toggle

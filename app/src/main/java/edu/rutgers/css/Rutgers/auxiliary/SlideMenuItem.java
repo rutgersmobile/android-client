@@ -1,12 +1,13 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 /**
  * Helper class for passing arguments to Component Factory. Fields include:
- * 	title		(required)
- * 	component	(required)
+ * 	title		(required for displaying in list)
+ * 	component	(required when passed to component factory)
  * 	url			(optional)
  * 	data		(optional JSON object or array in string representation)
  */
@@ -15,6 +16,7 @@ public class SlideMenuItem implements RMenuPart {
 	private Bundle args;
 	private boolean clickable;
 	private Drawable drawable;
+    private int colorResId;
 	
 	/**
 	 * Initialize menu item with a custom argument bundle.
@@ -23,66 +25,7 @@ public class SlideMenuItem implements RMenuPart {
 	public SlideMenuItem(Bundle args) {
 		this.setArgs(args);
 		this.setClickable(true);
-	}
-	
-	/**
-	 * Initialize menu item with a channel title and component ID.
-	 * @param title Title of the channel/item
-	 * @param component Component identifier
-	 */
-	public SlideMenuItem(String title, String component) {
-		Bundle args = new Bundle();
-		args.putString("title", title);
-		args.putString("component", component);
-		this.setArgs(args);
-		this.setClickable(true);
-	}
-	
-	/**
-	 * Initialize menu item with channel title, component ID, and a URL argument.
-	 * @param title Title of the channel/item
-	 * @param component Component identifier
-	 * @param url URL argument passed to component
-	 */
-	public SlideMenuItem(String title, String component, String url) {
-		Bundle args = new Bundle();
-		args.putString("title", title);
-		args.putString("component", component);
-		args.putString("url", url);
-		this.setArgs(args);
-		this.setClickable(true);
-	}
-	
-	/**
-	 * Initialize menu item with a channel title and component ID.
-	 * @param title Title of the channel/item
-	 * @param component Component identifier
-	 * @param drawable Item icon
-	 */
-	public SlideMenuItem(String title, String component, Drawable drawable) {
-		Bundle args = new Bundle();
-		args.putString("title", title);
-		args.putString("component", component);
-		this.setArgs(args);
-		this.setClickable(true);
-		this.setDrawable(drawable);
-	}
-	
-	/**
-	 * Initialize menu item with channel title, component ID, and a URL argument.
-	 * @param title Title of the channel/item
-	 * @param component Component identifier
-	 * @param url URL argument passed to component
-	 * @param drawable Item icon
-	 */
-	public SlideMenuItem(String title, String component, String url, Drawable drawable) {
-		Bundle args = new Bundle();
-		args.putString("title", title);
-		args.putString("component", component);
-		args.putString("url", url);
-		this.setArgs(args);
-		this.setClickable(true);
-		this.setDrawable(drawable);
+        this.setColorResId(args.getInt("color"));
 	}
 	
 	/**
@@ -94,6 +37,7 @@ public class SlideMenuItem implements RMenuPart {
 		args.putString("title", title);
 		this.setArgs(args);
 		this.setClickable(false);
+        this.setColorResId(args.getInt("color"));
 	}
 	
 	public void setClickable(boolean b) {
@@ -134,5 +78,13 @@ public class SlideMenuItem implements RMenuPart {
 	public boolean getIsCategory() {
 		return false;
 	}
-	
+
+    public void setColorResId(int resId) {
+        this.colorResId = resId;
+    }
+
+    public int getColorResId() {
+        return this.colorResId;
+    }
+
 }

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import org.jdeferred.android.AndroidDoneCallback;
@@ -123,10 +124,11 @@ public class FoodMeal extends Fragment {
 		mListView = (ListView) v.findViewById(R.id.food_meal_list);
 		
 		// Set title
-		if(args.get("location") != null && args.get("meal") != null)
+		if(args.getString("location") != null && args.getString("meal") != null)
 			getActivity().setTitle(args.getString("location") + " - " + args.getString("meal"));
 
 		mListView.setAdapter(foodItemAdapter);
+        mListView.setOnItemClickListener(null);
 
 		return v;
 	}

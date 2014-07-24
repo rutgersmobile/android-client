@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.auxiliary;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,6 +84,14 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 		// Set item text
 		if(holder.titleTextView != null) holder.titleTextView.setText(curItem.getTitle());
 		else Log.e(TAG, "R.id.title not found");
+
+        // Set item text color
+        if(curItem.getColorResId() != 0) {
+            holder.titleTextView.setTextColor(getContext().getResources().getColor(curItem.getColorResId()));
+        }
+        else {
+            holder.titleTextView.setTextColor(holder.titleTextView.getTextColors().getDefaultColor());
+        }
 		
 		// Set icon
 		if(holder.iconImageView != null){
@@ -115,5 +124,10 @@ public class RMenuAdapter extends ArrayAdapter<RMenuPart> {
 	    else if(getItem(position).getIsClickable()) return ViewTypes.CLICKABLE.ordinal();
 	    else return ViewTypes.UNCLICKABLE.ordinal();
 	}
-	
+
+    @Override
+    public boolean areAllItemsEnabled() {
+        return false;
+    }
+
 }

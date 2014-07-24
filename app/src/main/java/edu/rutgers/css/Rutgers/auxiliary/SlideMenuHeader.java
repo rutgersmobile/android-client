@@ -29,5 +29,10 @@ public class SlideMenuHeader implements RMenuPart {
 	public Drawable getDrawable() {
 		return null;
 	}
+
+    @Override
+    public int getColorResId() {
+        return 0;
+    }
 	
 }

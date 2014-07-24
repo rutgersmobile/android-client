@@ -61,8 +61,9 @@ public class FoodHall extends Fragment {
 						
 					for(int j = 0; j < meals.length(); j++) {
 						JSONObject curMeal = meals.getJSONObject(j);
-						if(curMeal.getBoolean("meal_avail"))
-							menuAdapter.add(curMeal.getString("meal_name"));
+						if(curMeal.getBoolean("meal_avail")) {
+                            menuAdapter.add(curMeal.getString("meal_name"));
+                        }
 					}		
 				}
 				catch(JSONException e) {
