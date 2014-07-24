@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -27,18 +28,20 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
+import edu.rutgers.css.Rutgers.auxiliary.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
 public class SOCCourses extends Fragment {
 
-    private static final String TAG = "SOCDisplay";
+    private static final String TAG = "SOCCourses";
 
-    private ArrayList<RMenuPart> mData;
-    private RMenuAdapter mAdapter;
+    private ArrayList<JSONObject> mData;
+    private ScheduleAdapter mAdapter;
     private ListView mListView;
 
     public SOCCourses() {
@@ -50,8 +53,8 @@ public class SOCCourses extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        mData = new ArrayList<RMenuPart>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
+        mData = new ArrayList<JSONObject>();
+        mAdapter = new ScheduleAdapter(getActivity(), R.layout.course_row, mData);
 
         final String campus = args.getString("campus");
         final String level = args.getString("level");
@@ -69,14 +72,7 @@ public class SOCCourses extends Fragment {
             public void onDone(JSONArray result) {
                 for (int i = 0; i < result.length(); i++) {
                     try {
-                        JSONObject courseJSON = result.getJSONObject(i);
-                        Bundle courseItem = new Bundle();
-                        courseItem.putString("title", courseJSON.getString("courseNumber") + ": " + courseJSON.getString("title"));
-                        courseItem.putString("subjectCode", courseJSON.getString("subject"));
-                        courseItem.putString("courseNumber", courseJSON.getString("courseNumber"));
-                        courseItem.putString("campus", courseJSON.getString("campusCode"));
-                        courseItem.putString("semester", semester);
-                        mAdapter.add(new SlideMenuItem(courseItem));
+                        mAdapter.add(result.getJSONObject(i));
                     } catch (JSONException e) {
                         Log.w(TAG, "getSubjects(): " + e.getMessage());
                     }
@@ -111,6 +107,19 @@ public class SOCCourses extends Fragment {
 
         mListView = (ListView) v.findViewById(R.id.list);
         mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
+
+                Bundle args = new Bundle();
+                args.putString("component","text");
+                args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
+                args.putString("data", clickedJSON.toString());
+
+                ComponentFactory.getInstance().switchFragments(args);
+            }
+        });
 
         return v;
     }

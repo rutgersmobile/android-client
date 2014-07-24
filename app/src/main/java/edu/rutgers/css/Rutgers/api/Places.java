@@ -240,7 +240,7 @@ public class Places {
 
                             // If the place is within range, add it to the list
                             if (results[0] < AppUtil.NEARBY_RANGE) {
-                                Log.v(TAG, "Found nearby place " + curPlaceKey);
+                                //Log.v(TAG, "Found nearby place " + curPlaceKey);
                                 curPlace.put("distance", ""+results[0]);
                                 result.add(new PlaceTuple(curPlaceKey, curPlace));
                             }

@@ -89,7 +89,7 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 		LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		Prediction prediction = this.getItem(position);
         Resources res = getContext().getResources();
-		ViewHolder holder = null;
+		ViewHolder holder;
 		
 		// Make new data holder or get existing one
 		if(convertView == null) {

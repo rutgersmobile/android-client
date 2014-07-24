@@ -6,8 +6,10 @@ import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.Promise;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +30,12 @@ public class Schedule {
 
     private static final String TAG = "ScheduleAPI";
     private static final String BASE_URL = "https://sis.rutgers.edu/soc/";
+
+    public static final String CODE_CAMPUS_NB = "NB";
+    public static final String CODE_CAMPUS_NWK = "NK";
+    public static final String CODE_CAMPUS_CAM = "CM";
+    public static final String CODE_LEVEL_UNDERGRAD = "U";
+    public static final String CODE_LEVEL_GRAD = "G";
 
     /**
      * Get current semester configuration from API.
@@ -124,6 +132,37 @@ public class Schedule {
     private static String invalidSemester(String semesterCode) {
         Log.w(TAG, "Invalid semester code \"" + semesterCode + "\"");
         return semesterCode;
+    }
+
+    /**
+     * Get the number of open visible sections, as well as the total number of visible sections.
+     * @param courseJSON Course to count visible sections for
+     * @return Int array with index 0 being the number of open sections, and index 1 being the total
+     */
+    public static int[] countVisibleSections(JSONObject courseJSON) {
+        int count = 0;
+        int openCount = 0;
+
+        if(courseJSON != null) {
+            try {
+                JSONArray sections = courseJSON.getJSONArray("sections");
+                for (int i = 0; i < sections.length(); i++) {
+                    JSONObject section = sections.getJSONObject(i);
+                    if (section.getString("printed").equalsIgnoreCase("Y")) {
+                        if (section.getBoolean("openStatus")) openCount++;
+                        count++;
+                    }
+                }
+            } catch (JSONException e) {
+                Log.w(TAG, "countVisibleOpenSections(): " + e.getMessage());
+            }
+        }
+
+        int[] result = new int[2];
+        result[0] = openCount;
+        result[1] = count;
+
+        return result;
     }
 
 }

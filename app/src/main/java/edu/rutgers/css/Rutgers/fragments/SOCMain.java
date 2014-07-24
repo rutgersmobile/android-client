@@ -38,22 +38,25 @@ import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
+import edu.rutgers.css.Rutgers.auxiliary.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
 public class SOCMain extends Fragment implements ActionBar.OnNavigationListener {
 
-    private static final String TAG = "SOCDisplay";
+    private static final String TAG = "SOCMain";
 
     private SpinnerAdapter mSpinnerAdapter;
     private ArrayAdapter<String> mSemesterAdapter;
-    private ArrayList<RMenuPart> mData;
-    private RMenuAdapter mAdapter;
+    private ArrayList<JSONObject> mData;
+    private ScheduleAdapter mAdapter;
     private ListView mListView;
 
     private String mCampus;
     private String mSemester;
     private String mLevel;
+
+    private int mSpinnerIndex;
 
     private JSONArray mSemesters;
 
@@ -62,28 +65,29 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Resources res = getResources();
 
         mSpinnerAdapter = new ArrayAdapter<String>(getActivity().getActionBar().getThemedContext(), android.R.layout.simple_dropdown_item_1line);
 
-        mData = new ArrayList<RMenuPart>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
+        mData = new ArrayList<JSONObject>();
+        mAdapter = new ScheduleAdapter(getActivity(), R.layout.course_row, mData);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String userHome = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, getResources().getString(R.string.campus_nb_tag));
         String userLevel = sharedPref.getString(SettingsActivity.KEY_PREF_USER_TYPE, getResources().getString(R.string.role_undergrad_tag));
 
         // Pick default campus code based on prefs (fall back to New Brunswick)
-        if(userHome.equals(res.getString(R.string.campus_nb_tag))) mCampus = "NB";
-        else if(userHome.equals(res.getString(R.string.campus_nwk_tag))) mCampus = "NK";
-        else mCampus = "NB";
+        if(userHome.equals(res.getString(R.string.campus_nb_tag))) mCampus = Schedule.CODE_CAMPUS_NB;
+        else if(userHome.equals(res.getString(R.string.campus_nwk_tag))) mCampus = Schedule.CODE_CAMPUS_NWK;
+        else if(userHome.equals(res.getString(R.string.campus_cam_tag))) mCampus = Schedule.CODE_CAMPUS_CAM;
+        else mCampus = Schedule.CODE_CAMPUS_NB;
 
         // Pick default user-level code based on prefs (fall back to Undergrad)
-        if(userLevel.equals(res.getString(R.string.role_undergrad_tag))) mLevel = "U";
-        else if(userLevel.equals(res.getString(R.string.role_grad_tag))) mLevel = "G";
-        else mLevel = "U";
+        if(userLevel.equals(res.getString(R.string.role_undergrad_tag))) mLevel = Schedule.CODE_LEVEL_UNDERGRAD;
+        else if(userLevel.equals(res.getString(R.string.role_grad_tag))) mLevel = Schedule.CODE_LEVEL_GRAD;
+        else mLevel = Schedule.CODE_LEVEL_UNDERGRAD;
 
         // Get the available & current semesters
         Schedule.getSemesters().done(new AndroidDoneCallback<JSONObject>() {
@@ -108,10 +112,15 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
                     }
                     Log.v(TAG, "Default semester: " + Schedule.translateSemester(semesters.getString(defaultSemester)));
 
-                    getActivity().getActionBar().setSelectedNavigationItem(defaultSemester);
-
-                    // Campus, level, and semester have been set. Load the subjects now.
-                    loadSubjects();
+                    // Campus, level, and semester have been set. Setting spinner loads the subjects.
+                    if(savedInstanceState != null) {
+                        mSpinnerIndex = savedInstanceState.getInt("mSpinnerIndex");
+                    }
+                    else {
+                        mSpinnerIndex = defaultSemester;
+                    }
+                    getActivity().getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+                    getActivity().getActionBar().setSelectedNavigationItem(mSpinnerIndex);
                 } catch (JSONException e) {
                     Log.w(TAG, "getSemesters(): " + e.getMessage());
                 }
@@ -147,15 +156,23 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Bundle clicked = ((SlideMenuItem)(parent.getItemAtPosition(position))).getArgs();
-
+                JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
                 Bundle args = new Bundle();
-                args.putString("component", "soccourses");
                 args.putString("campus", mCampus);
                 args.putString("semester", mSemester);
                 args.putString("level", mLevel);
-                args.putString("title", clicked.getString("title"));
-                args.putString("subjectCode", clicked.getString("code"));
+
+                if(!clickedJSON.has("courseNumber")) {
+                    args.putString("component", "soccourses");
+                    args.putString("title", clickedJSON.optString("description") + " (" + clickedJSON.optString("code") + ")");
+                    args.putString("subjectCode", clickedJSON.optString("code"));
+                }
+                else {
+                    // TODO - this is for when a course is clicked if it comes up through special filter
+                    args.putString("component", "text");
+                    args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
+                    args.putString("data", clickedJSON.toString());
+                }
 
                 ComponentFactory.getInstance().switchFragments(args);
             }
@@ -196,14 +213,22 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
     public void onResume() {
         super.onResume();
         getActivity().getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        getActivity().getActionBar().setSelectedNavigationItem(mSpinnerIndex);
         getActivity().getActionBar().setListNavigationCallbacks(mSpinnerAdapter, this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        mSpinnerIndex = getActivity().getActionBar().getSelectedNavigationIndex();
         getActivity().getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         getActivity().getActionBar().setListNavigationCallbacks(null, null);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("mSpinnerIndex", getActivity().getActionBar().getSelectedNavigationIndex());
     }
 
     @Override
@@ -214,7 +239,7 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
     }
 
     private void loadSubjects() {
-        Log.v(TAG, "Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
+        Log.v(TAG, "Loaded subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
         mAdapter.clear();
 
         Schedule.getSubjects(mCampus, mLevel, mSemester).done(new AndroidDoneCallback<JSONArray>() {
@@ -226,14 +251,10 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
 
             @Override
             public void onDone(JSONArray result) {
+                mAdapter.clear();
                 for (int i = 0; i < result.length(); i++) {
                     try {
-                        JSONObject subject = result.getJSONObject(i);
-                        Bundle subItem = new Bundle();
-                        subItem.putString("title", subject.getString("description") + " (" + subject.getString("code") + ")");
-                        subItem.putString("description", subject.getString("description"));
-                        subItem.putString("code", subject.getString("code"));
-                        mAdapter.add(new SlideMenuItem(subItem));
+                        mAdapter.add(result.getJSONObject(i));
                     } catch (JSONException e) {
                         Log.w(TAG, "getSubjects(): " + e.getMessage());
                     }
