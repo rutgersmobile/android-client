@@ -205,7 +205,8 @@ public class BusStops extends Fragment implements LocationClientReceiver {
         Log.v(TAG, "Received onConnected");
 
         // Location services reconnected - retry loading nearby stops
-        loadNearbyStops(mCurrentCampus);
+        // isAdded() makes sure this isn't called before the activity has been attached
+        if(isAdded()) loadNearbyStops(mCurrentCampus);
     }
 
     @Override
