@@ -28,6 +28,7 @@ import edu.rutgers.css.Rutgers.fragments.RecreationDisplay;
 import edu.rutgers.css.Rutgers.fragments.RecreationMain;
 import edu.rutgers.css.Rutgers.fragments.SOCCourses;
 import edu.rutgers.css.Rutgers.fragments.SOCMain;
+import edu.rutgers.css.Rutgers.fragments.SOCSections;
 import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers2.R;
@@ -73,6 +74,7 @@ public class ComponentFactory {
         // SOC views
         fragmentTable.put("soc", SOCMain.class);
         fragmentTable.put("soccourses", SOCCourses.class);
+        fragmentTable.put("socsections", SOCSections.class);
 
         // Other views
 		fragmentTable.put("ruinfo", RUInfoMain.class);

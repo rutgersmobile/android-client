@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.AppUtil;
@@ -40,7 +41,7 @@ public class SOCCourses extends Fragment {
 
     private static final String TAG = "SOCCourses";
 
-    private ArrayList<JSONObject> mData;
+    private List<JSONObject> mData;
     private ScheduleAdapter mAdapter;
     private ListView mListView;
 
@@ -102,6 +103,8 @@ public class SOCCourses extends Fragment {
 
         if(args.getString("title") != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString("title")));
 
+        final String semester = args.getString("semester");
+
         EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
         ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
 
@@ -113,9 +116,10 @@ public class SOCCourses extends Fragment {
                 JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
 
                 Bundle args = new Bundle();
-                args.putString("component","text");
+                args.putString("component","socsections");
                 args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
                 args.putString("data", clickedJSON.toString());
+                args.putString("semester", semester);
 
                 ComponentFactory.getInstance().switchFragments(args);
             }

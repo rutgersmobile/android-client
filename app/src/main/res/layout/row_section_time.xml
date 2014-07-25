@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="4dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingLeft="-12dp"
+        android:paddingRight="12dp"
+        android:gravity="right"
+        android:text="@string/replace_me"
+        android:id="@+id/dayTextView"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingRight="12dp"
+        android:gravity="left"
+        android:text="@string/replace_me"
+        android:id="@+id/timeTextView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingRight="12dp"
+        android:gravity="left"
+        android:text="@string/replace_me"
+        android:id="@+id/locationTextView"
+        android:textStyle="bold" />
+
+</LinearLayout>

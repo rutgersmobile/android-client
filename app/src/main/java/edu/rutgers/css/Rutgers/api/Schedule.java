@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.api;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
@@ -8,12 +9,6 @@ import org.jdeferred.Promise;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import edu.rutgers.css.Rutgers.AppUtil;
 
 /**
  * Created by jamchamb on 7/17/14.
@@ -29,7 +24,8 @@ import edu.rutgers.css.Rutgers.AppUtil;
 public class Schedule {
 
     private static final String TAG = "ScheduleAPI";
-    private static final String BASE_URL = "https://sis.rutgers.edu/soc/";
+    private static final String SOC_BASE_URL = "https://sis.rutgers.edu/soc/";
+    private static final String WEBREG_BASE_URL = "https://sims.rutgers.edu/webreg/";
 
     public static final String CODE_CAMPUS_NB = "NB";
     public static final String CODE_CAMPUS_NWK = "NK";
@@ -53,7 +49,7 @@ public class Schedule {
      * @return Array of course subjects
      */
     public static Promise<JSONArray, AjaxStatus, Double> getSubjects(String campus, String level, String semester) {
-        String reqUrl = BASE_URL + "subjects.json?semester=" + semester + "&campus=" + campus + "&level=" + level;
+        String reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semester + "&campus=" + campus + "&level=" + level;
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_HOUR);
     }
 
@@ -66,7 +62,7 @@ public class Schedule {
      * @return Array of courses for a subject
      */
     public static Promise<JSONArray, AjaxStatus, Double> getCourses(String campus, String level, String semester, String subjectCode) {
-        String reqUrl = BASE_URL + "courses.json?semester=" + semester + "&campus=" + campus + "&level=" + level + "&subject=" + subjectCode;
+        String reqUrl = SOC_BASE_URL + "courses.json?semester=" + semester + "&campus=" + campus + "&level=" + level + "&subject=" + subjectCode;
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_HOUR);
     }
 
@@ -79,7 +75,7 @@ public class Schedule {
      * @return JSON Object for one course
      */
     public static Promise<JSONObject, AjaxStatus, Double> getCourse(String campus, String semester, String subjectCode, String courseCode) {
-        String reqUrl = BASE_URL + "course.json?semester=" + semester + "&campus=" + campus + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+        String reqUrl = SOC_BASE_URL + "course.json?semester=" + semester + "&campus=" + campus + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         return Request.json(reqUrl, Request.CACHE_ONE_HOUR);
     }
 
@@ -163,6 +159,21 @@ public class Schedule {
         result[1] = count;
 
         return result;
+    }
+
+    /**
+     * Open WebReg registration for this course section in the browser.
+     * @param semester Semester code (e.g. 72014 for Summer 2014)
+     * @param index Section index number
+     */
+    public static void openRegistrationWindow(String semester, String index) {
+        String url = WEBREG_BASE_URL + "editSchedule.htm?login=cas&semesterSelection=" + semester + "&indexList=" + index;
+
+        Bundle args = new Bundle();
+        args.putString("component", "www");
+        args.putString("url", url);
+
+        ComponentFactory.getInstance().switchFragments(args);
     }
 
 }

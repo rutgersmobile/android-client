@@ -31,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.SettingsActivity;
@@ -48,7 +49,7 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
 
     private SpinnerAdapter mSpinnerAdapter;
     private ArrayAdapter<String> mSemesterAdapter;
-    private ArrayList<JSONObject> mData;
+    private List<JSONObject> mData;
     private ScheduleAdapter mAdapter;
     private ListView mListView;
 
@@ -169,7 +170,7 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
                 }
                 else {
                     // TODO - this is for when a course is clicked if it comes up through special filter
-                    args.putString("component", "text");
+                    args.putString("component", "socsections");
                     args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
                     args.putString("data", clickedJSON.toString());
                 }
@@ -212,9 +213,13 @@ public class SOCMain extends Fragment implements ActionBar.OnNavigationListener 
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        getActivity().getActionBar().setSelectedNavigationItem(mSpinnerIndex);
-        getActivity().getActionBar().setListNavigationCallbacks(mSpinnerAdapter, this);
+
+        // Restore action bar spinner if visible
+        if(isVisible()) {
+            getActivity().getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+            getActivity().getActionBar().setSelectedNavigationItem(mSpinnerIndex);
+            getActivity().getActionBar().setListNavigationCallbacks(mSpinnerAdapter, this);
+        }
     }
 
     @Override
