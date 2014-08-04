@@ -88,6 +88,11 @@ public class MainActivity extends FragmentActivity  implements
 
         mLocationListeners = new ArrayList<LocationClientReceiver>();
 
+        // **********
+        // DEBUG ONLY
+        // **********
+        //getSupportFragmentManager().enableDebugLogging(true);
+
 		/*
 		 * Set default settings the first time the app is run
 		 */
@@ -219,6 +224,8 @@ public class MainActivity extends FragmentActivity  implements
 	
 	@Override
 	public void onBackPressed() {
+        Log.d(TAG, "Back button pressed. Current top of backstack: " + AppUtil.backStackPeek(getSupportFragmentManager()));
+
         // If drawer is open, intercept back press to close drawer
         if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
             mDrawerLayout.closeDrawer(mDrawerListView);
@@ -226,10 +233,15 @@ public class MainActivity extends FragmentActivity  implements
         }
 
 		// If web display is active, send back button presses to it for navigating browser history
-		Fragment webView = getSupportFragmentManager().findFragmentByTag("www");
-		if (webView != null && webView.isVisible()) {
-			if(((WebDisplay) webView).backPress()) return;
-		}
+        if("www".equalsIgnoreCase(AppUtil.backStackPeek(getSupportFragmentManager()))) {
+            Fragment webView = getSupportFragmentManager().findFragmentByTag("www");
+            if (webView != null && webView.isVisible()) {
+                if(((WebDisplay) webView).backPress()) {
+                    Log.d(TAG, "Triggered WebView back button");
+                    return;
+                }
+            }
+        }
 
         // Default back press behavior (go back in fragments, etc.)
 		super.onBackPressed();

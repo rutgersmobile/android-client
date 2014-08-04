@@ -9,6 +9,7 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -214,6 +215,18 @@ public class AppUtil {
      */
     public static void showFailedLoadToast(Context context) {
         Toast.makeText(context, R.string.failed_load, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Get the tag for the fragment on top of the stack.
+     * @param fragmentManager App's {@link android.support.v4.app.FragmentManager}
+     * @return Name that was supplied to {@link android.support.v4.app.FragmentManager #addToBackStack(java.lang.String)}.
+     */
+    public static String backStackPeek(FragmentManager fragmentManager) {
+        if(fragmentManager == null || fragmentManager.getBackStackEntryCount() == 0) return null;
+
+        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount()-1);
+        return backStackEntry.getName();
     }
 
 }
