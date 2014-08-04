@@ -86,7 +86,7 @@ public class WebDisplay extends Fragment {
         }
 
         // Check for saved web view state first
-        if(savedInstanceState != null) {
+        if(savedInstanceState != null && savedInstanceState.containsKey("mCurrentURL")) {
             mCurrentURL = savedInstanceState.getString("mCurrentURL");
             mWebView.restoreState(savedInstanceState);
         }
@@ -191,8 +191,10 @@ public class WebDisplay extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("mCurrentURL", mCurrentURL);
-        mWebView.saveState(outState);
+        if(mWebView != null) {
+            outState.putString("mCurrentURL", mCurrentURL);
+            mWebView.saveState(outState);
+        }
     }
 
 	/**
