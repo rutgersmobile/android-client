@@ -72,17 +72,19 @@ public class HourSwiperFragment extends Fragment {
                 // Sometimes these are comma separated, sometimes not  ¯\_(ツ)_/¯
                 String hoursString = StringUtils.trim(hours.getString(curLocationKey));
                 if(StringUtils.startsWithIgnoreCase(hoursString, "closed")) {
-                    hoursTextView.setText(hoursString);
+                    setHoursTextView(hoursTextView, hoursString);
                 }
                 else if(StringUtils.countMatches(hoursString, ",") > 0) {
-                    hoursTextView.setText(hoursString.replace(",", "\n"));
+                    setHoursTextView(hoursTextView, hoursString.replace(",", "\n"));
                 }
                 else {
                     StringBuilder builder = new StringBuilder();
                     int matches = 0;
 
-                    // Here we go...
-                    Pattern pattern = Pattern.compile("\\d{1,2}(\\:\\d{2})?\\s?((A|P)M)?\\s?-\\s?\\d{1,2}(\\:\\d{2})?\\s?(A|P)M"); // Why? Because "9:30 - 11:30AM/7 - 10PM"
+                    // This matches something like "9:00AM - 10:00AM" with or without spaces in between the time and AM/PM
+                    // or in between the times and the separating dash, with the first AM/PM optional, and with the minutes
+                    // optional because you will encounter input like "9:30 - 11:30AM/7 - 10PM".
+                    Pattern pattern = Pattern.compile("\\d{1,2}(\\:\\d{2})?\\s?((A|P)M)?\\s?-\\s?\\d{1,2}(\\:\\d{2})?\\s?(A|P)M");
                     Matcher matcher = pattern.matcher(hoursString);
                     while(matcher.find()) {
                         //Log.v(TAG, "Found " + matcher.group() + " at ("+matcher.start()+","+matcher.end()+")");
@@ -91,11 +93,11 @@ public class HourSwiperFragment extends Fragment {
                     }
 
                     if(matches > 0) {
-                        hoursTextView.setText(StringUtils.chomp(builder.toString()));
+                        setHoursTextView(hoursTextView, StringUtils.chomp(builder.toString()));
                     }
                     else {
                         // ಥ_ಥ
-                        hoursTextView.setText(hoursString);
+                        setHoursTextView(hoursTextView, hoursString);
                     }
                 }
 
@@ -107,5 +109,10 @@ public class HourSwiperFragment extends Fragment {
 		
 		return v;
 	}
-	
+
+    private void setHoursTextView(TextView hoursTextView, String string) {
+        //hoursTextView.setText(WordUtils.wrap(string, 19));
+        hoursTextView.setText(string);
+    }
+
 }

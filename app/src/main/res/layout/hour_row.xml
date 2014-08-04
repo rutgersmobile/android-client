@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_column="0"
-        android:layout_gravity="left"
+        android:gravity="left"
         android:layout_weight="1"
         android:paddingRight="10dp"
         android:text="@string/replace_me"
@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_column="1"
-        android:layout_gravity="left"
+        android:gravity="right"
         android:layout_weight="1"
         android:text="@string/replace_me"/>
 
