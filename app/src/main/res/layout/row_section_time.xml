@@ -15,7 +15,8 @@
         android:gravity="right"
         android:text="@string/replace_me"
         android:id="@+id/dayTextView"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-bold"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -34,6 +35,7 @@
         android:gravity="left"
         android:text="@string/replace_me"
         android:id="@+id/locationTextView"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-bold"/>
 
 </LinearLayout>

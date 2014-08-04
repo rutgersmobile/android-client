@@ -17,6 +17,11 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
         <item name="android:actionBarStyle">@style/RutgersActionBar</item>
         <item name="android:actionMenuTextColor">@color/white</item>
+        <item name="android:listViewStyle">@style/RutgersListViewStyle</item>
+    </style>
+
+    <style name="RutgersListViewStyle" parent="@android:style/Widget.Holo.Light.ListView">
+        <!-- <item name="android:background">@color/lighter_gray</item> -->
     </style>
 
     <!-- ActionBar styles -->

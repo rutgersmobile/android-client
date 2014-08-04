@@ -5,7 +5,7 @@
     <string name="app_name">Rutgers</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_single_fragment">SingleFragmentActivity</string>
-    <string name="replace_me">REPLACE</string>
+    <string name="replace_me">Replace!</string>
     <string name="share">Share</string>
     <string name="send">Send</string>
     <string name="drawer_open">Open</string>
@@ -138,7 +138,7 @@
     <!-- Schedule of Classes -->
     <string name="soc_title">Schedule of Classes</string>
     <string name="soc_error_index">Invalid course index.</string>
-
+    <string name="soc_select">Select</string>
 
     <!-- Other channel titles -->
     <string name="news_title">News</string>

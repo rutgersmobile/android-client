@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical" >
 
 	<TextView
@@ -11,6 +11,6 @@
         android:padding="10dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@android:color/holo_red_dark"
-       	android:textStyle="bold" />
+        android:text="@string/replace_me"/>
 
 </LinearLayout>
