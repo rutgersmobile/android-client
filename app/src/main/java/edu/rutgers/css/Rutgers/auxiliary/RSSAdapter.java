@@ -66,7 +66,16 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		
 		// Populate RSS row layout elements
 		mHolder.titleTextView.setText(curItem.getTitle());
-		mHolder.dateTextView.setText(curItem.getDate());
+
+        if(curItem.getDate() != null && !curItem.getDate().isEmpty()) {
+            mHolder.dateTextView.setText(curItem.getDate());
+            mHolder.dateTextView.setVisibility(View.VISIBLE);
+        }
+        else {
+            mHolder.dateTextView.setVisibility(View.GONE);
+            mHolder.dateTextView.setText(null);
+        }
+
 		mHolder.descriptionTextView.setText(curItem.getDescription());
 		//mHolder.authorTextView.setText(curItem.getAuthor());
 		
