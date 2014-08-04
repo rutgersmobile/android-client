@@ -104,25 +104,39 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
             for(int i = 0; i < meetingTimes.length(); i++) {
                 JSONObject meetingTime = meetingTimes.getJSONObject(i);
 
+                // If all the text is null, we should discard the view. Set this to true if any
+                // actual text is added.
+                boolean keepView = false;
+
+                // Meeting time row (e.g. M 12:30-1:50 HCK 110)
                 View timeRow = (View) layoutInflater.inflate(R.layout.row_section_time, null);
                 TextView dayTextView = (TextView) timeRow.findViewById(R.id.dayTextView);
                 TextView timeTextView = (TextView) timeRow.findViewById(R.id.timeTextView);
                 TextView locationTextView = (TextView) timeRow.findViewById(R.id.locationTextView);
 
-                dayTextView.setText(meetingTime.getString("meetingDay"));
+                if(!meetingTime.isNull("meetingDay")) {
+                    dayTextView.setText(meetingTime.getString("meetingDay"));
+                    keepView = true;
+                }
 
                 // TODO Format this
-                timeTextView.setText(meetingTime.getString("startTime") + " - " + meetingTime.getString("endTime"));
+                if(!meetingTime.isNull("startTime") && !meetingTime.isNull("endTime")) {
+                    timeTextView.setText(meetingTime.getString("startTime") + " - " + meetingTime.getString("endTime"));
+                    keepView = true;
+                }
 
-                // I hate JavaScript. I hate JSON.
+                // I LOVE JSON <3
                 StringBuilder locationBuilder = new StringBuilder();
                 String[] mess = new String[3];
-                mess[0] = meetingTime.getString("campusAbbrev");
-                mess[1] = meetingTime.getString("buildingCode");
-                mess[2] = meetingTime.getString("roomNumber");
+                mess[0] = "campusAbbrev";
+                mess[1] = "buildingCode";
+                mess[2] = "roomNumber";
 
-                for(int weakAssVars = 0; weakAssVars < mess.length; weakAssVars++) {
-                    if(!mess[weakAssVars].equalsIgnoreCase("null")) locationBuilder.append(mess[weakAssVars] + " ");
+                for(int teletubbies = 0; teletubbies < mess.length; teletubbies++) {
+                    if(!meetingTime.isNull(mess[teletubbies])) {
+                        locationBuilder.append(meetingTime.getString(mess[teletubbies]) + " ");
+                        keepView = true;
+                    }
                     /*
                                 ___              |\            .---.             _
                                ( o )            |'_\           \ V /            | |
@@ -141,9 +155,9 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
                 String location = StringUtils.trim(locationBuilder.toString());
 
-                locationTextView.setText(location);
+                if(!location.isEmpty()) locationTextView.setText(location);
 
-                holder.meetingTimesLayout.addView(timeRow);
+                if(keepView) holder.meetingTimesLayout.addView(timeRow);
             }
         } catch (JSONException e) {
             Log.w(TAG, "getView(): " + e.getMessage());
