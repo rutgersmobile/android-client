@@ -206,7 +206,22 @@ public class AppUtil {
      * @return Custom string describing status
      */
     public static String formatAjaxStatus(AjaxStatus status) {
-        return "AJAX Response: " + status.getMessage() + " (" + status.getCode() + ")";
+        String translateStatusCode;
+        switch(status.getCode()) {
+            case AjaxStatus.NETWORK_ERROR:
+                translateStatusCode = "NETWORK_ERROR";
+                break;
+            case AjaxStatus.AUTH_ERROR:
+                translateStatusCode = "AUTH_ERROR";
+                break;
+            case AjaxStatus.TRANSFORM_ERROR:
+                translateStatusCode = "TRANSFORM_ERROR";
+                break;
+            default:
+                translateStatusCode = "other";
+        }
+
+        return "AJAX Response: " + status.getMessage() + " (" + status.getCode() + ": " + translateStatusCode + ")";
     }
 
     /**
