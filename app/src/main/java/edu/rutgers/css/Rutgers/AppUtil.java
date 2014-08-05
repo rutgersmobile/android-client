@@ -214,7 +214,8 @@ public class AppUtil {
      * @param context App's context (activity)
      */
     public static void showFailedLoadToast(Context context) {
-        Toast.makeText(context, R.string.failed_load, Toast.LENGTH_SHORT).show();
+        if(context != null) Toast.makeText(context, R.string.failed_load, Toast.LENGTH_SHORT).show();
+        Log.w(TAG, "showFailedLoadToast(): context null");
     }
 
     /**
