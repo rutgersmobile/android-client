@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.fragments;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
@@ -21,9 +20,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
-import org.jdeferred.ProgressCallback;
+import com.google.android.gms.common.GooglePlayServicesClient;
+
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidAlwaysCallback;
 import org.jdeferred.android.AndroidDoneCallback;
@@ -42,7 +41,6 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers.api.Places.PlaceTuple;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
-import edu.rutgers.css.Rutgers.auxiliary.LocationClientReceiver;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
@@ -53,7 +51,7 @@ import edu.rutgers.css.Rutgers2.R;
  * Main Places component: displays a text field with auto-complete information from places database.
  * User enters a building name and selects from list; selection sent to place display component.
  */
-public class PlacesMain extends Fragment implements LocationClientReceiver {
+public class PlacesMain extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
 
 	private static final String TAG = "PlacesMain";
 
@@ -62,7 +60,6 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
 	private ArrayList<RMenuPart> mData;
     private RMenuAdapter mAdapter;
     private ListView mListView;
-    private JSONObject mPlaceDatabase;
     private ProgressBar mProgressCircle;
     private LocationClientProvider mLocationClientProvider;
 
@@ -73,6 +70,7 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        Log.i(TAG, "Attaching to activity");
         try {
             mLocationClientProvider = (LocationClientProvider) activity;
             mLocationClientProvider.registerListener(this);
@@ -82,6 +80,13 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
         }
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.i(TAG, "Detaching from activity");
+        mLocationClientProvider = null;
+    }
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -89,13 +94,16 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
 		mSearchList = new ArrayList<PlaceTuple>();
 		mSearchAdapter = new ArrayAdapter<PlaceTuple>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSearchList);
 
+        // Get nearby places & populate nearby places list
+        mData = new ArrayList<RMenuPart>();
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
+
+        // TODO This needs to be cancelled when the screen rotates
         // Populate search list & list of nearby places
 		Places.getPlaces().done(new AndroidDoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject json) {
-				mPlaceDatabase = json;
-				
 				// Grab "all" field and add title from each object inside
                 @SuppressWarnings("unchecked")
                 Iterator<String> curKey = json.keys();
@@ -132,9 +140,6 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
 
         });
 
-        // Get nearby places & populate nearby places list
-        mData = new ArrayList<RMenuPart>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
     }
 	
 	@Override
@@ -216,10 +221,13 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     }
 
     @Override
-    public void onConnected(Bundle dataBundle) {
-        // When location services are restored, retry loading nearby places
-        // isAdded() is called to make sure the activity is attached first
-        if(isAdded()) loadNearbyPlaces();
+    public void onConnected(Bundle connectionHint) {
+        Log.i(TAG, "Connected to services");
+
+        // When location services are restored, retry loading nearby places.
+        // Make sure this isn't called before the activity has been attached
+        // or before onCreate() has ran.
+        if(mData != null && isAdded()) loadNearbyPlaces();
     }
 
     @Override
@@ -311,11 +319,11 @@ public class PlacesMain extends Fragment implements LocationClientReceiver {
     }
 
     private void showProgressCircle() {
-        mProgressCircle.setVisibility(View.VISIBLE);
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        mProgressCircle.setVisibility(View.GONE);
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

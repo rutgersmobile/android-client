@@ -32,7 +32,8 @@ public class Places {
 	private static final String TAG = "PlacesAPI";
 	private static final String API_URL = AppUtil.API_BASE + "places.txt";
 	private static final long expire = Request.CACHE_ONE_HOUR * 24; // Cache data for a day
-	
+
+    private static boolean isSetup;
 	private static Promise<Object, AjaxStatus, Object> configured;
 	private static JSONObject mPlacesConf;
 
@@ -81,7 +82,11 @@ public class Places {
     /**
 	 * Grab the places API data.
 	 */
-	private static void setup() {
+	private static synchronized void setup() {
+
+        if(isSetup) return;
+        isSetup = true;
+
 		// Get JSON object from places API
 		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
@@ -107,8 +112,11 @@ public class Places {
 		
 			@Override
 			public void onFail(AjaxStatus e) {
+
 				Log.e(TAG, AppUtil.formatAjaxStatus(e));
 				confd.reject(e);
+                isSetup = false;
+
 			}
 			
 			@Override

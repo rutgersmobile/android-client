@@ -494,7 +494,7 @@ public class Nextbus {
 	public static Promise<JSONObject, Exception, Double> getStopsByTitleNear(final String agency, final double sourceLat, final double sourceLon) {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
-		
+
 		configured.then(new AndroidDoneCallback<Object>() {
 			
 			@Override

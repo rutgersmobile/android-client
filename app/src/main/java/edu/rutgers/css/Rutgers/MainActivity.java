@@ -40,7 +40,6 @@ import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
-import edu.rutgers.css.Rutgers.auxiliary.LocationClientReceiver;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
@@ -69,7 +68,7 @@ public class MainActivity extends FragmentActivity  implements
 	private ActionBarDrawerToggle mDrawerToggle;
 	private RMenuAdapter mDrawerAdapter;
 
-    private ArrayList<LocationClientReceiver> mLocationListeners;
+    private ArrayList<GooglePlayServicesClient.ConnectionCallbacks> mLocationListeners;
 	
 	/**
 	 * For providing the location client to fragments
@@ -86,7 +85,7 @@ public class MainActivity extends FragmentActivity  implements
 		setContentView(R.layout.activity_main);
 		Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
 
-        mLocationListeners = new ArrayList<LocationClientReceiver>();
+        mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
 
         // **********
         // DEBUG ONLY
@@ -201,14 +200,20 @@ public class MainActivity extends FragmentActivity  implements
 		super.onStart();
 		
 		// Connect to location services when activity becomes visible
+        for(GooglePlayServicesClient.ConnectionCallbacks listener: mLocationListeners) {
+            mLocationClient.registerConnectionCallbacks(listener);
+        }
 		mLocationClient.connect();
 	}
 	
 	@Override
 	protected void onStop() {
 		// Disconnect from location services when activity is no longer visible
+        for(GooglePlayServicesClient.ConnectionCallbacks listener: mLocationListeners) {
+            mLocationClient.unregisterConnectionCallbacks(listener);
+        }
 		mLocationClient.disconnect();
-		
+
 		super.onStop();
 	}
 	
@@ -305,37 +310,32 @@ public class MainActivity extends FragmentActivity  implements
 	}
 
     @Override
-    public void registerListener(LocationClientReceiver listener) {
+    public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
+        Log.i(TAG, "Registering location listener: " + listener.toString());
         if(mLocationListeners == null) {
-            mLocationListeners = new ArrayList<LocationClientReceiver>();
+            mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
         }
 
         mLocationListeners.add(listener);
     }
 
     /**
-     * Play services connected - notify listeners
+     * Play services connected
      * @param dataBundle
      */
 	@Override
 	public void onConnected(Bundle dataBundle) {
-		Log.i(AppUtil.APPTAG, "Connected to Google Play services.");
-		for(LocationClientReceiver listener: mLocationListeners) {
-            listener.onConnected(dataBundle);
-        }
+		Log.i(TAG, "Connected to Google Play services.");
 	}
 	
 	@Override
 	public void onDisconnected() {
-		Log.i(AppUtil.APPTAG, "Disconnected from Google Play services");
-        for(LocationClientReceiver listener: mLocationListeners) {
-            listener.onDisconnected();
-        }
+		Log.i(TAG, "Disconnected from Google Play services");
 	}
 	
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.v(TAG, "Attempting to resolve Play Services connection failure");
+        Log.w(TAG, "Attempting to resolve Play Services connection failure");
 		if(connectionResult.hasResolution()) {
 			try {
 				connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);

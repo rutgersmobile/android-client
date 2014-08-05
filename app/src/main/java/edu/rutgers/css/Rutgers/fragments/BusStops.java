@@ -15,7 +15,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import com.google.android.gms.common.GooglePlayServicesClient;
 
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
@@ -39,14 +40,13 @@ import edu.rutgers.css.Rutgers.SettingsActivity;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
-import edu.rutgers.css.Rutgers.auxiliary.LocationClientReceiver;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
 import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
 import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusStops extends Fragment implements LocationClientReceiver {
+public class BusStops extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
 
 	private static final String TAG = "BusStops";
 	private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
@@ -201,12 +201,13 @@ public class BusStops extends Fragment implements LocationClientReceiver {
 	}
 
     @Override
-    public void onConnected(Bundle dataBundle) {
+    public void onConnected(Bundle connectionHint) {
         Log.v(TAG, "Received onConnected");
 
         // Location services reconnected - retry loading nearby stops
-        // isAdded() makes sure this isn't called before the activity has been attached
-        if(isAdded()) loadNearbyStops(mCurrentCampus);
+        // Make sure this isn't called before the activity has been attached
+        // or before onCreate() has ran.
+        if(mData != null && isAdded()) loadNearbyStops(mCurrentCampus);
     }
 
     @Override
