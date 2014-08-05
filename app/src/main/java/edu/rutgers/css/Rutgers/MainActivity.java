@@ -85,7 +85,7 @@ public class MainActivity extends FragmentActivity  implements
 		setContentView(R.layout.activity_main);
 		Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
 
-        mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
+        if(mLocationListeners == null) mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
 
         // **********
         // DEBUG ONLY
