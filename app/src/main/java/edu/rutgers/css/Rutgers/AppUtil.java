@@ -239,10 +239,20 @@ public class AppUtil {
      * @return Name that was supplied to {@link android.support.v4.app.FragmentManager #addToBackStack(java.lang.String)}.
      */
     public static String backStackPeek(FragmentManager fragmentManager) {
-        if(fragmentManager == null || fragmentManager.getBackStackEntryCount() == 0) return null;
+        if(fragmentManager == null || fragmentManager.getBackStackEntryCount() == 0) {
+            if(fragmentManager == null) Log.v(TAG, "Null fragment manager");
+            else Log.v(TAG, "Backstack empty");
+            return null;
+        }
 
         FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount()-1);
+        Log.v(TAG, "Top of backstack: " + backStackEntry.getName());
         return backStackEntry.getName();
+    }
+
+    public static boolean isOnTop(String handle, FragmentManager fragmentManager) {
+        if(handle == null) return false;
+        return handle.equalsIgnoreCase(backStackPeek(fragmentManager));
     }
 
 }

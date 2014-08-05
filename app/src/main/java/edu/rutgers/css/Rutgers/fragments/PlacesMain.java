@@ -216,8 +216,13 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     public void onResume() {
         super.onResume();
 
+        // Don't update the screen if the places fragment isn't on top
+        if(!AppUtil.isOnTop("places", getActivity().getSupportFragmentManager())) {
+            Log.v(TAG, "Not on top, not updating nearby places");
+        }
         // Reload nearby places
-        loadNearbyPlaces();
+        else loadNearbyPlaces();
+
     }
 
     @Override
@@ -227,7 +232,13 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         // When location services are restored, retry loading nearby places.
         // Make sure this isn't called before the activity has been attached
         // or before onCreate() has ran.
-        if(mData != null && isAdded()) loadNearbyPlaces();
+        if(mData != null && isAdded()) {
+            // Don't update the screen if the places fragment isn't on top
+            if(!AppUtil.isOnTop("places", getActivity().getSupportFragmentManager())) {
+                Log.v(TAG, "Not on top, not updating nearby places");
+            }
+            else loadNearbyPlaces();
+        }
     }
 
     @Override

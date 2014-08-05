@@ -495,6 +495,12 @@ public class Nextbus {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 
+        if(agency == null) {
+            Log.e(TAG, "getStopsByTitleNear(): agency tag not set");
+            d.reject(new Exception("Agency tag not set"));
+            return d.promise();
+        }
+
 		configured.then(new AndroidDoneCallback<Object>() {
 			
 			@Override

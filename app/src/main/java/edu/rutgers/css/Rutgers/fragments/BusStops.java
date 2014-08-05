@@ -67,6 +67,7 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
     @Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
+        Log.i(TAG, "Attaching to activity");
 		try {
 			mLocationClientProvider = (LocationClientProvider) activity;
             mLocationClientProvider.registerListener(this);
@@ -76,6 +77,13 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 		}
 	}
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.i(TAG, "Detaching from activity");
+        mLocationClientProvider = null;
+    }
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -83,6 +91,11 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 		mNearbyRowCount = 0;
 		mData = new ArrayList<RMenuPart>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.title_row, R.layout.basic_section_header, mData);
+
+        // Get current campus tag (default to "nb")
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
+                getResources().getString(R.string.campus_nb_tag));
 		
 		// Setup the timer stuff for updating the nearby stops
 		mUpdateTimer = new Timer();
@@ -118,21 +131,22 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 		
 		return v;
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
 
+        // Don't update the screen if the bus fragment isn't on top
+        if(!AppUtil.isOnTop("bus", getActivity().getSupportFragmentManager())) {
+            Log.v(TAG, "Not on top, not updating nearby stops");
+            return;
+        }
+
+        // TODO Replace calling this on every onResume() with a listener for preference changes
         // Get current campus tag (default to "nb")
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
                 getResources().getString(R.string.campus_nb_tag));
-
-        mAdapter.clear();
-        mNearbyRowCount = 0;
-
-        // Add "nearby stops" header
-        mAdapter.add(new SlideMenuHeader(getResources().getString(R.string.bus_nearby_active_stops_header)));
 
         // Start the update thread when screen is active
 		mUpdateTimer = new Timer();
@@ -202,12 +216,19 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.v(TAG, "Received onConnected");
+        Log.i(TAG, "Connected to services");
 
         // Location services reconnected - retry loading nearby stops
         // Make sure this isn't called before the activity has been attached
         // or before onCreate() has ran.
-        if(mData != null && isAdded()) loadNearbyStops(mCurrentCampus);
+        if(mData != null && isAdded()) {
+            // Don't update the screen if the bus fragment isn't on top
+            if(!AppUtil.isOnTop("bus", getActivity().getSupportFragmentManager())) {
+                Log.v(TAG, "Not on top, not updating nearby stops");
+            }
+            else loadNearbyStops(mCurrentCampus);
+        }
+
     }
 
     @Override
@@ -274,7 +295,19 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 	private void loadNearbyStops(final String agencyTag) {
         final Resources res = getResources();
 
-		// Check for location services
+        if(agencyTag == null) {
+            Log.w(TAG, "Agency tag not set");
+            addNearbyRow(1, new SlideMenuItem(res.getString(R.string.failed_location)));
+            return;
+        }
+
+        mAdapter.clear();
+        mNearbyRowCount = 0;
+
+        // Add "nearby stops" header
+        mAdapter.add(new SlideMenuHeader(getResources().getString(R.string.bus_nearby_active_stops_header)));
+
+        // Check for location services
 		if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
 			// Get last location
 			Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
