@@ -221,6 +221,8 @@ public class MainActivity extends FragmentActivity  implements
         }
 		mLocationClient.disconnect();
 
+        Analytics.postEvents(this);
+
 		super.onStop();
 	}
 	

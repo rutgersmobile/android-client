@@ -5,17 +5,32 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.androidquery.AQuery;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.Timestamp;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.SettingsActivity;
@@ -40,8 +55,11 @@ public class Analytics extends IntentService {
     private static final int QUEUE_MODE = 0;
     private static final int POST_MODE = 1;
 
+    private AQuery aq;
+
     public Analytics() {
         super("Analytics");
+        aq = new AQuery(this);
     }
 
     /**
@@ -54,6 +72,12 @@ public class Analytics extends IntentService {
         analyticsIntent.putExtra("mode", QUEUE_MODE);
         analyticsIntent.putExtra("type", eventType);
         analyticsIntent.putExtra("extra", extra);
+        context.startService(analyticsIntent);
+    }
+
+    public static void postEvents(Context context) {
+        Intent analyticsIntent = new Intent(context, Analytics.class);
+        analyticsIntent.putExtra("mode", POST_MODE);
         context.startService(analyticsIntent);
     }
 
@@ -100,7 +124,7 @@ public class Analytics extends IntentService {
             // Set up values to insert
             ContentValues newEntry = new ContentValues();
             newEntry.put(AnalyticsOpenHelper.TYPE_FIELD, eventType);
-            newEntry.put(AnalyticsOpenHelper.DATE_FIELD, getCurrentTimestamp().toString());
+            newEntry.put(AnalyticsOpenHelper.DATE_FIELD, getCurrentTimestamp());
             newEntry.put(AnalyticsOpenHelper.EXTRA_FIELD, extraString);
 
             // Try to add the event
@@ -111,10 +135,11 @@ public class Analytics extends IntentService {
                 Log.v(TAG, "Event queued");
             } catch (SQLiteException sqle) {
                 Log.e(TAG, "Failed to queue event: " + sqle.getMessage());
+            } finally {
+                database.endTransaction();
             }
 
             // Close database
-            database.endTransaction();
             database.close();
         }
     }
@@ -124,40 +149,91 @@ public class Analytics extends IntentService {
      * @param workIntent Work intent given to service
      */
     private void doPost(Intent workIntent) {
-        String eventType = workIntent.getStringExtra("type");
-        String extraString = workIntent.getStringExtra("extra");
+        JSONArray eventOutQueue = new JSONArray();
 
-        if(eventType != null) {
-            Log.v(TAG, "Queueing " + eventType + " event");
+        Log.v(TAG, "Attempting to post events");
 
-            // Open the event database
-            AnalyticsOpenHelper analyticsOpenHelper = new AnalyticsOpenHelper(this);
-            SQLiteDatabase database;
-            try {
-                database = analyticsOpenHelper.getWritableDatabase();
-            } catch (SQLiteException sqle) {
-                Log.e(TAG, sqle.getMessage());
-                return;
-            }
-
-            // Read out events and construct POST request
-            database.beginTransaction();
-            try {
-                //TODO Stuff
-                database.setTransactionSuccessful();
-                Log.v(TAG, "Event queued");
-            } catch (SQLiteException sqle) {
-                Log.e(TAG, "Failed to queue event: " + sqle.getMessage());
-            }
-
-            // Close database
-            database.endTransaction();
-            database.close();
+        // Open the event database
+        AnalyticsOpenHelper analyticsOpenHelper = new AnalyticsOpenHelper(this);
+        SQLiteDatabase database;
+        try {
+            database = analyticsOpenHelper.getWritableDatabase();
+        } catch (SQLiteException sqle) {
+            Log.e(TAG, sqle.getMessage());
+            return;
         }
+
+        // Read out events and construct POST request
+        database.beginTransaction();
+        try {
+            Cursor cursor = database.rawQuery("SELECT * FROM " + AnalyticsOpenHelper.TABLE_NAME, null);
+
+            if(cursor.getCount() == 0) {
+                Log.i(TAG, "No events to post.");
+            }
+            else {
+                while (cursor.moveToNext()) {
+                    String type = cursor.getString(1);
+                    String time = cursor.getString(2);
+                    String extra = cursor.getString(3);
+
+                    // Get JSON object of analytics event
+                    JSONObject eventJSON = getEventJSON(type, time, this);
+
+                    // Load extra fields
+                    try {
+                        JSONObject extraJSON = new JSONObject(extra);
+                        Iterator<String> keys = extraJSON.keys();
+                        while (keys.hasNext()) {
+                            String curKey = keys.next();
+                            eventJSON.put(curKey, extraJSON.get(curKey));
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "doPost(): " + e.getMessage());
+                    }
+
+                    // Add to the JSON array for posting
+                    eventOutQueue.put(eventJSON);
+                }
+
+                // TODO Delete loaded rows from database
+
+                // Build POST request
+                Log.v(TAG, "payload: " + eventOutQueue.toString());
+                /*
+                HttpClient httpClient = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost("http://sauron.rutgers.edu/~jamchamb/analytics.php");
+
+                try {
+                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                    nameValuePairs.add(new BasicNameValuePair("payload", eventOutQueue.toString()));
+                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                    HttpResponse httpResponse = httpClient.execute(httpPost);
+
+                    // Successful POST - commit transaction to remove rows
+                    database.setTransactionSuccessful();
+                    Log.i(TAG, cursor.getCount() + " events posted.");
+                } catch (ClientProtocolException e) {
+                    Log.e(TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+                */
+            }
+
+        } catch (SQLiteException sqle) {
+            Log.e(TAG, "Failed to post events: " + sqle.getMessage());
+        } finally {
+            database.endTransaction();
+        }
+
+        // Close database
+        database.close();
     }
 
-    public static Timestamp getCurrentTimestamp() {
-        return new java.sql.Timestamp(Calendar.getInstance(Locale.US).getTime().getTime());
+    public static String getCurrentTimestamp() {
+        return new Long(Calendar.getInstance(Locale.US).getTime().getTime()).toString();
     }
 
     public static JSONObject getEventJSON(String eventType, String timestamp, Context context) {

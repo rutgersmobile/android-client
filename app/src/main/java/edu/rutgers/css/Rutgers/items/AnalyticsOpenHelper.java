@@ -16,7 +16,7 @@ public class AnalyticsOpenHelper extends SQLiteOpenHelper {
     public static final String EXTRA_FIELD = "EXTRA";
 
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "AnalyticsDB";
+    public static final String DATABASE_NAME = "Analytics.db";
     public static final String TABLE_NAME = "events";
     private static final String TABLE_CREATE =
             "CREATE TABLE " + TABLE_NAME + " (" +
@@ -37,7 +37,10 @@ public class AnalyticsOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        // If this structure is ever actually changed, make a query to update leftover
+        // rows if you really want to save them.
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        onCreate(db);
     }
 
 }

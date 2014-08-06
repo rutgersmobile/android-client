@@ -8,6 +8,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Hashtable;
 import java.util.Locale;
 
@@ -179,7 +182,13 @@ public class ComponentFactory {
 			.commit();
 
         // Start analytics intent
-        Analytics.queueEvent(mMainActivity, Analytics.CHANNEL_OPENED, componentTag);
+        JSONObject extras = new JSONObject();
+        try {
+            extras.put("handle", componentTag);
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        Analytics.queueEvent(mMainActivity, Analytics.CHANNEL_OPENED, extras.toString());
 
 		return true;
 	}
