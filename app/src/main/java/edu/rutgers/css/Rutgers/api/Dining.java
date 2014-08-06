@@ -15,7 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
  * Helper for getting data from dining API

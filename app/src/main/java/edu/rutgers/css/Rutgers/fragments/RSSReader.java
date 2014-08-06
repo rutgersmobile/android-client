@@ -21,11 +21,11 @@ import org.jdeferred.android.AndroidFailCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.adapters.RSSAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.auxiliary.RSSAdapter;
-import edu.rutgers.css.Rutgers.auxiliary.RSSItem;
+import edu.rutgers.css.Rutgers.items.RSSItem;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -50,7 +50,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 		Bundle args = getArguments();
 		
 		mData = new ArrayList<RSSItem>();
-		mAdapter = new RSSAdapter(this.getActivity(), R.layout.rss_row, mData);
+		mAdapter = new RSSAdapter(this.getActivity(), R.layout.row_rss, mData);
 
         if(savedInstanceState != null && savedInstanceState.getSerializable("mData") != null) {
             Log.v(TAG, "Restoring mData");

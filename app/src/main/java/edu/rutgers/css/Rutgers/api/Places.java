@@ -21,7 +21,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
  * Helper for getting data from places API.
@@ -30,54 +30,10 @@ import edu.rutgers.css.Rutgers.AppUtil;
 public class Places {
 	
 	private static final String TAG = "PlacesAPI";
-	private static final String API_URL = AppUtil.API_BASE + "places.txt";
-	private static final long expire = Request.CACHE_ONE_HOUR * 24; // Cache data for a day
 
     private static boolean isSetup;
 	private static Promise<Object, AjaxStatus, Object> configured;
 	private static JSONObject mPlacesConf;
-
-
-    public static class PlaceTuple implements Comparable<PlaceTuple> {
-        private String key;
-        private JSONObject placeJson;
-
-        public PlaceTuple(String key, JSONObject placeJson) {
-            this.key = key;
-            this.placeJson = placeJson;
-        }
-
-        public String getKey() {
-            return this.key;
-        }
-
-        public JSONObject getPlaceJSON() {
-            return this.placeJson;
-        }
-
-        @Override
-        public String toString() {
-            try {
-                return placeJson.getString("title");
-            } catch (JSONException e) {
-                Log.w(TAG, "toString(): " + e.getMessage());
-                return key;
-            }
-        }
-
-        @Override
-        public int compareTo(PlaceTuple another) {
-            // Order by 'title' field alphabetically (or by key if getting title string fails)
-            try {
-                String thisTitle = getPlaceJSON().getString("title");
-                String thatTitle = another.getPlaceJSON().getString("title");
-                return thisTitle.compareTo(thatTitle);
-            } catch (JSONException e) {
-                Log.w(TAG, "compareTo(): " + e.getMessage());
-                return getKey().compareTo(another.getKey());
-            }
-        }
-    }
 
     /**
 	 * Grab the places API data.
@@ -91,7 +47,7 @@ public class Places {
 		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
 		
-		final Promise<JSONObject, AjaxStatus, Double> promisePlaces = Request.json(API_URL, expire);
+		final Promise<JSONObject, AjaxStatus, Double> promisePlaces = Request.api("places.txt", Request.CACHE_ONE_DAY);
 		
 		AndroidDeferredManager dm = new AndroidDeferredManager();		
 		dm.when(promisePlaces).done(new AndroidDoneCallback<JSONObject>() {
@@ -218,6 +174,12 @@ public class Places {
 		return d.promise();
 	}
 
+    /**
+     * Get places near a given location.
+     * @param sourceLat Latitude
+     * @param sourceLon Longitude
+     * @return Promise for a list of place keys & JSON objects.
+     */
     public static Promise<List<PlaceTuple>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
         final Deferred<List<PlaceTuple>, Exception, Double> d = new DeferredObject<List<PlaceTuple>, Exception, Double>();
         setup();
@@ -284,6 +246,47 @@ public class Places {
         });
 
         return d.promise();
+    }
+
+    public static class PlaceTuple implements Comparable<PlaceTuple> {
+        private String key;
+        private JSONObject placeJson;
+
+        public PlaceTuple(String key, JSONObject placeJson) {
+            this.key = key;
+            this.placeJson = placeJson;
+        }
+
+        public String getKey() {
+            return this.key;
+        }
+
+        public JSONObject getPlaceJSON() {
+            return this.placeJson;
+        }
+
+        @Override
+        public String toString() {
+            try {
+                return placeJson.getString("title");
+            } catch (JSONException e) {
+                Log.w(TAG, "toString(): " + e.getMessage());
+                return key;
+            }
+        }
+
+        @Override
+        public int compareTo(PlaceTuple another) {
+            // Order by 'title' field alphabetically (or by key if getting title string fails)
+            try {
+                String thisTitle = getPlaceJSON().getString("title");
+                String thatTitle = another.getPlaceJSON().getString("title");
+                return thisTitle.compareTo(thatTitle);
+            } catch (JSONException e) {
+                Log.w(TAG, "compareTo(): " + e.getMessage());
+                return getKey().compareTo(another.getKey());
+            }
+        }
     }
 
     private static class PTDistanceComparator implements Comparator<PlaceTuple> {

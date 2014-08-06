@@ -10,8 +10,8 @@ import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers.AppUtil;
 import edu.rutgers.css.Rutgers.MyApplication;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 // Convenience class for making requests
 public class Request {
@@ -22,7 +22,9 @@ public class Request {
 	private static boolean mSetupDone = false;
 	
 	public static long CACHE_NEVER = -1; // -1 means always refresh -- never use cache
-	public static long CACHE_ONE_HOUR = 1000 * 60 * 60;
+    public static long CACHE_ONE_MINUTE = 1000 * 60;
+	public static long CACHE_ONE_HOUR = CACHE_ONE_MINUTE * 60;
+    public static long CACHE_ONE_DAY = CACHE_ONE_HOUR * 24;
 	
 	private static void setup () {
 		if (!mSetupDone) {

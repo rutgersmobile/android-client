@@ -36,17 +36,18 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.auxiliary.LocationClientProvider;
-import edu.rutgers.css.Rutgers.auxiliary.RMenuAdapter;
-import edu.rutgers.css.Rutgers.auxiliary.RMenuPart;
-import edu.rutgers.css.Rutgers.auxiliary.SlideMenuHeader;
-import edu.rutgers.css.Rutgers.auxiliary.SlideMenuItem;
 import edu.rutgers.css.Rutgers.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
-import edu.rutgers.css.Rutgers.location.LocationUtils;
+import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
+import edu.rutgers.css.Rutgers.items.RMenuItemRow;
+import edu.rutgers.css.Rutgers.items.RMenuRow;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.LocationClientProvider;
+import edu.rutgers.css.Rutgers.utils.LocationUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -115,7 +116,7 @@ public class MainActivity extends FragmentActivity  implements
 		getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         
-        ArrayList<RMenuPart> menuArray = new ArrayList<RMenuPart>();
+        ArrayList<RMenuRow> menuArray = new ArrayList<RMenuRow>();
         mDrawerAdapter = new RMenuAdapter(this, R.layout.main_drawer_item, R.layout.main_drawer_header, menuArray);        
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -151,7 +152,7 @@ public class MainActivity extends FragmentActivity  implements
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if(view.isEnabled() == false) return;
 				
-				SlideMenuItem clickedItem = (SlideMenuItem) parent.getAdapter().getItem(position);
+				RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
 				if(clickedItem == null) {
 					Log.e("SlidingMenu", "Failed sliding menu click, index " + position);
 					mDrawerLayout.closeDrawer(mDrawerListView);
@@ -310,6 +311,10 @@ public class MainActivity extends FragmentActivity  implements
 		return true;
 	}
 
+    /**
+     * Register the fragment with the main activity's location client.
+     * @param listener Fragment that uses the location client.
+     */
     @Override
     public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
         Log.i(TAG, "Registering location listener: " + listener.toString());
@@ -318,14 +323,18 @@ public class MainActivity extends FragmentActivity  implements
         }
 
         mLocationListeners.add(listener);
+
+        if(mLocationClient != null) {
+            mLocationClient.registerConnectionCallbacks(listener);
+        }
     }
 
     /**
      * Play services connected
-     * @param dataBundle
+     * @param connectionHint
      */
 	@Override
-	public void onConnected(Bundle dataBundle) {
+	public void onConnected(Bundle connectionHint) {
 		Log.i(TAG, "Connected to Google Play services.");
 	}
 	
@@ -381,6 +390,10 @@ public class MainActivity extends FragmentActivity  implements
         }
     }
 
+    /**
+     * Check if Google Play Services are connected.
+     * @return True if connected, false if not.
+     */
     @Override
     public boolean servicesConnected() {
         return LocationUtils.servicesConnected(this);
@@ -437,7 +450,7 @@ public class MainActivity extends FragmentActivity  implements
      * @param items Menu items JSON
      */
     private void addMenuSection(String category, JSONArray items) {
-        mDrawerAdapter.add(new SlideMenuHeader(category));
+        mDrawerAdapter.add(new RMenuHeaderRow(category));
         for(int i = 0; i < items.length(); i++) {
             try {
                 // Create menu item
@@ -464,7 +477,7 @@ public class MainActivity extends FragmentActivity  implements
                 // Set data (JSON Array) if available
                 if(cur.optJSONArray("data") != null) itemArgs.putString("data", cur.getJSONArray("data").toString());
 
-                SlideMenuItem newSMI = new SlideMenuItem(itemArgs);
+                RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
                 // Try to find icon for this item and set it
                 if(!cur.optString("handle").isEmpty()) {
                     newSMI.setDrawable(AppUtil.getIcon(getResources(), cur.getString("handle")));

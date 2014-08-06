@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.AppUtil;
-import edu.rutgers.css.Rutgers.auxiliary.Prediction;
+import edu.rutgers.css.Rutgers.items.Prediction;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
  * Singleton class that provides access to the Nextbus API. Uses the JSON that nextbusjs generates to create requests

@@ -24,10 +24,10 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
-import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.adapters.JSONAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.auxiliary.JSONAdapter;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**

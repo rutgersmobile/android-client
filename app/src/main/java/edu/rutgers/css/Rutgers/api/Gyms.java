@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
-import edu.rutgers.css.Rutgers.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 public class Gyms {
 	
