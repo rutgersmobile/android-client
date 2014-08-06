@@ -86,12 +86,16 @@ public class MainActivity extends FragmentActivity  implements
 		setContentView(R.layout.activity_main);
 		Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
 
-        // This may be created and populated before onCreate() is called so don't clear it
-        if(mLocationListeners == null) mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
+        // Start Component Factory
+        ComponentFactory.getInstance().setMainActivity(this);
 
-        // **********
-        // DEBUG ONLY
-        // **********
+        // This is usually created and populated before onCreate() is called so only initialize if
+        // it's still null
+        if(mLocationListeners == null) {
+            mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
+        }
+
+        // *****DEBUG******
         //getSupportFragmentManager().enableDebugLogging(true);
 
 		/*
@@ -112,7 +116,7 @@ public class MainActivity extends FragmentActivity  implements
 		/*
 		 * Set up nav drawer
 		 */
-		//Enable drawer icon
+		// Enable drawer icon
 		getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         
@@ -185,7 +189,6 @@ public class MainActivity extends FragmentActivity  implements
         /*
          * Set up main screen
          */
-        ComponentFactory.getInstance().mMainActivity = this;
 		FrameLayout contentFrame = (FrameLayout) findViewById(R.id.main_content_frame);
 		//contentFrame.removeAllViews();
 		

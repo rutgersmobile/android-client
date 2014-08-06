@@ -40,7 +40,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class ComponentFactory {
 
 	private static ComponentFactory instance = null;
-	public FragmentActivity mMainActivity;
+	private FragmentActivity mMainActivity;
 	private static final String TAG = "ComponentFactory";
 	private Hashtable<String, Class<? extends Fragment>> fragmentTable;
 	
@@ -80,7 +80,11 @@ public class ComponentFactory {
 		fragmentTable.put("ruinfo", RUInfoMain.class);
 		fragmentTable.put("feedback", FeedbackMain.class);
 	}
-	
+
+    public void setMainActivity(FragmentActivity fragmentActivity) {
+        this.mMainActivity = fragmentActivity;
+    }
+
 	/**
 	 * Get singleton instance
 	 * @return Component factory singleton instance
@@ -143,7 +147,11 @@ public class ComponentFactory {
 	 * @return True if the new fragment was successfully created, false if not.
 	 */
 	public boolean switchFragments(Bundle args) {
-		if(args == null) {
+        if(mMainActivity == null) {
+            Log.e(TAG, "switchFragments(): main activity not set");
+            return false;
+        }
+		else if(args == null) {
 			Log.e(TAG, "switchFragments(): null args");
 			return false;
 		}

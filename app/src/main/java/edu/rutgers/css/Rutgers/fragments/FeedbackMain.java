@@ -117,7 +117,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		if(mSubjectSpinner.getSelectedItem().equals(res.getString(R.string.feedback_channel_feedback))) {
 			params.put("channel", mChannelSpinner.getSelectedItem());	
 		}
-		params.put("debuglog", "");
+		//params.put("debuglog", "");
 		params.put("version", AppUtil.VERSION);
 		params.put("osname", AppUtil.OSNAME);
 		params.put("betamode", AppUtil.BETAMODE);
@@ -176,8 +176,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	}
 
 	@Override
-	public void onItemSelected(AdapterView<?> parent, View view, int position,
-			long id) {
+	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		final Resources res = getResources();
 
 		if(parent.getId() == R.id.subjectSpinner) {

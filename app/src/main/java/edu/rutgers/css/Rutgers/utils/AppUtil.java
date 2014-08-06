@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.PorterDuff;
@@ -38,8 +39,10 @@ public class AppUtil {
     public static final String VERSION = "0.0";
     public static final String OSNAME = "android";
     public static final String BETAMODE = "dev";
+    public static final Boolean BETA = true;
 
-    public static final String API_BASE = "https://rumobile.rutgers.edu/1/";
+    public static final String API_LEVEL = "1";
+    public static final String API_BASE = "https://rumobile.rutgers.edu/"+API_LEVEL+"/";
 
     public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
 
@@ -73,7 +76,13 @@ public class AppUtil {
 		f.close();
 		return new String(bytes);
 	}
-	
+
+    public static boolean isTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK)
+                >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
 	/**
 	 * Get full campus title from campus tag.
 	 * @param context App context
