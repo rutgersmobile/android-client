@@ -37,6 +37,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
+import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
@@ -198,6 +199,7 @@ public class MainActivity extends FragmentActivity  implements
 				.replace(R.id.main_content_frame, new MainScreen(), "mainfrag")
 				.commit();
 		}
+
 	}
 	
 	@Override

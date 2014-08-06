@@ -178,6 +178,9 @@ public class ComponentFactory {
 			.addToBackStack(componentTag)
 			.commit();
 
+        // Start analytics intent
+        Analytics.queueEvent(mMainActivity, Analytics.CHANNEL_OPENED, componentTag);
+
 		return true;
 	}
 	
