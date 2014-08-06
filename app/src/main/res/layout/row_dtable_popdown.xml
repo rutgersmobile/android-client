@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:text="@string/replace_me"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:id="@+id/mainTextView" />
+            android:id="@+id/title" />
 
     </LinearLayout>
 
