@@ -55,11 +55,8 @@ public class Analytics extends IntentService {
     private static final int QUEUE_MODE = 0;
     private static final int POST_MODE = 1;
 
-    private AQuery aq;
-
     public Analytics() {
         super("Analytics");
-        aq = new AQuery(this);
     }
 
     /**
@@ -95,7 +92,7 @@ public class Analytics extends IntentService {
                 break;
 
             default:
-                Log.w(TAG, "Invalid mode");
+                Log.e(TAG, "Invalid mode supplied");
         }
 
     }
@@ -151,7 +148,7 @@ public class Analytics extends IntentService {
     private void doPost(Intent workIntent) {
         JSONArray eventOutQueue = new JSONArray();
 
-        Log.v(TAG, "Attempting to post events");
+        Log.i(TAG, "Attempting to post events");
 
         // Open the event database
         AnalyticsOpenHelper analyticsOpenHelper = new AnalyticsOpenHelper(this);
@@ -181,15 +178,17 @@ public class Analytics extends IntentService {
                     JSONObject eventJSON = getEventJSON(type, time, this);
 
                     // Load extra fields
-                    try {
-                        JSONObject extraJSON = new JSONObject(extra);
-                        Iterator<String> keys = extraJSON.keys();
-                        while (keys.hasNext()) {
-                            String curKey = keys.next();
-                            eventJSON.put(curKey, extraJSON.get(curKey));
+                    if(extra != null) {
+                        try {
+                            JSONObject extraJSON = new JSONObject(extra);
+                            Iterator<String> keys = extraJSON.keys();
+                            while (keys.hasNext()) {
+                                String curKey = keys.next();
+                                eventJSON.put(curKey, extraJSON.get(curKey));
+                            }
+                        } catch (JSONException e) {
+                            Log.e(TAG, "doPost(): " + e.getMessage());
                         }
-                    } catch (JSONException e) {
-                        Log.e(TAG, "doPost(): " + e.getMessage());
                     }
 
                     // Add to the JSON array for posting
@@ -200,10 +199,11 @@ public class Analytics extends IntentService {
                 database.delete(AnalyticsOpenHelper.TABLE_NAME, null, null);
 
                 // Build POST request
-                Log.v(TAG, "payload: " + eventOutQueue.toString());
-
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpPost httpPost = new HttpPost("http://sauron.rutgers.edu/~jamchamb/analytics.php");
+                if(BuildConfig.DEBUG) {
+                    Log.v(TAG, "payload: " + eventOutQueue.toString());
+                }
 
                 try {
                     List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
@@ -286,7 +286,7 @@ public class Analytics extends IntentService {
             releaseJSON.put("version", AppUtil.VERSION);
             releaseJSON.put("api", AppUtil.API_LEVEL);
         } catch (JSONException e) {
-            Log.e(TAG, "getReleaseJSON(): " + e.getMessage());
+            Log.w(TAG, "getReleaseJSON(): " + e.getMessage());
         }
         return releaseJSON;
     }

@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -49,6 +50,7 @@ import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.LocationClientProvider;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
+import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -96,13 +98,18 @@ public class MainActivity extends FragmentActivity  implements
             mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
         }
 
-        // *****DEBUG******
-        //getSupportFragmentManager().enableDebugLogging(true);
+        if(BuildConfig.DEBUG) {
+            //getSupportFragmentManager().enableDebugLogging(true);
+        }
 
 		/*
 		 * Set default settings the first time the app is run
 		 */
-		PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if(!sharedPreferences.getBoolean(PreferenceManager.KEY_HAS_SET_DEFAULT_VALUES, false)) {
+            Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
+            PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+        }
 		
 		/*
 		 * Connect to Google Play location services
