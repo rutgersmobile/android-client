@@ -196,11 +196,12 @@ public class Analytics extends IntentService {
                     eventOutQueue.put(eventJSON);
                 }
 
-                // TODO Delete loaded rows from database
+                // Delete loaded rows from database
+                database.delete(AnalyticsOpenHelper.TABLE_NAME, null, null);
 
                 // Build POST request
                 Log.v(TAG, "payload: " + eventOutQueue.toString());
-                /*
+
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpPost httpPost = new HttpPost("http://sauron.rutgers.edu/~jamchamb/analytics.php");
 
@@ -212,14 +213,18 @@ public class Analytics extends IntentService {
                     HttpResponse httpResponse = httpClient.execute(httpPost);
 
                     // Successful POST - commit transaction to remove rows
-                    database.setTransactionSuccessful();
-                    Log.i(TAG, cursor.getCount() + " events posted.");
+                    Log.i(TAG, httpResponse.getStatusLine().toString());
+                    int responseCode = httpResponse.getStatusLine().getStatusCode();
+                    if(responseCode >= 200 && responseCode <= 299) {
+                        database.setTransactionSuccessful();
+                        Log.i(TAG, cursor.getCount() + " events posted.");
+                    }
                 } catch (ClientProtocolException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                 }
-                */
+
             }
 
         } catch (SQLiteException sqle) {
