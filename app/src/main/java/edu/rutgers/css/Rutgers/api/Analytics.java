@@ -12,8 +12,6 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.androidquery.AQuery;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -51,6 +49,9 @@ public class Analytics extends IntentService {
     public static final String ERROR = "error";
     public static final String CHANNEL_OPENED = "channel";
     public static final String DEFAULT_TYPE = "event";
+
+    private static final String POST_URL = "http://sauron.rutgers.edu/~jamchamb/analytics.php";
+    //private static final String POST_URL = AppUtil.API_BASE + "analytics.php";
 
     private static final int QUEUE_MODE = 0;
     private static final int POST_MODE = 1;
@@ -200,7 +201,7 @@ public class Analytics extends IntentService {
 
                 // Build POST request
                 HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost("http://sauron.rutgers.edu/~jamchamb/analytics.php");
+                HttpPost httpPost = new HttpPost(POST_URL);
                 if(BuildConfig.DEBUG) {
                     Log.v(TAG, "payload: " + eventOutQueue.toString());
                 }

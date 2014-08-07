@@ -1,13 +1,17 @@
 package edu.rutgers.css.Rutgers.api;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -158,12 +162,42 @@ public class ComponentFactory {
 			Log.e(TAG, "switchFragments(): null args");
 			return false;
 		}
-		
-		Fragment fragment = createFragment(args);
+
+        String componentTag = args.getString("component");
+        boolean isTopLevel = args.getBoolean("topLevel");
+
+        // Create analytics event
+        JSONObject extras = new JSONObject();
+        try {
+            extras.put("handle", componentTag);
+            if(args.getString("url") != null) extras.put("url", args.getString("url"));
+            if(args.getString("api") != null) extras.put("api", args.getString("api"));
+            if(args.getString("title") != null) extras.put("title", args.getString("title"));
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        Analytics.queueEvent(mMainActivity, Analytics.CHANNEL_OPENED, extras.toString());
+
+        // Check if the URI is HTTP or not for links
+        if(componentTag.equalsIgnoreCase("www")) {
+            if(args.getString("url") != null) {
+                String url = args.getString("url");
+                if(url.contains("://") && !StringUtils.startsWithIgnoreCase(url, "http://") && !StringUtils.startsWithIgnoreCase(url, "https://")) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try {
+                        mMainActivity.getApplicationContext().startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        Toast.makeText(mMainActivity, "Couldn't find an app to open " + url, Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Couldn't find an activity to handle URI " + url);
+                    }
+                    return false;
+                }
+            }
+        }
+
+        Fragment fragment = createFragment(args);
 		if(fragment == null) return false;
-		
-		String componentTag = args.getString("component");
-		boolean isTopLevel = args.getBoolean("topLevel");
 
         AppUtil.closeKeyboard(mMainActivity);
 
@@ -180,15 +214,6 @@ public class ComponentFactory {
 			.replace(R.id.main_content_frame, fragment, componentTag)
 			.addToBackStack(componentTag)
 			.commit();
-
-        // Start analytics intent
-        JSONObject extras = new JSONObject();
-        try {
-            extras.put("handle", componentTag);
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-        }
-        Analytics.queueEvent(mMainActivity, Analytics.CHANNEL_OPENED, extras.toString());
 
 		return true;
 	}
