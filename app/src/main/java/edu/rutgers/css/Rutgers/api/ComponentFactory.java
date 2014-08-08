@@ -188,7 +188,7 @@ public class ComponentFactory {
                     try {
                         mMainActivity.getApplicationContext().startActivity(intent);
                     } catch (ActivityNotFoundException e) {
-                        Toast.makeText(mMainActivity, "Couldn't find an app to open " + url, Toast.LENGTH_LONG).show();
+                        Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.failed_uri, url), Toast.LENGTH_LONG).show();
                         Log.e(TAG, "Couldn't find an activity to handle URI " + url);
                     }
                     return false;

@@ -10,6 +10,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 public class RUInfoMain extends Fragment {
@@ -20,6 +22,8 @@ public class RUInfoMain extends Fragment {
 	private String mPhoneNumber = "tel:7324454636";
 	private String mTextNumber = "66746";
 	private String mEmailAddress = "colhenry@rci.rutgers.edu";
+    private String mMobileURL = "http://m.rutgers.edu/ruinfo.html";
+    private String mTabletURL = "http://ruinfo.rutgers.edu/";
 	
 	public RUInfoMain() {
 		// Required empty public constructor
@@ -31,10 +35,11 @@ public class RUInfoMain extends Fragment {
 		
 		getActivity().setTitle(getResources().getString(R.string.ruinfo_title));
 		
-		final Button callButton = (Button) v.findViewById(R.id.button1);
-		final Button textButton1 = (Button) v.findViewById(R.id.button2);
-		final Button textButton2 = (Button) v.findViewById(R.id.button3);
-		final Button emailButton = (Button) v.findViewById(R.id.button4);
+		final Button callButton = (Button) v.findViewById(R.id.callButton);
+		final Button textButton1 = (Button) v.findViewById(R.id.smsButton1);
+		final Button textButton2 = (Button) v.findViewById(R.id.smsButton2);
+		final Button emailButton = (Button) v.findViewById(R.id.emailButton);
+        final Button websiteButton = (Button) v.findViewById(R.id.websiteButton);
 		
 		// "Call RU-info"
 		callButton.setOnClickListener(new OnClickListener() {
@@ -87,7 +92,22 @@ public class RUInfoMain extends Fragment {
 			}
 			
 		});
-		
+
+        // "Visit our website"
+        websiteButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Bundle args = new Bundle();
+                args.putString("component", "www");
+                args.putString("title", getResources().getString(R.string.ruinfo_title));
+                if(AppUtil.isTablet(getActivity())) args.putString("url", mTabletURL);
+                else args.putString("url", mMobileURL);
+                ComponentFactory.getInstance().switchFragments(args);
+            }
+
+        });
+
 		return v;
 	}
 	

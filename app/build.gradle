@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     compile 'com.android.support:support-v4:20.+'
-    compile 'com.google.android.gms:play-services:+'
+    compile 'com.google.android.gms:play-services:5.0.+'
     compile files('libs/android-query-full.0.26.8.jar')
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'org.slf4j:slf4j-android:+'
