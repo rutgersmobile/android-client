@@ -81,6 +81,7 @@
     <!-- RU-info channel -->
     <string name="ruinfo_title">RU-info</string>
     <string name="ruinfo_main_text">You can contact a helpful information assistant at RU-info with your Rutgers questions by phone, text, or email.</string>
+    <string name="ruinfo_no_phone_text">You can also call RU-info from any phone to speak to an Information Assistant at 732–445–INFO (4636), or text your question via RU-info TEXT. Text \'Rutgers\' to 66746 on your mobile phone.</string>
     <string name="ruinfo_call_button">Call RU-info</string>
     <string name="ruinfo_phone_number">732–445–INFO (4636)</string>
     <string name="ruinfo_text_header">Text RU-info with your questions:</string>

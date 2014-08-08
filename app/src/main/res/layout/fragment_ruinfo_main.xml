@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/scrollView1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="match_parent" >
 
 	<LinearLayout
 	    android:layout_width="match_parent"
@@ -10,76 +10,85 @@
 	    android:gravity="center_horizontal|left"
 	    android:orientation="vertical"
 	    android:padding="8dp" >
-	
-	    <TextView
-	        android:id="@+id/textView1"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/ruinfo_main_text"
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ruinfo_main_text"
             android:layout_gravity="center_horizontal" />
-	
-	    <Button
-	        android:id="@+id/callButton"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:text="@string/ruinfo_call_button" />
-	
-	    <TextView
-	        android:id="@+id/textView2"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:text="@string/ruinfo_phone_number"
-	        android:textColor="@color/faded" />
-	
-	    <TextView
-	        android:id="@+id/textView3"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/ruinfo_text_header"
-	        android:textAppearance="?android:attr/textAppearanceMedium"
+
+        <LinearLayout android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_gravity="center_horizontal"
-            android:paddingTop="10dp" />
-	
-	    <TextView
-	        android:id="@+id/textView4"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/ruinfo_text_desc"
-            android:layout_gravity="center_horizontal" />
-	
-	    <Button
-	        android:id="@+id/smsButton1"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:text="@string/ruinfo_text_button" />
-	
-	    <TextView
-	        android:id="@+id/textView5"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:text="@string/ruinfo_text_already" />
-	
-	    <Button
-	        android:id="@+id/smsButton2"
-	        style="?android:attr/buttonStyleSmall"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="center_horizontal"
-	        android:text="@string/ruinfo_text_ruinfo" />
-	
+            android:id="@+id/telephonyLayout">
+
+            <Button
+                android:id="@+id/callButton"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/ruinfo_call_button"
+                android:layout_marginTop="10dp"/>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/ruinfo_phone_number"
+                android:textColor="@color/faded" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ruinfo_text_header"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ruinfo_text_desc"
+                android:layout_gravity="center_horizontal" />
+
+            <Button
+                android:id="@+id/smsButton1"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/ruinfo_text_button" />
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/ruinfo_text_already" />
+
+            <Button
+                android:id="@+id/smsButton2"
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/ruinfo_text_ruinfo" />
+
+        </LinearLayout>
+
 	    <TextView
 	        android:id="@+id/textView6"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:text="@string/ruinfo_email_desc"
             android:layout_gravity="center_horizontal"
-            android:paddingTop="10dp"/>
+            android:layout_marginTop="10dp"/>
 	
 	    <Button
 	        android:id="@+id/emailButton"
@@ -98,12 +107,21 @@
 	        android:textColor="@color/faded" />
 
         <TextView
+            android:id="@+id/noTelephonyText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ruinfo_no_phone_text"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"/>
+
+        <TextView
             android:id="@+id/textView8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/ruinfo_website_desc"
             android:layout_gravity="center_horizontal"
-            android:paddingTop="10dp"/>
+            android:layout_marginTop="10dp"/>
 
         <Button
             android:id="@+id/websiteButton"

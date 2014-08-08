@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.fragments;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +10,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
@@ -34,13 +38,16 @@ public class RUInfoMain extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_ruinfo_main, container, false);
 		
 		getActivity().setTitle(getResources().getString(R.string.ruinfo_title));
-		
+
+        final LinearLayout telephonyLayout = (LinearLayout) v.findViewById(R.id.telephonyLayout);
+        final TextView noTelephonyText = (TextView) v.findViewById(R.id.noTelephonyText);
+
 		final Button callButton = (Button) v.findViewById(R.id.callButton);
 		final Button textButton1 = (Button) v.findViewById(R.id.smsButton1);
 		final Button textButton2 = (Button) v.findViewById(R.id.smsButton2);
 		final Button emailButton = (Button) v.findViewById(R.id.emailButton);
         final Button websiteButton = (Button) v.findViewById(R.id.websiteButton);
-		
+
 		// "Call RU-info"
 		callButton.setOnClickListener(new OnClickListener() {
 
@@ -48,7 +55,11 @@ public class RUInfoMain extends Fragment {
 			public void onClick(View v) {
 				Intent intent = new Intent(Intent.ACTION_DIAL);
 				intent.setData(Uri.parse(mPhoneNumber));
-				startActivity(intent);
+				try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
+                }
 			}
 			
 		});
@@ -62,7 +73,11 @@ public class RUInfoMain extends Fragment {
 				intent.setType("vnd.android-dir/mms-sms");
 				intent.putExtra("address", mTextNumber);
 				intent.putExtra("sms_body", "Rutgers");
-				startActivity(intent);
+				try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
+                }
 			}
 			
 		});
@@ -75,7 +90,11 @@ public class RUInfoMain extends Fragment {
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				intent.setType("vnd.android-dir/mms-sms");
 				intent.putExtra("address", mTextNumber);
-				startActivity(intent);
+				try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
+                }
 			}
 			
 		});
@@ -88,7 +107,11 @@ public class RUInfoMain extends Fragment {
 				Intent intent = new Intent(Intent.ACTION_SEND);
 				intent.setType("message/rfc822");
 				intent.putExtra(Intent.EXTRA_EMAIL, new String[]{mEmailAddress});
-				startActivity(intent);
+				try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
+                }
 			}
 			
 		});

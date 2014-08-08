@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -256,8 +257,8 @@ public class PlacesDisplay extends Fragment {
         // Try to launch a map activity
         try {
             startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "No activity found to handle geolocation");
+        }  catch (ActivityNotFoundException e) {
+            Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
         }
     }
 
