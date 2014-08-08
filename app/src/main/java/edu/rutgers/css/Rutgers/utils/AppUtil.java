@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.UUID;
 
-import edu.rutgers.css.Rutgers.SettingsActivity;
+import edu.rutgers.css.Rutgers2.SettingsActivity;
 import edu.rutgers.css.Rutgers2.R;
 
 public class AppUtil {

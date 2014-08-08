@@ -52,6 +52,7 @@ import edu.rutgers.css.Rutgers.utils.LocationClientProvider;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 /**
  * RU Mobile main activity

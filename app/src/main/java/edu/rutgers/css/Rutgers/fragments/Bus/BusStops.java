@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import edu.rutgers.css.Rutgers.SettingsActivity;
+import edu.rutgers.css.Rutgers2.SettingsActivity;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
