@@ -129,12 +129,14 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		RSSItem item = mAdapter.getItem(position);
 
-		// Open web display fragment
-		Bundle args = new Bundle();
-		args.putString("component", "www");
-		args.putString("url", item.getLink());
+        if(item.getLink() != null) {
+            // Open web display fragment
+            Bundle args = new Bundle();
+            args.putString("component", "www");
+            args.putString("url", item.getLink());
 
-		ComponentFactory.getInstance().switchFragments(args);
+            ComponentFactory.getInstance().switchFragments(args);
+        }
 	}
 	
 }
