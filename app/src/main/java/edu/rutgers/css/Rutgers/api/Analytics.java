@@ -238,8 +238,12 @@ public class Analytics extends IntentService {
         database.close();
     }
 
+    /**
+     * Get a string representation of the time that can be parsed by PHP's strtotime() function.
+     * @return String representation of the current time which can be parsed by strtotime()
+     */
     public static String getCurrentTimestamp() {
-        return new Long(Calendar.getInstance(Locale.US).getTime().getTime()).toString();
+        return "@"+new Long(System.currentTimeMillis()/1000L).toString();
     }
 
     public static JSONObject getEventJSON(String eventType, String timestamp, Context context) {
