@@ -20,6 +20,7 @@
             android:text="@string/replace_me"
             android:id="@+id/sectionIndexTextView"
             android:textAllCaps="true"
+            android:fontFamily="sans-serif-bold"
             android:textStyle="bold"
             android:textSize="17sp"/>
 
@@ -31,6 +32,7 @@
             android:text="@string/replace_me"
             android:id="@+id/instructorTextView"
             android:textAllCaps="true"
+            android:fontFamily="sans-serif-bold"
             android:textStyle="bold"
             android:textSize="17sp"/>
 

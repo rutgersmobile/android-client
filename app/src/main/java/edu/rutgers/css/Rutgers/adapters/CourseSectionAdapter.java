@@ -88,8 +88,8 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
         // Set description
         String desc = jsonObject.optString("sectionNotes");
-        if(!desc.isEmpty() && !desc.equalsIgnoreCase("null")) {
-            holder.descriptionTextView.setText(jsonObject.optString("sectionNotes"));
+        if(!jsonObject.isNull("sectionNotes") && !desc.isEmpty()) {
+            holder.descriptionTextView.setText(desc);
             holder.descriptionTextView.setVisibility(View.VISIBLE);
         }
         else {
@@ -117,11 +117,17 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                     dayTextView.setText(meetingTime.getString("meetingDay"));
                     keepView = true;
                 }
+                else {
+                    dayTextView.setText("");
+                }
 
                 // TODO Format this
                 if(!meetingTime.isNull("startTime") && !meetingTime.isNull("endTime")) {
                     timeTextView.setText(meetingTime.getString("startTime") + " - " + meetingTime.getString("endTime"));
                     keepView = true;
+                }
+                else {
+                    timeTextView.setText("Hours by arr.");
                 }
 
                 // I LOVE JSON <3
