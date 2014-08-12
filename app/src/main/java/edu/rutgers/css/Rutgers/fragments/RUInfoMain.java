@@ -39,8 +39,8 @@ public class RUInfoMain extends Fragment {
 		
 		getActivity().setTitle(getResources().getString(R.string.ruinfo_title));
 
-        final LinearLayout telephonyLayout = (LinearLayout) v.findViewById(R.id.telephonyLayout);
-        final TextView noTelephonyText = (TextView) v.findViewById(R.id.noTelephonyText);
+        //final LinearLayout telephonyLayout = (LinearLayout) v.findViewById(R.id.telephonyLayout);
+        //final TextView noTelephonyText = (TextView) v.findViewById(R.id.noTelephonyText);
 
 		final Button callButton = (Button) v.findViewById(R.id.callButton);
 		final Button textButton1 = (Button) v.findViewById(R.id.smsButton1);

@@ -247,7 +247,12 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     }
 
     private void loadNearbyPlaces() {
-        final Resources res = getResources();
+        Resources res = getResources();
+        final String nearbyPlacesString = res.getString(R.string.places_nearby);
+        final String noneNearbyString = res.getString(R.string.places_none_nearby);
+        final String failedLoadString = res.getString(R.string.failed_load_short);
+        final String failedLocationString = res.getString(R.string.failed_location);
+        final String connectingString = res.getString(R.string.location_connecting);
 
         // Check for location services
         if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
@@ -257,8 +262,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
             if (lastLoc == null) {
                 Log.w(TAG, "Couldn't get location");
                 mAdapter.clear();
-                mAdapter.add(new RMenuHeaderRow(res.getString(R.string.places_nearby)));
-                mAdapter.add(new RMenuItemRow(res.getString(R.string.failed_location)));
+                mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+                mAdapter.add(new RMenuItemRow(failedLocationString));
                 return;
             }
 
@@ -274,10 +279,10 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                 @Override
                 public void onDone(List<PlaceTuple> result) {
                     mAdapter.clear();
-                    mAdapter.add(new RMenuHeaderRow(res.getString(R.string.places_nearby)));
+                    mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
 
                     if (result.isEmpty())
-                        mAdapter.add(new RMenuItemRow(res.getString(R.string.places_none_nearby)));
+                        mAdapter.add(new RMenuItemRow(noneNearbyString));
                     else {
                         for (PlaceTuple placeTuple : result) {
                             Bundle args = new Bundle();
@@ -301,11 +306,12 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                 @Override
                 public void onFail(Exception result) {
                     mAdapter.clear();
-                    mAdapter.add(new RMenuHeaderRow(res.getString(R.string.places_nearby)));
-                    mAdapter.add(new RMenuItemRow(getResources().getString(R.string.failed_load_short)));
+                    mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+                    mAdapter.add(new RMenuItemRow(failedLoadString));
                 }
 
             }).always(new AndroidAlwaysCallback<List<PlaceTuple>, Exception>() {
+
                 @Override
                 public void onAlways(Promise.State state, List<PlaceTuple> resolved, Exception rejected) {
                     hideProgressCircle();
@@ -315,6 +321,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                 public AndroidExecutionScope getExecutionScope() {
                     return AndroidExecutionScope.UI;
                 }
+
             });
 
         }
@@ -323,8 +330,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
             // We're still waiting for location services to connect
             mAdapter.clear();
-            mAdapter.add(new RMenuHeaderRow(res.getString(R.string.places_nearby)));
-            mAdapter.add(new RMenuItemRow(res.getString(R.string.location_connecting)));
+            mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+            mAdapter.add(new RMenuItemRow(connectingString));
         }
 
     }

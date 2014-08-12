@@ -298,7 +298,9 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 	 * @param agencyTag Agency tag for API request
 	 */
 	private void loadNearbyStops(final String agencyTag) {
-        final Resources res = getResources();
+        Resources res = getResources();
+        final String noneNearbyString = res.getString(R.string.bus_no_nearby_stops);
+        final String failedLoadString = res.getString(R.string.failed_load_short);
 
         if(agencyTag == null) {
             Log.w(TAG, "Agency tag not set");
@@ -337,7 +339,7 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 					
 					// If there aren't any results, put a "no stops nearby" message
 					if(activeNearbyStops.length() == 0) {
-						addNearbyRow(1, new RMenuItemRow(res.getString(R.string.bus_no_nearby_stops)));
+						addNearbyRow(1, new RMenuItemRow(noneNearbyString));
 					}
 					// If there are new results, add them
 					else {
@@ -370,7 +372,7 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 
                 @Override
                 public void onFail(Exception result) {
-                    addNearbyRow(1, new RMenuItemRow(res.getString(R.string.failed_load_short)));
+                    addNearbyRow(1, new RMenuItemRow(failedLoadString));
                 }
             });
 		}

@@ -57,7 +57,7 @@ public class BusAll extends Fragment {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        final Resources resources = getResources();
+        Resources resources = getResources();
 
 		mData = new ArrayList<RMenuRow>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
@@ -67,6 +67,11 @@ public class BusAll extends Fragment {
         final Promise nbStops = Nextbus.getAllStops("nb");
         final Promise nwkRoutes = Nextbus.getAllRoutes("nwk");
         final Promise nwkStops = Nextbus.getAllStops("nwk");
+
+        final String nbRoutesString = resources.getString(R.string.bus_nb_all_routes_header);
+        final String nwkRoutesString = resources.getString(R.string.bus_nwk_all_routes_header);
+        final String nbStopsString = resources.getString(R.string.bus_nb_all_stops_header);
+        final String nwkStopsString = resources.getString(R.string.bus_nwk_all_stops_header);
 
         // Synchronized load of all route & stop information
         AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -79,10 +84,10 @@ public class BusAll extends Fragment {
             @Override
             public void onDone(MultipleResults results) {
                 for(OneResult result: results) {
-                    if(result.getPromise() == nbRoutes) loadArray("nb", resources.getString(R.string.bus_nb_all_routes_header), "route", (JSONArray) result.getResult());
-                    else if(result.getPromise() == nwkRoutes) loadArray("nwk", resources.getString(R.string.bus_nwk_all_routes_header), "route", (JSONArray)result.getResult());
-                    else if(result.getPromise() == nbStops) loadArray("nb", resources.getString(R.string.bus_nb_all_stops_header), "stop", (JSONArray) result.getResult());
-                    else if(result.getPromise() == nwkStops) loadArray("nwk", resources.getString(R.string.bus_nwk_all_stops_header), "stop", (JSONArray) result.getResult());
+                    if(result.getPromise() == nbRoutes) loadArray("nb", nbRoutesString, "route", (JSONArray) result.getResult());
+                    else if(result.getPromise() == nwkRoutes) loadArray("nwk", nwkRoutesString, "route", (JSONArray)result.getResult());
+                    else if(result.getPromise() == nbStops) loadArray("nb", nbStopsString, "stop", (JSONArray) result.getResult());
+                    else if(result.getPromise() == nwkStops) loadArray("nwk", nwkStopsString, "stop", (JSONArray) result.getResult());
                 }
 
                 // Set filter after info is re-loaded

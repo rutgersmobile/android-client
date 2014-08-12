@@ -99,7 +99,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	 * Submit the feedback
 	 */
 	private void sendFeedback() {
-		final Resources res = getResources();
+		Resources res = getResources();
 				
 		// Empty message - do nothing
 		if(mMessageEditText.getText().toString().trim().isEmpty()) {
@@ -124,7 +124,10 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		
 		// Lock send button until POST request goes through
 		mLockSend = true;
-		
+
+        final String feedbackErrorString = res.getString(R.string.feedback_error);
+        final String feedbackSuccessString = res.getString(R.string.feedback_success);
+
 		aq.ajax(API, params, JSONObject.class, new AjaxCallback<JSONObject>() {
 			
 			@Override
@@ -137,12 +140,12 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 					// Errors - invalid input
 					if(json.optJSONArray("errors") != null) {
 						JSONArray response = json.optJSONArray("errors");
-						Toast.makeText(getActivity().getApplicationContext(), response.optString(0, res.getString(R.string.feedback_error)), Toast.LENGTH_LONG).show();
+						Toast.makeText(getActivity(), response.optString(0, feedbackErrorString), Toast.LENGTH_LONG).show();
 					}
 					// Success - input went through
-					else if(json.optString("success") != null) {
-						String response = json.optString("success", res.getString(R.string.feedback_success));
-						Toast.makeText(getActivity().getApplicationContext(), response, Toast.LENGTH_LONG).show();
+					else if(!json.isNull("success")) {
+						String response = json.optString("success", feedbackSuccessString);
+						Toast.makeText(getActivity(), response, Toast.LENGTH_LONG).show();
 						
 						// Only reset forms after message has gone through
 						resetForm();
@@ -177,7 +180,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		final Resources res = getResources();
+		Resources res = getResources();
 
 		if(parent.getId() == R.id.subjectSpinner) {
 			String selection = (String) parent.getItemAtPosition(position);

@@ -99,6 +99,10 @@ public class BusRoutes extends Fragment {
         final Promise nbActiveRoutes = Nextbus.getActiveRoutes("nb");
         final Promise nwkActiveRoutes = Nextbus.getActiveRoutes("nwk");
 
+        // This avoids referencing getResources() from the callback function
+        final String nbString = getResources().getString(R.string.bus_nb_active_routes_header);
+        final String nwkString =  getResources().getString(R.string.bus_nwk_active_routes_header);
+
         // Synchronized load of active routes
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(nbActiveRoutes, nwkActiveRoutes).done(new AndroidDoneCallback<MultipleResults>() {
@@ -111,8 +115,8 @@ public class BusRoutes extends Fragment {
             @Override
             public void onDone(MultipleResults results) {
                 for (OneResult result : results) {
-                    if(result.getPromise() == nbActiveRoutes) loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header), (JSONArray) result.getResult());
-                    else if(result.getPromise() == nwkActiveRoutes)  loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header), (JSONArray) result.getResult());
+                    if(result.getPromise() == nbActiveRoutes) loadAgency("nb", nbString, (JSONArray) result.getResult());
+                    else if(result.getPromise() == nwkActiveRoutes)  loadAgency("nwk", nwkString, (JSONArray) result.getResult());
                 }
             }
 
