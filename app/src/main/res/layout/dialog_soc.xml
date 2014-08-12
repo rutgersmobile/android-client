@@ -8,17 +8,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/semesterSpinner"
+        android:layout_margin="10dp"
         android:prompt="@string/soc_select_semester" />
 
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/campusSpinner"
+        android:layout_margin="10dp"
         android:prompt="@string/soc_select_campus" />
 
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/levelSpinner"
+        android:layout_margin="10dp"
         android:prompt="@string/soc_select_level" />
 </LinearLayout>

@@ -143,7 +143,7 @@
     <!-- Schedule of Classes -->
     <string name="soc_title">Schedule of Classes</string>
     <string name="soc_error_index">Invalid course index.</string>
-    <string name="soc_select">Select</string>
+    <string name="soc_select">Select schedule</string>
     <string name="soc_select_semester">Select semester</string>
     <string name="soc_select_campus">Select campus</string>
     <string name="soc_select_level">Select level</string>

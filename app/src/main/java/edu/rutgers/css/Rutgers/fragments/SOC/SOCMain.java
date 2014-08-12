@@ -4,7 +4,9 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -204,6 +206,7 @@ public class SOCMain extends Fragment {
         if(item.getItemId() == R.id.action_options) {
             // TODO Dialog for SOC options
             Log.v(TAG, "action_options pressed");
+            showSelectDialog();
             return true;
         }
 
@@ -225,6 +228,34 @@ public class SOCMain extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
+    /**
+     * Show dialog for choosing semester, campus, level.
+     */
+    private void showSelectDialog() {
+        if(mSemesters == null) {
+            Log.e(TAG, "No list of semesters to display for dialog");
+            return;
+        }
+
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        Fragment prev = getFragmentManager().findFragmentByTag("dialog");
+        if(prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+
+        ArrayList<String> semestersList = new ArrayList<String>(5);
+        for(int i = 0; i < mSemesters.length(); i++) {
+            semestersList.add(Schedule.translateSemester(mSemesters.optString(i)));
+        }
+
+        DialogFragment newDialogFragment = SOCDialog.newInstance(semestersList);
+        newDialogFragment.show(ft, "dialog");
+    }
+
+    /**
+     * Load list of subjects based on current configuration for campus, level, and semester.
+     */
     private void loadSubjects() {
         Log.v(TAG, "Loaded subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
         setTitle();
@@ -264,6 +295,9 @@ public class SOCMain extends Fragment {
         });
     }
 
+    /**
+     * Set title based on current campus, semester, and level configuration.
+     */
     private void setTitle() {
         getActivity().setTitle(mCampus + " " + Schedule.translateSemester(mSemester) + " " + mLevel);
     }
