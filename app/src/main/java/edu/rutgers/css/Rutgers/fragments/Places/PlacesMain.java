@@ -84,6 +84,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         super.onDetach();
         Log.i(TAG, "Detaching from activity");
         mLocationClientProvider = null;
+        mProgressCircle = null;
     }
 
 	@Override
@@ -243,6 +244,14 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     @Override
     public void onDisconnected() {
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mProgressCircle = null;
     }
 
     private void loadNearbyPlaces() {
