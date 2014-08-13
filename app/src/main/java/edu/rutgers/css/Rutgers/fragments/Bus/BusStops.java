@@ -50,8 +50,7 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 
 	private static final String TAG = "BusStops";
 	private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
-	
-	private ListView mListView;
+
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
 	private LocationClientProvider mLocationClientProvider;
@@ -106,28 +105,28 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_bus_stops, parent, false);
 		
-		mListView = (ListView) v.findViewById(R.id.list);
-		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(new OnItemClickListener() {
+		ListView listView = (ListView) v.findViewById(R.id.list);
+		listView.setAdapter(mAdapter);
+		listView.setOnItemClickListener(new OnItemClickListener() {
 
-			/**
-			 * Clicking on one of the stops will launch the bus display in stop mode, which lists routes going through that stop.
-			 */
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
-				Bundle clickedArgs = clickedItem.getArgs();
-						
-				Bundle args = new Bundle();
-				args.putString("component", "busdisplay");
-				args.putString("mode", "stop");
-				args.putString("title", clickedArgs.getString("title"));
-				args.putString("agency", clickedArgs.getString("agency"));
-				
-				ComponentFactory.getInstance().switchFragments(args);
-			}
-			
-		});
+            /**
+             * Clicking on one of the stops will launch the bus display in stop mode, which lists routes going through that stop.
+             */
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
+                Bundle clickedArgs = clickedItem.getArgs();
+
+                Bundle args = new Bundle();
+                args.putString("component", "busdisplay");
+                args.putString("mode", "stop");
+                args.putString("title", clickedArgs.getString("title"));
+                args.putString("agency", clickedArgs.getString("agency"));
+
+                ComponentFactory.getInstance().switchFragments(args);
+            }
+
+        });
 		
 		return v;
 	}

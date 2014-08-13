@@ -43,7 +43,7 @@ meals (array) ->
 public class FoodMeal extends Fragment {
 
 	private static final String TAG = "FoodMeal";
-	private ListView mListView;
+
 	private List<RMenuRow> foodItems;
 	private RMenuAdapter foodItemAdapter;
 
@@ -59,8 +59,12 @@ public class FoodMeal extends Fragment {
 		foodItems = new ArrayList<RMenuRow>();
 		foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.row_title, R.layout.row_section_header, foodItems);
 		
-		if(args.get("location") == null || args.get("meal") == null) {
-			Log.e(TAG, "null location/meal");
+		if(args.getString("location") == null) {
+            Log.e(TAG, "Location not set");
+            return;
+        }
+        else if(args.getString("meal") == null) {
+            Log.e(TAG, "Meal not set");
 			return;
 		}
 		
@@ -75,7 +79,6 @@ public class FoodMeal extends Fragment {
 					
 					for(int i = 0; i < mealGenres.length(); i++) {
 						try {
-					
 							JSONObject curGenre = mealGenres.getJSONObject(i);
 							JSONArray mealItems = curGenre.getJSONArray("items");
 							foodItemAdapter.add(new FoodItem(curGenre.getString("genre_name"), true)); // Add category header
@@ -83,11 +86,8 @@ public class FoodMeal extends Fragment {
 							for(int j = 0; j < mealItems.length(); j++) {
 								foodItemAdapter.add(new FoodItem(mealItems.getString(j)));
 							}
-							
 						} catch (JSONException e) {
-						
-							Log.e(TAG, e.getMessage());
-						
+							Log.w(TAG, "getDiningLocation(): " + e.getMessage());
 						}
 					}
 					
@@ -120,14 +120,15 @@ public class FoodMeal extends Fragment {
 		// Inflate the layout for this fragment
 		View v = inflater.inflate(R.layout.fragment_food_meal, container, false);
 		Bundle args = getArguments();
-		mListView = (ListView) v.findViewById(R.id.food_meal_list);
 		
 		// Set title
-		if(args.getString("location") != null && args.getString("meal") != null)
-			getActivity().setTitle(args.getString("location") + " - " + args.getString("meal"));
+		if(args.getString("location") != null && args.getString("meal") != null) {
+            getActivity().setTitle(args.getString("location") + " - " + args.getString("meal"));
+        }
 
-		mListView.setAdapter(foodItemAdapter);
-        mListView.setOnItemClickListener(null);
+        ListView listView = (ListView) v.findViewById(R.id.food_meal_list);
+		listView.setAdapter(foodItemAdapter);
+        listView.setOnItemClickListener(null);
 
 		return v;
 	}

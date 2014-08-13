@@ -33,7 +33,6 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 	
 	private ArrayList<Prediction> mData;
 	private PredictionAdapter mAdapter;
-	private ListView mListView;
 	private Mode mMode;
 	private String mTag;
 	private Handler mUpdateHandler;
@@ -114,13 +113,14 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 			getActivity().setTitle(getResources().getString(R.string.bus_title));
 		}
 
-        mListView = (ListView) v.findViewById(R.id.busDisplayList);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new OnItemClickListener() {
+        ListView listView = (ListView) v.findViewById(R.id.busDisplayList);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(!mAdapter.getItem(position).getMinutes().isEmpty()) mAdapter.togglePopped(position);
+                if (!mAdapter.getItem(position).getMinutes().isEmpty())
+                    mAdapter.togglePopped(position);
             }
 
         });

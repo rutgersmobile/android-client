@@ -27,7 +27,6 @@ public class SOCSections extends Fragment {
 
     private List<JSONObject> mData;
     private CourseSectionAdapter mAdapter;
-    private ListView mListView;
 
     public SOCSections() {
         // Required empty public constructor
@@ -64,18 +63,17 @@ public class SOCSections extends Fragment {
 
         final String semester = args.getString("semester");
 
-        mListView = (ListView) v.findViewById(R.id.list);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView listView = (ListView) v.findViewById(R.id.list);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
 
                 String index = clickedJSON.optString("index");
-                if(index != null && semester != null) {
+                if (index != null && semester != null) {
                     Schedule.openRegistrationWindow(semester, index);
-                }
-                else {
+                } else {
                     Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
                     Log.w(TAG, "Section had no index field. Failed to launch webreg.");
                 }

@@ -37,7 +37,6 @@ public class SOCCourses extends Fragment {
 
     private List<JSONObject> mData;
     private ScheduleAdapter mAdapter;
-    private ListView mListView;
 
     public SOCCourses() {
         // Required empty public constructor
@@ -102,15 +101,15 @@ public class SOCCourses extends Fragment {
         EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
         ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
 
-        mListView = (ListView) v.findViewById(R.id.list);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView listView = (ListView) v.findViewById(R.id.list);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
 
                 Bundle args = new Bundle();
-                args.putString("component","socsections");
+                args.putString("component", "socsections");
                 args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
                 args.putString("data", clickedJSON.toString());
                 args.putString("semester", semester);

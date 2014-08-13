@@ -38,7 +38,6 @@ public class DTable extends Fragment {
 	
 	private static final String TAG = "DTable";
 
-	private ListView mListView;
 	private JSONArray mData;
 	private JSONAdapter mAdapter;
 	private String mURL;
@@ -172,17 +171,17 @@ public class DTable extends Fragment {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
-		mListView = (ListView) v.findViewById(R.id.dtable_list);
+		ListView listView = (ListView) v.findViewById(R.id.dtable_list);
 
 		Bundle args = getArguments();
 		if(args.getString("title") != null) {
 			getActivity().setTitle(args.getString("title"));
 		}
 		
-		mListView.setAdapter(mAdapter);
+		listView.setAdapter(mAdapter);
 		
 		// Clicks on DTable item launch component in "view" field with arguments
-		mListView.setOnItemClickListener(new OnItemClickListener() {
+		listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -215,16 +214,18 @@ public class DTable extends Fragment {
                         // to the title set for the clickable item here. (They often match, but
                         // see rec.txt for an example of where they differ.)
                         Object title = null;
-                        if(channel.has("title")) title = channel.get("title");
-                        else if(clickedJson.has("title")) title = clickedJson.get("title");
+                        if (channel.has("title")) title = channel.get("title");
+                        else if (clickedJson.has("title")) title = clickedJson.get("title");
 
-                        if(title != null) args.putString("title", AppUtil.getLocalTitle(mContext, title));
+                        if (title != null)
+                            args.putString("title", AppUtil.getLocalTitle(mContext, title));
 
                         // Add the rest of the JSON fields to the arg bundle
                         Iterator<String> keys = channel.keys();
                         while (keys.hasNext()) {
                             String key = keys.next();
-                            if(key.equalsIgnoreCase("title")) continue; // title was already handled above
+                            if (key.equalsIgnoreCase("title"))
+                                continue; // title was already handled above
                             Log.v(dTag(), "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
                             args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
                         }

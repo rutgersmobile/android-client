@@ -10,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
@@ -25,15 +26,14 @@ import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Displays available meal menus for a dining hall.
+ * Displays available meal mData for a dining hall.
  *
  */
 public class FoodHall extends Fragment {
 
 	private static final String TAG = "FoodHall";
-	private ListView mListView;
-	private List<String> menus;
-	private ArrayAdapter<String> menuAdapter;
+	private List<String> mData;
+	private ArrayAdapter<String> mAdapter;
 	
 	public FoodHall() {
 		// Required empty public constructor
@@ -44,11 +44,11 @@ public class FoodHall extends Fragment {
 		super.onCreate(savedInstanceState);
 		Bundle args = getArguments();
 		
-		menus = new ArrayList<String>();
-		menuAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.row_title, R.id.title, menus);
+		mData = new ArrayList<String>();
+		mAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.row_title, R.id.title, mData);
 
-		if(args.get("location") == null) {
-			Log.e(TAG, "null location");
+		if(args.getString("location") == null) {
+			Log.e(TAG, "Location not set");
 			return;
 		}
 		
@@ -62,7 +62,7 @@ public class FoodHall extends Fragment {
 					for(int j = 0; j < meals.length(); j++) {
 						JSONObject curMeal = meals.getJSONObject(j);
 						if(curMeal.getBoolean("meal_avail")) {
-                            menuAdapter.add(curMeal.getString("meal_name"));
+                            mAdapter.add(curMeal.getString("meal_name"));
                         }
 					}		
 				}
@@ -84,30 +84,33 @@ public class FoodHall extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_food_hall, parent, false);
-		mListView = (ListView) v.findViewById(R.id.dining_menu_list);
-		
-		Bundle args = getArguments();
-		getActivity().setTitle(args.getString("location"));
-		setupList(args.getString("location"));
-		
-		return v;
-	}
-	
-	private void setupList(final String location) {
-		mListView.setAdapter(menuAdapter);
-		
-		mListView.setOnItemClickListener(new OnItemClickListener() {
+		final Bundle args = getArguments();
+		if(args.getString("location") != null) {
+            getActivity().setTitle(args.getString("location"));
+        }
+        else {
+            Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Location not set");
+            return v;
+        }
+
+        ListView listView = (ListView) v.findViewById(R.id.dining_menu_list);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Bundle args = new Bundle();
-                args.putString("component", "foodmeal");
-                args.putString("location", location);
-                args.putString("meal", (String) parent.getAdapter().getItem(position));
+                Bundle newArgs = new Bundle();
+                newArgs.putString("component", "foodmeal");
+                newArgs.putString("location", args.getString("location"));
+                newArgs.putString("meal", (String) parent.getAdapter().getItem(position));
 
-                ComponentFactory.getInstance().switchFragments(args);
+                ComponentFactory.getInstance().switchFragments(newArgs);
             }
 
         });
+
+		return v;
 	}
+
 }

@@ -46,7 +46,6 @@ public class SOCMain extends Fragment {
 
     private List<JSONObject> mData;
     private ScheduleAdapter mAdapter;
-    private ListView mListView;
 
     private String mCampus;
     private JSONArray mSemesters;
@@ -135,9 +134,9 @@ public class SOCMain extends Fragment {
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
         final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
 
-        mListView = (ListView) v.findViewById(R.id.list);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView listView = (ListView) v.findViewById(R.id.list);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -147,12 +146,11 @@ public class SOCMain extends Fragment {
                 args.putString("semester", mSemester);
                 args.putString("level", mLevel);
 
-                if(!clickedJSON.has("courseNumber")) {
+                if (!clickedJSON.has("courseNumber")) {
                     args.putString("component", "soccourses");
                     args.putString("title", clickedJSON.optString("description") + " (" + clickedJSON.optString("code") + ")");
                     args.putString("subjectCode", clickedJSON.optString("code"));
-                }
-                else {
+                } else {
                     // This is for when a course is clicked if it comes up through special filter
                     args.putString("component", "socsections");
                     args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));

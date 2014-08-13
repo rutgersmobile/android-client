@@ -59,7 +59,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 	private ArrayAdapter<PlaceTuple> mSearchAdapter;
 	private ArrayList<RMenuRow> mData;
     private RMenuAdapter mAdapter;
-    private ListView mListView;
     private ProgressBar mProgressCircle;
     private LocationClientProvider mLocationClientProvider;
 
@@ -151,8 +150,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
-        mListView = (ListView) v.findViewById(R.id.listView);
-        mListView.setAdapter(mAdapter);
+        ListView listView = (ListView) v.findViewById(R.id.listView);
+        listView.setAdapter(mAdapter);
 
 		final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
 		autoComp.setAdapter(mSearchAdapter);
@@ -201,7 +200,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         });
 
         // Click listener for nearby places list
-        mListView.setOnItemClickListener(new OnItemClickListener() {
+        listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clickedItem = (RMenuItemRow) parent.getItemAtPosition(position);

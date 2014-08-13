@@ -36,7 +36,6 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	
 	private static final String TAG = "RSSReader";
 	private ArrayList<RSSItem> mData;
-	private ListView mListView;
 	private RSSAdapter mAdapter;
 	private long expire = 60 * 1000; // cache feed for one minute
 	
@@ -102,7 +101,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_rss_reader, parent, false);
-		mListView = (ListView) v.findViewById(R.id.rssreader_list);
+		ListView listView = (ListView) v.findViewById(R.id.rssreader_list);
         Bundle args = getArguments();
 		
 		Log.v(TAG, "RSS Reader launched for " + args.getString("url"));
@@ -113,8 +112,8 @@ public class RSSReader extends Fragment implements OnItemClickListener {
         }
 
 		// Adapter & click listener for RSS list view
-		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(this);
+		listView.setAdapter(mAdapter);
+		listView.setOnItemClickListener(this);
 		
 		return v;
 	}

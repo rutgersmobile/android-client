@@ -38,7 +38,6 @@ public class RecreationMain extends Fragment {
 	private static final String TAG = "RecreationMain";
 	
 	private ArrayList<RMenuRow> mData;
-	private ListView mListView;
 	private RMenuAdapter mAdapter;
 	
 	public RecreationMain() {
@@ -113,20 +112,20 @@ public class RecreationMain extends Fragment {
 
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
 
-		mListView = (ListView) v.findViewById(R.id.list);
-		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(new OnItemClickListener() {
+		ListView listView = (ListView) v.findViewById(R.id.list);
+		listView.setAdapter(mAdapter);
+		listView.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				RMenuItemRow clicked = (RMenuItemRow) parent.getItemAtPosition(position);
-				Bundle args = clicked.getArgs();
-				args.putString("component", "recdisplay");
-				
-				ComponentFactory.getInstance().switchFragments(args);
-			}
-			
-		});
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                RMenuItemRow clicked = (RMenuItemRow) parent.getItemAtPosition(position);
+                Bundle args = clicked.getArgs();
+                args.putString("component", "recdisplay");
+
+                ComponentFactory.getInstance().switchFragments(args);
+            }
+
+        });
 		
 		return v;
 	}

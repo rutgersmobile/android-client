@@ -38,7 +38,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class FoodMain extends Fragment {
 
 	private static final String TAG = "FoodMain";
-	private ListView mListView;
+
     private ArrayList<RMenuRow> mData;
     private RMenuAdapter mAdapter;
 
@@ -52,14 +52,16 @@ public class FoodMain extends Fragment {
 
         mData = new ArrayList<RMenuRow>(4);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
-		
+
+        final String nbCampusFullString = getResources().getString(R.string.campus_nb_full);
+
 		// Get dining hall data and populate the top-level menu with names of the dining halls
 		Dining.getDiningHalls().done(new AndroidDoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray halls) {
                 try {
-                    mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.campus_nb_full)));
+                    mAdapter.add(new RMenuHeaderRow(nbCampusFullString));
 
                     // Add dining halls - if they have no active meals, make them unclickable
                     for (int i = 0; i < halls.length(); i++) {
@@ -108,25 +110,25 @@ public class FoodMain extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
-		mListView = (ListView) v.findViewById(R.id.dining_locations_list);
+		ListView listView = (ListView) v.findViewById(R.id.dining_locations_list);
 		
 		Bundle args = getArguments();
-		getActivity().setTitle(args.getString("title"));
+		if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
 
-		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(new OnItemClickListener() {
+		listView.setAdapter(mAdapter);
+		listView.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Bundle clickedArgs = ((RMenuItemRow) parent.getAdapter().getItem(position)).getArgs();
 
-				Bundle args = new Bundle(clickedArgs);
-				if(args.getString("component") == null) args.putString("component", "foodhall");
-				
-				ComponentFactory.getInstance().switchFragments(args);
-			}
-			
-		});	
+                Bundle args = new Bundle(clickedArgs);
+                if (args.getString("component") == null) args.putString("component", "foodhall");
+
+                ComponentFactory.getInstance().switchFragments(args);
+            }
+
+        });
 		
 		return v;
 	}

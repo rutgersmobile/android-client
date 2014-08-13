@@ -43,8 +43,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusAll extends Fragment {
 
 	private static final String TAG = "BusAll";
-	
-	private ListView mListView;
+
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
     private EditText mFilterEditText;
@@ -145,33 +144,34 @@ public class BusAll extends Fragment {
         });
 
 		// Set up list to accept clicks on route or stop rows
-		mListView = (ListView) v.findViewById(R.id.list);
-		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(new OnItemClickListener() {
+		ListView listView = (ListView) v.findViewById(R.id.list);
+		listView.setAdapter(mAdapter);
+		listView.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
-				Bundle clickedArgs = clickedItem.getArgs();
-				
-				try {
-					JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
-				
-					Bundle args = new Bundle();
-					args.putString("component", "busdisplay");
-					args.putString("mode", clickedArgs.getString("mode"));
-					args.putString("agency", clickedArgs.getString("agency"));
-					args.putString("title", clickedJSON.getString("title"));
-					if(clickedArgs.getString("mode").equalsIgnoreCase("route")) args.putString("tag", clickedJSON.getString("tag"));
-					
-					ComponentFactory.getInstance().switchFragments(args);
-				} catch (JSONException e) {
-					Log.e(TAG, "onCreateView()" + e.getMessage());
-				}
-				
-			}
-			
-		});
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
+                Bundle clickedArgs = clickedItem.getArgs();
+
+                try {
+                    JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
+
+                    Bundle args = new Bundle();
+                    args.putString("component", "busdisplay");
+                    args.putString("mode", clickedArgs.getString("mode"));
+                    args.putString("agency", clickedArgs.getString("agency"));
+                    args.putString("title", clickedJSON.getString("title"));
+                    if (clickedArgs.getString("mode").equalsIgnoreCase("route"))
+                        args.putString("tag", clickedJSON.getString("tag"));
+
+                    ComponentFactory.getInstance().switchFragments(args);
+                } catch (JSONException e) {
+                    Log.e(TAG, "onCreateView()" + e.getMessage());
+                }
+
+            }
+
+        });
 		
 		return v;
 	}
