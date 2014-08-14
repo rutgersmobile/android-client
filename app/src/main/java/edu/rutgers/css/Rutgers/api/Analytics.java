@@ -202,9 +202,9 @@ public class Analytics extends IntentService {
                 // Build POST request
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpPost httpPost = new HttpPost(POST_URL);
-                if(BuildConfig.DEBUG) {
+                /*if(BuildConfig.DEBUG) {
                     Log.v(TAG, "payload: " + eventOutQueue.toString());
-                }
+                }*/
 
                 try {
                     List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();

@@ -37,7 +37,7 @@ public class RUInfoMain extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_ruinfo_main, container, false);
 		
-		getActivity().setTitle(getResources().getString(R.string.ruinfo_title));
+		getActivity().setTitle(R.string.ruinfo_title);
 
         //final LinearLayout telephonyLayout = (LinearLayout) v.findViewById(R.id.telephonyLayout);
         //final TextView noTelephonyText = (TextView) v.findViewById(R.id.noTelephonyText);

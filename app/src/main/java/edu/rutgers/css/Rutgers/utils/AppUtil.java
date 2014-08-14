@@ -239,7 +239,7 @@ public class AppUtil {
      */
     public static void showFailedLoadToast(Context context) {
         if(context != null) Toast.makeText(context, R.string.failed_load, Toast.LENGTH_SHORT).show();
-        Log.w(TAG, "showFailedLoadToast(): context null");
+        else Log.w(TAG, "showFailedLoadToast(): context null");
     }
 
     /**

@@ -38,8 +38,8 @@ public class RSSItem implements Serializable {
     private final static DateFormat rssDf3 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US); // Mon, 26 May 2014 00:27:50 GMT
     private final static DateFormat rssOutFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.US); // May 26, 2014
     private final static DateFormat eventDf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
-    private final static DateFormat outDf = new SimpleDateFormat("E, MMM dd, h:mm a", Locale.US);
-    private final static DateFormat outEndDf = new SimpleDateFormat("h:mm a", Locale.US);
+    private final static DateFormat eventOutDf = new SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.US);
+    private final static DateFormat eventOutEndDf = new SimpleDateFormat("h:mm a", Locale.US);
 	
 	/**
 	 * Default constructor takes RSS item as XML object
@@ -99,12 +99,12 @@ public class RSSItem implements Serializable {
                     Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
 
                     // If days match show day with start & end hours
-                    if(isSameDay(eventBegin, eventEnd)) this.date = outDf.format(eventBegin) + " - " + outEndDf.format(eventEnd);
+                    if(isSameDay(eventBegin, eventEnd)) this.date = eventOutDf.format(eventBegin) + " - " + eventOutEndDf.format(eventEnd);
                     // Otherwise show start and end dates
-                    else this.date = outDf.format(eventBegin) + " - " + outDf.format(eventEnd);
+                    else this.date = eventOutDf.format(eventBegin) + " - " + eventOutDf.format(eventEnd);
                 }
                 else {
-                    this.date = outDf.format(eventBegin);
+                    this.date = eventOutDf.format(eventBegin);
                 }
 
 			} catch (ParseException e) {

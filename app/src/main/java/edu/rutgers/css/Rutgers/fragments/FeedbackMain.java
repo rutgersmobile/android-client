@@ -63,7 +63,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_feedback_main, container, false);
 		
-		getActivity().setTitle(getResources().getString(R.string.feedback_title));
+		getActivity().setTitle(R.string.feedback_title);
 		
 		mLockSend = false;
 		
