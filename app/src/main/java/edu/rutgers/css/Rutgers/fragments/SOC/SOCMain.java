@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.fragments.SOC;
 
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
@@ -33,6 +34,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 import edu.rutgers.css.Rutgers.adapters.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -40,16 +42,16 @@ import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
-public class SOCMain extends Fragment {
+public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogListener {
 
     private static final String TAG = "SOCMain";
 
     private List<JSONObject> mData;
     private ScheduleAdapter mAdapter;
-
-    private String mCampus;
     private JSONArray mSemesters;
+    private String mDefaultSemester;
     private String mSemester;
+    private String mCampus;
     private String mLevel;
 
     public SOCMain() {
@@ -66,20 +68,12 @@ public class SOCMain extends Fragment {
         mData = new ArrayList<JSONObject>();
         mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, mData);
 
+        // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String userHome = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, getResources().getString(R.string.campus_nb_tag));
-        String userLevel = sharedPref.getString(SettingsActivity.KEY_PREF_USER_TYPE, getResources().getString(R.string.role_undergrad_tag));
-
-        // Pick default campus code based on prefs (fall back to New Brunswick)
-        if(userHome.equals(res.getString(R.string.campus_nb_tag))) mCampus = Schedule.CODE_CAMPUS_NB;
-        else if(userHome.equals(res.getString(R.string.campus_nwk_tag))) mCampus = Schedule.CODE_CAMPUS_NWK;
-        else if(userHome.equals(res.getString(R.string.campus_cam_tag))) mCampus = Schedule.CODE_CAMPUS_CAM;
-        else mCampus = Schedule.CODE_CAMPUS_NB;
-
-        // Pick default user-level code based on prefs (fall back to Undergrad)
-        if(userLevel.equals(res.getString(R.string.role_undergrad_tag))) mLevel = Schedule.CODE_LEVEL_UNDERGRAD;
-        else if(userLevel.equals(res.getString(R.string.role_grad_tag))) mLevel = Schedule.CODE_LEVEL_GRAD;
-        else mLevel = Schedule.CODE_LEVEL_UNDERGRAD;
+        defaultSettings(sharedPref);
+        mLevel = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
+        mCampus = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
+        mSemester = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, null);
 
         // Get the available & current semesters
         Schedule.getSemesters().done(new AndroidDoneCallback<JSONObject>() {
@@ -95,13 +89,26 @@ public class SOCMain extends Fragment {
                     JSONArray semesters = result.getJSONArray("semesters");
                     int defaultSemester = result.getInt("defaultSemester");
 
-                    mSemester = semesters.getString(defaultSemester);
+                    mDefaultSemester = semesters.getString(defaultSemester);
                     mSemesters = semesters;
 
-                    for (int i = 0; i < semesters.length(); i++) {
-                        Log.v(TAG, "Got semester: " + Schedule.translateSemester(semesters.getString(i)));
+                    // If there is a saved semester setting, make sure it's valid
+                    if(mSemester != null) {
+                        boolean iTrulyLoveJSON = false;
+                        for(int i = 0; i < semesters.length(); i++) {
+                            // Found it
+                            if(mSemester.equals(semesters.optString(i))) iTrulyLoveJSON = true;
+                        }
+                        if(!iTrulyLoveJSON) mSemester = mDefaultSemester;
                     }
-                    Log.v(TAG, "Default semester: " + Schedule.translateSemester(semesters.getString(defaultSemester)));
+                    else mSemester = mDefaultSemester;
+
+                    if(BuildConfig.DEBUG) {
+                        for (int i = 0; i < semesters.length(); i++) {
+                            Log.v(TAG, "Got semester: " + Schedule.translateSemester(semesters.getString(i)));
+                        }
+                        Log.v(TAG, "Default semester: " + Schedule.translateSemester(semesters.getString(defaultSemester)));
+                    }
 
                     // Campus, level, and semester have been set.
                     loadSubjects();
@@ -202,8 +209,6 @@ public class SOCMain extends Fragment {
 
         // Handle options button
         if(item.getItemId() == R.id.action_options) {
-            // TODO Dialog for SOC options
-            Log.v(TAG, "action_options pressed");
             showSelectDialog();
             return true;
         }
@@ -226,6 +231,26 @@ public class SOCMain extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
+    @Override
+    public void onSettingsSaved() {
+        // When settings are saved from dialog, reload schedule
+        if(isAdded() && mAdapter != null) {
+            Log.v(TAG, "Loading new settings");
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            mCampus = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
+            mLevel = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
+            mSemester = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, mDefaultSemester);
+            loadSubjects();
+        }
+    }
+
+    /**
+     * Set title based on current campus, semester, and level configuration.
+     */
+    private void setTitle() {
+        getActivity().setTitle(mCampus + " " + Schedule.translateSemester(mSemester) + " " + mLevel);
+    }
+
     /**
      * Show dialog for choosing semester, campus, level.
      */
@@ -244,10 +269,10 @@ public class SOCMain extends Fragment {
 
         ArrayList<String> semestersList = new ArrayList<String>(5);
         for(int i = 0; i < mSemesters.length(); i++) {
-            semestersList.add(Schedule.translateSemester(mSemesters.optString(i)));
+            semestersList.add(mSemesters.optString(i));
         }
 
-        DialogFragment newDialogFragment = SOCDialog.newInstance(semestersList);
+        DialogFragment newDialogFragment = SOCDialogFragment.newInstance(this, semestersList);
         newDialogFragment.show(ft, "dialog");
     }
 
@@ -294,10 +319,35 @@ public class SOCMain extends Fragment {
     }
 
     /**
-     * Set title based on current campus, semester, and level configuration.
+     * Set default campus & level settings (if necessary) using the configured user role & campus.
+     * @param sharedPref Default shared preferences
      */
-    private void setTitle() {
-        getActivity().setTitle(mCampus + " " + Schedule.translateSemester(mSemester) + " " + mLevel);
+    private void defaultSettings(SharedPreferences sharedPref) {
+        // If there are already prefs, exit
+        if(sharedPref.contains(SettingsActivity.KEY_PREF_SOC_LEVEL)) return;
+
+        String campus, level;
+        Resources res = getResources();
+
+        // Set default values for schedule preferences if nothing
+        String userHome = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, res.getString(R.string.campus_nb_tag));
+        String userLevel = sharedPref.getString(SettingsActivity.KEY_PREF_USER_TYPE, res.getString(R.string.role_undergrad_tag));
+
+        // Pick default campus code based on prefs (fall back to New Brunswick)
+        if(userHome.equals(res.getString(R.string.campus_nb_tag))) campus = Schedule.CODE_CAMPUS_NB;
+        else if(userHome.equals(res.getString(R.string.campus_nwk_tag))) campus = Schedule.CODE_CAMPUS_NWK;
+        else if(userHome.equals(res.getString(R.string.campus_cam_tag))) campus = Schedule.CODE_CAMPUS_CAM;
+        else campus = Schedule.CODE_CAMPUS_NB;
+
+        // Pick default user-level code based on prefs (fall back to Undergrad)
+        if(userLevel.equals(res.getString(R.string.role_undergrad_tag))) level = Schedule.CODE_LEVEL_UNDERGRAD;
+        else if(userLevel.equals(res.getString(R.string.role_grad_tag))) level = Schedule.CODE_LEVEL_GRAD;
+        else level = Schedule.CODE_LEVEL_UNDERGRAD;
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(SettingsActivity.KEY_PREF_SOC_CAMPUS, campus);
+        editor.putString(SettingsActivity.KEY_PREF_SOC_LEVEL, level);
+        editor.commit();
     }
 
 }

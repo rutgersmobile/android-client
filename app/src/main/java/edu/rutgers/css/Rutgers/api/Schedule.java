@@ -126,7 +126,7 @@ public class Schedule {
      * @return Unchanged invalid string
      */
     private static String invalidSemester(String semesterCode) {
-        Log.w(TAG, "Invalid semester code \"" + semesterCode + "\"");
+        Log.e(TAG, "Invalid semester code \"" + semesterCode + "\"");
         return semesterCode;
     }
 
