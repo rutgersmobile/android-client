@@ -54,6 +54,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class PlacesMain extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
 
 	private static final String TAG = "PlacesMain";
+    public static final String HANDLE = "places";
 
 	private ArrayList<PlaceTuple> mSearchList;
 	private ArrayAdapter<PlaceTuple> mSearchAdapter;
@@ -168,7 +169,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 				Bundle args = new Bundle();
 				PlaceTuple placeTuple = (PlaceTuple) parent.getAdapter().getItem(position);
 				
-				args.putString("component", "placesdisplay");
+				args.putString("component", PlacesDisplay.HANDLE);
 				args.putString("placeKey", placeTuple.getKey());
 				args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
 				
@@ -236,7 +237,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         // or before onCreate() has ran.
         if(mData != null && isAdded()) {
             // Don't update the screen if the places fragment isn't on top
-            if(!AppUtil.isOnTop("places", getActivity().getSupportFragmentManager())) {
+            if(!AppUtil.isOnTop(PlacesMain.HANDLE, getActivity().getSupportFragmentManager())) {
                 Log.v(TAG, "Not on top, not updating nearby places");
             }
             else loadNearbyPlaces();
@@ -297,7 +298,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                         for (PlaceTuple placeTuple : result) {
                             Bundle args = new Bundle();
                             args.putString("title", placeTuple.getPlaceJSON().optString("title"));
-                            args.putString("component", "placesdisplay");
+                            args.putString("component", PlacesDisplay.HANDLE);
                             args.putString("placeKey", placeTuple.getKey());
                             args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
                             mAdapter.add(new RMenuItemRow(args));

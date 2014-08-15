@@ -69,7 +69,7 @@ public class BusRoutes extends Fragment {
                     JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
 
                     Bundle args = new Bundle();
-                    args.putString("component", "busdisplay");
+                    args.putString("component", BusDisplay.HANDLE);
                     args.putString("mode", "route");
                     args.putString("title", clickedJSON.getString("title"));
                     args.putString("tag", clickedJSON.getString("tag"));

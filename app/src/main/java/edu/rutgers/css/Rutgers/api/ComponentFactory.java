@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Reader;
 import java.util.Hashtable;
 import java.util.Locale;
 
@@ -56,36 +57,36 @@ public class ComponentFactory {
 		fragmentTable = new Hashtable<String, Class<? extends Fragment>>();
 
         // General views
-		fragmentTable.put("dtable", DTable.class);
-        fragmentTable.put("reader", RSSReader.class);
-        fragmentTable.put("text", TextDisplay.class);
-        fragmentTable.put("www", WebDisplay.class);
+		fragmentTable.put(DTable.HANDLE, DTable.class);
+        fragmentTable.put(RSSReader.HANDLE, RSSReader.class);
+        fragmentTable.put(TextDisplay.HANDLE, TextDisplay.class);
+        fragmentTable.put(WebDisplay.HANDLE, WebDisplay.class);
 
         // Bus views
-        fragmentTable.put("bus", BusMain.class);
-        fragmentTable.put("busdisplay", BusDisplay.class);
+        fragmentTable.put(BusMain.HANDLE, BusMain.class);
+        fragmentTable.put(BusDisplay.HANDLE, BusDisplay.class);
 
         // Food views
-        fragmentTable.put("food", FoodMain.class);
-		fragmentTable.put("foodhall", FoodHall.class);
-		fragmentTable.put("foodmeal", FoodMeal.class);
+        fragmentTable.put(FoodMain.HANDLE, FoodMain.class);
+		fragmentTable.put(FoodHall.HANDLE, FoodHall.class);
+		fragmentTable.put(FoodMeal.HANDLE, FoodMeal.class);
 
         // Places views
-		fragmentTable.put("places", PlacesMain.class);
-		fragmentTable.put("placesdisplay", PlacesDisplay.class);
+		fragmentTable.put(PlacesMain.HANDLE, PlacesMain.class);
+		fragmentTable.put(PlacesDisplay.HANDLE, PlacesDisplay.class);
 
         // Recreation views
-		fragmentTable.put("recreation", RecreationMain.class);
-		fragmentTable.put("recdisplay", RecreationDisplay.class);
+		fragmentTable.put(RecreationMain.HANDLE, RecreationMain.class);
+		fragmentTable.put(RecreationDisplay.HANDLE, RecreationDisplay.class);
 
         // SOC views
-        fragmentTable.put("soc", SOCMain.class);
-        fragmentTable.put("soccourses", SOCCourses.class);
-        fragmentTable.put("socsections", SOCSections.class);
+        fragmentTable.put(SOCMain.HANDLE, SOCMain.class);
+        fragmentTable.put(SOCCourses.HANDLE, SOCCourses.class);
+        fragmentTable.put(SOCSections.HANDLE, SOCSections.class);
 
         // Other views
-		fragmentTable.put("ruinfo", RUInfoMain.class);
-		fragmentTable.put("feedback", FeedbackMain.class);
+		fragmentTable.put(RUInfoMain.HANDLE, RUInfoMain.class);
+		fragmentTable.put(FeedbackMain.HANDLE, FeedbackMain.class);
 	}
 
     public void setMainActivity(FragmentActivity fragmentActivity) {
@@ -179,7 +180,7 @@ public class ComponentFactory {
         Analytics.queueEvent(mMainActivity, Analytics.CHANNEL_OPENED, extras.toString());
 
         // Check if the URI is HTTP or not for links
-        if(componentTag.equalsIgnoreCase("www")) {
+        if(componentTag.equalsIgnoreCase(WebDisplay.HANDLE)) {
             if(args.getString("url") != null) {
                 String url = args.getString("url");
                 if(url.contains("://") && !StringUtils.startsWithIgnoreCase(url, "http://") && !StringUtils.startsWithIgnoreCase(url, "https://")) {

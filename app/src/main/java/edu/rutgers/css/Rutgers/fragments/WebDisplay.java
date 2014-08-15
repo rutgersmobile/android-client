@@ -27,6 +27,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class WebDisplay extends Fragment {
 
 	private static final String TAG = "WebDisplay";
+    public static final String HANDLE = "www";
 
     // Could add to this from JSON when more extensions come up
     private static final String[] DOC_TYPES = {".pdf",

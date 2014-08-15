@@ -37,6 +37,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class DTable extends Fragment {
 	
 	private static final String TAG = "DTable";
+    public static final String HANDLE = "dtable";
 
 	private JSONArray mData;
 	private JSONAdapter mAdapter;

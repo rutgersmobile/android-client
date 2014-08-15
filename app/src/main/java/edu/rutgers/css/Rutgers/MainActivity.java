@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
@@ -255,8 +256,8 @@ public class MainActivity extends FragmentActivity  implements
         }
 
 		// If web display is active, send back button presses to it for navigating browser history
-        if("www".equalsIgnoreCase(AppUtil.backStackPeek(getSupportFragmentManager()))) {
-            Fragment webView = getSupportFragmentManager().findFragmentByTag("www");
+        if(WebDisplay.HANDLE.equalsIgnoreCase(AppUtil.backStackPeek(getSupportFragmentManager()))) {
+            Fragment webView = getSupportFragmentManager().findFragmentByTag(WebDisplay.HANDLE);
             if (webView != null && webView.isVisible()) {
                 if(((WebDisplay) webView).backPress()) {
                     Log.d(TAG, "Triggered WebView back button");
@@ -477,7 +478,7 @@ public class MainActivity extends FragmentActivity  implements
 
                 // Set component to launch. Default to WWW for web shortcuts
                 if(cur.optString("view").isEmpty() && !cur.optString("url").isEmpty()) {
-                    itemArgs.putString("component", "www");
+                    itemArgs.putString("component", WebDisplay.HANDLE);
                 }
                 else {
                     itemArgs.putString("component", cur.getString("view"));

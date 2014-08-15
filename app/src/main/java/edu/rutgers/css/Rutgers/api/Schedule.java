@@ -10,6 +10,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.fragments.WebDisplay;
+
 /**
  * Created by jamchamb on 7/17/14.
  *
@@ -170,7 +172,7 @@ public class Schedule {
         String url = WEBREG_BASE_URL + "editSchedule.htm?login=cas&semesterSelection=" + semester + "&indexList=" + index;
 
         Bundle args = new Bundle();
-        args.putString("component", "www");
+        args.putString("component", WebDisplay.HANDLE);
         args.putString("url", url);
 
         ComponentFactory.getInstance().switchFragments(args);

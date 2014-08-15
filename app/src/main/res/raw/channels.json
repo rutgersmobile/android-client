@@ -79,6 +79,22 @@
         "title": "Feedback",
         "handle": "feedback",
         "view": "feedback"
+    },
+
+    {
+        "category": "main",
+        "title": "Athletics Schedule",
+        "handle": "games",
+        "view": "dtable",
+        "url": "http://sauron.rutgers.edu/~jamchamb/athleticsfaq.txt"
+    },
+
+    {
+        "category": "main",
+        "title": "Football Schedule",
+        "handle": "football",
+        "view": "reader",
+        "url": "http://sauron.rutgers.edu/~jamchamb/football.xml"
     }
 
 ]

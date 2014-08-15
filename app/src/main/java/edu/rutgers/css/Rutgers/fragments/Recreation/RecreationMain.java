@@ -36,6 +36,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class RecreationMain extends Fragment {
 
 	private static final String TAG = "RecreationMain";
+    public static final String HANDLE = "recreation";
 	
 	private ArrayList<RMenuRow> mData;
 	private RMenuAdapter mAdapter;
@@ -122,7 +123,7 @@ public class RecreationMain extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clicked = (RMenuItemRow) parent.getItemAtPosition(position);
                 Bundle args = clicked.getArgs();
-                args.putString("component", "recdisplay");
+                args.putString("component", RecreationDisplay.HANDLE);
 
                 ComponentFactory.getInstance().switchFragments(args);
             }

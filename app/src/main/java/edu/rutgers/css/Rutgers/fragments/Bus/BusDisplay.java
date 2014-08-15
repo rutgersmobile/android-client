@@ -27,6 +27,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayList<Prediction>> {
 
 	private static final String TAG = "BusDisplay";
+    public static final String HANDLE = "busdisplay";
 	private enum Mode {ROUTE, STOP};
 	
 	private static final int REFRESH_INTERVAL = 30; // refresh interval in seconds

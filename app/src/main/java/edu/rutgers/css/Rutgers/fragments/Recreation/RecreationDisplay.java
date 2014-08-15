@@ -36,6 +36,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class RecreationDisplay extends Fragment {
 
 	private static final String TAG = "RecreationDisplay";
+    public static final String HANDLE = "recdisplay";
 
 	private ViewPager mPager;
 	private PagerAdapter mPagerAdapter;

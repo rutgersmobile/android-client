@@ -43,6 +43,7 @@ meals (array) ->
 public class FoodMeal extends Fragment {
 
 	private static final String TAG = "FoodMeal";
+    public static final String HANDLE = "foodmeal";
 
 	private List<RMenuRow> foodItems;
 	private RMenuAdapter foodItemAdapter;

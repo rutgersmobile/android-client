@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
+import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
@@ -38,6 +40,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class FoodMain extends Fragment {
 
 	private static final String TAG = "FoodMain";
+    public static final String HANDLE = "food";
 
     private ArrayList<RMenuRow> mData;
     private RMenuAdapter mAdapter;
@@ -125,7 +128,7 @@ public class FoodMain extends Fragment {
                 Bundle clickedArgs = ((RMenuItemRow) parent.getAdapter().getItem(position)).getArgs();
 
                 Bundle args = new Bundle(clickedArgs);
-                if (args.getString("component") == null) args.putString("component", "foodhall");
+                args.putString("component", FoodHall.HANDLE);
 
                 ComponentFactory.getInstance().switchFragments(args);
             }
@@ -137,12 +140,12 @@ public class FoodMain extends Fragment {
 
     private void loadStaticHalls() {
         Bundle nwk = new Bundle();
-        nwk.putString("component", "text");
+        nwk.putString("component", TextDisplay.HANDLE);
         nwk.putString("title", "Stonsby Commons & Eatery");
         nwk.putString("data", "Students enjoy all-you-care-to-eat dining in a contemporary setting. This exciting location offers fresh made menu items, cutting-edge American entrees, ethnically-inspired foods, vegetarian selections and lots more... \n\nThe Commons also features upscale Premium entrees and fresh baked goods from our in house bakery or local vendors.");
 
         Bundle cam = new Bundle();
-        cam.putString("component", "text");
+        cam.putString("component", TextDisplay.HANDLE);
         cam.putString("title", "Gateway Cafe");
         cam.putString("data", "The Camden Dining Hall, the Gateway Cafe, is located at the Camden Campus Center.\n\nIt offers a variety of eateries in one convenient location.");
 

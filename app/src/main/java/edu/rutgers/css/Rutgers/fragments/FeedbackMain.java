@@ -35,6 +35,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 
 	private static final String TAG = "FeedbackMain";
+    public static final String HANDLE = "feedback";
 	//private static final String API = AppUtil.API_BASE + "feedback.php";
 	private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php";
 	
@@ -196,7 +197,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 				mSelectChannelLayout.setVisibility(View.GONE);
 			}
 			
-			// "General questions" boots you to RU-info
+			// "General questions" boots you to RU-info. BURNNNN!!!
 			if(selection.equals(res.getString(R.string.feedback_general))) {
 				// Reset selection so that the user can hit back without getting booted right away
 				// (this means general questions can never be the default option!)
@@ -204,7 +205,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 				
 				// Launch RU-info channel
 				Bundle args = new Bundle();
-				args.putString("component", "ruinfo");
+				args.putString("component", RUInfoMain.HANDLE);
 				ComponentFactory.getInstance().switchFragments(args);
 			}
 

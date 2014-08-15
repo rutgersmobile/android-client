@@ -12,20 +12,16 @@ import com.androidquery.AQuery;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusMain extends Fragment {
-	private AQuery aq;
+
+    private static final String TAG = "BusMain";
+    public static final String HANDLE = "bus";
+
 	private FragmentTabHost mTabHost;
 
 	public BusMain() {
 		// Required empty public constructor
 	}
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		aq = new AQuery(this.getActivity());
-	}
-	
+
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_bus_main, parent, false);

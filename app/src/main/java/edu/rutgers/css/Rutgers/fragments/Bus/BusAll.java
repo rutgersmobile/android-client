@@ -157,7 +157,7 @@ public class BusAll extends Fragment {
                     JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
 
                     Bundle args = new Bundle();
-                    args.putString("component", "busdisplay");
+                    args.putString("component", BusDisplay.HANDLE);
                     args.putString("mode", clickedArgs.getString("mode"));
                     args.putString("agency", clickedArgs.getString("agency"));
                     args.putString("title", clickedJSON.getString("title"));

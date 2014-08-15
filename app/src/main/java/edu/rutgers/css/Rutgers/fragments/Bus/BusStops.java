@@ -118,7 +118,7 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
                 Bundle clickedArgs = clickedItem.getArgs();
 
                 Bundle args = new Bundle();
-                args.putString("component", "busdisplay");
+                args.putString("component", BusDisplay.HANDLE);
                 args.putString("mode", "stop");
                 args.putString("title", clickedArgs.getString("title"));
                 args.putString("agency", clickedArgs.getString("agency"));
@@ -136,7 +136,7 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 		super.onResume();
 
         // Don't update the screen if the bus fragment isn't on top
-        if(!AppUtil.isOnTop("bus", getActivity().getSupportFragmentManager())) {
+        if(!AppUtil.isOnTop(BusMain.HANDLE, getActivity().getSupportFragmentManager())) {
             Log.v(TAG, "Not on top, not updating nearby stops");
             return;
         }
@@ -222,7 +222,7 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
         // or before onCreate() has ran.
         if(mData != null && isAdded()) {
             // Don't update the screen if the bus fragment isn't on top
-            if(!AppUtil.isOnTop("bus", getActivity().getSupportFragmentManager())) {
+            if(!AppUtil.isOnTop(BusMain.HANDLE, getActivity().getSupportFragmentManager())) {
                 Log.v(TAG, "Not on top, not updating nearby stops");
             }
             else loadNearbyStops(mCurrentCampus);

@@ -32,6 +32,8 @@ import edu.rutgers.css.Rutgers2.R;
 public class FoodHall extends Fragment {
 
 	private static final String TAG = "FoodHall";
+    public static final String HANDLE = "foodhall";
+
 	private List<String> mData;
 	private ArrayAdapter<String> mAdapter;
 	
@@ -101,7 +103,7 @@ public class FoodHall extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Bundle newArgs = new Bundle();
-                newArgs.putString("component", "foodmeal");
+                newArgs.putString("component", FoodMeal.HANDLE);
                 newArgs.putString("location", args.getString("location"));
                 newArgs.putString("meal", (String) parent.getAdapter().getItem(position));
 

@@ -13,6 +13,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class TextDisplay extends Fragment {
 
     private static final String TAG = "TextDisplay";
+    public static final String HANDLE = "text";
 
     private TextView mTextView;
 

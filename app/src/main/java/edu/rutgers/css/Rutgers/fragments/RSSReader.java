@@ -35,6 +35,8 @@ import edu.rutgers.css.Rutgers2.R;
 public class RSSReader extends Fragment implements OnItemClickListener {	
 	
 	private static final String TAG = "RSSReader";
+    public static final String HANDLE = "reader";
+
 	private ArrayList<RSSItem> mData;
 	private RSSAdapter mAdapter;
 	private long expire = 60 * 1000; // cache feed for one minute
@@ -131,7 +133,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
         if(item.getLink() != null) {
             // Open web display fragment
             Bundle args = new Bundle();
-            args.putString("component", "www");
+            args.putString("component", WebDisplay.HANDLE);
             args.putString("url", item.getLink());
 
             ComponentFactory.getInstance().switchFragments(args);

@@ -34,6 +34,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class SOCCourses extends Fragment {
 
     private static final String TAG = "SOCCourses";
+    public static final String HANDLE = "soccourses";
 
     private List<JSONObject> mData;
     private ScheduleAdapter mAdapter;
@@ -109,7 +110,7 @@ public class SOCCourses extends Fragment {
                 JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
 
                 Bundle args = new Bundle();
-                args.putString("component", "socsections");
+                args.putString("component", SOCSections.HANDLE);
                 args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
                 args.putString("data", clickedJSON.toString());
                 args.putString("semester", semester);

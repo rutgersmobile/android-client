@@ -45,6 +45,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogListener {
 
     private static final String TAG = "SOCMain";
+    public static final String HANDLE = "soc";
 
     private List<JSONObject> mData;
     private ScheduleAdapter mAdapter;
@@ -154,12 +155,12 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
                 args.putString("level", mLevel);
 
                 if (!clickedJSON.has("courseNumber")) {
-                    args.putString("component", "soccourses");
+                    args.putString("component", SOCCourses.HANDLE);
                     args.putString("title", clickedJSON.optString("description") + " (" + clickedJSON.optString("code") + ")");
                     args.putString("subjectCode", clickedJSON.optString("code"));
                 } else {
                     // This is for when a course is clicked if it comes up through special filter
-                    args.putString("component", "socsections");
+                    args.putString("component", SOCSections.HANDLE);
                     args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
                     args.putString("data", clickedJSON.toString());
                 }

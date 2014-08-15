@@ -45,6 +45,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class PlacesDisplay extends Fragment {
 
 	private static final String TAG = "PlacesDisplay";
+    public static final String HANDLE = "placesdisplay";
 
     private static Map<String, String> mAgencyMap;
     private MapView mMapView;

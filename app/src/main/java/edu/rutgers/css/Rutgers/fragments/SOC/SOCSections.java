@@ -24,6 +24,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class SOCSections extends Fragment {
 
     private static final String TAG = "SOCSections";
+    public static final String HANDLE = "socsections";
 
     private List<JSONObject> mData;
     private CourseSectionAdapter mAdapter;
