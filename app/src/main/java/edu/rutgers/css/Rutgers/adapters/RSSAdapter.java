@@ -51,7 +51,8 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
     @Override
     public boolean isEnabled(int position) {
         RSSItem curItem = this.getItem(position);
-        if(curItem == null || curItem.getLink() == null) return false;
+        if(curItem == null) return false;
+        else if(curItem.getLink() == null) return false;
         else return true;
     }
 
