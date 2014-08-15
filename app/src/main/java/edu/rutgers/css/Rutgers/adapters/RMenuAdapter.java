@@ -66,14 +66,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 			else {
 				convertView = mLayoutInflater.inflate(this.itemResource, null);
 			}
-			
-			// Determine if item should not be clickable
-			if(!curItem.getIsClickable()) {
-				convertView.setEnabled(false);
-				convertView.setClickable(false);
-				convertView.setOnClickListener(null);
-			}
-			
+
 			holder = new ViewHolder();
 			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
 			holder.iconImageView = (ImageView) convertView.findViewById(R.id.icon);
@@ -128,6 +121,14 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
     @Override
     public boolean areAllItemsEnabled() {
         return false;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        RMenuRow curItem = this.getItem(position);
+        if(curItem == null) return false;
+        else if(!curItem.getIsClickable()) return false;
+        else return true;
     }
 
 }

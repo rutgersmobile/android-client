@@ -42,55 +42,66 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
 		
 		this.mTargetWidth = (int) getContext().getResources().getDimension(R.dimen.rss_image_width);
 	}
-	
-	@Override
+
+    @Override
+    public boolean areAllItemsEnabled() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        RSSItem curItem = this.getItem(position);
+        if(curItem == null || curItem.getLink() == null) return false;
+        else return true;
+    }
+
+    @Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		ViewHolder mHolder = null;
-		
-		/* Make new data holder or get existing one */
+		ViewHolder holder;
+
 		if(convertView == null) { 
 			convertView = mLayoutInflater.inflate(this.mLayoutResource, null);
-			mHolder = new ViewHolder();
-			mHolder.iconImageView = (ImageView) convertView.findViewById(R.id.rssRowIconView);
-			mHolder.titleTextView = (TextView) convertView.findViewById(R.id.rssRowTitleView);
-			mHolder.dateTextView = (TextView) convertView.findViewById(R.id.rssRowDateView);
-			mHolder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
-			//mHolder.authorTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorView);
-			convertView.setTag(mHolder);
+			holder = new ViewHolder();
+			holder.iconImageView = (ImageView) convertView.findViewById(R.id.rssRowIconView);
+			holder.titleTextView = (TextView) convertView.findViewById(R.id.rssRowTitleView);
+			holder.dateTextView = (TextView) convertView.findViewById(R.id.rssRowDateView);
+			holder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
+			//holder.authorTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorView);
+			convertView.setTag(holder);
 		}
 		else {	
-			mHolder = (ViewHolder) convertView.getTag();
+			holder = (ViewHolder) convertView.getTag();
 		}
 	
 		RSSItem curItem = this.getItem(position);
 		
 		// Populate RSS row layout elements
-		mHolder.titleTextView.setText(curItem.getTitle());
+		holder.titleTextView.setText(curItem.getTitle());
 
         if(curItem.getDate() != null && !curItem.getDate().isEmpty()) {
-            mHolder.dateTextView.setText(curItem.getDate());
-            mHolder.dateTextView.setVisibility(View.VISIBLE);
+            holder.dateTextView.setText(curItem.getDate());
+            holder.dateTextView.setVisibility(View.VISIBLE);
         }
         else {
-            mHolder.dateTextView.setVisibility(View.GONE);
-            mHolder.dateTextView.setText(null);
+            holder.dateTextView.setVisibility(View.GONE);
+            holder.dateTextView.setText(null);
         }
 
-		mHolder.descriptionTextView.setText(curItem.getDescription());
-		//mHolder.authorTextView.setText(curItem.getAuthor());
+		holder.descriptionTextView.setText(curItem.getDescription());
+		//holder.authorTextView.setText(curItem.getAuthor());
 		
 		// Download image
 		if(curItem.getImgUrl() == null) {
 			// No image - clear the image view
-			mHolder.iconImageView.setImageBitmap(null);
-			mHolder.iconImageView.setVisibility(View.GONE);
+			holder.iconImageView.setImageBitmap(null);
+			holder.iconImageView.setVisibility(View.GONE);
 		}
 		else {
-            mHolder.iconImageView.setVisibility(View.VISIBLE);
+            holder.iconImageView.setVisibility(View.VISIBLE);
 			// Download the image
             AQuery cvAq = aq.recycle(convertView);
-			cvAq.id(mHolder.iconImageView).image(curItem.getImgUrl().toString(), true, true, mTargetWidth, 0, null, AQuery.FADE_IN_NETWORK, 1.0f);
+			cvAq.id(holder.iconImageView).image(curItem.getImgUrl().toString(), true, true, mTargetWidth, 0, null, AQuery.FADE_IN_NETWORK, 1.0f);
 		}
 		
 		return convertView;

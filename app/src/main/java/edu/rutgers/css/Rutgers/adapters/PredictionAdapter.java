@@ -55,6 +55,14 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
         return false;
     }
 
+    @Override
+    public boolean isEnabled(int position) {
+        Prediction prediction = this.getItem(position);
+        if(prediction == null) return false;
+        else if(prediction.getMinutes().isEmpty()) return false;
+        else return true;
+    }
+
     /**
      * Toggle pop-down on a row.
      * @param position Position of the row to toggle
