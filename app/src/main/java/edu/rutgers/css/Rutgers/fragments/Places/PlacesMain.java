@@ -101,7 +101,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         // TODO This needs to be cancelled when the screen rotates
         // Populate search list & list of nearby places
-		Places.getPlaces().done(new AndroidDoneCallback<JSONObject>() {
+		/*Places.getPlaces().done(new AndroidDoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject json) {
@@ -139,7 +139,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                 AppUtil.showFailedLoadToast(getActivity());
             }
 
-        });
+        });*/
 
     }
 	
@@ -220,8 +220,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         super.onResume();
 
         // Don't update the screen if the places fragment isn't on top
-        if(!AppUtil.isOnTop("places", getActivity().getSupportFragmentManager())) {
-            Log.v(TAG, "Not on top, not updating nearby places");
+        if(!AppUtil.isOnTop(PlacesMain.HANDLE, getActivity().getSupportFragmentManager())) {
+            Log.v(TAG, "onResume(): Not on top, not updating nearby places");
         }
         // Reload nearby places
         else loadNearbyPlaces();
@@ -238,7 +238,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         if(mData != null && isAdded()) {
             // Don't update the screen if the places fragment isn't on top
             if(!AppUtil.isOnTop(PlacesMain.HANDLE, getActivity().getSupportFragmentManager())) {
-                Log.v(TAG, "Not on top, not updating nearby places");
+                Log.v(TAG, "onConnected(): Not on top, not updating nearby places");
             }
             else loadNearbyPlaces();
         }
@@ -266,7 +266,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         final String connectingString = res.getString(R.string.location_connecting);
 
         // Check for location services
-        if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
+        if(mLocationClientProvider != null && mLocationClientProvider.getLocationClient().isConnected()) {
 
             // Get last location
             final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();

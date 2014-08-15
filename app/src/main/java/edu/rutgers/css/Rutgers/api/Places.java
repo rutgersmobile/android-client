@@ -55,8 +55,16 @@ public class Places {
 			@Override
 			public void onDone(JSONObject res) {
 				
-				mPlacesConf = res;
-				confd.resolve(null);
+				try {
+                    mPlacesConf = res.getJSONObject("all");
+                    confd.resolve(null);
+                } catch (JSONException e) {
+                    Log.e(TAG, "setup(): " + e.getMessage());
+                    isSetup = false;
+                    AjaxStatus fake = new AjaxStatus();
+                    confd.reject(fake.code(-101));
+                }
+
 			}
 			
 			@Override
@@ -95,17 +103,7 @@ public class Places {
 			
 			@Override
 			public void onDone(Object o) {
-				JSONObject conf = mPlacesConf;
-				
-				try {
-					JSONObject allPlaces = conf.getJSONObject("all");
-					d.resolve(allPlaces);
-				}
-				catch(JSONException e) {
-					Log.w(TAG, "getPlaces(): " + e.getMessage());
-					d.reject(e);
-				}
-				
+				d.resolve(mPlacesConf);
 			}
 			
 			@Override
@@ -141,17 +139,13 @@ public class Places {
 			
 			@Override
 			public void onDone(Object o) {
-				JSONObject conf = mPlacesConf;
-				
 				try {
-					JSONObject allPlaces = conf.getJSONObject("all");	
-					JSONObject place = allPlaces.getJSONObject(placeKey);
+					JSONObject place = mPlacesConf.getJSONObject(placeKey);
 					d.resolve(place);
 				} catch (JSONException e) {
 					Log.w(TAG, "getPlace(): " + e.getMessage());
 					d.reject(e);
 				}
-				
 			}
 			
 			@Override
@@ -188,10 +182,8 @@ public class Places {
 
             @Override
             public void onDone(Object o) {
-                JSONObject conf = mPlacesConf;
-
                 try {
-                    JSONObject allPlaces = conf.getJSONObject("all");
+                    JSONObject allPlaces = mPlacesConf;
 
                     List<PlaceTuple> result = new ArrayList<PlaceTuple>();
 

@@ -48,7 +48,6 @@ public class PlacesDisplay extends Fragment {
     public static final String HANDLE = "placesdisplay";
 
     private static Map<String, String> mAgencyMap;
-    private MapView mMapView;
     private ItemizedOverlay<OverlayItem> mLocationOverlays;
     private JSONObject mPlaceJSON;
     private JSONObject mLocationJSON;
@@ -56,7 +55,7 @@ public class PlacesDisplay extends Fragment {
     public PlacesDisplay() {
 		// Required empty public constructor
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -105,14 +104,14 @@ public class PlacesDisplay extends Fragment {
 			getActivity().setTitle(mPlaceJSON.optString("title", getResources().getString(R.string.places_title)));
 
 			// Set up map
-            mMapView = (MapView) v.findViewById(R.id.mapview);
-            mMapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // disable hardware acceleration
-            mMapView.setBuiltInZoomControls(false);
-            mMapView.setMultiTouchControls(false);
+            final MapView mapView = (MapView) v.findViewById(R.id.mapview);
+            mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // disable hardware acceleration
+            mapView.setBuiltInZoomControls(false);
+            mapView.setMultiTouchControls(false);
 
             mLocationJSON = mPlaceJSON.optJSONObject("location");
 
-			if(mMapView != null && mLocationJSON != null) {
+			if(mapView != null && mLocationJSON != null) {
 
 				if(!mLocationJSON.optString("latitude").isEmpty() && !mLocationJSON.optString("longitude").isEmpty()) {
                     // Enable launch map activity button
@@ -135,24 +134,17 @@ public class PlacesDisplay extends Fragment {
                     mLocationOverlays = new ItemizedIconOverlay<OverlayItem>(items, null, new DefaultResourceProxyImpl(getActivity()));
 
                     // Add the icon and center the map of the location
-                    mMapView.getOverlays().add(mLocationOverlays);
-
-                    // This delays the center & zoom until after layout is set up
-                    v.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @Override
-                        public void onGlobalLayout() {
-                            mMapView.getController().setZoom(18);
-                            mMapView.getController().setCenter(position);
-                        }
-                    });
+                    mapView.getOverlays().add(mLocationOverlays);
+                    mapView.getController().setZoom(18);
+                    mapView.getController().setCenter(position);
 				}
                 else {
                     // No location set
-                    mMapView.setVisibility(View.GONE);
+                    mapView.setVisibility(View.GONE);
                 }
 			}
 			else {
-				if(mMapView == null) Log.e(TAG, "mMapView is null");
+				if(mapView == null) Log.e(TAG, "mapView is null");
 			}
 			
 			// Display address
