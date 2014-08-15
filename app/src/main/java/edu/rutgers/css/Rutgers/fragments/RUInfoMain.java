@@ -36,8 +36,11 @@ public class RUInfoMain extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_ruinfo_main, container, false);
-		
-		getActivity().setTitle(R.string.ruinfo_title);
+        Bundle args = getArguments();
+
+        // Set title from JSON
+        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        else getActivity().setTitle(R.string.ruinfo_title);
 
         //final LinearLayout telephonyLayout = (LinearLayout) v.findViewById(R.id.telephonyLayout);
         //final TextView noTelephonyText = (TextView) v.findViewById(R.id.noTelephonyText);

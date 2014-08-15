@@ -179,7 +179,7 @@ public class BusAll extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("filter", mFilterEditText.getText().toString());
+        if(mFilterEditText != null) outState.putString("filter", mFilterEditText.getText().toString());
     }
 
     /**

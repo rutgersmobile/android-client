@@ -147,7 +147,9 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 		final View v = inflater.inflate(R.layout.fragment_places, parent, false);
 		Bundle args = getArguments();
 
-		getActivity().setTitle(R.string.places_title);
+		// Set title from JSON
+        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        else getActivity().setTitle(R.string.places_title);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 

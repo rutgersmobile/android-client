@@ -192,7 +192,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         filterClearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                filterEditText.setText("");
+                filterEditText.setText(null);
             }
         });
 

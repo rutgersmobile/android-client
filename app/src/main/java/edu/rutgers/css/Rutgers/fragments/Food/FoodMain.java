@@ -111,9 +111,11 @@ public class FoodMain extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
 		ListView listView = (ListView) v.findViewById(R.id.dining_locations_list);
-		
 		Bundle args = getArguments();
+
+        // Set title from JSON
 		if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        else getActivity().setTitle(R.string.dining_title);
 
 		listView.setAdapter(mAdapter);
 		listView.setOnItemClickListener(new OnItemClickListener() {

@@ -110,7 +110,9 @@ public class RecreationMain extends Fragment {
 		final View v = inflater.inflate(R.layout.fragment_recreation_main, parent, false);
         Bundle args = getArguments();
 
+        // Set title from JSON
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        else getActivity().setTitle(R.string.rec_title);
 
 		ListView listView = (ListView) v.findViewById(R.id.list);
 		listView.setAdapter(mAdapter);

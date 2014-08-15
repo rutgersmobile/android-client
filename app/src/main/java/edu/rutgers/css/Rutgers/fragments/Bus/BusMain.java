@@ -29,9 +29,11 @@ public class BusMain extends Fragment {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_bus_main, parent, false);
-		
 		Bundle args = getArguments();
-		getActivity().setTitle(args.getString("title"));
+
+        // Set title from JSON
+        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        else getActivity().setTitle(R.string.bus_title);
 		
         mTabHost = (FragmentTabHost) v.findViewById(R.id.bus_tabhost);
         mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
