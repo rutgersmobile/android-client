@@ -101,7 +101,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         // TODO This needs to be cancelled when the screen rotates
         // Populate search list & list of nearby places
-		/*Places.getPlaces().done(new AndroidDoneCallback<JSONObject>() {
+		Places.getPlaces().done(new AndroidDoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject json) {
@@ -139,7 +139,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                 AppUtil.showFailedLoadToast(getActivity());
             }
 
-        });*/
+        });
 
     }
 	

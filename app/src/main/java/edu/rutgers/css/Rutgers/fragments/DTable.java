@@ -10,11 +10,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxStatus;
 
+import org.jdeferred.Promise;
+import org.jdeferred.android.AndroidAlwaysCallback;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
@@ -45,8 +48,6 @@ public class DTable extends Fragment {
 	private String mAPI;
 	private Context mContext;
     private String mHandle;
-	
-	private AQuery aq;
 
 	public DTable() {
 		// Required empty public constructor
@@ -65,7 +66,6 @@ public class DTable extends Fragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = getActivity();
-		aq = new AQuery(mContext);
 
         if(savedInstanceState != null && savedInstanceState.getString("mData") != null) {
             mHandle = savedInstanceState.getString("mHandle");
@@ -107,9 +107,12 @@ public class DTable extends Fragment {
             Log.e(dTag(), "DTable must have URL, API, or data in its arguments bundle");
             Toast.makeText(mContext, R.string.failed_internal, Toast.LENGTH_LONG).show();
         }
-		
-		if (mURL != null) {
-            Request.json(mURL, Request.CACHE_NEVER).done(new AndroidDoneCallback<JSONObject>() {
+
+        if(mURL != null || mAPI != null) {
+            Promise<JSONObject, AjaxStatus, Double> promise;
+            if(mURL != null) promise = Request.json(mURL, Request.CACHE_ONE_HOUR);
+            else promise = Request.api(mAPI, Request.CACHE_ONE_HOUR);
+            promise.done(new AndroidDoneCallback<JSONObject>() {
                 @Override
                 public AndroidExecutionScope getExecutionScope() {
                     return AndroidExecutionScope.UI;
@@ -137,36 +140,7 @@ public class DTable extends Fragment {
                 }
             });
         }
-        else if(mAPI != null) {
-            Request.api(mAPI, Request.CACHE_NEVER).done(new AndroidDoneCallback<JSONObject>() {
-                @Override
-                public AndroidExecutionScope getExecutionScope() {
-                    return AndroidExecutionScope.UI;
-                }
 
-                @Override
-                public void onDone(JSONObject result) {
-                    try {
-                        mAdapter.loadArray(result.getJSONArray("children"));
-                    }
-                    catch (JSONException e) {
-                        Log.w(dTag(), "onCreateView(): " + e.getMessage());
-                        AppUtil.showFailedLoadToast(getActivity());
-                    }
-                }
-            }).fail(new AndroidFailCallback<AjaxStatus>() {
-                @Override
-                public AndroidExecutionScope getExecutionScope() {
-                    return AndroidExecutionScope.UI;
-                }
-
-                @Override
-                public void onFail(AjaxStatus status) {
-                    Log.w(dTag(), AppUtil.formatAjaxStatus(status));
-                    AppUtil.showFailedLoadToast(mContext);
-                }
-            });
-        }
 	}
 	
 	@Override
