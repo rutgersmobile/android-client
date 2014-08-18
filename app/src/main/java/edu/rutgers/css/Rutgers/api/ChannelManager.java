@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import edu.rutgers.css.Rutgers.utils.AppUtil;
+
 /**
  * ChannelManager
  * Created by jamchamb on 7/1/14.
@@ -104,34 +106,8 @@ public class ChannelManager {
      * @param resourceId Raw resource file ID
      */
     public void loadChannelsFromResource(Resources resources, int resourceId) {
-        InputStream is = resources.openRawResource(resourceId);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        StringBuilder jsonStringBuilder = new StringBuilder();
-
-        try {
-            String readLine = null;
-            while((readLine = br.readLine()) != null) {
-                jsonStringBuilder.append(readLine);
-            }
-            is.close();
-            br.close();
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
-            return;
-        }
-
-        String jsonString = jsonStringBuilder.toString();
-        if(jsonString.isEmpty()) {
-            Log.e(TAG, "JSON resource was empty");
-            return;
-        }
-
-        try {
-            JSONArray jsonArray = new JSONArray(jsonString);
-            loadChannelsFromJSONArray(jsonArray);
-        } catch (JSONException e) {
-            Log.e(TAG, "loadChannelsFromResource(): " + e.getMessage());
-        }
+        JSONArray jsonArray = AppUtil.loadRawJSONArray(resources, resourceId);
+        loadChannelsFromJSONArray(jsonArray);
     }
 
     /**

@@ -1,0 +1,46 @@
+[
+    {
+        "tag": "NB",
+        "title": "New Brunswick"
+    },
+    {
+        "tag": "NK",
+        "title": "Newark"
+    },
+    {
+        "tag": "CM",
+        "title": "Camden"
+    },
+    {
+        "tag": "ONLINE",
+        "title": "Online Courses"
+    },
+    {
+        "tag": "WM",
+        "title": "Freehold WMHEC: RU-BCC"
+    },
+    {
+        "tag": "AC",
+        "title": "Mays Landing: RU-ACCC"
+    },
+    {
+        "tag": "MC",
+        "title": "Denville: RU-Morris"
+    },
+    {
+        "tag": "J",
+        "title": "McGuire-Dix-Lakehurst: RU-JBMDL"
+    },
+    {
+        "tag": "RV",
+        "title": "North Branch: RU-RVCC"
+    },
+    {
+        "tag": "CC",
+        "title": "Camden County College"
+    },
+    {
+        "tag": "CU",
+        "title": "Cumberland County College"
+    }
+]

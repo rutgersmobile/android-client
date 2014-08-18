@@ -16,12 +16,16 @@ import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.util.UUID;
 
@@ -68,7 +72,13 @@ public class AppUtil {
 		}
 		return installID;
 	}
-	
+
+    /**
+     * Read the UUID file
+     * @param installation Installation file
+     * @return Contents of file in string
+     * @throws IOException
+     */
 	private static String readInstallationFile(File installation) throws IOException {
 		RandomAccessFile f = new RandomAccessFile(installation, "r");
 		byte[] bytes = new byte[(int) f.length()];
@@ -77,6 +87,11 @@ public class AppUtil {
 		return new String(bytes);
 	}
 
+    /**
+     * Determine if the current device is a tablet.
+     * @param context App context
+     * @return True if the running device is a tablet, false if not.
+     */
     public static boolean isTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK)
@@ -259,9 +274,79 @@ public class AppUtil {
         return backStackEntry.getName();
     }
 
+    /**
+     * Check if the fragment on top of the stack has the given tag.
+     * @param handle Fragment handle
+     * @param fragmentManager App's {@link android.support.v4.app.FragmentManager}
+     * @return True if on top, false if not
+     */
     public static boolean isOnTop(String handle, FragmentManager fragmentManager) {
         if(handle == null) return false;
         return handle.equalsIgnoreCase(backStackPeek(fragmentManager));
+    }
+
+    /**
+     * Load string contents from raw resource file
+     * @param resources Application Resources
+     * @param resourceId Raw resource file ID
+     * @return Contents of resource file as a string, or null if file was empty or couldn't be read.
+     */
+    public static String loadRawResource(Resources resources, int resourceId) {
+        InputStream is = resources.openRawResource(resourceId);
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            String readLine;
+            while((readLine = br.readLine()) != null) {
+                stringBuilder.append(readLine);
+            }
+            is.close();
+            br.close();
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+            return null;
+        }
+
+        String contentString = stringBuilder.toString();
+        if(contentString.isEmpty()) return null;
+        else return contentString;
+    }
+
+    /**
+     * Load JSON array from raw resource file
+     * @param resources Application Resources
+     * @param resourceId Raw resource file ID
+     * @return JSON array or null if there was a problem loading the raw resource file
+     */
+    public static JSONArray loadRawJSONArray(Resources resources, int resourceId) {
+        String jsonString = loadRawResource(resources, resourceId);
+        if(jsonString == null) return null;
+
+        try {
+            return new JSONArray(jsonString);
+        } catch(JSONException e) {
+            Log.e(TAG, "loadRawJSONArray(): " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Load JSON object from raw resource file
+     * @param resources Application Resources
+     * @param resourceId Raw resource file ID
+     * @return JSON object or null if there was a problem loading the raw resource file
+     */
+    public static JSONObject loadRawJSONObject(Resources resources, int resourceId) {
+        String jsonString = loadRawResource(resources, resourceId);
+        if(jsonString == null) return null;
+
+        try {
+            return new JSONObject(jsonString);
+        } catch(JSONException e) {
+            Log.e(TAG, "loadRawJSONObject(): " + e.getMessage());
+            return null;
+        }
     }
 
 }

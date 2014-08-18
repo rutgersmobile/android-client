@@ -29,9 +29,13 @@ public class Schedule {
     private static final String SOC_BASE_URL = "https://sis.rutgers.edu/soc/";
     private static final String WEBREG_BASE_URL = "https://sims.rutgers.edu/webreg/";
 
+    // Campus codes
     public static final String CODE_CAMPUS_NB = "NB";
     public static final String CODE_CAMPUS_NWK = "NK";
     public static final String CODE_CAMPUS_CAM = "CM";
+    public static final String CODE_CAMPUS_ONLINE = "ONLINE";
+
+    // Course levels
     public static final String CODE_LEVEL_UNDERGRAD = "U";
     public static final String CODE_LEVEL_GRAD = "G";
 
@@ -40,7 +44,7 @@ public class Schedule {
      * @return SOC Conf API with semesters array and default semester setting
      */
     public static Promise<JSONObject, AjaxStatus, Double> getSemesters() {
-        return Request.api("soc_conf.txt", Request.CACHE_ONE_HOUR * 24);
+        return Request.api("soc_conf.txt", Request.CACHE_ONE_DAY);
     }
 
     /**
@@ -52,7 +56,7 @@ public class Schedule {
      */
     public static Promise<JSONArray, AjaxStatus, Double> getSubjects(String campus, String level, String semester) {
         String reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semester + "&campus=" + campus + "&level=" + level;
-        return Request.jsonArray(reqUrl, Request.CACHE_ONE_HOUR);
+        return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
     }
 
     /**
@@ -65,7 +69,7 @@ public class Schedule {
      */
     public static Promise<JSONArray, AjaxStatus, Double> getCourses(String campus, String level, String semester, String subjectCode) {
         String reqUrl = SOC_BASE_URL + "courses.json?semester=" + semester + "&campus=" + campus + "&level=" + level + "&subject=" + subjectCode;
-        return Request.jsonArray(reqUrl, Request.CACHE_ONE_HOUR);
+        return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
     }
 
     /**
@@ -78,7 +82,7 @@ public class Schedule {
      */
     public static Promise<JSONObject, AjaxStatus, Double> getCourse(String campus, String semester, String subjectCode, String courseCode) {
         String reqUrl = SOC_BASE_URL + "course.json?semester=" + semester + "&campus=" + campus + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
-        return Request.json(reqUrl, Request.CACHE_ONE_HOUR);
+        return Request.json(reqUrl, Request.CACHE_ONE_DAY);
     }
 
     /**

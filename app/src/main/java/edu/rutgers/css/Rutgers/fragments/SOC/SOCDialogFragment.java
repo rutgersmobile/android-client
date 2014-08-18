@@ -14,12 +14,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.items.KeyValPair;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
@@ -55,10 +60,7 @@ public class SOCDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ArrayList<KeyValPair> campuses = new ArrayList<KeyValPair>(3);
-        campuses.add(new KeyValPair("New Brunswick", Schedule.CODE_CAMPUS_NB));
-        campuses.add(new KeyValPair("Newark", Schedule.CODE_CAMPUS_NWK));
-        campuses.add(new KeyValPair("Camden", Schedule.CODE_CAMPUS_CAM));
+        ArrayList<KeyValPair> campuses = loadCampuses();
 
         ArrayList<KeyValPair> levels = new ArrayList<KeyValPair>(2);
         levels.add(new KeyValPair("Undergraduate", Schedule.CODE_LEVEL_UNDERGRAD));
@@ -122,6 +124,30 @@ public class SOCDialogFragment extends DialogFragment {
 
     public void setListener(SOCDialogListener listener) {
         mTarget = new WeakReference<SOCDialogListener>(listener);
+    }
+
+    /**
+     * Load list of campuses and their SOC codes from the JSON resource.
+     * @return Array of campus/code key value pairs
+     */
+    private ArrayList<KeyValPair> loadCampuses() {
+        ArrayList<KeyValPair> results = new ArrayList<KeyValPair>();
+        JSONArray campusJSONArray = AppUtil.loadRawJSONArray(getResources(), R.raw.soc_campuses);
+        if(campusJSONArray == null) {
+            Log.e(TAG, "Couldn't get list of campuses for SOC");
+            return results;
+        }
+
+        for(int i = 0; i < campusJSONArray.length(); i++) {
+            try {
+                JSONObject campusJSON = campusJSONArray.getJSONObject(i);
+                results.add(new KeyValPair(campusJSON.getString("title"), campusJSON.getString("tag")));
+            } catch(JSONException e) {
+                Log.w(TAG, "loadCampuses(): " + e.getMessage());
+            }
+        }
+
+        return results;
     }
 
 }
