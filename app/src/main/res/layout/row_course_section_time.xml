@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="4dp">
@@ -10,6 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_column="0"
         android:paddingLeft="-12dp"
         android:paddingRight="12dp"
         android:gravity="right"
@@ -22,6 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_column="1"
         android:paddingRight="12dp"
         android:gravity="left"
         android:text="@string/replace_me"
@@ -31,6 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_column="2"
         android:paddingRight="12dp"
         android:gravity="left"
         android:text="@string/replace_me"
@@ -38,4 +40,4 @@
         android:textStyle="bold"
         android:fontFamily="sans-serif-bold"/>
 
-</LinearLayout>
+</TableRow>

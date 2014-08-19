@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +45,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         TextView sectionIndexTextView;
         TextView instructorTextView;
         TextView descriptionTextView;
-        LinearLayout meetingTimesLayout;
+        TableLayout meetingTimesLayout;
     }
 
     static class DescViewHolder {
@@ -178,7 +180,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
             holder.sectionIndexTextView = (TextView) convertView.findViewById(R.id.sectionIndexTextView);
             holder.instructorTextView = (TextView) convertView.findViewById(R.id.instructorTextView);
             holder.descriptionTextView = (TextView) convertView.findViewById(R.id.descriptionTextView);
-            holder.meetingTimesLayout = (LinearLayout) convertView.findViewById(R.id.meetingTimesLayout);
+            holder.meetingTimesLayout = (TableLayout) convertView.findViewById(R.id.meetingTimesLayout);
             convertView.setTag(holder);
         }
         else {
@@ -229,7 +231,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                 boolean keepView = false;
 
                 // Meeting time row (e.g. M 12:30-1:50 HCK 110)
-                View timeRow = (View) layoutInflater.inflate(R.layout.row_course_section_time, null);
+                TableRow timeRow = (TableRow) layoutInflater.inflate(R.layout.row_course_section_time, null);
                 TextView dayTextView = (TextView) timeRow.findViewById(R.id.dayTextView);
                 TextView timeTextView = (TextView) timeRow.findViewById(R.id.timeTextView);
                 TextView locationTextView = (TextView) timeRow.findViewById(R.id.locationTextView);
