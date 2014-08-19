@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -87,6 +88,12 @@ public class SOCDialogFragment extends DialogFragment {
         campusSpinner.setAdapter(mCampusSpinnerAdapter);
         levelSpinner.setAdapter(mLevelSpinnerAdapter);
 
+        // Set selections to user's configured options
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        setSelectionByConfig(sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, null), mCampusSpinnerAdapter, campusSpinner);
+        setSelectionByConfig(sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, null), mLevelSpinnerAdapter, levelSpinner);
+        setSelectionByConfig(sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, null), mSemesterSpinnerAdapter, semesterSpinner);
+
         builder.setView(view)
                 .setTitle(R.string.soc_select)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -148,6 +155,17 @@ public class SOCDialogFragment extends DialogFragment {
         }
 
         return results;
+    }
+
+    private void setSelectionByConfig(String configString, SpinnerAdapter spinnerAdapter, Spinner spinner) {
+        if(configString == null) return;
+        for(int i = 0; i < spinnerAdapter.getCount(); i++) {
+            KeyValPair pair = (KeyValPair) spinnerAdapter.getItem(i);
+            if(configString.equals(pair.getValue())) {
+                spinner.setSelection(i);
+                return;
+            }
+        }
     }
 
 }
