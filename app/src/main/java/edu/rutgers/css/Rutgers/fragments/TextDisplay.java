@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +36,7 @@ public class TextDisplay extends Fragment {
             mTextView.setText("No text set");
         }
         else {
-            mTextView.setText(args.getString("data"));
+            mTextView.setText(Html.fromHtml(args.getString("data")));
         }
 
         return v;

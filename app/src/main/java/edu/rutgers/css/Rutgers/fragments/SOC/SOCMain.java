@@ -261,20 +261,13 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
             return;
         }
 
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        Fragment prev = getFragmentManager().findFragmentByTag("dialog");
-        if(prev != null) {
-            ft.remove(prev);
-        }
-        ft.addToBackStack(null);
-
         ArrayList<String> semestersList = new ArrayList<String>(5);
         for(int i = 0; i < mSemesters.length(); i++) {
             semestersList.add(mSemesters.optString(i));
         }
 
         DialogFragment newDialogFragment = SOCDialogFragment.newInstance(this, semestersList);
-        newDialogFragment.show(ft, "dialog");
+        ComponentFactory.getInstance().showDialogFragment(newDialogFragment, "socconfdialog");
     }
 
     /**

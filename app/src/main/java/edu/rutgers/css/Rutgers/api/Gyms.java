@@ -31,7 +31,7 @@ public class Gyms {
 	
 	public static final DateFormat GYM_DATE_FORMAT = new SimpleDateFormat("M/d/yyyy", Locale.US);
 	
-	private static final long expire = 1000 * 60 * 60 * 24; // Cache gym info for a day
+	private static final long expire = Request.CACHE_ONE_DAY; // Cache gym info for a day
 
     /**
      * Get the Gyms API.

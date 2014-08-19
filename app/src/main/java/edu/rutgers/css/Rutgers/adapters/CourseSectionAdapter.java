@@ -14,7 +14,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.rutgers.css.Rutgers2.R;
 
@@ -25,16 +30,36 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
     private static final String TAG = "CourseSectionAdapter";
 
+    // IDs for view types
+    private static final int DESCRIPTION_TYPE = 0;
+    private static final int PREREQ_TYPE = 1;
+    private static final int MEETTIME_TYPE =2 ;
+
     private int layoutResource;
     private int resolvedGreen;
     private int resolvedRed;
 
-    static class ViewHolder {
+    static class MeetTimeViewHolder {
         TextView sectionIndexTextView;
         TextView instructorTextView;
         TextView descriptionTextView;
         LinearLayout meetingTimesLayout;
     }
+
+    static class DescViewHolder {
+        TextView titleTextView;
+    }
+
+    // Assign numeric values to days of the week, for sorting meeting times
+    private static final Map<String, Integer> dayMap =
+            Collections.unmodifiableMap(new HashMap<String, Integer>() {{
+                put("M", 0);
+                put("T", 1);
+                put("W", 2);
+                put("TH", 3);
+                put("F", 4);
+                put("S", 5);
+            }});
 
     public CourseSectionAdapter(Context context, int resource, List<JSONObject> objects) {
         super(context, resource, objects);
@@ -45,13 +70,111 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
     }
 
     @Override
+    public int getViewTypeCount() {
+        return 3;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        JSONObject item = getItem(position);
+        if(item.optBoolean("isDescriptionRow")) return DESCRIPTION_TYPE;
+        else if(item.optBoolean("isPreReqRow")) return PREREQ_TYPE;
+        else return MEETTIME_TYPE;
+    }
+
+    @Override
+    public boolean areAllItemsEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        return true;
+    }
+
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        switch(getItemViewType(position)) {
+            case DESCRIPTION_TYPE:
+                return getDescView(position, convertView, parent);
+
+            case PREREQ_TYPE:
+                return getPreReqView(position, convertView, parent);
+
+            case MEETTIME_TYPE:
+            default:
+                return getSectionView(position, convertView, parent);
+        }
+    }
+
+    /**
+     * Get course description row view
+     * @param position
+     * @param convertView
+     * @param parent
+     * @return
+     */
+    public View getDescView(int position, View convertView, ViewGroup parent) {
         LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewHolder holder;
+        DescViewHolder holder;
+
+        if(convertView == null) {
+            convertView = layoutInflater.inflate(R.layout.row_title, null);
+            holder = new DescViewHolder();
+            holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
+            convertView.setTag(holder);
+        }
+        else {
+            holder = (DescViewHolder) convertView.getTag();
+        }
+
+        JSONObject jsonObject = getItem(position);
+        holder.titleTextView.setText(StringUtils.remove(jsonObject.optString("courseDescription"), '\n'));
+
+        return convertView;
+    }
+
+    /**
+     * Get pre-requisite row view
+     * @param position
+     * @param convertView
+     * @param parent
+     * @return
+     */
+    public View getPreReqView(int position, View convertView, ViewGroup parent) {
+        LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        DescViewHolder holder;
+
+        if(convertView == null) {
+            convertView = layoutInflater.inflate(R.layout.row_title, null);
+            holder = new DescViewHolder();
+            holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
+            convertView.setTag(holder);
+        }
+        else {
+            holder = (DescViewHolder) convertView.getTag();
+        }
+
+        JSONObject jsonObject = getItem(position);
+        holder.titleTextView.setText("Prerequisites");
+
+        return convertView;
+    }
+
+    /**
+     * Get section row
+     * @param position
+     * @param convertView
+     * @param parent
+     * @return
+     */
+    public View getSectionView(int position, View convertView, ViewGroup parent) {
+        LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        MeetTimeViewHolder holder;
 
         if(convertView == null) {
             convertView = layoutInflater.inflate(layoutResource, null);
-            holder = new ViewHolder();
+            holder = new MeetTimeViewHolder();
             holder.sectionIndexTextView = (TextView) convertView.findViewById(R.id.sectionIndexTextView);
             holder.instructorTextView = (TextView) convertView.findViewById(R.id.instructorTextView);
             holder.descriptionTextView = (TextView) convertView.findViewById(R.id.descriptionTextView);
@@ -59,7 +182,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
             convertView.setTag(holder);
         }
         else {
-            holder = (ViewHolder) convertView.getTag();
+            holder = (MeetTimeViewHolder) convertView.getTag();
         }
 
         JSONObject jsonObject = getItem(position);
@@ -99,10 +222,8 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         // List meeting times
         holder.meetingTimesLayout.removeAllViews();
         try {
-            JSONArray meetingTimes = jsonObject.getJSONArray("meetingTimes");
-            for(int i = 0; i < meetingTimes.length(); i++) {
-                JSONObject meetingTime = meetingTimes.getJSONObject(i);
-
+            List<JSONObject> sortedTimes = sortMeetingTimes(jsonObject.getJSONArray("meetingTimes"));
+            for(JSONObject meetingTime: sortedTimes) {
                 // If all the text is null, we should discard the view. Set this to true if any
                 // actual text is added.
                 boolean keepView = false;
@@ -171,5 +292,35 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         return convertView;
     }
 
+    private List<JSONObject> sortMeetingTimes(JSONArray meetingTimes) {
+        if(meetingTimes == null) return null;
+
+        List<JSONObject> result = new ArrayList<JSONObject>();
+        for(int i = 0; i < meetingTimes.length(); i++) {
+            result.add(meetingTimes.optJSONObject(i));
+        }
+
+        Comparator<JSONObject> meetingTimeComparator = new Comparator<JSONObject>() {
+
+            @Override
+            public int compare(JSONObject lhs, JSONObject rhs) {
+                if(lhs.isNull("meetingDay") && rhs.isNull("meetingDay")) return 0;
+                else if(lhs.isNull("meetingDay") && !rhs.isNull("meetingDay")) return 1;
+                else if(!lhs.isNull("meetingDay") && rhs.isNull("meetingDay")) return -1;
+                else {
+                    String lhsDay = lhs.optString("meetingDay");
+                    String rhsDay = rhs.optString("meetingDay");
+                    Integer l = dayMap.get(lhsDay);
+                    Integer r = dayMap.get(rhsDay);
+                    return l.compareTo(r);
+                }
+            }
+
+        };
+
+        Collections.sort(result, meetingTimeComparator);
+
+        return result;
+    }
 
 }

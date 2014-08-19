@@ -1,13 +1,16 @@
 package edu.rutgers.css.Rutgers.api;
 
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -218,5 +221,14 @@ public class ComponentFactory {
 
 		return true;
 	}
-	
+
+    public void showDialogFragment(DialogFragment dialogFragment, String tag) {
+        FragmentTransaction ft = mMainActivity.getSupportFragmentManager().beginTransaction();
+        Fragment prev = mMainActivity.getSupportFragmentManager().findFragmentByTag(tag);
+        if(prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        dialogFragment.show(ft, tag);
+    }
 }
