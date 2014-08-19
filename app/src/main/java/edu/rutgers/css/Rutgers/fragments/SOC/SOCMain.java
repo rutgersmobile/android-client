@@ -274,9 +274,10 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
      * Load list of subjects based on current configuration for campus, level, and semester.
      */
     private void loadSubjects() {
-        Log.v(TAG, "Loaded subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
+        Log.v(TAG, "Loading subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
         setTitle();
         mAdapter.clear();
+        mAdapter.notifyDataSetChanged();
 
         Schedule.getSubjects(mCampus, mLevel, mSemester).done(new AndroidDoneCallback<JSONArray>() {
 
@@ -306,6 +307,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
 
             @Override
             public void onFail(AjaxStatus result) {
+                mAdapter.clear();
                 AppUtil.showFailedLoadToast(getActivity());
             }
 

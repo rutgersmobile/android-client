@@ -20,8 +20,9 @@ import edu.rutgers.css.Rutgers.fragments.WebDisplay;
  *  http://sis.rutgers.edu/soc/courses.json?subject=010&semester=72014&campus=NB&level=U
  *  http://sis.rutgers.edu/soc/course.json?subject=010&semester=72014&campus=NB&courseNumber=272
  * Online courses:
- *  http://sis.rutgers.edu/soc/onlineCourses.json?term=$TERM&year=$YEAR&level=$LEVEL&subject=$SUBJ
+ *  http://sis.rutgers.edu/soc/onlineSubjects.json?term=7&year=2014&level=U
  *  http://sis.rutgers.edu/soc/onlineCourses.json?term=7&year=2014&level=U&subject=010
+ *  http://sis.rutgers.edu/soc/onlineCourse.json?term=7&year=2014&level=U&subject=010&courseNumber=372
  */
 public class Schedule {
 
@@ -55,7 +56,14 @@ public class Schedule {
      * @return Array of course subjects
      */
     public static Promise<JSONArray, AjaxStatus, Double> getSubjects(String campus, String level, String semester) {
-        String reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semester + "&campus=" + campus + "&level=" + level;
+        // Use special online course URL
+        String reqUrl;
+        if(CODE_CAMPUS_ONLINE.equals(campus)) {
+            reqUrl = SOC_BASE_URL + "onlineSubjects.json?term=" + semester.charAt(0) + "&year=" + semester.substring(1) + "&level=" + level;
+        }
+        else {
+            reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semester + "&campus=" + campus + "&level=" + level;
+        }
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
     }
 
@@ -68,7 +76,13 @@ public class Schedule {
      * @return Array of courses for a subject
      */
     public static Promise<JSONArray, AjaxStatus, Double> getCourses(String campus, String level, String semester, String subjectCode) {
-        String reqUrl = SOC_BASE_URL + "courses.json?semester=" + semester + "&campus=" + campus + "&level=" + level + "&subject=" + subjectCode;
+        String reqUrl;
+        if(CODE_CAMPUS_ONLINE.equals(campus)) {
+            reqUrl = SOC_BASE_URL + "onlineCourses.json?term=" + semester.charAt(0) + "&year=" + semester.substring(1) + "&level=" + level + "&subject=" + subjectCode;
+        }
+        else {
+            reqUrl = SOC_BASE_URL + "courses.json?semester=" + semester + "&campus=" + campus + "&level=" + level + "&subject=" + subjectCode;
+        }
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
     }
 
@@ -81,7 +95,13 @@ public class Schedule {
      * @return JSON Object for one course
      */
     public static Promise<JSONObject, AjaxStatus, Double> getCourse(String campus, String semester, String subjectCode, String courseCode) {
-        String reqUrl = SOC_BASE_URL + "course.json?semester=" + semester + "&campus=" + campus + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+        String reqUrl;
+        if(CODE_CAMPUS_ONLINE.equals(campus)) {
+            reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semester.charAt(0) + "&year=" + semester.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+        }
+        else {
+            reqUrl = SOC_BASE_URL + "course.json?semester=" + semester + "&campus=" + campus + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+        }
         return Request.json(reqUrl, Request.CACHE_ONE_DAY);
     }
 
