@@ -245,8 +245,8 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                 }
 
                 // TODO Format this
-                if(!meetingTime.isNull("startTime") && !meetingTime.isNull("endTime")) {
-                    timeTextView.setText(meetingTime.getString("startTime") + " - " + meetingTime.getString("endTime"));
+                if(!meetingTime.isNull("startTime") && !meetingTime.isNull("endTime") && !meetingTime.isNull("pmCode")) {
+                    timeTextView.setText(formatTimes(meetingTime.getString("startTime"), meetingTime.getString("endTime"), meetingTime.getString("pmCode")));
                     keepView = true;
                 }
                 else {
@@ -323,6 +323,37 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         Collections.sort(result, meetingTimeComparator);
 
         return result;
+    }
+
+    private String formatTimes(String beginTime, String endTime, String pmCode) {
+
+        // We only get the AM/PM code for the beginning hour. Check if meridiem changes,
+        // and adjust end code if necessary.
+        String beginHour = beginTime.substring(0,2);
+        String endHour = endTime.substring(0,2);
+        String endPmCode = pmCode;
+        try {
+            Integer beginInt = Integer.parseInt(beginHour);
+            Integer endInt = Integer.parseInt(endHour);
+            if(endInt == 12 || endInt < beginInt) endPmCode = "P";
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Couldn't parse ints");
+        }
+
+        StringBuilder result = new StringBuilder();
+        result.append(beginHour);
+        result.append(":");
+        result.append(beginTime.substring(2,4));
+        result.append(" ");
+        result.append(pmCode);
+        result.append("M - ");
+        result.append(endHour);
+        result.append(":");
+        result.append(endTime.substring(2,4));
+        result.append(" ");
+        result.append(endPmCode);
+        result.append("M");
+        return result.toString();
     }
 
 }

@@ -105,6 +105,10 @@ public class Schedule {
         return Request.json(reqUrl, Request.CACHE_ONE_DAY);
     }
 
+    public static Promise<JSONObject, AjaxStatus, Double> getIndex(String semesterCode, String campusCode, String levelCode) {
+        return Request.api("indexes/" + semesterCode + "_" + campusCode + "_" + levelCode + ".json", Request.CACHE_ONE_DAY);
+    }
+
     /**
      * Convert a semester code (e.g. "72014") to human-readable form ("Summer 2014")
      * @param semesterCode Semester code
