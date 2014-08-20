@@ -82,6 +82,9 @@ public class BusAll extends Fragment {
 
             @Override
             public void onDone(MultipleResults results) {
+                // Don't do anything if not attached to activity anymore
+                if(!isAdded()) return;
+
                 for(OneResult result: results) {
                     if(result.getPromise() == nbRoutes) loadArray("nb", nbRoutesString, "route", (JSONArray) result.getResult());
                     else if(result.getPromise() == nwkRoutes) loadArray("nwk", nwkRoutesString, "route", (JSONArray)result.getResult());
@@ -103,9 +106,9 @@ public class BusAll extends Fragment {
 
             @Override
             public void onFail(OneReject result) {
+                AppUtil.showFailedLoadToast(getActivity());
                 Exception e = (Exception) result.getReject();
                 Log.w(TAG, e.getMessage());
-                AppUtil.showFailedLoadToast(getActivity());
             }
         });
 	}

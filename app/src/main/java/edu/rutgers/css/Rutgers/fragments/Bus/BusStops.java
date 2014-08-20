@@ -176,6 +176,9 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 
             @Override
             public void onDone(MultipleResults results) {
+                // Don't do anything if not attached to activity anymore
+                if(!isAdded()) return;
+
                 for (OneResult result : results) {
                     if (result.getPromise() == nbActiveStops)
                         loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header), (JSONArray) result.getResult());

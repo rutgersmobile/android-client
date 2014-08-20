@@ -98,7 +98,6 @@ public class BusRoutes extends Fragment {
         final Promise nbActiveRoutes = Nextbus.getActiveRoutes("nb");
         final Promise nwkActiveRoutes = Nextbus.getActiveRoutes("nwk");
 
-        // This avoids referencing getResources() from the callback function
         final String nbString = getResources().getString(R.string.bus_nb_active_routes_header);
         final String nwkString =  getResources().getString(R.string.bus_nwk_active_routes_header);
 
@@ -113,6 +112,9 @@ public class BusRoutes extends Fragment {
 
             @Override
             public void onDone(MultipleResults results) {
+                // Don't do anything if not attached to activity anymore
+                if(!isAdded()) return;
+
                 for (OneResult result : results) {
                     if(result.getPromise() == nbActiveRoutes) loadAgency("nb", nbString, (JSONArray) result.getResult());
                     else if(result.getPromise() == nwkActiveRoutes)  loadAgency("nwk", nwkString, (JSONArray) result.getResult());
