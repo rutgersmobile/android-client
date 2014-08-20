@@ -2,12 +2,10 @@ package edu.rutgers.css.Rutgers.fragments.SOC;
 
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -34,13 +32,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers2.BuildConfig;
-import edu.rutgers.css.Rutgers2.SettingsActivity;
 import edu.rutgers.css.Rutgers.adapters.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogListener {
 
@@ -54,6 +52,8 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     private String mSemester;
     private String mCampus;
     private String mLevel;
+    private EditText mFilterEditText;
+    private String mFilterString;
 
     public SOCMain() {
         // Required empty public constructor
@@ -62,8 +62,6 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Resources res = getResources();
-
         setHasOptionsMenu(true);
 
         mData = new ArrayList<JSONObject>();
@@ -75,6 +73,11 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         mLevel = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
         mCampus = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
         mSemester = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, null);
+
+        // Restore filter
+        if(savedInstanceState != null && savedInstanceState.getString("filter") != null) {
+            mFilterString = savedInstanceState.getString("filter");
+        }
 
         // Get the available & current semesters
         Schedule.getSemesters().done(new AndroidDoneCallback<JSONObject>() {
@@ -134,13 +137,9 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_soc_main, parent, false);
-        Resources res = getResources();
-        Bundle args = getArguments();
+        setScheduleTitle();
 
-        setTitle();
-
-        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
-        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
+        mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
         ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
@@ -171,7 +170,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         });
 
         // Search text listener
-        filterEditText.addTextChangedListener(new TextWatcher() {
+        mFilterEditText.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -180,7 +179,8 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Set filter for list adapter
-                mAdapter.getFilter().filter(s);
+                mFilterString = s.toString();
+                mAdapter.getFilter().filter(mFilterString);
             }
 
             @Override
@@ -190,10 +190,11 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         });
 
         // Search clear button listener
+        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
         filterClearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                filterEditText.setText(null);
+                mFilterEditText.setText("");
             }
         });
 
@@ -230,6 +231,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        if(mFilterEditText != null) outState.putString("filter", mFilterString);
     }
 
     @Override
@@ -248,7 +250,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     /**
      * Set title based on current campus, semester, and level configuration.
      */
-    private void setTitle() {
+    private void setScheduleTitle() {
         getActivity().setTitle(Schedule.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
 
@@ -275,7 +277,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
      */
     private void loadSubjects() {
         Log.v(TAG, "Loading subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
-        setTitle();
+        setScheduleTitle();
         mAdapter.clear();
         mAdapter.notifyDataSetChanged();
 
@@ -296,6 +298,9 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
                         Log.w(TAG, "getSubjects(): " + e.getMessage());
                     }
                 }
+
+                // Re-apply filter
+                mAdapter.getFilter().filter(mFilterString);
             }
 
         }).fail(new AndroidFailCallback<AjaxStatus>() {
