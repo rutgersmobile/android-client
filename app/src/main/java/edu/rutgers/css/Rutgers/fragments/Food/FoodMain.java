@@ -72,6 +72,7 @@ public class FoodMain extends Fragment {
                         Bundle hallBundle = new Bundle();
                         hallBundle.putString("title", curHall.getString("location_name"));
                         hallBundle.putString("location", curHall.getString("location_name"));
+                        hallBundle.putString("component", FoodHall.HANDLE);
 
                         if (Dining.hasActiveMeals(curHall)) {
                             mAdapter.add(new RMenuItemRow(hallBundle));
@@ -126,11 +127,7 @@ public class FoodMain extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Bundle clickedArgs = ((RMenuItemRow) parent.getAdapter().getItem(position)).getArgs();
-
-                Bundle args = new Bundle(clickedArgs);
-                args.putString("component", FoodHall.HANDLE);
-
-                ComponentFactory.getInstance().switchFragments(args);
+                ComponentFactory.getInstance().switchFragments(clickedArgs);
             }
 
         });
