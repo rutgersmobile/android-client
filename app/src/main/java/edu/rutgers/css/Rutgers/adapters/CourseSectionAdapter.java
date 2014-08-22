@@ -131,7 +131,8 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         }
 
         JSONObject jsonObject = getItem(position);
-        holder.titleTextView.setText(StringUtils.remove(jsonObject.optString("courseDescription"), '\n'));
+        String desc = StringUtils.remove(jsonObject.optString("courseDescription"), '\n').trim();
+        holder.titleTextView.setText(desc);
 
         return convertView;
     }
