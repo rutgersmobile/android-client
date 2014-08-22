@@ -2,13 +2,17 @@ package edu.rutgers.css.Rutgers.fragments.Bus;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
@@ -27,23 +31,27 @@ import java.util.ArrayList;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
+import edu.rutgers.css.Rutgers.items.FilterFocusBroadcaster;
+import edu.rutgers.css.Rutgers.items.FilterFocusListener;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusRoutes extends Fragment {
+public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 	
 	private static final String TAG = "BusRoutes";
+    public static final String HANDLE = "busroutes";
 
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
+    private FilterFocusListener mFilterFocusListener;
 	
 	public BusRoutes() {
 		// Required empty public constructor
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -55,6 +63,15 @@ public class BusRoutes extends Fragment {
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_bus_routes, parent, false);
+
+        // Get the filter field and add a listener to it
+        EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        filterEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(mFilterFocusListener != null) mFilterFocusListener.focusEvent();
+            }
+        });
 		
 		ListView listView = (ListView) v.findViewById(R.id.list);
 		listView.setAdapter(mAdapter);
@@ -171,5 +188,10 @@ public class BusRoutes extends Fragment {
         }
 
     }
-	
+
+    @Override
+    public void setListener(FilterFocusListener listener) {
+        mFilterFocusListener = listener;
+    }
+
 }

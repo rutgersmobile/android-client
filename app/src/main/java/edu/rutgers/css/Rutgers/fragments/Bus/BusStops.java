@@ -8,13 +8,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesClient;
 
@@ -35,6 +39,8 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import edu.rutgers.css.Rutgers.items.FilterFocusBroadcaster;
+import edu.rutgers.css.Rutgers.items.FilterFocusListener;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -46,9 +52,11 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.LocationClientProvider;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusStops extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
+public class BusStops extends Fragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
 	private static final String TAG = "BusStops";
+    public static final String HANDLE = "busstops";
+
 	private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
 
 	private RMenuAdapter mAdapter;
@@ -58,6 +66,7 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 	private Timer mUpdateTimer;
 	private Handler mUpdateHandler;
     private String mCurrentCampus;
+    private FilterFocusListener mFilterFocusListener;
 	
 	public BusStops() {
 		// Required empty public constructor
@@ -104,7 +113,16 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 	@Override
 	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_bus_stops, parent, false);
-		
+
+        // Get the filter field and add a listener to it
+        EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        filterEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(mFilterFocusListener != null) mFilterFocusListener.focusEvent();
+            }
+        });
+
 		ListView listView = (ListView) v.findViewById(R.id.list);
 		listView.setAdapter(mAdapter);
 		listView.setOnItemClickListener(new OnItemClickListener() {
@@ -384,5 +402,10 @@ public class BusStops extends Fragment implements GooglePlayServicesClient.Conne
 		}
 
 	}
-	
+
+    @Override
+    public void setListener(FilterFocusListener listener) {
+        mFilterFocusListener = listener;
+    }
+
 }

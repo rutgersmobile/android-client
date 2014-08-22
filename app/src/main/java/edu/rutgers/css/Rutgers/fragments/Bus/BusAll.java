@@ -43,6 +43,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusAll extends Fragment {
 
 	private static final String TAG = "BusAll";
+    public static final String HANDLE = "busall";
 
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
@@ -51,7 +52,13 @@ public class BusAll extends Fragment {
 	public BusAll() {
 		// Required empty public constructor
 	}
-	
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mFilterEditText = null;
+    }
+
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
