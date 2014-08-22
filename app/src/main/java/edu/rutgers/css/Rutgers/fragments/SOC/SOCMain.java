@@ -22,9 +22,14 @@ import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
 
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.multiple.MultipleResults;
+import org.jdeferred.multiple.OneReject;
+import org.jdeferred.multiple.OneResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +40,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.adapters.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Schedule;
+import edu.rutgers.css.Rutgers.items.SOCIndex;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
@@ -46,6 +52,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     public static final String HANDLE = "soc";
 
     private List<JSONObject> mData;
+    private SOCIndex mSOCIndex;
     private ScheduleAdapter mAdapter;
     private JSONArray mSemesters;
     private String mDefaultSemester;
@@ -155,12 +162,12 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
 
                 if (!clickedJSON.has("courseNumber")) {
                     args.putString("component", SOCCourses.HANDLE);
-                    args.putString("title", clickedJSON.optString("description") + " (" + clickedJSON.optString("code") + ")");
+                    args.putString("title", Schedule.subjectLine(clickedJSON));
                     args.putString("subjectCode", clickedJSON.optString("code"));
                 } else {
                     // This is for when a course is clicked if it comes up through special filter
                     args.putString("component", SOCSections.HANDLE);
-                    args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
+                    args.putString("title", Schedule.courseLine(clickedJSON));
                     args.putString("data", clickedJSON.toString());
                 }
 
@@ -281,19 +288,23 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         mAdapter.clear();
         mAdapter.notifyDataSetChanged();
 
-        Schedule.getSubjects(mCampus, mLevel, mSemester).done(new AndroidDoneCallback<JSONArray>() {
+        // Get index & list of subjects
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(Schedule.getIndex(mSemester, mCampus, mLevel),  Schedule.getSubjects(mCampus, mLevel, mSemester)).done(new AndroidDoneCallback<MultipleResults>() {
 
             @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+            public void onDone(MultipleResults results) {
+                JSONObject index = (JSONObject) results.get(0).getResult();
+                JSONArray subjects = (JSONArray) results.get(1).getResult();
 
-            @Override
-            public void onDone(JSONArray result) {
+                mSOCIndex = new SOCIndex(index); // TODO Initialize this in background thread
+                mAdapter.setFilterIndex(mSOCIndex);
+
+                // Load subjects
                 mAdapter.clear();
-                for (int i = 0; i < result.length(); i++) {
+                for (int i = 0; i < subjects.length(); i++) {
                     try {
-                        mAdapter.add(result.getJSONObject(i));
+                        mAdapter.add(subjects.getJSONObject(i));
                     } catch (JSONException e) {
                         Log.w(TAG, "getSubjects(): " + e.getMessage());
                     }
@@ -303,20 +314,26 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
                 mAdapter.getFilter().filter(mFilterString);
             }
 
-        }).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public AndroidExecutionScope getExecutionScope() {
+                return AndroidExecutionScope.UI;
+            }
+
+        }).fail(new AndroidFailCallback<OneReject>() {
+
+            @Override
+            public void onFail(OneReject result) {
+                mAdapter.clear();
+                AppUtil.showFailedLoadToast(getActivity());
+            }
 
             @Override
             public AndroidExecutionScope getExecutionScope() {
                 return AndroidExecutionScope.UI;
             }
 
-            @Override
-            public void onFail(AjaxStatus result) {
-                mAdapter.clear();
-                AppUtil.showFailedLoadToast(getActivity());
-            }
-
         });
+
     }
 
     /**

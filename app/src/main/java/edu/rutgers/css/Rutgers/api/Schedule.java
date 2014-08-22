@@ -206,4 +206,12 @@ public class Schedule {
         ComponentFactory.getInstance().switchFragments(args);
     }
 
+    public static String courseLine(JSONObject jsonObject) {
+        return jsonObject.optString("courseNumber") + ": " +jsonObject.optString("title");
+    }
+
+    public static String subjectLine(JSONObject subjectJSON) {
+        return subjectJSON.optString("description") + " (" + subjectJSON.optString("code") + ")";
+    }
+
 }

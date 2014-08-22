@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.Schedule;
+import edu.rutgers.css.Rutgers.items.SOCIndex;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -28,6 +30,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
     private List<JSONObject> mList;
     private List<JSONObject> mOriginalList;
     private ScheduleFilter mFilter;
+    private SOCIndex mSOCIndex;
     private final Object mLock = new Object();
 
     static class ViewHolder {
@@ -66,7 +69,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             // Get the number of open/total visible sections for this course
             int[] counts = Schedule.countVisibleSections(jsonObject);
 
-            holder.titleTextView.setText(courseLine(jsonObject));
+            holder.titleTextView.setText(Schedule.courseLine(jsonObject));
             holder.creditsTextView.setText("credits: " + jsonObject.optInt("credits"));
             holder.sectionsTextView.setText("sections: " + counts[0] + "/" + counts[1]);
             holder.creditsTextView.setVisibility(View.VISIBLE);
@@ -74,7 +77,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
         }
         // Assume it's a subject and hide the extra fields
         else {
-            holder.titleTextView.setText(subjectLine(jsonObject));
+            holder.titleTextView.setText(Schedule.subjectLine(jsonObject));
             holder.creditsTextView.setVisibility(View.GONE);
             holder.sectionsTextView.setVisibility(View.GONE);
         }
@@ -82,23 +85,30 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
         return convertView;
     }
 
+    public void setFilterIndex(SOCIndex socIndex) {
+        mSOCIndex = socIndex;
+
+        if(mFilter != null) {
+            mFilter.setSocIndex(socIndex);
+        }
+    }
+
     @Override
     public Filter getFilter() {
         if(mFilter == null) {
             mFilter = new ScheduleFilter();
+            mFilter.setSocIndex(mSOCIndex);
         }
         return mFilter;
     }
 
-    private String courseLine(JSONObject jsonObject) {
-        return jsonObject.optString("courseNumber") + ": " +jsonObject.optString("title");
-    }
-
-    private String subjectLine(JSONObject subjectJSON) {
-        return subjectJSON.optString("description") + " (" + subjectJSON.optString("code") + ")";
-    }
-
     private class ScheduleFilter extends Filter {
+
+        SOCIndex socIndex;
+
+        public void setSocIndex(SOCIndex socIndex) {
+            this.socIndex = socIndex;
+        }
 
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
@@ -122,11 +132,31 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             }
             else {
                 ArrayList<JSONObject> passed = new ArrayList<JSONObject>();
+                String query = constraint.toString().trim();
+
+                // Consult the INDEX!!!
+                if(socIndex != null) {
+                    // Check if its full course code 000:000
+                    if(query.length() == 7 && query.charAt(3) == ':') {
+                        String subjCode = query.substring(0,3);
+                        String courseCode = query.substring(4,7);
+                        if(allDigits(subjCode) && allDigits(courseCode)) {
+                            JSONObject course = socIndex.getCourseByCode(subjCode, courseCode);
+                            if(course != null) passed.add(course);
+                        }
+                    }
+                    else {
+                        // Check abbreviations
+                        passed.addAll(socIndex.getSubjectsByAbbreviation(query.toUpperCase()));
+                    }
+                }
+
+                // Straight string compare
                 for(JSONObject jsonObject: tempList) {
                     String cmp;
-                    if(jsonObject.has("courseNumber")) cmp = courseLine(jsonObject);
-                    else cmp = subjectLine(jsonObject);
-                    if(StringUtils.containsIgnoreCase(cmp, constraint)) passed.add(jsonObject);
+                    if(jsonObject.has("courseNumber")) cmp = Schedule.courseLine(jsonObject);
+                    else cmp = Schedule.subjectLine(jsonObject);
+                    if(StringUtils.containsIgnoreCase(cmp, query)) passed.add(jsonObject);
                 }
                 filterResults.values = passed;
                 filterResults.count = passed.size();
@@ -143,6 +173,13 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
                 notifyDataSetChanged();
             }
         }
+    }
+
+    private static boolean allDigits(String string) {
+        for(int i = 0; i < string.length(); i++) {
+            if(!Character.isDigit(string.charAt(i))) return false;
+        }
+        return true;
     }
 
 }
