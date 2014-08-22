@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.items;
 
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import edu.rutgers.css.Rutgers.utils.JsonUtil;
 
@@ -120,7 +123,7 @@ public class SOCIndex {
     /**
      * Get subjects by abbreviation
      * @param abbrev Abbreviation
-     * @return List of Subject JSON (empty if no results found)
+     * @return List of subject JSON objects (empty if no results found)
      */
     public List<JSONObject> getSubjectsByAbbreviation(String abbrev) {
         List<JSONObject> results = new ArrayList<JSONObject>();
@@ -144,6 +147,11 @@ public class SOCIndex {
         return results;
     }
 
+    /**
+     * Get subject by subject code
+     * @param subjectCode Subject code
+     * @return Subject JSON object
+     */
     public JSONObject getSubjectByCode(String subjectCode) {
         Subject subject = mSubjects.get(subjectCode);
         if(subject == null) return null;
@@ -159,6 +167,12 @@ public class SOCIndex {
         }
     }
 
+    /**
+     * Get course by subject & course code combination
+     * @param subjectCode Subject code
+     * @param courseCode Course code
+     * @return Course-stub JSON object
+     */
     public JSONObject getCourseByCode(String subjectCode, String courseCode) {
         Subject subject = mSubjects.get(subjectCode);
         if(subject == null) return null;
@@ -166,14 +180,53 @@ public class SOCIndex {
 
         try {
             JSONObject newCourseJSON = new JSONObject();
-            newCourseJSON.put("courseNumber", courseCode);
             newCourseJSON.put("title", subject.courses.get(courseCode).toUpperCase());
+            newCourseJSON.put("subjectCode", subjectCode);
+            newCourseJSON.put("courseNumber", courseCode);
+            newCourseJSON.put("stub", true);
             // TODO Full course info so that sections and credits values aren't empty
             return newCourseJSON;
         } catch (JSONException e) {
             Log.w(TAG, "getCourseByCode(): " + e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Get courses by partial title matches on query.
+     * @param query Query string
+     * @param cap Maximum number of results (cutoff point)
+     * @return List of course-stub JSON objects (empty if no results found)
+     */
+    public List<JSONObject> getCoursesByName(String query, int cap) {
+        List<JSONObject> results = new ArrayList<JSONObject>();
+
+        Set<Map.Entry<String, Course>> set = mCourses.entrySet();
+        Iterator<Map.Entry<String, Course>> courseIter = set.iterator();
+        while(courseIter.hasNext()) {
+            Map.Entry<String, Course> curEntry = courseIter.next();
+            // If there's a partial match on the full course name...
+            if(StringUtils.containsIgnoreCase(curEntry.getKey(), query)) {
+                Course curCourse = curEntry.getValue();
+                String subjectCode = curCourse.subj;
+                String courseCode = curCourse.course;
+
+                try {
+                    JSONObject newCourseJSON = new JSONObject();
+                    newCourseJSON.put("title", curEntry.getKey().toUpperCase());
+                    newCourseJSON.put("subjectCode", subjectCode);
+                    newCourseJSON.put("courseNumber", courseCode);
+                    newCourseJSON.put("stub", true);
+                    // TODO Full course info so that sections and credits values aren't empty
+                    results.add(newCourseJSON);
+                    if(results.size() >= cap) return results;
+                } catch (JSONException e) {
+                    Log.w(TAG, "getCoursesByName(): " + e.getMessage());
+                }
+            }
+        }
+
+        return results;
     }
 
 }

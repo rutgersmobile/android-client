@@ -66,14 +66,20 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
 
         // If it's a course
         if(jsonObject.has("courseNumber")) {
-            // Get the number of open/total visible sections for this course
-            int[] counts = Schedule.countVisibleSections(jsonObject);
-
             holder.titleTextView.setText(Schedule.courseLine(jsonObject));
-            holder.creditsTextView.setText("credits: " + jsonObject.optInt("credits"));
-            holder.sectionsTextView.setText("sections: " + counts[0] + "/" + counts[1]);
-            holder.creditsTextView.setVisibility(View.VISIBLE);
-            holder.sectionsTextView.setVisibility(View.VISIBLE);
+
+            if(!jsonObject.optBoolean("stub")) {
+                // Get the number of open/total visible sections for this course
+                int[] counts = Schedule.countVisibleSections(jsonObject);
+                holder.creditsTextView.setText("credits: " + jsonObject.optInt("credits"));
+                holder.sectionsTextView.setText("sections: " + counts[0] + "/" + counts[1]);
+                holder.creditsTextView.setVisibility(View.VISIBLE);
+                holder.sectionsTextView.setVisibility(View.VISIBLE);
+            }
+            else {
+                holder.creditsTextView.setVisibility(View.GONE);
+                holder.sectionsTextView.setVisibility(View.GONE);
+            }
         }
         // Assume it's a subject and hide the extra fields
         else {
@@ -136,7 +142,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
 
                 // Consult the INDEX!!!
                 if(socIndex != null) {
-                    // Check if its full course code 000:000
+                    // Check if it's a full course code 000:000
                     if(query.length() == 7 && query.charAt(3) == ':') {
                         String subjCode = query.substring(0,3);
                         String courseCode = query.substring(4,7);
@@ -149,15 +155,23 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
                         // Check abbreviations
                         passed.addAll(socIndex.getSubjectsByAbbreviation(query.toUpperCase()));
                     }
+
                 }
 
-                // Straight string compare
-                for(JSONObject jsonObject: tempList) {
+                // Straight string comparison
+                for (JSONObject jsonObject : tempList) {
                     String cmp;
-                    if(jsonObject.has("courseNumber")) cmp = Schedule.courseLine(jsonObject);
+                    if (jsonObject.has("courseNumber")) cmp = Schedule.courseLine(jsonObject);
                     else cmp = Schedule.subjectLine(jsonObject);
-                    if(StringUtils.containsIgnoreCase(cmp, query)) passed.add(jsonObject);
+                    if (StringUtils.containsIgnoreCase(cmp, query)) passed.add(jsonObject);
                 }
+
+                // If we didn't find anything.. CONSULT THE INDEX!! to search full course names
+                if(passed.isEmpty() && socIndex != null) {
+                    List<JSONObject> fuzzies = socIndex.getCoursesByName(query, 10);
+                    passed.addAll(fuzzies);
+                }
+
                 filterResults.values = passed;
                 filterResults.count = passed.size();
             }
