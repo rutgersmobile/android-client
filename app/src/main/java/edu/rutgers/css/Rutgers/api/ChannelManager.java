@@ -7,12 +7,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
@@ -25,27 +23,21 @@ public class ChannelManager {
 
     private static final String TAG = "ChannelManager";
 
-    /*
-     * channelKeys holds the list of channel keys in the order they were added, to preserve
-     * input order when the channels are going to be displayed.
-     * channelsMap maps those keys to the channel JSON objects.
-     */
-    private ArrayList<String> channelKeys;
-    private Hashtable<String, JSONObject> channelsMap;
+    private Map<String, JSONObject> channelsMap;
 
     public ChannelManager() {
-        channelKeys = new ArrayList<String>();
-        channelsMap = new Hashtable<String, JSONObject>();
+        channelsMap = Collections.synchronizedMap(new LinkedHashMap<String, JSONObject>());
     }
 
     /**
      * Get all channels
-     * @return JSON array of all channels
+     * @return JSON array of all channel objects
      */
     public JSONArray getChannels() {
         JSONArray result = new JSONArray();
-        for(String key: channelKeys) {
-            result.put(channelsMap.get(key));
+        Set<Map.Entry<String, JSONObject>> set = channelsMap.entrySet();
+        for(Map.Entry<String, JSONObject> entry: set) {
+            result.put(entry.getValue());
         }
         return result;
     }
@@ -53,13 +45,14 @@ public class ChannelManager {
     /**
      * Get channels from a specific channel category (channels, shortcuts)
      * @param category Category name
-     * @return
+     * @return JSON array of all channel objects in category
      */
     public JSONArray getChannels(String category) {
         JSONArray result = new JSONArray();
-        for(String key: channelKeys) {
-            JSONObject cur = channelsMap.get(key);
-            if(cur.optString("category").equals(category)) result.put(cur);
+        Set<Map.Entry<String, JSONObject>> set = channelsMap.entrySet();
+        for(Map.Entry<String, JSONObject> entry: set) {
+            JSONObject cur = entry.getValue();
+            if(cur.optString("category").equals(category)) result.put(entry.getValue());
         }
         return result;
     }
@@ -133,14 +126,13 @@ public class ChannelManager {
                 channelsMap.put(handle, channel);
             }
             else {
-                Log.i(TAG, "Discarding duplicate channel: " + channel.toString());
+                Log.i(TAG, "Discarding duplicate channel: " + channel.optString("handle"));
                 return;
             }
         }
         // This channel is not already mapped - add it in
         else {
             channelsMap.put(handle, channel);
-            channelKeys.add(handle);
         }
     }
 
@@ -149,7 +141,6 @@ public class ChannelManager {
      * @param handle Handle of the channel to remove
      */
     private void removeChannel(String handle) {
-        channelKeys.remove(handle);
         channelsMap.remove(handle);
     }
 
