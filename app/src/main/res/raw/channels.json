@@ -83,18 +83,10 @@
 
     {
         "category": "main",
-        "title": "Athletics Schedule",
+        "title": "Scarlet Knights",
         "handle": "games",
         "view": "dtable",
-        "url": "http://sauron.rutgers.edu/~jamchamb/athleticsfaq.txt"
-    },
-
-    {
-        "category": "main",
-        "title": "Football Schedule",
-        "handle": "football",
-        "view": "reader",
-        "url": "http://sauron.rutgers.edu/~jamchamb/football.xml"
+        "url": "https://nstanlee.rutgers.edu/~rfranknj/mobile/1/athleticsfaq.txt"
     }
 
 ]
