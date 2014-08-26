@@ -135,7 +135,7 @@ public class BusAll extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Set filter for list adapter
-                mAdapter.getFilter().filter(s);
+                mAdapter.getFilter().filter(s.toString().trim());
             }
 
             @Override
