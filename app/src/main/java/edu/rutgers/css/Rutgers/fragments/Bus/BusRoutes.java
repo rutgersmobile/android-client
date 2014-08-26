@@ -2,8 +2,6 @@ package edu.rutgers.css.Rutgers.fragments.Bus;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +10,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
@@ -100,6 +97,10 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
             }
 
         });
+
+        // Set main bus fragment as focus listener, for switching to All tab
+        FilterFocusListener mainFragment = (BusMain) getParentFragment();
+        setListener(mainFragment);
 				
 		return v;
 	}

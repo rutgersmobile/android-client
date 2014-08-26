@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesClient;
 
@@ -39,18 +36,18 @@ import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import edu.rutgers.css.Rutgers.items.FilterFocusBroadcaster;
-import edu.rutgers.css.Rutgers.items.FilterFocusListener;
-import edu.rutgers.css.Rutgers2.SettingsActivity;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
+import edu.rutgers.css.Rutgers.items.FilterFocusBroadcaster;
+import edu.rutgers.css.Rutgers.items.FilterFocusListener;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.LocationClientProvider;
 import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 public class BusStops extends Fragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
@@ -145,6 +142,10 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             }
 
         });
+
+        // Set main bus fragment as focus listener, for switching to All tab
+        FilterFocusListener mainFragment = (BusMain) getParentFragment();
+        setListener(mainFragment);
 		
 		return v;
 	}

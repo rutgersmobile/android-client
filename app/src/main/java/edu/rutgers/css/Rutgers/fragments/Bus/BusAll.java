@@ -143,6 +143,7 @@ public class BusAll extends Fragment {
             }
 
         });
+        mFilterEditText.requestFocus();
 
         // Get clear button and set listener
         ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
