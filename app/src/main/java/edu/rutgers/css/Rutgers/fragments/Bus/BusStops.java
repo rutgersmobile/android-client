@@ -200,9 +200,9 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
                 for (OneResult result : results) {
                     if (result.getPromise() == nbActiveStops)
-                        loadAgency("nb", getResources().getString(R.string.bus_nb_active_routes_header), (JSONArray) result.getResult());
+                        loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header), (JSONArray) result.getResult());
                     else if (result.getPromise() == nwkActiveStops)
-                        loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_routes_header), (JSONArray) result.getResult());
+                        loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header), (JSONArray) result.getResult());
                 }
             }
 
