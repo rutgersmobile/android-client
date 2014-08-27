@@ -30,6 +30,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 	private static enum ViewTypes {
 		HEADER, CLICKABLE, UNCLICKABLE;
 	}
+    private static ViewTypes[] viewTypes = ViewTypes.values();
 	
 	static class ViewHolder {
 		TextView titleTextView;
@@ -50,6 +51,37 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 		this.categoryResource = categoryResource;
 	}
 
+    /**
+     * Types of row items:
+     * 1. Category headers
+     * 2. Unclickable items
+     * 3. Clickable items
+     */
+    @Override
+    public int getViewTypeCount() {
+        return viewTypes.length;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if(getItem(position).getIsCategory()) return ViewTypes.HEADER.ordinal();
+        else if(getItem(position).getIsClickable()) return ViewTypes.CLICKABLE.ordinal();
+        else return ViewTypes.UNCLICKABLE.ordinal();
+    }
+
+    @Override
+    public boolean areAllItemsEnabled() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        RMenuRow curItem = this.getItem(position);
+        if(curItem == null) return false;
+        else if(!curItem.getIsClickable()) return false;
+        else return true;
+    }
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -58,14 +90,15 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 		
 		// Choose appropriate layout
 		if(convertView == null) {
-			// Section headers
-			if(getItemViewType(position) == ViewTypes.HEADER.ordinal()) {
-				convertView = mLayoutInflater.inflate(this.categoryResource, null);
-			}
-			// Menu items
-			else {
-				convertView = mLayoutInflater.inflate(this.itemResource, null);
-			}
+            switch(viewTypes[getItemViewType(position)]) {
+                // Section headers
+                case HEADER:
+                    convertView = mLayoutInflater.inflate(this.categoryResource, null);
+                    break;
+                // Menu items
+                default:
+                    convertView = mLayoutInflater.inflate(this.itemResource, null);
+            }
 
 			holder = new ViewHolder();
 			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
@@ -99,36 +132,5 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 
 		return convertView;
 	}
-	
-	/**
-	 * Types of row items:
-	 * 1. Category headers
-	 * 2. Unclickable items
-	 * 3. Clickable items
-	 */
-	@Override
-	public int getViewTypeCount() {
-	    return ViewTypes.values().length;
-	}
-	
-	@Override
-	public int getItemViewType(int position) {
-	    if(getItem(position).getIsCategory()) return ViewTypes.HEADER.ordinal();
-	    else if(getItem(position).getIsClickable()) return ViewTypes.CLICKABLE.ordinal();
-	    else return ViewTypes.UNCLICKABLE.ordinal();
-	}
-
-    @Override
-    public boolean areAllItemsEnabled() {
-        return false;
-    }
-
-    @Override
-    public boolean isEnabled(int position) {
-        RMenuRow curItem = this.getItem(position);
-        if(curItem == null) return false;
-        else if(!curItem.getIsClickable()) return false;
-        else return true;
-    }
 
 }

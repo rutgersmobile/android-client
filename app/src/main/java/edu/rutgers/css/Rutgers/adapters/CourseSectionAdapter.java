@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -33,8 +32,10 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
     private static final String TAG = "CourseSectionAdapter";
 
     // IDs for view types
-    private static final int BASIC_TYPE = 0;
-    private static final int MEETTIME_TYPE = 1;
+    private static enum ViewTypes {
+        BASIC_TYPE, MEETTIME_TYPE;
+    }
+    private static ViewTypes[] viewTypes = ViewTypes.values();
 
     private int layoutResource;
     private int resolvedGreen;
@@ -72,15 +73,15 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
     @Override
     public int getViewTypeCount() {
-        return 2;
+        return viewTypes.length;
     }
 
     @Override
     public int getItemViewType(int position) {
         JSONObject item = getItem(position);
         if(item.optBoolean("isDescriptionRow") || item.optBoolean("isPreReqRow")
-                || item.optBoolean("isSynopsisRow")) return BASIC_TYPE;
-        else return MEETTIME_TYPE;
+                || item.optBoolean("isSynopsisRow")) return ViewTypes.BASIC_TYPE.ordinal();
+        else return ViewTypes.MEETTIME_TYPE.ordinal();
     }
 
     @Override
@@ -95,7 +96,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        switch(getItemViewType(position)) {
+        switch(viewTypes[getItemViewType(position)]) {
             case BASIC_TYPE:
                 return getBasicView(position, convertView, parent);
 
