@@ -60,8 +60,15 @@ public class SOCSections extends Fragment {
                 JSONObject descriptionRow = new JSONObject();
                 descriptionRow.put("isDescriptionRow", true);
                 descriptionRow.put("courseDescription", courseJSON.getString("courseDescription"));
-                if(!courseJSON.isNull("synopsisUrl")) descriptionRow.put("synopsisUrl", courseJSON.optString("synopsisUrl"));
                 mAdapter.add(descriptionRow);
+            }
+
+            // Create a synopsis link row, if a synopsis URL is set
+            if(!courseJSON.isNull("synopsisUrl")) {
+                JSONObject synopsisRow = new JSONObject();
+                synopsisRow.put("isSynopsisRow", true);
+                synopsisRow.put("synopsisUrl", courseJSON.getString("synopsisUrl"));
+                mAdapter.add(synopsisRow);
             }
 
             // Create pre-req row if pre-reqs are specified
@@ -101,19 +108,17 @@ public class SOCSections extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
 
-                // Check if it's a description row; send to synopsis URL
-                if(clickedJSON.optBoolean("isDescriptionRow")) {
-                    if(!clickedJSON.isNull("synopsisUrl")) {
-                        Bundle args = new Bundle();
-                        args.putString("component", WebDisplay.HANDLE);
-                        args.putString("url", clickedJSON.optString("synopsisUrl"));
-                        ComponentFactory.getInstance().switchFragments(args);
-                    }
+                // Check if it's a synopsis row; send to synopsis URL
+                if(clickedJSON.optBoolean("isSynopsisRow")) {
+                    Bundle args = new Bundle();
+                    args.putString("component", WebDisplay.HANDLE);
+                    args.putString("url", clickedJSON.optString("synopsisUrl"));
+                    ComponentFactory.getInstance().switchFragments(args);
                     return;
                 }
 
                 // Check if it's a pre-req row, open pre-reqs if so
-                if(clickedJSON.optBoolean("isPreReqRow")) {
+                else if(clickedJSON.optBoolean("isPreReqRow")) {
                     Bundle args = new Bundle();
                     args.putString("component", TextDisplay.HANDLE);
                     args.putString("data", clickedJSON.optString("preReqNotes"));
@@ -121,9 +126,14 @@ public class SOCSections extends Fragment {
                     return;
                 }
 
+                // Check if it's a description row; do nothing
+                else if(clickedJSON.optBoolean("isDescriptionRow")) {
+                    return;
+                }
+
                 // It's a section row, open WebReg for this section
-                String index = clickedJSON.optString("index");
-                if (index != null && semester != null) {
+                if (!clickedJSON.isNull("index") && semester != null) {
+                    String index = clickedJSON.optString("index");
                     Schedule.openRegistrationWindow(semester, index);
                 } else {
                     Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();

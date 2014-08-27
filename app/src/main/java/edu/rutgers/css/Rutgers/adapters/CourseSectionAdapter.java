@@ -33,9 +33,8 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
     private static final String TAG = "CourseSectionAdapter";
 
     // IDs for view types
-    private static final int DESCRIPTION_TYPE = 0;
-    private static final int PREREQ_TYPE = 1;
-    private static final int MEETTIME_TYPE =2 ;
+    private static final int BASIC_TYPE = 0;
+    private static final int MEETTIME_TYPE = 1;
 
     private int layoutResource;
     private int resolvedGreen;
@@ -73,14 +72,14 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
     @Override
     public int getViewTypeCount() {
-        return 3;
+        return 2;
     }
 
     @Override
     public int getItemViewType(int position) {
         JSONObject item = getItem(position);
-        if(item.optBoolean("isDescriptionRow")) return DESCRIPTION_TYPE;
-        else if(item.optBoolean("isPreReqRow")) return PREREQ_TYPE;
+        if(item.optBoolean("isDescriptionRow") || item.optBoolean("isPreReqRow")
+                || item.optBoolean("isSynopsisRow")) return BASIC_TYPE;
         else return MEETTIME_TYPE;
     }
 
@@ -97,11 +96,8 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         switch(getItemViewType(position)) {
-            case DESCRIPTION_TYPE:
-                return getDescView(position, convertView, parent);
-
-            case PREREQ_TYPE:
-                return getPreReqView(position, convertView, parent);
+            case BASIC_TYPE:
+                return getBasicView(position, convertView, parent);
 
             case MEETTIME_TYPE:
             default:
@@ -110,13 +106,13 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
     }
 
     /**
-     * Get course description row view
+     * Get basic text row view
      * @param position
      * @param convertView
      * @param parent
      * @return
      */
-    public View getDescView(int position, View convertView, ViewGroup parent) {
+    public View getBasicView(int position, View convertView, ViewGroup parent) {
         LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         DescViewHolder holder;
 
@@ -131,35 +127,18 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         }
 
         JSONObject jsonObject = getItem(position);
-        String desc = StringUtils.remove(jsonObject.optString("courseDescription"), '\n').trim();
-        holder.titleTextView.setText(desc);
+        String set = "";
 
-        return convertView;
-    }
-
-    /**
-     * Get pre-requisite row view
-     * @param position
-     * @param convertView
-     * @param parent
-     * @return
-     */
-    public View getPreReqView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        DescViewHolder holder;
-
-        if(convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.row_title, null);
-            holder = new DescViewHolder();
-            holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
-            convertView.setTag(holder);
+        if(jsonObject.optBoolean("isDescriptionRow")) {
+            set = StringUtils.remove(jsonObject.optString("courseDescription"), '\n').trim();
         }
-        else {
-            holder = (DescViewHolder) convertView.getTag();
+        else if(jsonObject.optBoolean("isSynopsisRow")) {
+            set = "Synopsis";
         }
-
-        JSONObject jsonObject = getItem(position);
-        holder.titleTextView.setText("Prerequisites");
+        else if(jsonObject.optBoolean("isPreReqRow")) {
+            set = "Prerequisites";
+        }
+        holder.titleTextView.setText(set);
 
         return convertView;
     }
