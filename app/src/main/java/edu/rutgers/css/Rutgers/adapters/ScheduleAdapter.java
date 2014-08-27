@@ -79,7 +79,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
         if(jsonObject.has("courseNumber")) {
             holder.titleTextView.setText(Schedule.courseLine(jsonObject));
 
-            if(jsonObject.optBoolean("stub")) {
+            if(jsonObject.optBoolean("stub") && !jsonObject.optBoolean("failedLoad")) {
                 // Replace the stub JSON data
                 final ScheduleAdapter scheduleAdapter = this;
                 Schedule.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), jsonObject.optString("subjectCode"), jsonObject.optString("courseNumber")).done(new AndroidDoneCallback<JSONObject>() {
@@ -106,6 +106,11 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
                     @Override
                     public void onFail(AjaxStatus result) {
                         Log.w(TAG, AppUtil.formatAjaxStatus(result));
+                        try {
+                            jsonObject.put("failedLoad", true);
+                        } catch (JSONException e) {
+                            Log.w(TAG, "getView(): " + e.getMessage());
+                        }
                     }
 
                     @Override
