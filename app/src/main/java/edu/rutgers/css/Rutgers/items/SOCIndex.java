@@ -2,6 +2,8 @@ package edu.rutgers.css.Rutgers.items;
 
 import android.util.Log;
 
+import com.androidquery.callback.AjaxCallback;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.rutgers.css.Rutgers.api.Schedule;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.JsonUtil;
 
 /**
@@ -34,16 +38,23 @@ public class SOCIndex {
         HashMap<String, String> courses;
     }
 
-    private HashMap<String, String[]> mAbbrevations;
+    private String semesterCode;
+    private String campusCode;
+    private String levelCode;
+
+    private HashMap<String, String[]> mAbbreviations;
     private HashMap<String, Course> mCourses;
     private HashMap<String, Subject> mSubjects;
     private HashMap<String, String> mSubjectNames;
-    /*private MutableBkTree<String> mCourseBKTree;*/
 
-    public SOCIndex(JSONObject index) {
+    public SOCIndex(String campusCode, String levelCode, String semesterCode, JSONObject index) {
         if(!(index.has("abbrevs") && index.has("courses") && index.has("ids") && index.has("names"))) {
             throw new IllegalArgumentException("Invalid index, missing critical fields");
         }
+
+        setSemesterCode(semesterCode);
+        setCampusCode(campusCode);
+        setLevelCode(levelCode);
 
         // Convert the JSON into native hashtables
         try {
@@ -53,13 +64,13 @@ public class SOCIndex {
             JSONObject courses = index.getJSONObject("courses"); // List of course names->sub/course IDs
 
             // Set up abbreviations hashtable
-            mAbbrevations = new HashMap<String, String[]>();
+            mAbbreviations = new HashMap<String, String[]>();
             Iterator<String> abbrevsIterator = abbrevs.keys();
             while(abbrevsIterator.hasNext()) {
                 String curAbbrev = abbrevsIterator.next();
                 JSONArray curContents = abbrevs.getJSONArray(curAbbrev);
                 String[] subIDStrings = JsonUtil.jsonToStringArray(curContents);
-                mAbbrevations.put(curAbbrev, subIDStrings);
+                mAbbreviations.put(curAbbrev, subIDStrings);
             }
 
             // Set up subject IDs hashtable
@@ -98,7 +109,6 @@ public class SOCIndex {
 
             // Set up course names
             mCourses = new HashMap<String, Course>();
-            /*mCourseBKTree = new MutableBkTree<String>(this);*/
             Iterator<String> coursesIterator = courses.keys();
             while(coursesIterator.hasNext()) {
                 String curCourseName = coursesIterator.next();
@@ -107,18 +117,11 @@ public class SOCIndex {
                 newCourse.course = curContents.getString("course");
                 newCourse.subj = curContents.getString("subj");
                 mCourses.put(curCourseName, newCourse);
-                /*mCourseBKTree.add(curCourseName);*/
             }
         } catch (JSONException e) {
             throw new IllegalArgumentException("Invalid index JSON: " + e.getMessage());
         }
     }
-
-/*    // Use Levenshtein distance for BK tree
-    @Override
-    public int distance(String x, String y) {
-        return StringUtils.getLevenshteinDistance(x.toLowerCase(),y.toLowerCase());
-    }*/
 
     /**
      * Get subjects by abbreviation
@@ -127,8 +130,8 @@ public class SOCIndex {
      */
     public List<JSONObject> getSubjectsByAbbreviation(String abbrev) {
         List<JSONObject> results = new ArrayList<JSONObject>();
-        if(mAbbrevations.containsKey(abbrev)) {
-            String[] subjCodes = mAbbrevations.get(abbrev);
+        if(mAbbreviations.containsKey(abbrev)) {
+            String[] subjCodes = mAbbreviations.get(abbrev);
             for(String subjCode: subjCodes) {
                 Subject curSubject = mSubjects.get(subjCode);
                 if(curSubject != null) {
@@ -174,20 +177,13 @@ public class SOCIndex {
      * @return Course-stub JSON object
      */
     public JSONObject getCourseByCode(String subjectCode, String courseCode) {
-        Subject subject = mSubjects.get(subjectCode);
-        if(subject == null) return null;
-        if(!subject.courses.containsKey(courseCode)) return null;
-
-        try {
-            JSONObject newCourseJSON = new JSONObject();
-            newCourseJSON.put("title", subject.courses.get(courseCode).toUpperCase());
-            newCourseJSON.put("subjectCode", subjectCode);
-            newCourseJSON.put("courseNumber", courseCode);
-            newCourseJSON.put("stub", true);
-            // TODO Full course info so that sections and credits values aren't empty
-            return newCourseJSON;
-        } catch (JSONException e) {
-            Log.w(TAG, "getCourseByCode(): " + e.getMessage());
+        AjaxCallback<JSONObject> cb = Schedule.getCourseSynchronous(getCampusCode(), getSemesterCode(), subjectCode, courseCode);
+        if(cb.getResult() != null) {
+            return cb.getResult();
+        }
+        else {
+            Log.w(TAG, "Failed to get course JSON for " + subjectCode + ":" + courseCode);
+            Log.w(TAG, AppUtil.formatAjaxStatus(cb.getStatus()));
             return null;
         }
     }
@@ -211,22 +207,43 @@ public class SOCIndex {
                 String subjectCode = curCourse.subj;
                 String courseCode = curCourse.course;
 
-                try {
-                    JSONObject newCourseJSON = new JSONObject();
-                    newCourseJSON.put("title", curEntry.getKey().toUpperCase());
-                    newCourseJSON.put("subjectCode", subjectCode);
-                    newCourseJSON.put("courseNumber", courseCode);
-                    newCourseJSON.put("stub", true);
-                    // TODO Full course info so that sections and credits values aren't empty
-                    results.add(newCourseJSON);
-                    if(results.size() >= cap) return results;
-                } catch (JSONException e) {
-                    Log.w(TAG, "getCoursesByName(): " + e.getMessage());
+                AjaxCallback<JSONObject> cb = Schedule.getCourseSynchronous(getCampusCode(), getSemesterCode(), subjectCode, courseCode);
+                if(cb.getResult() != null) {
+                    results.add(cb.getResult());
+                }
+                else {
+                    Log.w(TAG, "Failed to get course JSON for " + subjectCode + ":" + courseCode);
+                    Log.w(TAG, AppUtil.formatAjaxStatus(cb.getStatus()));
                 }
             }
         }
 
         return results;
+    }
+
+
+    public void setSemesterCode(String semesterCode) {
+        this.semesterCode = semesterCode;
+    }
+
+    public void setCampusCode(String campusCode) {
+        this.campusCode = campusCode;
+    }
+
+    public void setLevelCode(String levelCode) {
+        this.levelCode = levelCode;
+    }
+
+    public String getLevelCode() {
+        return levelCode;
+    }
+
+    public String getSemesterCode() {
+        return semesterCode;
+    }
+
+    public String getCampusCode() {
+        return campusCode;
     }
 
 }

@@ -6,15 +6,10 @@ import android.util.Log;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidDeferredObject;
 import org.jdeferred.android.DeferredAsyncTask;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
@@ -58,8 +53,6 @@ public class Schedule {
         AjaxStatus status;
     }
 
-    protected static AndroidDeferredManager dm = new AndroidDeferredManager();
-
     /**
      * Get current semester configuration from API.
      * @return SOC Conf API with semesters array and default semester setting
@@ -70,64 +63,84 @@ public class Schedule {
 
     /**
      * Get course subjects
-     * @param campus Campus code (e.g. NB)
-     * @param level Level code (e.g. U for undergrad, G for graduate)
-     * @param semester Semester code (e.g. 72014 for Summer 2014)
+     * @param campusCode Campus code (e.g. NB)
+     * @param levelCode Level code (e.g. U for undergrad, G for graduate)
+     * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
      * @return Array of course subjects
      */
-    public static Promise<JSONArray, AjaxStatus, Double> getSubjects(String campus, String level, String semester) {
+    public static Promise<JSONArray, AjaxStatus, Double> getSubjects(String campusCode, String levelCode, String semesterCode) {
         // Use special online course URL
         String reqUrl;
-        if(CODE_CAMPUS_ONLINE.equals(campus)) {
-            reqUrl = SOC_BASE_URL + "onlineSubjects.json?term=" + semester.charAt(0) + "&year=" + semester.substring(1) + "&level=" + level;
+        if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
+            reqUrl = SOC_BASE_URL + "onlineSubjects.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode;
         }
         else {
-            reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semester + "&campus=" + campus + "&level=" + level;
+            reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode;
         }
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
     }
 
     /**
      * Get course information for a subject
-     * @param campus Campus code (e.g. NB)
-     * @param level Level code (e.g. U for undergrad, G for graduate)
-     * @param semester Semester code (e.g. 72014 for Summer 2014)
+     * @param campusCode Campus code (e.g. NB)
+     * @param levelCode Level code (e.g. U for undergrad, G for graduate)
+     * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
      * @param subjectCode Subject code (e.g. 010, 084)
      * @return Array of courses for a subject
      */
-    public static Promise<JSONArray, AjaxStatus, Double> getCourses(String campus, String level, String semester, String subjectCode) {
+    public static Promise<JSONArray, AjaxStatus, Double> getCourses(String campusCode, String levelCode, String semesterCode, String subjectCode) {
         String reqUrl;
-        if(CODE_CAMPUS_ONLINE.equals(campus)) {
-            reqUrl = SOC_BASE_URL + "onlineCourses.json?term=" + semester.charAt(0) + "&year=" + semester.substring(1) + "&level=" + level + "&subject=" + subjectCode;
+        if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
+            reqUrl = SOC_BASE_URL + "onlineCourses.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode + "&subject=" + subjectCode;
         }
         else {
-            reqUrl = SOC_BASE_URL + "courses.json?semester=" + semester + "&campus=" + campus + "&level=" + level + "&subject=" + subjectCode;
+            reqUrl = SOC_BASE_URL + "courses.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode + "&subject=" + subjectCode;
         }
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
     }
 
     /**
      * Get information for a specific course
-     * @param campus Campus code (e.g. NB)
-     * @param semester Semester code (e.g. 72014 for Summer 2014)
+     * @param campusCode Campus code (e.g. NB)
+     * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
      * @param subjectCode Subject code (e.g. 010, 084)
      * @param courseCode Course code (e.g. 101, 252, 344)
      * @return JSON Object for one course
      */
-    public static Promise<JSONObject, AjaxStatus, Double> getCourse(String campus, String semester, String subjectCode, String courseCode) {
+    public static Promise<JSONObject, AjaxStatus, Double> getCourse(String campusCode, String semesterCode, String subjectCode, String courseCode) {
         String reqUrl;
-        if(CODE_CAMPUS_ONLINE.equals(campus)) {
-            reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semester.charAt(0) + "&year=" + semester.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+        if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
+            reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         }
         else {
-            reqUrl = SOC_BASE_URL + "course.json?semester=" + semester + "&campus=" + campus + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+            reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         }
         return Request.json(reqUrl, Request.CACHE_ONE_DAY);
+    }
+
+    /**
+     * Get information for a specific course, synchronously (blocking)
+     * @param campusCode Campus code (e.g. NB)
+     * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
+     * @param subjectCode Subject code (e.g. 010, 084)
+     * @param courseCode Course code (e.g. 101, 252, 344)
+     * @return JSON Object for one course
+     */
+    public static AjaxCallback<JSONObject> getCourseSynchronous(String campusCode, String semesterCode, String subjectCode, String courseCode) {
+        String reqUrl;
+        if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
+            reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+        }
+        else {
+            reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
+        }
+        return Request.jsonSynchronous(reqUrl, Request.CACHE_ONE_DAY);
     }
 
     public static Promise<SOCIndex, AjaxStatus, Double> getIndex(final String semesterCode, final String campusCode, final String levelCode) {
         final Deferred<SOCIndex, AjaxStatus, Double> deferred = new DeferredObject<SOCIndex, AjaxStatus, Double>();
 
+        AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(new DeferredAsyncTask<Void, Double, CallbackResults<SOCIndex>>() {
             @Override
             protected CallbackResults<SOCIndex> doInBackgroundSafe(Void... nil) throws Exception {
@@ -145,7 +158,7 @@ public class Schedule {
                     results.result = null;
                 }
                 else {
-                    SOCIndex index = new SOCIndex(result);
+                    SOCIndex index = new SOCIndex(campusCode, levelCode, semesterCode, result);
                     results.result = index;
                 }
 
@@ -246,11 +259,11 @@ public class Schedule {
 
     /**
      * Open WebReg registration for this course section in the browser.
-     * @param semester Semester code (e.g. 72014 for Summer 2014)
-     * @param index Section index number
+     * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
+     * @param courseIndex Section index number
      */
-    public static void openRegistrationWindow(String semester, String index) {
-        String url = WEBREG_BASE_URL + "editSchedule.htm?login=cas&semesterSelection=" + semester + "&indexList=" + index;
+    public static void openRegistrationWindow(String semesterCode, String courseIndex) {
+        String url = WEBREG_BASE_URL + "editSchedule.htm?login=cas&semesterSelection=" + semesterCode + "&indexList=" + courseIndex;
 
         Bundle args = new Bundle();
         args.putString("component", WebDisplay.HANDLE);

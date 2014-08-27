@@ -35,6 +35,7 @@ import edu.rutgers.css.Rutgers2.SettingsActivity;
 public class SOCDialogFragment extends DialogFragment {
 
     private static final String TAG = "SOCDialog";
+    public static final String HANDLE = "socconfdialog";
 
     private SpinnerAdapter mSemesterSpinnerAdapter;
     private SpinnerAdapter mCampusSpinnerAdapter;

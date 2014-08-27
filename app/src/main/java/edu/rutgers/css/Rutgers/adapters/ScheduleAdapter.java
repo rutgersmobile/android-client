@@ -68,18 +68,12 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
         if(jsonObject.has("courseNumber")) {
             holder.titleTextView.setText(Schedule.courseLine(jsonObject));
 
-            if(!jsonObject.optBoolean("stub")) {
-                // Get the number of open/total visible sections for this course
-                int[] counts = Schedule.countVisibleSections(jsonObject);
-                holder.creditsTextView.setText("credits: " + jsonObject.optInt("credits"));
-                holder.sectionsTextView.setText("sections: " + counts[0] + "/" + counts[1]);
-                holder.creditsTextView.setVisibility(View.VISIBLE);
-                holder.sectionsTextView.setVisibility(View.VISIBLE);
-            }
-            else {
-                holder.creditsTextView.setVisibility(View.GONE);
-                holder.sectionsTextView.setVisibility(View.GONE);
-            }
+            // Get the number of open/total visible sections for this course
+            int[] counts = Schedule.countVisibleSections(jsonObject);
+            holder.creditsTextView.setText("credits: " + jsonObject.optInt("credits"));
+            holder.sectionsTextView.setText("sections: " + counts[0] + "/" + counts[1]);
+            holder.creditsTextView.setVisibility(View.VISIBLE);
+            holder.sectionsTextView.setVisibility(View.VISIBLE);
         }
         // Assume it's a subject and hide the extra fields
         else {

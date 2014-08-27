@@ -266,7 +266,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         }
 
         DialogFragment newDialogFragment = SOCDialogFragment.newInstance(this, semestersList);
-        ComponentFactory.getInstance().showDialogFragment(newDialogFragment, "socconfdialog");
+        ComponentFactory.getInstance().showDialogFragment(newDialogFragment, SOCDialogFragment.HANDLE);
     }
 
     /**
