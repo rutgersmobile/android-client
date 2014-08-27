@@ -164,14 +164,15 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
                     args.putString("component", SOCCourses.HANDLE);
                     args.putString("title", Schedule.subjectLine(clickedJSON));
                     args.putString("subjectCode", clickedJSON.optString("code"));
-                } else {
+                    ComponentFactory.getInstance().switchFragments(args);
+                }
+                else if(!clickedJSON.optBoolean("stub")) {
                     // This is for when a course is clicked if it comes up through special filter
                     args.putString("component", SOCSections.HANDLE);
                     args.putString("title", Schedule.courseLine(clickedJSON));
                     args.putString("data", clickedJSON.toString());
+                    ComponentFactory.getInstance().switchFragments(args);
                 }
-
-                ComponentFactory.getInstance().switchFragments(args);
             }
 
         });

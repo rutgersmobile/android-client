@@ -7,16 +7,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.androidquery.callback.AjaxStatus;
+
 import org.apache.commons.lang3.StringUtils;
+import org.jdeferred.android.AndroidDoneCallback;
+import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidFailCallback;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.items.SOCIndex;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -37,6 +46,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
         TextView titleTextView;
         TextView creditsTextView;
         TextView sectionsTextView;
+        ProgressBar progressBar;
     }
 
     public ScheduleAdapter(Context context, int resource, List<JSONObject> objects) {
@@ -56,30 +66,74 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             holder.creditsTextView = (TextView) convertView.findViewById(R.id.credits);
             holder.sectionsTextView = (TextView) convertView.findViewById(R.id.sections);
+            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
             convertView.setTag(holder);
         }
         else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        JSONObject jsonObject = getItem(position);
+        final JSONObject jsonObject = getItem(position);
 
         // If it's a course
         if(jsonObject.has("courseNumber")) {
             holder.titleTextView.setText(Schedule.courseLine(jsonObject));
 
-            // Get the number of open/total visible sections for this course
-            int[] counts = Schedule.countVisibleSections(jsonObject);
-            holder.creditsTextView.setText("credits: " + jsonObject.optInt("credits"));
-            holder.sectionsTextView.setText("sections: " + counts[0] + "/" + counts[1]);
-            holder.creditsTextView.setVisibility(View.VISIBLE);
-            holder.sectionsTextView.setVisibility(View.VISIBLE);
+            if(jsonObject.optBoolean("stub")) {
+                // Replace the stub JSON data
+                final ScheduleAdapter scheduleAdapter = this;
+                Schedule.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), jsonObject.optString("subjectCode"), jsonObject.optString("courseNumber")).done(new AndroidDoneCallback<JSONObject>() {
+                    @Override
+                    public void onDone(JSONObject result) {
+                        Iterator<String> keys = result.keys();
+                        while(keys.hasNext()) {
+                            String curKey = keys.next();
+                            try {
+                                jsonObject.put(curKey, result.opt(curKey));
+                                jsonObject.put("stub", false);
+                            } catch(JSONException e) {
+                                Log.w(TAG, "getView(): " + e.getMessage());
+                            }
+                        }
+                        scheduleAdapter.notifyDataSetChanged();
+                    }
+
+                    @Override
+                    public AndroidExecutionScope getExecutionScope() {
+                        return AndroidExecutionScope.UI;
+                    }
+                }).fail(new AndroidFailCallback<AjaxStatus>() {
+                    @Override
+                    public void onFail(AjaxStatus result) {
+                        Log.w(TAG, AppUtil.formatAjaxStatus(result));
+                    }
+
+                    @Override
+                    public AndroidExecutionScope getExecutionScope() {
+                        return AndroidExecutionScope.UI;
+                    }
+                });
+
+                holder.creditsTextView.setVisibility(View.GONE);
+                holder.sectionsTextView.setVisibility(View.GONE);
+                holder.progressBar.setVisibility(View.VISIBLE);
+            }
+            else {
+                // Get the number of open/total visible sections for this course
+                int[] counts = Schedule.countVisibleSections(jsonObject);
+                holder.creditsTextView.setText("credits: " + jsonObject.optInt("credits"));
+                holder.sectionsTextView.setText("sections: " + counts[0] + "/" + counts[1]);
+                holder.creditsTextView.setVisibility(View.VISIBLE);
+                holder.sectionsTextView.setVisibility(View.VISIBLE);
+                holder.progressBar.setVisibility(View.GONE);
+            }
         }
         // Assume it's a subject and hide the extra fields
         else {
             holder.titleTextView.setText(Schedule.subjectLine(jsonObject));
             holder.creditsTextView.setVisibility(View.GONE);
             holder.sectionsTextView.setVisibility(View.GONE);
+            holder.progressBar.setVisibility(View.GONE);
         }
 
         return convertView;

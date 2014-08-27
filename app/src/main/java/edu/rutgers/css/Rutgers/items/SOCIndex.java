@@ -177,13 +177,19 @@ public class SOCIndex {
      * @return Course-stub JSON object
      */
     public JSONObject getCourseByCode(String subjectCode, String courseCode) {
-        AjaxCallback<JSONObject> cb = Schedule.getCourseSynchronous(getCampusCode(), getSemesterCode(), subjectCode, courseCode);
-        if(cb.getResult() != null) {
-            return cb.getResult();
-        }
-        else {
-            Log.w(TAG, "Failed to get course JSON for " + subjectCode + ":" + courseCode);
-            Log.w(TAG, AppUtil.formatAjaxStatus(cb.getStatus()));
+        Subject subject = mSubjects.get(subjectCode);
+        if(subject == null) return null;
+        if(!subject.courses.containsKey(courseCode)) return null;
+
+        try {
+            JSONObject newCourseJSON = new JSONObject();
+            newCourseJSON.put("title", subject.courses.get(courseCode).toUpperCase());
+            newCourseJSON.put("subjectCode", subjectCode);
+            newCourseJSON.put("courseNumber", courseCode);
+            newCourseJSON.put("stub", true);
+            return newCourseJSON;
+        } catch (JSONException e) {
+            Log.w(TAG, "getCourseByCode(): " + e.getMessage());
             return null;
         }
     }
@@ -207,13 +213,16 @@ public class SOCIndex {
                 String subjectCode = curCourse.subj;
                 String courseCode = curCourse.course;
 
-                AjaxCallback<JSONObject> cb = Schedule.getCourseSynchronous(getCampusCode(), getSemesterCode(), subjectCode, courseCode);
-                if(cb.getResult() != null) {
-                    results.add(cb.getResult());
-                }
-                else {
-                    Log.w(TAG, "Failed to get course JSON for " + subjectCode + ":" + courseCode);
-                    Log.w(TAG, AppUtil.formatAjaxStatus(cb.getStatus()));
+                try {
+                    JSONObject newCourseJSON = new JSONObject();
+                    newCourseJSON.put("title", curEntry.getKey().toUpperCase());
+                    newCourseJSON.put("subjectCode", subjectCode);
+                    newCourseJSON.put("courseNumber", courseCode);
+                    newCourseJSON.put("stub", true);
+                    results.add(newCourseJSON);
+                    if(results.size() >= cap) return results;
+                } catch (JSONException e) {
+                    Log.w(TAG, "getCoursesByName(): " + e.getMessage());
                 }
             }
         }
