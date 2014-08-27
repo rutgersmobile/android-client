@@ -226,16 +226,6 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if(mFilterEditText != null) outState.putString("filter", mFilterString);
@@ -294,10 +284,10 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
 
             @Override
             public void onDone(MultipleResults results) {
-                JSONObject index = (JSONObject) results.get(0).getResult();
+                SOCIndex index = (SOCIndex) results.get(0).getResult();
                 JSONArray subjects = (JSONArray) results.get(1).getResult();
 
-                mSOCIndex = new SOCIndex(index); // TODO Initialize this in background thread
+                mSOCIndex = index;
                 mAdapter.setFilterIndex(mSOCIndex);
 
                 // Load subjects

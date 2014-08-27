@@ -33,13 +33,33 @@ public class Request {
 			mSetupDone = true;
 		}
 	}
-	
-	// Makes a call against the api. Expects a JSON object
+
+    /**
+     * Get JSON from mobile server.
+     * @param resource JSON file URL
+     * @param expire Cache time in milliseconds
+     * @return Promise for a JSONObject
+     */
 	public static Promise<JSONObject, AjaxStatus, Double> api (String resource, long expire) {
 		return json(AppUtil.API_BASE + resource, expire);
 	}
-	
-	// gets arbitrary json
+
+    /**
+     * Get JSON from mobile server, synchronously (blocking).
+     * @param resource JSON file URL
+     * @param expire Cache time in milliseconds
+     * @return AjaxCallback for JSONObject
+     */
+    public static AjaxCallback<JSONObject> apiSynchronous(String resource, long expire) {
+        return jsonSynchronous(AppUtil.API_BASE + resource, expire);
+    }
+
+    /**
+     * Get arbitrary JSON.
+     * @param resource JSON file URL
+     * @param expire Cache time in milliseconds
+     * @return Promise for JSONObject
+     */
 	public static Promise<JSONObject, AjaxStatus, Double> json (String resource, long expire) {
 		setup();
 		final DeferredObject<JSONObject, AjaxStatus, Double> deferred = new DeferredObject<JSONObject, AjaxStatus, Double>();
@@ -60,6 +80,19 @@ public class Request {
 		
 		return deferred.promise();
 	}
+
+    /**
+     * Get arbitrary JSON synchronously (blocking).
+     * @param resource JSON file URL
+     * @param expire Cache time in milliseconds
+     * @return AjaxCallback for JSONObject
+     */
+    public static AjaxCallback<JSONObject> jsonSynchronous(String resource, long expire) {
+        AjaxCallback<JSONObject> callback = new AjaxCallback<JSONObject>();
+        callback.url(resource).expire(expire).type(JSONObject.class);
+        aq.sync(callback);
+        return callback;
+    }
 	
 	/**
 	 * Gets arbitrary JSON array.
