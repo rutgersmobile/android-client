@@ -49,12 +49,13 @@ public class RSSItem implements Serializable {
 		if(item == null) return;
 
 		// RSS 2.0 required fields
-		this.title = StringEscapeUtils.unescapeHtml4(item.text("title"));
-		this.description = StringEscapeUtils.unescapeHtml4(removeTrailingNewline(item.text("description")));
+		this.title = StringUtils.chomp(StringEscapeUtils.unescapeHtml4(item.text("title")));
+		this.description = StringUtils.chomp(stripTags(StringEscapeUtils.unescapeHtml4(item.text("description"))));
+        if(this.description != null) this.description = this.description.trim();
 		this.link = item.text("link");
 		
-		// Non-required fields
-		this.author = item.text("author") != null ? StringEscapeUtils.unescapeHtml4(item.text("author")) : "";
+		// Author is currently unused as its presence in feeds is too sporadic
+		this.author = StringUtils.chomp(StringEscapeUtils.unescapeHtml4(item.text("author")));
 		
 		// Get date - check pubDate for news or event:xxxDateTime for events
 		if(item.text("pubDate") != null) {
@@ -116,6 +117,7 @@ public class RSSItem implements Serializable {
 		// Image may be in url field (enclosure url attribute in the Rutgers feed)
 		try {
 			if(item.child("enclosure") != null) this.imgUrl = new URL(item.child("enclosure").attr("url"));
+            else if(item.child("media:thumbnail") != null) this.imgUrl = new URL(item.child("media:thumbnail").attr("url"));
 			else if(item.child("url") != null) this.imgUrl = new URL(item.text("url"));
 			else this.imgUrl = null;
 		} catch (MalformedURLException e) {
@@ -176,19 +178,17 @@ public class RSSItem implements Serializable {
 	 * toString returns RSS item title
 	 * @return RSS item title
 	 */
+    @Override
 	public String toString() {
 		return this.title;
 	}
-	
-	/**
-	 * Get rid of the trailing newline present in some description fields.
-	 * @param string String to cleanse
-	 * @return Cleansed string
-	 */
-	private String removeTrailingNewline(String string) {
-		return StringUtils.chomp(string);
-	}
 
+    /**
+     * Check if two different timestamps have the same date.
+     * @param d1 Date 1
+     * @param d2 Date 2
+     * @return True if days of year match, false if not
+     */
     private boolean isSameDay(Date d1, Date d2) {
         Calendar cal1 = Calendar.getInstance(Locale.US);
         Calendar cal2 = Calendar.getInstance(Locale.US);
@@ -197,6 +197,16 @@ public class RSSItem implements Serializable {
         cal1.setTime(d1);
         cal2.setTime(d2);
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+
+    /**
+     * Remove HTML tags from string
+     * @param string String to cleanse
+     * @return Cleansed string, or null if string was null
+     */
+    private String stripTags(String string) {
+        if(string == null) return null;
+        return string.replaceAll("\\<.*?\\>", "");
     }
 
 }
