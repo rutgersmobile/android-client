@@ -23,9 +23,6 @@ import android.widget.ProgressBar;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
-import java.net.URI;
-import java.util.Date;
-
 import edu.rutgers.css.Rutgers2.R;
 
 public class WebDisplay extends Fragment {
@@ -37,29 +34,6 @@ public class WebDisplay extends Fragment {
 	private String mCurrentURL;
 	private WebView mWebView;
 	private int setupCount = 0;
-    private LastDownload mLastDownload;
-
-    /**
-     * A class to keep track of the last download to prevent the stupid bug where
-     * clicks on PDFs get sent twice so we don't do a duplicate download :|
-     */
-    private class LastDownload {
-        private String url;
-        private long time;
-
-        public LastDownload(String url) {
-            this.url = url;
-            this.time = new Date().getTime();
-        }
-
-        public String getURL() {
-            return this.url;
-        }
-
-        public long getTime() {
-            return this.time;
-        }
-    }
 
 	public WebDisplay() {
 		// Required empty public constructor
