@@ -182,32 +182,16 @@ public class ComponentFactory {
         }
         Analytics.queueEvent(mMainActivity, Analytics.CHANNEL_OPENED, extras.toString());
 
-        // Check if the URI is HTTP or not for links
-        if(componentTag.equalsIgnoreCase(WebDisplay.HANDLE)) {
-            if(args.getString("url") != null) {
-                String url = args.getString("url");
-                if(url.contains("://") && !StringUtils.startsWithIgnoreCase(url, "http://") && !StringUtils.startsWithIgnoreCase(url, "https://")) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        mMainActivity.getApplicationContext().startActivity(intent);
-                    } catch (ActivityNotFoundException e) {
-                        Toast.makeText(mMainActivity, mMainActivity.getResources().getString(R.string.failed_uri, url), Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Couldn't find an activity to handle URI " + url);
-                    }
-                    return false;
-                }
-            }
-        }
-
+        // Attempt to create the fragment
         Fragment fragment = createFragment(args);
 		if(fragment == null) return false;
 
+        // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtil.closeKeyboard(mMainActivity);
 
-		FragmentManager fm = mMainActivity.getSupportFragmentManager();
-		
-		// If this is a top level (nav drawer) press, find the last time this channel was launched and pop backstack to it
+        FragmentManager fm = mMainActivity.getSupportFragmentManager();
+
+        // If this is a top level (nav drawer) press, find the last time this channel was launched and pop backstack to it
 		if(isTopLevel && fm.findFragmentByTag(componentTag) != null) {
 			fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 		}
@@ -222,6 +206,11 @@ public class ComponentFactory {
 		return true;
 	}
 
+    /**
+     * Show a dialog fragment and add it to backstack
+     * @param dialogFragment Dialog fragment to display
+     * @param tag Tag for fragment transaction backstack
+     */
     public void showDialogFragment(DialogFragment dialogFragment, String tag) {
         FragmentTransaction ft = mMainActivity.getSupportFragmentManager().beginTransaction();
         Fragment prev = mMainActivity.getSupportFragmentManager().findFragmentByTag(tag);

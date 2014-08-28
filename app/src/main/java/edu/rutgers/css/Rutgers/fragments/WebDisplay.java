@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.fragments;
 
 import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,12 +15,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.ShareActionProvider;
+import android.widget.Toast;
 
+import java.net.URI;
 import java.util.Date;
 
 import edu.rutgers.css.Rutgers2.R;
@@ -28,14 +32,6 @@ public class WebDisplay extends Fragment {
 
 	private static final String TAG = "WebDisplay";
     public static final String HANDLE = "www";
-
-    // Could add to this from JSON when more extensions come up
-    private static final String[] DOC_TYPES = {".pdf",
-            ".doc", ".docx", ".dot", ".xml", ".rtf",
-            ".odt", ".ott", ".oth", ".odm",
-            ".ppt", ".pptx", ".xls", ".xlsx", ".csv",
-            ".mp4", ".mp3", ".mov", ".wav",
-            ".zip", ".tar.gz", ".tgz"};
 
 	private ShareActionProvider mShareActionProvider;
 	private String mCurrentURL;
@@ -126,51 +122,53 @@ public class WebDisplay extends Fragment {
 
             @Override
 		    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // Regular pages will be handled by the browser
-                if(!isDoc(url)) {
-                    mCurrentURL = url;
-                    mWebView.loadUrl(mCurrentURL);
-                    setShareIntent(mCurrentURL);
-                    return true;
-                }
-                // Documents will be downloaded with the Download Manager
-                else {
-                    //Avoid duplicate download requests made within 1 second
-                    if(mLastDownload != null && url.equals(mLastDownload.getURL())) {
-                        long curTime = new Date().getTime();
-                        if(curTime - mLastDownload.getTime() < 1000) {
-                            Log.i(TAG, "Preventing duplicate download of " + url);
-                            return false;
-                        }
-                    }
-                    mLastDownload = new LastDownload(url);
-
-                    Log.i(TAG, "Downloading document: " + url);
-
-                    // Add cookies from current page to download request to maintain session
-                    // (otherwise download may fail)
-                    String cookies = CookieManager.getInstance().getCookie(mCurrentURL);
-
-                    // Set up download request
-                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                    request.allowScanningByMediaScanner();
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                    request.addRequestHeader("COOKIE",cookies);
-
-                    // Start download
-                    DownloadManager downloadManager = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
-                    downloadManager.enqueue(request);
-
-                    return false;
-                }
+                mCurrentURL = url;
+                mWebView.loadUrl(mCurrentURL);
+                setShareIntent(mCurrentURL);
+                return true;
 		    }
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 Log.w(TAG, "WebViewClient error: code " + errorCode + ": " + description + " @ " + failingUrl);
+
+                // Can't handle this URI scheme, try a view intent
+                if(errorCode == WebViewClient.ERROR_UNSUPPORTED_SCHEME) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(failingUrl));
+                    try {
+                        startActivity(intent);
+                        String handleIt = String.format(getResources().getString(R.string.www_handle_uri), failingUrl);
+                        mWebView.loadData(handleIt, "text/plain", null);
+                    } catch(ActivityNotFoundException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
             }
 
 		});
+
+        mWebView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long length) {
+                Log.i(TAG, "Downloading an " + mimeType);
+
+                // Add cookies from current page to download request to maintain session
+                // (otherwise download may fail)
+                String cookies = CookieManager.getInstance().getCookie(mCurrentURL);
+
+                // Set up download request
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                request.allowScanningByMediaScanner();
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.addRequestHeader("COOKIE",cookies);
+
+                // Start download
+                DownloadManager downloadManager = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+                downloadManager.enqueue(request);
+
+                Toast.makeText(getActivity(), R.string.www_start_dl, Toast.LENGTH_SHORT).show();
+            }
+        });
 		
 		return v;
 	}
@@ -237,20 +235,5 @@ public class WebDisplay extends Fragment {
 		
 		return false;
 	}
-
-    /**
-     * Should this URL get intercepted by the download manager?
-     * @param url URL to check
-     * @return True if URL should be passed to downloader, false if not.
-     */
-    private boolean isDoc(String url) {
-        if(url == null || url.isEmpty()) return false;
-
-        for(int i = 0; i < DOC_TYPES.length; i++) {
-            if(url.toLowerCase().endsWith(DOC_TYPES[i])) return true;
-        }
-
-        return false;
-    }
 	
 }

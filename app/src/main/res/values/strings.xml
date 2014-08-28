@@ -163,4 +163,8 @@
     <string name="sakai_title">Sakai</string>
     <string name="stud_life_title">Student Life</string>
 
+    <!-- Web display -->
+    <string name="www_handle_uri">Launching activity for %1$s</string>
+    <string name="www_start_dl">Downloading&#8230;</string>
+
 </resources>
