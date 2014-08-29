@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -46,6 +47,7 @@ import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.LocationClientProvider;
+import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
@@ -60,6 +62,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 	private ArrayList<RMenuRow> mData;
 	private LocationClientProvider mLocationClientProvider;
 	private int mNearbyRowCount; // Keep track of number of nearby stops displayed
+    private boolean mNearbyHeaderAdded;
 	private Timer mUpdateTimer;
 	private Handler mUpdateHandler;
     private String mCurrentCampus;
@@ -94,6 +97,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 		super.onCreate(savedInstanceState);
 		
 		mNearbyRowCount = 0;
+        mNearbyHeaderAdded = false;
 		mData = new ArrayList<RMenuRow>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
@@ -216,8 +220,6 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             @Override
             public void onFail(OneReject result) {
                 AppUtil.showFailedLoadToast(getActivity());
-                Exception e = (Exception) result.getReject();
-                Log.w(TAG, e.getMessage());
             }
 
         });
@@ -229,10 +231,10 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 		super.onPause();
 
 		// Stop the update thread from running when screen isn't active
-		if(mUpdateTimer == null) return;
-		
-		mUpdateTimer.cancel();
-		mUpdateTimer = null;
+		if(mUpdateTimer != null) {
+            mUpdateTimer.cancel();
+            mUpdateTimer = null;
+        }
 	}
 
     @Override
@@ -329,11 +331,15 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             return;
         }
 
-        mAdapter.clear();
+        clearNearbyRows();
         mNearbyRowCount = 0;
 
         // Add "nearby stops" header
-        mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.bus_nearby_active_stops_header)));
+        if(!mNearbyHeaderAdded) {
+            mData.add(0, new RMenuHeaderRow(getResources().getString(R.string.bus_nearby_active_stops_header)));
+            mAdapter.notifyDataSetChanged();
+            mNearbyHeaderAdded = true;
+        }
 
         // Check for location services
 		if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
@@ -345,13 +351,11 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 				addNearbyRow(1, new RMenuItemRow(res.getString(R.string.failed_location)));
 				return;
 			}
-			Log.d(TAG, "Current location: " + lastLoc.toString());
+			if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
 			
 			// Look up nearby active bus stops
-			Nextbus.getActiveStopsByTitleNear(agencyTag, 
-					(float) lastLoc.getLatitude(), 
-					(float) lastLoc.getLongitude()
-					).then(new AndroidDoneCallback<JSONObject>() {
+			Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(),
+					(float) lastLoc.getLongitude()).then(new AndroidDoneCallback<JSONObject>() {
 
 				@Override
 				public void onDone(JSONObject activeNearbyStops) {				
