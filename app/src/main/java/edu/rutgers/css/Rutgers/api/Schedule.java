@@ -118,25 +118,6 @@ public class Schedule {
         return Request.json(reqUrl, Request.CACHE_ONE_DAY);
     }
 
-    /**
-     * Get information for a specific course, synchronously (blocking)
-     * @param campusCode Campus code (e.g. NB)
-     * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
-     * @param subjectCode Subject code (e.g. 010, 084)
-     * @param courseCode Course code (e.g. 101, 252, 344)
-     * @return JSON Object for one course
-     */
-    public static AjaxCallback<JSONObject> getCourseSynchronous(String campusCode, String semesterCode, String subjectCode, String courseCode) {
-        String reqUrl;
-        if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
-            reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
-        }
-        else {
-            reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
-        }
-        return Request.jsonSynchronous(reqUrl, Request.CACHE_ONE_DAY);
-    }
-
     public static Promise<SOCIndex, AjaxStatus, Double> getIndex(final String semesterCode, final String campusCode, final String levelCode) {
         final Deferred<SOCIndex, AjaxStatus, Double> deferred = new DeferredObject<SOCIndex, AjaxStatus, Double>();
 
@@ -149,17 +130,21 @@ public class Schedule {
                 AjaxStatus status = cb.getStatus();
                 JSONObject result = cb.getResult();
 
-                CallbackResults results = new CallbackResults();
+                CallbackResults<SOCIndex> results = new CallbackResults<SOCIndex>();
 
                 results.status = status;
 
-                if(result == null || status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+                if(result == null) {
                     Log.e(TAG, "getIndex(): " + AppUtil.formatAjaxStatus(status));
                     results.result = null;
                 }
                 else {
-                    SOCIndex index = new SOCIndex(campusCode, levelCode, semesterCode, result);
-                    results.result = index;
+                    try {
+                        results.result = new SOCIndex(campusCode, levelCode, semesterCode, result);
+                    } catch (IllegalArgumentException e) {
+                        Log.e(TAG, "getIndex(): " + e.getMessage());
+                        results.result = null;
+                    }
                 }
 
                 return results;
@@ -167,7 +152,7 @@ public class Schedule {
         }).done(new DoneCallback<CallbackResults<SOCIndex>>() {
             @Override
             public void onDone(CallbackResults<SOCIndex> results) {
-                if(results.result == null) deferred.reject(results.status);
+                if (results.result == null) deferred.reject(results.status);
                 else deferred.resolve(results.result);
             }
         });

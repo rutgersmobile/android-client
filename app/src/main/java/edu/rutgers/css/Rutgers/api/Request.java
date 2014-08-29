@@ -68,6 +68,7 @@ public class Request {
 
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
+                // Don't cache if we didn't get a valid object
 				if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
 					status.invalidate();
 					deferred.reject(status);
@@ -91,6 +92,10 @@ public class Request {
         AjaxCallback<JSONObject> callback = new AjaxCallback<JSONObject>();
         callback.url(resource).expire(expire).type(JSONObject.class);
         aq.sync(callback);
+        // Don't cache if we didn't get a valid object
+        if(callback.getStatus().getCode() == AjaxStatus.TRANSFORM_ERROR) {
+            callback.getStatus().invalidate();
+        }
         return callback;
     }
 	
@@ -108,7 +113,8 @@ public class Request {
 
 			@Override
 			public void callback(String url, JSONArray jsonArray, AjaxStatus status) {
-				if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+                // Don't cache if we didn't get a valid object
+                if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
 					status.invalidate();
 					deferred.reject(status);
 				}
@@ -135,7 +141,8 @@ public class Request {
 
 			@Override
 			public void callback(String url, XmlDom xml, AjaxStatus status) {
-				if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+                // Don't cache if we didn't get a valid object
+                if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
 					status.invalidate();
 					deferred.reject(status);
 				}
