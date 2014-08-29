@@ -24,8 +24,9 @@ import edu.rutgers.css.Rutgers2.R;
 public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 
 	private final static String TAG = "RMenuAdapter";
-	private int itemResource;
-	private int categoryResource;
+	private int mItemResource;
+	private int mCategoryResource;
+    private List<RMenuRow> mData;
 
 	private static enum ViewTypes {
 		HEADER, CLICKABLE, UNCLICKABLE;
@@ -38,7 +39,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 	}
 	
 	/**
-	 * 
+	 * RMenuAdapter constructor
 	 * @param context App context
 	 * @param itemResource Layout to use for menu items
 	 * @param categoryResource Layout to use for section headers
@@ -47,9 +48,20 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 	public RMenuAdapter(Context context, int itemResource, int categoryResource, List<RMenuRow> objects) {
 		super(context, itemResource, objects);
 		
-		this.itemResource = itemResource;
-		this.categoryResource = categoryResource;
+		this.mItemResource = itemResource;
+		this.mCategoryResource = categoryResource;
+        this.mData = objects;
 	}
+
+    /**
+     * Remove item at index.
+     * @param index Index of item to remove
+     */
+    public void remove(int index) {
+        if(mData == null) return;
+        mData.remove(index);
+        notifyDataSetChanged();
+    }
 
     /**
      * Types of row items:
@@ -93,11 +105,11 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
             switch(viewTypes[getItemViewType(position)]) {
                 // Section headers
                 case HEADER:
-                    convertView = mLayoutInflater.inflate(this.categoryResource, null);
+                    convertView = mLayoutInflater.inflate(this.mCategoryResource, null);
                     break;
                 // Menu items
                 default:
-                    convertView = mLayoutInflater.inflate(this.itemResource, null);
+                    convertView = mLayoutInflater.inflate(this.mItemResource, null);
             }
 
 			holder = new ViewHolder();

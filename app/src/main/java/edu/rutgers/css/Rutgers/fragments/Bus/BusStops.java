@@ -56,7 +56,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 	private static final String TAG = "BusStops";
     public static final String HANDLE = "busstops";
 
-	private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
+	private static final int REFRESH_INTERVAL = 10; // nearby stop refresh interval in seconds
 
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
@@ -299,8 +299,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 	 */
 	private void clearNearbyRows() {
 		for(int i = 0; i < mNearbyRowCount; i++) {
-			mData.remove(1);
-			mAdapter.notifyDataSetChanged();
+            mAdapter.remove(1);
 		}
 		mNearbyRowCount = 0;
 	}
@@ -311,9 +310,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      * @param row value
      */
 	private void addNearbyRow(int pos, RMenuRow row) {
-		mData.add(pos, row);
+        mAdapter.insert(row, pos);
 		mNearbyRowCount++;
-		mAdapter.notifyDataSetChanged();
 	}
 	
 	/**
@@ -336,8 +334,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
         // Add "nearby stops" header
         if(!mNearbyHeaderAdded) {
-            mData.add(0, new RMenuHeaderRow(getResources().getString(R.string.bus_nearby_active_stops_header)));
-            mAdapter.notifyDataSetChanged();
+            mAdapter.insert(new RMenuHeaderRow(getResources().getString(R.string.bus_nearby_active_stops_header)), 0);
             mNearbyHeaderAdded = true;
         }
 
