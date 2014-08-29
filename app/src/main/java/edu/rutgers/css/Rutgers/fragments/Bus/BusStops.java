@@ -56,7 +56,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 	private static final String TAG = "BusStops";
     public static final String HANDLE = "busstops";
 
-	private static final int REFRESH_INTERVAL = 10; // nearby stop refresh interval in seconds
+	private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
 
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
