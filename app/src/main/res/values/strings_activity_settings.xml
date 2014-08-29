@@ -33,22 +33,29 @@
 	</string-array>
 
     <string name="role_undergrad_tag">undergrad</string>
+    <string name="role_undergrad_full">Undergraduate Student</string>
     <string name="role_grad_tag">grad</string>
-    <string name="role_prospect_tag">prospective</string>
+    <string name="role_grad_full">Graduate Student</string>
+    <string name="role_prospect_tag">prospect</string>
+    <string name="role_prospect_full">Prospective Student</string>
     <string name="role_facstaff_tag">facstaff</string>
+    <string name="role_facstaff_full">Faculty/Staff</string>
     <string name="role_parent_tag">parent</string>
+    <string name="role_parent_full">Parent</string>
     <string name="role_alumni_tag">alumni</string>
+    <string name="role_alumni_full">Alumni</string>
     <string name="role_friend_tag">friend</string>
+    <string name="role_friend_full">Friend</string>
 
 	<string name="pref_user_type_title">User Type</string>
 	<string-array name="pref_user_type_strings">
-	    <item>Undergraduate Student</item>
-	    <item>Graduate Student</item>
-	    <item>Prospective Student</item>
-	    <item>Faculty/Staff</item>
-	    <item>Parent</item>
-	    <item>Alumni</item>
-	    <item>Friend</item>
+	    <item>@string/role_undergrad_full</item>
+	    <item>@string/role_grad_full</item>
+	    <item>@string/role_prospect_full</item>
+	    <item>@string/role_facstaff_full</item>
+	    <item>@string/role_parent_full</item>
+	    <item>@string/role_alumni_full</item>
+	    <item>@string/role_friend_full</item>
 	</string-array>
 	<string-array name="pref_user_type_values">
 	    <item>@string/role_undergrad_tag</item>

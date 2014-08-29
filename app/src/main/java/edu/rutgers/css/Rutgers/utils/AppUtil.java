@@ -108,7 +108,6 @@ public class AppUtil {
 		if(campusTag == null) return null;
 		
 		Resources res = context.getResources();
-		
 		try {
 			int id = res.getIdentifier("campus_"+campusTag+"_full", "string", AppUtil.PACKAGE_NAME);
 			return res.getString(id);
@@ -116,6 +115,24 @@ public class AppUtil {
 			return null;
 		}
 	}
+
+    /**
+     * Get full role title from role tag.
+     * @param context App context
+     * @param roleTag Role tag
+     * @return Full role title
+     */
+    public static String getFullRoleTitle(Context context, String roleTag) {
+        if(roleTag == null) return null;
+
+        Resources res = context.getResources();
+        try {
+            int id = res.getIdentifier("role_"+roleTag+"_full", "string", AppUtil.PACKAGE_NAME);
+            return res.getString(id);
+        } catch (NotFoundException e) {
+            return null;
+        }
+    }
 
 	/**
 	 * In cases where multiple titles are specified ("homeTitle", "foreignTitle"), gets appropriate title

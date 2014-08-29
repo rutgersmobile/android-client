@@ -251,8 +251,8 @@ public class Analytics extends IntentService {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         //TODO Translate these to full names
-        String userCampus = prefs.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, "null");
-        String userRole = prefs.getString(SettingsActivity.KEY_PREF_USER_TYPE, "null");
+        String userCampus = AppUtil.getFullCampusTitle(context, prefs.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, null));
+        String userRole = AppUtil.getFullRoleTitle(context, prefs.getString(SettingsActivity.KEY_PREF_USER_TYPE, null));
 
         try {
             eventJSON.put("type", eventType);
