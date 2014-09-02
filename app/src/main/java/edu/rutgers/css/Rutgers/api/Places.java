@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.api;
 import android.location.Location;
 import android.util.Log;
 
+import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.Deferred;
@@ -31,7 +32,6 @@ public class Places {
 	
 	private static final String TAG = "PlacesAPI";
 
-    private static boolean isSetup;
 	private static Promise<Object, AjaxStatus, Object> configured;
 	private static JSONObject mPlacesConf;
 
@@ -40,54 +40,50 @@ public class Places {
 	 */
 	private static synchronized void setup() {
 
-        if(isSetup) return;
-        isSetup = true;
-
-		// Get JSON object from places API
+		// Get places JSON from server
 		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
 		
-		final Promise<JSONObject, AjaxStatus, Double> promisePlaces = Request.api("places.txt", Request.CACHE_ONE_DAY);
+		final Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> promisePlaces = Request.apiWithStatus("places.txt", Request.CACHE_ONE_DAY * 7);
 		
 		AndroidDeferredManager dm = new AndroidDeferredManager();		
-		dm.when(promisePlaces).done(new AndroidDoneCallback<JSONObject>() {
+		dm.when(promisePlaces).done(new AndroidDoneCallback<AjaxCallback<JSONObject>>() {
 
 			@Override
-			public void onDone(JSONObject res) {
-				
+			public void onDone(AjaxCallback<JSONObject> res) {
+                // If the result came from cache, skip new setup
+                if(mPlacesConf != null && res.getStatus().getSource() != AjaxStatus.NETWORK) {
+                    confd.resolve(null);
+                    return;
+                }
+
 				try {
-                    mPlacesConf = res.getJSONObject("all");
+                    mPlacesConf = res.getResult().getJSONObject("all");
                     confd.resolve(null);
                 } catch (JSONException e) {
                     Log.e(TAG, "setup(): " + e.getMessage());
-                    isSetup = false;
-                    AjaxStatus fake = new AjaxStatus();
-                    confd.reject(fake.code(-101));
+                    confd.reject(res.getStatus());
                 }
-
 			}
 			
 			@Override
 			public AndroidExecutionScope getExecutionScope() {
 				return AndroidExecutionScope.BACKGROUND;
 			}
-			
+
 		}).fail(new AndroidFailCallback<AjaxStatus>() {
-		
+
 			@Override
 			public void onFail(AjaxStatus e) {
-
 				Log.e(TAG, AppUtil.formatAjaxStatus(e));
 				confd.reject(e);
-                isSetup = false;
-
 			}
 			
 			@Override
 			public AndroidExecutionScope getExecutionScope() {
 				return AndroidExecutionScope.BACKGROUND;
 			}
-			
+
 		});	
 	}
 	
