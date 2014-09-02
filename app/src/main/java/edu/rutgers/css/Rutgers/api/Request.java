@@ -89,6 +89,7 @@ public class Request {
      * @return AjaxCallback for JSONObject
      */
     public static AjaxCallback<JSONObject> jsonSynchronous(String resource, long expire) {
+        setup();
         AjaxCallback<JSONObject> callback = new AjaxCallback<JSONObject>();
         callback.url(resource).expire(expire).type(JSONObject.class);
         aq.sync(callback);
