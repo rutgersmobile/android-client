@@ -6,6 +6,7 @@ import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
 import org.jdeferred.Promise;
+import org.jdeferred.android.AndroidDeferredObject;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,6 +46,16 @@ public class Request {
 	}
 
     /**
+     * Get full AJAX callback object for JSON from mobile server.
+     * @param resource JSON file URL
+     * @param expire Cache time in milliseconds
+     * @return Promise for an AJAX callback object
+     */
+    public static Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> apiWithStatus(String resource, long expire) {
+        return jsonWithStatus(AppUtil.API_BASE + resource, expire);
+    }
+
+    /**
      * Get JSON from mobile server, synchronously (blocking).
      * @param resource JSON file URL
      * @param expire Cache time in milliseconds
@@ -69,18 +80,42 @@ public class Request {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
                 // Don't cache if we didn't get a valid object
-				if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+				if(json == null) {
 					status.invalidate();
 					deferred.reject(status);
 				}
-				else if (json != null) deferred.resolve(json);
-				else deferred.reject(status);
+				else deferred.resolve(json);
 			}
 			
 		});
 		
 		return deferred.promise();
 	}
+
+    /**
+     * Get arbitrary JSON, in full AJAX callback.
+     * @param resource
+     * @param expire
+     * @return
+     */
+    public static Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> jsonWithStatus(String resource, long expire) {
+        setup();
+        final DeferredObject<AjaxCallback<JSONObject>, AjaxStatus, Double> deferred = new DeferredObject<AjaxCallback<JSONObject>, AjaxStatus, Double>();
+
+        aq.ajax(resource, JSONObject.class, expire, new AjaxCallback<JSONObject>() {
+            @Override
+            public void callback(String url, JSONObject json, AjaxStatus status) {
+                // Don't cache if we didn't get a valid object
+                if(json == null) {
+                    status.invalidate();
+                    deferred.reject(status);
+                }
+                else deferred.resolve(this);
+            }
+        });
+
+        return deferred.promise();
+    }
 
     /**
      * Get arbitrary JSON synchronously (blocking).
@@ -115,12 +150,11 @@ public class Request {
 			@Override
 			public void callback(String url, JSONArray jsonArray, AjaxStatus status) {
                 // Don't cache if we didn't get a valid object
-                if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+                if(jsonArray == null) {
 					status.invalidate();
 					deferred.reject(status);
 				}
-				else if(jsonArray != null) deferred.resolve(jsonArray);
-				else deferred.reject(status);
+				else deferred.resolve(jsonArray);
 			}
 			
 		});
@@ -143,12 +177,11 @@ public class Request {
 			@Override
 			public void callback(String url, XmlDom xml, AjaxStatus status) {
                 // Don't cache if we didn't get a valid object
-                if(status.getCode() == AjaxStatus.TRANSFORM_ERROR) {
+                if(xml == null) {
 					status.invalidate();
 					deferred.reject(status);
 				}
-				else if (xml != null) deferred.resolve(xml);
-				else deferred.reject(status);
+				else deferred.resolve(xml);
 			}
 			
 		});
