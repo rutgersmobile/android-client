@@ -249,6 +249,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
      * Set title based on current campus, semester, and level configuration.
      */
     private void setScheduleTitle() {
+        if(!isAdded()) return;
         if(mSemester == null) getActivity().setTitle(R.string.soc_title);
         else getActivity().setTitle(Schedule.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
@@ -276,7 +277,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
      */
     private void loadSubjects() {
         Log.v(TAG, "Loading subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
-        setScheduleTitle();
+        if(isAdded() && AppUtil.isOnTop(SOCMain.HANDLE, getFragmentManager())) setScheduleTitle();
         mAdapter.clear();
         mAdapter.notifyDataSetChanged();
 
