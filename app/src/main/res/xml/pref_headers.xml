@@ -5,8 +5,5 @@
     <header
         android:fragment="edu.rutgers.css.Rutgers2.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_user" />
-    <header
-        android:fragment="edu.rutgers.css.Rutgers2.SettingsActivity$NotificationPreferenceFragment"
-        android:title="@string/pref_header_notifications" />
 
 </preference-headers>

@@ -34,12 +34,12 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class SettingsActivity extends PreferenceActivity {
 
-    public static final String KEY_PREF_HOME_CAMPUS = "campus_list";
-    public static final String KEY_PREF_USER_TYPE = "user_type_list";
-    public static final String KEY_PREF_NOTIFICATIONS = "notifications_new_message_ringtone";
-    public static final String KEY_PREF_SOC_CAMPUS = "soc_campus";
-    public static final String KEY_PREF_SOC_LEVEL = "soc_level";
-    public static final String KEY_PREF_SOC_SEMESTER = "soc_semester";
+    public static final String KEY_PREF_HOME_CAMPUS     = "campus_list";
+    public static final String KEY_PREF_USER_TYPE       = "user_type_list";
+    public static final String KEY_PREF_NOTIFICATIONS   = "notifications_new_message_ringtone";
+    public static final String KEY_PREF_SOC_CAMPUS      = "soc_campus";
+    public static final String KEY_PREF_SOC_LEVEL       = "soc_level";
+    public static final String KEY_PREF_SOC_SEMESTER    = "soc_semester";
 
 	/**
 	 * Determines whether to always show the simplified settings UI, where
@@ -73,18 +73,11 @@ public class SettingsActivity extends PreferenceActivity {
 		// Add 'general' preferences.
 		addPreferencesFromResource(R.xml.pref_general);
 
-		// Add 'notifications' preferences, and a corresponding header.
-		PreferenceCategory notificationsHeader = new PreferenceCategory(this);
-		notificationsHeader.setTitle(R.string.pref_header_notifications);
-		getPreferenceScreen().addPreference(notificationsHeader);
-		addPreferencesFromResource(R.xml.pref_notification);
-
 		// Bind the summaries of EditText/List/Dialog/Ringtone preferences to
 		// their values. When their values change, their summaries are updated
 		// to reflect the new value, per the Android Design guidelines.
 		bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_HOME_CAMPUS));
 		bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_USER_TYPE));
-		bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_NOTIFICATIONS));
 	}
 
 	/** {@inheritDoc} */
@@ -143,29 +136,6 @@ public class SettingsActivity extends PreferenceActivity {
 						.setSummary(index >= 0 ? listPreference.getEntries()[index]
 								: null);
 
-			} else if (preference instanceof RingtonePreference) {
-				// For ringtone preferences, look up the correct display value
-				// using RingtoneManager.
-				if (TextUtils.isEmpty(stringValue)) {
-					// Empty values correspond to 'silent' (no ringtone).
-					preference.setSummary(R.string.pref_ringtone_silent);
-
-				} else {
-					Ringtone ringtone = RingtoneManager.getRingtone(
-							preference.getContext(), Uri.parse(stringValue));
-
-					if (ringtone == null) {
-						// Clear the summary if there was a lookup error.
-						preference.setSummary(null);
-					} else {
-						// Set the summary to reflect the new ringtone display
-						// name.
-						String name = ringtone
-								.getTitle(preference.getContext());
-						preference.setSummary(name);
-					}
-				}
-
 			} else {
 				// For all other preferences, set the summary to the value's
 				// simple string representation.
@@ -219,29 +189,6 @@ public class SettingsActivity extends PreferenceActivity {
 			// guidelines.
 			bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_HOME_CAMPUS));
 			bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_USER_TYPE));
-		}
-	}
-
-	/**
-	 * This fragment shows notification preferences only. It is used when the
-	 * activity is showing a two-pane settings UI.
-	 */
-	public static class NotificationPreferenceFragment extends PreferenceFragment {
-
-        public NotificationPreferenceFragment() {
-            // Required empty public constructor
-        }
-
-		@Override
-		public void onCreate(Bundle savedInstanceState) {
-			super.onCreate(savedInstanceState);
-			addPreferencesFromResource(R.xml.pref_notification);
-
-			// Bind the summaries of EditText/List/Dialog/Ringtone preferences
-			// to their values. When their values change, their summaries are
-			// updated to reflect the new value, per the Android Design
-			// guidelines.
-			bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_NOTIFICATIONS));
 		}
 	}
 
