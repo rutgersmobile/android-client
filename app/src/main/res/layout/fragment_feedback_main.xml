@@ -7,76 +7,31 @@
     android:padding="8dp"
     tools:context="edu.rutgers.css.Rutgers.MainActivity" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingRight="2dp"
-            android:visibility="gone"
-            android:text="@string/feedback_email_caption"
-            android:textSize="16sp" />
-
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:ems="10"
-            android:id="@+id/emailEditText"
-            android:hint="@string/feedback_email_hint">
-            <requestFocus />
-        </EditText>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    
-	    <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/feedback_select_subject"
-            android:visibility="gone"
-	        android:textSize="16sp" />
-	
-	    <Spinner
-	        android:id="@+id/subjectSpinner"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:entries="@array/feedback_subjects"
-	        android:gravity="fill_horizontal"
-	        android:spinnerMode="dropdown"
-	        tools:listitem="@android:layout/simple_spinner_dropdown_item" />
-	    
-    </LinearLayout>
-
-    <LinearLayout
+    <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/selectChannelLayout"
-        android:visibility="gone" >
-    
-	    <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="@string/feedback_select_channel"
-            android:visibility="gone"
-	        android:textSize="16sp" />
-	
-	    <Spinner
-	        android:id="@+id/channelSpinner"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:entries="@array/feedback_channels"
-	        android:gravity="fill_horizontal"
-	        android:spinnerMode="dropdown"
-	        tools:listitem="@android:layout/simple_spinner_dropdown_item" />
-	    
-    </LinearLayout>
+        android:inputType="textEmailAddress"
+        android:ems="10"
+        android:id="@+id/emailEditText"
+        android:hint="@string/feedback_email_hint">
+        <requestFocus />
+    </EditText>
+
+    <Spinner
+        android:id="@+id/subjectSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/feedback_subjects"
+        android:gravity="fill_horizontal"
+        android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+
+    <Spinner
+        android:id="@+id/channelSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="fill_horizontal"
+        android:spinnerStyle="@android:style/Widget.Spinner.DropDown"
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/messageEditText"

@@ -13,9 +13,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.androidquery.AQuery;
@@ -23,13 +25,17 @@ import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.items.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers2.R;
 
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
@@ -43,7 +49,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	private Spinner mChannelSpinner;
 	private EditText mMessageEditText;
     private EditText mEmailEditText;
-	private LinearLayout mSelectChannelLayout;
+    private SpinnerAdapterImpl<String> mChannelSpinnerAdapter;
 	private boolean mLockSend;
 	
 	private AQuery aq;
@@ -70,14 +76,27 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         else getActivity().setTitle(R.string.feedback_title);
 		
 		mLockSend = false;
-		
-		mSubjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
-		mChannelSpinner = (Spinner) v.findViewById(R.id.channelSpinner);
-		mMessageEditText = (EditText) v.findViewById(R.id.messageEditText);
+
+        mMessageEditText = (EditText) v.findViewById(R.id.messageEditText);
         mEmailEditText = (EditText) v.findViewById(R.id.emailEditText);
-		mSelectChannelLayout = (LinearLayout) v.findViewById(R.id.selectChannelLayout);
-		
-		mSubjectSpinner.setOnItemSelectedListener(this);
+
+        mSubjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
+        mSubjectSpinner.setOnItemSelectedListener(this);
+
+        mChannelSpinnerAdapter = new SpinnerAdapterImpl<String>(getActivity(), android.R.layout.simple_spinner_item);
+        mChannelSpinner = (Spinner) v.findViewById(R.id.channelSpinner);
+        mChannelSpinner.setAdapter(mChannelSpinnerAdapter);
+
+        ChannelManager channelManager = ((ChannelManagerProvider) getActivity()).getChannelManager();
+        JSONArray channels = channelManager.getChannels();
+        for(int i = 0; i < channels.length(); i++) {
+            try {
+                JSONObject channel = channels.getJSONObject(i);
+                mChannelSpinnerAdapter.add(AppUtil.getLocalTitle(getActivity(), channel.opt("title")));
+            } catch (JSONException e) {
+                Log.w(TAG, "onCreateView(): " + e.getMessage());
+            }
+        }
 		
 		return v;
 	}
@@ -191,10 +210,10 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 			
 			// Channel feedback allows user to select a specific channel
 			if(selection.equals(res.getString(R.string.feedback_channel_feedback))) {
-				mSelectChannelLayout.setVisibility(View.VISIBLE);
+				mChannelSpinner.setVisibility(View.VISIBLE);
 			}
 			else {
-				mSelectChannelLayout.setVisibility(View.GONE);
+				mChannelSpinner.setVisibility(View.GONE);
 			}
 			
 			// "General questions" boots you to RU-info. BURNNNN!!!

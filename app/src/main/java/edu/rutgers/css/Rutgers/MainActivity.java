@@ -48,6 +48,7 @@ import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.utils.LocationClientProvider;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
 import edu.rutgers.css.Rutgers2.BuildConfig;
@@ -61,7 +62,7 @@ import edu.rutgers.css.Rutgers2.SettingsActivity;
 public class MainActivity extends FragmentActivity  implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener,
-		LocationClientProvider {
+		LocationClientProvider, ChannelManagerProvider {
 	
 	private static final String TAG = "MainActivity";
 	private static final String SC_API = AppUtil.API_BASE + "shortcuts.txt";
@@ -506,4 +507,8 @@ public class MainActivity extends FragmentActivity  implements
         }
     }
 
+    @Override
+    public ChannelManager getChannelManager() {
+        return mChannelManager;
+    }
 }
