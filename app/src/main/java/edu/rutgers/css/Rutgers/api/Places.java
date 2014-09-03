@@ -6,6 +6,7 @@ import android.util.Log;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
@@ -18,9 +19,11 @@ import org.json.JSONObject;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import edu.rutgers.css.Rutgers.items.PlaceStub;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
@@ -33,11 +36,17 @@ public class Places {
 	private static Promise<Object, AjaxStatus, Object> configured;
 	private static JSONObject sPlaceConf;
     private static final AndroidDeferredManager sDeferredManager = new AndroidDeferredManager();
+    private static boolean sSetupLocked;
 
     /**
 	 * Grab the places API data.
 	 */
 	private static synchronized void setup() {
+
+        // Prevent multiple calls coming in and spawning many different requests for the places JSON,
+        // which is about 2-3 MB and often results in heap growth.
+        if(sSetupLocked) return;
+        else sSetupLocked = true;
 
 		// Get places JSON from server
         final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
@@ -72,7 +81,14 @@ public class Places {
 				confd.reject(e);
 			}
 
-		});	
+		}).always(new AlwaysCallback<AjaxCallback<JSONObject>, AjaxStatus>() {
+
+            @Override
+            public void onAlways(Promise.State state, AjaxCallback<JSONObject> resolved, AjaxStatus rejected) {
+                sSetupLocked = false;
+            }
+
+        });
 	}
 	
 	/**
@@ -143,29 +159,35 @@ public class Places {
      * @return Promise for a list of place keys & JSON objects.
      */
     public static Promise<Set<PlaceTuple>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
-        final Deferred<Set<PlaceTuple>, Exception, Double> d = new DeferredObject<Set<PlaceTuple>, Exception, Double>();
+        final Deferred<Set<PlaceTuple>, Exception, Double> deferred = new DeferredObject<Set<PlaceTuple>, Exception, Double>();
         setup();
 
         configured.then(new DoneCallback<Object>() {
 
             @Override
             public void onDone(Object o) {
-                calculateNearby(d, sourceLat, sourceLon);
+                calculateNearby(deferred, sourceLat, sourceLon);
             }
 
         }).fail(new FailCallback<AjaxStatus>() {
 
             @Override
             public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
             }
 
         });
 
-        return d.promise();
+        return deferred.promise();
     }
 
-    private static void calculateNearby(final Deferred<Set<PlaceTuple>, Exception, Double> d, final double sourceLat, final double sourceLon) {
+    /**
+     * Calculate nearby locations in a background thread
+     * @param deferred
+     * @param sourceLat
+     * @param sourceLon
+     */
+    private static void calculateNearby(final Deferred<Set<PlaceTuple>, Exception, Double> deferred, final double sourceLat, final double sourceLon) {
         sDeferredManager.when(new DeferredAsyncTask<Void, Object, Set<PlaceTuple>>() {
             @Override
             protected Set<PlaceTuple> doInBackgroundSafe(Void... voids) throws Exception {
@@ -201,7 +223,7 @@ public class Places {
         }).done(new DoneCallback<Set<PlaceTuple>>() {
             @Override
             public void onDone(Set<PlaceTuple> result) {
-                d.resolve(result);
+                deferred.resolve(result);
             }
         });
     }
