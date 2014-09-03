@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -265,6 +266,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         final String failedLocationString = res.getString(R.string.failed_location);
         final String connectingString = res.getString(R.string.location_connecting);
 
+        mAdapter.clear();
+
         // Check for location services
         if(mLocationClientProvider != null && mLocationClientProvider.getLocationClient().isConnected()) {
 
@@ -272,7 +275,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
             final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
             if (lastLoc == null) {
                 Log.w(TAG, "Couldn't get location");
-                mAdapter.clear();
                 mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
                 mAdapter.add(new RMenuItemRow(failedLocationString));
                 return;
@@ -280,7 +282,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
             showProgressCircle();
 
-            Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new AndroidDoneCallback<List<PlaceTuple>>() {
+            Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new AndroidDoneCallback<Set<PlaceTuple>>() {
 
                 @Override
                 public AndroidExecutionScope getExecutionScope() {
@@ -288,7 +290,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                 }
 
                 @Override
-                public void onDone(List<PlaceTuple> result) {
+                public void onDone(Set<PlaceTuple> result) {
                     mAdapter.clear();
                     mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
 
@@ -321,10 +323,10 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                     mAdapter.add(new RMenuItemRow(failedLoadString));
                 }
 
-            }).always(new AndroidAlwaysCallback<List<PlaceTuple>, Exception>() {
+            }).always(new AndroidAlwaysCallback<Set<PlaceTuple>, Exception>() {
 
                 @Override
-                public void onAlways(Promise.State state, List<PlaceTuple> resolved, Exception rejected) {
+                public void onAlways(Promise.State state, Set<PlaceTuple> resolved, Exception rejected) {
                     hideProgressCircle();
                 }
 
@@ -340,7 +342,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
             Log.w(TAG, "Location services not connected");
 
             // We're still waiting for location services to connect
-            mAdapter.clear();
             mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
             mAdapter.add(new RMenuItemRow(connectingString));
         }

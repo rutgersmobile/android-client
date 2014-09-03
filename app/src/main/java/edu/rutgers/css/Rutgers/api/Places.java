@@ -1,17 +1,21 @@
 package edu.rutgers.css.Rutgers.api;
 
 import android.location.Location;
+import android.os.Looper;
 import android.util.Log;
 
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.Deferred;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.android.DeferredAsyncTask;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +25,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
@@ -45,43 +51,31 @@ public class Places {
 		configured = confd.promise();
 		
 		final Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> promisePlaces = Request.apiWithStatus("places.txt", Request.CACHE_ONE_DAY * 7);
-		
-		AndroidDeferredManager dm = new AndroidDeferredManager();		
-		dm.when(promisePlaces).done(new AndroidDoneCallback<AjaxCallback<JSONObject>>() {
+		promisePlaces.done(new DoneCallback<AjaxCallback<JSONObject>>() {
 
-			@Override
-			public void onDone(AjaxCallback<JSONObject> res) {
+            @Override
+            public void onDone(AjaxCallback<JSONObject> res) {
                 // If the result came from cache, skip new setup
-                if(mPlacesConf != null && res.getStatus().getSource() != AjaxStatus.NETWORK) {
+                if (mPlacesConf != null && res.getStatus().getSource() != AjaxStatus.NETWORK) {
                     confd.resolve(null);
                     return;
                 }
 
-				try {
+                try {
                     mPlacesConf = res.getResult().getJSONObject("all");
                     confd.resolve(null);
                 } catch (JSONException e) {
                     Log.e(TAG, "setup(): " + e.getMessage());
                     confd.reject(res.getStatus());
                 }
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
-			}
+            }
 
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
+        }).fail(new FailCallback<AjaxStatus>() {
 
 			@Override
 			public void onFail(AjaxStatus e) {
 				Log.e(TAG, AppUtil.formatAjaxStatus(e));
 				confd.reject(e);
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
 			}
 
 		});	
@@ -95,28 +89,20 @@ public class Places {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
-		configured.then(new AndroidDoneCallback<Object>() {
-			
+		configured.then(new DoneCallback<Object>() {
+
 			@Override
 			public void onDone(Object o) {
 				d.resolve(mPlacesConf);
 			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.BACKGROUND;
-            }
+
+		}).fail(new FailCallback<AjaxStatus>() {
 
             @Override
             public void onFail(AjaxStatus status) {
                 d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
             }
+
         });
 		
 		return d.promise();
@@ -131,7 +117,7 @@ public class Places {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
-		configured.then(new AndroidDoneCallback<Object>() {
+		configured.then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -143,17 +129,8 @@ public class Places {
 					d.reject(e);
 				}
 			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.BACKGROUND;
-            }
+
+		}).fail(new FailCallback<AjaxStatus>() {
 
             @Override
             public void onFail(AjaxStatus status) {
@@ -170,70 +147,70 @@ public class Places {
      * @param sourceLon Longitude
      * @return Promise for a list of place keys & JSON objects.
      */
-    public static Promise<List<PlaceTuple>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
-        final Deferred<List<PlaceTuple>, Exception, Double> d = new DeferredObject<List<PlaceTuple>, Exception, Double>();
+    public static Promise<Set<PlaceTuple>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
+        final Deferred<Set<PlaceTuple>, Exception, Double> d = new DeferredObject<Set<PlaceTuple>, Exception, Double>();
         setup();
 
-        configured.then(new AndroidDoneCallback<Object>() {
+        final AndroidDeferredManager dm = new AndroidDeferredManager();
+        configured.then(new DoneCallback<Object>() {
 
             @Override
             public void onDone(Object o) {
-                try {
-                    JSONObject allPlaces = mPlacesConf;
-
-                    List<PlaceTuple> result = new ArrayList<PlaceTuple>();
-
-                    Iterator<String> placesIter = allPlaces.keys();
-                    while(placesIter.hasNext()) {
-                        String curPlaceKey = placesIter.next();
-
-                        JSONObject curPlace = allPlaces.getJSONObject(curPlaceKey);
-                        if(curPlace.has("location")) {
-                            JSONObject curPlaceLocation = curPlace.getJSONObject("location");
-                            double placeLongitude = Double.parseDouble(curPlaceLocation.getString("longitude"));
-                            double placeLatitude = Double.parseDouble(curPlaceLocation.getString("latitude"));
-
-                            float[] results = new float[1];
-                            Location.distanceBetween(sourceLat, sourceLon, placeLatitude, placeLongitude, results);
-
-                            // If the place is within range, add it to the list
-                            if (results[0] < AppUtil.NEARBY_RANGE) {
-                                //Log.v(TAG, "Found nearby place " + curPlaceKey);
-                                curPlace.put("distance", ""+results[0]);
-                                result.add(new PlaceTuple(curPlaceKey, curPlace));
-                            }
-                        }
-                    }
-
-                    // Sort by distance
-                    Collections.sort(result, new PTDistanceComparator());
-                    d.resolve(result);
-                }
-                catch(JSONException e) {
-                    Log.w(TAG, "getPlacesNear(): " + e.getMessage());
-                    d.reject(e);
-                }
-
+                calculateNearby(d, sourceLat, sourceLon);
             }
 
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.BACKGROUND;
-            }
-
-        }).fail(new AndroidFailCallback<AjaxStatus>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.BACKGROUND;
-            }
+        }).fail(new FailCallback<AjaxStatus>() {
 
             @Override
             public void onFail(AjaxStatus status) {
                 d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
             }
+
         });
 
         return d.promise();
+    }
+
+    private static void calculateNearby(final Deferred<Set<PlaceTuple>, Exception, Double> d, final double sourceLat, final double sourceLon) {
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(new DeferredAsyncTask<Void, Object, Set<PlaceTuple>>() {
+           @Override
+           protected Set<PlaceTuple> doInBackgroundSafe(Void... voids) throws Exception {
+               Set<PlaceTuple> result = new TreeSet<PlaceTuple>(new PTDistanceComparator());
+
+               Iterator<String> placesIter = mPlacesConf.keys();
+               while(placesIter.hasNext()) {
+                   String curPlaceKey = placesIter.next();
+                   try {
+                       JSONObject curPlace = mPlacesConf.getJSONObject(curPlaceKey);
+                       if (curPlace.has("location")) {
+                           JSONObject curPlaceLocation = curPlace.getJSONObject("location");
+                           double placeLongitude = Double.parseDouble(curPlaceLocation.getString("longitude"));
+                           double placeLatitude = Double.parseDouble(curPlaceLocation.getString("latitude"));
+
+                           float[] results = new float[1];
+                           Location.distanceBetween(sourceLat, sourceLon, placeLatitude, placeLongitude, results);
+
+                           // If the place is within range, add it to the list
+                           if (results[0] < AppUtil.NEARBY_RANGE) {
+                               //Log.v(TAG, "Found nearby place " + curPlaceKey);
+                               curPlace.put("distance", "" + results[0]);
+                               result.add(new PlaceTuple(curPlaceKey, curPlace));
+                           }
+                       }
+                   } catch(JSONException e) {
+                       Log.w(TAG, "calculateNearby(): " + e.getMessage());
+                   }
+               }
+
+               return result;
+           }
+        }).done(new DoneCallback<Set<PlaceTuple>>() {
+            @Override
+            public void onDone(Set<PlaceTuple> result) {
+                d.resolve(result);
+            }
+        });
     }
 
     public static class PlaceTuple implements Comparable<PlaceTuple> {
