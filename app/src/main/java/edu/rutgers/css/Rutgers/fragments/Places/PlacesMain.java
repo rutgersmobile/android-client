@@ -23,6 +23,9 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.google.android.gms.common.GooglePlayServicesClient;
 
+import org.jdeferred.AlwaysCallback;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidAlwaysCallback;
 import org.jdeferred.android.AndroidDoneCallback;
@@ -34,7 +37,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
@@ -86,7 +88,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         super.onDetach();
         Log.i(TAG, "Detaching from activity");
         mLocationClientProvider = null;
-        mProgressCircle = null;
     }
 
 	@Override
@@ -102,7 +103,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         // TODO This needs to be cancelled when the screen rotates
         // Populate search list & list of nearby places
-		Places.getPlaces().done(new AndroidDoneCallback<JSONObject>() {
+		Places.getPlaces().done(new DoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject json) {
@@ -123,17 +124,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
 			}
 			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<Exception>() {
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+		}).fail(new FailCallback<Exception>() {
 
             @Override
             public void onFail(Exception result) {
@@ -226,7 +217,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         }
         // Reload nearby places
         else loadNearbyPlaces();
-
     }
 
     @Override
@@ -269,82 +259,63 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         mAdapter.clear();
 
         // Check for location services
-        if(mLocationClientProvider != null && mLocationClientProvider.getLocationClient().isConnected()) {
-
-            // Get last location
-            final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
-            if (lastLoc == null) {
-                Log.w(TAG, "Couldn't get location");
-                mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-                mAdapter.add(new RMenuItemRow(failedLocationString));
-                return;
-            }
-
-            showProgressCircle();
-
-            Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new AndroidDoneCallback<Set<PlaceTuple>>() {
-
-                @Override
-                public AndroidExecutionScope getExecutionScope() {
-                    return AndroidExecutionScope.UI;
-                }
-
-                @Override
-                public void onDone(Set<PlaceTuple> result) {
-                    mAdapter.clear();
-                    mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-
-                    if (result.isEmpty())
-                        mAdapter.add(new RMenuItemRow(noneNearbyString));
-                    else {
-                        for (PlaceTuple placeTuple : result) {
-                            Bundle args = new Bundle();
-                            args.putString("title", placeTuple.getPlaceJSON().optString("title"));
-                            args.putString("component", PlacesDisplay.HANDLE);
-                            args.putString("placeKey", placeTuple.getKey());
-                            args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
-                            mAdapter.add(new RMenuItemRow(args));
-                        }
-                    }
-
-                }
-
-            }).fail(new AndroidFailCallback<Exception>() {
-
-                @Override
-                public AndroidExecutionScope getExecutionScope() {
-                    return AndroidExecutionScope.UI;
-                }
-
-                @Override
-                public void onFail(Exception result) {
-                    mAdapter.clear();
-                    mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-                    mAdapter.add(new RMenuItemRow(failedLoadString));
-                }
-
-            }).always(new AndroidAlwaysCallback<Set<PlaceTuple>, Exception>() {
-
-                @Override
-                public void onAlways(Promise.State state, Set<PlaceTuple> resolved, Exception rejected) {
-                    hideProgressCircle();
-                }
-
-                @Override
-                public AndroidExecutionScope getExecutionScope() {
-                    return AndroidExecutionScope.UI;
-                }
-
-            });
-
-        }
-        else {
+        if(mLocationClientProvider == null || !mLocationClientProvider.getLocationClient().isConnected()) {
             Log.w(TAG, "Location services not connected");
-
-            // We're still waiting for location services to connect
             mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
             mAdapter.add(new RMenuItemRow(connectingString));
+            return;
         }
+
+        // Get last location
+        final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
+        if (lastLoc == null) {
+            Log.w(TAG, "Couldn't get location");
+            mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+            mAdapter.add(new RMenuItemRow(failedLocationString));
+            return;
+        }
+
+        showProgressCircle();
+
+        Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<Set<PlaceTuple>>() {
+
+            @Override
+            public void onDone(Set<PlaceTuple> result) {
+                mAdapter.clear();
+                mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+
+                if (result.isEmpty())
+                    mAdapter.add(new RMenuItemRow(noneNearbyString));
+                else {
+                    for (PlaceTuple placeTuple : result) {
+                        Bundle args = new Bundle();
+                        args.putString("title", placeTuple.getPlaceJSON().optString("title"));
+                        args.putString("component", PlacesDisplay.HANDLE);
+                        args.putString("placeKey", placeTuple.getKey());
+                        args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
+                        mAdapter.add(new RMenuItemRow(args));
+                    }
+                }
+
+            }
+
+        }).fail(new FailCallback<Exception>() {
+
+            @Override
+            public void onFail(Exception result) {
+                mAdapter.clear();
+                mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+                mAdapter.add(new RMenuItemRow(failedLoadString));
+            }
+
+        }).always(new AlwaysCallback<Set<PlaceTuple>, Exception>() {
+
+            @Override
+            public void onAlways(Promise.State state, Set<PlaceTuple> resolved, Exception rejected) {
+                hideProgressCircle();
+            }
+
+        });
 
     }
 
