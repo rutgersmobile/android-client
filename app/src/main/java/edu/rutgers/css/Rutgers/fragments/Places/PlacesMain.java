@@ -27,22 +27,15 @@ import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidAlwaysCallback;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
-import edu.rutgers.css.Rutgers.api.Places.PlaceTuple;
+import edu.rutgers.css.Rutgers.items.PlaceStub;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
@@ -59,8 +52,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 	private static final String TAG = "PlacesMain";
     public static final String HANDLE = "places";
 
-	private ArrayList<PlaceTuple> mSearchList;
-	private ArrayAdapter<PlaceTuple> mSearchAdapter;
+	private ArrayList<PlaceStub> mSearchList;
+	private ArrayAdapter<PlaceStub> mSearchAdapter;
 	private ArrayList<RMenuRow> mData;
     private RMenuAdapter mAdapter;
     private ProgressBar mProgressCircle;
@@ -94,8 +87,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mSearchList = new ArrayList<PlaceTuple>();
-		mSearchAdapter = new ArrayAdapter<PlaceTuple>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSearchList);
+		mSearchList = new ArrayList<PlaceStub>();
+		mSearchAdapter = new ArrayAdapter<PlaceStub>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSearchList);
 
         // Get nearby places & populate nearby places list
         mData = new ArrayList<RMenuRow>();
@@ -103,25 +96,13 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         // TODO This needs to be cancelled when the screen rotates
         // Populate search list & list of nearby places
-		Places.getPlaces().done(new DoneCallback<JSONObject>() {
+		Places.getPlaceStubs().done(new DoneCallback<List<PlaceStub>>() {
 
 			@Override
-			public void onDone(JSONObject json) {
-				// Grab "all" field and add title from each object inside
-                @SuppressWarnings("unchecked")
-                Iterator<String> curKey = json.keys();
-                while(curKey.hasNext()) {
-                    String key = curKey.next();
-                    try {
-                        JSONObject curBuilding = json.getJSONObject(key);
-                        PlaceTuple newPT = new PlaceTuple(key, curBuilding);
-                        mSearchAdapter.add(newPT);
-                    } catch (JSONException e) {
-                        Log.w(TAG, "getPlaces().done: " + e.getMessage());
-                    }
+			public void onDone(List<PlaceStub> stubList) {
+                for(PlaceStub stub: stubList) {
+                    mSearchAdapter.add(stub);
                 }
-                Collections.sort(mSearchList);
-
 			}
 			
 		}).fail(new FailCallback<Exception>() {
@@ -159,11 +140,11 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				// Launch Places display fragment
 				Bundle args = new Bundle();
-				PlaceTuple placeTuple = (PlaceTuple) parent.getAdapter().getItem(position);
-				
+				PlaceStub placeStub = (PlaceStub) parent.getAdapter().getItem(position);
+
 				args.putString("component", PlacesDisplay.HANDLE);
-				args.putString("placeKey", placeTuple.getKey());
-				args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
+				args.putString("placeKey", placeStub.getKey());
+				args.putString("title", placeStub.getTitle());
 				
 				ComponentFactory.getInstance().switchFragments(args);
 			}
@@ -277,22 +258,21 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         showProgressCircle();
 
-        Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<Set<PlaceTuple>>() {
+        Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<Set<PlaceStub>>() {
 
             @Override
-            public void onDone(Set<PlaceTuple> result) {
+            public void onDone(Set<PlaceStub> result) {
                 mAdapter.clear();
                 mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
 
                 if (result.isEmpty())
                     mAdapter.add(new RMenuItemRow(noneNearbyString));
                 else {
-                    for (PlaceTuple placeTuple : result) {
+                    for (PlaceStub placeStub : result) {
                         Bundle args = new Bundle();
-                        args.putString("title", placeTuple.getPlaceJSON().optString("title"));
                         args.putString("component", PlacesDisplay.HANDLE);
-                        args.putString("placeKey", placeTuple.getKey());
-                        args.putString("placeJSON", placeTuple.getPlaceJSON().toString());
+                        args.putString("title", placeStub.getTitle());
+                        args.putString("placeKey", placeStub.getKey());
                         mAdapter.add(new RMenuItemRow(args));
                     }
                 }
@@ -308,10 +288,10 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                 mAdapter.add(new RMenuItemRow(failedLoadString));
             }
 
-        }).always(new AlwaysCallback<Set<PlaceTuple>, Exception>() {
+        }).always(new AlwaysCallback<Set<PlaceStub>, Exception>() {
 
             @Override
-            public void onAlways(Promise.State state, Set<PlaceTuple> resolved, Exception rejected) {
+            public void onAlways(Promise.State state, Set<PlaceStub> resolved, Exception rejected) {
                 hideProgressCircle();
             }
 

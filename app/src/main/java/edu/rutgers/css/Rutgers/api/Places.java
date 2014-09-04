@@ -40,7 +40,6 @@ public class Places {
 	private static final String TAG = "PlacesAPI";
 
 	private static Promise<Object, AjaxStatus, Object> configured;
-	private static JSONObject sPlaceConf;
     private static final AndroidDeferredManager sDeferredManager = new AndroidDeferredManager();
     private static boolean sSetupLocked;
     private static Map<String, JSONObject> sPlacesTable;
@@ -65,7 +64,7 @@ public class Places {
             @Override
             public void onDone(AjaxCallback<JSONObject> res) {
                 // If the result came from cache, skip new setup
-                if (sPlaceConf != null && res.getStatus().getSource() != AjaxStatus.NETWORK) {
+                if (sPlacesTable != null && res.getStatus().getSource() != AjaxStatus.NETWORK) {
                     Log.v(TAG, "Retaining cached place data");
                     confd.resolve(null);
                     return;
@@ -76,7 +75,6 @@ public class Places {
 
                 try {
                     JSONObject allPlaces = res.getResult().getJSONObject("all");
-                    sPlaceConf = allPlaces;
                     sPlacesTable = Collections.synchronizedMap(new LinkedHashMap<String, JSONObject>());
 
                     Iterator<String> placeIter = allPlaces.keys();
@@ -109,33 +107,6 @@ public class Places {
             }
 
         });
-	}
-	
-	/**
-	 * Get the JSON containing all of the place information
-	 * @return JSONObject containing "all" field from Places API
-	 */
-	public static Promise<JSONObject, Exception, Double> getPlaces() {
-		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
-		setup();
-		
-		configured.then(new DoneCallback<Object>() {
-
-			@Override
-			public void onDone(Object o) {
-				d.resolve(sPlaceConf);
-			}
-
-		}).fail(new FailCallback<AjaxStatus>() {
-
-            @Override
-            public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
-            }
-
-        });
-		
-		return d.promise();
 	}
 
     public static Promise<List<PlaceStub>, Exception, Double> getPlaceStubs() {
@@ -177,13 +148,7 @@ public class Places {
 			
 			@Override
 			public void onDone(Object o) {
-				try {
-					JSONObject place = sPlaceConf.getJSONObject(placeKey);
-					d.resolve(place);
-				} catch (JSONException e) {
-					Log.w(TAG, "getPlace(): " + e.getMessage());
-					d.reject(e);
-				}
+                d.resolve(sPlacesTable.get(placeKey));
 			}
 
 		}).fail(new FailCallback<AjaxStatus>() {
@@ -204,8 +169,8 @@ public class Places {
      * @param sourceLon Longitude
      * @return Promise for a list of place keys & JSON objects.
      */
-    public static Promise<Set<PlaceTuple>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
-        final Deferred<Set<PlaceTuple>, Exception, Double> deferred = new DeferredObject<Set<PlaceTuple>, Exception, Double>();
+    public static Promise<Set<PlaceStub>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
+        final Deferred<Set<PlaceStub>, Exception, Double> deferred = new DeferredObject<Set<PlaceStub>, Exception, Double>();
         setup();
 
         configured.then(new DoneCallback<Object>() {
@@ -233,17 +198,17 @@ public class Places {
      * @param sourceLat
      * @param sourceLon
      */
-    private static void calculateNearby(final Deferred<Set<PlaceTuple>, Exception, Double> deferred, final double sourceLat, final double sourceLon) {
-        sDeferredManager.when(new DeferredAsyncTask<Void, Object, Set<PlaceTuple>>() {
+    private static void calculateNearby(final Deferred<Set<PlaceStub>, Exception, Double> deferred, final double sourceLat, final double sourceLon) {
+        sDeferredManager.when(new DeferredAsyncTask<Void, Object, Set<PlaceStub>>() {
             @Override
-            protected Set<PlaceTuple> doInBackgroundSafe(Void... voids) throws Exception {
-                Set<PlaceTuple> result = new TreeSet<PlaceTuple>(new PTDistanceComparator());
+            protected Set<PlaceStub> doInBackgroundSafe(Void... voids) throws Exception {
+                Set<PlaceStub> result = new TreeSet<PlaceStub>(new PlaceDistanceComparator());
 
-                Iterator<String> placesIter = sPlaceConf.keys();
+                Iterator<String> placesIter = sPlacesTable.keySet().iterator();
                 while (placesIter.hasNext()) {
                     String curPlaceKey = placesIter.next();
                     try {
-                        JSONObject curPlace = sPlaceConf.getJSONObject(curPlaceKey);
+                        JSONObject curPlace = sPlacesTable.get(curPlaceKey);
                         if (curPlace.has("location")) {
                             JSONObject curPlaceLocation = curPlace.getJSONObject("location");
                             double placeLongitude = Double.parseDouble(curPlaceLocation.getString("longitude"));
@@ -253,10 +218,10 @@ public class Places {
                             Location.distanceBetween(sourceLat, sourceLon, placeLatitude, placeLongitude, results);
 
                             // If the place is within range, add it to the list
-                            if (results[0] < AppUtil.NEARBY_RANGE) {
-                                //Log.v(TAG, "Found nearby place " + curPlaceKey);
-                                curPlace.put("distance", "" + results[0]);
-                                result.add(new PlaceTuple(curPlaceKey, curPlace));
+                            if (results[0] <= AppUtil.NEARBY_RANGE) {
+                                PlaceStub stub = new PlaceStub(curPlaceKey, curPlace.optString("title"));
+                                stub.setDistance(results[0]);
+                                result.add(stub);
                             }
                         }
                     } catch (JSONException e) {
@@ -266,64 +231,19 @@ public class Places {
 
                 return result;
             }
-        }).done(new DoneCallback<Set<PlaceTuple>>() {
+        }).done(new DoneCallback<Set<PlaceStub>>() {
             @Override
-            public void onDone(Set<PlaceTuple> result) {
+            public void onDone(Set<PlaceStub> result) {
                 deferred.resolve(result);
             }
         });
     }
 
-    public static class PlaceTuple implements Comparable<PlaceTuple> {
-        private String key;
-        private JSONObject placeJson;
-
-        public PlaceTuple(String key, JSONObject placeJson) {
-            this.key = key;
-            this.placeJson = placeJson;
-        }
-
-        public String getKey() {
-            return this.key;
-        }
-
-        public JSONObject getPlaceJSON() {
-            return this.placeJson;
-        }
-
+    private static class PlaceDistanceComparator implements Comparator<PlaceStub> {
         @Override
-        public String toString() {
-            try {
-                return placeJson.getString("title");
-            } catch (JSONException e) {
-                Log.w(TAG, "toString(): " + e.getMessage());
-                return key;
-            }
-        }
-
-        @Override
-        public int compareTo(PlaceTuple another) {
-            // Order by 'title' field alphabetically (or by key if getting title string fails)
-            try {
-                String thisTitle = getPlaceJSON().getString("title");
-                String thatTitle = another.getPlaceJSON().getString("title");
-                return thisTitle.compareTo(thatTitle);
-            } catch (JSONException e) {
-                Log.w(TAG, "compareTo(): " + e.getMessage());
-                return getKey().compareTo(another.getKey());
-            }
-        }
-    }
-
-    private static class PTDistanceComparator implements Comparator<PlaceTuple> {
-        @Override
-        public int compare(PlaceTuple pt1, PlaceTuple pt2) {
-            String distString1 = pt1.getPlaceJSON().optString("distance");
-            String distString2 = pt2.getPlaceJSON().optString("distance");
-
-            Float dist1 = Float.parseFloat(distString1);
-            Float dist2 = Float.parseFloat(distString2);
-
+        public int compare(PlaceStub ps1, PlaceStub ps2) {
+            Float dist1 = new Float(ps1.getDistance());
+            Float dist2 = new Float(ps2.getDistance());
             return dist1.compareTo(dist2);
         }
     }

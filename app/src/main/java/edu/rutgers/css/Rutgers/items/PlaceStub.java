@@ -8,6 +8,7 @@ public class PlaceStub implements Comparable<PlaceStub> {
 
     private String key;
     private String title;
+    private float distance;
 
     public PlaceStub(String key, String title) {
         this.key = key;
@@ -30,10 +31,23 @@ public class PlaceStub implements Comparable<PlaceStub> {
         this.title = title;
     }
 
+    public float getDistance() {
+        return distance;
+    }
+
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
+
     @Override
     public int compareTo(PlaceStub other) {
         if(other == null) return -1;
         return other.getTitle().compareTo(this.getTitle());
+    }
+
+    @Override
+    public String toString() {
+        return title;
     }
 
 }
