@@ -60,8 +60,12 @@ public class Places {
             public void onDone(AjaxCallback<JSONObject> res) {
                 // If the result came from cache, skip new setup
                 if (sPlaceConf != null && res.getStatus().getSource() != AjaxStatus.NETWORK) {
+                    Log.v(TAG, "Retaining cached place data");
                     confd.resolve(null);
                     return;
+                }
+                else {
+                    Log.v(TAG, "Generating new place data from network");
                 }
 
                 try {
@@ -117,6 +121,25 @@ public class Places {
 		
 		return d.promise();
 	}
+
+    public static Promise<List<PlaceStub>, Exception, Double> getPlaceStubs() {
+        final Deferred<List<PlaceStub>, Exception, Double> d = new DeferredObject<List<PlaceStub>, Exception, Double>();
+        setup();
+
+        configured.then(new DoneCallback<Object>() {
+            @Override
+            public void onDone(Object result) {
+
+            }
+        }).fail(new FailCallback<AjaxStatus>() {
+            @Override
+            public void onFail(AjaxStatus result) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(result)));
+            }
+        });
+
+        return d.promise();
+    }
 	
 	/**
 	 * Get JSON for a specific place.
