@@ -14,12 +14,18 @@ import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.DeferredAsyncTask;
 import org.jdeferred.impl.DeferredObject;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -37,6 +43,7 @@ public class Places {
 	private static JSONObject sPlaceConf;
     private static final AndroidDeferredManager sDeferredManager = new AndroidDeferredManager();
     private static boolean sSetupLocked;
+    private static Map<String, JSONObject> sPlacesTable;
 
     /**
 	 * Grab the places API data.
@@ -51,7 +58,6 @@ public class Places {
 		// Get places JSON from server
         final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
-
 
         final Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> promisePlaces = Request.apiWithStatus("places.txt", Request.CACHE_ONE_DAY * 7);
         promisePlaces.done(new DoneCallback<AjaxCallback<JSONObject>>() {
@@ -69,7 +75,17 @@ public class Places {
                 }
 
                 try {
-                    sPlaceConf = res.getResult().getJSONObject("all");
+                    JSONObject allPlaces = res.getResult().getJSONObject("all");
+                    sPlaceConf = allPlaces;
+                    sPlacesTable = Collections.synchronizedMap(new LinkedHashMap<String, JSONObject>());
+
+                    Iterator<String> placeIter = allPlaces.keys();
+                    while(placeIter.hasNext()) {
+                        String curKey = placeIter.next();
+                        JSONObject curPlace = allPlaces.getJSONObject(curKey);
+                        sPlacesTable.put(curKey, curPlace);
+                    }
+
                     confd.resolve(null);
                 } catch (JSONException e) {
                     Log.e(TAG, "setup(): " + e.getMessage());
@@ -128,8 +144,15 @@ public class Places {
 
         configured.then(new DoneCallback<Object>() {
             @Override
-            public void onDone(Object result) {
+            public void onDone(Object o) {
+                List<PlaceStub> results = new ArrayList<PlaceStub>();
 
+                Set<Map.Entry<String, JSONObject>> placeSet = sPlacesTable.entrySet();
+                for(Map.Entry<String, JSONObject> placeEntry: placeSet) {
+                    results.add(new PlaceStub(placeEntry.getKey(), placeEntry.getValue().optString("title")));
+                }
+
+                d.resolve(results);
             }
         }).fail(new FailCallback<AjaxStatus>() {
             @Override

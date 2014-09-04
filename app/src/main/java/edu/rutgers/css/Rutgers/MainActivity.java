@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -89,6 +88,8 @@ public class MainActivity extends FragmentActivity  implements
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
+
+        // This will create the UUID if one does not yet exist
 		Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
 
         // Start Component Factory
