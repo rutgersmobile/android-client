@@ -107,12 +107,8 @@ public class MainActivity extends FragmentActivity  implements
 		/*
 		 * Set default settings the first time the app is run
 		 */
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if(!sharedPreferences.getBoolean(PreferenceManager.KEY_HAS_SET_DEFAULT_VALUES, false)) {
-            Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
-            PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
-        }
-		
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+
 		/*
 		 * Connect to Google Play location services
 		 */
