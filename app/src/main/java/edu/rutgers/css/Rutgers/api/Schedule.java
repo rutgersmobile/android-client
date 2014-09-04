@@ -22,15 +22,6 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
  * Created by jamchamb on 7/17/14.
- *
- * Regular courses:
- *  http://sis.rutgers.edu/soc/subjects.json?semester=72014&campus=NB&level=U
- *  http://sis.rutgers.edu/soc/courses.json?subject=010&semester=72014&campus=NB&level=U
- *  http://sis.rutgers.edu/soc/course.json?subject=010&semester=72014&campus=NB&courseNumber=272
- * Online courses:
- *  http://sis.rutgers.edu/soc/onlineSubjects.json?term=7&year=2014&level=U
- *  http://sis.rutgers.edu/soc/onlineCourses.json?term=7&year=2014&level=U&subject=010
- *  http://sis.rutgers.edu/soc/onlineCourse.json?term=7&year=2014&level=U&subject=010&courseNumber=372
  */
 public class Schedule {
 
@@ -38,7 +29,7 @@ public class Schedule {
     private static final String SOC_BASE_URL = "https://sis.rutgers.edu/soc/";
     private static final String WEBREG_BASE_URL = "https://sims.rutgers.edu/webreg/";
 
-    // Campus codes
+    // Campus codes (full list should be read res/raw/soc_campuses.json)
     public static final String CODE_CAMPUS_NB = "NB";
     public static final String CODE_CAMPUS_NWK = "NK";
     public static final String CODE_CAMPUS_CAM = "CM";
@@ -69,7 +60,6 @@ public class Schedule {
      * @return Array of course subjects
      */
     public static Promise<JSONArray, AjaxStatus, Double> getSubjects(String campusCode, String levelCode, String semesterCode) {
-        // Use special online course URL
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineSubjects.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode;
@@ -118,6 +108,13 @@ public class Schedule {
         return Request.json(reqUrl, Request.CACHE_ONE_DAY);
     }
 
+    /**
+     * Get SOC Index file for a schedule
+     * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
+     * @param campusCode Campus code (e.g. NB)
+     * @param levelCode Level code (e.g. U for undergrad, G for graduate)
+     * @return Promise for an SOCIndex
+     */
     public static Promise<SOCIndex, AjaxStatus, Double> getIndex(final String semesterCode, final String campusCode, final String levelCode) {
         final Deferred<SOCIndex, AjaxStatus, Double> deferred = new DeferredObject<SOCIndex, AjaxStatus, Double>();
 
@@ -257,10 +254,20 @@ public class Schedule {
         ComponentFactory.getInstance().switchFragments(args);
     }
 
-    public static String courseLine(JSONObject jsonObject) {
-        return jsonObject.optString("courseNumber") + ": " +jsonObject.optString("title");
+    /**
+     * Get display string for a course
+     * @param courseJSON Course JSON
+     * @return Display string, e.g. "112: DATA STRUCTURES"
+     */
+    public static String courseLine(JSONObject courseJSON) {
+        return courseJSON.optString("courseNumber") + ": " +courseJSON.optString("title");
     }
 
+    /**
+     * Get display string for a subject
+     * @param subjectJSON Subject JSON
+     * @return Display string, e.g. "COMPUTER SCIENCE (198)"
+     */
     public static String subjectLine(JSONObject subjectJSON) {
         return subjectJSON.optString("description") + " (" + subjectJSON.optString("code") + ")";
     }
