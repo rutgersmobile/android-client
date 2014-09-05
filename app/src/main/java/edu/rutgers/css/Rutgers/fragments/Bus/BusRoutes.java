@@ -79,21 +79,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
                 Bundle clickedArgs = clickedItem.getArgs();
 
-                try {
-                    JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
+                Bundle args = new Bundle(clickedArgs);
+                args.putString("component", BusDisplay.HANDLE);
+                args.putString("mode", "route");
 
-                    Bundle args = new Bundle();
-                    args.putString("component", BusDisplay.HANDLE);
-                    args.putString("mode", "route");
-                    args.putString("title", clickedJSON.getString("title"));
-                    args.putString("tag", clickedJSON.getString("tag"));
-                    args.putString("agency", clickedArgs.getString("agency"));
-
-                    ComponentFactory.getInstance().switchFragments(args);
-                } catch (JSONException e) {
-                    Log.e(TAG, "onItemClick(): " + e.getMessage());
-                }
-
+                ComponentFactory.getInstance().switchFragments(args);
             }
 
         });
@@ -109,7 +99,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     public void onResume() {
         super.onResume();
 
-        // Update active routes
+        // Clear out everything
         mAdapter.clear();
 
         // Get promises for active routes
@@ -179,7 +169,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 JSONObject jsonObj = data.getJSONObject(i);
                 Bundle menuBundle = new Bundle();
                 menuBundle.putString("title", jsonObj.getString("title"));
-                menuBundle.putString("json", jsonObj.toString());
+                menuBundle.putString("tag", jsonObj.getString("tag"));
                 menuBundle.putString("agency", agencyTag);
                 RMenuItemRow newMenuItem = new RMenuItemRow(menuBundle);
                 mAdapter.add(newMenuItem);

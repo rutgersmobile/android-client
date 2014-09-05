@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +20,8 @@ import android.widget.ListView;
 
 import com.google.android.gms.common.GooglePlayServicesClient;
 
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
@@ -136,11 +138,9 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                 RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
                 Bundle clickedArgs = clickedItem.getArgs();
 
-                Bundle args = new Bundle();
+                Bundle args = new Bundle(clickedArgs);
                 args.putString("component", BusDisplay.HANDLE);
                 args.putString("mode", "stop");
-                args.putString("title", clickedArgs.getString("title"));
-                args.putString("agency", clickedArgs.getString("agency"));
 
                 ComponentFactory.getInstance().switchFragments(args);
             }
@@ -160,9 +160,13 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
         // Don't update the screen if the bus fragment isn't on top
         if(!AppUtil.isOnTop(BusMain.HANDLE, getActivity().getSupportFragmentManager())) {
-            Log.v(TAG, "Not on top, not updating nearby stops");
+            Log.v(TAG, "Not on top, not updating active/nearby stops");
             return;
         }
+
+        // Clear out everything
+        clearNearbyRows();
+        mAdapter.clear();
 
         // TODO Replace calling this on every onResume() with a listener for preference changes
         // Get current campus tag (default to "nb")
@@ -190,12 +194,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
         // Synchronized load of active stops
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(nbActiveStops, nwkActiveStops).done(new AndroidDoneCallback<MultipleResults>() {
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+        dm.when(nbActiveStops, nwkActiveStops).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
@@ -210,12 +209,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                 }
             }
 
-        }).fail(new AndroidFailCallback<OneReject>() {
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+        }).fail(new FailCallback<OneReject>() {
 
             @Override
             public void onFail(OneReject result) {
@@ -302,6 +296,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             mAdapter.remove(1);
 		}
 		mNearbyRowCount = 0;
+        removeNearbyHeader();
 	}
 
     /**
@@ -310,33 +305,38 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      * @param row value
      */
 	private void addNearbyRow(int pos, RMenuRow row) {
+        addNearbyHeader(); // Add header if it's not in yet
         mAdapter.insert(row, pos);
 		mNearbyRowCount++;
 	}
-	
-	/**
-	 * Populate list with active nearby stops for an agency
-	 * @param agencyTag Agency tag for API request
-	 */
-	private void loadNearbyStops(final String agencyTag) {
-        Resources res = getResources();
-        final String noneNearbyString = res.getString(R.string.bus_no_nearby_stops);
-        final String failedLoadString = res.getString(R.string.failed_load_short);
 
-        if(agencyTag == null) {
-            Log.w(TAG, "Agency tag not set");
-            addNearbyRow(1, new RMenuItemRow(res.getString(R.string.failed_location)));
-            return;
-        }
-
-        clearNearbyRows();
-        mNearbyRowCount = 0;
-
-        // Add "nearby stops" header
+    /** Add "nearby stops" header */
+    private void addNearbyHeader() {
         if(!mNearbyHeaderAdded) {
             mAdapter.insert(new RMenuHeaderRow(getResources().getString(R.string.bus_nearby_active_stops_header)), 0);
             mNearbyHeaderAdded = true;
         }
+    }
+
+    /** Remove "nearby stops" header */
+    private void removeNearbyHeader() {
+        if(mNearbyHeaderAdded) {
+            mAdapter.remove(0);
+            mNearbyHeaderAdded = false;
+        }
+    }
+
+	/**
+	 * Populate list with active nearby stops for an agency
+	 * @param agencyTag Agency tag for API request
+	 */
+	private void loadNearbyStops(@NonNull final String agencyTag) {
+        Resources res = getResources();
+        final String noneNearbyString = res.getString(R.string.bus_no_nearby_stops);
+        final String failedLoadString = res.getString(R.string.failed_load_short);
+
+        // First clear all "nearby stop"-related rows
+        clearNearbyRows();
 
         // Check for location services
 		if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
