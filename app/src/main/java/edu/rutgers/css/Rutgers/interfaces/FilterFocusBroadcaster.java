@@ -1,6 +1,4 @@
-package edu.rutgers.css.Rutgers.items;
-
-import android.support.v4.app.Fragment;
+package edu.rutgers.css.Rutgers.interfaces;
 
 /**
  * Created by jamchamb on 8/22/14.

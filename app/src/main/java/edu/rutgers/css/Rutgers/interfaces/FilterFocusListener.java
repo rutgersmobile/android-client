@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers.items;
+package edu.rutgers.css.Rutgers.interfaces;
 
 /**
  * Created by jamchamb on 8/22/14.

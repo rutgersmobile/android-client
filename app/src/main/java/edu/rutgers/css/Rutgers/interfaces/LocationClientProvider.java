@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers.utils;
+package edu.rutgers.css.Rutgers.interfaces;
 
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;

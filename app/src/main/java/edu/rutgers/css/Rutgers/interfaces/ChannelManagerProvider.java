@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers.utils;
+package edu.rutgers.css.Rutgers.interfaces;
 
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 

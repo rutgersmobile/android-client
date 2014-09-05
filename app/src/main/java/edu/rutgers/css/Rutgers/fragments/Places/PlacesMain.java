@@ -40,7 +40,7 @@ import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.utils.LocationClientProvider;
+import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers2.R;
 
 /**

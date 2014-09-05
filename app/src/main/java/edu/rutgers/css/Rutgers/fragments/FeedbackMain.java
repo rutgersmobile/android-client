@@ -13,11 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.androidquery.AQuery;
@@ -35,7 +32,7 @@ import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.items.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.utils.ChannelManagerProvider;
+import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers2.R;
 
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
