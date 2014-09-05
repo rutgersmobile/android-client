@@ -25,8 +25,9 @@
 
         <ImageButton
             android:layout_width="46dp"
-            android:layout_height="38dp"
+            android:layout_height="fill_parent"
             android:id="@+id/filterClearButton"
+            android:layout_weight="0"
             android:clickable="true"
             android:src="@android:drawable/ic_input_delete"
             android:layout_marginRight="8dp"

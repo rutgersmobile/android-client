@@ -1,10 +1,7 @@
 package edu.rutgers.css.Rutgers.api;
 
-import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -12,15 +9,16 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.widget.Toast;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Reader;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Map;
 
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.Bus.BusDisplay;
@@ -50,46 +48,47 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class ComponentFactory {
 
-	private static ComponentFactory instance = null;
-	private FragmentActivity mMainActivity;
-	private static final String TAG = "ComponentFactory";
-	private Hashtable<String, Class<? extends Fragment>> fragmentTable;
-	
-	protected ComponentFactory() {
-		// Set up table of fragments that can be launched
-		fragmentTable = new Hashtable<String, Class<? extends Fragment>>();
+    private static final String TAG = "ComponentFactory";
 
+	private static ComponentFactory instance = null;
+    private FragmentActivity mMainActivity;
+
+    // Set up table of fragments that can be launched
+    private static Map<String, Class<? extends Fragment>> sFragmentTable = Collections.unmodifiableMap(new HashMap<String, Class<? extends Fragment>>() {{
         // General views
-		fragmentTable.put(DTable.HANDLE, DTable.class);
-        fragmentTable.put(RSSReader.HANDLE, RSSReader.class);
-        fragmentTable.put(TextDisplay.HANDLE, TextDisplay.class);
-        fragmentTable.put(WebDisplay.HANDLE, WebDisplay.class);
+        put(DTable.HANDLE, DTable.class);
+        put(RSSReader.HANDLE, RSSReader.class);
+        put(TextDisplay.HANDLE, TextDisplay.class);
+        put(WebDisplay.HANDLE, WebDisplay.class);
 
         // Bus views
-        fragmentTable.put(BusMain.HANDLE, BusMain.class);
-        fragmentTable.put(BusDisplay.HANDLE, BusDisplay.class);
+        put(BusMain.HANDLE, BusMain.class);
+        put(BusDisplay.HANDLE, BusDisplay.class);
 
         // Food views
-        fragmentTable.put(FoodMain.HANDLE, FoodMain.class);
-		fragmentTable.put(FoodHall.HANDLE, FoodHall.class);
-		fragmentTable.put(FoodMeal.HANDLE, FoodMeal.class);
+        put(FoodMain.HANDLE, FoodMain.class);
+        put(FoodHall.HANDLE, FoodHall.class);
+        put(FoodMeal.HANDLE, FoodMeal.class);
 
         // Places views
-		fragmentTable.put(PlacesMain.HANDLE, PlacesMain.class);
-		fragmentTable.put(PlacesDisplay.HANDLE, PlacesDisplay.class);
+        put(PlacesMain.HANDLE, PlacesMain.class);
+        put(PlacesDisplay.HANDLE, PlacesDisplay.class);
 
         // Recreation views
-		fragmentTable.put(RecreationMain.HANDLE, RecreationMain.class);
-		fragmentTable.put(RecreationDisplay.HANDLE, RecreationDisplay.class);
+        put(RecreationMain.HANDLE, RecreationMain.class);
+        put(RecreationDisplay.HANDLE, RecreationDisplay.class);
 
         // SOC views
-        fragmentTable.put(SOCMain.HANDLE, SOCMain.class);
-        fragmentTable.put(SOCCourses.HANDLE, SOCCourses.class);
-        fragmentTable.put(SOCSections.HANDLE, SOCSections.class);
+        put(SOCMain.HANDLE, SOCMain.class);
+        put(SOCCourses.HANDLE, SOCCourses.class);
+        put(SOCSections.HANDLE, SOCSections.class);
 
         // Other views
-		fragmentTable.put(RUInfoMain.HANDLE, RUInfoMain.class);
-		fragmentTable.put(FeedbackMain.HANDLE, FeedbackMain.class);
+        put(RUInfoMain.HANDLE, RUInfoMain.class);
+        put(FeedbackMain.HANDLE, FeedbackMain.class);
+    }});
+
+	protected ComponentFactory() {
 	}
 
     public void setMainActivity(FragmentActivity fragmentActivity) {
@@ -120,7 +119,7 @@ public class ComponentFactory {
 		}
 		
 		component = options.getString("component").toLowerCase(Locale.US);
-		Class<? extends Fragment> compClass = fragmentTable.get(component);
+		Class<? extends Fragment> compClass = sFragmentTable.get(component);
 		if(compClass != null) {
             Log.v(TAG, "Creating a " + compClass.getSimpleName());
 			try {

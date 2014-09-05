@@ -32,6 +32,7 @@ import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -50,10 +51,18 @@ public class PlacesDisplay extends Fragment {
 	private static final String TAG = "PlacesDisplay";
     public static final String HANDLE = "placesdisplay";
 
-    private static Map<String, String> mAgencyMap;
     private ItemizedOverlay<OverlayItem> mLocationOverlays;
     private JSONObject mPlaceJSON;
     private JSONObject mLocationJSON;
+    private static final Map<String, String> sAgencyMap = Collections.unmodifiableMap(new HashMap<String, String>() {{
+        put("Busch", "nb");
+        put("College Avenue", "nb");
+        put("Douglass", "nb");
+        put("Cook", "nb");
+        put("Livingston", "nb");
+        put("Newark", "nwk");
+        put("Health Sciences at Newark", "nwk");
+    }});
 
     public PlacesDisplay() {
 		// Required empty public constructor
@@ -62,15 +71,6 @@ public class PlacesDisplay extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-        mAgencyMap = new HashMap<String, String>();
-        mAgencyMap.put("Busch", "nb");
-        mAgencyMap.put("College Avenue", "nb");
-        mAgencyMap.put("Douglass", "nb");
-        mAgencyMap.put("Cook", "nb");
-        mAgencyMap.put("Livingston", "nb");
-        mAgencyMap.put("Newark", "nwk");
-        mAgencyMap.put("Health Sciences at Newark", "nwk");
 	}
 	
 	@Override
@@ -186,7 +186,7 @@ public class PlacesDisplay extends Fragment {
 
                             if(!mPlaceJSON.optString("campus_name").isEmpty()) {
                                 String campus_name = mPlaceJSON.optString("campus_name");
-                                String agency = mAgencyMap.get(campus_name);
+                                String agency = sAgencyMap.get(campus_name);
 
                                 if(agency != null) {
                                     Nextbus.getStopsByTitleNear(agency, buildLat, buildLon).then(new AndroidDoneCallback<JSONObject>() {

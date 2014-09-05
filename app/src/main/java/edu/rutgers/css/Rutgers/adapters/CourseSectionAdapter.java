@@ -53,7 +53,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
     }
 
     // Assign numeric values to days of the week, for sorting meeting times
-    private static final Map<String, Integer> dayMap =
+    private static final Map<String, Integer> sDayMap =
             Collections.unmodifiableMap(new HashMap<String, Integer>() {{
                 put("M", 0);
                 put("T", 1);
@@ -293,8 +293,8 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                 else {
                     String lhsDay = lhs.optString("meetingDay");
                     String rhsDay = rhs.optString("meetingDay");
-                    Integer l = dayMap.get(lhsDay);
-                    Integer r = dayMap.get(rhsDay);
+                    Integer l = sDayMap.get(lhsDay);
+                    Integer r = sDayMap.get(rhsDay);
                     return l.compareTo(r);
                 }
             }
