@@ -2,14 +2,13 @@ package edu.rutgers.css.Rutgers.fragments.Food;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import org.jdeferred.DoneCallback;
@@ -19,10 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
@@ -36,60 +31,54 @@ public class FoodHall extends Fragment {
 	private static final String TAG = "FoodHall";
     public static final String HANDLE = "foodhall";
 
-	private List<String> mData;
-	private ArrayAdapter<String> mAdapter;
-	
+    private String mLocation;
+    private MealPagerAdapter mPagerAdapter;
+
 	public FoodHall() {
 		// Required empty public constructor
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Bundle args = getArguments();
-		
-		mData = new ArrayList<String>();
-		mAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.row_title, R.id.title, mData);
+        final Bundle args = getArguments();
 
-		if(args.getString("location") == null) {
-			Log.e(TAG, "Location not set");
-			return;
-		}
+        mLocation = args.getString("location");
+        if(mLocation == null) return;
+
+        mPagerAdapter = new MealPagerAdapter(getChildFragmentManager());
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-		dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<JSONObject>() {
+        dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<JSONObject>() {
 
-			@Override
-			public void onDone(JSONObject hall) {
-				try {
-					JSONArray meals = hall.getJSONArray("meals");
-						
-					for(int j = 0; j < meals.length(); j++) {
-						JSONObject curMeal = meals.getJSONObject(j);
-						if(curMeal.getBoolean("meal_avail")) {
-                            mAdapter.add(curMeal.getString("meal_name"));
+            @Override
+            public void onDone(JSONObject hall) {
+                try {
+                    JSONArray meals = hall.getJSONArray("meals");
+                    for (int j = 0; j < meals.length(); j++) {
+                        JSONObject curMeal = meals.getJSONObject(j);
+                        if (curMeal.getBoolean("meal_avail")) {
+                            mPagerAdapter.add(curMeal);
                         }
-					}		
-				}
-				catch(JSONException e) {
-					
-					Log.e(TAG, e.getMessage());
-				
-				}
-			}
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
 
-		}).fail(new FailCallback<Exception>() {
+        }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception result) {
                 AppUtil.showFailedLoadToast(getActivity());
             }
         });
 	}
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_food_hall, parent, false);
 		final Bundle args = getArguments();
+
 		if(args.getString("location") != null) {
             getActivity().setTitle(args.getString("location"));
         }
@@ -99,23 +88,58 @@ public class FoodHall extends Fragment {
             return v;
         }
 
-        ListView listView = (ListView) v.findViewById(R.id.dining_menu_list);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Bundle newArgs = new Bundle();
-                newArgs.putString("component", FoodMeal.HANDLE);
-                newArgs.putString("location", args.getString("location"));
-                newArgs.putString("meal", (String) parent.getAdapter().getItem(position));
-
-                ComponentFactory.getInstance().switchFragments(newArgs);
-            }
-
-        });
+        final ViewPager viewPager = (ViewPager) v.findViewById(R.id.viewPager);
+        viewPager.setAdapter(mPagerAdapter);
 
 		return v;
 	}
+
+    private class MealPagerAdapter extends FragmentStatePagerAdapter {
+
+        private JSONArray mData;
+
+        public MealPagerAdapter(FragmentManager fm) {
+            super(fm);
+            mData = new JSONArray();
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+            try {
+                JSONObject curMeal = mData.getJSONObject(i);
+                String mealName = curMeal.getString("meal_name");
+                Bundle tabArgs = new Bundle();
+                tabArgs.putString("location", mLocation);
+                tabArgs.putString("meal", mealName);
+                Fragment fragment = new FoodMeal();
+                fragment.setArguments(tabArgs);
+                return fragment;
+            } catch (JSONException e) {
+                Log.w(TAG, e.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return mData.length();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            try {
+                return mData.getJSONObject(position).getString("meal_name");
+            } catch (JSONException e) {
+                Log.w(TAG, "getPageTitle(): " + e.getMessage());
+                return "";
+            }
+        }
+
+        public void add(JSONObject object) {
+            mData.put(object);
+            this.notifyDataSetChanged();
+        }
+
+    }
 
 }

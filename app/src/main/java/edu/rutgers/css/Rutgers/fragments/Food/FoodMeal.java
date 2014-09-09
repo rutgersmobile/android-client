@@ -59,7 +59,7 @@ public class FoodMeal extends Fragment {
 		
 		foodItems = new ArrayList<RMenuRow>();
 		foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.row_title, R.layout.row_section_header, foodItems);
-		
+
 		if(args.getString("location") == null) {
             Log.e(TAG, "Location not set");
             return;
@@ -111,12 +111,6 @@ public class FoodMeal extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		View v = inflater.inflate(R.layout.fragment_food_meal, container, false);
-		Bundle args = getArguments();
-		
-		// Set title
-		if(args.getString("location") != null && args.getString("meal") != null) {
-            getActivity().setTitle(args.getString("location") + " - " + args.getString("meal"));
-        }
 
         ListView listView = (ListView) v.findViewById(R.id.food_meal_list);
 		listView.setAdapter(foodItemAdapter);
