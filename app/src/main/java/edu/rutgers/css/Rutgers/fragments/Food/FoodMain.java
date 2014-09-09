@@ -126,6 +126,8 @@ public class FoodMain extends Fragment {
 	}
 
     private void loadStaticHalls() {
+        if(!isAdded()) return;
+
         Bundle nwk = new Bundle();
         nwk.putString("component", TextDisplay.HANDLE);
         nwk.putString("title", "Stonsby Commons & Eatery");
