@@ -27,7 +27,7 @@ public class Dining {
 	private static final String TAG = "DiningAPI";
 	
 	private static JSONArray mNBDiningConf;
-    private static AndroidDeferredManager dm;
+    private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 	
 	private static final String API_URL = AppUtil.API_BASE + "rutgers-dining.txt";
 	private static long expire = Request.CACHE_ONE_HOUR; // Cache dining data for an hour
@@ -37,15 +37,13 @@ public class Dining {
 	 * (Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)
 	 */
 	private static void setup() {
-        if(dm == null) dm = new AndroidDeferredManager();
-
 		// Get JSON array from dining API
 		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
 		
 		final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
 
-		dm.when(promiseNBDining, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
+		sDM.when(promiseNBDining, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray res) {
@@ -72,7 +70,7 @@ public class Dining {
 		final Deferred<JSONArray, AjaxStatus, Double> d = new DeferredObject<JSONArray, AjaxStatus, Double>();
 		setup();
 		
-		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -101,7 +99,7 @@ public class Dining {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 
-        dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {

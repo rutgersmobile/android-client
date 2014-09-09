@@ -12,16 +12,15 @@ import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
+import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.DeferredAsyncTask;
 import org.jdeferred.impl.DeferredObject;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,7 +39,7 @@ public class Places {
 	private static final String TAG = "PlacesAPI";
 
 	private static Promise<Object, AjaxStatus, Object> configured;
-    private static final AndroidDeferredManager sDeferredManager = new AndroidDeferredManager();
+    private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
     private static boolean sSetupLocked;
     private static Map<String, JSONObject> sPlacesTable;
 
@@ -59,7 +58,7 @@ public class Places {
 		configured = confd.promise();
 
         final Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> promisePlaces = Request.apiWithStatus("places.txt", Request.CACHE_ONE_DAY * 7);
-        promisePlaces.done(new DoneCallback<AjaxCallback<JSONObject>>() {
+        sDM.when(promisePlaces, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<AjaxCallback<JSONObject>>() {
 
             @Override
             public void onDone(AjaxCallback<JSONObject> res) {
@@ -113,7 +112,7 @@ public class Places {
         final Deferred<List<PlaceStub>, Exception, Double> d = new DeferredObject<List<PlaceStub>, Exception, Double>();
         setup();
 
-        configured.then(new DoneCallback<Object>() {
+        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
             @Override
             public void onDone(Object o) {
                 List<PlaceStub> results = new ArrayList<PlaceStub>();
@@ -144,7 +143,7 @@ public class Places {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
 		
-		configured.then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -173,7 +172,7 @@ public class Places {
         final Deferred<Set<PlaceStub>, Exception, Double> deferred = new DeferredObject<Set<PlaceStub>, Exception, Double>();
         setup();
 
-        configured.then(new DoneCallback<Object>() {
+        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 
             @Override
             public void onDone(Object o) {
@@ -199,7 +198,7 @@ public class Places {
      * @param sourceLon
      */
     private static void calculateNearby(final Deferred<Set<PlaceStub>, Exception, Double> deferred, final double sourceLat, final double sourceLon) {
-        sDeferredManager.when(new DeferredAsyncTask<Void, Object, Set<PlaceStub>>() {
+        sDM.when(new DeferredAsyncTask<Void, Object, Set<PlaceStub>>() {
             @Override
             protected Set<PlaceStub> doInBackgroundSafe(Void... voids) throws Exception {
                 Set<PlaceStub> result = new TreeSet<PlaceStub>(new PlaceDistanceComparator());

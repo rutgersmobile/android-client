@@ -35,7 +35,7 @@ public class Nextbus {
 
 	private static final String TAG = "Nextbus";
 
-    private static AndroidDeferredManager dm;
+    private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 	private static Promise<Object, AjaxStatus, Object> configured;
 	private static JSONObject mNBConf;
 	private static JSONObject mNWKConf;
@@ -51,8 +51,6 @@ public class Nextbus {
 	 * Load JSON data on active buses & the entire bus config.
 	 */
 	private static void setup () {
-        if(dm == null) dm = new AndroidDeferredManager();
-
 		// This promise is used to notify the other objects that the object has been configured.
 		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
@@ -62,7 +60,7 @@ public class Nextbus {
 		final Promise promiseNBConf = Request.api("rutgersrouteconfig.txt", configExpireTime);
 		final Promise promiseNWKConf = Request.api("rutgers-newarkrouteconfig.txt", configExpireTime);
 
-		dm.when(AndroidExecutionScope.BACKGROUND, promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new DoneCallback<MultipleResults>() {
+		sDM.when(AndroidExecutionScope.BACKGROUND, promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new DoneCallback<MultipleResults>() {
 			
 			@Override
 			public void onDone(MultipleResults res) {
@@ -102,7 +100,7 @@ public class Nextbus {
 		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
 		
-		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			public void onDone(Object o) {
 				Log.d(TAG, "routePredict: " + agency + ", " + route);
@@ -180,7 +178,7 @@ public class Nextbus {
 		final Deferred<ArrayList<Prediction>, Exception, Double> d = new DeferredObject<ArrayList<Prediction>, Exception, Double>();
 		setup();
 		
-		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			public void onDone(Object o) {
 				Log.d(TAG, "stopPredict: " + agency + ", " + stop);
@@ -264,7 +262,7 @@ public class Nextbus {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
-		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			public void onDone(Object o) {
 				try {
@@ -301,7 +299,7 @@ public class Nextbus {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
-		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			public void onDone(Object o) {
 				try {
@@ -338,7 +336,7 @@ public class Nextbus {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
-		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 
             @Override
             public void onDone(Object o) {
@@ -376,7 +374,7 @@ public class Nextbus {
 		final Deferred<JSONArray, Exception, Double> d = new DeferredObject<JSONArray, Exception, Double>();
 		setup();
 		
-		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -422,7 +420,7 @@ public class Nextbus {
             return d.promise();
         }
 
-		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -482,7 +480,7 @@ public class Nextbus {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		Promise<JSONObject, Exception, Double> allNearStops = getStopsByTitleNear(agency, sourceLat, sourceLon);
 		
-		dm.when(allNearStops, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<JSONObject>() {
+		sDM.when(allNearStops, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<JSONObject>() {
 
 			public void onDone(JSONObject stopsByTitle) {
 				JSONObject active = agency.equals("nb") ? mNBActive : mNWKActive;
