@@ -12,8 +12,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -53,8 +55,9 @@ public class FoodHall extends Fragment {
 			Log.e(TAG, "Location not set");
 			return;
 		}
-		
-		Dining.getDiningLocation(args.getString("location")).done(new AndroidDoneCallback<JSONObject>() {
+
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+		dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject hall) {
@@ -74,13 +77,13 @@ public class FoodHall extends Fragment {
 				
 				}
 			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		});
+
+		}).fail(new FailCallback<Exception>() {
+            @Override
+            public void onFail(Exception result) {
+                AppUtil.showFailedLoadToast(getActivity());
+            }
+        });
 	}
 	
 	@Override

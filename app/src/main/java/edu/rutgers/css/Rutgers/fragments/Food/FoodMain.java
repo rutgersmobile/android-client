@@ -9,14 +9,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +58,8 @@ public class FoodMain extends Fragment {
         final String nbCampusFullString = getResources().getString(R.string.campus_nb_full);
 
 		// Get dining hall data and populate the top-level menu with names of the dining halls
-		Dining.getDiningHalls().done(new AndroidDoneCallback<JSONArray>() {
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+		dm.when(Dining.getDiningHalls()).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray halls) {
@@ -91,21 +91,11 @@ public class FoodMain extends Fragment {
                 }
             }
 
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
-
-        }).fail(new AndroidFailCallback<AjaxStatus>() {
+        }).fail(new FailCallback<AjaxStatus>() {
 
             @Override
             public void onFail(AjaxStatus e) {
                 AppUtil.showFailedLoadToast(getActivity());
-            }
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
             }
 
         });

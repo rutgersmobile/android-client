@@ -8,9 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,8 +68,9 @@ public class FoodMeal extends Fragment {
             Log.e(TAG, "Meal not set");
 			return;
 		}
-		
-		Dining.getDiningLocation(args.getString("location")).done(new AndroidDoneCallback<JSONObject>() {
+
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+		dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<JSONObject>() {
 
 			@Override
 			public void onDone(JSONObject dinLoc) {
@@ -94,25 +95,15 @@ public class FoodMeal extends Fragment {
 					
 				}				
 			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<Exception>() {
-		
-			@Override
-			public void onFail(Exception e) {
-				Log.e(TAG, e.getMessage());
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		});
+
+		}).fail(new FailCallback<Exception>() {
+
+            @Override
+            public void onFail(Exception e) {
+                Log.e(TAG, e.getMessage());
+            }
+
+        });
 		
 	}
 	

@@ -5,11 +5,11 @@ import android.util.Log;
 import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.Deferred;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +27,7 @@ public class Dining {
 	private static final String TAG = "DiningAPI";
 	
 	private static JSONArray mNBDiningConf;
+    private static AndroidDeferredManager dm;
 	
 	private static final String API_URL = AppUtil.API_BASE + "rutgers-dining.txt";
 	private static long expire = Request.CACHE_ONE_HOUR; // Cache dining data for an hour
@@ -36,40 +37,31 @@ public class Dining {
 	 * (Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)
 	 */
 	private static void setup() {
+        if(dm == null) dm = new AndroidDeferredManager();
+
 		// Get JSON array from dining API
 		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
 		configured = confd.promise();
 		
 		final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
-		
-		AndroidDeferredManager dm = new AndroidDeferredManager();		
-		dm.when(promiseNBDining).done(new AndroidDoneCallback<JSONArray>() {
 
-			@Override
-			public void onDone(JSONArray res) {
-				mNBDiningConf = (JSONArray) res;
-				confd.resolve(null);
-			}
+		dm.when(promiseNBDining, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
 
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
-		
-			@Override
-			public void onFail(AjaxStatus e) {
-				Log.e(TAG, AppUtil.formatAjaxStatus(e));
-				confd.reject(e);
-			}
+            @Override
+            public void onDone(JSONArray res) {
+                mNBDiningConf = res;
+                confd.resolve(null);
+            }
 
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
-			}
-			
-		});	
+        }).fail(new FailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus e) {
+                Log.e(TAG, AppUtil.formatAjaxStatus(e));
+                confd.reject(e);
+            }
+
+        });
 	}
 	
 	/**
@@ -80,31 +72,21 @@ public class Dining {
 		final Deferred<JSONArray, AjaxStatus, Double> d = new DeferredObject<JSONArray, AjaxStatus, Double>();
 		setup();
 		
-		configured.then(new AndroidDoneCallback<Object>() {
+		dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
 				JSONArray conf = mNBDiningConf;
 				d.resolve(conf);
 			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
+
+		}).fail(new FailCallback<AjaxStatus>() {
 
 			@Override
 			public void onFail(AjaxStatus e) {
 				d.reject(e);
 			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
-			}
-			
+
 		});
 		
 		return d.promise();
@@ -118,8 +100,8 @@ public class Dining {
 	public static Promise<JSONObject, Exception, Double> getDiningLocation(final String location) {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		setup();
-		
-		configured.then(new AndroidDoneCallback<Object>() {
+
+        dm.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
@@ -147,13 +129,15 @@ public class Dining {
 					d.reject(new IllegalArgumentException("Invalid dining location \"" + location +"\""));
 				}
 			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.BACKGROUND;
-			}
-			
-		});
+
+		}).fail(new FailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus result) {
+                d.reject(new Exception(AppUtil.formatAjaxStatus(result)));
+            }
+
+        });
 		
 		return d.promise();
 	}
