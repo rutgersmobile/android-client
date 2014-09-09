@@ -24,9 +24,6 @@ import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
 import org.jdeferred.multiple.OneResult;
@@ -44,11 +41,11 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
+import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
@@ -351,8 +348,9 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 			if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
 			
 			// Look up nearby active bus stops
-			Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(),
-					(float) lastLoc.getLongitude()).then(new AndroidDoneCallback<JSONObject>() {
+            AndroidDeferredManager dm = new AndroidDeferredManager();
+			dm.when(Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(),
+					(float) lastLoc.getLongitude())).then(new DoneCallback<JSONObject>() {
 
 				@Override
 				public void onDone(JSONObject activeNearbyStops) {				
@@ -380,22 +378,14 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 						}
 					}
 				}
-				
-				@Override
-				public AndroidExecutionScope getExecutionScope() {
-					return AndroidExecutionScope.UI;
-				}
-				
-			}).fail(new AndroidFailCallback<Exception>() {
-                @Override
-                public AndroidExecutionScope getExecutionScope() {
-                    return AndroidExecutionScope.UI;
-                }
+
+			}).fail(new FailCallback<Exception>() {
 
                 @Override
                 public void onFail(Exception result) {
                     addNearbyRow(1, new RMenuItemRow(failedLoadString));
                 }
+
             });
 		}
 		else {

@@ -16,11 +16,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
 import org.jdeferred.multiple.OneResult;
@@ -81,11 +80,7 @@ public class BusAll extends Fragment {
 
         // Synchronized load of all route & stop information
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new AndroidDoneCallback<MultipleResults>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+        dm.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
@@ -105,11 +100,8 @@ public class BusAll extends Fragment {
                 }
 
             }
-        }).fail(new AndroidFailCallback<OneReject>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+
+        }).fail(new FailCallback<OneReject>() {
 
             @Override
             public void onFail(OneReject result) {
@@ -117,6 +109,7 @@ public class BusAll extends Fragment {
                 Exception e = (Exception) result.getReject();
                 Log.w(TAG, e.getMessage());
             }
+
         });
 	}
 	

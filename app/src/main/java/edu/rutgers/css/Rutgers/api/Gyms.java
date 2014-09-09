@@ -22,12 +22,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
-import edu.rutgers.css.Rutgers.utils.AppUtil;
-
 public class Gyms {
 	
 	private static final String TAG = "Gyms";
-	private static final String API_URL = AppUtil.API_BASE + "gyms.txt";
 	
 	public static final DateFormat GYM_DATE_FORMAT = new SimpleDateFormat("M/d/yyyy", Locale.US);
 	
@@ -38,7 +35,7 @@ public class Gyms {
      * @return Gyms API JSON object
      */
 	public static Promise<JSONObject, AjaxStatus, Double> getGyms() {
-		final Deferred<JSONObject, AjaxStatus, Double> d = new AndroidDeferredObject<JSONObject, AjaxStatus, Double>(Request.json(API_URL, expire), AndroidExecutionScope.BACKGROUND);
+		final Deferred<JSONObject, AjaxStatus, Double> d = new AndroidDeferredObject<JSONObject, AjaxStatus, Double>(Request.api("gyms.txt", expire), AndroidExecutionScope.BACKGROUND);
 		return d.promise();
 	}
 

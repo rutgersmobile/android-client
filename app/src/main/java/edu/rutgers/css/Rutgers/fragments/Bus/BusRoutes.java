@@ -11,11 +11,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
 import org.jdeferred.multiple.OneResult;
@@ -44,6 +43,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
     private FilterFocusListener mFilterFocusListener;
+    private AndroidDeferredManager mDM;
 	
 	public BusRoutes() {
 		// Required empty public constructor
@@ -52,6 +52,8 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+        mDM = new AndroidDeferredManager();
 
 		mData = new ArrayList<RMenuRow>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
@@ -110,13 +112,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         final String nwkString =  getResources().getString(R.string.bus_nwk_active_routes_header);
 
         // Synchronized load of active routes
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(nbActiveRoutes, nwkActiveRoutes).done(new AndroidDoneCallback<MultipleResults>() {
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+        mDM.when(nbActiveRoutes, nwkActiveRoutes).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
@@ -129,12 +125,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 }
             }
 
-        }).fail(new AndroidFailCallback<OneReject>() {
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+        }).fail(new FailCallback<OneReject>() {
 
             @Override
             public void onFail(OneReject result) {

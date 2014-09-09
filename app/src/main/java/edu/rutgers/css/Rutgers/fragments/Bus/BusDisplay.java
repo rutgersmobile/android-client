@@ -12,8 +12,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -24,7 +24,7 @@ import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.items.Prediction;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayList<Prediction>> {
+public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Prediction>> {
 
 	private static final String TAG = "BusDisplay";
     public static final String HANDLE = "busdisplay";
@@ -39,6 +39,7 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 	private Handler mUpdateHandler;
 	private Timer mUpdateTimer;
 	private String mAgency;
+    private AndroidDeferredManager mDM;
 	
 	public BusDisplay() {
 		// Required empty public constructor
@@ -47,6 +48,8 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+        mDM = new AndroidDeferredManager();
 
         mData = new ArrayList<Prediction>();
 		mAdapter = new PredictionAdapter(getActivity(), R.layout.row_bus_prediction, mData);
@@ -176,13 +179,16 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 	 * Load prediction data
 	 */
 	private void loadPredictions() {
-		if(mAgency == null || mTag == null) return;
+		if(mAgency == null || mTag == null) {
+            Log.e(TAG, "loadPredictions(): agency or tag is null");
+            return;
+        }
 			
 		if(mMode == Mode.ROUTE) {
-			Nextbus.routePredict(mAgency, mTag).then(this);
+			mDM.when(Nextbus.routePredict(mAgency, mTag)).then(this);
 		}
 		else if(mMode == Mode.STOP) {
-			Nextbus.stopPredict(mAgency, mTag).then(this);
+			mDM.when(Nextbus.stopPredict(mAgency, mTag)).then(this);
 		}
 	}
 	
@@ -228,10 +234,5 @@ public class BusDisplay extends Fragment implements AndroidDoneCallback<ArrayLis
 			}
 		}
 	}
-	
-	@Override
-	public AndroidExecutionScope getExecutionScope() {
-		return AndroidExecutionScope.UI;
-	}
-	
+
 }
