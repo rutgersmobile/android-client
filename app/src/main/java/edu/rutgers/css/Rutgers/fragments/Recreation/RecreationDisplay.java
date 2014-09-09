@@ -16,6 +16,9 @@ import android.widget.TextView;
 import com.androidquery.callback.AjaxStatus;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
@@ -72,13 +75,13 @@ public class RecreationDisplay extends Fragment {
 
 		// Make sure necessary arguments were given
 		Bundle args = getArguments();
-		if(args.getString("campus") == null || args.getString("location") == null) {
+		if(args.get("campus") == null || args.get("location") == null) {
 			Log.w(TAG, "Missing campus/location arg");
 			AppUtil.showFailedLoadToast(getActivity());
 			return v;
 		}
 		
-		getActivity().setTitle(args.getString("location"));
+		getActivity().setTitle(args.getString("title"));
 		
 		// Set up pager for hours displays
 		mPager = (ViewPager) v.findViewById(R.id.hoursViewPager);
@@ -92,15 +95,18 @@ public class RecreationDisplay extends Fragment {
         }
 
         // Don't have JSON yet - do request
-		final String location = args.getString("location");
-		final String campus = args.getString("campus");
-		Gyms.getGyms().done(new AndroidDoneCallback<JSONObject>() {
+        final int locationIndex = args.getInt("location");
+        final int campusIndex = args.getInt("campus");
+
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+		dm.when(Gyms.getGyms()).done(new DoneCallback<JSONArray>() {
 
 			@Override
-			public void onDone(JSONObject gymsJson) {
+			public void onDone(JSONArray gymsJson) {
 				try {
 					// Get location JSON
-					mLocationJSON = gymsJson.getJSONObject(campus).getJSONObject(location);
+                    JSONArray campusJSON = gymsJson.getJSONArray(campusIndex);
+					mLocationJSON = campusJSON.getJSONObject(locationIndex);
                     displayInfo(v);
 				} catch (JSONException e) {
 					Log.w(TAG, "onCreateView(): " + e.getMessage());
@@ -108,25 +114,15 @@ public class RecreationDisplay extends Fragment {
 				
 			}
 
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
+		}).fail(new FailCallback<AjaxStatus>() {
 
-			@Override
-			public void onFail(AjaxStatus status) {
-				AppUtil.showFailedLoadToast(getActivity());
+            @Override
+            public void onFail(AjaxStatus status) {
+                AppUtil.showFailedLoadToast(getActivity());
                 Log.w(TAG, status.getMessage());
-			}
+            }
 
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		});
+        });
 
 		return v;
 	}
@@ -153,10 +149,10 @@ public class RecreationDisplay extends Fragment {
 
 
         // Fill in location info
-        String infoDesk = mLocationJSON.optString("FacilityInformation");
-        String businessOffice = mLocationJSON.optString("FacilityBusiness");
+        String infoDesk = mLocationJSON.optString("information_number");
+        String businessOffice = mLocationJSON.optString("business_number");
 
-        addressTextView.setText(mLocationJSON.optString("FacilityAddress"));
+        addressTextView.setText(mLocationJSON.optString("address"));
 
         if(infoDesk != null && !infoDesk.isEmpty()) {
             infoDeskNumberTextView.setText(infoDesk);
@@ -174,7 +170,7 @@ public class RecreationDisplay extends Fragment {
             businessContentRow.setVisibility(View.GONE);
         }
 
-        descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("FacilityBody")));
+        descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description")));
 
         try {
             // Generate hours array if it wasn't restored

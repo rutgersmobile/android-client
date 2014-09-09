@@ -12,9 +12,13 @@ import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
 
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,57 +55,43 @@ public class RecreationMain extends Fragment {
 		
 		mData = new ArrayList<RMenuRow>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
-		
-		Gyms.getGyms().done(new AndroidDoneCallback<JSONObject>() {
 
-			@Override
-			public void onDone(JSONObject gymsJson) {
-				try {
-					// Loop through campuses
-					Iterator<String> campusIter = gymsJson.keys();
-					while(campusIter.hasNext()) {
-						String curCampusKey = campusIter.next();
-						mAdapter.add(new RMenuHeaderRow(curCampusKey));
-						
-						// Loop through locations on this campus
-						JSONObject curCampus = gymsJson.getJSONObject(curCampusKey);
-						Iterator<String> locationIter = curCampus.keys();
-						while(locationIter.hasNext()) {
-							String curLocationKey = locationIter.next();
-							JSONObject curLocation = curCampus.getJSONObject(curLocationKey);
-							
-							Bundle args = new Bundle();
-							args.putString("title", curLocationKey);
-							args.putString("campus", curCampusKey);
-							args.putString("location", curLocationKey);
-							
-							mAdapter.add(new RMenuItemRow(args));
-						}
-						
-					}
-				} catch (JSONException e) {
-					Log.w(TAG, "onCreate(): " + e.getMessage());
-				}
-			}
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+		dm.when(Gyms.getGyms()).done(new DoneCallback<JSONArray>() {
 
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
+            @Override
+            public void onDone(JSONArray gymsJson) {
+                try {
+                    for (int i = 0; i < gymsJson.length(); i++) {
+                        JSONObject campus = gymsJson.getJSONObject(i);
 
-			@Override
-			public void onFail(AjaxStatus status) {
-				Log.w(TAG, status.getMessage());
-			}
+                        // Create campus header
+                        mAdapter.add(new RMenuHeaderRow(campus.getString("title")));
 
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		});
+                        // Create facility rows
+                        JSONArray facilities = campus.getJSONArray("facilities");
+                        for (int j = 0; j < facilities.length(); j++) {
+                            JSONObject facility = facilities.getJSONObject(j);
+                            Bundle rowArgs = new Bundle();
+                            rowArgs.putString("title", facility.getString("title"));
+                            rowArgs.putInt("campus", i);
+                            rowArgs.putInt("location", j);
+                            mAdapter.add(new RMenuItemRow(rowArgs));
+                        }
+                    }
+                } catch (JSONException e) {
+                    Log.w(TAG, "onCreate(): " + e.getMessage());
+                }
+            }
+
+        }).fail(new FailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                Log.w(TAG, status.getMessage());
+            }
+
+        });
 		
 	}
 	
