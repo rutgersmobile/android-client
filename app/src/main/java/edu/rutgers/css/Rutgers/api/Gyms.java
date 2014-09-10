@@ -1,12 +1,19 @@
 package edu.rutgers.css.Rutgers.api;
 
+import android.util.Log;
+
 import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.Deferred;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredObject;
 import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,5 +35,50 @@ public class Gyms {
 		final Deferred<JSONArray, AjaxStatus, Double> d = new AndroidDeferredObject<JSONArray, AjaxStatus, Double>(Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.json", expire), AndroidExecutionScope.BACKGROUND);
 		return d.promise();
 	}
-	
+
+    /**
+     * Get facility information.
+     * @param campusTitle Campus title
+     * @param facilityTitle Facility title
+     * @return Promise for a facility JSON object, which resolves as null if no facility of the given title can be found.
+     */
+    public static Promise<JSONObject, AjaxStatus, Double> getFacility(final String campusTitle, final String facilityTitle) {
+        final Deferred<JSONObject, AjaxStatus, Double> d = new DeferredObject<JSONObject, AjaxStatus, Double>();
+
+        getGyms().done(new DoneCallback<JSONArray>() {
+            @Override
+            public void onDone(JSONArray result) {
+                try {
+                    // Loop to find campus
+                    for (int i = 0; i < result.length(); i++) {
+                        JSONObject campus = result.getJSONObject(i);
+                        if(campus.getString("title").equalsIgnoreCase(campusTitle)) {
+
+                            // Found campus; loop to find facility
+                            JSONArray facilities = campus.getJSONArray("facilities");
+                            for(int j = 0; j < facilities.length(); j++) {
+                                JSONObject facility = facilities.getJSONObject(j);
+                                if(facility.getString("title").equalsIgnoreCase(facilityTitle)) {
+                                    d.resolve(facility);
+                                    return;
+                                }
+                            }
+
+                        }
+                    }
+                } catch (JSONException e) {
+                    Log.w(TAG, "getFacility(): " + e.getMessage());
+                }
+                d.resolve(null);
+            }
+        }).fail(new FailCallback<AjaxStatus>() {
+            @Override
+            public void onFail(AjaxStatus status) {
+                d.reject(status);
+            }
+        });
+
+        return d.promise();
+    }
+
 }

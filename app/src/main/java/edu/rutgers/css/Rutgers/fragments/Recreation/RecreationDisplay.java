@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,23 +81,18 @@ public class RecreationDisplay extends Fragment {
         }
 
         // Get the facility JSON
-        final int locationIndex = args.getInt("location");
-        final int campusIndex = args.getInt("campus");
+        final String campusTitle = args.getString("campus");
+        final String facilityTitle = args.getString("facility");
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Gyms.getGyms()).done(new DoneCallback<JSONArray>() {
+        dm.when(Gyms.getFacility(campusTitle, facilityTitle)).done(new DoneCallback<JSONObject>() {
 
             @Override
-            public void onDone(JSONArray gymsJson) {
-                try {
-                    // Get location JSON
-                    JSONArray campusFacilities = gymsJson.getJSONObject(campusIndex).getJSONArray("facilities");
-                    mLocationJSON = campusFacilities.getJSONObject(locationIndex);
+            public void onDone(JSONObject result) {
+                if(result != null) {
+                    mLocationJSON = result;
                     addInfo();
-                } catch (JSONException e) {
-                    Log.w(TAG, "onCreateView(): " + e.getMessage());
                 }
-
             }
 
         }).fail(new FailCallback<AjaxStatus>() {
@@ -121,7 +115,7 @@ public class RecreationDisplay extends Fragment {
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
 
 		// Make sure necessary arguments were given
-		if(args.get("campus") == null || args.get("location") == null) {
+		if(args.get("campus") == null || args.get("facility") == null) {
 			Log.w(TAG, "Missing campus/location arg");
 			AppUtil.showFailedLoadToast(getActivity());
 			return v;

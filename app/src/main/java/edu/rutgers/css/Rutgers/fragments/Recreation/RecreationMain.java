@@ -15,15 +15,11 @@ import com.androidquery.callback.AjaxStatus;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -74,8 +70,8 @@ public class RecreationMain extends Fragment {
                             JSONObject facility = facilities.getJSONObject(j);
                             Bundle rowArgs = new Bundle();
                             rowArgs.putString("title", facility.getString("title"));
-                            rowArgs.putInt("campus", i);
-                            rowArgs.putInt("location", j);
+                            rowArgs.putString("campus", campus.getString("title"));
+                            rowArgs.putString("facility", facility.getString("title"));
                             mAdapter.add(new RMenuItemRow(rowArgs));
                         }
                     }
