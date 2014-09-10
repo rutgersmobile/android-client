@@ -254,7 +254,7 @@ public class PlacesDisplay extends Fragment {
         }
         // Fallback to longitude & latitude
         else {
-            intent.setData(Uri.parse("geo:0,0?q=" + mLocationJSON.optString("latitude") + ", " + mLocationJSON.optString("longitude")));
+            intent.setData(Uri.parse("geo:"+mLocationJSON.optString("latitude")+","+ mLocationJSON.optString("longitude")));
         }
 
         // Try to launch a map activity
