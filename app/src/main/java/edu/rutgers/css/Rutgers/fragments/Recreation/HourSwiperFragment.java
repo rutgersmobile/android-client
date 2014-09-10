@@ -13,10 +13,10 @@ import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,11 +30,11 @@ public class HourSwiperFragment extends Fragment {
 		// Required empty public constructor
 	}
 	
-	public static HourSwiperFragment newInstance(String date, JSONObject hours) {
+	public static HourSwiperFragment newInstance(String date, JSONArray locations) {
 		HourSwiperFragment newFrag =  new HourSwiperFragment();
 		Bundle args = new Bundle();
 		args.putString("date", date);
-		args.putString("hours", hours.toString());
+		args.putString("locations", locations.toString());
 		newFrag.setArguments(args);
 		return newFrag;
 	}
@@ -48,21 +48,21 @@ public class HourSwiperFragment extends Fragment {
 		
 		// Add hours rows here
 		try {
-			JSONObject hours = new JSONObject(args.getString("hours"));
-			Iterator<String> keys = hours.keys();
-			while(keys.hasNext()) {
-				String curLocationKey = keys.next();
-				TableRow newTR = (TableRow) inflater.inflate(R.layout.hour_row, container, false);
+			JSONArray locations = new JSONArray(args.getString("locations"));
+			for(int i = 0; i < locations.length(); i++) {
+                TableRow newTR = (TableRow) inflater.inflate(R.layout.hour_row, container, false);
+                JSONObject curLocation = locations.getJSONObject(i);
+                String locationTitle = curLocation.getString("location");
 
                 // Set the sub-location title. Wrap at ~18 chars in portrait mode.
                 TextView sublocTextView = (TextView) newTR.findViewById(R.id.sublocTextView);
                 switch(getResources().getConfiguration().orientation) {
                     case Configuration.ORIENTATION_PORTRAIT:
-                        sublocTextView.setText(WordUtils.wrap(curLocationKey,18));
+                        sublocTextView.setText(WordUtils.wrap(locationTitle,18));
                         break;
                     default:
                         // The word wrap is unnecessary in landscape mode
-                        sublocTextView.setText(curLocationKey);
+                        sublocTextView.setText(locationTitle);
                         break;
                 }
 
@@ -70,7 +70,7 @@ public class HourSwiperFragment extends Fragment {
                 TextView hoursTextView = (TextView) newTR.findViewById(R.id.hoursTextView);
 
                 // Sometimes these are comma separated, sometimes not  ¯\_(ツ)_/¯
-                String hoursString = StringUtils.trim(hours.getString(curLocationKey));
+                String hoursString = StringUtils.trim(curLocation.getString("hours"));
                 if(StringUtils.startsWithIgnoreCase(hoursString, "closed")) {
                     setHoursTextView(hoursTextView, hoursString);
                 }

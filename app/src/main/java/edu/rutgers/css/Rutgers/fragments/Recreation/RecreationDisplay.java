@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +20,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -105,8 +103,8 @@ public class RecreationDisplay extends Fragment {
 			public void onDone(JSONArray gymsJson) {
 				try {
 					// Get location JSON
-                    JSONArray campusJSON = gymsJson.getJSONArray(campusIndex);
-					mLocationJSON = campusJSON.getJSONObject(locationIndex);
+                    JSONArray campusFacilities = gymsJson.getJSONObject(campusIndex).getJSONArray("facilities");
+					mLocationJSON = campusFacilities.getJSONObject(locationIndex);
                     displayInfo(v);
 				} catch (JSONException e) {
 					Log.w(TAG, "onCreateView(): " + e.getMessage());
@@ -170,18 +168,18 @@ public class RecreationDisplay extends Fragment {
             businessContentRow.setVisibility(View.GONE);
         }
 
-        descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description")));
+        descriptionTextView.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description"))));
 
         try {
             // Generate hours array if it wasn't restored
             if(mLocationHours == null) {
                 // Get hours data for sub-locations & create fragments
-                mLocationHours = Gyms.getGymHours(mLocationJSON);
+                mLocationHours = mLocationJSON.getJSONArray("area_hours");
                 mPagerAdapter.notifyDataSetChanged();
 
                 // Set swipe page to today's date
                 int pos = getCurrentPos(mLocationHours);
-                mPager.setCurrentItem(pos, true);
+                mPager.setCurrentItem(pos, false);
             }
 
             // Hide hours pager if there's nothing to display
@@ -204,9 +202,9 @@ public class RecreationDisplay extends Fragment {
 			try {
 				data = mLocationHours.getJSONObject(position);
 				String date = data.getString("date");
-				JSONObject hours = data.getJSONObject("hours");
-				if(hours == null) return null;
-				return HourSwiperFragment.newInstance(date, hours);
+				JSONArray locations = data.getJSONArray("locations");
+				if(locations == null) return null;
+				return HourSwiperFragment.newInstance(date, locations);
 			} catch (JSONException e) {
 				Log.w(TAG, "getItem(): " + e.getMessage());
 				return null;
