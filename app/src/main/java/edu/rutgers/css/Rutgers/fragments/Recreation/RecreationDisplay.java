@@ -53,13 +53,11 @@ public class RecreationDisplay extends Fragment {
 		super.onCreate(savedInstanceState);
 
         if(savedInstanceState != null) {
-            String jsonString, hoursString;
-            jsonString = savedInstanceState.getString("mLocationJSON");
-            hoursString = savedInstanceState.getString("mLocationHours");
+            String jsonString = savedInstanceState.getString("mLocationJSON");
 
             try {
                 if(jsonString != null) mLocationJSON = new JSONObject(jsonString);
-                if(hoursString != null) mLocationHours = new JSONArray(hoursString);
+                mLocationHours = mLocationJSON.getJSONArray("area_hours");
             } catch (JSONException e) {
                 Log.w(TAG, "onCreate(): " + e.getMessage());
             }
@@ -129,7 +127,6 @@ public class RecreationDisplay extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if(mLocationJSON != null) outState.putString("mLocationJSON", mLocationJSON.toString());
-        if(mLocationHours != null) outState.putString("mLocationHours", mLocationHours.toString());
     }
 
     private void displayInfo(View v) {
@@ -190,6 +187,9 @@ public class RecreationDisplay extends Fragment {
 
     }
 
+    /**
+     * A pager adapter which creates fragments to display facility hours.
+     */
 	private class HoursSlidePagerAdapter extends FragmentStatePagerAdapter {
 		
 		public HoursSlidePagerAdapter(FragmentManager fm) {
@@ -198,12 +198,10 @@ public class RecreationDisplay extends Fragment {
 
 		@Override
 		public Fragment getItem(int position) {
-			JSONObject data;
 			try {
-				data = mLocationHours.getJSONObject(position);
+                JSONObject data = mLocationHours.getJSONObject(position);
 				String date = data.getString("date");
 				JSONArray locations = data.getJSONArray("locations");
-				if(locations == null) return null;
 				return HourSwiperFragment.newInstance(date, locations);
 			} catch (JSONException e) {
 				Log.w(TAG, "getItem(): " + e.getMessage());
@@ -228,7 +226,12 @@ public class RecreationDisplay extends Fragment {
         }
 		
 	}
-	
+
+    /**
+     * Pick default page based on today's date
+     * @param locationHours Locations/hours array
+     * @return Index of the page for today's date, or 0 if it's not found.
+     */
 	private int getCurrentPos(JSONArray locationHours) {
 		String todayString = Gyms.GYM_DATE_FORMAT.format(new Date());
 		for(int i = 0; i < locationHours.length(); i++) {
