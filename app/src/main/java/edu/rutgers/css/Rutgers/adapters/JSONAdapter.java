@@ -171,7 +171,7 @@ public class JSONAdapter extends BaseAdapter {
         // If we aren't given a view, inflate one. Get special layout for sub-menu items.
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.row_category, null);
+            convertView = layoutInflater.inflate(R.layout.row_dtable_category, null);
             holder = new ViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             convertView.setTag(holder);
