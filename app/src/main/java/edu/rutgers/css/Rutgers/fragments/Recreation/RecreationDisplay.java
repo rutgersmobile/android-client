@@ -1,32 +1,38 @@
 package edu.rutgers.css.Rutgers.fragments.Recreation;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TableRow;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
+import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Gyms;
+import edu.rutgers.css.Rutgers.fragments.TextDisplay;
+import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
+import edu.rutgers.css.Rutgers.items.RMenuItemRow;
+import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -39,10 +45,16 @@ public class RecreationDisplay extends Fragment {
 	private static final String TAG = "RecreationDisplay";
     public static final String HANDLE = "recdisplay";
 
-	private ViewPager mPager;
-	private PagerAdapter mPagerAdapter;
-	private JSONArray mLocationHours;
+    private static final String ID_KEY = "id";
+    private static final int ADDRESS_ROW = 0;
+    private static final int INFO_ROW = 1;
+    private static final int BUSINESS_ROW = 2;
+    private static final int DESCRIPTION_ROW = 3;
+    private static final int HOURS_ROW = 4;
+
     private JSONObject mLocationJSON;
+    private RMenuAdapter mAdapter;
+    private List<RMenuRow> mData;
 	
 	public RecreationDisplay() {
 		// Required empty public constructor
@@ -51,17 +63,47 @@ public class RecreationDisplay extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        Bundle args = getArguments();
+
+        mData = new ArrayList<RMenuRow>(10);
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
         if(savedInstanceState != null) {
             String jsonString = savedInstanceState.getString("mLocationJSON");
 
             try {
                 if(jsonString != null) mLocationJSON = new JSONObject(jsonString);
-                mLocationHours = mLocationJSON.getJSONArray("area_hours");
+                addInfo();
+                return;
             } catch (JSONException e) {
                 Log.w(TAG, "onCreate(): " + e.getMessage());
             }
         }
+
+        // Get the facility JSON
+        final String campusTitle = args.getString("campus");
+        final String facilityTitle = args.getString("facility");
+
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(Gyms.getFacility(campusTitle, facilityTitle)).done(new DoneCallback<JSONObject>() {
+
+            @Override
+            public void onDone(JSONObject result) {
+                if(result != null) {
+                    mLocationJSON = result;
+                    addInfo();
+                }
+            }
+
+        }).fail(new FailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                AppUtil.showFailedLoadToast(getActivity());
+                Log.w(TAG, AppUtil.formatAjaxStatus(status));
+            }
+
+        });
 	}
 	
 	@Override
@@ -69,58 +111,58 @@ public class RecreationDisplay extends Fragment {
 		super.onCreateView(inflater, parent, savedInstanceState);
 		final View v = inflater.inflate(R.layout.fragment_recreation_display, parent, false);
 
+        final Bundle args = getArguments();
+        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+
 		// Make sure necessary arguments were given
-		Bundle args = getArguments();
-		if(args.get("campus") == null || args.get("location") == null) {
+		if(args.get("campus") == null || args.get("facility") == null) {
 			Log.w(TAG, "Missing campus/location arg");
 			AppUtil.showFailedLoadToast(getActivity());
 			return v;
 		}
-		
-		getActivity().setTitle(args.getString("title"));
-		
-		// Set up pager for hours displays
-		mPager = (ViewPager) v.findViewById(R.id.hoursViewPager);
-		mPagerAdapter = new HoursSlidePagerAdapter(getChildFragmentManager());
-		mPager.setAdapter(mPagerAdapter);
 
-        // If location JSON was saved in state, display info now.
-        if(mLocationJSON != null) {
-            displayInfo(v);
-            return v;
-        }
-
-        // Don't have JSON yet - do request
-        final int locationIndex = args.getInt("location");
-        final int campusIndex = args.getInt("campus");
-
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-		dm.when(Gyms.getGyms()).done(new DoneCallback<JSONArray>() {
-
-			@Override
-			public void onDone(JSONArray gymsJson) {
-				try {
-					// Get location JSON
-                    JSONArray campusFacilities = gymsJson.getJSONObject(campusIndex).getJSONArray("facilities");
-					mLocationJSON = campusFacilities.getJSONObject(locationIndex);
-                    displayInfo(v);
-				} catch (JSONException e) {
-					Log.w(TAG, "onCreateView(): " + e.getMessage());
-				}
-				
-			}
-
-		}).fail(new FailCallback<AjaxStatus>() {
-
+        // Set up list adapter
+        final ListView listView = (ListView) v.findViewById(R.id.list);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onFail(AjaxStatus status) {
-                AppUtil.showFailedLoadToast(getActivity());
-                Log.w(TAG, status.getMessage());
-            }
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                RMenuItemRow clicked = (RMenuItemRow) parent.getItemAtPosition(position);
+                Bundle clickedArgs = clicked.getArgs();
 
+                switch(clickedArgs.getInt(ID_KEY)) {
+                    case ADDRESS_ROW:
+                        Intent mapIntent = new Intent(Intent.ACTION_VIEW);
+                        mapIntent.setData(Uri.parse("geo:0,0?q=" + clicked.getTitle()));
+                        try {
+                            startActivity(mapIntent);
+                        } catch (ActivityNotFoundException e) {
+                            Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case INFO_ROW:
+                    case BUSINESS_ROW:
+                        Intent dialIntent = new Intent(Intent.ACTION_DIAL);
+                        dialIntent.setData(Uri.parse("tel:"+clicked.getTitle()));
+                        try {
+                            startActivity(dialIntent);
+                        } catch (ActivityNotFoundException e) {
+                            Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case DESCRIPTION_ROW:
+                        Bundle newArgs = new Bundle(clickedArgs);
+                        newArgs.putString("title", args.getString("title"));
+                        newArgs.putString("component", TextDisplay.HANDLE);
+                        ComponentFactory.getInstance().switchFragments(newArgs);
+                        break;
+                    case HOURS_ROW:
+                        break;
+                }
+            }
         });
 
-		return v;
+        return v;
 	}
 
     @Override
@@ -129,121 +171,52 @@ public class RecreationDisplay extends Fragment {
         if(mLocationJSON != null) outState.putString("mLocationJSON", mLocationJSON.toString());
     }
 
-    private void displayInfo(View v) {
-
-        // Get view IDs
-        final TextView addressTextView = (TextView) v.findViewById(R.id.addressTextView);
-        final TextView infoDeskNumberTextView = (TextView) v.findViewById(R.id.infoDeskNumberTextView);
-        final TextView businessOfficeNumberTextView = (TextView) v.findViewById(R.id.businessOfficeNumberTextView);
-        final TextView descriptionTextView = (TextView) v.findViewById(R.id.descriptionTextView);
-
-        final TableRow infoHeadRow = (TableRow) v.findViewById(R.id.infoRowHead);
-        final TableRow infoContentRow = (TableRow) v.findViewById(R.id.infoRowContent);
-        final TableRow businessHeadRow = (TableRow) v.findViewById(R.id.businessRowHead);
-        final TableRow businessContentRow = (TableRow) v.findViewById(R.id.businessRowContent);
-
+    private void addInfo() {
+        if(getResources() == null) return;
 
         // Fill in location info
         String infoDesk = mLocationJSON.optString("information_number");
         String businessOffice = mLocationJSON.optString("business_number");
+        String address = mLocationJSON.optString("address");
+        //Spanned description = Html.fromHtml(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description")));
+        String descriptionHtml =  StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description"));
 
-        addressTextView.setText(mLocationJSON.optString("address"));
+        if(!StringUtils.isEmpty(address)) {
+            Bundle rowArgs = new Bundle();
+            rowArgs.putInt(ID_KEY, ADDRESS_ROW);
+            rowArgs.putString("title", address);
 
-        if(infoDesk != null && !infoDesk.isEmpty()) {
-            infoDeskNumberTextView.setText(infoDesk);
-        }
-        else {
-            infoHeadRow.setVisibility(View.GONE);
-            infoContentRow.setVisibility(View.GONE);
-        }
-
-        if(businessOffice != null && !businessOffice.isEmpty()) {
-            businessOfficeNumberTextView.setText(businessOffice);
-        }
-        else {
-            businessHeadRow.setVisibility(View.GONE);
-            businessContentRow.setVisibility(View.GONE);
+            mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.rec_address_header)));
+            mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-        descriptionTextView.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description"))));
+        if(!StringUtils.isEmpty(infoDesk)) {
+            Bundle rowArgs = new Bundle();
+            rowArgs.putInt(ID_KEY, INFO_ROW);
+            rowArgs.putString("title", infoDesk);
 
-        try {
-            // Generate hours array if it wasn't restored
-            if(mLocationHours == null) {
-                // Get hours data for sub-locations & create fragments
-                mLocationHours = mLocationJSON.getJSONArray("area_hours");
-                mPagerAdapter.notifyDataSetChanged();
-
-                // Set swipe page to today's date
-                int pos = getCurrentPos(mLocationHours);
-                mPager.setCurrentItem(pos, false);
-            }
-
-            // Hide hours pager if there's nothing to display
-            if(mLocationHours.length() == 0) mPager.setVisibility(View.GONE);
-        } catch (JSONException e) {
-            Log.w(TAG, "displayInfo(): " + e.getMessage());
+            mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.rec_info_desk_header)));
+            mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
+        if(!StringUtils.isEmpty(businessOffice)) {
+            Bundle rowArgs = new Bundle();
+            rowArgs.putInt(ID_KEY, BUSINESS_ROW);
+            rowArgs.putString("title", businessOffice);
+
+            mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.rec_business_office_header)));
+            mAdapter.add(new RMenuItemRow(rowArgs));
+        }
+
+        if(!StringUtils.isEmpty(descriptionHtml)) {
+            Bundle rowArgs = new Bundle();
+            rowArgs.putInt(ID_KEY, DESCRIPTION_ROW);
+            rowArgs.putString("title", "View Description");
+            rowArgs.putString("data", descriptionHtml);
+
+            mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.rec_description_header)));
+            mAdapter.add(new RMenuItemRow(rowArgs));
+        }
     }
-
-    /**
-     * A pager adapter which creates fragments to display facility hours.
-     */
-	private class HoursSlidePagerAdapter extends FragmentStatePagerAdapter {
-		
-		public HoursSlidePagerAdapter(FragmentManager fm) {
-			super(fm);
-		}
-
-		@Override
-		public Fragment getItem(int position) {
-			try {
-                JSONObject data = mLocationHours.getJSONObject(position);
-				String date = data.getString("date");
-				JSONArray locations = data.getJSONArray("locations");
-				return HourSwiperFragment.newInstance(date, locations);
-			} catch (JSONException e) {
-				Log.w(TAG, "getItem(): " + e.getMessage());
-				return null;
-			}
-		}
-
-		@Override
-		public int getCount() {
-			if(mLocationHours == null) return 0;
-			else return mLocationHours.length();
-		}
-		
-        @Override
-        public CharSequence getPageTitle(int position) {
-            try {
-				return mLocationHours.getJSONObject(position).getString("date");
-			} catch (JSONException e) {
-				Log.w(TAG, "getPageTitle(): " + e.getMessage());
-				return "";
-			}
-        }
-		
-	}
-
-    /**
-     * Pick default page based on today's date
-     * @param locationHours Locations/hours array
-     * @return Index of the page for today's date, or 0 if it's not found.
-     */
-	private int getCurrentPos(JSONArray locationHours) {
-		String todayString = Gyms.GYM_DATE_FORMAT.format(new Date());
-		for(int i = 0; i < locationHours.length(); i++) {
-			try {
-				if(locationHours.getJSONObject(i).getString("date").equals(todayString)) return i;
-			} catch (JSONException e) {
-				Log.w(TAG, "getCurrentPos(): " + e.getMessage());
-				return 0;
-			}
-		}
-		
-		return 0;
-	}
 
 }
