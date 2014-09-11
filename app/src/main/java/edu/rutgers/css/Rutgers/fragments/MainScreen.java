@@ -1,8 +1,6 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -11,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 public class MainScreen extends Fragment {
@@ -21,23 +20,28 @@ public class MainScreen extends Fragment {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_main_screen, container, false);
+		final View v = inflater.inflate(R.layout.fragment_main_screen, container, false);
 		
 		getActivity().setTitle(R.string.app_name);
 
-        int bgResource;
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) bgResource = R.drawable.bgland;
-        else bgResource = R.drawable.bgportrait;
-        Bitmap bg = BitmapFactory.decodeResource(getResources(), bgResource, new BitmapFactory.Options());
-        Drawable bgDraw = new BitmapDrawable(bg);
+        // Set background after view is created and size is set
+        v.post(new Runnable() {
+            @Override
+            public void run() {
+                if(!isAdded()) return;
+                // Loads and resizes the background logo
+                Bitmap bg = AppUtil.decodeSampledBitmapFromResource(getResources(), R.drawable.background, v.getWidth(), v.getHeight());
+                Drawable bgDrawable = new BitmapDrawable(getResources(), bg);
 
-        if(android.os.Build.VERSION.SDK_INT >= 16) {
-            v.setBackground(bgDraw);
-        }
-        else {
-            v.setBackgroundDrawable(bgDraw);
-        }
+                if (android.os.Build.VERSION.SDK_INT >= 16) {
+                    v.setBackground(bgDrawable);
+                } else {
+                    v.setBackgroundDrawable(bgDrawable);
+                }
+            }
+        });
 
 		return v;
 	}
+
 }
