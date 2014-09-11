@@ -30,8 +30,14 @@ public class MainScreen extends Fragment {
         else bgResource = R.drawable.bgportrait;
         Bitmap bg = BitmapFactory.decodeResource(getResources(), bgResource, new BitmapFactory.Options());
         Drawable bgDraw = new BitmapDrawable(bg);
-        v.setBackground(bgDraw);
-		
+
+        if(android.os.Build.VERSION.SDK_INT >= 16) {
+            v.setBackground(bgDraw);
+        }
+        else {
+            v.setBackgroundDrawable(bgDraw);
+        }
+
 		return v;
 	}
 }
