@@ -428,7 +428,7 @@ public class MainActivity extends FragmentActivity  implements
 	 * Grab web links and add them to the menu.
 	 */
 	private void loadWebShortcuts() {
-		Request.jsonArray(SC_API, Request.CACHE_ONE_HOUR * 24).done(new AndroidDoneCallback<JSONArray>() {
+		Request.jsonArray(SC_API, Request.CACHE_ONE_DAY).done(new AndroidDoneCallback<JSONArray>() {
 
 			@Override
 			public void onDone(JSONArray shortcutsArray) {
