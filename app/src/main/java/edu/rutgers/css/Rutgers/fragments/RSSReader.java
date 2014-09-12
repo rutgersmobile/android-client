@@ -14,9 +14,9 @@ import android.widget.Toast;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +66,9 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 			return;
 		}
 		
-		// Get RSS feed XML and add items through the array adapter
-		Request.xml(args.getString("url"), expire).done(new AndroidDoneCallback<XmlDom>() {
+		// Get RSS feed XML and add items through the array adapter\
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+		dm.when(Request.xml(args.getString("url"), expire)).done(new DoneCallback<XmlDom>() {
 			
 			@Override
 			public void onDone(XmlDom xml) {
@@ -78,26 +79,16 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 					mAdapter.add(newItem);
 				}
 			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
-		
-			@Override
-			public void onFail(AjaxStatus e) {
-				Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
+
+		}).fail(new FailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus e) {
+                Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
                 AppUtil.showFailedLoadToast(getActivity());
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		});
+            }
+
+        });
 	}
 
 	@Override

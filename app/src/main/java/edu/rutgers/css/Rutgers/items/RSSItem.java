@@ -6,13 +6,14 @@ import com.androidquery.util.XmlDom;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateParser;
+import org.apache.commons.lang3.time.DatePrinter;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -33,13 +34,13 @@ public class RSSItem implements Serializable {
 	private String date;
 	private URL imgUrl;
 
-	private final static DateFormat rssDf = new SimpleDateFormat("EEE, dd MMM yyyy ZZZZZ", Locale.US); // Mon, 26 May 2014 -0400
-	private final static DateFormat rssDf2 = new SimpleDateFormat("EEE, MMM dd, yyyy", Locale.US); // Monday, May 26, 2014
-    private final static DateFormat rssDf3 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US); // Mon, 26 May 2014 00:27:50 GMT
-    private final static DateFormat rssOutFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.US); // May 26, 2014
-    private final static DateFormat eventDf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
-    private final static DateFormat eventOutDf = new SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.US);
-    private final static DateFormat eventOutEndDf = new SimpleDateFormat("h:mm a", Locale.US);
+	private final static DateParser rssDf = FastDateFormat.getInstance("EEE, dd MMM yyyy ZZZZZ", Locale.US); // Mon, 26 May 2014 -0400
+	private final static DateParser rssDf2 = FastDateFormat.getInstance("EEE, MMM dd, yyyy", Locale.US); // Monday, May 26, 2014
+    private final static DateParser rssDf3 = FastDateFormat.getInstance("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US); // Mon, 26 May 2014 00:27:50 GMT
+    private final static DatePrinter rssOutFormat = FastDateFormat.getInstance("MMMM d, yyyy", Locale.US); // May 26, 2014
+    private final static DateParser eventDf = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
+    private final static DatePrinter eventOutDf = FastDateFormat.getInstance("MMM dd, yyyy h:mm a", Locale.US);
+    private final static DatePrinter eventOutEndDf = FastDateFormat.getInstance("h:mm a", Locale.US);
 	
 	/**
 	 * Default constructor takes RSS item as XML object
