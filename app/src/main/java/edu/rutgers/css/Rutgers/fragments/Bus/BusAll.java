@@ -27,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
@@ -46,17 +47,11 @@ public class BusAll extends Fragment {
 
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
-    private EditText mFilterEditText;
+    private WeakReference<EditText> mFilterEditText;
 	
 	public BusAll() {
 		// Required empty public constructor
 	}
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mFilterEditText = null;
-    }
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
@@ -118,8 +113,9 @@ public class BusAll extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_bus_all, parent, false);
 
         // Get the filter field and add a listener to it
-        mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
-        mFilterEditText.addTextChangedListener(new TextWatcher() {
+        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        mFilterEditText = new WeakReference<EditText>(filterEditText);
+        filterEditText.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -136,14 +132,14 @@ public class BusAll extends Fragment {
             }
 
         });
-        mFilterEditText.requestFocus();
+        filterEditText.requestFocus();
 
         // Get clear button and set listener
         ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
         filterClearButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                mFilterEditText.setText("");
+                filterEditText.setText("");
             }
         });
 
@@ -183,7 +179,7 @@ public class BusAll extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFilterEditText != null) outState.putString("filter", mFilterEditText.getText().toString());
+        if(mFilterEditText.get() != null) outState.putString("filter", mFilterEditText.get().getText().toString());
     }
 
     /**
