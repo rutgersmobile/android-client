@@ -22,6 +22,7 @@ import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
 
+import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidDoneCallback;
@@ -29,7 +30,6 @@ import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
-import org.jdeferred.multiple.OneResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +59,6 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     private String mSemester;
     private String mCampus;
     private String mLevel;
-    private EditText mFilterEditText;
     private String mFilterString;
 
     public SOCMain() {
@@ -82,7 +81,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         mSemester = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, null);
 
         // Restore filter
-        if(savedInstanceState != null && savedInstanceState.getString("filter") != null) {
+        if(savedInstanceState != null) {
             mFilterString = savedInstanceState.getString("filter");
         }
 
@@ -146,7 +145,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         View v = inflater.inflate(R.layout.fragment_soc_main, parent, false);
         setScheduleTitle();
 
-        mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
         ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
@@ -178,7 +177,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         });
 
         // Search text listener
-        mFilterEditText.addTextChangedListener(new TextWatcher() {
+        filterEditText.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -187,7 +186,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Set filter for list adapter
-                mFilterString = s.toString();
+                mFilterString = s.toString().trim();
                 mAdapter.getFilter().filter(mFilterString);
             }
 
@@ -202,7 +201,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         filterClearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mFilterEditText.setText("");
+                filterEditText.setText("");
             }
         });
 
@@ -229,7 +228,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFilterEditText != null) outState.putString("filter", mFilterString);
+        if(mFilterString != null) outState.putString("filter", mFilterString);
     }
 
     @Override
@@ -283,7 +282,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
 
         // Get index & list of subjects
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Schedule.getIndex(mSemester, mCampus, mLevel),  Schedule.getSubjects(mCampus, mLevel, mSemester)).done(new AndroidDoneCallback<MultipleResults>() {
+        dm.when(Schedule.getIndex(mSemester, mCampus, mLevel),  Schedule.getSubjects(mCampus, mLevel, mSemester)).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
@@ -304,25 +303,17 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
                 }
 
                 // Re-apply filter
-                mAdapter.getFilter().filter(mFilterString);
+                if (mFilterString != null && !mFilterString.isEmpty()) {
+                    mAdapter.getFilter().filter(mFilterString);
+                }
             }
 
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
-
-        }).fail(new AndroidFailCallback<OneReject>() {
+        }).fail(new FailCallback<OneReject>() {
 
             @Override
             public void onFail(OneReject result) {
                 mAdapter.clear();
                 AppUtil.showFailedLoadToast(getActivity());
-            }
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
             }
 
         });

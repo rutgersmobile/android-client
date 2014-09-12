@@ -174,22 +174,27 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             FilterResults filterResults = new FilterResults();
 
             // Copy list of original values
-            if(mOriginalList == null) {
-                synchronized(mLock) {
-                    mOriginalList = new ArrayList<JSONObject>(mList);
+            synchronized(mLock) {
+                if(mOriginalList == null) {
+                    if(mList.size() == 0) {
+                        filterResults.values = null;
+                        filterResults.count = 0;
+                        return filterResults;
+                    }
+                    else mOriginalList = new ArrayList<JSONObject>(mList);
                 }
             }
 
-            ArrayList<JSONObject> tempList;
-            synchronized (mLock) {
-                tempList = new ArrayList<JSONObject>(mOriginalList);
-            }
-
-            if(constraint == null || constraint.toString().isEmpty()) {
-                filterResults.values = tempList;
-                filterResults.count = tempList.size();
+            if(constraint == null || constraint.toString().trim().isEmpty()) {
+                // Empty filter, do nothing
+                return null;
             }
             else {
+                ArrayList<JSONObject> tempList;
+                synchronized (mLock) {
+                    tempList = new ArrayList<JSONObject>(mOriginalList);
+                }
+
                 ArrayList<JSONObject> passed = new ArrayList<JSONObject>();
                 String query = constraint.toString().trim();
 
@@ -227,16 +232,19 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
 
                 filterResults.values = passed;
                 filterResults.count = passed.size();
+                return filterResults;
             }
 
-            return filterResults;
         }
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
+            // Empty filter, do nothing
+            if(filterResults == null) return;
+
             synchronized (mLock) {
                 mList.clear();
-                mList.addAll((ArrayList<JSONObject>) filterResults.values);
+                if(filterResults.count > 0) mList.addAll((ArrayList<JSONObject>) filterResults.values);
                 notifyDataSetChanged();
             }
         }
