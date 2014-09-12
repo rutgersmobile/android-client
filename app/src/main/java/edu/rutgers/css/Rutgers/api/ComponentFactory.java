@@ -13,10 +13,9 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collection;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 
@@ -51,7 +50,8 @@ public class ComponentFactory {
     private static final String TAG = "ComponentFactory";
 
 	private static ComponentFactory instance = null;
-    private FragmentActivity mMainActivity;
+    private static String topHandle;
+    private WeakReference<FragmentActivity> mMainActivity;
 
     // Set up table of fragments that can be launched
     private static Map<String, Class<? extends Fragment>> sFragmentTable = Collections.unmodifiableMap(new HashMap<String, Class<? extends Fragment>>() {{
@@ -92,7 +92,7 @@ public class ComponentFactory {
 	}
 
     public void setMainActivity(FragmentActivity fragmentActivity) {
-        this.mMainActivity = fragmentActivity;
+        this.mMainActivity = new WeakReference<FragmentActivity>(fragmentActivity);
     }
 
 	/**
@@ -157,8 +157,8 @@ public class ComponentFactory {
 	 * @return True if the new fragment was successfully created, false if not.
 	 */
 	public boolean switchFragments(Bundle args) {
-        if(mMainActivity == null) {
-            Log.e(TAG, "switchFragments(): main activity not set");
+        if(mMainActivity.get() == null) {
+            Log.e(TAG, "switchFragments(): main activity ref is null");
             return false;
         }
 		else if(args == null) {
@@ -179,16 +179,16 @@ public class ComponentFactory {
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
-        Analytics.queueEvent(mMainActivity, Analytics.CHANNEL_OPENED, extras.toString());
+        Analytics.queueEvent(mMainActivity.get(), Analytics.CHANNEL_OPENED, extras.toString());
 
         // Attempt to create the fragment
         Fragment fragment = createFragment(args);
 		if(fragment == null) return false;
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
-        AppUtil.closeKeyboard(mMainActivity);
+        AppUtil.closeKeyboard(mMainActivity.get());
 
-        FragmentManager fm = mMainActivity.getSupportFragmentManager();
+        FragmentManager fm = mMainActivity.get().getSupportFragmentManager();
 
         // If this is a top level (nav drawer) press, find the last time this channel was launched and pop backstack to it
 		if(isTopLevel && fm.findFragmentByTag(componentTag) != null) {
@@ -211,8 +211,13 @@ public class ComponentFactory {
      * @param tag Tag for fragment transaction backstack
      */
     public void showDialogFragment(DialogFragment dialogFragment, String tag) {
-        FragmentTransaction ft = mMainActivity.getSupportFragmentManager().beginTransaction();
-        Fragment prev = mMainActivity.getSupportFragmentManager().findFragmentByTag(tag);
+        if(mMainActivity.get() == null) {
+            Log.e(TAG, "main activity ref null");
+            return;
+        }
+
+        FragmentTransaction ft = mMainActivity.get().getSupportFragmentManager().beginTransaction();
+        Fragment prev = mMainActivity.get().getSupportFragmentManager().findFragmentByTag(tag);
         if(prev != null) {
             ft.remove(prev);
         }
