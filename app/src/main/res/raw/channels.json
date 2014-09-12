@@ -86,7 +86,7 @@
         "title": "Scarlet Knights",
         "handle": "athletics",
         "view": "dtable",
-        "url": "https://nstanlee.rutgers.edu/~rfranknj/mobile/1/athleticsfaq.txt"
+        "api": "athleticsfaq.txt"
     }
 
 ]
