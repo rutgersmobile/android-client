@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Stack;
 
 import edu.rutgers.css.Rutgers.SingleFragmentActivity;
 import edu.rutgers.css.Rutgers.fragments.Bus.BusDisplay;
@@ -49,9 +50,9 @@ public class ComponentFactory {
 
     private static final String TAG = "ComponentFactory";
 
-	private static ComponentFactory instance = null;
-    private static String topHandle;
-    private WeakReference<FragmentActivity> mMainActivity;
+	private static ComponentFactory instance;
+    private static WeakReference<FragmentActivity> sMainActivity;
+    private static Stack<String> sHandleStack;
 
     // Set up table of fragments that can be launched
     private static Map<String, Class<? extends Fragment>> sFragmentTable = Collections.unmodifiableMap(new HashMap<String, Class<? extends Fragment>>() {{
@@ -92,15 +93,16 @@ public class ComponentFactory {
 	}
 
     public void setMainActivity(FragmentActivity fragmentActivity) {
-        this.mMainActivity = new WeakReference<FragmentActivity>(fragmentActivity);
+        sMainActivity = new WeakReference<FragmentActivity>(fragmentActivity);
     }
 
 	/**
 	 * Get singleton instance
 	 * @return Component factory singleton instance
 	 */
-	public static ComponentFactory getInstance () {
-		if (instance == null) instance = new ComponentFactory();
+	public static ComponentFactory getInstance() {
+		if(instance == null) instance = new ComponentFactory();
+        if(sHandleStack == null) sHandleStack = new Stack<String>();
 		return instance;
 	}
 	
@@ -109,7 +111,7 @@ public class ComponentFactory {
 	 * @param options Argument bundle with at least 'component' argument set to describe which component to build. The options bundle will be passed to the new fragment.
 	 * @return Built fragment
 	 */
-	public Fragment createFragment (Bundle options) {
+	public Fragment createFragment(Bundle options) {
 		Fragment fragment;
 		String component;
 		
@@ -143,7 +145,7 @@ public class ComponentFactory {
 	 * @param context
 	 * @param options Argument bundle
 	 */
-	public void launch (Context context, Bundle options) {
+	public void launch(Context context, Bundle options) {
 		Intent i = new Intent(context, SingleFragmentActivity.class);
 		i.putExtras(options);
 		context.startActivity(i);
@@ -157,7 +159,7 @@ public class ComponentFactory {
 	 * @return True if the new fragment was successfully created, false if not.
 	 */
 	public boolean switchFragments(Bundle args) {
-        if(mMainActivity.get() == null) {
+        if(sMainActivity.get() == null) {
             Log.e(TAG, "switchFragments(): main activity ref is null");
             return false;
         }
@@ -179,16 +181,16 @@ public class ComponentFactory {
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
-        Analytics.queueEvent(mMainActivity.get(), Analytics.CHANNEL_OPENED, extras.toString());
+        Analytics.queueEvent(sMainActivity.get(), Analytics.CHANNEL_OPENED, extras.toString());
 
         // Attempt to create the fragment
         Fragment fragment = createFragment(args);
 		if(fragment == null) return false;
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
-        AppUtil.closeKeyboard(mMainActivity.get());
+        AppUtil.closeKeyboard(sMainActivity.get());
 
-        FragmentManager fm = mMainActivity.get().getSupportFragmentManager();
+        FragmentManager fm = sMainActivity.get().getSupportFragmentManager();
 
         // If this is a top level (nav drawer) press, find the last time this channel was launched and pop backstack to it
 		if(isTopLevel && fm.findFragmentByTag(componentTag) != null) {
@@ -202,6 +204,9 @@ public class ComponentFactory {
 			.addToBackStack(componentTag)
 			.commit();
 
+        // Set tag of fragment that is on top
+        sHandleStack.push(componentTag);
+
 		return true;
 	}
 
@@ -211,17 +216,29 @@ public class ComponentFactory {
      * @param tag Tag for fragment transaction backstack
      */
     public void showDialogFragment(DialogFragment dialogFragment, String tag) {
-        if(mMainActivity.get() == null) {
+        if(sMainActivity.get() == null) {
             Log.e(TAG, "main activity ref null");
             return;
         }
 
-        FragmentTransaction ft = mMainActivity.get().getSupportFragmentManager().beginTransaction();
-        Fragment prev = mMainActivity.get().getSupportFragmentManager().findFragmentByTag(tag);
+        FragmentTransaction ft = sMainActivity.get().getSupportFragmentManager().beginTransaction();
+        Fragment prev = sMainActivity.get().getSupportFragmentManager().findFragmentByTag(tag);
         if(prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(null);
         dialogFragment.show(ft, tag);
     }
+
+    // Get tag of fragment that is on top
+    public String getTopHandle() {
+        if(!sHandleStack.isEmpty()) return sHandleStack.peek();
+        else return null;
+    }
+
+    public String popHandleStack() {
+        if(!sHandleStack.isEmpty()) return sHandleStack.pop();
+        else return null;
+    }
+
 }

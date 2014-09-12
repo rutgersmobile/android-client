@@ -35,12 +35,12 @@ import java.util.Set;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
+import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.items.PlaceStub;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -193,7 +193,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         super.onResume();
 
         // Don't update the screen if the places fragment isn't on top
-        if(!AppUtil.isOnTop(PlacesMain.HANDLE, getActivity().getSupportFragmentManager())) {
+        if(!AppUtil.isOnTop(PlacesMain.HANDLE)) {
             Log.v(TAG, "onResume(): Not on top, not updating nearby places");
         }
         // Reload nearby places
@@ -209,7 +209,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         // or before onCreate() has ran.
         if(mData != null && isAdded()) {
             // Don't update the screen if the places fragment isn't on top
-            if(!AppUtil.isOnTop(PlacesMain.HANDLE, getActivity().getSupportFragmentManager())) {
+            if(!AppUtil.isOnTop(PlacesMain.HANDLE)) {
                 Log.v(TAG, "onConnected(): Not on top, not updating nearby places");
             }
             else loadNearbyPlaces();

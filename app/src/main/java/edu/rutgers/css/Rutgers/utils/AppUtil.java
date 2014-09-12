@@ -11,7 +11,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -32,6 +31,7 @@ import java.io.RandomAccessFile;
 import java.util.UUID;
 
 import edu.rutgers.css.Rutgers.api.Analytics;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
@@ -279,31 +279,13 @@ public class AppUtil {
     }
 
     /**
-     * Get the tag for the fragment on top of the stack.
-     * @param fragmentManager App's {@link android.support.v4.app.FragmentManager}
-     * @return Name that was supplied to {@link android.support.v4.app.FragmentManager #addToBackStack(java.lang.String)}.
-     */
-    public static String backStackPeek(FragmentManager fragmentManager) {
-        if(fragmentManager == null || fragmentManager.getBackStackEntryCount() == 0) {
-            if(fragmentManager == null) Log.v(TAG, "Null fragment manager");
-            else Log.v(TAG, "Backstack empty");
-            return null;
-        }
-
-        FragmentManager.BackStackEntry backStackEntry = fragmentManager.getBackStackEntryAt(fragmentManager.getBackStackEntryCount()-1);
-        Log.v(TAG, "Top of backstack: " + backStackEntry.getName());
-        return backStackEntry.getName();
-    }
-
-    /**
      * Check if the fragment on top of the stack has the given tag.
      * @param handle Fragment handle
-     * @param fragmentManager App's {@link android.support.v4.app.FragmentManager}
      * @return True if on top, false if not
      */
-    public static boolean isOnTop(String handle, FragmentManager fragmentManager) {
+    public static boolean isOnTop(String handle) {
         if(handle == null) return false;
-        return handle.equalsIgnoreCase(backStackPeek(fragmentManager));
+        return handle.equalsIgnoreCase(ComponentFactory.getInstance().getTopHandle());
     }
 
     /**

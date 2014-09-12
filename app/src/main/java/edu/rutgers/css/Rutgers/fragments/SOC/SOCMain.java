@@ -269,7 +269,6 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
         if(somethingChanged) {
             Log.v(TAG, "Loading new subjects");
-            setScheduleTitle(); // force title change
             loadSubjects();
         }
     }
@@ -306,7 +305,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      */
     private void loadSubjects() {
         Log.v(TAG, "Loading subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
-        if(isAdded() && AppUtil.isOnTop(SOCMain.HANDLE, getFragmentManager())) setScheduleTitle();
+        if(isAdded() && AppUtil.isOnTop(SOCMain.HANDLE)) setScheduleTitle();
         mAdapter.clear();
         mAdapter.notifyDataSetChanged();
 

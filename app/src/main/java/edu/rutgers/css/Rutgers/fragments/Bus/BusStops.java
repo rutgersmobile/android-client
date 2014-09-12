@@ -156,7 +156,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 		super.onResume();
 
         // Don't update the screen if the bus fragment isn't on top
-        if(!AppUtil.isOnTop(BusMain.HANDLE, getActivity().getSupportFragmentManager())) {
+        if(!AppUtil.isOnTop(BusMain.HANDLE)) {
             Log.v(TAG, "Not on top, not updating active/nearby stops");
             return;
         }
@@ -237,7 +237,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         // or before onCreate() has ran.
         if(mData != null && isAdded()) {
             // Don't update the screen if the bus fragment isn't on top
-            if(!AppUtil.isOnTop(BusMain.HANDLE, getActivity().getSupportFragmentManager())) {
+            if(!AppUtil.isOnTop(BusMain.HANDLE)) {
                 Log.v(TAG, "Not on top, not updating nearby stops");
             }
             else loadNearbyStops(mCurrentCampus);
