@@ -33,6 +33,7 @@ import edu.rutgers.css.Rutgers.fragments.Places.PlacesMain;
 import edu.rutgers.css.Rutgers.fragments.RSSReader;
 import edu.rutgers.css.Rutgers.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.fragments.Recreation.RecreationDisplay;
+import edu.rutgers.css.Rutgers.fragments.Recreation.RecreationHoursDisplay;
 import edu.rutgers.css.Rutgers.fragments.Recreation.RecreationMain;
 import edu.rutgers.css.Rutgers.fragments.SOC.SOCCourses;
 import edu.rutgers.css.Rutgers.fragments.SOC.SOCMain;
@@ -78,6 +79,7 @@ public class ComponentFactory {
         // Recreation views
         put(RecreationMain.HANDLE, RecreationMain.class);
         put(RecreationDisplay.HANDLE, RecreationDisplay.class);
+        put(RecreationHoursDisplay.HANDLE, RecreationHoursDisplay.class);
 
         // SOC views
         put(SOCMain.HANDLE, SOCMain.class);

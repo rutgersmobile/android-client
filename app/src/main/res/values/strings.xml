@@ -79,6 +79,8 @@
     <string name="rec_hours_header">Hours</string>
     <string name="rec_description_header">Description</string>
     <string name="rec_address_header">Address</string>
+    <string name="rec_view_hours">View Hours</string>
+    <string name="rec_view_description">View Description</string>
 
     <!-- RU-info channel -->
     <string name="ruinfo_title">RU-info</string>

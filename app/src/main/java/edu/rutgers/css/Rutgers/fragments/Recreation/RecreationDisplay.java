@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -151,12 +152,16 @@ public class RecreationDisplay extends Fragment {
                         }
                         break;
                     case DESCRIPTION_ROW:
-                        Bundle newArgs = new Bundle(clickedArgs);
-                        newArgs.putString("title", args.getString("title"));
-                        newArgs.putString("component", TextDisplay.HANDLE);
-                        ComponentFactory.getInstance().switchFragments(newArgs);
+                        Bundle descArgs = new Bundle(clickedArgs);
+                        descArgs.putString("title", args.getString("title"));
+                        descArgs.putString("component", TextDisplay.HANDLE);
+                        ComponentFactory.getInstance().switchFragments(descArgs);
                         break;
                     case HOURS_ROW:
+                        Bundle hoursArgs = new Bundle(clickedArgs);
+                        hoursArgs.putString("title", args.getString("title") + " - Hours");
+                        hoursArgs.putString("component", RecreationHoursDisplay.HANDLE);
+                        ComponentFactory.getInstance().switchFragments(hoursArgs);
                         break;
                 }
             }
@@ -181,12 +186,26 @@ public class RecreationDisplay extends Fragment {
         //Spanned description = Html.fromHtml(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description")));
         String descriptionHtml =  StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description"));
 
+        try {
+            JSONArray areaHours = mLocationJSON.getJSONArray("area_hours");
+            if(areaHours.length() > 0) {
+                Bundle rowArgs = new Bundle();
+                rowArgs.putInt(ID_KEY, HOURS_ROW);
+                rowArgs.putString("title", getString(R.string.rec_view_hours));
+                rowArgs.putString("data", areaHours.toString());
+                mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_hours_header)));
+                mAdapter.add(new RMenuItemRow(rowArgs));
+            }
+        } catch (JSONException e) {
+            Log.w(TAG, "addInfo(): " + e.getMessage());
+        }
+
         if(!StringUtils.isEmpty(address)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, ADDRESS_ROW);
             rowArgs.putString("title", address);
 
-            mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.rec_address_header)));
+            mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_address_header)));
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
@@ -195,7 +214,7 @@ public class RecreationDisplay extends Fragment {
             rowArgs.putInt(ID_KEY, INFO_ROW);
             rowArgs.putString("title", infoDesk);
 
-            mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.rec_info_desk_header)));
+            mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_info_desk_header)));
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
@@ -204,17 +223,17 @@ public class RecreationDisplay extends Fragment {
             rowArgs.putInt(ID_KEY, BUSINESS_ROW);
             rowArgs.putString("title", businessOffice);
 
-            mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.rec_business_office_header)));
+            mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_business_office_header)));
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
         if(!StringUtils.isEmpty(descriptionHtml)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, DESCRIPTION_ROW);
-            rowArgs.putString("title", "View Description");
+            rowArgs.putString("title", getString(R.string.rec_view_description));
             rowArgs.putString("data", descriptionHtml);
 
-            mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.rec_description_header)));
+            mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_description_header)));
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
     }

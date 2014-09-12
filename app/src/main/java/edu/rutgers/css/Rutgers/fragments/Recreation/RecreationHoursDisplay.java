@@ -26,7 +26,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class RecreationHoursDisplay extends Fragment {
 
     private static final String TAG = "RecreationHoursDisplay";
-    private static final String HANDLE = "rechoursdisplay";
+    public static final String HANDLE = "rechoursdisplay";
 
     private ViewPager mPager;
     private PagerAdapter mPagerAdapter;
@@ -34,6 +34,21 @@ public class RecreationHoursDisplay extends Fragment {
 
     public RecreationHoursDisplay() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Load location hours
+        Bundle args = getArguments();
+        if(args.getString("data") != null) {
+            try {
+                mLocationHours = new JSONArray(args.getString("data"));
+            } catch (JSONException e) {
+                Log.w(TAG, "onCreateView(): " + e.getMessage());
+            }
+        }
     }
 
     @Override

@@ -32,7 +32,7 @@ public class Gyms {
      * @return Gyms API JSON object
      */
 	public static Promise<JSONArray, AjaxStatus, Double> getGyms() {
-		final Deferred<JSONArray, AjaxStatus, Double> d = new AndroidDeferredObject<JSONArray, AjaxStatus, Double>(Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.json", expire), AndroidExecutionScope.BACKGROUND);
+		final Deferred<JSONArray, AjaxStatus, Double> d = new AndroidDeferredObject<JSONArray, AjaxStatus, Double>(Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.txt", expire), AndroidExecutionScope.BACKGROUND);
 		return d.promise();
 	}
 
