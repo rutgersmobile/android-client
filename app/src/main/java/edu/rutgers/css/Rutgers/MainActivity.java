@@ -244,7 +244,7 @@ public class MainActivity extends FragmentActivity  implements
 	
 	@Override
 	public void onBackPressed() {
-        Log.v(TAG, "Back button pressed. Current top component: " + ComponentFactory.getInstance().getTopHandle());
+        Log.v(TAG, "Back button pressed. Leaving top component: " + ComponentFactory.getInstance().getTopHandle());
 
         // If drawer is open, intercept back press to close drawer
         if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
@@ -265,7 +265,7 @@ public class MainActivity extends FragmentActivity  implements
 
         // Default back press behavior (go back in fragments, etc.)
         ComponentFactory.getInstance().popHandleStack();
-		super.onBackPressed();
+        super.onBackPressed();
 	}
 	
 	@Override
