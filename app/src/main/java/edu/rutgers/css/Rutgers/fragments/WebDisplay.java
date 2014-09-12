@@ -74,7 +74,7 @@ public class WebDisplay extends Fragment {
         }
 
         if(mCurrentURL == null) {
-			String msg = getResources().getString(R.string.failed_no_url);
+			String msg = getString(R.string.failed_no_url);
 			mWebView.loadData(msg, "text/plain", null);
 			return v;
 		}
@@ -111,7 +111,7 @@ public class WebDisplay extends Fragment {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(failingUrl));
                     try {
                         startActivity(intent);
-                        String handleIt = String.format(getResources().getString(R.string.www_handle_uri), failingUrl);
+                        String handleIt = String.format(getString(R.string.www_handle_uri), failingUrl);
                         mWebView.loadData(handleIt, "text/plain", null);
                     } catch(ActivityNotFoundException e) {
                         Log.e(TAG, e.getMessage());

@@ -108,8 +108,8 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         final Promise nbActiveRoutes = Nextbus.getActiveRoutes("nb");
         final Promise nwkActiveRoutes = Nextbus.getActiveRoutes("nwk");
 
-        final String nbString = getResources().getString(R.string.bus_nb_active_routes_header);
-        final String nwkString =  getResources().getString(R.string.bus_nwk_active_routes_header);
+        final String nbString = getString(R.string.bus_nb_active_routes_header);
+        final String nwkString =  getString(R.string.bus_nwk_active_routes_header);
 
         // Synchronized load of active routes
         mDM.when(nbActiveRoutes, nwkActiveRoutes).done(new DoneCallback<MultipleResults>() {
@@ -147,11 +147,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         mAdapter.add(new RMenuHeaderRow(agencyTitle));
 
         if(data == null) {
-            mAdapter.add(new RMenuItemRow(getResources().getString(R.string.failed_load_short)));
+            mAdapter.add(new RMenuItemRow(getString(R.string.failed_load_short)));
             return;
         }
         else if (data.length() == 0) {
-            mAdapter.add(new RMenuItemRow(getResources().getString(R.string.bus_no_active_routes)));
+            mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_routes)));
             return;
         }
 

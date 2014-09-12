@@ -68,10 +68,10 @@ public class BusAll extends Fragment {
         final Promise nwkRoutes = Nextbus.getAllRoutes("nwk");
         final Promise nwkStops = Nextbus.getAllStops("nwk");
 
-        final String nbRoutesString = resources.getString(R.string.bus_nb_all_routes_header);
-        final String nwkRoutesString = resources.getString(R.string.bus_nwk_all_routes_header);
-        final String nbStopsString = resources.getString(R.string.bus_nb_all_stops_header);
-        final String nwkStopsString = resources.getString(R.string.bus_nwk_all_stops_header);
+        final String nbRoutesString = getString(R.string.bus_nb_all_routes_header);
+        final String nwkRoutesString = getString(R.string.bus_nwk_all_routes_header);
+        final String nbStopsString = getString(R.string.bus_nb_all_stops_header);
+        final String nwkStopsString = getString(R.string.bus_nwk_all_stops_header);
 
         // Synchronized load of all route & stop information
         AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -193,12 +193,12 @@ public class BusAll extends Fragment {
         mAdapter.add(new RMenuHeaderRow(agencyHeader));
 
         if(data == null) {
-            mAdapter.add(new RMenuItemRow(getResources().getString(R.string.failed_load_short)));
+            mAdapter.add(new RMenuItemRow(getString(R.string.failed_load_short)));
             return;
         }
         else if(data.length() == 0) {
-            if(mode.equalsIgnoreCase("stop")) mAdapter.add(new RMenuItemRow(getResources().getString(R.string.bus_no_configured_stops)));
-            else if(mode.equalsIgnoreCase("route")) mAdapter.add(new RMenuItemRow(getResources().getString(R.string.bus_no_configured_routes)));
+            if(mode.equalsIgnoreCase("stop")) mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_stops)));
+            else if(mode.equalsIgnoreCase("route")) mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_routes)));
             return;
         }
 

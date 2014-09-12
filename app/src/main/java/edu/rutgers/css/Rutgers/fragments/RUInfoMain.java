@@ -10,8 +10,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -127,7 +125,7 @@ public class RUInfoMain extends Fragment {
             public void onClick(View v) {
                 Bundle args = new Bundle();
                 args.putString("component", WebDisplay.HANDLE);
-                args.putString("title", getResources().getString(R.string.ruinfo_title));
+                args.putString("title", getString(R.string.ruinfo_title));
                 if(AppUtil.isTablet(getActivity())) args.putString("url", mTabletURL);
                 else args.putString("url", mMobileURL);
                 ComponentFactory.getInstance().switchFragments(args);

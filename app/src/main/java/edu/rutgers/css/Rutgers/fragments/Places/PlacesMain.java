@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.fragments.Places;
 
 import android.app.Activity;
-import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -230,12 +229,13 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     }
 
     private void loadNearbyPlaces() {
-        Resources res = getResources();
-        final String nearbyPlacesString = res.getString(R.string.places_nearby);
-        final String noneNearbyString = res.getString(R.string.places_none_nearby);
-        final String failedLoadString = res.getString(R.string.failed_load_short);
-        final String failedLocationString = res.getString(R.string.failed_location);
-        final String connectingString = res.getString(R.string.location_connecting);
+        if(!isAdded()) return;
+
+        final String nearbyPlacesString = getString(R.string.places_nearby);
+        final String noneNearbyString = getString(R.string.places_none_nearby);
+        final String failedLoadString = getString(R.string.failed_load_short);
+        final String failedLocationString = getString(R.string.failed_location);
+        final String connectingString = getString(R.string.location_connecting);
 
         mAdapter.clear();
 

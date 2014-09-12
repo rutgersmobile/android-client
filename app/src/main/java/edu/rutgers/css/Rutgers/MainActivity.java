@@ -422,7 +422,7 @@ public class MainActivity extends FragmentActivity  implements
 	 */
 	private void loadChannels() {
         mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
-        addMenuSection(getResources().getString(R.string.drawer_channels), mChannelManager.getChannels("main"));
+        addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels("main"));
 	}
 	
 	/**
@@ -435,7 +435,7 @@ public class MainActivity extends FragmentActivity  implements
             @Override
             public void onDone(JSONArray shortcutsArray) {
                 mChannelManager.loadChannelsFromJSONArray(shortcutsArray, "shortcuts");
-                addMenuSection(getResources().getString(R.string.drawer_shortcuts), mChannelManager.getChannels("shortcuts"));
+                addMenuSection(getString(R.string.drawer_shortcuts), mChannelManager.getChannels("shortcuts"));
             }
 
         }).fail(new FailCallback<AjaxStatus>() {

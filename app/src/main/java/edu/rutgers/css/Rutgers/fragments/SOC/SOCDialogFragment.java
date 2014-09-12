@@ -61,8 +61,8 @@ public class SOCDialogFragment extends DialogFragment {
         ArrayList<KeyValPair> campuses = loadCampuses();
 
         ArrayList<KeyValPair> levels = new ArrayList<KeyValPair>(2);
-        levels.add(new KeyValPair(getResources().getString(R.string.soc_undergrad), Schedule.CODE_LEVEL_UNDERGRAD));
-        levels.add(new KeyValPair(getResources().getString(R.string.soc_grad), Schedule.CODE_LEVEL_GRAD));
+        levels.add(new KeyValPair(getString(R.string.soc_undergrad), Schedule.CODE_LEVEL_UNDERGRAD));
+        levels.add(new KeyValPair(getString(R.string.soc_grad), Schedule.CODE_LEVEL_GRAD));
 
         mSemesterSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSemesters);
         mCampusSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, campuses);

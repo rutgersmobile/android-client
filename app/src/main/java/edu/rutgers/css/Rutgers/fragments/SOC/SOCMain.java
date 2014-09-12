@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.fragments.SOC;
 
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
@@ -350,21 +349,20 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         if(sharedPref.contains(SettingsActivity.KEY_PREF_SOC_LEVEL)) return;
 
         String campus, level;
-        Resources res = getResources();
 
         // Set default values for schedule preferences if nothing
-        String userHome = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, res.getString(R.string.campus_nb_tag));
-        String userLevel = sharedPref.getString(SettingsActivity.KEY_PREF_USER_TYPE, res.getString(R.string.role_undergrad_tag));
+        String userHome = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, getString(R.string.campus_nb_tag));
+        String userLevel = sharedPref.getString(SettingsActivity.KEY_PREF_USER_TYPE, getString(R.string.role_undergrad_tag));
 
         // Pick default campus code based on prefs (fall back to New Brunswick)
-        if(userHome.equals(res.getString(R.string.campus_nb_tag))) campus = Schedule.CODE_CAMPUS_NB;
-        else if(userHome.equals(res.getString(R.string.campus_nwk_tag))) campus = Schedule.CODE_CAMPUS_NWK;
-        else if(userHome.equals(res.getString(R.string.campus_cam_tag))) campus = Schedule.CODE_CAMPUS_CAM;
+        if(userHome.equals(getString(R.string.campus_nb_tag))) campus = Schedule.CODE_CAMPUS_NB;
+        else if(userHome.equals(getString(R.string.campus_nwk_tag))) campus = Schedule.CODE_CAMPUS_NWK;
+        else if(userHome.equals(getString(R.string.campus_cam_tag))) campus = Schedule.CODE_CAMPUS_CAM;
         else campus = Schedule.CODE_CAMPUS_NB;
 
         // Pick default user-level code based on prefs (fall back to Undergrad)
-        if(userLevel.equals(res.getString(R.string.role_undergrad_tag))) level = Schedule.CODE_LEVEL_UNDERGRAD;
-        else if(userLevel.equals(res.getString(R.string.role_grad_tag))) level = Schedule.CODE_LEVEL_GRAD;
+        if(userLevel.equals(getString(R.string.role_undergrad_tag))) level = Schedule.CODE_LEVEL_UNDERGRAD;
+        else if(userLevel.equals(getString(R.string.role_grad_tag))) level = Schedule.CODE_LEVEL_GRAD;
         else level = Schedule.CODE_LEVEL_UNDERGRAD;
 
         SharedPreferences.Editor editor = sharedPref.edit();

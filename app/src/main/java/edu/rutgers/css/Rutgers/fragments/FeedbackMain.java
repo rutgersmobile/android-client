@@ -30,9 +30,9 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.items.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers2.R;
 
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
@@ -119,8 +119,6 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 	 * Submit the feedback
 	 */
 	private void sendFeedback() {
-		Resources res = getResources();
-				
 		// Empty message - do nothing
 		if(mMessageEditText.getText().toString().trim().isEmpty()) {
 			return;
@@ -134,7 +132,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		params.put("message", mMessageEditText.getText().toString().trim());
 		params.put("wants_response", !mEmailEditText.getText().toString().isEmpty());
 		// Post the selected channel if this is channel feedback
-		if(mSubjectSpinner.getSelectedItem().equals(res.getString(R.string.feedback_channel_feedback))) {
+		if(mSubjectSpinner.getSelectedItem().equals(getString(R.string.feedback_channel_feedback))) {
 			params.put("channel", mChannelSpinner.getSelectedItem());	
 		}
 		//params.put("debuglog", "");
@@ -145,8 +143,8 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 		// Lock send button until POST request goes through
 		mLockSend = true;
 
-        final String feedbackErrorString = res.getString(R.string.feedback_error);
-        final String feedbackSuccessString = res.getString(R.string.feedback_success);
+        final String feedbackErrorString = getString(R.string.feedback_error);
+        final String feedbackSuccessString = getString(R.string.feedback_success);
 
 		aq.ajax(API, params, JSONObject.class, new AjaxCallback<JSONObject>() {
 			
@@ -206,7 +204,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 			String selection = (String) parent.getItemAtPosition(position);
 			
 			// Channel feedback allows user to select a specific channel
-			if(selection.equals(res.getString(R.string.feedback_channel_feedback))) {
+			if(selection.equals(getString(R.string.feedback_channel_feedback))) {
 				mChannelSpinner.setVisibility(View.VISIBLE);
 			}
 			else {
@@ -214,7 +212,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 			}
 			
 			// "General questions" boots you to RU-info. BURNNNN!!!
-			if(selection.equals(res.getString(R.string.feedback_general))) {
+			if(selection.equals(getString(R.string.feedback_general))) {
 				// Reset selection so that the user can hit back without getting booted right away
 				// (this means general questions can never be the default option!)
 				parent.setSelection(0);

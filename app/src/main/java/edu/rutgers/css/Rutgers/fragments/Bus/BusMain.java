@@ -33,9 +33,9 @@ public class BusMain extends Fragment implements FilterFocusListener {
         mTabHost = (FragmentTabHost) v.findViewById(R.id.bus_tabhost);
         mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
 
-        mTabHost.addTab(mTabHost.newTabSpec(BusRoutes.HANDLE).setIndicator(getResources().getString(R.string.bus_routes_tab)), BusRoutes.class, null);
-        mTabHost.addTab(mTabHost.newTabSpec(BusStops.HANDLE).setIndicator(getResources().getString(R.string.bus_stops_tab)), BusStops.class, null);
-        mTabHost.addTab(mTabHost.newTabSpec(BusAll.HANDLE).setIndicator(getResources().getString(R.string.bus_all_tab)), BusAll.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec(BusRoutes.HANDLE).setIndicator(getString(R.string.bus_routes_tab)), BusRoutes.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec(BusStops.HANDLE).setIndicator(getString(R.string.bus_stops_tab)), BusStops.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec(BusAll.HANDLE).setIndicator(getString(R.string.bus_all_tab)), BusAll.class, null);
 
 		return v;
 	}

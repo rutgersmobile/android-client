@@ -55,7 +55,7 @@ public class FoodMain extends Fragment {
         mData = new ArrayList<RMenuRow>(4);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
-        final String nbCampusFullString = getResources().getString(R.string.campus_nb_full);
+        final String nbCampusFullString = getString(R.string.campus_nb_full);
 
 		// Get dining hall data and populate the top-level menu with names of the dining halls
         AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -138,9 +138,9 @@ public class FoodMain extends Fragment {
         cam.putString("title", "Gateway Cafe");
         cam.putString("data", "The Camden Dining Hall, the Gateway Cafe, is located at the Camden Campus Center.\n\nIt offers a variety of eateries in one convenient location.");
 
-        mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.campus_nwk_full)));
+        mAdapter.add(new RMenuHeaderRow(getString(R.string.campus_nwk_full)));
         mAdapter.add(new RMenuItemRow(nwk));
-        mAdapter.add(new RMenuHeaderRow(getResources().getString(R.string.campus_cam_full)));
+        mAdapter.add(new RMenuHeaderRow(getString(R.string.campus_cam_full)));
         mAdapter.add(new RMenuItemRow(cam));
     }
 	

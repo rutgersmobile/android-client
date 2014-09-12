@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.fragments.Bus;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -103,7 +102,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         // Get current campus tag (default to "nb")
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
-                getResources().getString(R.string.campus_nb_tag));
+                getString(R.string.campus_nb_tag));
 		
 		// Setup the timer stuff for updating the nearby stops
 		mUpdateTimer = new Timer();
@@ -169,7 +168,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         // Get current campus tag (default to "nb")
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
-                getResources().getString(R.string.campus_nb_tag));
+                getString(R.string.campus_nb_tag));
 
         // Start the update thread when screen is active
 		mUpdateTimer = new Timer();
@@ -200,9 +199,9 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
                 for (OneResult result : results) {
                     if (result.getPromise() == nbActiveStops)
-                        loadAgency("nb", getResources().getString(R.string.bus_nb_active_stops_header), (JSONArray) result.getResult());
+                        loadAgency("nb", getString(R.string.bus_nb_active_stops_header), (JSONArray) result.getResult());
                     else if (result.getPromise() == nwkActiveStops)
-                        loadAgency("nwk", getResources().getString(R.string.bus_nwk_active_stops_header), (JSONArray) result.getResult());
+                        loadAgency("nwk", getString(R.string.bus_nwk_active_stops_header), (JSONArray) result.getResult());
                 }
             }
 
@@ -261,11 +260,11 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         mAdapter.add(new RMenuHeaderRow(agencyTitle));
 
         if(data == null) {
-            mAdapter.add(new RMenuItemRow(getResources().getString(R.string.failed_load_short)));
+            mAdapter.add(new RMenuItemRow(getString(R.string.failed_load_short)));
             return;
         }
 		else if(data.length() == 0) {
-            mAdapter.add(new RMenuItemRow(getResources().getString(R.string.bus_no_active_stops)));
+            mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_stops)));
             return;
         }
 
@@ -310,7 +309,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     /** Add "nearby stops" header */
     private void addNearbyHeader() {
         if(!mNearbyHeaderAdded) {
-            mAdapter.insert(new RMenuHeaderRow(getResources().getString(R.string.bus_nearby_active_stops_header)), 0);
+            mAdapter.insert(new RMenuHeaderRow(getString(R.string.bus_nearby_active_stops_header)), 0);
             mNearbyHeaderAdded = true;
         }
     }
@@ -328,9 +327,10 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 	 * @param agencyTag Agency tag for API request
 	 */
 	private void loadNearbyStops(@NonNull final String agencyTag) {
-        Resources res = getResources();
-        final String noneNearbyString = res.getString(R.string.bus_no_nearby_stops);
-        final String failedLoadString = res.getString(R.string.failed_load_short);
+        if(!isAdded()) return;
+
+        final String noneNearbyString = getString(R.string.bus_no_nearby_stops);
+        final String failedLoadString = getString(R.string.failed_load_short);
 
         // First clear all "nearby stop"-related rows
         clearNearbyRows();
@@ -342,7 +342,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 			if(lastLoc == null) {
 				Log.w(TAG, "Could not get location");
 				clearNearbyRows();
-				addNearbyRow(1, new RMenuItemRow(res.getString(R.string.failed_location)));
+				addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
 				return;
 			}
 			if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
@@ -390,7 +390,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 		}
 		else {
 			Log.w(TAG, "Couldn't get location provider, can't find nearby stops");
-            addNearbyRow(1, new RMenuItemRow(res.getString(R.string.failed_location)));
+            addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
 		}
 
 	}

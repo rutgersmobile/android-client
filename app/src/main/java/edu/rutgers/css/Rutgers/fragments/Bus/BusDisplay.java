@@ -114,7 +114,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		}
 		else {
 			Log.e(TAG, "title not set");
-			getActivity().setTitle(getResources().getString(R.string.bus_title));
+			getActivity().setTitle(getString(R.string.bus_title));
 		}
 
         ListView listView = (ListView) v.findViewById(R.id.busDisplayList);
