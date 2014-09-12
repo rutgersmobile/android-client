@@ -13,9 +13,9 @@ import android.widget.TextView;
 import com.androidquery.callback.AjaxStatus;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,7 +82,9 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             if(jsonObject.optBoolean("stub") && !jsonObject.optBoolean("failedLoad")) {
                 // Replace the stub JSON data
                 final ScheduleAdapter scheduleAdapter = this;
-                Schedule.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), jsonObject.optString("subjectCode"), jsonObject.optString("courseNumber")).done(new AndroidDoneCallback<JSONObject>() {
+                AndroidDeferredManager dm = new AndroidDeferredManager();
+                dm.when(Schedule.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), jsonObject.optString("subjectCode"), jsonObject.optString("courseNumber"))).done(new DoneCallback<JSONObject>() {
+
                     @Override
                     public void onDone(JSONObject result) {
                         Iterator<String> keys = result.keys();
@@ -98,11 +100,8 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
                         scheduleAdapter.notifyDataSetChanged();
                     }
 
-                    @Override
-                    public AndroidExecutionScope getExecutionScope() {
-                        return AndroidExecutionScope.UI;
-                    }
-                }).fail(new AndroidFailCallback<AjaxStatus>() {
+                }).fail(new FailCallback<AjaxStatus>() {
+
                     @Override
                     public void onFail(AjaxStatus result) {
                         Log.w(TAG, AppUtil.formatAjaxStatus(result));
@@ -113,10 +112,6 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
                         }
                     }
 
-                    @Override
-                    public AndroidExecutionScope getExecutionScope() {
-                        return AndroidExecutionScope.UI;
-                    }
                 });
 
                 holder.creditsTextView.setVisibility(View.GONE);

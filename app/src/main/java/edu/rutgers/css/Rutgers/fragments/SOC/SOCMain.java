@@ -25,9 +25,6 @@ import com.androidquery.callback.AjaxStatus;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
 import org.json.JSONArray;
@@ -89,11 +86,8 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         }
 
         // Get the available & current semesters
-        Schedule.getSemesters().done(new AndroidDoneCallback<JSONObject>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(Schedule.getSemesters()).done(new DoneCallback<JSONObject>() {
 
             @Override
             public void onDone(JSONObject result) {
@@ -129,16 +123,14 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
                     Log.w(TAG, "getSemesters(): " + e.getMessage());
                 }
             }
-        }).fail(new AndroidFailCallback<AjaxStatus>() {
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+
+        }).fail(new FailCallback<AjaxStatus>() {
 
             @Override
             public void onFail(AjaxStatus result) {
                 AppUtil.showFailedLoadToast(getActivity());
             }
+
         });
 
     }

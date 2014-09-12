@@ -10,17 +10,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxStatus;
 
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidAlwaysCallback;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -112,11 +109,8 @@ public class DTable extends Fragment {
             Promise<JSONObject, AjaxStatus, Double> promise;
             if(mURL != null) promise = Request.json(mURL, Request.CACHE_ONE_HOUR);
             else promise = Request.api(mAPI, Request.CACHE_ONE_HOUR);
-            promise.done(new AndroidDoneCallback<JSONObject>() {
-                @Override
-                public AndroidExecutionScope getExecutionScope() {
-                    return AndroidExecutionScope.UI;
-                }
+            AndroidDeferredManager dm = new AndroidDeferredManager();
+            dm.when(promise).done(new DoneCallback<JSONObject>() {
 
                 @Override
                 public void onDone(JSONObject result) {
@@ -127,17 +121,15 @@ public class DTable extends Fragment {
                         AppUtil.showFailedLoadToast(getActivity());
                     }
                 }
-            }).fail(new AndroidFailCallback<AjaxStatus>() {
-                @Override
-                public AndroidExecutionScope getExecutionScope() {
-                    return AndroidExecutionScope.UI;
-                }
+
+            }).fail(new FailCallback<AjaxStatus>() {
 
                 @Override
                 public void onFail(AjaxStatus status) {
                     Log.w(dTag(), AppUtil.formatAjaxStatus(status));
                     AppUtil.showFailedLoadToast(mContext);
                 }
+
             });
         }
 

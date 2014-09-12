@@ -19,8 +19,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -189,7 +188,8 @@ public class PlacesDisplay extends Fragment {
                                 String agency = sAgencyMap.get(campus_name);
 
                                 if(agency != null) {
-                                    Nextbus.getStopsByTitleNear(agency, buildLat, buildLon).then(new AndroidDoneCallback<JSONObject>() {
+                                    AndroidDeferredManager dm = new AndroidDeferredManager();
+                                    dm.when(Nextbus.getStopsByTitleNear(agency, buildLat, buildLon)).then(new DoneCallback<JSONObject>() {
 
                                         @Override
                                         public void onDone(JSONObject nearbyStopsByTitle) {
@@ -207,11 +207,6 @@ public class PlacesDisplay extends Fragment {
                                                 newStopTextView.setText(stopTitle);
                                                 nearbyBusesLinearLayout.addView(newStopTextView);
                                             }
-                                        }
-
-                                        @Override
-                                        public AndroidExecutionScope getExecutionScope() {
-                                            return AndroidExecutionScope.UI;
                                         }
 
                                     });

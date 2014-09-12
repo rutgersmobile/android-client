@@ -27,9 +27,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -429,32 +429,23 @@ public class MainActivity extends FragmentActivity  implements
 	 * Grab web links and add them to the menu.
 	 */
 	private void loadWebShortcuts() {
-		Request.jsonArray(SC_API, Request.CACHE_ONE_DAY).done(new AndroidDoneCallback<JSONArray>() {
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+		dm.when(Request.jsonArray(SC_API, Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
 
-			@Override
-			public void onDone(JSONArray shortcutsArray) {
-				mChannelManager.loadChannelsFromJSONArray(shortcutsArray, "shortcuts");
+            @Override
+            public void onDone(JSONArray shortcutsArray) {
+                mChannelManager.loadChannelsFromJSONArray(shortcutsArray, "shortcuts");
                 addMenuSection(getResources().getString(R.string.drawer_shortcuts), mChannelManager.getChannels("shortcuts"));
-			}
+            }
 
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		}).fail(new AndroidFailCallback<AjaxStatus>() {
+        }).fail(new FailCallback<AjaxStatus>() {
 
-			@Override
-			public void onFail(AjaxStatus status) {
-				Log.e(TAG, "loadWebShortcuts(): " + AppUtil.formatAjaxStatus(status));
-			}
-			
-			@Override
-			public AndroidExecutionScope getExecutionScope() {
-				return AndroidExecutionScope.UI;
-			}
-			
-		});
+            @Override
+            public void onFail(AjaxStatus status) {
+                Log.e(TAG, "loadWebShortcuts(): " + AppUtil.formatAjaxStatus(status));
+            }
+
+        });
 		
 	}
 

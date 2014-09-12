@@ -17,9 +17,9 @@ import android.widget.ListView;
 import com.androidquery.callback.AjaxStatus;
 
 import org.apache.commons.lang3.text.WordUtils;
-import org.jdeferred.android.AndroidDoneCallback;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.AndroidFailCallback;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,12 +65,8 @@ public class SOCCourses extends Fragment {
         final String semester = args.getString("semester");
         final String subjectCode = args.getString("subjectCode");
 
-        Schedule.getCourses(campus, level, semester, subjectCode).done(new AndroidDoneCallback<JSONArray>() {
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(Schedule.getCourses(campus, level, semester, subjectCode)).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray result) {
@@ -86,12 +82,7 @@ public class SOCCourses extends Fragment {
                 mAdapter.getFilter().filter(mFilterString);
             }
 
-        }).fail(new AndroidFailCallback<AjaxStatus>() {
-
-            @Override
-            public AndroidExecutionScope getExecutionScope() {
-                return AndroidExecutionScope.UI;
-            }
+        }).fail(new FailCallback<AjaxStatus>() {
 
             @Override
             public void onFail(AjaxStatus result) {
