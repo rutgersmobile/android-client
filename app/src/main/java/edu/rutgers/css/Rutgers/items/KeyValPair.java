@@ -1,9 +1,11 @@
 package edu.rutgers.css.Rutgers.items;
 
+import java.io.Serializable;
+
 /**
  * Created by jamchamb on 8/14/14.
  */
-public class KeyValPair {
+public class KeyValPair implements Serializable {
 
     private String name;
     private String value;

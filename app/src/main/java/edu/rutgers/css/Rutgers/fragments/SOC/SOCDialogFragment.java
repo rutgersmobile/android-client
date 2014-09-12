@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -19,7 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,20 +38,14 @@ public class SOCDialogFragment extends DialogFragment {
     private SpinnerAdapter mSemesterSpinnerAdapter;
     private SpinnerAdapter mCampusSpinnerAdapter;
     private SpinnerAdapter mLevelSpinnerAdapter;
-    private List<KeyValPair> mSemesters;
-    private WeakReference<SOCDialogListener> mTarget;
-
-    public interface SOCDialogListener {
-        public void onSettingsSaved();
-    }
+    private ArrayList<KeyValPair> mSemesters;
 
     public SOCDialogFragment() {
         // Required public empty constructor
     }
 
-    public static SOCDialogFragment newInstance(SOCDialogListener listener, List<String> semesters) {
+    public static SOCDialogFragment newInstance(List<String> semesters) {
         SOCDialogFragment dialog = new SOCDialogFragment();
-        dialog.setListener(listener);
         dialog.setSemesters(semesters);
         return dialog;
     }
@@ -62,11 +54,15 @@ public class SOCDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if(savedInstanceState != null) {
+            mSemesters = (ArrayList<KeyValPair>) savedInstanceState.getSerializable("semesters");
+        }
+
         ArrayList<KeyValPair> campuses = loadCampuses();
 
         ArrayList<KeyValPair> levels = new ArrayList<KeyValPair>(2);
-        levels.add(new KeyValPair("Undergraduate", Schedule.CODE_LEVEL_UNDERGRAD));
-        levels.add(new KeyValPair("Graduate", Schedule.CODE_LEVEL_GRAD));
+        levels.add(new KeyValPair(getResources().getString(R.string.soc_undergrad), Schedule.CODE_LEVEL_UNDERGRAD));
+        levels.add(new KeyValPair(getResources().getString(R.string.soc_grad), Schedule.CODE_LEVEL_GRAD));
 
         mSemesterSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSemesters);
         mCampusSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, campuses);
@@ -108,8 +104,6 @@ public class SOCDialogFragment extends DialogFragment {
                         editor.putString(SettingsActivity.KEY_PREF_SOC_SEMESTER, ((KeyValPair) semesterSpinner.getSelectedItem()).getValue());
                         editor.commit();
                         Log.i(TAG, "Saved settings");
-
-                        if(mTarget.get() != null) mTarget.get().onSettingsSaved();
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -122,16 +116,22 @@ public class SOCDialogFragment extends DialogFragment {
         return builder.create();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable("semesters", mSemesters);
+        super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * Set list of current semesters for the spinner.
+     * @param semesterCodes List of semester codes
+     */
     public void setSemesters(List<String> semesterCodes) {
         ArrayList<KeyValPair> semesters = new ArrayList<KeyValPair>(5);
         for(String code: semesterCodes) {
             semesters.add(new KeyValPair(Schedule.translateSemester(code), code));
         }
         mSemesters = semesters;
-    }
-
-    public void setListener(SOCDialogListener listener) {
-        mTarget = new WeakReference<SOCDialogListener>(listener);
     }
 
     /**
@@ -158,6 +158,12 @@ public class SOCDialogFragment extends DialogFragment {
         return results;
     }
 
+    /**
+     * Set selected spinner items based on user's existing config.
+     * @param configString Current config value
+     * @param spinnerAdapter Spinner adapter to search for value matching config string
+     * @param spinner Spinner view to perform selection for
+     */
     private void setSelectionByConfig(String configString, SpinnerAdapter spinnerAdapter, Spinner spinner) {
         if(configString == null) return;
         for(int i = 0; i < spinnerAdapter.getCount(); i++) {

@@ -46,7 +46,7 @@ import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
-public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogListener {
+public class SOCMain extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "SOCMain";
     public static final String HANDLE = "soc";
@@ -79,6 +79,9 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
         mLevel = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
         mCampus = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
         mSemester = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, null);
+
+        // Register settings listener
+        sharedPref.registerOnSharedPreferenceChangeListener(this);
 
         // Restore filter
         if(savedInstanceState != null) {
@@ -232,14 +235,41 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
     }
 
     @Override
-    public void onSettingsSaved() {
-        // When settings are saved from dialog, reload schedule
-        if(isAdded() && mAdapter != null) {
-            Log.v(TAG, "Loading new settings");
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            mCampus = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
-            mLevel = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
-            mSemester = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, mDefaultSemester);
+    public void onSharedPreferenceChanged(SharedPreferences sharedPref, String key) {
+        Log.v(TAG, "Setting changed: " + key);
+
+        // All 3 changes are submitted at once by the dialog. This gets all of the changes at once
+        // in order to avoid calling loadSubjects() multiple times each time the config is changed.
+        boolean somethingChanged = false;
+        if(key.equals(SettingsActivity.KEY_PREF_SOC_CAMPUS)
+                || key.equals(SettingsActivity.KEY_PREF_SOC_LEVEL)
+                || key.equals(SettingsActivity.KEY_PREF_SOC_SEMESTER)) {
+
+
+            String temp;
+
+            temp = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
+            if(!mCampus.equals(temp)) {
+                somethingChanged = true;
+                mCampus = temp;
+            }
+
+            temp = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
+            if(!mLevel.equals(temp)) {
+                somethingChanged = true;
+                mLevel = temp;
+            }
+
+            temp = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, mDefaultSemester);
+            if(!mSemester.equals(temp)) {
+                somethingChanged = true;
+                mSemester = temp;
+            }
+        }
+
+        if(somethingChanged) {
+            Log.v(TAG, "Loading new subjects");
+            setScheduleTitle(); // force title change
             loadSubjects();
         }
     }
@@ -267,7 +297,7 @@ public class SOCMain extends Fragment implements SOCDialogFragment.SOCDialogList
             semestersList.add(mSemesters.optString(i));
         }
 
-        DialogFragment newDialogFragment = SOCDialogFragment.newInstance(this, semestersList);
+        DialogFragment newDialogFragment = SOCDialogFragment.newInstance(semestersList);
         ComponentFactory.getInstance().showDialogFragment(newDialogFragment, SOCDialogFragment.HANDLE);
     }
 
