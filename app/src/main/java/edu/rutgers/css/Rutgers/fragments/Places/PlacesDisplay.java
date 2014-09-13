@@ -114,7 +114,7 @@ public class PlacesDisplay extends Fragment {
 
                     // Set up map
                     if(mapView != null && mLocationJSON != null) {
-                        if(!mLocationJSON.optString("latitude").isEmpty() && !mLocationJSON.optString("longitude").isEmpty()) {
+                        if(!mLocationJSON.isNull("latitude") && !mLocationJSON.isNull("longitude")) {
                             // Enable launch map activity button
                             mapLaunchButton.setVisibility(View.VISIBLE);
                             mapLaunchButton.setOnClickListener(new View.OnClickListener() {
@@ -164,14 +164,14 @@ public class PlacesDisplay extends Fragment {
                     campusNameTextView.setText(mPlaceJSON.optString("campus_name"));
 
                     // Display building description
-                    if(mPlaceJSON.optString("description").isEmpty()) {
+                    if(mPlaceJSON.isNull("description") || mPlaceJSON.optString("description").isEmpty()) {
                         descriptionHeaderRow.setVisibility(View.GONE);
                         descriptionContentRow.setVisibility(View.GONE);
                     }
                     else descriptionTextView.setText(StringEscapeUtils.unescapeHtml4(mPlaceJSON.optString("description")));
 
                     // Display offices housed in this building
-                    if(mPlaceJSON.optString("offices").isEmpty()) {
+                    if(mPlaceJSON.isNull("offices") || mPlaceJSON.optString("offices").isEmpty()) {
                         officesHeaderRow.setVisibility(View.GONE);
                         officesContentRow.setVisibility(View.GONE);
                     }
@@ -183,7 +183,7 @@ public class PlacesDisplay extends Fragment {
                             double buildLon = Double.parseDouble(mLocationJSON.getString("longitude"));
                             double buildLat = Double.parseDouble(mLocationJSON.getString("latitude"));
 
-                            if(!mPlaceJSON.optString("campus_name").isEmpty()) {
+                            if(!mPlaceJSON.isNull("campus_name") && !mPlaceJSON.optString("campus_name").isEmpty()) {
                                 String campus_name = mPlaceJSON.optString("campus_name");
                                 String agency = sAgencyMap.get(campus_name);
 
@@ -242,14 +242,18 @@ public class PlacesDisplay extends Fragment {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        // Prefer address for user readability
-        if(!mLocationJSON.optString("street").isEmpty() && !mLocationJSON.optString("street").isEmpty() && !mLocationJSON.optString("state").isEmpty()) {
+        // Prefer address for user readability.
+        // Checking isNull() and optString().isEmpty() because if the string is null,
+        // optString() returns the string "null" instead of an empty string. swag ;)
+
+        if(!mLocationJSON.isNull("street") && !mLocationJSON.isNull("city") && !mLocationJSON.isNull("state") &&
+                !mLocationJSON.optString("street").isEmpty() && !mLocationJSON.optString("city").isEmpty() && !mLocationJSON.optString("state").isEmpty()) {
             String addr = mLocationJSON.optString("street") + ", " + mLocationJSON.optString("city") + ", " + mLocationJSON.optString("state");
             intent.setData(Uri.parse("geo:0,0?q=" + addr));
         }
         // Fallback to longitude & latitude
         else {
-            intent.setData(Uri.parse("geo:"+mLocationJSON.optString("latitude")+","+ mLocationJSON.optString("longitude")));
+            intent.setData(Uri.parse("geo:0,0?q="+mLocationJSON.optString("latitude")+","+ mLocationJSON.optString("longitude")));
         }
 
         // Try to launch a map activity
@@ -269,9 +273,9 @@ public class PlacesDisplay extends Fragment {
 		if(address == null) return "";
 		StringBuilder result = new StringBuilder();
 		
-		if(!address.optString("name").isEmpty()) result.append(address.optString("name") + "\n");
-		if(!address.optString("street").isEmpty()) result.append(address.optString("street") + "\n");
-		if(!address.optString("city").isEmpty()) result.append(address.optString("city") + ", " +
+		if(!address.isNull("name") && !address.optString("name").isEmpty()) result.append(address.optString("name") + "\n");
+		if(!address.isNull("street") && !address.optString("street").isEmpty()) result.append(address.optString("street") + "\n");
+		if(!address.isNull("city") && !address.optString("city").isEmpty()) result.append(address.optString("city") + ", " +
 				address.optString("state_abbr") + " " + address.optString("postal_code"));
 
 		return StringUtils.trim(result.toString());

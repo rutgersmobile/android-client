@@ -466,7 +466,7 @@ public class MainActivity extends FragmentActivity  implements
                 itemArgs.putString("title", AppUtil.getLocalTitle(this, cur.get("title")));
 
                 // Set component to launch. Default to WWW for web shortcuts
-                if(cur.optString("view").isEmpty() && !cur.optString("url").isEmpty()) {
+                if(cur.isNull("view") && !cur.isNull("url")) {
                     itemArgs.putString("component", WebDisplay.HANDLE);
                 }
                 else {
@@ -474,17 +474,17 @@ public class MainActivity extends FragmentActivity  implements
                 }
 
                 // Set URL if available
-                if(!cur.optString("url").isEmpty()) itemArgs.putString("url", cur.getString("url"));
+                if(!cur.isNull("url")) itemArgs.putString("url", cur.getString("url"));
 
                 // Set API if available
-                if(!cur.optString("api").isEmpty()) itemArgs.putString("api", cur.getString("api"));
+                if(!cur.isNull("api")) itemArgs.putString("api", cur.getString("api"));
 
                 // Set data (JSON Array) if available
                 if(cur.optJSONArray("data") != null) itemArgs.putString("data", cur.getJSONArray("data").toString());
 
                 RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
                 // Try to find icon for this item and set it
-                if(!cur.optString("handle").isEmpty()) {
+                if(!cur.isNull("handle")) {
                     newSMI.setDrawable(AppUtil.getIcon(getResources(), cur.getString("handle")));
                 }
 
