@@ -10,7 +10,7 @@ import android.os.Bundle;
  * 	url			(optional)
  * 	data		(optional JSON object or array in string representation)
  */
-public class RMenuItemRow implements RMenuRow {
+public class RMenuItemRow extends RMenuRow {
 
 	private Bundle args;
 	private boolean clickable;
@@ -22,9 +22,9 @@ public class RMenuItemRow implements RMenuRow {
 	 * @param args Custom argument bundle, which needs at least the title and component fields.
 	 */
 	public RMenuItemRow(Bundle args) {
-		this.setArgs(args);
-		this.setClickable(true);
-        this.setColorResId(args.getInt("color"));
+		setArgs(args);
+		setClickable(true);
+        setColorResId(args.getInt("color"));
 	}
 	
 	/**
@@ -34,19 +34,29 @@ public class RMenuItemRow implements RMenuRow {
 	public RMenuItemRow(String title) {
 		Bundle args = new Bundle();
 		args.putString("title", title);
-		this.setArgs(args);
-		this.setClickable(false);
-        this.setColorResId(args.getInt("color"));
+		setArgs(args);
+		setClickable(false);
+        setColorResId(args.getInt("color"));
 	}
-	
-	public void setClickable(boolean b) {
-		this.clickable = b;
-	}
-	
+
+    @Override
+    public String getTitle() {
+        return this.args.getString("title");
+    }
+
+    @Override
+    public boolean getIsCategory() {
+        return false;
+    }
+
 	@Override
 	public boolean getIsClickable() {
 		return this.clickable;
 	}
+
+    public void setClickable(boolean b) {
+        this.clickable = b;
+    }
 
 	public void setArgs(Bundle args) {
 		this.args = args;
@@ -62,20 +72,6 @@ public class RMenuItemRow implements RMenuRow {
 	
 	public Drawable getDrawable() {
 		return this.drawable;
-	}
-	
-	public String toString() {
-		return args.getString("title");
-	}
-
-	@Override
-	public String getTitle() {
-		return this.args.getString("title");
-	}
-
-	@Override
-	public boolean getIsCategory() {
-		return false;
 	}
 
     public void setColorResId(int resId) {

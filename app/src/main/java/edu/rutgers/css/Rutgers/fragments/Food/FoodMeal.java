@@ -20,7 +20,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.Dining;
-import edu.rutgers.css.Rutgers.items.FoodItem;
+import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
+import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -83,10 +84,13 @@ public class FoodMeal extends Fragment {
 						try {
 							JSONObject curGenre = mealGenres.getJSONObject(i);
 							JSONArray mealItems = curGenre.getJSONArray("items");
-							foodItemAdapter.add(new FoodItem(curGenre.getString("genre_name"), true)); // Add category header
-							
+
+                            // Add category header
+							foodItemAdapter.add(new RMenuHeaderRow(curGenre.getString("genre_name")));
+
+                            // Add food items
 							for(int j = 0; j < mealItems.length(); j++) {
-								foodItemAdapter.add(new FoodItem(mealItems.getString(j)));
+								foodItemAdapter.add(new RMenuItemRow(mealItems.getString(j)));
 							}
 						} catch (JSONException e) {
 							Log.w(TAG, "getDiningLocation(): " + e.getMessage());
