@@ -22,6 +22,9 @@ import java.util.regex.Pattern;
 
 import edu.rutgers.css.Rutgers2.R;
 
+/**
+ * Fragment for an individual page of facility hours.
+ */
 public class HourSwiperFragment extends Fragment {
 
 	private static final String TAG = "HourSwiperFragment";
