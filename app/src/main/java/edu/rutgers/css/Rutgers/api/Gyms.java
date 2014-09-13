@@ -8,7 +8,7 @@ import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredObject;
+import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
@@ -32,8 +32,7 @@ public class Gyms {
      * @return Gyms API JSON object
      */
 	public static Promise<JSONArray, AjaxStatus, Double> getGyms() {
-		final Deferred<JSONArray, AjaxStatus, Double> d = new AndroidDeferredObject<JSONArray, AjaxStatus, Double>(Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.txt", expire), AndroidExecutionScope.BACKGROUND);
-		return d.promise();
+		return Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.txt", expire);
 	}
 
     /**
@@ -45,20 +44,21 @@ public class Gyms {
     public static Promise<JSONObject, AjaxStatus, Double> getFacility(final String campusTitle, final String facilityTitle) {
         final Deferred<JSONObject, AjaxStatus, Double> d = new DeferredObject<JSONObject, AjaxStatus, Double>();
 
-        getGyms().done(new DoneCallback<JSONArray>() {
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(getGyms(), AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
             @Override
             public void onDone(JSONArray result) {
                 try {
                     // Loop to find campus
                     for (int i = 0; i < result.length(); i++) {
                         JSONObject campus = result.getJSONObject(i);
-                        if(campus.getString("title").equalsIgnoreCase(campusTitle)) {
+                        if (campus.getString("title").equalsIgnoreCase(campusTitle)) {
 
                             // Found campus; loop to find facility
                             JSONArray facilities = campus.getJSONArray("facilities");
-                            for(int j = 0; j < facilities.length(); j++) {
+                            for (int j = 0; j < facilities.length(); j++) {
                                 JSONObject facility = facilities.getJSONObject(j);
-                                if(facility.getString("title").equalsIgnoreCase(facilityTitle)) {
+                                if (facility.getString("title").equalsIgnoreCase(facilityTitle)) {
                                     d.resolve(facility);
                                     return;
                                 }
