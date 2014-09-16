@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.fragments.SOC;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -79,7 +78,7 @@ public class SOCCourses extends Fragment {
                 }
 
                 // Re-apply filter
-                mAdapter.getFilter().filter(mFilterString);
+                if(mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
             }
 
         }).fail(new FailCallback<AjaxStatus>() {
@@ -95,7 +94,6 @@ public class SOCCourses extends Fragment {
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_soc_main, parent, false);
-        Resources res = getResources();
         Bundle args = getArguments();
 
         if(args.getString("title") != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString("title")));
@@ -111,13 +109,13 @@ public class SOCCourses extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
 
-                Bundle args = new Bundle();
-                args.putString("component", SOCSections.HANDLE);
-                args.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
-                args.putString("data", clickedJSON.toString());
-                args.putString("semester", semester);
+                Bundle newArgs = new Bundle();
+                newArgs.putString("component", SOCSections.HANDLE);
+                newArgs.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
+                newArgs.putString("data", clickedJSON.toString());
+                newArgs.putString("semester", semester);
 
-                ComponentFactory.getInstance().switchFragments(args);
+                ComponentFactory.getInstance().switchFragments(newArgs);
             }
         });
 
@@ -131,7 +129,7 @@ public class SOCCourses extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Set filter for list adapter
-                mFilterString = s.toString();
+                mFilterString = s.toString().trim();
                 mAdapter.getFilter().filter(mFilterString);
             }
 
@@ -146,7 +144,7 @@ public class SOCCourses extends Fragment {
         filterClearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mFilterEditText.setText("");
+                mFilterEditText.setText(null);
             }
         });
 
