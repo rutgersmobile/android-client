@@ -171,15 +171,15 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             // If constraint is null/empty, return original list
             if(constraint == null || constraint.toString().trim().isEmpty()) {
                 synchronized (mLock) {
+                    // A filter has been applied before and there is a backup list, restore it
                     if(mOriginalList != null) {
                         filterResults.values = mOriginalList;
                         filterResults.count = mOriginalList.size();
                         return filterResults;
                     }
+                    // No non-empty filter has been applied so far, leave the current list untouched
                     else {
-                        filterResults.values = null;
-                        filterResults.count = 0;
-                        return filterResults;
+                        return null;
                     }
                 }
             }
@@ -242,6 +242,9 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
+            // If filterResults is null, leave the current list alone.
+            if(filterResults == null) return;
+
             // Replace current list with results
             synchronized (mLock) {
                 mList.clear();
