@@ -168,78 +168,84 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
         protected FilterResults performFiltering(CharSequence constraint) {
             FilterResults filterResults = new FilterResults();
 
-            // Copy list of original values
+            // If constraint is null/empty, return original list
+            if(constraint == null || constraint.toString().trim().isEmpty()) {
+                synchronized (mLock) {
+                    if(mOriginalList != null) {
+                        filterResults.values = mOriginalList;
+                        filterResults.count = mOriginalList.size();
+                        return filterResults;
+                    }
+                    else {
+                        filterResults.values = null;
+                        filterResults.count = 0;
+                        return filterResults;
+                    }
+                }
+            }
+
+            ArrayList<JSONObject> tempList; //will be a copy of original list
+
+            // Save list of original values if it doesn't exist
             synchronized(mLock) {
-                if(mOriginalList == null) {
-                    if(mList.size() == 0) {
+                if (mOriginalList == null) {
+                    if (mList.size() == 0) {
                         filterResults.values = null;
                         filterResults.count = 0;
                         return filterResults;
                     }
                     else mOriginalList = new ArrayList<JSONObject>(mList);
                 }
+
+                tempList = new ArrayList<JSONObject>(mOriginalList);
             }
 
-            if(constraint == null || constraint.toString().trim().isEmpty()) {
-                // Empty filter, do nothing
-                return null;
-            }
-            else {
-                ArrayList<JSONObject> tempList;
-                synchronized (mLock) {
-                    tempList = new ArrayList<JSONObject>(mOriginalList);
-                }
+            ArrayList<JSONObject> passed = new ArrayList<JSONObject>();
+            String query = constraint.toString().trim();
 
-                ArrayList<JSONObject> passed = new ArrayList<JSONObject>();
-                String query = constraint.toString().trim();
-
-                // Consult the INDEX!!!
-                if(socIndex != null) {
-                    // Check if it's a full course code 000:000
-                    if(query.length() == 7 && query.charAt(3) == ':') {
-                        String subjCode = query.substring(0,3);
-                        String courseCode = query.substring(4,7);
-                        if(allDigits(subjCode) && allDigits(courseCode)) {
-                            JSONObject course = socIndex.getCourseByCode(subjCode, courseCode);
-                            if(course != null) passed.add(course);
-                        }
+            // Consult the INDEX!!!
+            if(socIndex != null) {
+                // Check if it's a full course code 000:000
+                if(query.length() == 7 && query.charAt(3) == ':') {
+                    String subjCode = query.substring(0,3);
+                    String courseCode = query.substring(4,7);
+                    if(allDigits(subjCode) && allDigits(courseCode)) {
+                        JSONObject course = socIndex.getCourseByCode(subjCode, courseCode);
+                        if(course != null) passed.add(course);
                     }
-                    else {
-                        // Check abbreviations
-                        passed.addAll(socIndex.getSubjectsByAbbreviation(query.toUpperCase()));
-                    }
-
+                }
+                else {
+                    // Check abbreviations
+                    passed.addAll(socIndex.getSubjectsByAbbreviation(query.toUpperCase()));
                 }
 
-                // Straight string comparison
-                for (JSONObject jsonObject : tempList) {
-                    String cmp;
-                    if (jsonObject.has("courseNumber")) cmp = Schedule.courseLine(jsonObject);
-                    else cmp = Schedule.subjectLine(jsonObject);
-                    if (StringUtils.containsIgnoreCase(cmp, query)) passed.add(jsonObject);
-                }
-
-                // If we didn't find anything.. CONSULT THE INDEX!! to search full course names
-                if(passed.isEmpty() && socIndex != null) {
-                    List<JSONObject> fuzzies = socIndex.getCoursesByName(query, 10);
-                    passed.addAll(fuzzies);
-                }
-
-                filterResults.values = passed;
-                filterResults.count = passed.size();
-                return filterResults;
             }
 
+            // Straight string comparison on original list
+            for(JSONObject jsonObject: tempList) {
+                String cmp;
+                if (jsonObject.has("courseNumber")) cmp = Schedule.courseLine(jsonObject);
+                else cmp = Schedule.subjectLine(jsonObject);
+                if (StringUtils.containsIgnoreCase(cmp, query)) passed.add(jsonObject);
+            }
+
+            // If we didn't find anything.. CONSULT THE INDEX!! to search full course names
+            if(passed.isEmpty() && socIndex != null) {
+                List<JSONObject> fuzzies = socIndex.getCoursesByName(query, 10);
+                passed.addAll(fuzzies);
+            }
+
+            filterResults.values = passed;
+            filterResults.count = passed.size();
+            return filterResults;
         }
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
-            // Empty filter, do nothing
-            if(filterResults == null) return;
-
+            // Replace current list with results
             synchronized (mLock) {
                 mList.clear();
-                if(filterResults.count > 0) mList.addAll((ArrayList<JSONObject>) filterResults.values);
+                if (filterResults.values != null) mList.addAll((ArrayList<JSONObject>) filterResults.values);
                 notifyDataSetChanged();
             }
         }
