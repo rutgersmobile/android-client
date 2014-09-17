@@ -155,12 +155,9 @@ public class AppUtil {
 		// "title" is a JSON Object - figure out which string to display
 		else if(title.getClass() == JSONObject.class) {
 			JSONObject titles = (JSONObject) title;
-			
-			// Get the full name of the user's home campus (default to NB if there's no config)
-			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-			String userHome = AppUtil.getFullCampusTitle(context, sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, context.getResources().getString(R.string.campus_nb_tag)));
-			//Log.v(TAG, "User home: " + userHome);
-			
+
+			String userHome = AppUtil.getHomeCampus(context);
+
 			try {
 				String titleHome = titles.getString("homeCampus");
 				// If user config home matches title's home, show home title
@@ -180,6 +177,16 @@ public class AppUtil {
 		
 		return null;
 	}
+
+    /**
+     * Get the full name of the user's home campus (defaults to New Brunswick if no prefs are set)
+     * @param context App context
+     * @return Full title of user's home campus
+     */
+    public static String getHomeCampus(Context context) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        return AppUtil.getFullCampusTitle(context, sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, context.getString(R.string.campus_nb_tag)));
+    }
 
     /**
      * Get icon by resource ID, colored white

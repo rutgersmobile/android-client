@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -55,16 +56,41 @@ public class FoodMain extends Fragment {
         mData = new ArrayList<RMenuRow>(4);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
-        final String nbCampusFullString = getString(R.string.campus_nb_full);
+        // Get user's home campus
+        final String userHome = AppUtil.getHomeCampus(getActivity());
 
-		// Get dining hall data and populate the top-level menu with names of the dining halls
+        // getString() in callback can cause crashes - load Resource strings here
+        final String nbCampusFullString = getString(R.string.campus_nb_full);
+        final String nwkCampusFullString = getString(R.string.campus_nwk_full);
+        final String camCampusFullString = getString(R.string.campus_cam_full);
+
+        // Static dining entries
+        Bundle nwkRow = new Bundle();
+        nwkRow.putString("component", TextDisplay.HANDLE);
+        nwkRow.putString("title", getString(R.string.dining_stonsby_title));
+        nwkRow.putString("data", getString(R.string.dining_stonsby_description));
+        final ArrayList<RMenuRow> nwkRows = new ArrayList<RMenuRow>(2);
+        nwkRows.add(new RMenuHeaderRow(nwkCampusFullString));
+        nwkRows.add(new RMenuItemRow(nwkRow));
+
+        Bundle camRow = new Bundle();
+        camRow.putString("component", TextDisplay.HANDLE);
+        camRow.putString("title", getString(R.string.dining_gateway_title));
+        camRow.putString("data", getString(R.string.dining_gateway_description));
+        final ArrayList<RMenuRow> camRows = new ArrayList<RMenuRow>(2);
+        camRows.add(new RMenuHeaderRow(camCampusFullString));
+        camRows.add(new RMenuItemRow(camRow));
+
+        // Get dining hall data and populate the top-level menu with names of the dining halls
         AndroidDeferredManager dm = new AndroidDeferredManager();
 		dm.when(Dining.getDiningHalls()).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray halls) {
                 try {
-                    mAdapter.add(new RMenuHeaderRow(nbCampusFullString));
+                    // Temporary NB results holder
+                    List<RMenuRow> nbResults = new ArrayList<RMenuRow>();
+                    nbResults.add(new RMenuHeaderRow(nbCampusFullString));
 
                     // Add dining halls - if they have no active meals, make them unclickable
                     for (int i = 0; i < halls.length(); i++) {
@@ -75,16 +101,30 @@ public class FoodMain extends Fragment {
                         hallBundle.putString("component", FoodHall.HANDLE);
 
                         if (Dining.hasActiveMeals(curHall)) {
-                            mAdapter.add(new RMenuItemRow(hallBundle));
+                            nbResults.add(new RMenuItemRow(hallBundle));
                         } else {
                             RMenuItemRow inactiveHallItem = new RMenuItemRow(hallBundle);
                             inactiveHallItem.setClickable(false);
                             inactiveHallItem.setColorResId(R.color.light_gray);
-                            mAdapter.add(inactiveHallItem);
+                            nbResults.add(inactiveHallItem);
                         }
                     }
 
-                    loadStaticHalls();
+                    // Determine campus ordering
+                    if (userHome.equals(nwkCampusFullString)) {
+                        mAdapter.addAll(nwkRows);
+                        mAdapter.addAll(camRows);
+                        mAdapter.addAll(nbResults);
+                    } else if (userHome.equals(camCampusFullString)) {
+                        mAdapter.addAll(camRows);
+                        mAdapter.addAll(nwkRows);
+                        mAdapter.addAll(nbResults);
+                    } else {
+                        mAdapter.addAll(nbResults);
+                        mAdapter.addAll(camRows);
+                        mAdapter.addAll(nwkRows);
+                    }
+
                 } catch (JSONException e) {
                     Log.w(TAG, e.getMessage());
                     Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
@@ -116,32 +156,15 @@ public class FoodMain extends Fragment {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Bundle clickedArgs = ((RMenuItemRow) parent.getAdapter().getItem(position)).getArgs();
+                RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
+                if(!(clickedRow instanceof RMenuItemRow)) return;        Bundle nwk = new Bundle();
+
+                Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
                 ComponentFactory.getInstance().switchFragments(clickedArgs);
             }
-
         });
 		
 		return v;
 	}
 
-    private void loadStaticHalls() {
-        if(!isAdded()) return;
-
-        Bundle nwk = new Bundle();
-        nwk.putString("component", TextDisplay.HANDLE);
-        nwk.putString("title", "Stonsby Commons & Eatery");
-        nwk.putString("data", "Students enjoy all-you-care-to-eat dining in a contemporary setting. This exciting location offers fresh made menu items, cutting-edge American entrees, ethnically-inspired foods, vegetarian selections and lots more... \n\nThe Commons also features upscale Premium entrees and fresh baked goods from our in house bakery or local vendors.");
-
-        Bundle cam = new Bundle();
-        cam.putString("component", TextDisplay.HANDLE);
-        cam.putString("title", "Gateway Cafe");
-        cam.putString("data", "The Camden Dining Hall, the Gateway Cafe, is located at the Camden Campus Center.\n\nIt offers a variety of eateries in one convenient location.");
-
-        mAdapter.add(new RMenuHeaderRow(getString(R.string.campus_nwk_full)));
-        mAdapter.add(new RMenuItemRow(nwk));
-        mAdapter.add(new RMenuHeaderRow(getString(R.string.campus_cam_full)));
-        mAdapter.add(new RMenuItemRow(cam));
-    }
-	
 }

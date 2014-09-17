@@ -35,7 +35,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
 
     private static final String TAG = "ScheduleAdapter";
 
-    private int layoutResource;
+    private int mRowLayoutResId;
     private List<JSONObject> mList;
     private List<JSONObject> mOriginalList;
     private ScheduleFilter mFilter;
@@ -51,7 +51,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
 
     public ScheduleAdapter(Context context, int resource, List<JSONObject> objects) {
         super(context, resource, objects);
-        this.layoutResource = resource;
+        this.mRowLayoutResId = resource;
         this.mList = objects;
     }
 
@@ -61,7 +61,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
         ViewHolder holder;
 
         if(convertView == null) {
-            convertView = layoutInflater.inflate(layoutResource, null);
+            convertView = layoutInflater.inflate(mRowLayoutResId, null);
             holder = new ViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             holder.creditsTextView = (TextView) convertView.findViewById(R.id.credits);

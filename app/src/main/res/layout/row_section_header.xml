@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/lighter_gray"
+    android:background="@color/light_gray"
     android:orientation="vertical">
 
 	<TextView
@@ -10,7 +10,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:text="@string/replace_me"
-		android:textColor="@color/dark_gray"
+		android:textColor="@color/white"
 		android:textStyle="bold"
 		android:textAllCaps="true"
         android:paddingLeft="10dp"
@@ -22,8 +22,8 @@
 	<!-- for height: 1dp may be rounded down to 0px on some screens -->
 	<View
 	    android:layout_width="match_parent"
-		android:layout_height="2dp"
-		android:background="@android:color/darker_gray"
-        android:visibility="gone"/>
+		android:layout_height="4dp"
+		android:background="@drawable/shadow_vertical"
+        android:visibility="visible"/>
 
 </LinearLayout>

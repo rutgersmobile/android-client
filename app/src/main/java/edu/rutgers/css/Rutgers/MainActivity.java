@@ -161,16 +161,10 @@ public class MainActivity extends FragmentActivity  implements
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				if(view.isEnabled() == false) return;
-				
-				RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
-				if(clickedItem == null) {
-					Log.e("SlidingMenu", "Failed sliding menu click, index " + position);
-					mDrawerLayout.closeDrawer(mDrawerListView);
-					return;
-				}
-				
-				Bundle clickedArgs = clickedItem.getArgs();
+                RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
+                if(!(clickedRow instanceof RMenuItemRow)) return;
+
+				Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
 				clickedArgs.putBoolean("topLevel", true); // This is a top level menu press
 				
 				// Launch component
