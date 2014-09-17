@@ -225,7 +225,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                     dayTextView.setText("");
                 }
 
-                // TODO Format this
+                // Format meeting times
                 if(!meetingTime.isNull("startTime") && !meetingTime.isNull("endTime") && !meetingTime.isNull("pmCode")) {
                     timeTextView.setText(formatTimes(meetingTime.getString("startTime"), meetingTime.getString("endTime"), meetingTime.getString("pmCode")));
                     keepView = true;

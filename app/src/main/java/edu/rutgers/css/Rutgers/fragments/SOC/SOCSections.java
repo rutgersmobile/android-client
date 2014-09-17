@@ -1,9 +1,6 @@
 package edu.rutgers.css.Rutgers.fragments.SOC;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,10 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,12 +59,14 @@ public class SOCSections extends Fragment {
             }
 
             // Create a synopsis link row, if a synopsis URL is set
+            /*
             if(!courseJSON.isNull("synopsisUrl")) {
                 JSONObject synopsisRow = new JSONObject();
                 synopsisRow.put("isSynopsisRow", true);
                 synopsisRow.put("synopsisUrl", courseJSON.getString("synopsisUrl"));
                 mAdapter.add(synopsisRow);
             }
+            */
 
             // Create pre-req row if pre-reqs are specified
             if(!courseJSON.isNull("preReqNotes") && !courseJSON.getString("preReqNotes").isEmpty()) {
