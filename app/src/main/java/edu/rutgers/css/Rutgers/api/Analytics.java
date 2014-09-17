@@ -26,22 +26,26 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
-import edu.rutgers.css.Rutgers2.SettingsActivity;
 import edu.rutgers.css.Rutgers.items.AnalyticsOpenHelper;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.BuildConfig;
+import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 /**
- * Created by jamchamb on 8/5/14.
+ * Analytics service. Queues analytics events and flushes them to the server when the app is paused.
+ * <p>
+ * The events are stored in a local SQLite database until they are successfully flushed to the server.
+ * @author James Chambers
  */
 public class Analytics extends IntentService {
 
     public static final String TAG = "Analytics";
+
+    private static final String POST_URL = "http://sauron.rutgers.edu/~jamchamb/analytics.php"; // TODO Remove
+    //private static final String POST_URL = AppUtil.API_BASE + "analytics.php";
 
     // Event types
     public static final String NEW_INSTALL = "fresh_launch";
@@ -49,9 +53,6 @@ public class Analytics extends IntentService {
     public static final String ERROR = "error";
     public static final String CHANNEL_OPENED = "channel";
     public static final String DEFAULT_TYPE = "event";
-
-    private static final String POST_URL = "http://sauron.rutgers.edu/~jamchamb/analytics.php";
-    //private static final String POST_URL = AppUtil.API_BASE + "analytics.php";
 
     private static final int QUEUE_MODE = 0;
     private static final int POST_MODE = 1;
@@ -64,6 +65,7 @@ public class Analytics extends IntentService {
      * Queue an analytics event.
      * @param context App context
      * @param eventType Event type
+     * @param extra Extra information, in a string
      */
     public static void queueEvent(Context context, String eventType, String extra) {
         Intent analyticsIntent = new Intent(context, Analytics.class);
@@ -73,6 +75,10 @@ public class Analytics extends IntentService {
         context.startService(analyticsIntent);
     }
 
+    /**
+     * Tell the service to flush all analytics events to the server.
+     * @param context App context
+     */
     public static void postEvents(Context context) {
         Intent analyticsIntent = new Intent(context, Analytics.class);
         analyticsIntent.putExtra("mode", POST_MODE);
@@ -202,9 +208,6 @@ public class Analytics extends IntentService {
                 // Build POST request
                 HttpClient httpClient = new DefaultHttpClient();
                 HttpPost httpPost = new HttpPost(POST_URL);
-                /*if(BuildConfig.DEBUG) {
-                    Log.v(TAG, "payload: " + eventOutQueue.toString());
-                }*/
 
                 try {
                     List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
@@ -246,11 +249,17 @@ public class Analytics extends IntentService {
         return "@"+new Long(System.currentTimeMillis()/1000L).toString();
     }
 
-    public static JSONObject getEventJSON(String eventType, String timestamp, Context context) {
+    /**
+     * Get JSON object describing an analytics event.
+     * @param eventType Event type
+     * @param timestamp Timestamp for when the event occurred
+     * @param context App context
+     * @return JSON object describing the analytics event.
+     */
+    private static JSONObject getEventJSON(String eventType, String timestamp, Context context) {
         JSONObject eventJSON = new JSONObject();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        //TODO Translate these to full names
         String userCampus = AppUtil.getFullCampusTitle(context, prefs.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, null));
         String userRole = AppUtil.getFullRoleTitle(context, prefs.getString(SettingsActivity.KEY_PREF_USER_TYPE, null));
 
@@ -268,7 +277,12 @@ public class Analytics extends IntentService {
         return eventJSON;
     }
 
-    public static JSONObject getPlatformJSON(Context context) {
+    /**
+     * Get JSON object describing the current device.
+     * @param context App context
+     * @return JSON object describing the current device
+     */
+    private static JSONObject getPlatformJSON(Context context) {
         JSONObject platformJSON = new JSONObject();
         try {
             platformJSON.put("os", AppUtil.OSNAME);
@@ -283,7 +297,12 @@ public class Analytics extends IntentService {
         return platformJSON;
     }
 
-    public static JSONObject getReleaseJSON(Context context) {
+    /**
+     * Get JSON object describing the current app release.
+     * @param context App context
+     * @return JSON object describing the current release
+     */
+    private static JSONObject getReleaseJSON(Context context) {
         JSONObject releaseJSON = new JSONObject();
         try {
             releaseJSON.put("debug", BuildConfig.DEBUG);
