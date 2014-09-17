@@ -11,12 +11,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.time.DatePrinter;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Calendar;
+import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
@@ -61,6 +66,12 @@ public class FoodHall extends Fragment {
                             mPagerAdapter.add(curMeal);
                         }
                     }
+
+                    // Set title to show timestamp for dining data
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(hall.getLong("date"));
+                    DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
+                    if(getActivity() != null) getActivity().setTitle(args.getString("location") + " (" + dout.format(calendar) + ")");
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());
                 }

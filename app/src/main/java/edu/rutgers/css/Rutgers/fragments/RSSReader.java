@@ -84,7 +84,7 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 
             @Override
             public void onFail(AjaxStatus e) {
-                Log.e(TAG, e.getError() + "; " + e.getMessage() + "; Response code: " + e.getCode());
+                Log.e(TAG, AppUtil.formatAjaxStatus(e));
                 AppUtil.showFailedLoadToast(getActivity());
             }
 
