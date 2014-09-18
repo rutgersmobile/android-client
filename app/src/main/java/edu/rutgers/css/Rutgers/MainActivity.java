@@ -125,8 +125,10 @@ public class MainActivity extends FragmentActivity  implements
 		 * Set up nav drawer
 		 */
 		// Enable drawer icon
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        if(getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
+        }
         
         ArrayList<RMenuRow> menuArray = new ArrayList<RMenuRow>();
         mDrawerAdapter = new RMenuAdapter(this, R.layout.row_drawer_item, R.layout.row_drawer_header, menuArray);
