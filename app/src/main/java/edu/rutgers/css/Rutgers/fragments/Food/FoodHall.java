@@ -71,7 +71,9 @@ public class FoodHall extends Fragment {
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(hall.getLong("date"));
                     DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
-                    if(getActivity() != null) getActivity().setTitle(args.getString("location") + " (" + dout.format(calendar) + ")");
+                    if(getActivity() != null && AppUtil.isOnTop(FoodHall.HANDLE)) {
+                        getActivity().setTitle(args.getString("location") + " (" + dout.format(calendar) + ")");
+                    }
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());
                 }
