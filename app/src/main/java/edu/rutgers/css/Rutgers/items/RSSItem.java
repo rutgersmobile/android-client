@@ -14,10 +14,10 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
+
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
  * Class for holding RSS item data
@@ -26,22 +26,22 @@ import java.util.TimeZone;
 public class RSSItem implements Serializable {
 
 	private static final String TAG = "RSSItem";
-	
-	private String title;
+
+    private final static DateParser rssDf = FastDateFormat.getInstance("EEE, dd MMM yyyy ZZZZZ", Locale.US); // Mon, 26 May 2014 -0400
+    private final static DateParser rssDf2 = FastDateFormat.getInstance("EEE, MMM dd, yyyy", Locale.US); // Monday, May 26, 2014
+    private final static DateParser rssDf3 = FastDateFormat.getInstance("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US); // Mon, 26 May 2014 00:27:50 GMT
+    private final static DatePrinter rssOutFormat = FastDateFormat.getInstance("MMMM d, yyyy", Locale.US); // May 26, 2014
+    private final static DateParser eventDf = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
+    private final static DatePrinter eventOutDf = FastDateFormat.getInstance("MMM dd, yyyy h:mm a", Locale.US);
+    private final static DatePrinter eventOutEndDf = FastDateFormat.getInstance("h:mm a", Locale.US);
+
+    private String title;
 	private String description;
 	private String link;
 	private String author;
 	private String date;
 	private URL imgUrl;
 
-	private final static DateParser rssDf = FastDateFormat.getInstance("EEE, dd MMM yyyy ZZZZZ", Locale.US); // Mon, 26 May 2014 -0400
-	private final static DateParser rssDf2 = FastDateFormat.getInstance("EEE, MMM dd, yyyy", Locale.US); // Monday, May 26, 2014
-    private final static DateParser rssDf3 = FastDateFormat.getInstance("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US); // Mon, 26 May 2014 00:27:50 GMT
-    private final static DatePrinter rssOutFormat = FastDateFormat.getInstance("MMMM d, yyyy", Locale.US); // May 26, 2014
-    private final static DateParser eventDf = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
-    private final static DatePrinter eventOutDf = FastDateFormat.getInstance("MMM dd, yyyy h:mm a", Locale.US);
-    private final static DatePrinter eventOutEndDf = FastDateFormat.getInstance("h:mm a", Locale.US);
-	
 	/**
 	 * Default constructor takes RSS item as XML object
 	 * @param item RSS item in XML form
@@ -51,7 +51,7 @@ public class RSSItem implements Serializable {
 
 		// RSS 2.0 required fields
 		this.title = StringUtils.chomp(StringEscapeUtils.unescapeHtml4(item.text("title")));
-		this.description = StringUtils.chomp(stripTags(StringEscapeUtils.unescapeHtml4(item.text("description"))));
+		this.description = StringUtils.chomp(AppUtil.stripTags(StringEscapeUtils.unescapeHtml4(item.text("description"))));
         if(this.description != null) this.description = this.description.trim();
 		this.link = item.text("link");
 		
@@ -71,8 +71,7 @@ public class RSSItem implements Serializable {
 			if(parsed == null) {
 				try {
 					parsed = rssDf2.parse(item.text("pubDate"));
-				}
-				catch(ParseException e) {}
+				} catch(ParseException e) {}
 			}
 			
 			if(parsed == null) {
@@ -101,14 +100,13 @@ public class RSSItem implements Serializable {
                     Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
 
                     // If days match show day with start & end hours
-                    if(isSameDay(eventBegin, eventEnd)) this.date = eventOutDf.format(eventBegin) + " - " + eventOutEndDf.format(eventEnd);
+                    if(AppUtil.isSameDay(eventBegin, eventEnd)) this.date = eventOutDf.format(eventBegin) + " - " + eventOutEndDf.format(eventEnd);
                     // Otherwise show start and end dates
                     else this.date = eventOutDf.format(eventBegin) + " - " + eventOutDf.format(eventEnd);
                 }
                 else {
                     this.date = eventOutDf.format(eventBegin);
                 }
-
 			} catch (ParseException e) {
 				Log.w(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
 				this.date = item.text("event:beginDateTime");
@@ -183,31 +181,5 @@ public class RSSItem implements Serializable {
 	public String toString() {
 		return this.title;
 	}
-
-    /**
-     * Check if two different timestamps have the same date.
-     * @param d1 Date 1
-     * @param d2 Date 2
-     * @return True if days of year match, false if not
-     */
-    private boolean isSameDay(Date d1, Date d2) {
-        Calendar cal1 = Calendar.getInstance(Locale.US);
-        Calendar cal2 = Calendar.getInstance(Locale.US);
-        cal1.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-        cal2.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-        cal1.setTime(d1);
-        cal2.setTime(d2);
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
-    }
-
-    /**
-     * Remove HTML tags from string
-     * @param string String to cleanse
-     * @return Cleansed string, or null if string was null
-     */
-    private String stripTags(String string) {
-        if(string == null) return null;
-        return string.replaceAll("\\<.*?\\>", "");
-    }
 
 }

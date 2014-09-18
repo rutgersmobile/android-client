@@ -33,6 +33,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.items.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
@@ -89,7 +90,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         for(int i = 0; i < channels.length(); i++) {
             try {
                 JSONObject channel = channels.getJSONObject(i);
-                mChannelSpinnerAdapter.add(AppUtil.getLocalTitle(getActivity(), channel.opt("title")));
+                mChannelSpinnerAdapter.add(RutgersUtil.getLocalTitle(getActivity(), channel.opt("title")));
             } catch (JSONException e) {
                 Log.w(TAG, "onCreateView(): " + e.getMessage());
             }

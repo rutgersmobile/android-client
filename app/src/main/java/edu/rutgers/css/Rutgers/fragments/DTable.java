@@ -28,6 +28,7 @@ import edu.rutgers.css.Rutgers.adapters.JSONAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -158,9 +159,9 @@ public class DTable extends Fragment {
                 try {
                     // This object has an array of more channels
                     if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.CAT_TYPE.ordinal()) {
-                        Log.v(dTag(), "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
+                        Log.v(dTag(), "Clicked \"" + RutgersUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
                         args.putString("component", "dtable");
-                        args.putString("title", AppUtil.getLocalTitle(mContext, clickedJson.get("title")));
+                        args.putString("title", RutgersUtil.getLocalTitle(mContext, clickedJson.get("title")));
                         args.putString("data", clickedJson.getJSONArray("children").toString());
                     }
                     // This is a FAQ button
@@ -172,7 +173,7 @@ public class DTable extends Fragment {
                     // This object has a channel
                     else {
                         JSONObject channel = clickedJson.getJSONObject("channel");
-                        Log.v(dTag(), "Clicked \"" + AppUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
+                        Log.v(dTag(), "Clicked \"" + RutgersUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
 
                         // Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
                         args.putString("component", channel.getString("view"));
@@ -185,7 +186,7 @@ public class DTable extends Fragment {
                         else if (clickedJson.has("title")) title = clickedJson.get("title");
 
                         if (title != null)
-                            args.putString("title", AppUtil.getLocalTitle(mContext, title));
+                            args.putString("title", RutgersUtil.getLocalTitle(mContext, title));
 
                         // Add the rest of the JSON fields to the arg bundle
                         Iterator<String> keys = channel.keys();

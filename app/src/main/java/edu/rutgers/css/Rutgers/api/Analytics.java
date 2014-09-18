@@ -31,6 +31,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.items.AnalyticsOpenHelper;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
@@ -260,8 +261,8 @@ public class Analytics extends IntentService {
         JSONObject eventJSON = new JSONObject();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String userCampus = AppUtil.getFullCampusTitle(context, prefs.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, null));
-        String userRole = AppUtil.getFullRoleTitle(context, prefs.getString(SettingsActivity.KEY_PREF_USER_TYPE, null));
+        String userCampus = RutgersUtil.getFullCampusTitle(context, prefs.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, null));
+        String userRole = RutgersUtil.getFullRoleTitle(context, prefs.getString(SettingsActivity.KEY_PREF_USER_TYPE, null));
 
         try {
             eventJSON.put("type", eventType);

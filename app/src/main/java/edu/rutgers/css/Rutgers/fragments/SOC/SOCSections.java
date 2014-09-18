@@ -59,7 +59,7 @@ public class SOCSections extends Fragment {
             }
 
             // Create a synopsis link row, if a synopsis URL is set
-            /*
+            /* Bring it back if these links are ever useful
             if(!courseJSON.isNull("synopsisUrl")) {
                 JSONObject synopsisRow = new JSONObject();
                 synopsisRow.put("isSynopsisRow", true);

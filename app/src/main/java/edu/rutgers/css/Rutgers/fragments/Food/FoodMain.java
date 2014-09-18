@@ -31,6 +31,7 @@ import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -57,7 +58,7 @@ public class FoodMain extends Fragment {
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
         // Get user's home campus
-        final String userHome = AppUtil.getHomeCampus(getActivity());
+        final String userHome = RutgersUtil.getHomeCampus(getActivity());
 
         // getString() in callback can cause crashes - load Resource strings here
         final String nbCampusFullString = getString(R.string.campus_nb_full);

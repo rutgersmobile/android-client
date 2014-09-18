@@ -50,6 +50,7 @@ import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
@@ -457,7 +458,7 @@ public class MainActivity extends FragmentActivity  implements
                 Bundle itemArgs = new Bundle();
 
                 // Set title - may be a multi-title object
-                itemArgs.putString("title", AppUtil.getLocalTitle(this, cur.get("title")));
+                itemArgs.putString("title", RutgersUtil.getLocalTitle(this, cur.get("title")));
 
                 // Set component to launch. Default to WWW for web shortcuts
                 if(cur.isNull("view") && !cur.isNull("url")) {

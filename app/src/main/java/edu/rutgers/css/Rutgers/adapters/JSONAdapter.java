@@ -13,7 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -160,7 +160,7 @@ public class JSONAdapter extends BaseAdapter {
         }
 
         JSONObject jsonObject = (JSONObject) getItem(position);
-        String title = AppUtil.getLocalTitle(mContext, jsonObject.opt("title"));
+        String title = RutgersUtil.getLocalTitle(mContext, jsonObject.opt("title"));
         holder.titleTextView.setText(title);
         return convertView;
     }
@@ -181,7 +181,7 @@ public class JSONAdapter extends BaseAdapter {
         }
 
         JSONObject jsonObject = (JSONObject) getItem(position);
-        String title = AppUtil.getLocalTitle(mContext, jsonObject.opt("title"));
+        String title = RutgersUtil.getLocalTitle(mContext, jsonObject.opt("title"));
         holder.titleTextView.setText(title);
         return convertView;
     }
@@ -204,7 +204,7 @@ public class JSONAdapter extends BaseAdapter {
         }
 
         JSONObject jsonObject = (JSONObject) getItem(position);
-        String title = AppUtil.getLocalTitle(mContext, jsonObject.opt("title"));
+        String title = RutgersUtil.getLocalTitle(mContext, jsonObject.opt("title"));
 
         holder.titleTextView.setText(title);
 
