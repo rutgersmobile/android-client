@@ -128,7 +128,7 @@ public class WebDisplay extends Fragment {
 
                 // Add cookies from current page to download request to maintain session
                 // (otherwise download may fail)
-                String cookies = CookieManager.getInstance().getCookie(mCurrentURL);
+                String cookies = CookieManager.getInstance().getCookie(url);
 
                 // Set up download request
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
