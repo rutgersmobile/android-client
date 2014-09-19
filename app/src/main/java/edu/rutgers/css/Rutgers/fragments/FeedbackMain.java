@@ -159,12 +159,12 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 					// Errors - invalid input
 					if(json.optJSONArray("errors") != null) {
 						JSONArray response = json.optJSONArray("errors");
-						Toast.makeText(getActivity(), response.optString(0, feedbackErrorString), Toast.LENGTH_LONG).show();
+						Toast.makeText(getActivity(), response.optString(0, feedbackErrorString), Toast.LENGTH_SHORT).show();
 					}
 					// Success - input went through
 					else if(!json.isNull("success")) {
 						String response = json.optString("success", feedbackSuccessString);
-						Toast.makeText(getActivity(), response, Toast.LENGTH_LONG).show();
+						Toast.makeText(getActivity(), response, Toast.LENGTH_SHORT).show();
 						
 						// Only reset forms after message has gone through
 						resetForm();

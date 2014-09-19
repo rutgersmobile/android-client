@@ -103,7 +103,7 @@ public class DTable extends Fragment {
 		else if (args.getString("api") != null) mAPI = args.getString("api");
 		else {
             Log.e(dTag(), "DTable must have URL, API, or data in its arguments bundle");
-            Toast.makeText(mContext, R.string.failed_internal, Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, R.string.failed_internal, Toast.LENGTH_SHORT).show();
         }
 
         if(mURL != null || mAPI != null) {

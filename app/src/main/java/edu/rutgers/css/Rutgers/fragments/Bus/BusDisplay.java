@@ -199,10 +199,11 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 	public void onDone(ArrayList<Prediction> predictionArray) {
         // If no routes are running through this stop right now, show message
         if(mMode == Mode.STOP && predictionArray.isEmpty()) {
-            Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
         }
 
-		/* Add items if the list is being newly populated, or
+		/*
+         * Add items if the list is being newly populated, or
 		 * the updated JSON doesn't seem to match and the list should be
 		 * cleared and repopulated.
 		 */
@@ -216,7 +217,9 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 				mAdapter.add(p);
 			}
 		}
-		/* Update items individually if the list is already populated
+
+		/*
+		 * Update items individually if the list is already populated
 		 * and the returned JSON seems valid (matches in size).
 		 */
 		else {
