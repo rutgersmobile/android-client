@@ -8,5 +8,6 @@ public interface LocationClientProvider {
 	public LocationClient getLocationClient();
     public boolean servicesConnected();
     public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener);
+    public void unregisterListener(GooglePlayServicesClient.ConnectionCallbacks listener);
 	
 }

@@ -68,7 +68,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         Log.i(TAG, "Attaching to activity");
         try {
             mLocationClientProvider = (LocationClientProvider) activity;
-            mLocationClientProvider.registerListener(this);
         } catch(ClassCastException e) {
             mLocationClientProvider = null;
             Log.e(TAG, e.getMessage());
@@ -191,12 +190,21 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     public void onResume() {
         super.onResume();
 
+        if(mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
+
         // Don't update the screen if the places fragment isn't on top
         if(!AppUtil.isOnTop(PlacesMain.HANDLE)) {
             Log.v(TAG, "onResume(): Not on top, not updating nearby places");
         }
         // Reload nearby places
         else loadNearbyPlaces();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if(mLocationClientProvider != null) mLocationClientProvider.unregisterListener(this);
     }
 
     @Override

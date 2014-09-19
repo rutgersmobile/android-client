@@ -76,7 +76,6 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         Log.i(TAG, "Attaching to activity");
 		try {
 			mLocationClientProvider = (LocationClientProvider) activity;
-            mLocationClientProvider.registerListener(this);
 		} catch(ClassCastException e) {
 			mLocationClientProvider = null;
 			Log.e(TAG, e.getMessage());
@@ -160,6 +159,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             return;
         }
 
+        if(mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
+
         // Clear out everything
         clearNearbyRows();
         mAdapter.clear();
@@ -225,6 +226,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             mUpdateTimer.cancel();
             mUpdateTimer = null;
         }
+
+        if(mLocationClientProvider != null) mLocationClientProvider.unregisterListener(this);
 	}
 
     @Override

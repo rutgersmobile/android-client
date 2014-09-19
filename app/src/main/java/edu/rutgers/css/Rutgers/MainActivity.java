@@ -224,6 +224,7 @@ public class MainActivity extends FragmentActivity  implements
         }
 		mLocationClient.disconnect();
 
+        // Attempt to flush analytics events to server
         Analytics.postEvents(this);
 
 		super.onStop();
@@ -279,14 +280,12 @@ public class MainActivity extends FragmentActivity  implements
         
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
-    
-    //TODO Save state
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
     	super.onSaveInstanceState(outState);
     }
-    
-    //TODO Restore state
+
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
     	super.onRestoreInstanceState(savedInstanceState);
@@ -323,12 +322,11 @@ public class MainActivity extends FragmentActivity  implements
 	}
 
     /**
-     * Register the fragment with the main activity's location client.
+     * Register a child fragment with the main activity's location client.
      * @param listener Fragment that uses the location client.
      */
     @Override
     public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        Log.i(TAG, "Registering location listener: " + listener.toString());
         if(mLocationListeners == null) {
             mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
         }
@@ -337,6 +335,24 @@ public class MainActivity extends FragmentActivity  implements
 
         if(mLocationClient != null) {
             mLocationClient.registerConnectionCallbacks(listener);
+            Log.d(TAG, "Registered location listener: " + listener.toString());
+        } else {
+            Log.w(TAG, "Failed to register listener: " + listener.toString());
+        }
+    }
+
+    /**
+     * Unregister a child fragment from the main activity's location client.
+     * @param listener
+     */
+    @Override
+    public void unregisterListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
+        if(mLocationListeners != null) {
+            mLocationListeners.remove(listener);
+        }
+        if(mLocationClient != null) {
+            mLocationClient.unregisterConnectionCallbacks(listener);
+            Log.d(TAG, "Unregistered location listener: " + listener.toString());
         }
     }
 
