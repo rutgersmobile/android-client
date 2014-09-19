@@ -38,6 +38,7 @@ public class FoodHall extends Fragment {
 
     private String mLocation;
     private MealPagerAdapter mPagerAdapter;
+    private JSONObject mData;
 
 	public FoodHall() {
 		// Required empty public constructor
@@ -46,37 +47,33 @@ public class FoodHall extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        final Bundle args = getArguments();
+        Bundle args = getArguments();
 
         mLocation = args.getString("location");
         if(mLocation == null) return;
 
         mPagerAdapter = new MealPagerAdapter(getChildFragmentManager());
 
+        if(savedInstanceState != null) {
+            String json = savedInstanceState.getString("mData");
+            if(json != null) {
+                try {
+                    mData = new JSONObject(json);
+                    loadPages(mData);
+                    return;
+                } catch (JSONException e) {
+                    mData = null;
+                }
+            }
+        }
+
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<JSONObject>() {
 
             @Override
             public void onDone(JSONObject hall) {
-                try {
-                    JSONArray meals = hall.getJSONArray("meals");
-                    for (int j = 0; j < meals.length(); j++) {
-                        JSONObject curMeal = meals.getJSONObject(j);
-                        if (curMeal.getBoolean("meal_avail")) {
-                            mPagerAdapter.add(curMeal);
-                        }
-                    }
-
-                    // Set title to show timestamp for dining data
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(hall.getLong("date"));
-                    DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
-                    if(getActivity() != null && AppUtil.isOnTop(FoodHall.HANDLE)) {
-                        getActivity().setTitle(args.getString("location") + " (" + dout.format(calendar) + ")");
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG, e.getMessage());
-                }
+                mData = hall;
+                loadPages(mData);
             }
 
         }).fail(new FailCallback<Exception>() {
@@ -106,6 +103,34 @@ public class FoodHall extends Fragment {
 
 		return v;
 	}
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mData != null) outState.putString("mData", mData.toString());
+    }
+
+    private void loadPages(JSONObject hall) {
+        try {
+            JSONArray meals = hall.getJSONArray("meals");
+            for (int j = 0; j < meals.length(); j++) {
+                JSONObject curMeal = meals.getJSONObject(j);
+                if (curMeal.getBoolean("meal_avail")) {
+                    mPagerAdapter.add(curMeal);
+                }
+            }
+
+            // Set title to show timestamp for dining data
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(hall.getLong("date"));
+            DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
+            if(getActivity() != null && AppUtil.isOnTop(FoodHall.HANDLE)) {
+                getActivity().setTitle(mLocation + " (" + dout.format(calendar) + ")");
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
 
     private class MealPagerAdapter extends FragmentStatePagerAdapter {
 
