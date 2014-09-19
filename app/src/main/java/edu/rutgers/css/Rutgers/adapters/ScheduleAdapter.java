@@ -87,8 +87,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
 
                     @Override
                     public void onDone(JSONObject result) {
-                        Iterator<String> keys = result.keys();
-                        while(keys.hasNext()) {
+                        for(Iterator<String> keys = result.keys(); keys.hasNext();) {
                             String curKey = keys.next();
                             try {
                                 jsonObject.put(curKey, result.opt(curKey));

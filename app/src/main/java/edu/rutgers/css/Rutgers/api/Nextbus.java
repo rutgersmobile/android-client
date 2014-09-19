@@ -431,8 +431,7 @@ public class Nextbus {
 					JSONObject stopsByTitle = conf.getJSONObject("stopsByTitle");
 					
 					// Loop through stop titles
-					Iterator<String> confIter = stopsByTitle.keys();
-					while(confIter.hasNext()) {
+					for(Iterator<String> confIter = stopsByTitle.keys(); confIter.hasNext();) {
 						String curTitle = confIter.next();
 						JSONObject curStopByTitle = stopsByTitle.getJSONObject(curTitle);
 						JSONArray curStopTags = curStopByTitle.getJSONArray("tags");
@@ -498,8 +497,7 @@ public class Nextbus {
 					JSONArray activeStops = active.getJSONArray("stops");
 					
 					// Loop through ALL nearby stops returned by earlier call
-					Iterator<String> stopTitleIter = stopsByTitle.keys();
-					while(stopTitleIter.hasNext()) {
+					for(Iterator<String> stopTitleIter = stopsByTitle.keys(); stopTitleIter.hasNext();) {
 						String curTitle = stopTitleIter.next();
 						
 						// Check to see if this stop is active

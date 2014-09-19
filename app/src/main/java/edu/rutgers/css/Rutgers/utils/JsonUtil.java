@@ -35,8 +35,7 @@ public class JsonUtil {
         JSONObject result = new JSONObject();
 
         for(JSONObject curObj: objects) {
-            Iterator<String> keys = curObj.keys();
-            while(keys.hasNext()) {
+            for(Iterator<String> keys = curObj.keys(); keys.hasNext();) {
                 String curKey = keys.next();
                 Object curVal = curObj.get(curKey);
                 result.put(curKey, curVal);

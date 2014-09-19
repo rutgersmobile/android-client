@@ -189,8 +189,7 @@ public class DTable extends Fragment {
                             args.putString("title", RutgersUtil.getLocalTitle(mContext, title));
 
                         // Add the rest of the JSON fields to the arg bundle
-                        Iterator<String> keys = channel.keys();
-                        while (keys.hasNext()) {
+                        for(Iterator<String> keys = channel.keys(); keys.hasNext();) {
                             String key = keys.next();
                             if (key.equalsIgnoreCase("title"))
                                 continue; // title was already handled above

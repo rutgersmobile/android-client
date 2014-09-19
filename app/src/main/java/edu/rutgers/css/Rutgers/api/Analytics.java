@@ -189,8 +189,7 @@ public class Analytics extends IntentService {
                     if(extra != null) {
                         try {
                             JSONObject extraJSON = new JSONObject(extra);
-                            Iterator<String> keys = extraJSON.keys();
-                            while (keys.hasNext()) {
+                            for(Iterator<String> keys = extraJSON.keys(); keys.hasNext();) {
                                 String curKey = keys.next();
                                 eventJSON.put(curKey, extraJSON.get(curKey));
                             }
@@ -247,7 +246,7 @@ public class Analytics extends IntentService {
      * @return String representation of the current time which can be parsed by strtotime()
      */
     public static String getCurrentTimestamp() {
-        return "@"+new Long(System.currentTimeMillis()/1000L).toString();
+        return "@" + Long.toString(System.currentTimeMillis()/1000L);
     }
 
     /**

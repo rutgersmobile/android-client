@@ -76,8 +76,7 @@ public class Places {
                     JSONObject allPlaces = res.getResult().getJSONObject("all");
                     sPlacesTable = Collections.synchronizedMap(new LinkedHashMap<String, JSONObject>());
 
-                    Iterator<String> placeIter = allPlaces.keys();
-                    while(placeIter.hasNext()) {
+                    for(Iterator<String> placeIter = allPlaces.keys(); placeIter.hasNext();) {
                         String curKey = placeIter.next();
                         JSONObject curPlace = allPlaces.getJSONObject(curKey);
                         sPlacesTable.put(curKey, curPlace);
@@ -193,9 +192,9 @@ public class Places {
 
     /**
      * Calculate nearby locations in a background thread
-     * @param deferred
-     * @param sourceLat
-     * @param sourceLon
+     * @param deferred Deferred object to resolve results for
+     * @param sourceLat Latitude
+     * @param sourceLon Longitude
      */
     private static void calculateNearby(final Deferred<Set<PlaceStub>, Exception, Double> deferred, final double sourceLat, final double sourceLon) {
         sDM.when(new DeferredAsyncTask<Void, Object, Set<PlaceStub>>() {
@@ -203,9 +202,7 @@ public class Places {
             protected Set<PlaceStub> doInBackgroundSafe(Void... voids) throws Exception {
                 Set<PlaceStub> result = new TreeSet<PlaceStub>(new PlaceDistanceComparator());
 
-                Iterator<String> placesIter = sPlacesTable.keySet().iterator();
-                while (placesIter.hasNext()) {
-                    String curPlaceKey = placesIter.next();
+                for(String curPlaceKey: sPlacesTable.keySet()) {
                     try {
                         JSONObject curPlace = sPlacesTable.get(curPlaceKey);
                         if (curPlace.has("location")) {
@@ -241,8 +238,8 @@ public class Places {
     private static class PlaceDistanceComparator implements Comparator<PlaceStub> {
         @Override
         public int compare(PlaceStub ps1, PlaceStub ps2) {
-            Float dist1 = new Float(ps1.getDistance());
-            Float dist2 = new Float(ps2.getDistance());
+            Float dist1 = ps1.getDistance();
+            Float dist2 = ps2.getDistance();
             return dist1.compareTo(dist2);
         }
     }

@@ -200,8 +200,7 @@ public class PlacesDisplay extends Fragment {
                                                 return;
                                             }
 
-                                            Iterator<String> stopTitleIter = nearbyStopsByTitle.keys();
-                                            while (stopTitleIter.hasNext()) {
+                                            for(Iterator<String> stopTitleIter = nearbyStopsByTitle.keys(); stopTitleIter.hasNext();) {
                                                 TextView newStopTextView = new TextView(v.getContext());
                                                 String stopTitle = stopTitleIter.next();
                                                 newStopTextView.setText(stopTitle);
@@ -272,11 +271,11 @@ public class PlacesDisplay extends Fragment {
 	private static String formatAddress(JSONObject address) {
 		if(address == null) return "";
 		StringBuilder result = new StringBuilder();
-		
-		if(!address.isNull("name") && !address.optString("name").isEmpty()) result.append(address.optString("name") + "\n");
-		if(!address.isNull("street") && !address.optString("street").isEmpty()) result.append(address.optString("street") + "\n");
-		if(!address.isNull("city") && !address.optString("city").isEmpty()) result.append(address.optString("city") + ", " +
-				address.optString("state_abbr") + " " + address.optString("postal_code"));
+
+		if(!address.isNull("name") && !address.optString("name").isEmpty()) result.append(address.optString("name")).append("\n");
+		if(!address.isNull("street") && !address.optString("street").isEmpty()) result.append(address.optString("street")).append("\n");
+		if(!address.isNull("city") && !address.optString("city").isEmpty()) result.append(address.optString("city")).append(", ")
+            .append(address.optString("state_abbr")).append(" ").append(address.optString("postal_code"));
 
 		return StringUtils.trim(result.toString());
 	}
@@ -286,7 +285,7 @@ public class PlacesDisplay extends Fragment {
 	 * @param offices Offices JSON Array
 	 * @return Multi-line string listing offices
 	 */
-	private static final String formatOffices(JSONArray offices) {
+	private static String formatOffices(JSONArray offices) {
 		if(offices == null) return "";
 		String result = "";
 		

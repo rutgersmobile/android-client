@@ -61,8 +61,7 @@ public class SOCIndex {
 
             // Set up abbreviations hashtable
             mAbbreviations = new HashMap<String, String[]>();
-            Iterator<String> abbrevsIterator = abbrevs.keys();
-            while(abbrevsIterator.hasNext()) {
+            for(Iterator<String> abbrevsIterator = abbrevs.keys(); abbrevsIterator.hasNext();) {
                 String curAbbrev = abbrevsIterator.next();
                 JSONArray curContents = abbrevs.getJSONArray(curAbbrev);
                 String[] subIDStrings = JsonUtil.jsonToStringArray(curContents);
@@ -71,16 +70,14 @@ public class SOCIndex {
 
             // Set up subject IDs hashtable
             mSubjectsByCode = new HashMap<String, Subject>();
-            Iterator<String> idsIterator = ids.keys();
-            while(idsIterator.hasNext()) {
+            for(Iterator<String> idsIterator = ids.keys(); idsIterator.hasNext();) {
                 String curID = idsIterator.next();
                 JSONObject curContents = ids.getJSONObject(curID);
 
                 // Set up the list of CourseID:CourseName mappings for this Subject ID entry
                 JSONObject curCourses = curContents.getJSONObject("courses");
                 HashMap<String, String> courseMap = new HashMap<String, String>();
-                Iterator<String> courseIDIterator = curCourses.keys();
-                while(courseIDIterator.hasNext()) {
+                for(Iterator<String> courseIDIterator = curCourses.keys(); courseIDIterator.hasNext();) {
                     String curCourseID = courseIDIterator.next();
                     String curCourseName = curCourses.getString(curCourseID);
                     courseMap.put(curCourseID, curCourseName);
@@ -96,8 +93,7 @@ public class SOCIndex {
 
             // Set up subject names hashtable
             mSubjectsByName = new HashMap<String, String>();
-            Iterator<String> namesIterator = names.keys();
-            while(namesIterator.hasNext()) {
+            for(Iterator<String> namesIterator = names.keys(); namesIterator.hasNext();) {
                 String curName = namesIterator.next();
                 String curContents = names.getString(curName);
                 mSubjectsByName.put(curName, curContents);
@@ -105,8 +101,7 @@ public class SOCIndex {
 
             // Set up course names
             mCoursesByName = new HashMap<String, Course>();
-            Iterator<String> coursesIterator = courses.keys();
-            while(coursesIterator.hasNext()) {
+            for(Iterator<String> coursesIterator = courses.keys(); coursesIterator.hasNext();) {
                 String curCourseName = coursesIterator.next();
                 JSONObject curContents = courses.getJSONObject(curCourseName);
                 Course newCourse = new Course();

@@ -386,12 +386,10 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
                     // Put all stop titles into one list
                     List<KeyValPair> stopTitles = new ArrayList<KeyValPair>(nbStops.length() + nwkStops.length());
-                    Iterator<String> stopsIter = nbStops.keys();
-                    while(stopsIter.hasNext()) {
+                    for(Iterator<String> stopsIter = nbStops.keys(); stopsIter.hasNext();) {
                         stopTitles.add(new KeyValPair(stopsIter.next(), "nb"));
                     }
-                    stopsIter = nwkStops.keys();
-                    while(stopsIter.hasNext()) {
+                    for(Iterator<String> stopsIter = nwkStops.keys(); stopsIter.hasNext();) {
                         stopTitles.add(new KeyValPair(stopsIter.next(), "nwk"));
                     }
 
