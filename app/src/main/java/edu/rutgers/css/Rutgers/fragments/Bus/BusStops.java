@@ -45,6 +45,7 @@ import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
@@ -65,6 +66,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 	private Handler mUpdateHandler;
     private String mCurrentCampus;
     private FilterFocusListener mFilterFocusListener;
+    private AndroidDeferredManager mDM;
 	
 	public BusStops() {
 		// Required empty public constructor
@@ -92,6 +94,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+        mDM = new AndroidDeferredManager();
 		
 		mNearbyRowCount = 0;
         mNearbyHeaderAdded = false;
@@ -185,24 +189,35 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 			}
 		}, 0, 1000 * REFRESH_INTERVAL);
 
+        // Get home campus for result ordering
+        String userHome = RutgersUtil.getHomeCampus(getActivity());
+        final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
+
         // Get promises for active stops
         final Promise nbActiveStops = Nextbus.getActiveStops("nb");
         final Promise nwkActiveStops = Nextbus.getActiveStops("nwk");
 
         // Synchronized load of active stops
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(nbActiveStops, nwkActiveStops).done(new DoneCallback<MultipleResults>() {
+        mDM.when(nbActiveStops, nwkActiveStops).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
                 if(!isAdded()) return;
 
+                JSONArray nbResult = null, nwkResult = null;
+
                 for (OneResult result : results) {
-                    if (result.getPromise() == nbActiveStops)
-                        loadAgency("nb", getString(R.string.bus_nb_active_stops_header), (JSONArray) result.getResult());
-                    else if (result.getPromise() == nwkActiveStops)
-                        loadAgency("nwk", getString(R.string.bus_nwk_active_stops_header), (JSONArray) result.getResult());
+                    if (result.getPromise() == nbActiveStops) nbResult = (JSONArray) result.getResult();
+                    else if (result.getPromise() == nwkActiveStops) nwkResult = (JSONArray) result.getResult();
+                }
+
+                if(nbHome) {
+                    loadAgency("nb", getString(R.string.bus_nb_active_stops_header), nbResult);
+                    loadAgency("nwk", getString(R.string.bus_nwk_active_stops_header), nwkResult);
+                } else {
+                    loadAgency("nwk", getString(R.string.bus_nwk_active_stops_header), nwkResult);
+                    loadAgency("nb", getString(R.string.bus_nb_active_stops_header), nbResult);
                 }
             }
 
@@ -357,8 +372,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 			if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
 			
 			// Look up nearby active bus stops
-            AndroidDeferredManager dm = new AndroidDeferredManager();
-			dm.when(Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(),
+            mDM.when(Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(),
 					(float) lastLoc.getLongitude())).then(new DoneCallback<JSONObject>() {
 
 				@Override

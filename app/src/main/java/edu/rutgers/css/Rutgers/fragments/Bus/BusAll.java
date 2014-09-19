@@ -35,6 +35,7 @@ import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 
@@ -46,6 +47,7 @@ public class BusAll extends Fragment {
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
     private String mFilterString;
+    private AndroidDeferredManager mDM;
 	
 	public BusAll() {
 		// Required empty public constructor
@@ -55,6 +57,8 @@ public class BusAll extends Fragment {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+        mDM = new AndroidDeferredManager();
+
 		mData = new ArrayList<RMenuRow>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
@@ -62,6 +66,10 @@ public class BusAll extends Fragment {
         if(savedInstanceState != null) {
             mFilterString = savedInstanceState.getString("filter");
         }
+
+        // Get home campus for result ordering
+        String userHome = RutgersUtil.getHomeCampus(getActivity());
+        final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
 
         // Get promises for all route & stop information
         final Promise nbRoutes = Nextbus.getAllRoutes("nb");
@@ -75,19 +83,32 @@ public class BusAll extends Fragment {
         final String nwkStopsString = getString(R.string.bus_nwk_all_stops_header);
 
         // Synchronized load of all route & stop information
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new DoneCallback<MultipleResults>() {
+        mDM.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
                 if(!isAdded()) return;
 
+                JSONArray nbRoutesResult = null, nbStopsResult = null, nwkRoutesResult = null, nwkStopsResult = null;
+
                 for(OneResult result: results) {
-                    if(result.getPromise() == nbRoutes) loadArray("nb", nbRoutesString, "route", (JSONArray) result.getResult());
-                    else if(result.getPromise() == nwkRoutes) loadArray("nwk", nwkRoutesString, "route", (JSONArray)result.getResult());
-                    else if(result.getPromise() == nbStops) loadArray("nb", nbStopsString, "stop", (JSONArray) result.getResult());
-                    else if(result.getPromise() == nwkStops) loadArray("nwk", nwkStopsString, "stop", (JSONArray) result.getResult());
+                    if(result.getPromise() == nbRoutes) nbRoutesResult = (JSONArray) result.getResult();
+                    else if(result.getPromise() == nwkRoutes) nwkRoutesResult = (JSONArray) result.getResult();
+                    else if(result.getPromise() == nbStops) nbStopsResult = (JSONArray) result.getResult();
+                    else if(result.getPromise() == nwkStops) nwkStopsResult = (JSONArray) result.getResult();
+                }
+
+                if(nbHome) {
+                    loadArray("nb", nbRoutesString, "route", nbRoutesResult);
+                    loadArray("nb", nbStopsString, "stop", nbStopsResult);
+                    loadArray("nwk", nwkRoutesString, "route", nwkRoutesResult);
+                    loadArray("nwk", nwkStopsString, "stop", nwkStopsResult);
+                } else {
+                    loadArray("nwk", nwkRoutesString, "route", nwkRoutesResult);
+                    loadArray("nwk", nwkStopsString, "stop", nwkStopsResult);
+                    loadArray("nb", nbRoutesString, "route", nbRoutesResult);
+                    loadArray("nb", nbStopsString, "stop", nbStopsResult);
                 }
 
                 // Set filter after info is re-loaded

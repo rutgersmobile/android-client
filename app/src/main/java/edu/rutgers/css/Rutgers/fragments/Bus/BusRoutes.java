@@ -33,6 +33,7 @@ import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
@@ -104,6 +105,10 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         // Clear out everything
         mAdapter.clear();
 
+        // Get home campus for result ordering
+        String userHome = RutgersUtil.getHomeCampus(getActivity());
+        final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
+
         // Get promises for active routes
         final Promise nbActiveRoutes = Nextbus.getActiveRoutes("nb");
         final Promise nwkActiveRoutes = Nextbus.getActiveRoutes("nwk");
@@ -117,11 +122,22 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
             @Override
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
-                if(!isAdded()) return;
+                if (!isAdded()) return;
+                JSONArray nbResult = null, nwkResult = null;
 
                 for (OneResult result : results) {
-                    if(result.getPromise() == nbActiveRoutes) loadAgency("nb", nbString, (JSONArray) result.getResult());
-                    else if(result.getPromise() == nwkActiveRoutes)  loadAgency("nwk", nwkString, (JSONArray) result.getResult());
+                    if (result.getPromise() == nbActiveRoutes)
+                        nbResult = (JSONArray) result.getResult();
+                    else if (result.getPromise() == nwkActiveRoutes)
+                        nwkResult = (JSONArray) result.getResult();
+                }
+
+                if (nbHome) {
+                    loadAgency("nb", nbString, nbResult);
+                    loadAgency("nwk", nwkString, nwkResult);
+                } else {
+                    loadAgency("nwk", nwkString, nwkResult);
+                    loadAgency("nb", nbString, nbResult);
                 }
             }
 
@@ -150,13 +166,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 	 * @param agencyTitle Header title that goes above these routes
 	 */
 	private void loadAgency(final String agencyTag, final String agencyTitle, final JSONArray data) {
+        if(data == null) return;
+
         mAdapter.add(new RMenuHeaderRow(agencyTitle));
 
-        if(data == null) {
-            mAdapter.add(new RMenuItemRow(getString(R.string.failed_load_short)));
-            return;
-        }
-        else if (data.length() == 0) {
+        if (data.length() == 0) {
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_routes)));
             return;
         }
