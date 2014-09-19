@@ -91,7 +91,7 @@ public class HourSwiperFragment extends Fragment {
                     Matcher matcher = pattern.matcher(hoursString);
                     while(matcher.find()) {
                         //Log.v(TAG, "Found " + matcher.group() + " at ("+matcher.start()+","+matcher.end()+")");
-                        builder.append(StringUtils.trim(matcher.group()) + "\n");
+                        builder.append(StringUtils.trim(matcher.group())).append("\n");
                         matches++;
                     }
 
@@ -114,8 +114,11 @@ public class HourSwiperFragment extends Fragment {
 	}
 
     private void setHoursTextView(TextView hoursTextView, String string) {
-        //hoursTextView.setText(WordUtils.wrap(string, 19));
-        hoursTextView.setText(string);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            hoursTextView.setText(string);
+        } else {
+            hoursTextView.setText(WordUtils.wrap(string, 18).replaceAll("\\n\\n","\n"));
+        }
     }
 
 }
