@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.fragments.Bus;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -27,7 +26,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
@@ -47,7 +45,7 @@ public class BusAll extends Fragment {
 
 	private RMenuAdapter mAdapter;
 	private ArrayList<RMenuRow> mData;
-    private WeakReference<EditText> mFilterEditText;
+    private String mFilterString;
 	
 	public BusAll() {
 		// Required empty public constructor
@@ -57,10 +55,13 @@ public class BusAll extends Fragment {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-        Resources resources = getResources();
-
 		mData = new ArrayList<RMenuRow>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+
+        // Restore filter
+        if(savedInstanceState != null) {
+            mFilterString = savedInstanceState.getString("filter");
+        }
 
         // Get promises for all route & stop information
         final Promise nbRoutes = Nextbus.getAllRoutes("nb");
@@ -90,8 +91,8 @@ public class BusAll extends Fragment {
                 }
 
                 // Set filter after info is re-loaded
-                if(savedInstanceState != null && savedInstanceState.getString("filter") != null) {
-                    mAdapter.getFilter().filter(savedInstanceState.getString("filter"));
+                if(mFilterString != null) {
+                    mAdapter.getFilter().filter(mFilterString);
                 }
 
             }
@@ -114,7 +115,6 @@ public class BusAll extends Fragment {
 
         // Get the filter field and add a listener to it
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
-        mFilterEditText = new WeakReference<EditText>(filterEditText);
         filterEditText.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -124,7 +124,8 @@ public class BusAll extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Set filter for list adapter
-                mAdapter.getFilter().filter(s.toString().trim());
+                mFilterString = s.toString().trim();
+                mAdapter.getFilter().filter(mFilterString);
             }
 
             @Override
@@ -179,7 +180,7 @@ public class BusAll extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFilterEditText.get() != null) outState.putString("filter", mFilterEditText.get().getText().toString());
+        if(mFilterString != null) outState.putString("filter", mFilterString);
     }
 
     /**
