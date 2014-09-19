@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,6 +42,7 @@ import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
+import edu.rutgers.css.Rutgers.items.KeyValPair;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
@@ -370,31 +372,43 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 				return;
 			}
 			if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
-			
+
+            Promise<JSONObject, Exception, Double> nbNearbyStops = Nextbus.getActiveStopsByTitleNear("nb", (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
+            Promise<JSONObject, Exception, Double> nwkNearbyStops = Nextbus.getActiveStopsByTitleNear("nwk", (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
+
 			// Look up nearby active bus stops
-            mDM.when(Nextbus.getActiveStopsByTitleNear(agencyTag, (float) lastLoc.getLatitude(),
-					(float) lastLoc.getLongitude())).then(new DoneCallback<JSONObject>() {
+            mDM.when(nbNearbyStops, nwkNearbyStops).then(new DoneCallback<MultipleResults>() {
 
 				@Override
-				public void onDone(JSONObject activeNearbyStops) {				
+				public void onDone(MultipleResults results) {
+                    JSONObject nbStops = (JSONObject) results.get(0).getResult();
+                    JSONObject nwkStops = (JSONObject) results.get(1).getResult();
+
+                    // Put all stop titles into one list
+                    List<KeyValPair> stopTitles = new ArrayList<KeyValPair>(nbStops.length() + nwkStops.length());
+                    Iterator<String> stopsIter = nbStops.keys();
+                    while(stopsIter.hasNext()) {
+                        stopTitles.add(new KeyValPair(stopsIter.next(), "nb"));
+                    }
+                    stopsIter = nwkStops.keys();
+                    while(stopsIter.hasNext()) {
+                        stopTitles.add(new KeyValPair(stopsIter.next(), "nwk"));
+                    }
+
 					// Clear previous rows
 					clearNearbyRows();
 					
 					// If there aren't any results, put a "no stops nearby" message
-					if(activeNearbyStops.length() == 0) {
+					if(stopTitles.isEmpty()) {
 						addNearbyRow(1, new RMenuItemRow(noneNearbyString));
 					}
 					// If there are new results, add them
 					else {
 						int j = 1;
-						Iterator<String> stopTitleIter = activeNearbyStops.keys();
-						while(stopTitleIter.hasNext()) {
-                            String curTitle = stopTitleIter.next();
-                            //JSONObject curStop = activeNearbyStops.getJSONObject(curTitle);
-
+						for(KeyValPair curTitle: stopTitles) {
                             Bundle menuBundle = new Bundle();
-                            menuBundle.putString("title", curTitle);
-                            menuBundle.putString("agency", agencyTag);
+                            menuBundle.putString("title", curTitle.getKey());
+                            menuBundle.putString("agency", curTitle.getValue());
                             RMenuItemRow newMenuItem = new RMenuItemRow(menuBundle);
 
                             addNearbyRow(j++, newMenuItem);
@@ -402,13 +416,11 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 					}
 				}
 
-			}).fail(new FailCallback<Exception>() {
-
+			}).fail(new FailCallback<OneReject>() {
                 @Override
-                public void onFail(Exception result) {
+                public void onFail(OneReject result) {
                     addNearbyRow(1, new RMenuItemRow(failedLoadString));
                 }
-
             });
 		}
 		else {

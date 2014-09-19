@@ -7,24 +7,20 @@ import java.io.Serializable;
  */
 public class KeyValPair implements Serializable {
 
-    private String name;
+    private String key;
     private String value;
 
-    public KeyValPair(String name, String value) {
-        this.name = name;
+    public KeyValPair(String key, String value) {
+        this.key = key;
         this.value = value;
     }
 
-    public String toString() {
-        return this.getName();
+    public String getKey() {
+        return key;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getValue() {
@@ -33,6 +29,11 @@ public class KeyValPair implements Serializable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return this.getKey();
     }
 
 }

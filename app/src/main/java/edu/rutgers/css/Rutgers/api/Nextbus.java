@@ -475,7 +475,14 @@ public class Nextbus {
 		
 		return d.promise();
 	}
-	
+
+    /**
+     * Get all active bus stops (by title) near a specific location.
+     * @param agency Agency (campus) to get bus stops for
+     * @param sourceLat Latitude of location
+     * @param sourceLon Longitude of location
+     * @return stopByTitle JSON objects
+     */
 	public static Promise<JSONObject, Exception, Double> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
 		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 		Promise<JSONObject, Exception, Double> allNearStops = getStopsByTitleNear(agency, sourceLat, sourceLon);

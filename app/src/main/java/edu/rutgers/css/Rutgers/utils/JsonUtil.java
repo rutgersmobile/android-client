@@ -1,12 +1,9 @@
 package edu.rutgers.css.Rutgers.utils;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -27,23 +24,22 @@ public class JsonUtil {
         return result;
     }
 
-    public static JSONObject combineJSONObjs(JSONObject conf1, JSONObject conf2) {
+    /**
+     * Combine multiple JSON objects.
+     * Duplicate fields will be overwritten, so this is mainly for hashtable-like JSON objects.
+     * @param objects JSON objects to combine
+     * @return Single JSON object containing the fields of all the combined JSON objects
+     * @throws JSONException
+     */
+    public static JSONObject combineJSONObjs(JSONObject... objects) throws JSONException {
         JSONObject result = new JSONObject();
-        ArrayList<JSONObject> confs = new ArrayList<JSONObject>();
-        confs.add(conf1);
-        confs.add(conf2);
 
-        for(JSONObject curConf: confs) {
-            Iterator<String> confKeys = curConf.keys();
-            while(confKeys.hasNext()) {
-                try {
-                    String curKey = confKeys.next();
-                    Object curObj = curConf.get(curKey);
-                    result.put(curKey, curObj);
-                } catch(JSONException e) {
-                    Log.e(TAG, "combineJSONObjs(): " + e.getMessage());
-                    return null;
-                }
+        for(JSONObject curObj: objects) {
+            Iterator<String> keys = curObj.keys();
+            while(keys.hasNext()) {
+                String curKey = keys.next();
+                Object curVal = curObj.get(curKey);
+                result.put(curKey, curVal);
             }
         }
 
