@@ -1,12 +1,9 @@
 package edu.rutgers.css.Rutgers.fragments.Bus;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -50,7 +47,6 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
-import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 public class BusStops extends Fragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
@@ -66,7 +62,6 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     private boolean mNearbyHeaderAdded;
 	private Timer mUpdateTimer;
 	private Handler mUpdateHandler;
-    private String mCurrentCampus;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
 	
@@ -103,11 +98,6 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         mNearbyHeaderAdded = false;
 		mData = new ArrayList<RMenuRow>();
 		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
-
-        // Get current campus tag (default to "nb")
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
-                getString(R.string.campus_nb_tag));
 		
 		// Setup the timer stuff for updating the nearby stops
 		mUpdateTimer = new Timer();
@@ -171,12 +161,6 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         clearNearbyRows();
         mAdapter.clear();
 
-        // TODO Replace calling this on every onResume() with a listener for preference changes
-        // Get current campus tag (default to "nb")
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mCurrentCampus = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS,
-                getString(R.string.campus_nb_tag));
-
         // Start the update thread when screen is active
 		mUpdateTimer = new Timer();
 		mUpdateTimer.schedule(new TimerTask() {
@@ -185,7 +169,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 				mUpdateHandler.post(new Runnable() {
 					@Override
 					public void run() {
-						loadNearbyStops(mCurrentCampus);
+						loadNearbyStops();
 					}
 				});
 			}
@@ -265,7 +249,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             if(!AppUtil.isOnTop(BusMain.HANDLE)) {
                 Log.v(TAG, "Not on top, not updating nearby stops");
             }
-            else loadNearbyStops(mCurrentCampus);
+            else loadNearbyStops();
         }
 
     }
@@ -350,9 +334,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
 	/**
 	 * Populate list with active nearby stops for an agency
-	 * @param agencyTag Agency tag for API request
 	 */
-	private void loadNearbyStops(@NonNull final String agencyTag) {
+	private void loadNearbyStops() {
         if(!isAdded()) return;
 
         final String noneNearbyString = getString(R.string.bus_no_nearby_stops);
