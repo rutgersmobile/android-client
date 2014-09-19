@@ -91,27 +91,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         // Get nearby places & populate nearby places list
         mData = new ArrayList<RMenuRow>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
-
-        // TODO This needs to be cancelled when the screen rotates
-        // Populate search list & list of nearby places
-		Places.getPlaceStubs().done(new DoneCallback<List<PlaceStub>>() {
-
-			@Override
-			public void onDone(List<PlaceStub> stubList) {
-                for(PlaceStub stub: stubList) {
-                    mSearchAdapter.add(stub);
-                }
-			}
-			
-		}).fail(new FailCallback<Exception>() {
-
-            @Override
-            public void onFail(Exception result) {
-                AppUtil.showFailedLoadToast(getActivity());
-            }
-
-        });
-
     }
 	
 	@Override
@@ -225,7 +204,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
     @Override
     public void onDisconnected() {
-
+        Log.i(TAG, "Disconnected from services");
     }
 
     @Override
@@ -266,10 +245,10 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         showProgressCircle();
 
-        Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<Set<PlaceStub>>() {
+        Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<List<PlaceStub>>() {
 
             @Override
-            public void onDone(Set<PlaceStub> result) {
+            public void onDone(List<PlaceStub> result) {
                 mAdapter.clear();
                 mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
 
@@ -291,15 +270,16 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
             @Override
             public void onFail(Exception result) {
+                Log.e(TAG, result.getMessage());
                 mAdapter.clear();
                 mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
                 mAdapter.add(new RMenuItemRow(failedLoadString));
             }
 
-        }).always(new AlwaysCallback<Set<PlaceStub>, Exception>() {
+        }).always(new AlwaysCallback<List<PlaceStub>, Exception>() {
 
             @Override
-            public void onAlways(Promise.State state, Set<PlaceStub> resolved, Exception rejected) {
+            public void onAlways(Promise.State state, List<PlaceStub> resolved, Exception rejected) {
                 hideProgressCircle();
             }
 
