@@ -145,7 +145,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
         // Set main bus fragment as focus listener, for switching to All tab
         FilterFocusListener mainFragment = (BusMain) getParentFragment();
-        setListener(mainFragment);
+        setFocusListener(mainFragment);
 		
 		return v;
 	}
@@ -226,6 +226,12 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             mUpdateTimer = null;
         }
 	}
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        setFocusListener(null);
+    }
 
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -396,7 +402,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 	}
 
     @Override
-    public void setListener(FilterFocusListener listener) {
+    public void setFocusListener(FilterFocusListener listener) {
         mFilterFocusListener = listener;
     }
 

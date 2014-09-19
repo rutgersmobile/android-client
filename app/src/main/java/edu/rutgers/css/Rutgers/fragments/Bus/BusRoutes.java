@@ -92,7 +92,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 
         // Set main bus fragment as focus listener, for switching to All tab
         FilterFocusListener mainFragment = (BusMain) getParentFragment();
-        setListener(mainFragment);
+        setFocusListener(mainFragment);
 				
 		return v;
 	}
@@ -137,7 +137,13 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         });
 
     }
-	
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        setFocusListener(null);
+    }
+
 	/**
 	 * Populate list with bus routes for agency, with a section header for that agency
 	 * @param agencyTag Agency tag for API request
@@ -172,7 +178,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     }
 
     @Override
-    public void setListener(FilterFocusListener listener) {
+    public void setFocusListener(FilterFocusListener listener) {
         mFilterFocusListener = listener;
     }
 
