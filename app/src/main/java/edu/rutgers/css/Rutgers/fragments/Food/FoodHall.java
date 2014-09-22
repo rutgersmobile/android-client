@@ -39,6 +39,7 @@ public class FoodHall extends Fragment {
     private String mLocation;
     private MealPagerAdapter mPagerAdapter;
     private JSONObject mData;
+    private String mTitle;
 
 	public FoodHall() {
 		// Required empty public constructor
@@ -65,6 +66,7 @@ public class FoodHall extends Fragment {
                     mData = null;
                 }
             }
+            mTitle = savedInstanceState.getString("mTitle");
         }
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -89,10 +91,11 @@ public class FoodHall extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_food_hall, parent, false);
 		final Bundle args = getArguments();
 
-		if(args.getString("location") != null) {
+		if(mTitle != null) {
+            getActivity().setTitle(mTitle);
+        } else if(args.getString("location") != null) {
             getActivity().setTitle(args.getString("location"));
-        }
-        else {
+        } else {
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Location not set");
             return v;
@@ -108,6 +111,7 @@ public class FoodHall extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if(mData != null) outState.putString("mData", mData.toString());
+        if(mTitle != null) outState.putString("mTitle", mTitle);
     }
 
     private void loadPages(JSONObject hall) {
@@ -124,11 +128,12 @@ public class FoodHall extends Fragment {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(hall.getLong("date"));
             DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
+            mTitle = mLocation + " (" + dout.format(calendar) + ")";
             if(getActivity() != null && AppUtil.isOnTop(FoodHall.HANDLE)) {
-                getActivity().setTitle(mLocation + " (" + dout.format(calendar) + ")");
+                getActivity().setTitle(mTitle);
             }
         } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, "loadPages(): " + e.getMessage());
         }
     }
 
@@ -146,14 +151,17 @@ public class FoodHall extends Fragment {
             try {
                 JSONObject curMeal = mData.getJSONObject(i);
                 String mealName = curMeal.getString("meal_name");
+
                 Bundle tabArgs = new Bundle();
                 tabArgs.putString("location", mLocation);
                 tabArgs.putString("meal", mealName);
+
                 Fragment fragment = new FoodMeal();
                 fragment.setArguments(tabArgs);
+
                 return fragment;
             } catch (JSONException e) {
-                Log.w(TAG, e.getMessage());
+                Log.w(TAG, "getItem(): " + e.getMessage());
                 return null;
             }
         }
@@ -169,7 +177,7 @@ public class FoodHall extends Fragment {
                 return mData.getJSONObject(position).getString("meal_name");
             } catch (JSONException e) {
                 Log.w(TAG, "getPageTitle(): " + e.getMessage());
-                return "";
+                return "Meal " + position;
             }
         }
 
