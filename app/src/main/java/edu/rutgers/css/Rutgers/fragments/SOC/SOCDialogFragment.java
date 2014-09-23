@@ -61,8 +61,8 @@ public class SOCDialogFragment extends DialogFragment {
         ArrayList<KeyValPair> campuses = loadCampuses();
 
         ArrayList<KeyValPair> levels = new ArrayList<KeyValPair>(2);
-        levels.add(new KeyValPair(getString(R.string.soc_undergrad), Schedule.CODE_LEVEL_UNDERGRAD));
-        levels.add(new KeyValPair(getString(R.string.soc_grad), Schedule.CODE_LEVEL_GRAD));
+        levels.add(new KeyValPair(Schedule.CODE_LEVEL_UNDERGRAD, getString(R.string.soc_undergrad)));
+        levels.add(new KeyValPair(Schedule.CODE_LEVEL_GRAD, getString(R.string.soc_grad)));
 
         mSemesterSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSemesters);
         mCampusSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, campuses);
@@ -99,9 +99,9 @@ public class SOCDialogFragment extends DialogFragment {
                         // Save settings
                         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
                         SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString(SettingsActivity.KEY_PREF_SOC_CAMPUS, ((KeyValPair) campusSpinner.getSelectedItem()).getValue());
-                        editor.putString(SettingsActivity.KEY_PREF_SOC_LEVEL, ((KeyValPair) levelSpinner.getSelectedItem()).getValue());
-                        editor.putString(SettingsActivity.KEY_PREF_SOC_SEMESTER, ((KeyValPair) semesterSpinner.getSelectedItem()).getValue());
+                        editor.putString(SettingsActivity.KEY_PREF_SOC_CAMPUS, ((KeyValPair) campusSpinner.getSelectedItem()).getKey());
+                        editor.putString(SettingsActivity.KEY_PREF_SOC_LEVEL, ((KeyValPair) levelSpinner.getSelectedItem()).getKey());
+                        editor.putString(SettingsActivity.KEY_PREF_SOC_SEMESTER, ((KeyValPair) semesterSpinner.getSelectedItem()).getKey());
                         editor.commit();
                         Log.i(TAG, "Saved settings");
                     }
@@ -129,7 +129,7 @@ public class SOCDialogFragment extends DialogFragment {
     public void setSemesters(List<String> semesterCodes) {
         ArrayList<KeyValPair> semesters = new ArrayList<KeyValPair>(5);
         for(String code: semesterCodes) {
-            semesters.add(new KeyValPair(Schedule.translateSemester(code), code));
+            semesters.add(new KeyValPair(code, Schedule.translateSemester(code)));
         }
         mSemesters = semesters;
     }
@@ -149,7 +149,7 @@ public class SOCDialogFragment extends DialogFragment {
         for(int i = 0; i < campusJSONArray.length(); i++) {
             try {
                 JSONObject campusJSON = campusJSONArray.getJSONObject(i);
-                results.add(new KeyValPair(campusJSON.getString("title"), campusJSON.getString("tag")));
+                results.add(new KeyValPair(campusJSON.getString("tag"), campusJSON.getString("title")));
             } catch(JSONException e) {
                 Log.w(TAG, "loadCampuses(): " + e.getMessage());
             }
@@ -168,7 +168,7 @@ public class SOCDialogFragment extends DialogFragment {
         if(configString == null) return;
         for(int i = 0; i < spinnerAdapter.getCount(); i++) {
             KeyValPair pair = (KeyValPair) spinnerAdapter.getItem(i);
-            if(configString.equals(pair.getValue())) {
+            if(configString.equals(pair.getKey())) {
                 spinner.setSelection(i);
                 return;
             }
