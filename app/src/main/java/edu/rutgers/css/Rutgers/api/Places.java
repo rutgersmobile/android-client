@@ -1,34 +1,25 @@
 package edu.rutgers.css.Rutgers.api;
 
-import android.location.Location;
 import android.util.Log;
 
-import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
-import org.jdeferred.AlwaysCallback;
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.android.DeferredAsyncTask;
 import org.jdeferred.impl.DeferredObject;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
-import edu.rutgers.css.Rutgers.items.PlaceStub;
+import edu.rutgers.css.Rutgers.items.KeyValPair;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
@@ -38,90 +29,39 @@ public class Places {
 	
 	private static final String TAG = "PlacesAPI";
 
-	private static Promise<Object, AjaxStatus, Object> configured;
+    private static final String API_URL = "http://sauron.rutgers.edu/pq";
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
-    private static boolean sSetupLocked;
-    private static Map<String, JSONObject> sPlacesTable;
 
-    /**
-	 * Grab the places API data.
+	/**
+	 * Get JSON for a specific place.
+	 * @param placeKey Place key
+	 * @return JSON for place
 	 */
-	private static synchronized void setup() {
+	public static Promise<JSONObject, Exception, Double> getPlace(final String placeKey) {
+		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
 
-        // Prevent multiple calls coming in and spawning many different requests for the places JSON,
-        // which is about 2-3 MB and often results in heap growth.
-        if(sSetupLocked) return;
-        else sSetupLocked = true;
+        String parameter;
+        try {
+            parameter = URLEncoder.encode(placeKey, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            d.reject(e);
+            return d.promise();
+        }
 
-		// Get places JSON from server
-        final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
-		configured = confd.promise();
-
-        final Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> promisePlaces = Request.apiWithStatus("places.txt", Request.CACHE_ONE_DAY * 7);
-        sDM.when(promisePlaces, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<AjaxCallback<JSONObject>>() {
-
+        sDM.when(Request.json(API_URL+"?id="+parameter, Request.CACHE_ONE_DAY * 7)).done(new DoneCallback<JSONObject>() {
             @Override
-            public void onDone(AjaxCallback<JSONObject> res) {
-                // If the result came from cache, skip new setup
-                if (sPlacesTable != null && res.getStatus().getSource() != AjaxStatus.NETWORK) {
-                    Log.v(TAG, "Retaining cached place data");
-                    confd.resolve(null);
-                    return;
-                }
-                else {
-                    Log.v(TAG, "Generating new place data from network");
-                }
-
+            public void onDone(JSONObject result) {
                 try {
-                    JSONObject allPlaces = res.getResult().getJSONObject("all");
-                    sPlacesTable = Collections.synchronizedMap(new LinkedHashMap<String, JSONObject>());
+                    JSONObject data = result.getJSONObject("data");
 
-                    for(Iterator<String> placeIter = allPlaces.keys(); placeIter.hasNext();) {
-                        String curKey = placeIter.next();
-                        JSONObject curPlace = allPlaces.getJSONObject(curKey);
-                        sPlacesTable.put(curKey, curPlace);
+                    if (result.getString("status").equals("success")) {
+                        d.resolve(data.getJSONObject("place"));
+                    } else {
+                        d.reject(new Exception(data.getString("message")));
                     }
-
-                    confd.resolve(null);
                 } catch (JSONException e) {
-                    Log.e(TAG, "setup(): " + e.getMessage());
-                    confd.reject(res.getStatus());
+                    d.reject(e);
                 }
-            }
-
-        }).fail(new FailCallback<AjaxStatus>() {
-
-			@Override
-			public void onFail(AjaxStatus e) {
-				Log.e(TAG, AppUtil.formatAjaxStatus(e));
-				confd.reject(e);
-			}
-
-		}).always(new AlwaysCallback<AjaxCallback<JSONObject>, AjaxStatus>() {
-
-            @Override
-            public void onAlways(Promise.State state, AjaxCallback<JSONObject> resolved, AjaxStatus rejected) {
-                sSetupLocked = false;
-            }
-
-        });
-	}
-
-    public static Promise<List<PlaceStub>, Exception, Double> getPlaceStubs() {
-        final Deferred<List<PlaceStub>, Exception, Double> d = new DeferredObject<List<PlaceStub>, Exception, Double>();
-        setup();
-
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
-            @Override
-            public void onDone(Object o) {
-                List<PlaceStub> results = new ArrayList<PlaceStub>();
-
-                Set<Map.Entry<String, JSONObject>> placeSet = sPlacesTable.entrySet();
-                for(Map.Entry<String, JSONObject> placeEntry: placeSet) {
-                    results.add(new PlaceStub(placeEntry.getKey(), placeEntry.getValue().optString("title")));
-                }
-
-                d.resolve(results);
             }
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
@@ -130,34 +70,6 @@ public class Places {
             }
         });
 
-        return d.promise();
-    }
-	
-	/**
-	 * Get JSON for a specific place.
-	 * @param placeKey Place key (NOT title)
-	 * @return JSON for place
-	 */
-	public static Promise<JSONObject, Exception, Double> getPlace(final String placeKey) {
-		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
-		setup();
-		
-		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
-			
-			@Override
-			public void onDone(Object o) {
-                d.resolve(sPlacesTable.get(placeKey));
-			}
-
-		}).fail(new FailCallback<AjaxStatus>() {
-
-            @Override
-            public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
-            }
-
-        });
-		
 		return d.promise();
 	}
 
@@ -167,81 +79,85 @@ public class Places {
      * @param sourceLon Longitude
      * @return Promise for a list of place keys & JSON objects.
      */
-    public static Promise<Set<PlaceStub>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
-        final Deferred<Set<PlaceStub>, Exception, Double> deferred = new DeferredObject<Set<PlaceStub>, Exception, Double>();
-        setup();
+    public static Promise<List<KeyValPair>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
+        final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<List<KeyValPair>, Exception, Double>();
 
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
-
+        sDM.when(Request.json(API_URL+"?latitude="+sourceLat+"&longitude="+sourceLon, Request.CACHE_ONE_MINUTE)).done(new DoneCallback<JSONObject>() {
             @Override
-            public void onDone(Object o) {
-                calculateNearby(deferred, sourceLat, sourceLon);
-            }
+            public void onDone(JSONObject result) {
+                try {
+                    JSONObject data = result.getJSONObject("data");
 
+                    if(result.getString("status").equals("success")) {
+                        JSONArray places = data.getJSONArray("places");
+
+                        List<KeyValPair> stubs = new ArrayList<KeyValPair>();
+                        for (int i = 0; i < places.length(); i++) {
+                            try {
+                                JSONObject place = places.getJSONObject(i);
+                                stubs.add(new KeyValPair(place.getString("id"), place.getString("title")));
+                            } catch (JSONException e) {
+                                Log.w(TAG, "getPlacesNear(): " + e.getMessage());
+                            }
+                        }
+
+                        deferred.resolve(stubs);
+                    } else {
+                        deferred.reject(new Exception(data.getString("message")));
+                    }
+                } catch(JSONException e) {
+                    deferred.reject(e);
+                }
+            }
         }).fail(new FailCallback<AjaxStatus>() {
-
             @Override
-            public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            public void onFail(AjaxStatus result) {
+                deferred.reject(new Exception(AppUtil.formatAjaxStatus(result)));
             }
-
         });
 
         return deferred.promise();
     }
 
     /**
-     * Calculate nearby locations in a background thread
-     * @param deferred Deferred object to resolve results for
-     * @param sourceLat Latitude
-     * @param sourceLon Longitude
+     * Search places by title or building code.
+     * @param query Query
+     * @return JSON array of results.
      */
-    private static void calculateNearby(final Deferred<Set<PlaceStub>, Exception, Double> deferred, final double sourceLat, final double sourceLon) {
-        sDM.when(new DeferredAsyncTask<Void, Object, Set<PlaceStub>>() {
+    public static Promise<List<KeyValPair>, Exception, Double> searchPlaces(final String query) {
+        final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<List<KeyValPair>, Exception, Double>();
+
+        sDM.when(Request.json(API_URL+"?search="+query, Request.CACHE_ONE_MINUTE)).done(new DoneCallback<JSONObject>() {
             @Override
-            protected Set<PlaceStub> doInBackgroundSafe(Void... voids) throws Exception {
-                Set<PlaceStub> result = new TreeSet<PlaceStub>(new PlaceDistanceComparator());
+            public void onDone(JSONObject result) {
+                try {
+                    JSONObject data = result.getJSONObject("data");
 
-                for(String curPlaceKey: sPlacesTable.keySet()) {
-                    try {
-                        JSONObject curPlace = sPlacesTable.get(curPlaceKey);
-                        if (curPlace.has("location")) {
-                            JSONObject curPlaceLocation = curPlace.getJSONObject("location");
-                            double placeLongitude = Double.parseDouble(curPlaceLocation.getString("longitude"));
-                            double placeLatitude = Double.parseDouble(curPlaceLocation.getString("latitude"));
+                    if (result.getString("status").equals("success")) {
+                        JSONArray places = data.getJSONArray("places");
+                        List<KeyValPair> stubs = new ArrayList<KeyValPair>();
 
-                            float[] results = new float[1];
-                            Location.distanceBetween(sourceLat, sourceLon, placeLatitude, placeLongitude, results);
-
-                            // If the place is within range, add it to the list
-                            if (results[0] <= AppUtil.NEARBY_RANGE) {
-                                PlaceStub stub = new PlaceStub(curPlaceKey, curPlace.optString("title"));
-                                stub.setDistance(results[0]);
-                                result.add(stub);
-                            }
+                        for (int i = 0; i < places.length(); i++) {
+                            JSONObject place = places.getJSONObject(i);
+                            stubs.add(new KeyValPair(place.getString("id"), place.getString("title")));
                         }
-                    } catch (JSONException e) {
-                        Log.w(TAG, "calculateNearby(): " + e.getMessage());
-                    }
-                }
 
-                return result;
+                        deferred.resolve(stubs);
+                    } else {
+                        deferred.reject(new Exception(data.getString("message")));
+                    }
+                } catch (JSONException e) {
+                    deferred.reject(e);
+                }
             }
-        }).done(new DoneCallback<Set<PlaceStub>>() {
+        }).fail(new FailCallback<AjaxStatus>() {
             @Override
-            public void onDone(Set<PlaceStub> result) {
-                deferred.resolve(result);
+            public void onFail(AjaxStatus result) {
+                deferred.reject(new Exception(AppUtil.formatAjaxStatus(result)));
             }
         });
-    }
 
-    private static class PlaceDistanceComparator implements Comparator<PlaceStub> {
-        @Override
-        public int compare(PlaceStub ps1, PlaceStub ps2) {
-            Float dist1 = ps1.getDistance();
-            Float dist2 = ps2.getDistance();
-            return dist1.compareTo(dist2);
-        }
+        return deferred.promise();
     }
 
 }

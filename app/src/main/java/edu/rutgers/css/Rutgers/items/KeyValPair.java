@@ -33,7 +33,7 @@ public class KeyValPair implements Serializable {
 
     @Override
     public String toString() {
-        return this.getKey();
+        return this.getValue();
     }
 
 }

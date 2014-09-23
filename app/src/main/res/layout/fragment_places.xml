@@ -16,9 +16,10 @@
             android:layout_weight="1"
             android:ems="10"
             android:hint="@string/building_search"
+            android:fontFamily="sans-serif-light"
             android:maxLines="1"
             android:singleLine="true"
-            android:imeOptions="actionGo" >
+            android:imeOptions="actionSearch" >
 
             <requestFocus />
         </AutoCompleteTextView>
