@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers.items;
+package edu.rutgers.css.Rutgers.adapters;
 
 import android.app.Activity;
 import android.view.LayoutInflater;

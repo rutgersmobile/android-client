@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -28,10 +27,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.adapters.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
-import edu.rutgers.css.Rutgers.items.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
@@ -199,8 +198,6 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		Resources res = getResources();
-
 		if(parent.getId() == R.id.subjectSpinner) {
 			String selection = (String) parent.getItemAtPosition(position);
 			
