@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -29,13 +28,13 @@ import org.jdeferred.Promise;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
+import edu.rutgers.css.Rutgers.adapters.PlaceAutoCompleteAdapter;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
-import edu.rutgers.css.Rutgers.items.PlaceStub;
+import edu.rutgers.css.Rutgers.items.KeyValPair;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
@@ -51,10 +50,9 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 	private static final String TAG = "PlacesMain";
     public static final String HANDLE = "places";
 
-	private ArrayList<PlaceStub> mSearchList;
-	private ArrayAdapter<PlaceStub> mSearchAdapter;
-	private ArrayList<RMenuRow> mData;
-    private RMenuAdapter mAdapter;
+	private PlaceAutoCompleteAdapter mSearchAdapter;
+	private ArrayList<RMenuRow> mNearbyData;
+    private RMenuAdapter mNearbyAdapter;
     private ProgressBar mProgressCircle;
     private LocationClientProvider mLocationClientProvider;
 
@@ -85,12 +83,11 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mSearchList = new ArrayList<PlaceStub>();
-		mSearchAdapter = new ArrayAdapter<PlaceStub>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSearchList);
+		mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
 
         // Get nearby places & populate nearby places list
-        mData = new ArrayList<RMenuRow>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+        mNearbyData = new ArrayList<RMenuRow>();
+        mNearbyAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mNearbyData);
     }
 	
 	@Override
@@ -105,7 +102,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
         ListView listView = (ListView) v.findViewById(R.id.listView);
-        listView.setAdapter(mAdapter);
+        listView.setAdapter(mNearbyAdapter);
 
 		final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
 		autoComp.setAdapter(mSearchAdapter);
@@ -117,11 +114,11 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				// Launch Places display fragment
 				Bundle args = new Bundle();
-				PlaceStub placeStub = (PlaceStub) parent.getAdapter().getItem(position);
+				KeyValPair placeStub = (KeyValPair) parent.getAdapter().getItem(position);
 
 				args.putString("component", PlacesDisplay.HANDLE);
 				args.putString("placeKey", placeStub.getKey());
-				args.putString("title", placeStub.getTitle());
+				args.putString("title", placeStub.getValue());
 				
 				ComponentFactory.getInstance().switchFragments(args);
 			}
@@ -133,11 +130,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
 			@Override
 			public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-				if(actionId == EditorInfo.IME_ACTION_GO) {
-					return true;
-				}
-				
-				return false;
+				if(actionId == EditorInfo.IME_ACTION_SEARCH) return true;
+				else return false;
 			}
 			
 		});
@@ -193,7 +187,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         // When location services are restored, retry loading nearby places.
         // Make sure this isn't called before the activity has been attached
         // or before onCreate() has ran.
-        if(mData != null && isAdded()) {
+        if(mNearbyData != null && isAdded()) {
             // Don't update the screen if the places fragment isn't on top
             if(!AppUtil.isOnTop(PlacesMain.HANDLE)) {
                 Log.v(TAG, "onConnected(): Not on top, not updating nearby places");
@@ -224,13 +218,13 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         final String failedLocationString = getString(R.string.failed_location);
         final String connectingString = getString(R.string.location_connecting);
 
-        mAdapter.clear();
+        mNearbyAdapter.clear();
 
         // Check for location services
         if(mLocationClientProvider == null || !mLocationClientProvider.getLocationClient().isConnected()) {
             Log.w(TAG, "Location services not connected");
-            mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-            mAdapter.add(new RMenuItemRow(connectingString));
+            mNearbyAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+            mNearbyAdapter.add(new RMenuItemRow(connectingString));
             return;
         }
 
@@ -238,29 +232,29 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
         if (lastLoc == null) {
             Log.w(TAG, "Couldn't get location");
-            mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-            mAdapter.add(new RMenuItemRow(failedLocationString));
+            mNearbyAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+            mNearbyAdapter.add(new RMenuItemRow(failedLocationString));
             return;
         }
 
         showProgressCircle();
 
-        Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<List<PlaceStub>>() {
+        Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<List<KeyValPair>>() {
 
             @Override
-            public void onDone(List<PlaceStub> result) {
-                mAdapter.clear();
-                mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+            public void onDone(List<KeyValPair> result) {
+                mNearbyAdapter.clear();
+                mNearbyAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
 
                 if (result.isEmpty())
-                    mAdapter.add(new RMenuItemRow(noneNearbyString));
+                    mNearbyAdapter.add(new RMenuItemRow(noneNearbyString));
                 else {
-                    for (PlaceStub placeStub : result) {
+                    for (KeyValPair placeStub : result) {
                         Bundle args = new Bundle();
                         args.putString("component", PlacesDisplay.HANDLE);
-                        args.putString("title", placeStub.getTitle());
+                        args.putString("title", placeStub.getValue());
                         args.putString("placeKey", placeStub.getKey());
-                        mAdapter.add(new RMenuItemRow(args));
+                        mNearbyAdapter.add(new RMenuItemRow(args));
                     }
                 }
 
@@ -271,15 +265,15 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
             @Override
             public void onFail(Exception result) {
                 Log.e(TAG, result.getMessage());
-                mAdapter.clear();
-                mAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-                mAdapter.add(new RMenuItemRow(failedLoadString));
+                mNearbyAdapter.clear();
+                mNearbyAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+                mNearbyAdapter.add(new RMenuItemRow(failedLoadString));
             }
 
-        }).always(new AlwaysCallback<List<PlaceStub>, Exception>() {
+        }).always(new AlwaysCallback<List<KeyValPair>, Exception>() {
 
             @Override
-            public void onAlways(Promise.State state, List<PlaceStub> resolved, Exception rejected) {
+            public void onAlways(Promise.State state, List<KeyValPair> resolved, Exception rejected) {
                 hideProgressCircle();
             }
 

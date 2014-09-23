@@ -19,7 +19,7 @@
             android:fontFamily="sans-serif-light"
             android:maxLines="1"
             android:singleLine="true"
-            android:imeOptions="actionGo" >
+            android:imeOptions="actionSearch" >
 
             <requestFocus />
         </AutoCompleteTextView>
