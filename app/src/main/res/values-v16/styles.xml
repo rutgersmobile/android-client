@@ -2,7 +2,7 @@
 <resources>
 
     <!-- API 16+ support font family -->
-    <style name="RutgersBaseTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+    <style name="RutgersBaseTheme" parent="android:Theme.Holo.Light">
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
         <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
         <item name="android:editTextStyle">@style/RobotoEditTextStyle</item>
@@ -23,7 +23,7 @@
     <style name="RutgersActionBarTitleText"
         parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
 
-        <item name="android:textColor">@color/white</item>
+        <item name="android:textColor">@color/actbar_text</item>
         <item name="android:fontFamily">sans-serif-light</item>
 
     </style>
