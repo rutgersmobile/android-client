@@ -11,28 +11,29 @@
         android:background="#DADADA"
         android:visibility="visible"/>
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/replace_me"
+	<TextView
+		android:id="@+id/title"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:text="@string/replace_me"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/almost_black"
-        android:textStyle="bold"
+		android:textColor="@color/almost_black"
+		android:textStyle="bold"
         android:fontFamily="sans-serif-bold"
-        android:textAllCaps="false"
+		android:textAllCaps="false"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
+        android:gravity="center_horizontal"
         android:textSize="15sp" />
-
-    <!-- Horizontal divider -->
-    <!-- for height: 1dp may be rounded down to 0px on some screens -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="#DADADA"
+	
+	<!-- Horizontal divider -->
+	<!-- for height: 1dp may be rounded down to 0px on some screens -->
+	<View
+	    android:layout_width="match_parent"
+		android:layout_height="1px"
+		android:background="#DADADA"
         android:visibility="visible"/>
 
 </LinearLayout>

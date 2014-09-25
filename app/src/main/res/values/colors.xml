@@ -5,6 +5,8 @@
     <color name="black">#000000</color>
     <color name="lighter_gray">#E0E0E0</color>
     <color name="light_gray">#C0C0C0</color>
+    <color name="almost_white">#F3F6F7</color>
+    <color name="almost_black">#131313</color>
     <color name="dark_gray">#505050</color>
     <color name="pantone186">#D21034</color>
     <color name="pantone431">#5F6A72</color>
@@ -20,7 +22,7 @@
 
     <!-- Action bar colors -->
     <color name="actbar_bg">#F5F7F7</color>
-    <color name="actbar_text">#131313</color>
+    <color name="actbar_text">@color/almost_black</color>
 
     <!-- Nav drawer colors -->
     <color name="drawer_selected">#EB4B4B</color>

@@ -55,7 +55,7 @@ public class FoodMain extends Fragment {
 		super.onCreate(savedInstanceState);
 
         mData = new ArrayList<RMenuRow>(4);
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title_centered, R.layout.row_section_header_centered, mData);
 
         // Get user's home campus
         final String userHome = RutgersUtil.getHomeCampus(getActivity());
@@ -158,7 +158,7 @@ public class FoodMain extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
-                if(!(clickedRow instanceof RMenuItemRow)) return;        Bundle nwk = new Bundle();
+                if(!(clickedRow instanceof RMenuItemRow)) return;
 
                 Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
                 ComponentFactory.getInstance().switchFragments(clickedArgs);
