@@ -29,7 +29,7 @@ public class Places {
 	
 	private static final String TAG = "PlacesAPI";
 
-    private static final String API_URL = "http://sauron.rutgers.edu/pq";
+    private static final String API_URL = "https://oss-services.rutgers.edu/pq";
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 
 	/**
