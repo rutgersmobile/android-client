@@ -44,7 +44,6 @@ import edu.rutgers.css.Rutgers.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
-import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
@@ -215,6 +214,8 @@ public class MainActivity extends FragmentActivity  implements
 	
 	@Override
 	protected void onStop() {
+        super.onStop();
+
 		// Disconnect from location services when activity is no longer visible
         for(GooglePlayServicesClient.ConnectionCallbacks listener: mLocationListeners) {
             mLocationClient.unregisterConnectionCallbacks(listener);
@@ -223,8 +224,6 @@ public class MainActivity extends FragmentActivity  implements
 
         // Attempt to flush analytics events to server
         Analytics.postEvents(this);
-
-		super.onStop();
 	}
 	
 	@Override
@@ -465,7 +464,7 @@ public class MainActivity extends FragmentActivity  implements
      * @param items Menu items JSON
      */
     private void addMenuSection(String category, JSONArray items) {
-        mDrawerAdapter.add(new RMenuHeaderRow(category));
+        //mDrawerAdapter.add(new RMenuHeaderRow(category));
         for(int i = 0; i < items.length(); i++) {
             try {
                 // Create menu item
