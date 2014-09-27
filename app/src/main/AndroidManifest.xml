@@ -19,6 +19,7 @@
     <application
         android:name="edu.rutgers.css.Rutgers.MyApplication"
         android:allowBackup="true"
+        android:supportsRtl="false"
         android:icon="@drawable/seal"
         android:label="@string/app_name"
         android:theme="@style/RutgersTheme" >

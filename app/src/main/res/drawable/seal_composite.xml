@@ -3,6 +3,10 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:drawable="@drawable/seal_gradient"/>
-    <item android:drawable="@drawable/seal_nored"/>
+    <item android:drawable="@drawable/seal_nored"
+        android:bottom="6dp"
+        android:top="6dp"
+        android:left="6dp"
+        android:right="6dp"/>
 
 </layer-list>

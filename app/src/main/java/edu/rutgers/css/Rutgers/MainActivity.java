@@ -13,12 +13,16 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
@@ -70,6 +74,8 @@ public class MainActivity extends FragmentActivity  implements
 	private ListView mDrawerListView;
 	private ActionBarDrawerToggle mDrawerToggle;
 	private RMenuAdapter mDrawerAdapter;
+    private PopupWindow mLogoPopup;
+
 
     private ArrayList<GooglePlayServicesClient.ConnectionCallbacks> mLocationListeners;
 	
@@ -210,8 +216,10 @@ public class MainActivity extends FragmentActivity  implements
             mLocationClient.registerConnectionCallbacks(listener);
         }
 		mLocationClient.connect();
+
+        showLogoOverlay(R.id.main_content_frame);
 	}
-	
+
 	@Override
 	protected void onStop() {
         super.onStop();
@@ -221,6 +229,8 @@ public class MainActivity extends FragmentActivity  implements
             mLocationClient.unregisterConnectionCallbacks(listener);
         }
 		mLocationClient.disconnect();
+
+        dismissLogoOverlay();
 
         // Attempt to flush analytics events to server
         Analytics.postEvents(this);
@@ -509,4 +519,59 @@ public class MainActivity extends FragmentActivity  implements
     public ChannelManager getChannelManager() {
         return mChannelManager;
     }
+
+    /**
+     * Hack to display special logo over the action bar icon.
+     * @param rootLayoutId Resource ID of the root layout for the main activity
+     */
+    private void showLogoOverlay(int rootLayoutId) {
+        // Get a layout that just contains the logo to display
+        final View logo = getLayoutInflater().inflate(R.layout.logo, null, false);
+        logo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
+        // Get the the action bar, home button, and title text views
+        final View home = findViewById(android.R.id.home);
+        final View decorView = getWindow().getDecorView();
+        final View actionBarView = decorView.findViewById(getResources().getIdentifier("action_bar_container", "id", "android"));
+        final TextView actionBarTitle = (TextView) decorView.findViewById(getResources().getIdentifier("action_bar_title", "id", "android"));
+
+        // Post an event so that after the layouts are drawn, a popup containing the logo displays
+        // over the normal action bar icon. Then add padding to the title so that it's not obscured
+        // by the logo popup.
+        findViewById(rootLayoutId).post(new Runnable() {
+            public void run() {
+                int side = actionBarView.getHeight();
+                mLogoPopup = new PopupWindow(logo, side+10, side+10, false);
+                mLogoPopup.showAsDropDown(actionBarView, (int) home.getX(), -side);
+                mLogoPopup.setTouchInterceptor(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        // Clicking the logo toggles drawer
+                        if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
+                            mDrawerLayout.closeDrawer(mDrawerListView);
+                        } else {
+                            mDrawerLayout.openDrawer(Gravity.START);
+                        }
+                        return true;
+                    }
+                });
+                mLogoPopup.setTouchable(true);
+
+                // Move the title text over so it's not obscured by the logo
+                int diff = Math.abs(mLogoPopup.getWidth() - home.getWidth());
+                actionBarTitle.setPadding(diff, 0, 0, 0);
+            }
+        });
+    }
+
+    /**
+     * Dismiss the logo popup.
+     */
+    private void dismissLogoOverlay() {
+        if(mLogoPopup != null) {
+            mLogoPopup.dismiss();
+            mLogoPopup = null;
+        }
+    }
+
 }
