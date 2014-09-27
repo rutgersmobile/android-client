@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
@@ -51,7 +50,6 @@ import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
-import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
@@ -102,9 +100,11 @@ public class MainActivity extends FragmentActivity  implements
             mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
         }
 
+        /*
         if(BuildConfig.DEBUG) {
-            //getSupportFragmentManager().enableDebugLogging(true);
+            getSupportFragmentManager().enableDebugLogging(true);
         }
+        */
 
 		/*
 		 * Set default settings the first time the app is run
@@ -193,9 +193,6 @@ public class MainActivity extends FragmentActivity  implements
         /*
          * Set up main screen
          */
-		FrameLayout contentFrame = (FrameLayout) findViewById(R.id.main_content_frame);
-		//contentFrame.removeAllViews();
-		
 		FragmentManager fm = getSupportFragmentManager();
 		if(fm.getBackStackEntryCount() == 0) {
 			fm.beginTransaction()
