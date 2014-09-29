@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.utils;
 
+import android.support.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +15,23 @@ public class JsonUtil {
 
     private static final String TAG = "JsonUtil";
 
+    /**
+     * Check if a JSON string is really empty - do not coerce null value into string "null".
+     * @param jsonObject JSON object containing string field
+     * @param field Name of the string field
+     * @return True if there are no contents for the string, false if there are.
+     */
+    public static boolean stringIsReallyEmpty(@NonNull JSONObject jsonObject, @NonNull String field) {
+        if(jsonObject.isNull(field)) return true;
+        else if(jsonObject.optString(field).isEmpty()) return true;
+        else return false;
+    }
+
+    /**
+     * Convert a JSON array of strings to a native array of strings.
+     * @param strings JSON array containing only strings
+     * @return String array
+     */
     public static String[] jsonToStringArray(JSONArray strings) {
         final int size = strings.length();
         String[] result = new String[size];
