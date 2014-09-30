@@ -200,6 +200,19 @@ public class RecreationDisplay extends Fragment {
             Log.w(TAG, "addInfo(): " + e.getMessage());
         }
 
+        if(!StringUtils.isEmpty(descriptionHtml)) {
+            // Decode HTML chars, remove HTML tags, remove whitespace from beginning and end, and then ellipsize the description
+            String desc = StringUtils.abbreviate(StringUtils.strip(AppUtil.stripTags(StringEscapeUtils.unescapeHtml4(descriptionHtml))), 100);
+
+            Bundle rowArgs = new Bundle();
+            rowArgs.putInt(ID_KEY, DESCRIPTION_ROW);
+            rowArgs.putString("title", desc);
+            rowArgs.putString("data", descriptionHtml);
+
+            mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_description_header)));
+            mAdapter.add(new RMenuItemRow(rowArgs));
+        }
+
         if(!StringUtils.isEmpty(address)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, ADDRESS_ROW);
@@ -227,15 +240,6 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-        if(!StringUtils.isEmpty(descriptionHtml)) {
-            Bundle rowArgs = new Bundle();
-            rowArgs.putInt(ID_KEY, DESCRIPTION_ROW);
-            rowArgs.putString("title", getString(R.string.rec_view_description));
-            rowArgs.putString("data", descriptionHtml);
-
-            mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_description_header)));
-            mAdapter.add(new RMenuItemRow(rowArgs));
-        }
     }
 
 }
