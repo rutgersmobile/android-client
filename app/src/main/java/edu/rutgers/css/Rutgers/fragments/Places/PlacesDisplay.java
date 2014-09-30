@@ -114,7 +114,7 @@ public class PlacesDisplay extends Fragment {
                 }
 
                 // Add description row
-                if (mPlace.getDescription() != null) {
+                if (!StringUtils.isEmpty(mPlace.getDescription())) {
                     Bundle descArgs = new Bundle();
                     descArgs.putInt(ID_KEY, DESC_ROW);
                     descArgs.putString("title", StringUtils.abbreviate(mPlace.getDescription(), 80));
@@ -175,13 +175,13 @@ public class PlacesDisplay extends Fragment {
                 }
 
                 // Add building number row
-                if (mPlace.getBuildingNumber() != null) {
+                if (!StringUtils.isEmpty(mPlace.getBuildingNumber())) {
                     mAdapter.add(new RMenuHeaderRow(buildingNoHeader));
                     mAdapter.add(new RMenuItemRow(mPlace.getBuildingNumber()));
                 }
 
                 // Add campus rows
-                if (mPlace.getCampusName() != null) {
+                if (!StringUtils.isEmpty(mPlace.getCampusName())) {
                     mAdapter.add(new RMenuHeaderRow(campusHeader));
                     mAdapter.add(new RMenuItemRow(mPlace.getCampusName()));
                 }
@@ -287,7 +287,7 @@ public class PlacesDisplay extends Fragment {
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         // Prefer address for user readability.
-        if(location.getStreet() != null && location.getCity() != null && location.getStateAbbr() != null) {
+        if(!StringUtils.isEmpty(location.getStreet()) && !StringUtils.isEmpty(location.getCity()) && !StringUtils.isEmpty(location.getStateAbbr())) {
             StringBuilder address = new StringBuilder();
             address.append(location.getStreet()).append(", ").append(location.getCity()).append(", ").append(location.getStateAbbr());
             intent.setData(Uri.parse("geo:0,0?q=" + address.toString()));
@@ -315,10 +315,10 @@ public class PlacesDisplay extends Fragment {
 
         StringBuilder result = new StringBuilder();
 
-        if(location.getName() != null) result.append(location.getName()).append('\n');
-        if(location.getStreet() != null) result.append(location.getStreet()).append('\n');
-        if(location.getAdditional() != null) result.append(location.getAdditional()).append('\n');
-        if(location.getCity() != null) result.append(location.getCity()).append(", ")
+        if(!StringUtils.isEmpty(location.getName())) result.append(location.getName()).append('\n');
+        if(!StringUtils.isEmpty(location.getStreet())) result.append(location.getStreet()).append('\n');
+        if(!StringUtils.isEmpty(location.getAdditional())) result.append(location.getAdditional()).append('\n');
+        if(!StringUtils.isEmpty(location.getCity())) result.append(location.getCity()).append(", ")
                 .append(location.getStateAbbr()).append(' ').append(location.getPostalCode());
 
 		return StringUtils.trim(result.toString());

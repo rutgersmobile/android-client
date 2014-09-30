@@ -34,43 +34,35 @@ public class Place {
         private double longitude;
 
         public String getName() {
-            if(name != null && !name.isEmpty()) return name;
-            else return null;
+            return name;
         }
 
         public String getStreet() {
-            if(street != null && !street.isEmpty()) return street;
-            else return null;
+            return street;
         }
 
         public String getAdditional() {
-            if(additional != null && !additional.isEmpty()) return additional;
-            else return null;
+            return additional;
         }
 
         public String getCity() {
-            if(city != null && !city.isEmpty()) return city;
-            else return null;
+            return city;
         }
 
         public String getState() {
-            if(state != null && !state.isEmpty()) return state;
-            else return null;
+            return state;
         }
 
         public String getStateAbbr() {
-            if(stateAbbr != null && !stateAbbr.isEmpty()) return stateAbbr;
-            else return null;
+            return stateAbbr;
         }
 
         public String getPostalCode() {
-            if(postalCode != null && !postalCode.isEmpty()) return postalCode;
-            else return null;
+            return postalCode;
         }
 
         public String getCountry() {
-            if(country != null && !country.isEmpty()) return country;
-            else return null;
+            return country;
         }
 
         public double getLatitude() {
@@ -84,53 +76,43 @@ public class Place {
     }
 
     public String getId() {
-        if(id != null && !id.isEmpty()) return id;
-        return null;
+        return id;
     }
 
     public String getTitle() {
-        if(title != null && !title.isEmpty()) return title;
-        else return null;
+        return title;
     }
 
     public String getDescription() {
-        if(description != null && !description.isEmpty()) return description;
-        else return null;
+        return description;
     }
 
     public String getCid() {
-        if(cid != null && !cid.isEmpty()) return cid;
-        else return null;
+        return cid;
     }
 
     public String getBuildingID() {
-        if(buildingID != null && !buildingID.isEmpty()) return buildingID;
-        else return null;
+        return buildingID;
     }
 
     public String getBuildingNumber() {
-        if(buildingNumber != null && !buildingNumber.isEmpty()) return buildingNumber;
-        else return null;
+        return buildingNumber;
     }
 
     public String getBuildingCode() {
-        if(buildingCode != null && !buildingCode.isEmpty()) return buildingCode;
-        else return null;
+        return buildingCode;
     }
 
     public String getCampusCode() {
-        if(campusCode != null && !campusCode.isEmpty()) return campusCode;
-        else return null;
+        return campusCode;
     }
 
     public String getCampusName() {
-        if(campusName != null && !campusName.isEmpty()) return campusName;
-        else return null;
+        return campusName;
     }
 
     public List<String> getOffices() {
-        if(offices != null && !offices.isEmpty()) return offices;
-        else return null;
+        return offices;
     }
 
     public Location getLocation() {
