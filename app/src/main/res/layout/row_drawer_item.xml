@@ -6,8 +6,8 @@
 
     	<ImageView
     	    android:id="@+id/icon"
-    	    android:layout_width="40dp"
-    	    android:layout_height="40dp"
+    	    android:layout_width="30dp"
+    	    android:layout_height="30dp"
     	    android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
@@ -18,12 +18,14 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
-            android:layout_toEndOf="@+id/icon"
-			android:layout_toRightOf="@+id/icon"
+            android:layout_toEndOf="@id/icon"
+			android:layout_toRightOf="@id/icon"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
 			android:text="@string/replace_me"
-			android:textSize="18sp"
-			android:textColor="@color/drawer_item_text"/>
+			android:textSize="16sp"
+			android:textColor="@color/drawer_item_text"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-bold"/>
     
 </RelativeLayout>

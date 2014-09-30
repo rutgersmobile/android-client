@@ -13,9 +13,9 @@
 
     <ListView
         android:id="@+id/left_drawer"
-        android:layout_width="300dp"
+        android:layout_width="270dp"
         android:layout_height="match_parent"
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         android:choiceMode="singleChoice"
         android:listSelector="@drawable/main_drawer_selector"
         android:divider="@drawable/drawer_divider"
