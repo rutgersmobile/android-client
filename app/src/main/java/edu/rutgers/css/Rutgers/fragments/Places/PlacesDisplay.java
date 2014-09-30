@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -16,17 +17,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
+import org.json.JSONObject;
 import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.api.Places;
+import edu.rutgers.css.Rutgers.fragments.Bus.BusDisplay;
+import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.items.Place;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
@@ -42,6 +49,11 @@ public class PlacesDisplay extends Fragment {
 
 	private static final String TAG = "PlacesDisplay";
     public static final String HANDLE = "placesdisplay";
+
+    private static final String ID_KEY = "id";
+    private static final int ADDRESS_ROW = 0;
+    private static final int DESC_ROW = 1;
+    private static final int BUS_ROW = 2;
 
     private ItemizedOverlay<OverlayItem> mLocationOverlays;
     private Place mPlace;
@@ -70,150 +82,155 @@ public class PlacesDisplay extends Fragment {
 
         Bundle args = getArguments();
 
-        // Get place JSON and display it
+        // Get place key
         String key = args.getString("placeKey");
         if(key == null) {
             AppUtil.showFailedLoadToast(getActivity());
             Log.e(TAG, "placeKey is null");
-        } else {
+            return;
+        }
 
-            final String addressHeader = getString(R.string.address_header);
-            final String buildingNoHeader = getString(R.string.building_no_header);
-            final String campusHeader = getString(R.string.campus_header);
-            final String descriptionHeader = getString(R.string.description_header);
-            final String officesHeader = getString(R.string.offices_header);
-            final String nearbyHeader = getString(R.string.nearby_bus_header);
+        // Get resource strings
+        final String addressHeader = getString(R.string.address_header);
+        final String buildingNoHeader = getString(R.string.building_no_header);
+        final String campusHeader = getString(R.string.campus_header);
+        final String descriptionHeader = getString(R.string.description_header);
+        final String officesHeader = getString(R.string.offices_header);
+        final String nearbyHeader = getString(R.string.nearby_bus_header);
 
-            final AndroidDeferredManager dm = new AndroidDeferredManager();
+        final AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(Places.getPlace(key)).done(new DoneCallback<Place>() {
+            @Override
+            public void onDone(Place result) {
+                mPlace = result;
 
-            dm.when(Places.getPlace(key)).done(new DoneCallback<Place>() {
-                @Override
-                public void onDone(Place result) {
-                    mPlace = result;
+                // Add address rows
+                if (mPlace.getLocation() != null) {
+                    Bundle addressArgs = new Bundle();
+                    addressArgs.putInt(ID_KEY, ADDRESS_ROW);
+                    addressArgs.putString("title", formatAddress(mPlace.getLocation()));
+                    mAdapter.add(new RMenuHeaderRow(addressHeader));
+                    mAdapter.add(new RMenuItemRow(addressArgs));
+                }
 
-                    // Add address rows
-                    if (mPlace.getLocation() != null) {
-                        Bundle addressArgs = new Bundle();
-                        addressArgs.putString("title", formatAddress(mPlace.getLocation()));
-                        addressArgs.putBoolean("addressRow", true);
-                        mAdapter.add(new RMenuHeaderRow(addressHeader));
-                        mAdapter.add(new RMenuItemRow(addressArgs));
-                    }
+                // Add description row
+                if (mPlace.getDescription() != null) {
+                    Bundle descArgs = new Bundle();
+                    descArgs.putInt(ID_KEY, DESC_ROW);
+                    descArgs.putString("title", StringUtils.abbreviate(mPlace.getDescription(), 80));
+                    descArgs.putString("component", TextDisplay.HANDLE);
+                    descArgs.putString("data", mPlace.getDescription());
+                    mAdapter.add(new RMenuHeaderRow(descriptionHeader));
+                    mAdapter.add(new RMenuItemRow(descArgs));
+                }
 
-                    // Add description row
-                    if (mPlace.getDescription() != null) {
-                        mAdapter.add(new RMenuHeaderRow(descriptionHeader));
-                        mAdapter.add(new RMenuItemRow(mPlace.getDescription()));
-                    }
+                // Add nearby bus stops
+                if (mPlace.getLocation() != null) {
+                    final int startPos = mAdapter.getCount();
 
-                    // List offices housed in this building
-                    if (mPlace.getOffices() != null) {
-                        mAdapter.add(new RMenuHeaderRow(officesHeader));
-                        for (String office : mPlace.getOffices()) {
-                            mAdapter.add(new RMenuItemRow(office));
-                        }
-                    }
+                    Place.Location location = mPlace.getLocation();
+                    double buildLon = location.getLongitude();
+                    double buildLat = location.getLatitude();
 
-                    // Add building number row
-                    if (mPlace.getBuildingNumber() != null) {
-                        mAdapter.add(new RMenuHeaderRow(buildingNoHeader));
-                        mAdapter.add(new RMenuItemRow(mPlace.getBuildingNumber()));
-                    }
+                    // Determine Nextbus agency by campus
+                    final String agency = sAgencyMap.get(mPlace.getCampusName());
 
-                    // Add campus rows
-                    if (mPlace.getCampusName() != null) {
-                        mAdapter.add(new RMenuHeaderRow(campusHeader));
-                        mAdapter.add(new RMenuItemRow(mPlace.getCampusName()));
-                    }
+                    if (agency != null) {
+                        dm.when(Nextbus.getStopsByTitleNear(agency, buildLat, buildLon)).then(new DoneCallback<JSONObject>() {
+                            @Override
+                            public void onDone(JSONObject result) {
+                                if (result.length() > 0) {
+                                    int insertPos = startPos;
+                                    mData.add(insertPos++, new RMenuHeaderRow(nearbyHeader));
+                                    mAdapter.notifyDataSetChanged();
 
-                    /*
-                    // Add nearby bus stops
-                    if (mLocationJSON != null) {
-                        try {
-                            double buildLon = Double.parseDouble(mLocationJSON.getString("longitude"));
-                            double buildLat = Double.parseDouble(mLocationJSON.getString("latitude"));
-
-                            if (!JsonUtil.stringIsReallyEmpty(mPlaceJSON, "campus_name")) {
-                                String campus_name = mPlaceJSON.optString("campus_name");
-                                String agency = sAgencyMap.get(campus_name);
-
-                                if (agency != null) {
-                                    dm.when(Nextbus.getStopsByTitleNear(agency, buildLat, buildLon)).then(new DoneCallback<JSONObject>() {
-
-                                        @Override
-                                        public void onDone(JSONObject nearbyStopsByTitle) {
-                                            // Hide nearby bus view if there aren't any to display
-                                            if (nearbyStopsByTitle.length() == 0) {
-                                                nearbyBusesHeaderRow.setVisibility(View.GONE);
-                                                nearbyBusesContentRow.setVisibility(View.GONE);
-                                                return;
-                                            }
-
-                                            for (Iterator<String> stopTitleIter = nearbyStopsByTitle.keys(); stopTitleIter.hasNext(); ) {
-                                                TextView newStopTextView = new TextView(v.getContext());
-                                                String stopTitle = stopTitleIter.next();
-                                                newStopTextView.setText(stopTitle);
-                                                nearbyBusesLinearLayout.addView(newStopTextView);
-                                            }
-                                        }
-
-                                    });
-                                } else {
-                                    nearbyBusesHeaderRow.setVisibility(View.GONE);
-                                    nearbyBusesContentRow.setVisibility(View.GONE);
+                                    for (Iterator<String> stopTitleIter = result.keys(); stopTitleIter.hasNext(); ) {
+                                        String title = stopTitleIter.next();
+                                        Bundle stopArgs = new Bundle();
+                                        stopArgs.putInt(ID_KEY, BUS_ROW);
+                                        stopArgs.putString("title", title);
+                                        stopArgs.putString("component", BusDisplay.HANDLE);
+                                        stopArgs.putString("agency", agency);
+                                        stopArgs.putString("mode", "stop");
+                                        mData.add(insertPos++, new RMenuItemRow(stopArgs));
+                                        mAdapter.notifyDataSetChanged();
+                                    }
                                 }
                             }
-                        } catch (JSONException e) {
-                            Log.w(TAG, "mLocationJSON: " + e.getMessage());
-                        }
-                    }*/
+                        }).fail(new FailCallback<Exception>() {
+                            @Override
+                            public void onFail(Exception result) {
+                                Log.w(TAG, "Getting nearby buses: " + result.getMessage());
+                            }
+                        });
+                    }
+                }
 
-                    /*
-                    // Set up map
-                    if(mapView != null && mLocationJSON != null) {
-                        if(!mLocationJSON.isNull("latitude") && !mLocationJSON.isNull("longitude")) {
-                            // Enable launch map activity button
-                            mapLaunchButton.setVisibility(View.VISIBLE);
-                            mapLaunchButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    launchMap();
-                                }
-                            });
+                // Add offices housed in this building
+                if (mPlace.getOffices() != null) {
+                    mAdapter.add(new RMenuHeaderRow(officesHeader));
+                    for (String office : mPlace.getOffices()) {
+                        mAdapter.add(new RMenuItemRow(office));
+                    }
+                }
 
-                            // Get latitude & longitude of location
-                            double lon = Double.parseDouble(mLocationJSON.optString("longitude"));
-                            double lat = Double.parseDouble(mLocationJSON.optString("latitude"));
-                            final GeoPoint position = new GeoPoint(lat, lon);
+                // Add building number row
+                if (mPlace.getBuildingNumber() != null) {
+                    mAdapter.add(new RMenuHeaderRow(buildingNoHeader));
+                    mAdapter.add(new RMenuItemRow(mPlace.getBuildingNumber()));
+                }
 
-                            // Create map icon for location
-                            final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
-                            items.add(new OverlayItem(mPlaceJSON.optString("title"), "", position));
-                            mLocationOverlays = new ItemizedIconOverlay<OverlayItem>(items, null, new DefaultResourceProxyImpl(getActivity()));
+                // Add campus rows
+                if (mPlace.getCampusName() != null) {
+                    mAdapter.add(new RMenuHeaderRow(campusHeader));
+                    mAdapter.add(new RMenuItemRow(mPlace.getCampusName()));
+                }
 
-                            // Add the icon and center the map of the location
-                            mapView.getOverlays().add(mLocationOverlays);
-                            mapView.getController().setZoom(18);
-                            mapView.getController().setCenter(position);
-                        }
-                        else {
-                            // No location set
-                            mapView.setVisibility(View.GONE);
-                        }
+                /*
+                // Set up map
+                if(mapView != null && mLocationJSON != null) {
+                    if(!mLocationJSON.isNull("latitude") && !mLocationJSON.isNull("longitude")) {
+                        // Enable launch map activity button
+                        mapLaunchButton.setVisibility(View.VISIBLE);
+                        mapLaunchButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                launchMap();
+                            }
+                        });
+
+                        // Get latitude & longitude of location
+                        double lon = Double.parseDouble(mLocationJSON.optString("longitude"));
+                        double lat = Double.parseDouble(mLocationJSON.optString("latitude"));
+                        final GeoPoint position = new GeoPoint(lat, lon);
+
+                        // Create map icon for location
+                        final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
+                        items.add(new OverlayItem(mPlaceJSON.optString("title"), "", position));
+                        mLocationOverlays = new ItemizedIconOverlay<OverlayItem>(items, null, new DefaultResourceProxyImpl(getActivity()));
+
+                        // Add the icon and center the map of the location
+                        mapView.getOverlays().add(mLocationOverlays);
+                        mapView.getController().setZoom(18);
+                        mapView.getController().setCenter(position);
                     }
                     else {
-                        if(mapView == null) Log.e(TAG, "mapView is null");
+                        // No location set
+                        mapView.setVisibility(View.GONE);
                     }
-                    */
                 }
-            }).fail(new FailCallback<Exception>() {
-                @Override
-                public void onFail(Exception e) {
-                    AppUtil.showFailedLoadToast(getActivity());
-                    Log.w(TAG, e.getMessage());
+                else {
+                    if(mapView == null) Log.e(TAG, "mapView is null");
                 }
-            });
-        }
+                */
+            }
+        }).fail(new FailCallback<Exception>() {
+            @Override
+            public void onFail(Exception e) {
+                AppUtil.showFailedLoadToast(getActivity());
+                Log.w(TAG, e.getMessage());
+            }
+        });
 
     }
 	
@@ -236,6 +253,26 @@ public class PlacesDisplay extends Fragment {
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                RMenuItemRow clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
+                Bundle clickedArgs = clicked.getArgs();
+
+                switch(clickedArgs.getInt(ID_KEY)) {
+                    case ADDRESS_ROW:
+                        launchMap();
+                        break;
+                    case DESC_ROW:
+                        clickedArgs.putString("title", mPlace.getTitle());
+                        ComponentFactory.getInstance().switchFragments(clickedArgs);
+                        break;
+                    case BUS_ROW:
+                        ComponentFactory.getInstance().switchFragments(clickedArgs);
+                        break;
+                }
+            }
+        });
 
 		return v;
 	}
