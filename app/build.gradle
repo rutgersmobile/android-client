@@ -30,6 +30,7 @@ dependencies {
     compile 'org.slf4j:slf4j-android:1.7.7'
     compile 'org.osmdroid:osmdroid-android:4.2'
     compile 'org.jdeferred:jdeferred-android-aar:1.2.3'
+    compile 'com.google.code.gson:gson:2.3'
 }
 
 idea {

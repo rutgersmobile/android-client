@@ -3,6 +3,8 @@ package edu.rutgers.css.Rutgers.api;
 import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.items.KeyValPair;
+import edu.rutgers.css.Rutgers.items.Place;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
@@ -37,8 +40,8 @@ public class Places {
 	 * @param placeKey Place key
 	 * @return JSON for place
 	 */
-	public static Promise<JSONObject, Exception, Double> getPlace(final String placeKey) {
-		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
+	public static Promise<Place, Exception, Double> getPlace(final String placeKey) {
+		final Deferred<Place, Exception, Double> d = new DeferredObject<Place, Exception, Double>();
 
         String parameter;
         try {
@@ -55,7 +58,13 @@ public class Places {
                     JSONObject data = result.getJSONObject("data");
 
                     if (result.getString("status").equals("success")) {
-                        d.resolve(data.getJSONObject("place"));
+                        try {
+                            Gson gson = new Gson();
+                            Place place = gson.fromJson(data.getJSONObject("place").toString(), Place.class);
+                            d.resolve(place);
+                        } catch (JsonSyntaxException e) {
+                            d.reject(e);
+                        }
                     } else {
                         d.reject(new Exception(data.getString("message")));
                     }

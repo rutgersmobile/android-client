@@ -16,9 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
@@ -30,11 +27,11 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.Places;
+import edu.rutgers.css.Rutgers.items.Place;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.utils.JsonUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -47,8 +44,7 @@ public class PlacesDisplay extends Fragment {
     public static final String HANDLE = "placesdisplay";
 
     private ItemizedOverlay<OverlayItem> mLocationOverlays;
-    private JSONObject mPlaceJSON;
-    private JSONObject mLocationJSON;
+    private Place mPlace;
     private List<RMenuRow> mData;
     private RMenuAdapter mAdapter;
 
@@ -90,48 +86,48 @@ public class PlacesDisplay extends Fragment {
 
             final AndroidDeferredManager dm = new AndroidDeferredManager();
 
-            dm.when(Places.getPlace(key)).done(new DoneCallback<JSONObject>() {
+            dm.when(Places.getPlace(key)).done(new DoneCallback<Place>() {
                 @Override
-                public void onDone(JSONObject result) {
-                    mPlaceJSON = result;
-                    mLocationJSON = mPlaceJSON.optJSONObject("location");
+                public void onDone(Place result) {
+                    mPlace = result;
 
                     // Add address rows
-                    Bundle addressArgs = new Bundle();
-                    addressArgs.putString("title", formatAddress(mLocationJSON));
-                    addressArgs.putBoolean("addressRow", true);
-                    mAdapter.add(new RMenuHeaderRow(addressHeader));
-                    mAdapter.add(new RMenuItemRow(addressArgs));
+                    if (mPlace.getLocation() != null) {
+                        Bundle addressArgs = new Bundle();
+                        addressArgs.putString("title", formatAddress(mPlace.getLocation()));
+                        addressArgs.putBoolean("addressRow", true);
+                        mAdapter.add(new RMenuHeaderRow(addressHeader));
+                        mAdapter.add(new RMenuItemRow(addressArgs));
+                    }
 
                     // Add description row
-                    if (!JsonUtil.stringIsReallyEmpty(mPlaceJSON, "description")) {
+                    if (mPlace.getDescription() != null) {
                         mAdapter.add(new RMenuHeaderRow(descriptionHeader));
-                        mAdapter.add(new RMenuItemRow(mPlaceJSON.optString("description")));
+                        mAdapter.add(new RMenuItemRow(mPlace.getDescription()));
                     }
 
                     // List offices housed in this building
-                    if (!mPlaceJSON.isNull("offices")) {
+                    if (mPlace.getOffices() != null) {
                         mAdapter.add(new RMenuHeaderRow(officesHeader));
-                        String offices[] = JsonUtil.jsonToStringArray(mPlaceJSON.optJSONArray("offices"));
-                        for (int i = 0; i < offices.length; i++) {
-                            mAdapter.add(new RMenuItemRow(offices[i]));
+                        for (String office : mPlace.getOffices()) {
+                            mAdapter.add(new RMenuItemRow(office));
                         }
                     }
 
                     // Add building number row
-                    if (!JsonUtil.stringIsReallyEmpty(mPlaceJSON, "building_number")) {
+                    if (mPlace.getBuildingNumber() != null) {
                         mAdapter.add(new RMenuHeaderRow(buildingNoHeader));
-                        mAdapter.add(new RMenuItemRow(mPlaceJSON.optString("building_number")));
+                        mAdapter.add(new RMenuItemRow(mPlace.getBuildingNumber()));
                     }
 
                     // Add campus rows
-                    if (!JsonUtil.stringIsReallyEmpty(mPlaceJSON, "campus_name")) {
+                    if (mPlace.getCampusName() != null) {
                         mAdapter.add(new RMenuHeaderRow(campusHeader));
-                        mAdapter.add(new RMenuItemRow(mPlaceJSON.optString("campus_name")));
+                        mAdapter.add(new RMenuItemRow(mPlace.getCampusName()));
                     }
 
                     /*
-                    // Get & display nearby bus stops
+                    // Add nearby bus stops
                     if (mLocationJSON != null) {
                         try {
                             double buildLon = Double.parseDouble(mLocationJSON.getString("longitude"));
@@ -168,10 +164,10 @@ public class PlacesDisplay extends Fragment {
                                 }
                             }
                         } catch (JSONException e) {
-                            Log.w(TAG, "onCreateView(): " + e.getMessage());
+                            Log.w(TAG, "mLocationJSON: " + e.getMessage());
                         }
-                    }
-                    */
+                    }*/
+
                     /*
                     // Set up map
                     if(mapView != null && mLocationJSON != null) {
@@ -248,22 +244,20 @@ public class PlacesDisplay extends Fragment {
      * Start a map activity intent for this address/location
      */
     public void launchMap() {
-        if(mLocationJSON == null) return;
+        if(mPlace == null || mPlace.getLocation() == null) return;
+        Place.Location location = mPlace.getLocation();
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         // Prefer address for user readability.
-        // Checking isNull() and optString().isEmpty() because if the string is null,
-        // optString() returns the string "null" instead of an empty string. swag ;)
-
-        if(!mLocationJSON.isNull("street") && !mLocationJSON.isNull("city") && !mLocationJSON.isNull("state") &&
-                !mLocationJSON.optString("street").isEmpty() && !mLocationJSON.optString("city").isEmpty() && !mLocationJSON.optString("state").isEmpty()) {
-            String addr = mLocationJSON.optString("street") + ", " + mLocationJSON.optString("city") + ", " + mLocationJSON.optString("state");
-            intent.setData(Uri.parse("geo:0,0?q=" + addr));
+        if(location.getStreet() != null && location.getCity() != null && location.getStateAbbr() != null) {
+            StringBuilder address = new StringBuilder();
+            address.append(location.getStreet()).append(", ").append(location.getCity()).append(", ").append(location.getStateAbbr());
+            intent.setData(Uri.parse("geo:0,0?q=" + address.toString()));
         }
         // Fallback to longitude & latitude
         else {
-            intent.setData(Uri.parse("geo:0,0?q="+mLocationJSON.optString("latitude")+","+ mLocationJSON.optString("longitude")));
+            intent.setData(Uri.parse("geo:0,0?q="+Double.toString(location.getLatitude())+","+Double.toString(location.getLongitude())));
         }
 
         // Try to launch a map activity
@@ -275,41 +269,22 @@ public class PlacesDisplay extends Fragment {
     }
 
 	/**
-	 * Put JSON address object into readable string form
-	 * @param address JSON address object from place data
+	 * Compile location information into readable string form
+	 * @param location Place location info
 	 * @return Multi-line string containing address
 	 */
-	private static String formatAddress(JSONObject address) {
-		if(address == null) return "";
-		StringBuilder result = new StringBuilder();
+	private static String formatAddress(Place.Location location) {
+		if(location == null) return null;
 
-		if(!address.isNull("name") && !address.optString("name").isEmpty()) result.append(address.optString("name")).append("\n");
-		if(!address.isNull("street") && !address.optString("street").isEmpty()) result.append(address.optString("street")).append("\n");
-		if(!address.isNull("city") && !address.optString("city").isEmpty()) result.append(address.optString("city")).append(", ")
-            .append(address.optString("state_abbr")).append(" ").append(address.optString("postal_code"));
+        StringBuilder result = new StringBuilder();
+
+        if(location.getName() != null) result.append(location.getName()).append('\n');
+        if(location.getStreet() != null) result.append(location.getStreet()).append('\n');
+        if(location.getAdditional() != null) result.append(location.getAdditional()).append('\n');
+        if(location.getCity() != null) result.append(location.getCity()).append(", ")
+                .append(location.getStateAbbr()).append(' ').append(location.getPostalCode());
 
 		return StringUtils.trim(result.toString());
 	}
-	
-	/**
-	 * Add each value from the Offices array to a single string with line breaks
-	 * @param offices Offices JSON Array
-	 * @return Multi-line string listing offices
-	 */
-	private static String formatOffices(JSONArray offices) {
-		if(offices == null) return "";
-		String result = "";
 
-		for(int i = 0; i < offices.length(); i++) {
-			try {
-				result += offices.getString(i);
-				if(i != offices.length()-1) result += "\n";
-			} catch (JSONException e) {
-				Log.w(TAG, "formatOffices(): " + e.getMessage());
-			}
-		}
-		
-		return result;
-	}
-	
 }
