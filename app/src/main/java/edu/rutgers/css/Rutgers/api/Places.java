@@ -26,7 +26,8 @@ import edu.rutgers.css.Rutgers.items.Place;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
- * Helper for getting data from places API.
+ * Provides access to the Places database.
+ * @author James Chambers
  */
 public class Places {
 	
@@ -36,9 +37,9 @@ public class Places {
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 
 	/**
-	 * Get JSON for a specific place.
-	 * @param placeKey Place key
-	 * @return JSON for place
+	 * Get a specific place from the Places API.
+	 * @param placeKey Key for place entry, returned from search results
+	 * @return Promise for a Place object representing the entry in the database
 	 */
 	public static Promise<Place, Exception, Double> getPlace(final String placeKey) {
 		final Deferred<Place, Exception, Double> d = new DeferredObject<Place, Exception, Double>();
@@ -83,10 +84,10 @@ public class Places {
 	}
 
     /**
-     * Get places near a given location.
+     * Search for places near a given location.
      * @param sourceLat Latitude
      * @param sourceLon Longitude
-     * @return Promise for a list of place keys & JSON objects.
+     * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
     public static Promise<List<KeyValPair>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
         final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<List<KeyValPair>, Exception, Double>();
@@ -129,9 +130,13 @@ public class Places {
     }
 
     /**
-     * Search places by title or building code.
-     * @param query Query
-     * @return JSON array of results.
+     * <p>Search places by title or building code.</p>
+     *
+     * <p>Server-side, this means the query is processed by the lunr index. Should more fields
+     * be added to the index (such as the full place description), then it will also be possible
+     * to search based on the contents of those fields.</p>
+     * @param query Query string
+     * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
     public static Promise<List<KeyValPair>, Exception, Double> searchPlaces(final String query) {
         final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<List<KeyValPair>, Exception, Double>();

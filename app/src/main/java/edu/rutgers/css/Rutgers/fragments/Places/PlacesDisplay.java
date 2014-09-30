@@ -42,8 +42,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Place information display component
- * 
+ * Display information about a Rutgers location from the Places database.
+ * @author James Chambers
  */
 public class PlacesDisplay extends Fragment {
 

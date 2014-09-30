@@ -42,8 +42,11 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Main Places component: displays a text field with auto-complete information from places database.
- * User enters a building name and selects from list; selection sent to place display component.
+ * <p>The main Places fragment displays nearby Rutgers locations (buildings, parks, etc.), as well as
+ * a search bar allowing the user to find places by name or building code.</p>
+ *
+ * <p>Places selected from this fragment are displayed with {@link edu.rutgers.css.Rutgers.fragments.Places.PlacesDisplay}.</p>
+ * @author James Chambers
  */
 public class PlacesMain extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
 

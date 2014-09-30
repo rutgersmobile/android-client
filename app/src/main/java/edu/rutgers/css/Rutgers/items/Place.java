@@ -5,7 +5,9 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /**
- * Created by jamchamb on 9/30/14.
+ * Represents a building from the places database. Equivalent to a "place" JSON object from the
+ * places API. Use GSON to construct.
+ * @author James Chambers
  */
 public class Place {
 
@@ -22,6 +24,7 @@ public class Place {
     private Location location;
 
     public static class Location {
+
         private String name;
         private String street;
         private String additional;
