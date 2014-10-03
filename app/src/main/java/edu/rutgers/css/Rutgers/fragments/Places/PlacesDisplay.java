@@ -1,14 +1,18 @@
 package edu.rutgers.css.Rutgers.fragments.Places;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -21,6 +25,8 @@ import org.json.JSONObject;
 import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +42,7 @@ import edu.rutgers.css.Rutgers.fragments.Bus.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.items.Place;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
+import edu.rutgers.css.Rutgers.items.RMenuImageRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
@@ -104,8 +111,25 @@ public class PlacesDisplay extends Fragment {
             public void onDone(Place result) {
                 mPlace = result;
 
-                // Add address rows
+                // Add address rows and static map
                 if (mPlace.getLocation() != null) {
+
+                    // Get static map image and add it
+                    try {
+                        WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+                        Display display = wm.getDefaultDisplay();
+                        Point size = new Point();
+                        display.getSize(size);
+
+                        int width = size.x;
+                        int height = width/2;
+                        URL imgUrl = new URL("http://maps.googleapis.com/maps/api/staticmap?zoom=17&size="+width+"x"+height+"&markers=size:mid|color:red|"+mPlace.getLocation().getLatitude()+","+mPlace.getLocation().getLongitude()+"&sensor=false");
+                        RMenuImageRow staticMapRow = new RMenuImageRow(imgUrl, width, height);
+                        mAdapter.add(staticMapRow);
+                    } catch (MalformedURLException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+
                     Bundle addressArgs = new Bundle();
                     addressArgs.putInt(ID_KEY, ADDRESS_ROW);
                     addressArgs.putString("title", formatAddress(mPlace.getLocation()));
@@ -185,44 +209,6 @@ public class PlacesDisplay extends Fragment {
                     mAdapter.add(new RMenuHeaderRow(campusHeader));
                     mAdapter.add(new RMenuItemRow(mPlace.getCampusName()));
                 }
-
-                /*
-                // Set up map
-                if(mapView != null && mLocationJSON != null) {
-                    if(!mLocationJSON.isNull("latitude") && !mLocationJSON.isNull("longitude")) {
-                        // Enable launch map activity button
-                        mapLaunchButton.setVisibility(View.VISIBLE);
-                        mapLaunchButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                launchMap();
-                            }
-                        });
-
-                        // Get latitude & longitude of location
-                        double lon = Double.parseDouble(mLocationJSON.optString("longitude"));
-                        double lat = Double.parseDouble(mLocationJSON.optString("latitude"));
-                        final GeoPoint position = new GeoPoint(lat, lon);
-
-                        // Create map icon for location
-                        final ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
-                        items.add(new OverlayItem(mPlaceJSON.optString("title"), "", position));
-                        mLocationOverlays = new ItemizedIconOverlay<OverlayItem>(items, null, new DefaultResourceProxyImpl(getActivity()));
-
-                        // Add the icon and center the map of the location
-                        mapView.getOverlays().add(mLocationOverlays);
-                        mapView.getController().setZoom(18);
-                        mapView.getController().setCenter(position);
-                    }
-                    else {
-                        // No location set
-                        mapView.setVisibility(View.GONE);
-                    }
-                }
-                else {
-                    if(mapView == null) Log.e(TAG, "mapView is null");
-                }
-                */
             }
         }).fail(new FailCallback<Exception>() {
             @Override
@@ -242,14 +228,6 @@ public class PlacesDisplay extends Fragment {
         // Set title
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
         else getActivity().setTitle(R.string.places_title);
-
-        /*
-        // Set up map
-        final MapView mapView = (MapView) v.findViewById(R.id.mapview);
-        mapView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // disable hardware acceleration
-        mapView.setBuiltInZoomControls(false);
-        mapView.setMultiTouchControls(false);
-        */
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
