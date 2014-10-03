@@ -152,11 +152,8 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 			} else if(curItem instanceof RMenuImageRow) {
                 // Get image from network
                 RMenuImageRow imageRowItem = (RMenuImageRow) curItem;
-                holder.imageView.setMaxHeight(imageRowItem.getHeight());
-                holder.imageView.setMaxWidth(imageRowItem.getWidth());
-
                 AQuery cvAq = aq.recycle(convertView);
-                cvAq.id(holder.imageView).image(imageRowItem.getDrawableURL(), false, true, 0, 0, null, AQuery.FADE_IN_NETWORK, 1.0f);
+                cvAq.id(holder.imageView).image(imageRowItem.getDrawableURL(), false, true, imageRowItem.getWidth(), 0, null, AQuery.FADE_IN_NETWORK);
             } else {
                 holder.imageView.setImageBitmap(null);
 				holder.imageView.setVisibility(View.GONE);
