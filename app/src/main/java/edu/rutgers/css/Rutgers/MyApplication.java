@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
+import com.androidquery.callback.BitmapAjaxCallback;
+
 import edu.rutgers.css.Rutgers.api.Analytics;
 
 public class MyApplication extends Application {
@@ -12,16 +14,25 @@ public class MyApplication extends Application {
 
     private static Context context;
 
+    @Override
     public void onCreate() {
         super.onCreate();
         MyApplication.context = getApplicationContext();
 
-        Log.v(TAG, "Created");
+        Log.v(TAG, "Application started");
+
         // Queue "app launched" event
         Analytics.queueEvent(this, Analytics.LAUNCH, null);
+    }
+
+    @Override
+    public void onLowMemory() {
+        // Remove images from memory cache
+        BitmapAjaxCallback.clearCache();
     }
 
     public static Context getAppContext() {
         return MyApplication.context;
     }
+
 }
