@@ -5,7 +5,7 @@
  		android:padding="10dp" >
 
     	<ImageView
-    	    android:id="@+id/icon"
+    	    android:id="@+id/imageView"
     	    android:layout_width="30dp"
     	    android:layout_height="30dp"
     	    android:layout_centerVertical="true"
@@ -18,8 +18,8 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/icon"
-			android:layout_toRightOf="@id/icon"
+            android:layout_toEndOf="@id/imageView"
+			android:layout_toRightOf="@id/imageView"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
 			android:text="@string/replace_me"

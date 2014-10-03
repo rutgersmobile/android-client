@@ -9,8 +9,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.androidquery.AQuery;
+
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.items.RMenuImageRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -24,18 +27,20 @@ import edu.rutgers.css.Rutgers2.R;
 public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 
 	private final static String TAG = "RMenuAdapter";
+
 	private int mItemResource;
 	private int mCategoryResource;
     private List<RMenuRow> mData;
+    private AQuery aq;
 
-	private static enum ViewTypes {
-		HEADER, CLICKABLE, UNCLICKABLE;
+	protected static enum ViewTypes {
+		HEADER, CLICKABLE, UNCLICKABLE, IMAGE
 	}
-    private static ViewTypes[] viewTypes = ViewTypes.values();
+    protected static ViewTypes[] viewTypes = ViewTypes.values();
 	
-	static class ViewHolder {
+	protected static class ViewHolder {
 		TextView titleTextView;
-		ImageView iconImageView;
+		ImageView imageView;
 	}
 	
 	/**
@@ -51,6 +56,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 		this.mItemResource = itemResource;
 		this.mCategoryResource = categoryResource;
         this.mData = objects;
+        this.aq = new AQuery(context);
 	}
 
     /**
@@ -78,6 +84,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
     public int getItemViewType(int position) {
         if(getItem(position).getIsCategory()) return ViewTypes.HEADER.ordinal();
         else if(getItem(position).getIsClickable()) return ViewTypes.CLICKABLE.ordinal();
+        else if(getItem(position) instanceof RMenuImageRow) return ViewTypes.IMAGE.ordinal();
         else return ViewTypes.UNCLICKABLE.ordinal();
     }
 
@@ -99,46 +106,60 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		RMenuRow curItem = this.getItem(position);
 		ViewHolder holder;
-		
-		// Choose appropriate layout
+
 		if(convertView == null) {
+            // Choose appropriate layout
             switch(viewTypes[getItemViewType(position)]) {
                 // Section headers
                 case HEADER:
-                    convertView = mLayoutInflater.inflate(this.mCategoryResource, null);
+                    convertView = mLayoutInflater.inflate(mCategoryResource, null);
+                    break;
+                case IMAGE:
+                    convertView = mLayoutInflater.inflate(R.layout.row_image, null);
                     break;
                 // Menu items
                 default:
-                    convertView = mLayoutInflater.inflate(this.mItemResource, null);
+                    convertView = mLayoutInflater.inflate(mItemResource, null);
             }
 
 			holder = new ViewHolder();
 			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
-			holder.iconImageView = (ImageView) convertView.findViewById(R.id.icon);
+			holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
 			convertView.setTag(holder);
-		}
-		else holder = (ViewHolder) convertView.getTag();
+		} else {
+            holder = (ViewHolder) convertView.getTag();
+        }
 		
 		// Set item text
-		if(holder.titleTextView != null) holder.titleTextView.setText(curItem.getTitle());
-		else Log.e(TAG, "R.id.title not found");
+		if(holder.titleTextView != null) {
+            holder.titleTextView.setText(curItem.getTitle());
 
-        // Set item text color
-        if(curItem.getColorResId() != 0) {
-            holder.titleTextView.setTextColor(getContext().getResources().getColor(curItem.getColorResId()));
-        }
-        else {
-            holder.titleTextView.setTextColor(holder.titleTextView.getTextColors().getDefaultColor());
+            // Set item text color
+            if(curItem.getColorResId() != 0) {
+                holder.titleTextView.setTextColor(getContext().getResources().getColor(curItem.getColorResId()));
+            } else {
+                holder.titleTextView.setTextColor(holder.titleTextView.getTextColors().getDefaultColor());
+            }
+        } else if(viewTypes[getItemViewType(position)] != ViewTypes.IMAGE) {
+            Log.e(TAG, "R.id.title not found for view at position " + position);
         }
 		
-		// Set icon
-		if(holder.iconImageView != null){
+		// Set image
+		if(holder.imageView != null){
 			if(curItem.getDrawable() != null) {
-				holder.iconImageView.setImageDrawable(curItem.getDrawable());
-				holder.iconImageView.setVisibility(View.VISIBLE);
-			}
-			else {
-				holder.iconImageView.setVisibility(View.GONE);
+				holder.imageView.setImageDrawable(curItem.getDrawable());
+				holder.imageView.setVisibility(View.VISIBLE);
+			} else if(curItem instanceof RMenuImageRow) {
+                // Get image from network
+                RMenuImageRow imageRowItem = (RMenuImageRow) curItem;
+                holder.imageView.setMaxHeight(imageRowItem.getHeight());
+                holder.imageView.setMaxWidth(imageRowItem.getWidth());
+
+                AQuery cvAq = aq.recycle(convertView);
+                cvAq.id(holder.imageView).image(imageRowItem.getDrawableURL(), false, true, 0, 0, null, AQuery.FADE_IN_NETWORK, 1.0f);
+            } else {
+                holder.imageView.setImageBitmap(null);
+				holder.imageView.setVisibility(View.GONE);
 			}
 		}
 
