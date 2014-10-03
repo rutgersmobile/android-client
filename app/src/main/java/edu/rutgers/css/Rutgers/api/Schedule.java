@@ -29,7 +29,7 @@ public class Schedule {
     private static final String SOC_BASE_URL = "https://sis.rutgers.edu/soc/";
     private static final String WEBREG_BASE_URL = "https://sims.rutgers.edu/webreg/";
 
-    // Campus codes (full list should be read res/raw/soc_campuses.json)
+    // Campus codes (full list should be read from res/raw/soc_campuses.json)
     public static final String CODE_CAMPUS_NB = "NB";
     public static final String CODE_CAMPUS_NWK = "NK";
     public static final String CODE_CAMPUS_CAM = "CM";
