@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.fragments.Places;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -118,9 +119,16 @@ public class PlacesDisplay extends Fragment {
                         Point size = new Point();
                         display.getSize(size);
 
+                        // Note: The maximum dimensions for free requests is 640x640
                         int width = size.x;
-                        int height = width/2;
-                        URL imgUrl = new URL("https://maps.googleapis.com/maps/api/staticmap?zoom=18&size="+width+"x"+height+"&markers=size:mid|color:red|"+mPlace.getLocation().getLatitude()+","+mPlace.getLocation().getLongitude());
+                        int height;
+                        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                            height = width / 4;
+                        } else {
+                            height = width / 2;
+                        }
+
+                        URL imgUrl = new URL("https://maps.googleapis.com/maps/api/staticmap?zoom=18&size=" + (width / 2) + "x" + (height / 2) + "&markers=size:mid|color:red|" + mPlace.getLocation().getLatitude() + "," + mPlace.getLocation().getLongitude());
                         RMenuImageRow staticMapRow = new RMenuImageRow(imgUrl, width, height);
                         mAdapter.add(staticMapRow);
                     } catch (MalformedURLException e) {
