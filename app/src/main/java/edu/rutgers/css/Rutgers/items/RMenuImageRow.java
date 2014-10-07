@@ -1,9 +1,11 @@
 package edu.rutgers.css.Rutgers.items;
 
+import android.support.annotation.NonNull;
+
 import java.net.URL;
 
 /**
- * Created by jamchamb on 10/3/14.
+ * Image row for RMenuAdapter that displays an image from the network.
  */
 public class RMenuImageRow extends RMenuRow {
 
@@ -11,10 +13,12 @@ public class RMenuImageRow extends RMenuRow {
     private int height;
     private int width;
 
-    public RMenuImageRow(URL imageURL, int width, int height) {
+    public RMenuImageRow(@NonNull URL imageURL, int width, int height) {
         this.imageURL = imageURL;
         this.height = height;
         this.width = width;
+
+        setTitle(imageURL.getFile());
     }
 
     public int getHeight() {
@@ -37,11 +41,6 @@ public class RMenuImageRow extends RMenuRow {
     @Override
     public boolean getIsClickable() {
         return false;
-    }
-
-    @Override
-    public String toString() {
-        return imageURL.getFile();
     }
 
 }

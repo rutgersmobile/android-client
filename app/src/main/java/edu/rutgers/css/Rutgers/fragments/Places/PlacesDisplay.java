@@ -22,8 +22,6 @@ import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONObject;
-import org.osmdroid.views.overlay.ItemizedOverlay;
-import org.osmdroid.views.overlay.OverlayItem;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -62,7 +60,6 @@ public class PlacesDisplay extends Fragment {
     private static final int DESC_ROW = 1;
     private static final int BUS_ROW = 2;
 
-    private ItemizedOverlay<OverlayItem> mLocationOverlays;
     private Place mPlace;
     private List<RMenuRow> mData;
     private RMenuAdapter mAdapter;
@@ -123,7 +120,7 @@ public class PlacesDisplay extends Fragment {
 
                         int width = size.x;
                         int height = width/2;
-                        URL imgUrl = new URL("http://maps.googleapis.com/maps/api/staticmap?zoom=17&size="+width+"x"+height+"&markers=size:mid|color:red|"+mPlace.getLocation().getLatitude()+","+mPlace.getLocation().getLongitude()+"&sensor=false");
+                        URL imgUrl = new URL("https://maps.googleapis.com/maps/api/staticmap?zoom=18&size="+width+"x"+height+"&markers=size:mid|color:red|"+mPlace.getLocation().getLatitude()+","+mPlace.getLocation().getLongitude());
                         RMenuImageRow staticMapRow = new RMenuImageRow(imgUrl, width, height);
                         mAdapter.add(staticMapRow);
                     } catch (MalformedURLException e) {
