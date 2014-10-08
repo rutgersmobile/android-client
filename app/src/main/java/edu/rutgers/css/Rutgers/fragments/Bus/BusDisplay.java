@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
@@ -22,13 +23,15 @@ import java.util.TimerTask;
 import edu.rutgers.css.Rutgers.adapters.PredictionAdapter;
 import edu.rutgers.css.Rutgers.api.Nextbus;
 import edu.rutgers.css.Rutgers.items.Prediction;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Prediction>> {
+public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Prediction>>, FailCallback<Exception> {
 
 	private static final String TAG = "BusDisplay";
     public static final String HANDLE = "busdisplay";
-	private enum Mode {ROUTE, STOP};
+
+    private enum Mode {ROUTE, STOP}
 	
 	private static final int REFRESH_INTERVAL = 30; // refresh interval in seconds
 	
@@ -83,16 +86,14 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		if(args.getString("mode") == null) {
 			Log.e(TAG, "mode was not set");
 			return;
-		}
-		else if(args.getString("mode").equalsIgnoreCase("route")) {
+		} else if(args.getString("mode").equalsIgnoreCase("route")) {
 			mMode = Mode.ROUTE;
 			mTag = args.getString("tag");
 			if(mTag == null) {
 				Log.e(TAG, "tag not set for route");
 				return;
 			}
-		}
-		else if(args.getString("mode").equalsIgnoreCase("stop")) {
+		} else if(args.getString("mode").equalsIgnoreCase("stop")) {
 			mMode = Mode.STOP;
 			mTag = args.getString("title");
 			if(mTag == null) {
@@ -111,8 +112,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		// Get title
 		if(args.getString("title") != null) {
 			getActivity().setTitle(args.getString("title"));
-		}
-		else {
+		} else {
 			Log.e(TAG, "title not set");
 			getActivity().setTitle(getString(R.string.bus_title));
 		}
@@ -123,8 +123,9 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (!mAdapter.getItem(position).getMinutes().isEmpty())
+                if (!mAdapter.getItem(position).getMinutes().isEmpty()) {
                     mAdapter.togglePopped(position);
+                }
             }
 
         });
@@ -159,10 +160,10 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		super.onPause();
 		
 		// Stop the update thread from running when screen isn't active
-		if(mUpdateTimer == null) return;
-		
-		mUpdateTimer.cancel();
-		mUpdateTimer = null;
+		if(mUpdateTimer != null) {
+            mUpdateTimer.cancel();
+            mUpdateTimer = null;
+        }
 	}
 
     @Override
@@ -185,13 +186,12 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
         }
 			
 		if(mMode == Mode.ROUTE) {
-			mDM.when(Nextbus.routePredict(mAgency, mTag)).then(this);
-		}
-		else if(mMode == Mode.STOP) {
-			mDM.when(Nextbus.stopPredict(mAgency, mTag)).then(this);
+			mDM.when(Nextbus.routePredict(mAgency, mTag)).then(this).fail(this);
+		} else if(mMode == Mode.STOP) {
+			mDM.when(Nextbus.stopPredict(mAgency, mTag)).then(this).fail(this);
 		}
 	}
-	
+
 	/**
 	 * Callback function for when nextbus data is loaded
 	 */
@@ -237,5 +237,11 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 			}
 		}
 	}
+
+    @Override
+    public void onFail(Exception result) {
+        AppUtil.showFailedLoadToast(getActivity());
+        mAdapter.clear();
+    }
 
 }
