@@ -1,19 +1,14 @@
 package edu.rutgers.css.Rutgers.fragments.Places;
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -24,8 +19,6 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,7 +34,6 @@ import edu.rutgers.css.Rutgers.fragments.Bus.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.items.Place;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.items.RMenuImageRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
@@ -109,9 +101,11 @@ public class PlacesDisplay extends Fragment {
             public void onDone(Place result) {
                 mPlace = result;
 
-                // Add address rows and static map
+                // Add address rows
                 if (mPlace.getLocation() != null) {
 
+                    // Map deferred to a later release
+                    /*
                     // Get static map image and add it
                     try {
                         WindowManager wm = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
@@ -134,6 +128,7 @@ public class PlacesDisplay extends Fragment {
                     } catch (MalformedURLException e) {
                         Log.e(TAG, e.getMessage());
                     }
+                    */
 
                     Bundle addressArgs = new Bundle();
                     addressArgs.putInt(ID_KEY, ADDRESS_ROW);
@@ -269,15 +264,11 @@ public class PlacesDisplay extends Fragment {
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
-        // Prefer address for user readability.
+        // Create the maps query. Prefer addresses for user readability.
         if(!StringUtils.isEmpty(location.getStreet()) && !StringUtils.isEmpty(location.getCity()) && !StringUtils.isEmpty(location.getStateAbbr())) {
-            StringBuilder address = new StringBuilder();
-            address.append(location.getStreet()).append(", ").append(location.getCity()).append(", ").append(location.getStateAbbr());
-            intent.setData(Uri.parse("geo:0,0?q=" + address.toString()));
-        }
-        // Fallback to longitude & latitude
-        else {
-            intent.setData(Uri.parse("geo:0,0?q="+Double.toString(location.getLatitude())+","+Double.toString(location.getLongitude())));
+            intent.setData(Uri.parse("geo:0,0?q=" + location.getStreet() + ", " + location.getCity() + ", " + location.getStateAbbr()));
+        } else {
+            intent.setData(Uri.parse("geo:0,0?q=" + Double.toString(location.getLatitude()) + "," + Double.toString(location.getLongitude())));
         }
 
         // Try to launch a map activity
@@ -296,15 +287,14 @@ public class PlacesDisplay extends Fragment {
 	private static String formatAddress(Place.Location location) {
 		if(location == null) return null;
 
-        StringBuilder result = new StringBuilder();
+        String resultString = "";
+        if(!StringUtils.isEmpty(location.getName())) resultString += location.getName() + "\n";
+        if(!StringUtils.isEmpty(location.getStreet())) resultString += location.getStreet() + "\n";
+        if(!StringUtils.isEmpty(location.getAdditional())) resultString += location.getAdditional() + "\n";
+        if(!StringUtils.isEmpty(location.getCity())) resultString += location.getCity() + ", " +
+                location.getStateAbbr() + " " + location.getPostalCode();
 
-        if(!StringUtils.isEmpty(location.getName())) result.append(location.getName()).append('\n');
-        if(!StringUtils.isEmpty(location.getStreet())) result.append(location.getStreet()).append('\n');
-        if(!StringUtils.isEmpty(location.getAdditional())) result.append(location.getAdditional()).append('\n');
-        if(!StringUtils.isEmpty(location.getCity())) result.append(location.getCity()).append(", ")
-                .append(location.getStateAbbr()).append(' ').append(location.getPostalCode());
-
-		return StringUtils.trim(result.toString());
+		return StringUtils.trim(resultString);
 	}
 
 }
