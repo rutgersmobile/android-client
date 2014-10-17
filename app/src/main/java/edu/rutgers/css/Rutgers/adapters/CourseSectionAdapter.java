@@ -306,12 +306,19 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         return result;
     }
 
+    /**
+     * Produce a single-line string showing a time range, using the time strings supplied by WebReg.
+     * @param beginTime 12-hour time string formatted like "1230"
+     * @param endTime 12-hour time string formatted like "1230"
+     * @param pmCode AM or PM
+     * @return Time range string like "11:30 AM - 02:30 PM"
+     */
     private String formatTimes(String beginTime, String endTime, String pmCode) {
+        String beginHour = beginTime.substring(0,2);
+        String endHour = endTime.substring(0,2);
 
         // We only get the AM/PM code for the beginning hour. Check if meridiem changes,
         // and adjust end code if necessary.
-        String beginHour = beginTime.substring(0,2);
-        String endHour = endTime.substring(0,2);
         String endPmCode = pmCode;
         try {
             Integer beginInt = Integer.parseInt(beginHour);
@@ -321,20 +328,9 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
             Log.w(TAG, "Couldn't parse ints");
         }
 
-        StringBuilder result = new StringBuilder();
-        result.append(beginHour);
-        result.append(":");
-        result.append(beginTime.substring(2,4));
-        result.append(" ");
-        result.append(pmCode);
-        result.append("M - ");
-        result.append(endHour);
-        result.append(":");
-        result.append(endTime.substring(2,4));
-        result.append(" ");
-        result.append(endPmCode);
-        result.append("M");
-        return result.toString();
+        return beginHour + ":" + beginTime.substring(2,4) + " " + pmCode + "M" +
+                " - " +
+                endHour + ":" + endTime.substring(2,4) + " " + endPmCode + "M";
     }
 
 }
