@@ -3,9 +3,11 @@ package edu.rutgers.css.Rutgers;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -67,6 +69,7 @@ public class MainActivity extends FragmentActivity  implements
 	
 	private static final String TAG = "MainActivity";
 	private static final String SC_API = AppUtil.API_BASE + "shortcuts.txt";
+    private static final String KEY_PREFS_FIRST_LAUNCH = "first_launch";
 
     private ChannelManager mChannelManager;
 	private LocationClient mLocationClient;
@@ -90,7 +93,6 @@ public class MainActivity extends FragmentActivity  implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.activity_main);
 
         // This will create the UUID if one does not yet exist
@@ -115,6 +117,22 @@ public class MainActivity extends FragmentActivity  implements
 		 * Set default settings the first time the app is run
 		 */
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+
+        // Check if this is the first time the app is being launched
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.getBoolean(KEY_PREFS_FIRST_LAUNCH, true)) {
+            Log.i(TAG, "First launch");
+
+            // First launch, create analytics event & show settings screen
+            Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
+
+            /*
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            */
+
+            prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH, false).commit();
+        }
 
 		/*
 		 * Connect to Google Play location services
@@ -293,7 +311,7 @@ public class MainActivity extends FragmentActivity  implements
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
+    public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
     	super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -349,7 +367,7 @@ public class MainActivity extends FragmentActivity  implements
 
     /**
      * Unregister a child fragment from the main activity's location client.
-     * @param listener
+     * @param listener Play services Connection Callbacks listener
      */
     @Override
     public void unregisterListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
@@ -364,13 +382,16 @@ public class MainActivity extends FragmentActivity  implements
 
     /**
      * Play services connected
-     * @param connectionHint
+     * @param connectionHint Bundle of data provided to clients by Google Play services. May be null if no content is provided by the service.
      */
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		Log.i(TAG, "Connected to Google Play services.");
 	}
-	
+
+    /**
+     * Play services disconnected
+     */
 	@Override
 	public void onDisconnected() {
 		Log.i(TAG, "Disconnected from Google Play services");

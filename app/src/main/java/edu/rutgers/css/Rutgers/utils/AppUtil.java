@@ -32,7 +32,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -70,7 +69,6 @@ public class AppUtil {
 					FileOutputStream out = new FileOutputStream(installation);
 					out.write(UUID.randomUUID().toString().getBytes());
 					out.close();
-                    Analytics.queueEvent(context, Analytics.NEW_INSTALL, null);
 				}
 				installID = readInstallationFile(installation);
 			} catch (Exception e) {
