@@ -25,7 +25,10 @@ import java.util.Map;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Created by jamchamb on 7/25/14.
+ * An array adapter for course sections. Displays each section with instructor and meeting times.
+ * Also displays course description and prerequisites if available.
+ *
+ * @author James Chambers
  */
 public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
@@ -33,7 +36,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
     // IDs for view types
     private static enum ViewTypes {
-        BASIC_TYPE, MEETTIME_TYPE;
+        BASIC_TYPE, MEETTIME_TYPE
     }
     private static ViewTypes[] viewTypes = ViewTypes.values();
 
@@ -52,7 +55,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         TextView titleTextView;
     }
 
-    // Assign numeric values to days of the week, for sorting meeting times
+    // Assign numeric values to days of the week, for sorting meet times
     private static final Map<String, Integer> sDayMap =
             Collections.unmodifiableMap(new HashMap<String, Integer>() {{
                 put("M", 0);
@@ -108,10 +111,6 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
     /**
      * Get basic text row view
-     * @param position
-     * @param convertView
-     * @param parent
-     * @return
      */
     public View getBasicView(int position, View convertView, ViewGroup parent) {
         LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -146,10 +145,6 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
     /**
      * Get section row
-     * @param position
-     * @param convertView
-     * @param parent
-     * @return
      */
     public View getSectionView(int position, View convertView, ViewGroup parent) {
         LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -163,17 +158,16 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
             holder.descriptionTextView = (TextView) convertView.findViewById(R.id.descriptionTextView);
             holder.meetingTimesLayout = (TableLayout) convertView.findViewById(R.id.meetingTimesLayout);
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (MeetTimeViewHolder) convertView.getTag();
         }
 
         JSONObject jsonObject = getItem(position);
 
+        // Open sections have a green background, closed sections have a red background
         if(jsonObject.optBoolean("openStatus")) {
             convertView.setBackgroundColor(resolvedGreen);
-        }
-        else {
+        } else {
             convertView.setBackgroundColor(resolvedRed);
         }
 
@@ -185,7 +179,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         try {
             JSONArray instructorArray = jsonObject.getJSONArray("instructors");
             for (int i = 0; i < instructorArray.length(); i++) {
-                instructors.append(instructorArray.getJSONObject(i).getString("name") + "\n");
+                instructors.append(instructorArray.getJSONObject(i).getString("name")).append("\n");
             }
         } catch (JSONException e) {
             Log.w(TAG, "getView(): " + e.getMessage());
@@ -197,8 +191,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         if(!jsonObject.isNull("sectionNotes") && !desc.isEmpty()) {
             holder.descriptionTextView.setText(desc);
             holder.descriptionTextView.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             holder.descriptionTextView.setVisibility(View.GONE);
         }
 
@@ -220,8 +213,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                 if(!meetingTime.isNull("meetingDay")) {
                     dayTextView.setText(meetingTime.getString("meetingDay"));
                     keepView = true;
-                }
-                else {
+                } else {
                     dayTextView.setText("");
                 }
 
@@ -229,37 +221,35 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                 if(!meetingTime.isNull("startTime") && !meetingTime.isNull("endTime") && !meetingTime.isNull("pmCode")) {
                     timeTextView.setText(formatTimes(meetingTime.getString("startTime"), meetingTime.getString("endTime"), meetingTime.getString("pmCode")));
                     keepView = true;
-                }
-                else {
+                } else {
                     timeTextView.setText("Hours by arr.");
                 }
 
-                // I LOVE JSON <3
                 StringBuilder locationBuilder = new StringBuilder();
-                String[] mess = new String[3];
-                mess[0] = "campusAbbrev";
-                mess[1] = "buildingCode";
-                mess[2] = "roomNumber";
+                String[] fields = new String[3];
+                fields[0] = "campusAbbrev";
+                fields[1] = "buildingCode";
+                fields[2] = "roomNumber";
 
-                for(int teletubbies = 0; teletubbies < mess.length; teletubbies++) {
-                    if(!meetingTime.isNull(mess[teletubbies])) {
-                        locationBuilder.append(meetingTime.getString(mess[teletubbies]) + " ");
+                /*
+                    ___              |\            .---.             _
+                   ( o )            |'_\           \ V /            | |
+                   _| |_           _| |_           _| |_           _| |_
+                 .`_____`.       .`_____`.       .`_____`.       .`_____`.
+               |\ /     \ /|   |\ /     \ /|   |\ /     \ /|   |\ /     \ /|
+               |||  @ @  |||   |||  9 9  |||   |||  6 6  |||   |||  o o  |||
+               \_\   =   /_/   \_\   -   /_/   \_\   o   /_/   \_\  ._.  /_/
+                .-'-----'-.     .-'-----'-.     .-'-----'-.     .-'-----'-.
+               (_   ___   _)   (_   ___   _)   (_   ___   _)   (_   ___   _)
+                 | |___| |       | |___| |       | |___| |       | |___| |
+                 |       |       |       |       |       |       |       |
+                 (___|___)       (___|___)       (___|___)       (___|___)
+                */
+                for(String field: fields) {
+                    if(!meetingTime.isNull(field)) {
+                        locationBuilder.append(meetingTime.getString(field)).append(" ");
                         keepView = true;
                     }
-                    /*
-                                ___              |\            .---.             _
-                               ( o )            |'_\           \ V /            | |
-                               _| |_           _| |_           _| |_           _| |_
-                             .`_____`.       .`_____`.       .`_____`.       .`_____`.
-                           |\ /     \ /|   |\ /     \ /|   |\ /     \ /|   |\ /     \ /|
-                           |||  @ @  |||   |||  9 9  |||   |||  6 6  |||   |||  o o  |||
-                           \_\   =   /_/   \_\   -   /_/   \_\   o   /_/   \_\  ._.  /_/
-                            .-'-----'-.     .-'-----'-.     .-'-----'-.     .-'-----'-.
-                           (_   ___   _)   (_   ___   _)   (_   ___   _)   (_   ___   _)
-                             | |___| |       | |___| |       | |___| |       | |___| |
-                             |       |       |       |       |       |       |       |
-                             (___|___)       (___|___)       (___|___)       (___|___)
-                     */
                 }
 
                 String location = StringUtils.trim(locationBuilder.toString());
@@ -275,6 +265,11 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
         return convertView;
     }
 
+    /**
+     * Arrange list of meet times by day of week.
+     * @param meetingTimes List of meeting times to sort
+     * @return Meeting times sorted by day
+     */
     private List<JSONObject> sortMeetingTimes(JSONArray meetingTimes) {
         if(meetingTimes == null) return null;
 
