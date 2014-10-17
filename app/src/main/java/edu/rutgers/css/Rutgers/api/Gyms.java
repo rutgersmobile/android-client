@@ -32,7 +32,7 @@ public class Gyms {
      * @return Gyms API JSON object
      */
 	public static Promise<JSONArray, AjaxStatus, Double> getGyms() {
-		return Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.txt", expire);
+		return Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.txt", expire); // TODO Replace
 	}
 
     /**
