@@ -68,8 +68,8 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
      * @param position Position of the row to toggle
      */
     public void togglePopped(int position) {
-        if(!poppedRows.remove(new Integer(position))) {
-            poppedRows.add(new Integer(position));
+        if(!poppedRows.remove(Integer.valueOf(position))) {
+            poppedRows.add(position);
         }
         notifyDataSetChanged();
     }
@@ -192,7 +192,7 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
 			if(i != 0 && i == minutes.size() - 1) result.append(resources.getString(R.string.bus_and));
 			
 			if(minutes.get(i) < 1) result.append(" <1");
-			else result.append(" "+minutes.get(i));
+			else result.append(" ").append(minutes.get(i));
 			
 			if(minutes.size() > 2 && i != minutes.size() - 1) result.append(",");
 		}
@@ -216,7 +216,7 @@ public class PredictionAdapter extends ArrayAdapter<Prediction> {
         for(int i = 0; i < minutes.size(); i++) {
             // Hack so that it displays "<1 minute" instead of "0 minutes"
             int mins = minutes.get(i) == 0 ? 1 : minutes.get(i);
-            String minString = minutes.get(i) < 1 ? "&lt;1" : new Integer(mins).toString();
+            String minString = minutes.get(i) < 1 ? "&lt;1" : Integer.toString(mins);
 
             // Determine bus arrival time
             Date date = new Date();

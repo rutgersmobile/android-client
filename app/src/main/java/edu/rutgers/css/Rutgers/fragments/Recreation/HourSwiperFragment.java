@@ -76,11 +76,9 @@ public class HourSwiperFragment extends Fragment {
                 String hoursString = StringUtils.trim(curLocation.getString("hours"));
                 if(StringUtils.startsWithIgnoreCase(hoursString, "closed")) {
                     setHoursTextView(hoursTextView, hoursString);
-                }
-                else if(StringUtils.countMatches(hoursString, ",") > 0) {
+                } else if(StringUtils.countMatches(hoursString, ",") > 0) {
                     setHoursTextView(hoursTextView, hoursString.replace(",", "\n"));
-                }
-                else {
+                } else {
                     StringBuilder builder = new StringBuilder();
                     int matches = 0;
 
@@ -97,9 +95,8 @@ public class HourSwiperFragment extends Fragment {
 
                     if(matches > 0) {
                         setHoursTextView(hoursTextView, StringUtils.chomp(builder.toString()));
-                    }
-                    else {
-                        // ಥ_ಥ
+                    } else {
+                        // :'(
                         setHoursTextView(hoursTextView, hoursString);
                     }
                 }
