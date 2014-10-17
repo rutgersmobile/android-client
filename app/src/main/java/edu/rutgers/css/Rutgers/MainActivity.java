@@ -541,7 +541,7 @@ public class MainActivity extends FragmentActivity  implements
         findViewById(rootLayoutId).post(new Runnable() {
             public void run() {
                 int side = actionBarView.getHeight();
-                mLogoPopup = new PopupWindow(logo, side+10, side+10, false);
+                mLogoPopup = new PopupWindow(logo, side+16, side+16, false);
                 mLogoPopup.showAsDropDown(actionBarView, (int) home.getX(), -side);
                 mLogoPopup.setTouchInterceptor(new View.OnTouchListener() {
                     @Override
