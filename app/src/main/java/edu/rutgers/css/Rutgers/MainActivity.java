@@ -131,7 +131,7 @@ public class MainActivity extends FragmentActivity  implements
             startActivity(settingsIntent);
             */
 
-            prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH, false).commit();
+            prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH, false).apply();
         }
 
 		/*
