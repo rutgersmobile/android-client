@@ -143,13 +143,16 @@ public class AppUtil {
      * @return Icon drawable for channel
      */
     public static Drawable getIcon(Resources resources, String handle) {
-        int iconRes = 0;
-        int colorRes = 0;
+        int iconRes = 0, colorRes = 0;
+
+        // Look up the icon resource
         try {
-            iconRes = resources.getIdentifier(handle, "drawable", AppUtil.PACKAGE_NAME);
+            iconRes = resources.getIdentifier("ic_"+handle, "drawable", AppUtil.PACKAGE_NAME);
         } catch(NotFoundException e) {
             Log.i(TAG, "getIcon(): " + e.getMessage());
         }
+
+        // Look up the color resource
         try {
             colorRes = resources.getIdentifier(handle+"_icon_color", "color", AppUtil.PACKAGE_NAME);
         } catch(NotFoundException e) {

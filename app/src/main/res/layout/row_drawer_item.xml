@@ -11,7 +11,7 @@
     	    android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
             android:layout_marginLeft="10dp"
-    	    android:src="@drawable/ruinfo" />
+    	    android:src="@drawable/ic_ruinfo" />
        		
    		<TextView
 			android:id="@+id/title"
