@@ -11,35 +11,22 @@ import android.widget.ListView;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.Dining;
+import edu.rutgers.css.Rutgers.items.DiningMenu;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
-/* Dining JSON structure
-location_name = "Brower Commons"
-meals (array) ->
-		meal_name = "Breakfast"
-		meal_avail - boolean
-		genres (array) ->
-			genre_name = "Breakfast Entrees"
-			items (array) ->
-					"Oatmeal"
-					"Pancake
- */
-
 /**
- * Meal display fragment
  * Displays all food items available for a specific meal at a specific dining location.
+ * @author James Chambers
  */
 public class FoodMeal extends Fragment {
 
@@ -64,47 +51,42 @@ public class FoodMeal extends Fragment {
 		if(args.getString("location") == null) {
             Log.e(TAG, "Location not set");
             return;
-        }
-        else if(args.getString("meal") == null) {
+        } else if(args.getString("meal") == null) {
             Log.e(TAG, "Meal not set");
 			return;
 		}
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-		dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<JSONObject>() {
+		dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
 
-			@Override
-			public void onDone(JSONObject dinLoc) {
-				JSONArray mealGenres = Dining.getMealGenres(dinLoc, args.getString("meal"));			
-				
-				// Populate list
-				if(mealGenres != null) {
-					
-					for(int i = 0; i < mealGenres.length(); i++) {
-						try {
-							JSONObject curGenre = mealGenres.getJSONObject(i);
-							JSONArray mealItems = curGenre.getJSONArray("items");
+            @Override
+            public void onDone(DiningMenu diningMenu) {
+                DiningMenu.Meal meal = diningMenu.getMeal(args.getString("meal"));
+                if (meal == null) {
+                    Log.e(TAG, "Meal \"" + args.getString("meal") + "\" not found");
+                    return;
+                }
 
-                            // Add category header
-							foodItemAdapter.add(new RMenuHeaderRow(curGenre.getString("genre_name")));
+                // Populate the menu with categories and food items
+                List<DiningMenu.Genre> mealGenres = meal.getGenres();
+                for (DiningMenu.Genre genre : mealGenres) {
+                    // Add category header
+                    foodItemAdapter.add(new RMenuHeaderRow(genre.getGenreName()));
 
-                            // Add food items
-							for(int j = 0; j < mealItems.length(); j++) {
-								foodItemAdapter.add(new RMenuItemRow(mealItems.getString(j)));
-							}
-						} catch (JSONException e) {
-							Log.w(TAG, "getDiningLocation(): " + e.getMessage());
-						}
-					}
-					
-				}				
-			}
+                    // Add food items
+                    List<String> items = genre.getItems();
+                    for (String item : items) {
+                        foodItemAdapter.add(new RMenuItemRow(item));
+                    }
+                }
+            }
 
-		}).fail(new FailCallback<Exception>() {
+        }).fail(new FailCallback<Exception>() {
 
             @Override
             public void onFail(Exception e) {
                 Log.e(TAG, e.getMessage());
+                AppUtil.showFailedLoadToast(getActivity());
             }
 
         });

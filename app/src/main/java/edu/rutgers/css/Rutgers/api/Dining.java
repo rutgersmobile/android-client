@@ -1,8 +1,10 @@
 package edu.rutgers.css.Rutgers.api;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
 
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
@@ -13,8 +15,11 @@ import org.jdeferred.android.AndroidExecutionScope;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.rutgers.css.Rutgers.items.DiningMenu;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
@@ -22,23 +27,23 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
  *
  */
 public class Dining {
-	
-	private static Promise<Object, AjaxStatus, Object> configured;
+
 	private static final String TAG = "DiningAPI";
-	
-	private static JSONArray mNBDiningConf;
+
+    private static final String API_URL = AppUtil.API_BASE + "rutgers-dining.txt";
+    private static long expire = Request.CACHE_ONE_HOUR; // Cache dining data for an hour
+
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
-	
-	private static final String API_URL = AppUtil.API_BASE + "rutgers-dining.txt";
-	private static long expire = Request.CACHE_ONE_HOUR; // Cache dining data for an hour
-	
+    private static Promise<Object, Exception, Void> configured;
+    private static List<DiningMenu> mNBDiningMenus;
+
 	/**
 	 * Grab the dining API data.
-	 * (Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)
+	 * <p>(Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)</p>
 	 */
 	private static void setup() {
 		// Get JSON array from dining API
-		final Deferred<Object, AjaxStatus, Object> confd = new DeferredObject<Object, AjaxStatus, Object>();
+		final Deferred<Object, Exception, Void> confd = new DeferredObject<Object, Exception, Void>();
 		configured = confd.promise();
 		
 		final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
@@ -47,7 +52,19 @@ public class Dining {
 
             @Override
             public void onDone(JSONArray res) {
-                mNBDiningConf = res;
+                Gson gson = new Gson();
+
+                mNBDiningMenus = new ArrayList<DiningMenu>(4);
+                try {
+                    for (int i = 0; i < res.length(); i++) {
+                        DiningMenu diningMenu = gson.fromJson(res.getJSONObject(i).toString(), DiningMenu.class);
+                        mNBDiningMenus.add(diningMenu);
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, "setup(): " + e.getMessage());
+                    confd.reject(e);
+                }
+
                 confd.resolve(null);
             }
 
@@ -56,151 +73,71 @@ public class Dining {
             @Override
             public void onFail(AjaxStatus e) {
                 Log.e(TAG, AppUtil.formatAjaxStatus(e));
-                confd.reject(e);
+                confd.reject(new Exception(AppUtil.formatAjaxStatus(e)));
             }
 
         });
 	}
 	
 	/**
-	 * Get the JSONArray containing all of the dining hall JSON objects
-	 * @return JSONArray of dining hall JSONObjects
+	 * Get all dining hall menus.
+	 * @return List of all dining hall menus
 	 */
-	public static Promise<JSONArray, AjaxStatus, Double> getDiningHalls() {
-		final Deferred<JSONArray, AjaxStatus, Double> d = new DeferredObject<JSONArray, AjaxStatus, Double>();
+	public static Promise<List<DiningMenu>, Exception, Void> getDiningHalls() {
+		final Deferred<List<DiningMenu>, Exception, Void> d = new DeferredObject<List<DiningMenu>, Exception, Void>();
 		setup();
 		
 		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 			
 			@Override
 			public void onDone(Object o) {
-				JSONArray conf = mNBDiningConf;
-				d.resolve(conf);
+				d.resolve(mNBDiningMenus);
 			}
 
-		}).fail(new FailCallback<AjaxStatus>() {
-
-			@Override
-			public void onFail(AjaxStatus e) {
-				d.reject(e);
-			}
-
-		});
-		
-		return d.promise();
-	}
-	
-	/**
-	 * Get the JSON Object for a specific dining hall
-	 * @param location Dining hall to get JSON object of
-	 * @return Promise containing the JSONObject data for a dining hall.
-	 */
-	public static Promise<JSONObject, Exception, Double> getDiningLocation(final String location) {
-		final Deferred<JSONObject, Exception, Double> d = new DeferredObject<JSONObject, Exception, Double>();
-		setup();
-
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
-			
-			@Override
-			public void onDone(Object o) {
-				JSONArray conf = mNBDiningConf;
-				boolean resret = false; //if resolve or reject was already called
-				
-				// Find dining location in dining data
-				for(int i = 0; i < conf.length(); i++) {
-					JSONObject curLoc;
-					try {
-						curLoc = (JSONObject) conf.get(i);
-						if(curLoc.getString("location_name").equalsIgnoreCase(location)) {
-							resret = true;
-							d.resolve(curLoc);
-						}
-					} catch (JSONException e) {
-						Log.e(TAG, "getDiningLocation(): " + e.getMessage());
-						resret = true;
-						d.reject(e);
-					}
-				}
-				
-				if(!resret) {
-					Log.e(TAG, "Dining hall location \""+location+"\" not found API");
-					d.reject(new IllegalArgumentException("Invalid dining location \"" + location +"\""));
-				}
-			}
-
-		}).fail(new FailCallback<AjaxStatus>() {
-
+		}).fail(new FailCallback<Exception>() {
             @Override
-            public void onFail(AjaxStatus result) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(result)));
+            public void onFail(Exception e) {
+                d.reject(e);
             }
-
         });
 		
 		return d.promise();
 	}
 	
 	/**
-	 * Get meal genres array for a meal at a specific dining hall. The "genre" is the category of food, its array is a set of strings describing
-	 * each food item in that category.
-	 * @param diningLocation JSON Object of the dining hall to get meal genres from
-	 * @param meal Name of the meal to get genres from
-	 * @return JSON Array containing categories of food, each category containing a list of food items.
+	 * Get the menu for a specific dining hall.
+	 * @param location Dining hall to get menu for
+	 * @return Promise for the dining hall menu
 	 */
-	public static JSONArray getMealGenres(JSONObject diningLocation, String meal) {
-		if(diningLocation == null) {
-			Log.e(TAG, "null dining location data");
-			return null;
-		}
+	public static Promise<DiningMenu, Exception, Void> getDiningLocation(@NonNull final String location) {
+		final Deferred<DiningMenu, Exception, Void> d = new DeferredObject<DiningMenu, Exception, Void>();
+		setup();
+
+        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+
+            @Override
+            public void onDone(Object o) {
+                // Get the dining hall menu with matching name
+                for (DiningMenu diningMenu : mNBDiningMenus) {
+                    if (diningMenu.getLocationName().equalsIgnoreCase(location)) {
+                        d.resolve(diningMenu);
+                        return;
+                    }
+                }
+
+                // No matching dining hall found
+                Log.w(TAG, "Dining hall \"" + location + "\" not found in API.");
+                d.reject(new IllegalArgumentException("Dining hall not found"));
+            }
+
+        }).fail(new FailCallback<Exception>() {
+            @Override
+            public void onFail(Exception e) {
+                d.reject(e);
+            }
+        });
 		
-		try {
-			JSONArray meals = diningLocation.getJSONArray("meals");
-			
-			// Find meal in dining hall data
-			for(int i = 0; i < meals.length(); i++) {
-				JSONObject curMeal = (JSONObject) meals.get(i);
-				
-				// Found meal - check if marked available & if so, return genres array
-				if(curMeal.getString("meal_name").equalsIgnoreCase(meal)) {
-					if(!curMeal.getBoolean("meal_avail")) {
-						return null;
-					}
-					
-					return curMeal.getJSONArray("genres");
-				}
-			}
-			
-		} catch (JSONException e) {
-			Log.e(TAG, e.getMessage());
-			return null;
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Check whether a dining hall has any meals available.
-	 * Dining halls without any active meals shouldn't be displayed in the food menu.
-	 * @param diningHall Dining hall JSON data
-	 * @return True if there are any meals active, false if not.
-	 */
-	public static boolean hasActiveMeals(JSONObject diningHall) {
-		if(!diningHall.has("meals")) return false;
-		else {
-			try {
-				JSONArray meals = diningHall.getJSONArray("meals");
-				for(int i = 0; i < meals.length(); i++) {
-					JSONObject curMeal = meals.getJSONObject(i);
-					if(curMeal.getBoolean("meal_avail") == true) {
-						return true;
-					}
-				}
-			} catch (JSONException e) {
-				Log.e(TAG, e.getMessage());
-			}
-			
-			return false;
-		}
+		return d.promise();
 	}
 
 }

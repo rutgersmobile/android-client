@@ -2,23 +2,16 @@ package edu.rutgers.css.Rutgers.fragments.Food;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +20,7 @@ import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers.fragments.TextDisplay;
+import edu.rutgers.css.Rutgers.items.DiningMenu;
 import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
@@ -35,8 +29,8 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Displays dining halls. Selecting a hall goes to meal menu.
- *
+ * Displays dining halls that have menus available in the Dining API.
+ * @author James Chambers
  */
 public class FoodMain extends Fragment {
 
@@ -84,61 +78,49 @@ public class FoodMain extends Fragment {
 
         // Get dining hall data and populate the top-level menu with names of the dining halls
         AndroidDeferredManager dm = new AndroidDeferredManager();
-		dm.when(Dining.getDiningHalls()).done(new DoneCallback<JSONArray>() {
+		dm.when(Dining.getDiningHalls()).done(new DoneCallback<List<DiningMenu>>() {
 
             @Override
-            public void onDone(JSONArray halls) {
-                try {
-                    // Temporary NB results holder
-                    List<RMenuRow> nbResults = new ArrayList<RMenuRow>();
-                    nbResults.add(new RMenuHeaderRow(nbCampusFullString));
+            public void onDone(List<DiningMenu> diningMenus) {
+                // Temporary NB results holder
+                List<RMenuRow> nbResults = new ArrayList<RMenuRow>();
+                nbResults.add(new RMenuHeaderRow(nbCampusFullString));
 
-                    // Add dining halls - if they have no active meals, make them unclickable
-                    for (int i = 0; i < halls.length(); i++) {
-                        JSONObject curHall = halls.getJSONObject(i);
-                        Bundle hallBundle = new Bundle();
-                        hallBundle.putString("title", curHall.getString("location_name"));
-                        hallBundle.putString("location", curHall.getString("location_name"));
-                        hallBundle.putString("component", FoodHall.HANDLE);
+                // Add dining halls - if they have no active meals, make them unclickable
+                for (DiningMenu diningMenu : diningMenus) {
+                    RMenuItemRow menuItemRow = new RMenuItemRow(diningMenu.getLocationName());
 
-                        if (Dining.hasActiveMeals(curHall)) {
-                            nbResults.add(new RMenuItemRow(hallBundle));
-                        } else {
-                            RMenuItemRow inactiveHallItem = new RMenuItemRow(hallBundle);
-                            inactiveHallItem.setClickable(false);
-                            inactiveHallItem.setColorResId(R.color.light_gray);
-                            nbResults.add(inactiveHallItem);
-                        }
-                    }
-
-                    // Determine campus ordering
-                    if (userHome.equals(nwkCampusFullString)) {
-                        mAdapter.addAll(nwkRows);
-                        mAdapter.addAll(camRows);
-                        mAdapter.addAll(nbResults);
-                    } else if (userHome.equals(camCampusFullString)) {
-                        mAdapter.addAll(camRows);
-                        mAdapter.addAll(nwkRows);
-                        mAdapter.addAll(nbResults);
+                    if (!diningMenu.hasActiveMeals()) {
+                        menuItemRow.setClickable(false);
+                        menuItemRow.setColorResId(R.color.light_gray);
                     } else {
-                        mAdapter.addAll(nbResults);
-                        mAdapter.addAll(camRows);
-                        mAdapter.addAll(nwkRows);
+                        menuItemRow.setClickable(true);
                     }
 
-                } catch (JSONException e) {
-                    Log.w(TAG, e.getMessage());
-                    Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
+                    nbResults.add(menuItemRow);
+                }
+
+                // Determine campus ordering
+                if (userHome.equals(nwkCampusFullString)) {
+                    mAdapter.addAll(nwkRows);
+                    mAdapter.addAll(camRows);
+                    mAdapter.addAll(nbResults);
+                } else if (userHome.equals(camCampusFullString)) {
+                    mAdapter.addAll(camRows);
+                    mAdapter.addAll(nwkRows);
+                    mAdapter.addAll(nbResults);
+                } else {
+                    mAdapter.addAll(nbResults);
+                    mAdapter.addAll(camRows);
+                    mAdapter.addAll(nwkRows);
                 }
             }
 
-        }).fail(new FailCallback<AjaxStatus>() {
-
+        }).fail(new FailCallback<Exception>() {
             @Override
-            public void onFail(AjaxStatus e) {
+            public void onFail(Exception result) {
                 AppUtil.showFailedLoadToast(getActivity());
             }
-
         });
 	}
 	
@@ -161,7 +143,12 @@ public class FoodMain extends Fragment {
                 if(!(clickedRow instanceof RMenuItemRow)) return;
 
                 Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
-                ComponentFactory.getInstance().switchFragments(clickedArgs);
+
+                Bundle hallArgs = new Bundle(clickedArgs);
+                hallArgs.putString("location", clickedArgs.getString("title"));
+                hallArgs.putString("component", FoodHall.HANDLE);
+
+                ComponentFactory.getInstance().switchFragments(hallArgs);
             }
         });
 		

@@ -16,29 +16,30 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.api.Dining;
+import edu.rutgers.css.Rutgers.items.DiningMenu;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Displays available meal mData for a dining hall.
- *
+ * Displays available meals for a dining hall.
+ * @author James Chambers
  */
 public class FoodHall extends Fragment {
 
 	private static final String TAG = "FoodHall";
     public static final String HANDLE = "foodhall";
 
+    private final static DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
+
     private String mLocation;
     private MealPagerAdapter mPagerAdapter;
-    private JSONObject mData;
+    private DiningMenu mData;
     private String mTitle;
 
 	public FoodHall() {
@@ -56,28 +57,18 @@ public class FoodHall extends Fragment {
         mPagerAdapter = new MealPagerAdapter(getChildFragmentManager());
 
         if(savedInstanceState != null) {
-            String json = savedInstanceState.getString("mData");
-            if(json != null) {
-                try {
-                    mData = new JSONObject(json);
-                    loadPages(mData);
-                    return;
-                } catch (JSONException e) {
-                    mData = null;
-                }
-            }
-            mTitle = savedInstanceState.getString("mTitle");
+            mData = (DiningMenu) savedInstanceState.getSerializable("mData");
+            loadPages(mData);
+            return;
         }
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<JSONObject>() {
-
+        dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
             @Override
-            public void onDone(JSONObject hall) {
+            public void onDone(DiningMenu hall) {
                 mData = hall;
                 loadPages(mData);
             }
-
         }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception result) {
@@ -110,79 +101,58 @@ public class FoodHall extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mData != null) outState.putString("mData", mData.toString());
-        if(mTitle != null) outState.putString("mTitle", mTitle);
+        if(mData != null) outState.putSerializable("mData", mData);
     }
 
-    private void loadPages(JSONObject hall) {
-        try {
-            JSONArray meals = hall.getJSONArray("meals");
-            for (int j = 0; j < meals.length(); j++) {
-                JSONObject curMeal = meals.getJSONObject(j);
-                if (curMeal.getBoolean("meal_avail")) {
-                    mPagerAdapter.add(curMeal);
-                }
-            }
+    private void loadPages(DiningMenu diningMenu) {
+        List<DiningMenu.Meal> meals = diningMenu.getMeals();
+        for(DiningMenu.Meal meal: meals) {
+            if(meal.isMealAvailable()) mPagerAdapter.add(meal);
+        }
 
-            // Set title to show timestamp for dining data
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(hall.getLong("date"));
-            DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
-            mTitle = mLocation + " (" + dout.format(calendar) + ")";
-            if(getActivity() != null && AppUtil.isOnTop(FoodHall.HANDLE)) {
-                getActivity().setTitle(mTitle);
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, "loadPages(): " + e.getMessage());
+        // Set title to show timestamp for dining data
+        mTitle = mLocation + " (" + dout.format(diningMenu.getDate()) + ")";
+        if(getActivity() != null && AppUtil.isOnTop(FoodHall.HANDLE)) {
+            getActivity().setTitle(mTitle);
         }
     }
 
     private class MealPagerAdapter extends FragmentStatePagerAdapter {
 
-        private JSONArray mData;
+        private List<DiningMenu.Meal> mData;
 
         public MealPagerAdapter(FragmentManager fm) {
             super(fm);
-            mData = new JSONArray();
+            mData = new ArrayList<DiningMenu.Meal>();
         }
 
         @Override
         public Fragment getItem(int i) {
-            try {
-                JSONObject curMeal = mData.getJSONObject(i);
-                String mealName = curMeal.getString("meal_name");
+            DiningMenu.Meal curMeal = mData.get(i);
+            String mealName = curMeal.getMealName();
 
-                Bundle tabArgs = new Bundle();
-                tabArgs.putString("location", mLocation);
-                tabArgs.putString("meal", mealName);
+            Bundle tabArgs = new Bundle();
+            tabArgs.putString("location", mLocation);
+            tabArgs.putString("meal", mealName);
 
-                Fragment fragment = new FoodMeal();
-                fragment.setArguments(tabArgs);
+            Fragment fragment = new FoodMeal();
+            fragment.setArguments(tabArgs);
 
-                return fragment;
-            } catch (JSONException e) {
-                Log.w(TAG, "getItem(): " + e.getMessage());
-                return null;
-            }
+            return fragment;
         }
 
         @Override
         public int getCount() {
-            return mData.length();
+            return mData.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            try {
-                return mData.getJSONObject(position).getString("meal_name");
-            } catch (JSONException e) {
-                Log.w(TAG, "getPageTitle(): " + e.getMessage());
-                return "Meal " + position;
-            }
+            return mData.get(position).getMealName();
         }
 
-        public void add(JSONObject object) {
-            mData.put(object);
+        public void add(DiningMenu.Meal meal) {
+            mData.add(meal);
             this.notifyDataSetChanged();
         }
 
