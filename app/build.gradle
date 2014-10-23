@@ -31,7 +31,10 @@ dependencies {
     //compile 'org.osmdroid:osmdroid-android:4.2'
     compile 'org.jdeferred:jdeferred-android-aar:1.2.3'
     compile 'com.google.code.gson:gson:2.3'
+    compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.nhaarman.listviewanimations:lib-core:3.1.0@aar'
+    compile 'com.nhaarman.listviewanimations:lib-manipulation:3.1.0@aar'
+    compile 'com.nhaarman.listviewanimations:lib-core-slh:3.1.0@aar'
 }
 
 idea {

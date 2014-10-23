@@ -7,10 +7,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
 
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
@@ -55,7 +55,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
         mDM = new AndroidDeferredManager();
 
         mData = new ArrayList<Prediction>();
-		mAdapter = new PredictionAdapter(getActivity(), R.layout.row_bus_prediction, mData);
+		mAdapter = new PredictionAdapter(getActivity(), mData);
 
         // Setup the timer stuff for updating the bus predictions
         mUpdateTimer = new Timer();
@@ -67,7 +67,6 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
             mTag = savedInstanceState.getString("mTag");
             mMode = (Mode) savedInstanceState.getSerializable("mMode");
             mData.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable("mData"));
-            mAdapter.restoreState(savedInstanceState);
             mAdapter.notifyDataSetChanged();
             return;
         }
@@ -118,17 +117,10 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 		}
 
         ListView listView = (ListView) v.findViewById(R.id.busDisplayList);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new OnItemClickListener() {
 
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (!mAdapter.getItem(position).getMinutes().isEmpty()) {
-                    mAdapter.togglePopped(position);
-                }
-            }
-
-        });
+        ScaleInAnimationAdapter scaleInAnimationAdapter = new ScaleInAnimationAdapter(mAdapter);
+        scaleInAnimationAdapter.setAbsListView(listView);
+        listView.setAdapter(scaleInAnimationAdapter);
 
 		return v;
 	}
@@ -169,7 +161,6 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mAdapter.saveState(outState);
         outState.putString("mAgency", mAgency);
         outState.putString("mTag", mTag);
         outState.putSerializable("mMode", mMode);
