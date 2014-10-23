@@ -235,18 +235,18 @@ public class PlacesDisplay extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
-                Bundle clickedArgs = clicked.getArgs();
+                Bundle newArgs = new Bundle(clicked.getArgs());
 
-                switch(clickedArgs.getInt(ID_KEY)) {
+                switch(newArgs.getInt(ID_KEY)) {
                     case ADDRESS_ROW:
                         launchMap();
                         break;
                     case DESC_ROW:
-                        clickedArgs.putString("title", mPlace.getTitle());
-                        ComponentFactory.getInstance().switchFragments(clickedArgs);
+                        newArgs.putString("title", mPlace.getTitle());
+                        ComponentFactory.getInstance().switchFragments(newArgs);
                         break;
                     case BUS_ROW:
-                        ComponentFactory.getInstance().switchFragments(clickedArgs);
+                        ComponentFactory.getInstance().switchFragments(newArgs);
                         break;
                 }
             }
