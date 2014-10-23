@@ -50,13 +50,12 @@ public class RSSItem implements Serializable {
 		if(item == null) return;
 
 		// RSS 2.0 required fields
-		this.title = StringUtils.chomp(StringEscapeUtils.unescapeHtml4(item.text("title")));
-		this.description = StringUtils.chomp(AppUtil.stripTags(StringEscapeUtils.unescapeHtml4(item.text("description"))));
-        if(this.description != null) this.description = this.description.trim();
+		this.title = sanitizeString(item.text("title"));
+		this.description = sanitizeStringWithTags(item.text("description"));
 		this.link = item.text("link");
 		
 		// Author is currently unused as its presence in feeds is too sporadic
-		this.author = StringUtils.chomp(StringEscapeUtils.unescapeHtml4(item.text("author")));
+		this.author = sanitizeString(item.text("author"));
 		
 		// Get date - check pubDate for news or event:xxxDateTime for events
 		if(item.text("pubDate") != null) {
@@ -82,13 +81,11 @@ public class RSSItem implements Serializable {
 			
 			if(parsed != null) {
 				this.date = rssOutFormat.format(parsed);
-			}
-			else {
+			} else {
 				// Couldn't parse the date, just display it as is
 				this.date = item.text("pubDate");
 			}
-		}
-		else if(item.text("event:beginDateTime") != null) {
+		} else if(item.text("event:beginDateTime") != null) {
 			// Event time - parse start & end timestamps and produce an output string that gives
 			// the date and beginning and end times, e.g. "Fri, Apr 18, 10:00 AM - 11:00 AM"
             // Events feed dates are in Eastern time.
@@ -103,8 +100,7 @@ public class RSSItem implements Serializable {
                     if(AppUtil.isSameDay(eventBegin, eventEnd)) this.date = eventOutDf.format(eventBegin) + " - " + eventOutEndDf.format(eventEnd);
                     // Otherwise show start and end dates
                     else this.date = eventOutDf.format(eventBegin) + " - " + eventOutDf.format(eventEnd);
-                }
-                else {
+                } else {
                     this.date = eventOutDf.format(eventBegin);
                 }
 			} catch (ParseException e) {
@@ -124,7 +120,15 @@ public class RSSItem implements Serializable {
 			this.imgUrl = null;
 		}
 	}
-	
+
+    private String sanitizeString(String string) {
+        return StringUtils.trim(StringUtils.chomp(StringEscapeUtils.unescapeHtml4(string)));
+    }
+
+    private String sanitizeStringWithTags(String string) {
+        return StringUtils.trim(StringUtils.chomp(AppUtil.stripTags(StringEscapeUtils.unescapeHtml4(string))));
+    }
+
 	/**
 	 * Get decoded RSS item title
 	 * @return HTML escaped item title
