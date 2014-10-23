@@ -27,7 +27,7 @@ public class JSONAdapter extends BaseAdapter {
     private JSONArray mItems;
 
     public static enum ViewTypes {
-        DEF_TYPE, CAT_TYPE, FAQ_TYPE;
+        DEF_TYPE, CAT_TYPE, FAQ_TYPE
     }
     private static ViewTypes[] viewTypes = ViewTypes.values();
 
@@ -48,14 +48,13 @@ public class JSONAdapter extends BaseAdapter {
 
     /**
      * Copy a JSON array to the member array
-     * @param in JSON array to copy
      */
-    public void loadArray(JSONArray in) {
-        if(in == null) return;
+    public void loadArray(JSONArray jsonArray) {
+        if(jsonArray == null) return;
 
-        for(int i = 0; i < in.length(); i++) {
+        for(int i = 0; i < jsonArray.length(); i++) {
             try {
-                this.add(in.get(i));
+                this.add(jsonArray.getJSONObject(i));
             } catch (JSONException e) {
                 Log.w(TAG, "loadArray(): " + e.getMessage());
             }
@@ -64,22 +63,14 @@ public class JSONAdapter extends BaseAdapter {
 
     /**
      * Add an object to the JSON array.
-     * @param o JSON Object to add
      */
-    public void add(Object o) {
-        if(o instanceof JSONObject) {
-            mItems.put(o);
-            this.notifyDataSetChanged();
-        }
-        else {
-            Log.e(TAG, "Tried to add non-JSON object to JSON array");
-            throw new IllegalArgumentException("JSONAdapter only accepts JSON Objects");
-        }
+    public void add(JSONObject o) {
+        mItems.put(o);
+        notifyDataSetChanged();
     }
 
     /**
      * Toggle DTable row pop-down view
-     * @param position
      */
     public void togglePopdown(int position) {
         if(getItemViewType(position) != ViewTypes.FAQ_TYPE.ordinal()) return;
@@ -87,7 +78,7 @@ public class JSONAdapter extends BaseAdapter {
         JSONObject selected = mItems.optJSONObject(position);
         if(selected != null) {
             try {
-                if(selected.optBoolean("popped") == false) selected.put("popped", true);
+                if(!selected.optBoolean("popped")) selected.put("popped", true);
                 else selected.put("popped", false);
                 notifyDataSetChanged();
             } catch (JSONException e) {
@@ -144,6 +135,10 @@ public class JSONAdapter extends BaseAdapter {
         }
     }
 
+    /**
+     * Basic row with a line of text. Will display the appropriate "local" title based on
+     * user's home campus if home and away strings are specified.
+     */
     private View getDefaultView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
@@ -154,8 +149,7 @@ public class JSONAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
@@ -165,6 +159,10 @@ public class JSONAdapter extends BaseAdapter {
         return convertView;
     }
 
+    /**
+     * Category row with category title. Will display the appropriate "local" title based on
+     * user's home campus if home and away strings are specified.
+     */
     private View getCategoryView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
@@ -175,8 +173,7 @@ public class JSONAdapter extends BaseAdapter {
             holder = new ViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
@@ -186,6 +183,10 @@ public class JSONAdapter extends BaseAdapter {
         return convertView;
     }
 
+    /**
+     * FAQ row, which displays a line of text and can be clicked on to open a pop-down which
+     * displays further text.
+     */
     public View getFAQView(int position, View convertView, ViewGroup parent) {
         FAQViewHolder holder;
 
@@ -198,8 +199,7 @@ public class JSONAdapter extends BaseAdapter {
             holder.popdownLayout = (LinearLayout) convertView.findViewById(R.id.popdownLayout);
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (FAQViewHolder) convertView.getTag();
         }
 

@@ -33,7 +33,7 @@ import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Dynamic Table
- * Use {@link #dTag()} instead of TAG when logging
+ * <p>Use {@link #dTag()} instead of TAG when logging</p>
  */
 public class DTable extends Fragment {
 	
@@ -44,7 +44,6 @@ public class DTable extends Fragment {
 	private JSONAdapter mAdapter;
 	private String mURL;
 	private String mAPI;
-	private Context mContext;
     private String mHandle;
 
 	public DTable() {
@@ -63,7 +62,6 @@ public class DTable extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mContext = getActivity();
 
         if(savedInstanceState != null && savedInstanceState.getString("mData") != null) {
             mHandle = savedInstanceState.getString("mHandle");
@@ -103,7 +101,7 @@ public class DTable extends Fragment {
 		else if (args.getString("api") != null) mAPI = args.getString("api");
 		else {
             Log.e(dTag(), "DTable must have URL, API, or data in its arguments bundle");
-            Toast.makeText(mContext, R.string.failed_internal, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
         }
 
         if(mURL != null || mAPI != null) {
@@ -128,7 +126,7 @@ public class DTable extends Fragment {
                 @Override
                 public void onFail(AjaxStatus status) {
                     Log.w(dTag(), AppUtil.formatAjaxStatus(status));
-                    AppUtil.showFailedLoadToast(mContext);
+                    AppUtil.showFailedLoadToast(getActivity());
                 }
 
             });
@@ -141,7 +139,9 @@ public class DTable extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
 		ListView listView = (ListView) v.findViewById(R.id.dtable_list);
 
-		Bundle args = getArguments();
+        final Context context = getActivity();
+
+		final Bundle args = getArguments();
 		if(args.getString("title") != null) {
 			getActivity().setTitle(args.getString("title"));
 		}
@@ -154,15 +154,15 @@ public class DTable extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 JSONObject clickedJson = (JSONObject) parent.getAdapter().getItem(position);
-                Bundle args = new Bundle();
+                Bundle newArgs = new Bundle();
 
                 try {
                     // This object has an array of more channels
                     if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.CAT_TYPE.ordinal()) {
-                        Log.v(dTag(), "Clicked \"" + RutgersUtil.getLocalTitle(mContext, clickedJson.get("title")) + "\"");
-                        args.putString("component", "dtable");
-                        args.putString("title", RutgersUtil.getLocalTitle(mContext, clickedJson.get("title")));
-                        args.putString("data", clickedJson.getJSONArray("children").toString());
+                        Log.v(dTag(), "Clicked \"" + RutgersUtil.getLocalTitle(context, clickedJson.get("title")) + "\"");
+                        newArgs.putString("component", "dtable");
+                        newArgs.putString("title", RutgersUtil.getLocalTitle(context, clickedJson.get("title")));
+                        newArgs.putString("data", clickedJson.getJSONArray("children").toString());
                     }
                     // This is a FAQ button
                     else if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
@@ -173,10 +173,10 @@ public class DTable extends Fragment {
                     // This object has a channel
                     else {
                         JSONObject channel = clickedJson.getJSONObject("channel");
-                        Log.v(dTag(), "Clicked \"" + RutgersUtil.getLocalTitle(mContext, clickedJson.opt("title")) + "\"");
+                        Log.v(dTag(), "Clicked \"" + RutgersUtil.getLocalTitle(context, clickedJson.opt("title")) + "\"");
 
                         // Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
-                        args.putString("component", channel.getString("view"));
+                        newArgs.putString("component", channel.getString("view"));
 
                         // First, attempt to get 'title' for the channel. If it's not set, fall back
                         // to the title set for the clickable item here. (They often match, but
@@ -186,7 +186,7 @@ public class DTable extends Fragment {
                         else if (clickedJson.has("title")) title = clickedJson.get("title");
 
                         if (title != null)
-                            args.putString("title", RutgersUtil.getLocalTitle(mContext, title));
+                            newArgs.putString("title", RutgersUtil.getLocalTitle(context, title));
 
                         // Add the rest of the JSON fields to the arg bundle
                         for(Iterator<String> keys = channel.keys(); keys.hasNext();) {
@@ -194,11 +194,11 @@ public class DTable extends Fragment {
                             if (key.equalsIgnoreCase("title"))
                                 continue; // title was already handled above
                             Log.v(dTag(), "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
-                            args.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
+                            newArgs.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
                         }
                     }
 
-                    ComponentFactory.getInstance().switchFragments(args);
+                    ComponentFactory.getInstance().switchFragments(newArgs);
                 } catch (JSONException e) {
                     Log.w(dTag(), "onItemClick(): " + e.getMessage());
                 }
