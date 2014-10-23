@@ -20,6 +20,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -94,14 +95,12 @@ public final class LocationUtils {
      * Check if Google Play services is connected.
      * @return True if connected, false if not.
      */
-    public static boolean servicesConnected(FragmentActivity activity) {
+    public static boolean servicesConnected(@NonNull FragmentActivity activity) {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
-
         if(resultCode == ConnectionResult.SUCCESS) {
             Log.v(TAG, "Google Play services available.");
             return true;
-        }
-        else {
+        } else {
             showErrorDialog(activity, resultCode);
             Log.w(TAG, LocationServiceErrorMessages.getErrorString(activity, resultCode));
             return false;
@@ -116,17 +115,15 @@ public final class LocationUtils {
      * @return The latitude and longitude of the current location, or null if no
      * location is available.
      */
-    public static String getLatLng(Context context, Location currentLocation) {
+    public static String getLatLng(@NonNull Context context, Location currentLocation) {
         // If the location is valid
         if (currentLocation != null) {
-
             // Return the latitude and longitude as strings
             return context.getString(
                     R.string.latitude_longitude,
                     currentLocation.getLatitude(),
                     currentLocation.getLongitude());
         } else {
-
             // Otherwise, return the empty string
             return EMPTY_STRING;
         }
@@ -137,7 +134,7 @@ public final class LocationUtils {
      * @param activity Activity to display dialog for
      * @param errorCode Error code
      */
-    public static void showErrorDialog(FragmentActivity activity, int errorCode) {
+    public static void showErrorDialog(@NonNull FragmentActivity activity, int errorCode) {
         Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
                 errorCode,
                 activity,

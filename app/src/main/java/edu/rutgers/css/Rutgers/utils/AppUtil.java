@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -41,6 +42,7 @@ import edu.rutgers.css.Rutgers2.R;
 public class AppUtil {
 
 	private static final String TAG = "AppUtil";
+
 	private static final String INSTALLATION = "INSTALLATION";
 	private static String installID = null;
 
@@ -61,7 +63,7 @@ public class AppUtil {
 	 * @param context App context
 	 * @return UUID string
 	 */
-	public synchronized static String getUUID(Context context) {
+	public synchronized static String getUUID(@NonNull Context context) {
 		if(installID == null) {
 			File installation = new File(context.getFilesDir(), INSTALLATION);
 			try {
@@ -85,7 +87,7 @@ public class AppUtil {
      * @return Contents of file in string
      * @throws IOException
      */
-	private static String readInstallationFile(File installation) throws IOException {
+	private static String readInstallationFile(@NonNull File installation) throws IOException {
 		RandomAccessFile f = new RandomAccessFile(installation, "r");
 		byte[] bytes = new byte[(int) f.length()];
 		f.readFully(bytes);
@@ -98,7 +100,7 @@ public class AppUtil {
      * @param context App context
      * @return True if the running device is a tablet, false if not.
      */
-    public static boolean isTablet(Context context) {
+    public static boolean isTablet(@NonNull Context context) {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK)
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
@@ -110,7 +112,7 @@ public class AppUtil {
      * @param drawableResource Icon resource ID
      * @return Icon drawable
      */
-    public static Drawable getIcon(Resources resources, int drawableResource) {
+    public static Drawable getIcon(@NonNull Resources resources, int drawableResource) {
         return getIcon(resources, drawableResource, R.color.white);
     }
 
@@ -121,7 +123,7 @@ public class AppUtil {
      * @param colorResource Color to be applied to icon
      * @return Icon drawable
      */
-    public static Drawable getIcon(Resources resources, int drawableResource, int colorResource) {
+    public static Drawable getIcon(@NonNull Resources resources, int drawableResource, int colorResource) {
         if(drawableResource == 0) return null;
         if(colorResource == 0) colorResource = R.color.white;
 
@@ -142,7 +144,7 @@ public class AppUtil {
      * @param handle Channel handle
      * @return Icon drawable for channel
      */
-    public static Drawable getIcon(Resources resources, String handle) {
+    public static Drawable getIcon(@NonNull Resources resources, String handle) {
         int iconRes = 0, colorRes = 0;
 
         // Look up the icon resource
@@ -167,8 +169,8 @@ public class AppUtil {
      * @param activity App activity
      */
     public static void closeKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if(activity.getCurrentFocus() != null) {
+        if(activity != null && activity.getCurrentFocus() != null) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         }
     }
@@ -178,7 +180,7 @@ public class AppUtil {
      * @param status AjaxStatus object
      * @return Custom string describing status
      */
-    public static String formatAjaxStatus(AjaxStatus status) {
+    public static String formatAjaxStatus(@NonNull AjaxStatus status) {
         String translateStatusCode;
         switch(status.getCode()) {
             case AjaxStatus.NETWORK_ERROR:
@@ -211,8 +213,7 @@ public class AppUtil {
      * @param handle Fragment handle
      * @return True if on top, false if not
      */
-    public static boolean isOnTop(String handle) {
-        if(handle == null) return false;
+    public static boolean isOnTop(@NonNull String handle) {
         return handle.equalsIgnoreCase(ComponentFactory.getInstance().getTopHandle());
     }
 
@@ -222,7 +223,7 @@ public class AppUtil {
      * @param resourceId Raw resource file ID
      * @return Contents of resource file as a string, or null if file was empty or couldn't be read.
      */
-    public static String loadRawResource(Resources resources, int resourceId) {
+    public static String loadRawResource(@NonNull Resources resources, int resourceId) {
         InputStream is = resources.openRawResource(resourceId);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         StringBuilder stringBuilder = new StringBuilder();
@@ -250,7 +251,7 @@ public class AppUtil {
      * @param resourceId Raw resource file ID
      * @return JSON array or null if there was a problem loading the raw resource file
      */
-    public static JSONArray loadRawJSONArray(Resources resources, int resourceId) {
+    public static JSONArray loadRawJSONArray(@NonNull Resources resources, int resourceId) {
         String jsonString = loadRawResource(resources, resourceId);
         if(jsonString == null) return null;
 
@@ -268,7 +269,7 @@ public class AppUtil {
      * @param resourceId Raw resource file ID
      * @return JSON object or null if there was a problem loading the raw resource file
      */
-    public static JSONObject loadRawJSONObject(Resources resources, int resourceId) {
+    public static JSONObject loadRawJSONObject(@NonNull Resources resources, int resourceId) {
         String jsonString = loadRawResource(resources, resourceId);
         if(jsonString == null) return null;
 
@@ -280,7 +281,7 @@ public class AppUtil {
         }
     }
 
-    public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight) {
+    public static Bitmap decodeSampledBitmapFromResource(@NonNull Resources res, int resId, int reqWidth, int reqHeight) {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeResource(res, resId, options);
@@ -291,7 +292,7 @@ public class AppUtil {
         return BitmapFactory.decodeResource(res, resId, options);
     }
 
-    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    private static int calculateInSampleSize(@NonNull BitmapFactory.Options options, int reqWidth, int reqHeight) {
         final int height = options.outHeight;
         final int width = options.outWidth;
         int inSampleSize = 1;
@@ -314,7 +315,7 @@ public class AppUtil {
      * @param d2 Date 2
      * @return True if days of year match, false if not
      */
-    public static boolean isSameDay(Date d1, Date d2) {
+    public static boolean isSameDay(@NonNull Date d1, @NonNull Date d2) {
         Calendar cal1 = Calendar.getInstance(Locale.US);
         Calendar cal2 = Calendar.getInstance(Locale.US);
         cal1.setTimeZone(TimeZone.getTimeZone("America/New_York"));

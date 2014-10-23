@@ -32,7 +32,7 @@ public class JsonUtil {
      * @param strings JSON array containing only strings
      * @return String array
      */
-    public static String[] jsonToStringArray(JSONArray strings) {
+    public static String[] jsonToStringArray(@NonNull JSONArray strings) {
         final int size = strings.length();
         String[] result = new String[size];
 
@@ -50,7 +50,7 @@ public class JsonUtil {
      * @return Single JSON object containing the fields of all the combined JSON objects
      * @throws JSONException
      */
-    public static JSONObject combineJSONObjs(JSONObject... objects) throws JSONException {
+    public static JSONObject combineJSONObjs(@NonNull JSONObject... objects) throws JSONException {
         JSONObject result = new JSONObject();
 
         for(JSONObject curObj: objects) {

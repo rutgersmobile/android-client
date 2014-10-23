@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -25,7 +26,7 @@ public class RutgersUtil {
      * @param campusTag Campus tag
      * @return Full campus title
      */
-    public static String getFullCampusTitle(Context context, String campusTag) {
+    public static String getFullCampusTitle(@NonNull Context context, String campusTag) {
         if(campusTag == null) return null;
 
         Resources res = context.getResources();
@@ -43,13 +44,13 @@ public class RutgersUtil {
     * @param roleTag Role tag
     * @return Full role title
     */
-    public static String getFullRoleTitle(Context context, String roleTag) {
+    public static String getFullRoleTitle(@NonNull Context context, String roleTag) {
         if(roleTag == null) return null;
 
         Resources res = context.getResources();
         try {
             int id = res.getIdentifier("role_"+roleTag+"_full", "string", AppUtil.PACKAGE_NAME);
-         return res.getString(id);
+            return res.getString(id);
         } catch (Resources.NotFoundException e) {
             return null;
         }
@@ -61,18 +62,16 @@ public class RutgersUtil {
      * @param title String or JSONObject returned by get("title") on channel JSONObject
      * @return Appropriate title to display
      */
-    public static String getLocalTitle(Context context, Object title) {
+    @NonNull
+    public static String getLocalTitle(@NonNull Context context, Object title) {
         if(title == null) {
             return "(No title)";
-        }
-        // "title" is just a string - nothing to do
-        else if(title.getClass() == String.class) {
+        } else if(title.getClass() == String.class) {
+            // "title" is just a string - nothing to do
             return (String) title;
-        }
-        // "title" is a JSON Object - figure out which string to display
-        else if(title.getClass() == JSONObject.class) {
+        } else if(title.getClass() == JSONObject.class) {
+            // "title" is a JSON Object - figure out which string to display
             JSONObject titles = (JSONObject) title;
-
             String userHome = getHomeCampus(context);
 
             try {
@@ -90,9 +89,10 @@ public class RutgersUtil {
                 Log.w(TAG, "title JSON: " + title.toString());
                 return title.toString();
             }
+        } else {
+            Log.e(TAG, "Unexpected class for title: " + title.getClass().getSimpleName());
+            return "(Invalid title)";
         }
-
-        return null;
     }
 
     /**
@@ -100,7 +100,7 @@ public class RutgersUtil {
     * @param context App context
     * @return Full title of user's home campus
     */
-    public static String getHomeCampus(Context context) {
+    public static String getHomeCampus(@NonNull Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         return getFullCampusTitle(context, sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, context.getString(R.string.campus_nb_tag)));
     }

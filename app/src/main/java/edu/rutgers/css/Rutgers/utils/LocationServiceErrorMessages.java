@@ -18,6 +18,7 @@ package edu.rutgers.css.Rutgers.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 
 import com.google.android.gms.common.ConnectionResult;
 
@@ -31,7 +32,7 @@ public class LocationServiceErrorMessages {
     // Don't allow instantiation
     private LocationServiceErrorMessages() {}
 
-    public static String getErrorString(Context context, int errorCode) {
+    public static String getErrorString(@NonNull Context context, int errorCode) {
 
         // Get a handle to resources, to allow the method to retrieve messages.
         Resources mResources = context.getResources();
