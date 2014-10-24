@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.adapters.DTableAdapter;
-import edu.rutgers.css.Rutgers.adapters.JSONAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.items.DTableChannel;
@@ -165,13 +164,13 @@ public class DTable extends Fragment {
                 Bundle newArgs = new Bundle();
 
                 // This is another DTable root
-                if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.CAT_TYPE.ordinal()) {
+                if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.CAT_TYPE.ordinal()) {
                     newArgs.putString("component", "dtable");
                     newArgs.putString("title", element.getTitle(homeCampus));
                     newArgs.putSerializable("data", element);
                 }
                 // This is a FAQ button
-                else if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
+                else if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
                     // Toggle pop-down visibility
                     mAdapter.togglePopdown(position);
                     return;
