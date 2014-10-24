@@ -10,6 +10,7 @@ public class DTableFAQ extends DTableElement {
 
     private boolean window;
     private String answer;
+    private boolean opened;
 
     public DTableFAQ(JSONObject jsonObject) throws JSONException {
         super(jsonObject);
@@ -24,6 +25,14 @@ public class DTableFAQ extends DTableElement {
 
     public String getAnswer() {
         return answer;
+    }
+
+    public boolean isOpened() {
+        return opened;
+    }
+
+    public void setOpened(boolean opened) {
+        this.opened = opened;
     }
 
 }

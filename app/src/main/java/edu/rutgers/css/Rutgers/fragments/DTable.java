@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,15 +17,19 @@ import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
+import edu.rutgers.css.Rutgers.adapters.DTableAdapter;
 import edu.rutgers.css.Rutgers.adapters.JSONAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.items.DTableChannel;
+import edu.rutgers.css.Rutgers.items.DTableElement;
+import edu.rutgers.css.Rutgers.items.DTableRoot;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
@@ -40,8 +43,12 @@ public class DTable extends Fragment {
 	private static final String TAG = "DTable";
     public static final String HANDLE = "dtable";
 
-	private JSONArray mData;
-	private JSONAdapter mAdapter;
+    private static final String TAG_HANDLE = "mHandle";
+    private static final String TAG_ROOT = "mDRoot";
+
+    private DTableRoot mDRoot;
+    private List<DTableElement> mData;
+    private DTableAdapter mAdapter;
 	private String mURL;
 	private String mAPI;
     private String mHandle;
@@ -64,20 +71,16 @@ public class DTable extends Fragment {
 		super.onCreate(savedInstanceState);
 
         if(savedInstanceState != null && savedInstanceState.getString("mData") != null) {
-            mHandle = savedInstanceState.getString("mHandle");
             Log.v(dTag(), "Restoring mData");
-            try {
-                mData = new JSONArray(savedInstanceState.getString("mData"));
-                mAdapter = new JSONAdapter(getActivity(), mData);
-                return;
-            } catch (JSONException e) {
-                Log.w(dTag(), "onCreate(): " + e.getMessage());
-            }
+            mHandle = savedInstanceState.getString(TAG_HANDLE);
+            mDRoot = (DTableRoot) savedInstanceState.getSerializable(TAG_ROOT);
+            mAdapter = new DTableAdapter(getActivity(), mData);
+            return;
         }
 
         // Didn't restore adapter & data from state; initialize here
-        mData = new JSONArray();
-        mAdapter = new JSONAdapter(getActivity(), mData);
+        mData = new ArrayList<DTableElement>();
+        mAdapter = new DTableAdapter(getActivity(), mData);
 
 		Bundle args = getArguments();
 
@@ -88,10 +91,13 @@ public class DTable extends Fragment {
         else mHandle = "null";
 
         // If a JSON array was provided in "data" field, load it
-		if (args.getString("data") != null) {
+		if (args.getSerializable("data") != null) {
 			try {
-				mAdapter.loadArray(new JSONArray(args.getString("data")));
-			} catch (JSONException e) {
+                mDRoot = (DTableRoot) args.getSerializable("data");
+                mData = mDRoot.getChildren();
+				mAdapter.setData(mData);
+                return;
+			} catch (ClassCastException e) {
 				Log.e(dTag(), "onCreateView(): " + e.getMessage());
 			}
 		}
@@ -102,36 +108,38 @@ public class DTable extends Fragment {
 		else {
             Log.e(dTag(), "DTable must have URL, API, or data in its arguments bundle");
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        if(mURL != null || mAPI != null) {
-            Promise<JSONObject, AjaxStatus, Double> promise;
-            if(mURL != null) promise = Request.json(mURL, Request.CACHE_ONE_HOUR);
-            else promise = Request.api(mAPI, Request.CACHE_ONE_HOUR);
-            AndroidDeferredManager dm = new AndroidDeferredManager();
-            dm.when(promise).done(new DoneCallback<JSONObject>() {
+        Promise<JSONObject, AjaxStatus, Double> promise;
+        if(mURL != null) promise = Request.json(mURL, Request.CACHE_ONE_HOUR);
+        else promise = Request.api(mAPI, Request.CACHE_ONE_HOUR);
 
-                @Override
-                public void onDone(JSONObject result) {
-                    try {
-                        mAdapter.loadArray(result.getJSONArray("children"));
-                    } catch (JSONException e) {
-                        Log.w(dTag(), "onCreateView(): " + e.getMessage());
-                        AppUtil.showFailedLoadToast(getActivity());
-                    }
-                }
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(promise).done(new DoneCallback<JSONObject>() {
 
-            }).fail(new FailCallback<AjaxStatus>() {
-
-                @Override
-                public void onFail(AjaxStatus status) {
-                    Log.w(dTag(), AppUtil.formatAjaxStatus(status));
+            @Override
+            public void onDone(JSONObject result) {
+                try {
+                    mDRoot = new DTableRoot(result);
+                    Log.v(dTag(), "Loaded DTable root: " + mDRoot.getTitle());
+                    mData = mDRoot.getChildren();
+                    mAdapter.setData(mData);
+                } catch (JSONException e) {
+                    Log.e(dTag(), "onCreate(): " + e.getMessage());
                     AppUtil.showFailedLoadToast(getActivity());
                 }
+            }
 
-            });
-        }
+        }).fail(new FailCallback<AjaxStatus>() {
 
+            @Override
+            public void onFail(AjaxStatus status) {
+                Log.w(dTag(), AppUtil.formatAjaxStatus(status));
+                AppUtil.showFailedLoadToast(getActivity());
+            }
+
+        });
 	}
 	
 	@Override
@@ -139,70 +147,49 @@ public class DTable extends Fragment {
 		View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
 		ListView listView = (ListView) v.findViewById(R.id.dtable_list);
 
-        final Context context = getActivity();
-
 		final Bundle args = getArguments();
 		if(args.getString("title") != null) {
 			getActivity().setTitle(args.getString("title"));
 		}
 		
 		listView.setAdapter(mAdapter);
+
+        final String homeCampus = RutgersUtil.getHomeCampus(getActivity());
 		
 		// Clicks on DTable item launch component in "view" field with arguments
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                JSONObject clickedJson = (JSONObject) parent.getAdapter().getItem(position);
+                DTableElement element = (DTableElement) parent.getAdapter().getItem(position);
                 Bundle newArgs = new Bundle();
 
-                try {
-                    // This object has an array of more channels
-                    if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.CAT_TYPE.ordinal()) {
-                        Log.v(dTag(), "Clicked \"" + RutgersUtil.getLocalTitle(context, clickedJson.get("title")) + "\"");
-                        newArgs.putString("component", "dtable");
-                        newArgs.putString("title", RutgersUtil.getLocalTitle(context, clickedJson.get("title")));
-                        newArgs.putString("data", clickedJson.getJSONArray("children").toString());
-                    }
-                    // This is a FAQ button
-                    else if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
-                        // Toggle pop-down visibility
-                        mAdapter.togglePopdown(position);
-                        return;
-                    }
-                    // This object has a channel
-                    else {
-                        JSONObject channel = clickedJson.getJSONObject("channel");
-                        Log.v(dTag(), "Clicked \"" + RutgersUtil.getLocalTitle(context, clickedJson.opt("title")) + "\"");
+                // This is another DTable root
+                if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.CAT_TYPE.ordinal()) {
+                    newArgs.putString("component", "dtable");
+                    newArgs.putString("title", element.getTitle(homeCampus));
+                    newArgs.putSerializable("data", element);
+                }
+                // This is a FAQ button
+                else if (mAdapter.getItemViewType(position) == JSONAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
+                    // Toggle pop-down visibility
+                    mAdapter.togglePopdown(position);
+                    return;
+                }
+                // This object has a channel
+                else {
+                    DTableChannel channel = (DTableChannel) element;
+                    // Must have view and title set to launch a channel
+                    newArgs.putString("component", channel.getView());
+                    newArgs.putString("title", channel.getChannelTitle(homeCampus));
 
-                        // Channel must have "title" field for title and "view" field to specify which fragment is going to be launched
-                        newArgs.putString("component", channel.getString("view"));
-
-                        // First, attempt to get 'title' for the channel. If it's not set, fall back
-                        // to the title set for the clickable item here. (They often match, but
-                        // see rec.txt for an example of where they differ.)
-                        Object title = null;
-                        if (channel.has("title")) title = channel.get("title");
-                        else if (clickedJson.has("title")) title = clickedJson.get("title");
-
-                        if (title != null)
-                            newArgs.putString("title", RutgersUtil.getLocalTitle(context, title));
-
-                        // Add the rest of the JSON fields to the arg bundle
-                        for(Iterator<String> keys = channel.keys(); keys.hasNext();) {
-                            String key = keys.next();
-                            if (key.equalsIgnoreCase("title"))
-                                continue; // title was already handled above
-                            Log.v(dTag(), "Adding to args: \"" + key + "\", \"" + channel.get(key).toString() + "\"");
-                            newArgs.putString(key, channel.get(key).toString()); // TODO Better handling of type mapped by "key"
-                        }
-                    }
-
-                    ComponentFactory.getInstance().switchFragments(newArgs);
-                } catch (JSONException e) {
-                    Log.w(dTag(), "onItemClick(): " + e.getMessage());
+                    // Add the rest of the fields to the arg bundle
+                    if(channel.getUrl() != null) newArgs.putString("url", channel.getUrl());
+                    if(channel.getData() != null) newArgs.putString("data", channel.getData());
+                    if(channel.getCount() > 0) newArgs.putInt("count", channel.getCount());
                 }
 
+                ComponentFactory.getInstance().switchFragments(newArgs);
             }
 
         });
@@ -215,9 +202,9 @@ public class DTable extends Fragment {
         super.onSaveInstanceState(outState);
 
         // If any data was actually loaded, save it in state
-        if(mData != null && mData.length() > 0) {
-            outState.putString("mData", mData.toString());
-            outState.putString("mHandle", mHandle);
+        if(mData != null && mData.size() > 0) {
+            outState.putSerializable(TAG_ROOT, mDRoot);
+            outState.putString(TAG_HANDLE, mHandle);
         }
     }
 
