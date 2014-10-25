@@ -8,7 +8,7 @@ import com.androidquery.callback.BitmapAjaxCallback;
 
 import edu.rutgers.css.Rutgers.api.Analytics;
 
-public class MyApplication extends Application {
+public class RutgersApplication extends Application {
 
     private static final String TAG = "RutgersApplication";
 
@@ -17,7 +17,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        MyApplication.context = getApplicationContext();
+        RutgersApplication.context = getApplicationContext();
 
         Log.v(TAG, "Application started");
 
@@ -32,7 +32,7 @@ public class MyApplication extends Application {
     }
 
     public static Context getAppContext() {
-        return MyApplication.context;
+        return RutgersApplication.context;
     }
 
 }

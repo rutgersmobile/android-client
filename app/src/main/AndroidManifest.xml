@@ -17,7 +17,7 @@
     <!-- <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"/> -->
 
     <application
-        android:name="edu.rutgers.css.Rutgers.MyApplication"
+        android:name="edu.rutgers.css.Rutgers.RutgersApplication"
         android:allowBackup="true"
         android:supportsRtl="false"
         android:icon="@drawable/seal"

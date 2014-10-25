@@ -10,7 +10,7 @@ import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers.MyApplication;
+import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 // Convenience class for making requests
@@ -27,7 +27,7 @@ public class Request {
     
     private static void setup () {
         if (!mSetupDone) {
-            aq = new AQuery(MyApplication.getAppContext());
+            aq = new AQuery(RutgersApplication.getAppContext());
             
             mSetupDone = true;
         }
