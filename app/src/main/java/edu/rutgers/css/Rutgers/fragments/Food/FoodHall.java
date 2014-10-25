@@ -32,7 +32,7 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class FoodHall extends Fragment {
 
-	private static final String TAG = "FoodHall";
+    private static final String TAG = "FoodHall";
     public static final String HANDLE = "foodhall";
 
     private final static DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
@@ -42,13 +42,13 @@ public class FoodHall extends Fragment {
     private DiningMenu mData;
     private String mTitle;
 
-	public FoodHall() {
-		// Required empty public constructor
-	}
+    public FoodHall() {
+        // Required empty public constructor
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
         mLocation = args.getString("location");
@@ -75,14 +75,14 @@ public class FoodHall extends Fragment {
                 AppUtil.showFailedLoadToast(getActivity());
             }
         });
-	}
+    }
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_food_hall, parent, false);
-		final Bundle args = getArguments();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_food_hall, parent, false);
+        final Bundle args = getArguments();
 
-		if(mTitle != null) {
+        if(mTitle != null) {
             getActivity().setTitle(mTitle);
         } else if(args.getString("location") != null) {
             getActivity().setTitle(args.getString("location"));
@@ -95,8 +95,8 @@ public class FoodHall extends Fragment {
         final ViewPager viewPager = (ViewPager) v.findViewById(R.id.viewPager);
         viewPager.setAdapter(mPagerAdapter);
 
-		return v;
-	}
+        return v;
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

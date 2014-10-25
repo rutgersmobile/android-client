@@ -15,16 +15,16 @@ public class BusMain extends Fragment implements FilterFocusListener {
     private static final String TAG = "BusMain";
     public static final String HANDLE = "bus";
 
-	private FragmentTabHost mTabHost;
+    private FragmentTabHost mTabHost;
 
-	public BusMain() {
-		// Required empty public constructor
-	}
+    public BusMain() {
+        // Required empty public constructor
+    }
 
-	@Override
-	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_bus_main, parent, false);
-		Bundle args = getArguments();
+    @Override
+    public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_bus_main, parent, false);
+        Bundle args = getArguments();
 
         // Set title from JSON
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
@@ -37,8 +37,8 @@ public class BusMain extends Fragment implements FilterFocusListener {
         mTabHost.addTab(mTabHost.newTabSpec(BusStops.HANDLE).setIndicator(getString(R.string.bus_stops_tab)), BusStops.class, null);
         mTabHost.addTab(mTabHost.newTabSpec(BusAll.HANDLE).setIndicator(getString(R.string.bus_all_tab)), BusAll.class, null);
 
-		return v;
-	}
+        return v;
+    }
 
     @Override
     public void onDestroyView() {

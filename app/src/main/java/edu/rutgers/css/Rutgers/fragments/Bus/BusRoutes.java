@@ -37,32 +37,32 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
-	
-	private static final String TAG = "BusRoutes";
+    
+    private static final String TAG = "BusRoutes";
     public static final String HANDLE = "busroutes";
 
-	private RMenuAdapter mAdapter;
-	private ArrayList<RMenuRow> mData;
+    private RMenuAdapter mAdapter;
+    private ArrayList<RMenuRow> mData;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
-	
-	public BusRoutes() {
-		// Required empty public constructor
-	}
+    
+    public BusRoutes() {
+        // Required empty public constructor
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         mDM = new AndroidDeferredManager();
 
-		mData = new ArrayList<RMenuRow>();
-		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
-	}
-	
-	@Override
-	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_bus_routes, parent, false);
+        mData = new ArrayList<RMenuRow>();
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+    }
+    
+    @Override
+    public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_bus_routes, parent, false);
 
         // Get the filter field and add a listener to it
         EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -72,10 +72,10 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 if(mFilterFocusListener != null) mFilterFocusListener.focusEvent();
             }
         });
-		
-		ListView listView = (ListView) v.findViewById(R.id.list);
-		listView.setAdapter(mAdapter);
-		listView.setOnItemClickListener(new OnItemClickListener() {
+        
+        ListView listView = (ListView) v.findViewById(R.id.list);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -94,9 +94,9 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         // Set main bus fragment as focus listener, for switching to All tab
         FilterFocusListener mainFragment = (BusMain) getParentFragment();
         setFocusListener(mainFragment);
-				
-		return v;
-	}
+                
+        return v;
+    }
 
     @Override
     public void onResume() {
@@ -160,12 +160,12 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         setFocusListener(null);
     }
 
-	/**
-	 * Populate list with bus routes for agency, with a section header for that agency
-	 * @param agencyTag Agency tag for API request
-	 * @param agencyTitle Header title that goes above these routes
-	 */
-	private void loadAgency(final String agencyTag, final String agencyTitle, final JSONArray data) {
+    /**
+     * Populate list with bus routes for agency, with a section header for that agency
+     * @param agencyTag Agency tag for API request
+     * @param agencyTitle Header title that goes above these routes
+     */
+    private void loadAgency(final String agencyTag, final String agencyTitle, final JSONArray data) {
         if(data == null) return;
 
         mAdapter.add(new RMenuHeaderRow(agencyTitle));

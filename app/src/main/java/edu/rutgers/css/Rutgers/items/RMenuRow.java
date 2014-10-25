@@ -6,7 +6,7 @@ public abstract class RMenuRow {
 
     private String title;
 
-	public String getTitle() {
+    public String getTitle() {
         return title;
     }
 
@@ -14,11 +14,11 @@ public abstract class RMenuRow {
         this.title = title;
     }
 
-	public abstract boolean getIsCategory();
+    public abstract boolean getIsCategory();
 
-	public abstract boolean getIsClickable();
+    public abstract boolean getIsClickable();
 
-	public Drawable getDrawable() {
+    public Drawable getDrawable() {
         return null;
     }
 

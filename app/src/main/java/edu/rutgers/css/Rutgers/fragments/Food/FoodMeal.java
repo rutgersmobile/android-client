@@ -30,34 +30,34 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class FoodMeal extends Fragment {
 
-	private static final String TAG = "FoodMeal";
+    private static final String TAG = "FoodMeal";
     public static final String HANDLE = "foodmeal";
 
-	private List<RMenuRow> foodItems;
-	private RMenuAdapter foodItemAdapter;
+    private List<RMenuRow> foodItems;
+    private RMenuAdapter foodItemAdapter;
 
-	public FoodMeal() {
-		// Required empty public constructor
-	}
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		final Bundle args = getArguments();
-		
-		foodItems = new ArrayList<RMenuRow>();
-		foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.row_title, R.layout.row_section_header, foodItems);
+    public FoodMeal() {
+        // Required empty public constructor
+    }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final Bundle args = getArguments();
+        
+        foodItems = new ArrayList<RMenuRow>();
+        foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.row_title, R.layout.row_section_header, foodItems);
 
-		if(args.getString("location") == null) {
+        if(args.getString("location") == null) {
             Log.e(TAG, "Location not set");
             return;
         } else if(args.getString("meal") == null) {
             Log.e(TAG, "Meal not set");
-			return;
-		}
+            return;
+        }
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-		dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
+        dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
 
             @Override
             public void onDone(DiningMenu diningMenu) {
@@ -90,19 +90,19 @@ public class FoodMeal extends Fragment {
             }
 
         });
-		
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		// Inflate the layout for this fragment
-		View v = inflater.inflate(R.layout.fragment_food_meal, container, false);
+        
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View v = inflater.inflate(R.layout.fragment_food_meal, container, false);
 
         ListView listView = (ListView) v.findViewById(R.id.food_meal_list);
-		listView.setAdapter(foodItemAdapter);
+        listView.setAdapter(foodItemAdapter);
         listView.setOnItemClickListener(null);
 
-		return v;
-	}
-	
+        return v;
+    }
+    
 }

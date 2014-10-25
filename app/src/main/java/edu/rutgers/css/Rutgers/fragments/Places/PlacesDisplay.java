@@ -45,7 +45,7 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class PlacesDisplay extends Fragment {
 
-	private static final String TAG = "PlacesDisplay";
+    private static final String TAG = "PlacesDisplay";
     public static final String HANDLE = "placesdisplay";
 
     private static final String ID_KEY = "id";
@@ -68,12 +68,12 @@ public class PlacesDisplay extends Fragment {
     }});
 
     public PlacesDisplay() {
-		// Required empty public constructor
-	}
+        // Required empty public constructor
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         mData = new ArrayList<RMenuRow>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
@@ -219,11 +219,11 @@ public class PlacesDisplay extends Fragment {
         });
 
     }
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		final View v = inflater.inflate(R.layout.fragment_place_display, container, false);
-		Bundle args = getArguments();
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final View v = inflater.inflate(R.layout.fragment_place_display, container, false);
+        Bundle args = getArguments();
 
         // Set title
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
@@ -252,8 +252,8 @@ public class PlacesDisplay extends Fragment {
             }
         });
 
-		return v;
-	}
+        return v;
+    }
 
     /**
      * Start a map activity intent for this address/location
@@ -279,13 +279,13 @@ public class PlacesDisplay extends Fragment {
         }
     }
 
-	/**
-	 * Compile location information into readable string form
-	 * @param location Place location info
-	 * @return Multi-line string containing address
-	 */
-	private static String formatAddress(Place.Location location) {
-		if(location == null) return null;
+    /**
+     * Compile location information into readable string form
+     * @param location Place location info
+     * @return Multi-line string containing address
+     */
+    private static String formatAddress(Place.Location location) {
+        if(location == null) return null;
 
         String resultString = "";
         if(!StringUtils.isEmpty(location.getName())) resultString += location.getName() + "\n";
@@ -294,7 +294,7 @@ public class PlacesDisplay extends Fragment {
         if(!StringUtils.isEmpty(location.getCity())) resultString += location.getCity() + ", " +
                 location.getStateAbbr() + " " + location.getPostalCode();
 
-		return StringUtils.trim(resultString);
-	}
+        return StringUtils.trim(resultString);
+    }
 
 }

@@ -30,28 +30,28 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
 
-	private static final String TAG = "PredictionAdapter";
+    private static final String TAG = "PredictionAdapter";
 
     private static final SimpleDateFormat arriveDf12 = new SimpleDateFormat("h:mm a", Locale.US);
     private static final SimpleDateFormat arriveDf24 = new SimpleDateFormat("H:mm", Locale.US);
 
     private Context mContext;
-	
-	static class ViewHolder {
-		TextView titleTextView;
-		TextView directionTextView;
-		TextView minutesTextView;
-	}
+    
+    static class ViewHolder {
+        TextView titleTextView;
+        TextView directionTextView;
+        TextView minutesTextView;
+    }
 
     static class PopViewHolder {
         TextView popdownTextView;
         LinearLayout popdownLayout;
     }
-	
-	public PredictionAdapter(Context context, List<Prediction> objects) {
-		super(context, R.layout.row_bus_prediction, R.id.titleFrame, R.id.contentFrame, objects);
+    
+    public PredictionAdapter(Context context, List<Prediction> objects) {
+        super(context, R.layout.row_bus_prediction, R.id.titleFrame, R.id.contentFrame, objects);
         mContext = context;
-	}
+    }
 
     @Override
     public boolean areAllItemsEnabled() {
@@ -158,32 +158,32 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
     }
 
     /**
-	 * Create "Arriving in..." string, e.g.<br>
-	 *      Arriving in 2 minutes.<br>
-	 * 		Arriving in 2 and 4 minutes.<br>
-	 * 		Arriving in 2, 3, and 4 minutes.<br>
-	 * 		Arriving in 1 minute.<br>
-	 * @param minutes Array of arrival times in minutes
-	 * @return Formatted arrival time string
-	 */
-	private String formatMinutes(ArrayList<Integer> minutes) {
-		Resources resources = mContext.getResources();
-		StringBuilder result = new StringBuilder(resources.getString(R.string.bus_prediction_begin));
-		
-		for(int i = 0; i < minutes.size(); i++) {
-			if(i != 0 && i == minutes.size() - 1) result.append(resources.getString(R.string.bus_and));
-			
-			if(minutes.get(i) < 1) result.append(" <1");
-			else result.append(" ").append(minutes.get(i));
-			
-			if(minutes.size() > 2 && i != minutes.size() - 1) result.append(",");
-		}
-		
-		if(minutes.size() == 1 && minutes.get(0) == 1) result.append(resources.getString(R.string.bus_minute_singular));
-		else result.append(resources.getString(R.string.bus_minute_plural));
-		
-		return result.toString();
-	}
+     * Create "Arriving in..." string, e.g.<br>
+     *      Arriving in 2 minutes.<br>
+     *         Arriving in 2 and 4 minutes.<br>
+     *         Arriving in 2, 3, and 4 minutes.<br>
+     *         Arriving in 1 minute.<br>
+     * @param minutes Array of arrival times in minutes
+     * @return Formatted arrival time string
+     */
+    private String formatMinutes(ArrayList<Integer> minutes) {
+        Resources resources = mContext.getResources();
+        StringBuilder result = new StringBuilder(resources.getString(R.string.bus_prediction_begin));
+        
+        for(int i = 0; i < minutes.size(); i++) {
+            if(i != 0 && i == minutes.size() - 1) result.append(resources.getString(R.string.bus_and));
+            
+            if(minutes.get(i) < 1) result.append(" <1");
+            else result.append(" ").append(minutes.get(i));
+            
+            if(minutes.size() > 2 && i != minutes.size() - 1) result.append(",");
+        }
+        
+        if(minutes.size() == 1 && minutes.get(0) == 1) result.append(resources.getString(R.string.bus_minute_singular));
+        else result.append(resources.getString(R.string.bus_minute_plural));
+        
+        return result.toString();
+    }
 
     /**
      * Create pop-down details string<br/>
@@ -218,5 +218,5 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
 
         return result;
     }
-	
+    
 }

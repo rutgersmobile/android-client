@@ -41,10 +41,10 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class AppUtil {
 
-	private static final String TAG = "AppUtil";
+    private static final String TAG = "AppUtil";
 
-	private static final String INSTALLATION = "INSTALLATION";
-	private static String installID = null;
+    private static final String INSTALLATION = "INSTALLATION";
+    private static String installID = null;
 
     public static final String APPTAG = "Rutgers";
     public static final String PACKAGE_NAME = "edu.rutgers.css.Rutgers2";
@@ -58,28 +58,28 @@ public class AppUtil {
 
     public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
 
-	/**
-	 * Get (or create) UUID for the installation of this app.
-	 * @param context App context
-	 * @return UUID string
-	 */
-	public synchronized static String getUUID(@NonNull Context context) {
-		if(installID == null) {
-			File installation = new File(context.getFilesDir(), INSTALLATION);
-			try {
-				if(!installation.exists()) {
-					FileOutputStream out = new FileOutputStream(installation);
-					out.write(UUID.randomUUID().toString().getBytes());
-					out.close();
-				}
-				installID = readInstallationFile(installation);
-			} catch (Exception e) {
-				Log.e(TAG, Log.getStackTraceString(e));
-				throw new RuntimeException(e);
-			}
-		}
-		return installID;
-	}
+    /**
+     * Get (or create) UUID for the installation of this app.
+     * @param context App context
+     * @return UUID string
+     */
+    public synchronized static String getUUID(@NonNull Context context) {
+        if(installID == null) {
+            File installation = new File(context.getFilesDir(), INSTALLATION);
+            try {
+                if(!installation.exists()) {
+                    FileOutputStream out = new FileOutputStream(installation);
+                    out.write(UUID.randomUUID().toString().getBytes());
+                    out.close();
+                }
+                installID = readInstallationFile(installation);
+            } catch (Exception e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+                throw new RuntimeException(e);
+            }
+        }
+        return installID;
+    }
 
     /**
      * Read the UUID file
@@ -87,13 +87,13 @@ public class AppUtil {
      * @return Contents of file in string
      * @throws IOException
      */
-	private static String readInstallationFile(@NonNull File installation) throws IOException {
-		RandomAccessFile f = new RandomAccessFile(installation, "r");
-		byte[] bytes = new byte[(int) f.length()];
-		f.readFully(bytes);
-		f.close();
-		return new String(bytes);
-	}
+    private static String readInstallationFile(@NonNull File installation) throws IOException {
+        RandomAccessFile f = new RandomAccessFile(installation, "r");
+        byte[] bytes = new byte[(int) f.length()];
+        f.readFully(bytes);
+        f.close();
+        return new String(bytes);
+    }
 
     /**
      * Determine if the current device is a tablet.

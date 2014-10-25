@@ -28,7 +28,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
  */
 public class Dining {
 
-	private static final String TAG = "DiningAPI";
+    private static final String TAG = "DiningAPI";
 
     private static final String API_URL = AppUtil.API_BASE + "rutgers-dining.txt";
     private static long expire = Request.CACHE_ONE_HOUR; // Cache dining data for an hour
@@ -37,18 +37,18 @@ public class Dining {
     private static Promise<Object, Exception, Void> configured;
     private static List<DiningMenu> mNBDiningMenus;
 
-	/**
-	 * Grab the dining API data.
-	 * <p>(Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)</p>
-	 */
-	private static void setup() {
-		// Get JSON array from dining API
-		final Deferred<Object, Exception, Void> confd = new DeferredObject<Object, Exception, Void>();
-		configured = confd.promise();
-		
-		final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
+    /**
+     * Grab the dining API data.
+     * <p>(Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)</p>
+     */
+    private static void setup() {
+        // Get JSON array from dining API
+        final Deferred<Object, Exception, Void> confd = new DeferredObject<Object, Exception, Void>();
+        configured = confd.promise();
+        
+        final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
 
-		sDM.when(promiseNBDining, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
+        sDM.when(promiseNBDining, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray res) {
@@ -77,41 +77,41 @@ public class Dining {
             }
 
         });
-	}
-	
-	/**
-	 * Get all dining hall menus.
-	 * @return List of all dining hall menus
-	 */
-	public static Promise<List<DiningMenu>, Exception, Void> getDiningHalls() {
-		final Deferred<List<DiningMenu>, Exception, Void> d = new DeferredObject<List<DiningMenu>, Exception, Void>();
-		setup();
-		
-		sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
-			
-			@Override
-			public void onDone(Object o) {
-				d.resolve(mNBDiningMenus);
-			}
+    }
+    
+    /**
+     * Get all dining hall menus.
+     * @return List of all dining hall menus
+     */
+    public static Promise<List<DiningMenu>, Exception, Void> getDiningHalls() {
+        final Deferred<List<DiningMenu>, Exception, Void> d = new DeferredObject<List<DiningMenu>, Exception, Void>();
+        setup();
+        
+        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
+            
+            @Override
+            public void onDone(Object o) {
+                d.resolve(mNBDiningMenus);
+            }
 
-		}).fail(new FailCallback<Exception>() {
+        }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception e) {
                 d.reject(e);
             }
         });
-		
-		return d.promise();
-	}
-	
-	/**
-	 * Get the menu for a specific dining hall.
-	 * @param location Dining hall to get menu for
-	 * @return Promise for the dining hall menu
-	 */
-	public static Promise<DiningMenu, Exception, Void> getDiningLocation(@NonNull final String location) {
-		final Deferred<DiningMenu, Exception, Void> d = new DeferredObject<DiningMenu, Exception, Void>();
-		setup();
+        
+        return d.promise();
+    }
+    
+    /**
+     * Get the menu for a specific dining hall.
+     * @param location Dining hall to get menu for
+     * @return Promise for the dining hall menu
+     */
+    public static Promise<DiningMenu, Exception, Void> getDiningLocation(@NonNull final String location) {
+        final Deferred<DiningMenu, Exception, Void> d = new DeferredObject<DiningMenu, Exception, Void>();
+        setup();
 
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
 
@@ -136,8 +136,8 @@ public class Dining {
                 d.reject(e);
             }
         });
-		
-		return d.promise();
-	}
+        
+        return d.promise();
+    }
 
 }

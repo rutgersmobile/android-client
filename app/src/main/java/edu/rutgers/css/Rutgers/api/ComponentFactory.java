@@ -49,7 +49,7 @@ public class ComponentFactory {
 
     private static final String TAG = "ComponentFactory";
 
-	private static ComponentFactory sSingletonInstance;
+    private static ComponentFactory sSingletonInstance;
     private static WeakReference<FragmentActivity> sMainActivity;
     private static Stack<String> sHandleStack;
 
@@ -90,66 +90,66 @@ public class ComponentFactory {
         put(FeedbackMain.HANDLE, FeedbackMain.class);
     }});
 
-	protected ComponentFactory() {
-	}
+    protected ComponentFactory() {
+    }
 
     public void setMainActivity(FragmentActivity fragmentActivity) {
         sMainActivity = new WeakReference<FragmentActivity>(fragmentActivity);
     }
 
-	/**
-	 * Get singleton sSingletonInstance
-	 * @return Component factory singleton sSingletonInstance
-	 */
-	public static ComponentFactory getInstance() {
-		if(sSingletonInstance == null) sSingletonInstance = new ComponentFactory();
+    /**
+     * Get singleton sSingletonInstance
+     * @return Component factory singleton sSingletonInstance
+     */
+    public static ComponentFactory getInstance() {
+        if(sSingletonInstance == null) sSingletonInstance = new ComponentFactory();
         if(sHandleStack == null) sHandleStack = new Stack<String>();
-		return sSingletonInstance;
-	}
-	
-	/**
-	 * Create component fragment
-	 * @param options Argument bundle with at least 'component' argument set to describe which
+        return sSingletonInstance;
+    }
+    
+    /**
+     * Create component fragment
+     * @param options Argument bundle with at least 'component' argument set to describe which
      *                component to build. The options bundle will be passed to the new fragment.
-	 * @return Built fragment
-	 */
-	public Fragment createFragment(@NonNull Bundle options) {
-		Fragment fragment;
-		String component;
-		
-		if(options.getString("component") == null || options.getString("component").isEmpty()) {
-			Log.e(TAG, "Component argument not set");
-			return null;
-		}
-		
-		component = options.getString("component").toLowerCase(Locale.US);
-		Class<? extends Fragment> componentClass = sFragmentTable.get(component);
-		if(componentClass != null) {
+     * @return Built fragment
+     */
+    public Fragment createFragment(@NonNull Bundle options) {
+        Fragment fragment;
+        String component;
+        
+        if(options.getString("component") == null || options.getString("component").isEmpty()) {
+            Log.e(TAG, "Component argument not set");
+            return null;
+        }
+        
+        component = options.getString("component").toLowerCase(Locale.US);
+        Class<? extends Fragment> componentClass = sFragmentTable.get(component);
+        if(componentClass != null) {
             Log.v(TAG, "Creating a " + componentClass.getSimpleName());
-			try {
-				fragment = componentClass.newInstance();
-			} catch (Exception e) {
-				Log.e(TAG, Log.getStackTraceString(e));
-				return null;
-			}	
-		} else {
-			Log.e(TAG, "Component \"" + component + "\" is undefined");
-			return null;
-		}
-		
-		fragment.setArguments(options);
-		return fragment;
-	}
-	
-	/**
-	 * Add current fragment to the backstack and switch to the new one defined by given arguments.
-	 * For calls from the nav drawer, this will attempt to pop all backstack history until the last 
-	 * time the desired channel was launched.
-	 * @param args Argument bundle with at least 'component' argument set to describe which
+            try {
+                fragment = componentClass.newInstance();
+            } catch (Exception e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+                return null;
+            }    
+        } else {
+            Log.e(TAG, "Component \"" + component + "\" is undefined");
+            return null;
+        }
+        
+        fragment.setArguments(options);
+        return fragment;
+    }
+    
+    /**
+     * Add current fragment to the backstack and switch to the new one defined by given arguments.
+     * For calls from the nav drawer, this will attempt to pop all backstack history until the last 
+     * time the desired channel was launched.
+     * @param args Argument bundle with at least 'component' argument set to describe which
      *             component to build. All other arguments will be passed to the new fragment.
-	 * @return True if the new fragment was successfully created, false if not.
-	 */
-	public boolean switchFragments(@NonNull Bundle args) {
+     * @return True if the new fragment was successfully created, false if not.
+     */
+    public boolean switchFragments(@NonNull Bundle args) {
         if(sMainActivity.get() == null) {
             Log.e(TAG, "switchFragments(): Reference to main activity is null");
             return false;
@@ -172,7 +172,7 @@ public class ComponentFactory {
 
         // Attempt to create the fragment
         Fragment fragment = createFragment(args);
-		if(fragment == null) return false;
+        if(fragment == null) return false;
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtil.closeKeyboard(sMainActivity.get());
@@ -181,22 +181,22 @@ public class ComponentFactory {
 
         // If this is a top level (nav drawer) press, find the last time this channel was launched
         // and pop backstack to it
-		if(isTopLevel && fm.findFragmentByTag(componentTag) != null) {
-			fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE); // TODO Not synced with handle stack
-		}
-				
-		// Switch the main content fragment
-		fm.beginTransaction()
+        if(isTopLevel && fm.findFragmentByTag(componentTag) != null) {
+            fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE); // TODO Not synced with handle stack
+        }
+                
+        // Switch the main content fragment
+        fm.beginTransaction()
             .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left, R.animator.slide_in_left, R.animator.slide_out_right)
-			.replace(R.id.main_content_frame, fragment, componentTag)
-			.addToBackStack(componentTag)
-			.commit();
+            .replace(R.id.main_content_frame, fragment, componentTag)
+            .addToBackStack(componentTag)
+            .commit();
 
         // Set tag of fragment that is on top
         sHandleStack.push(componentTag);
 
-		return true;
-	}
+        return true;
+    }
 
     /**
      * Show a dialog fragment and add it to backstack

@@ -26,38 +26,38 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 
-	private final static String TAG = "RMenuAdapter";
+    private final static String TAG = "RMenuAdapter";
 
-	private int mItemResource;
-	private int mCategoryResource;
+    private int mItemResource;
+    private int mCategoryResource;
     private List<RMenuRow> mData;
     private AQuery aq;
 
-	protected static enum ViewTypes {
-		HEADER, CLICKABLE, UNCLICKABLE, IMAGE
-	}
+    protected static enum ViewTypes {
+        HEADER, CLICKABLE, UNCLICKABLE, IMAGE
+    }
     protected static ViewTypes[] viewTypes = ViewTypes.values();
-	
-	protected static class ViewHolder {
-		TextView titleTextView;
-		ImageView imageView;
-	}
-	
-	/**
-	 * RMenuAdapter constructor
-	 * @param context App context
-	 * @param itemResource Layout to use for menu items
-	 * @param categoryResource Layout to use for section headers
-	 * @param objects List of menu objects to use
-	 */
-	public RMenuAdapter(Context context, int itemResource, int categoryResource, List<RMenuRow> objects) {
-		super(context, itemResource, objects);
-		
-		this.mItemResource = itemResource;
-		this.mCategoryResource = categoryResource;
+    
+    protected static class ViewHolder {
+        TextView titleTextView;
+        ImageView imageView;
+    }
+    
+    /**
+     * RMenuAdapter constructor
+     * @param context App context
+     * @param itemResource Layout to use for menu items
+     * @param categoryResource Layout to use for section headers
+     * @param objects List of menu objects to use
+     */
+    public RMenuAdapter(Context context, int itemResource, int categoryResource, List<RMenuRow> objects) {
+        super(context, itemResource, objects);
+        
+        this.mItemResource = itemResource;
+        this.mCategoryResource = categoryResource;
         this.mData = objects;
         this.aq = new AQuery(context);
-	}
+    }
 
     /**
      * Remove item at index.
@@ -101,13 +101,13 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
         else return true;
     }
 
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		RMenuRow curItem = this.getItem(position);
-		ViewHolder holder;
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        RMenuRow curItem = this.getItem(position);
+        ViewHolder holder;
 
-		if(convertView == null) {
+        if(convertView == null) {
             // Choose appropriate layout
             switch(viewTypes[getItemViewType(position)]) {
                 // Section headers
@@ -122,16 +122,16 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
                     convertView = mLayoutInflater.inflate(mItemResource, null);
             }
 
-			holder = new ViewHolder();
-			holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
-			holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
-			convertView.setTag(holder);
-		} else {
+            holder = new ViewHolder();
+            holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
+            holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
+            convertView.setTag(holder);
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
-		
-		// Set item text
-		if(holder.titleTextView != null) {
+        
+        // Set item text
+        if(holder.titleTextView != null) {
             holder.titleTextView.setText(curItem.getTitle());
 
             // Set item text color
@@ -143,24 +143,24 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
         } else if(viewTypes[getItemViewType(position)] != ViewTypes.IMAGE) {
             Log.e(TAG, "R.id.title not found for view at position " + position);
         }
-		
-		// Set image
-		if(holder.imageView != null){
-			if(curItem.getDrawable() != null) {
-				holder.imageView.setImageDrawable(curItem.getDrawable());
-				holder.imageView.setVisibility(View.VISIBLE);
-			} else if(curItem instanceof RMenuImageRow) {
+        
+        // Set image
+        if(holder.imageView != null){
+            if(curItem.getDrawable() != null) {
+                holder.imageView.setImageDrawable(curItem.getDrawable());
+                holder.imageView.setVisibility(View.VISIBLE);
+            } else if(curItem instanceof RMenuImageRow) {
                 // Get image from network
                 RMenuImageRow imageRowItem = (RMenuImageRow) curItem;
                 AQuery cvAq = aq.recycle(convertView);
                 cvAq.id(holder.imageView).image(imageRowItem.getDrawableURL(), false, true, imageRowItem.getWidth(), 0, null, AQuery.FADE_IN_NETWORK);
             } else {
                 holder.imageView.setImageBitmap(null);
-				holder.imageView.setVisibility(View.GONE);
-			}
-		}
+                holder.imageView.setVisibility(View.GONE);
+            }
+        }
 
-		return convertView;
-	}
+        return convertView;
+    }
 
 }

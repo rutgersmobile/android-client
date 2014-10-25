@@ -30,19 +30,19 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
  * @author James Chambers
  */
 public class Places {
-	
-	private static final String TAG = "PlacesAPI";
+    
+    private static final String TAG = "PlacesAPI";
 
     private static final String API_URL = "https://oss-services.rutgers.edu/pq";
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 
-	/**
-	 * Get a specific place from the Places API.
-	 * @param placeKey Key for place entry, returned from search results
-	 * @return Promise for a Place object representing the entry in the database
-	 */
-	public static Promise<Place, Exception, Double> getPlace(final String placeKey) {
-		final Deferred<Place, Exception, Double> d = new DeferredObject<Place, Exception, Double>();
+    /**
+     * Get a specific place from the Places API.
+     * @param placeKey Key for place entry, returned from search results
+     * @return Promise for a Place object representing the entry in the database
+     */
+    public static Promise<Place, Exception, Double> getPlace(final String placeKey) {
+        final Deferred<Place, Exception, Double> d = new DeferredObject<Place, Exception, Double>();
 
         String parameter;
         try {
@@ -80,8 +80,8 @@ public class Places {
             }
         });
 
-		return d.promise();
-	}
+        return d.promise();
+    }
 
     /**
      * Search for places near a given location.

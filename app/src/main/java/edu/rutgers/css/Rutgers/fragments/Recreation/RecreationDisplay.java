@@ -43,7 +43,7 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class RecreationDisplay extends Fragment {
 
-	private static final String TAG = "RecreationDisplay";
+    private static final String TAG = "RecreationDisplay";
     public static final String HANDLE = "recdisplay";
 
     private static final String ID_KEY = "id";
@@ -56,14 +56,14 @@ public class RecreationDisplay extends Fragment {
     private JSONObject mLocationJSON;
     private RMenuAdapter mAdapter;
     private List<RMenuRow> mData;
-	
-	public RecreationDisplay() {
-		// Required empty public constructor
-	}	
+    
+    public RecreationDisplay() {
+        // Required empty public constructor
+    }    
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
         mData = new ArrayList<RMenuRow>(10);
@@ -105,22 +105,22 @@ public class RecreationDisplay extends Fragment {
             }
 
         });
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		super.onCreateView(inflater, parent, savedInstanceState);
-		final View v = inflater.inflate(R.layout.fragment_recreation_display, parent, false);
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        super.onCreateView(inflater, parent, savedInstanceState);
+        final View v = inflater.inflate(R.layout.fragment_recreation_display, parent, false);
 
         final Bundle args = getArguments();
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
 
-		// Make sure necessary arguments were given
-		if(args.get("campus") == null || args.get("facility") == null) {
-			Log.w(TAG, "Missing campus/location arg");
-			AppUtil.showFailedLoadToast(getActivity());
-			return v;
-		}
+        // Make sure necessary arguments were given
+        if(args.get("campus") == null || args.get("facility") == null) {
+            Log.w(TAG, "Missing campus/location arg");
+            AppUtil.showFailedLoadToast(getActivity());
+            return v;
+        }
 
         // Set up list adapter
         final ListView listView = (ListView) v.findViewById(R.id.list);
@@ -168,7 +168,7 @@ public class RecreationDisplay extends Fragment {
         });
 
         return v;
-	}
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

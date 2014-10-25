@@ -41,26 +41,26 @@ import edu.rutgers.css.Rutgers2.R;
 
 public class BusAll extends Fragment {
 
-	private static final String TAG = "BusAll";
+    private static final String TAG = "BusAll";
     public static final String HANDLE = "busall";
 
-	private RMenuAdapter mAdapter;
-	private ArrayList<RMenuRow> mData;
+    private RMenuAdapter mAdapter;
+    private ArrayList<RMenuRow> mData;
     private String mFilterString;
     private AndroidDeferredManager mDM;
-	
-	public BusAll() {
-		// Required empty public constructor
-	}
+    
+    public BusAll() {
+        // Required empty public constructor
+    }
 
-	@Override
-	public void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         mDM = new AndroidDeferredManager();
 
-		mData = new ArrayList<RMenuRow>();
-		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+        mData = new ArrayList<RMenuRow>();
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
         // Restore filter
         if(savedInstanceState != null) {
@@ -128,11 +128,11 @@ public class BusAll extends Fragment {
             }
 
         });
-	}
-	
-	@Override
-	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_bus_all, parent, false);
+    }
+    
+    @Override
+    public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_bus_all, parent, false);
 
         // Get the filter field and add a listener to it
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -165,10 +165,10 @@ public class BusAll extends Fragment {
             }
         });
 
-		// Set up list to accept clicks on route or stop rows
-		ListView listView = (ListView) v.findViewById(R.id.list);
-		listView.setAdapter(mAdapter);
-		listView.setOnItemClickListener(new OnItemClickListener() {
+        // Set up list to accept clicks on route or stop rows
+        ListView listView = (ListView) v.findViewById(R.id.list);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -194,9 +194,9 @@ public class BusAll extends Fragment {
             }
 
         });
-		
-		return v;
-	}
+        
+        return v;
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -252,5 +252,5 @@ public class BusAll extends Fragment {
             Log.w(TAG, "loadItem(): " + e.getMessage());
         }
     }
-	
+    
 }

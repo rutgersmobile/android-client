@@ -63,40 +63,40 @@ import edu.rutgers.css.Rutgers2.SettingsActivity;
  *
  */
 public class MainActivity extends FragmentActivity  implements
-		GooglePlayServicesClient.ConnectionCallbacks,
-		GooglePlayServicesClient.OnConnectionFailedListener,
-		LocationClientProvider, ChannelManagerProvider {
-	
-	private static final String TAG = "MainActivity";
-	private static final String SC_API = AppUtil.API_BASE + "shortcuts.txt";
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        LocationClientProvider, ChannelManagerProvider {
+    
+    private static final String TAG = "MainActivity";
+    private static final String SC_API = AppUtil.API_BASE + "shortcuts.txt";
     private static final String KEY_PREFS_FIRST_LAUNCH = "first_launch";
 
     private ChannelManager mChannelManager;
-	private LocationClient mLocationClient;
-	private DrawerLayout mDrawerLayout;
-	private ListView mDrawerListView;
-	private ActionBarDrawerToggle mDrawerToggle;
-	private RMenuAdapter mDrawerAdapter;
+    private LocationClient mLocationClient;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerListView;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private RMenuAdapter mDrawerAdapter;
     private PopupWindow mLogoPopup;
 
 
     private ArrayList<GooglePlayServicesClient.ConnectionCallbacks> mLocationListeners;
-	
-	/**
-	 * For providing the location client to fragments
-	 */
-	@Override
-	public LocationClient getLocationClient() {
-		return mLocationClient;
-	}
+    
+    /**
+     * For providing the location client to fragments
+     */
+    @Override
+    public LocationClient getLocationClient() {
+        return mLocationClient;
+    }
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         // This will create the UUID if one does not yet exist
-		Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
+        Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
 
         // Start Component Factory
         ComponentFactory.getInstance().setMainActivity(this);
@@ -113,9 +113,9 @@ public class MainActivity extends FragmentActivity  implements
         }
         */
 
-		/*
-		 * Set default settings the first time the app is run
-		 */
+        /*
+         * Set default settings the first time the app is run
+         */
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 
         // Check if this is the first time the app is being launched
@@ -134,20 +134,20 @@ public class MainActivity extends FragmentActivity  implements
             prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH, false).apply();
         }
 
-		/*
-		 * Connect to Google Play location services
-		 */
-		mLocationClient = new LocationClient(this, this, this);
+        /*
+         * Connect to Google Play location services
+         */
+        mLocationClient = new LocationClient(this, this, this);
 
         /*
          * Set up channel manager
          */
         mChannelManager = new ChannelManager();
 
-		/*
-		 * Set up nav drawer
-		 */
-		// Enable drawer icon
+        /*
+         * Set up nav drawer
+         */
+        // Enable drawer icon
         if(getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
@@ -185,21 +185,21 @@ public class MainActivity extends FragmentActivity  implements
         mDrawerListView.setAdapter(mDrawerAdapter);
         mDrawerListView.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
                 if(!(clickedRow instanceof RMenuItemRow)) return;
 
-				Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
-				clickedArgs.putBoolean("topLevel", true); // This is a top level menu press
-				
-				// Launch component
-				ComponentFactory.getInstance().switchFragments(clickedArgs);
-				
-				//mDrawerAdapter.setSelectedPos(position);
-				mDrawerListView.invalidateViews();
-				mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
-			}
+                Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
+                clickedArgs.putBoolean("topLevel", true); // This is a top level menu press
+                
+                // Launch component
+                ComponentFactory.getInstance().switchFragments(clickedArgs);
+                
+                //mDrawerAdapter.setSelectedPos(position);
+                mDrawerListView.invalidateViews();
+                mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
+            }
 
         });
         
@@ -216,56 +216,56 @@ public class MainActivity extends FragmentActivity  implements
         /*
          * Set up main screen
          */
-		FragmentManager fm = getSupportFragmentManager();
-		if(fm.getBackStackEntryCount() == 0) {
-			fm.beginTransaction()
-				.replace(R.id.main_content_frame, new MainScreen(), "mainfrag")
-				.commit();
-		}
+        FragmentManager fm = getSupportFragmentManager();
+        if(fm.getBackStackEntryCount() == 0) {
+            fm.beginTransaction()
+                .replace(R.id.main_content_frame, new MainScreen(), "mainfrag")
+                .commit();
+        }
 
-	}
-	
-	@Override
-	protected void onStart() {
-		super.onStart();
-		
-		// Connect to location services when activity becomes visible
+    }
+    
+    @Override
+    protected void onStart() {
+        super.onStart();
+        
+        // Connect to location services when activity becomes visible
         for(GooglePlayServicesClient.ConnectionCallbacks listener: mLocationListeners) {
             mLocationClient.registerConnectionCallbacks(listener);
         }
-		mLocationClient.connect();
+        mLocationClient.connect();
 
         showLogoOverlay(R.id.main_content_frame);
-	}
+    }
 
-	@Override
-	protected void onStop() {
+    @Override
+    protected void onStop() {
         super.onStop();
 
-		// Disconnect from location services when activity is no longer visible
+        // Disconnect from location services when activity is no longer visible
         for(GooglePlayServicesClient.ConnectionCallbacks listener: mLocationListeners) {
             mLocationClient.unregisterConnectionCallbacks(listener);
         }
-		mLocationClient.disconnect();
+        mLocationClient.disconnect();
 
         dismissLogoOverlay();
 
         // Attempt to flush analytics events to server
         Analytics.postEvents(this);
-	}
-	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		
-		// Clear AQuery cache on exit
-		if(isTaskRoot()) {
-			AQUtility.cleanCacheAsync(this);
-		}
-	}
-	
-	@Override
-	public void onBackPressed() {
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        
+        // Clear AQuery cache on exit
+        if(isTaskRoot()) {
+            AQUtility.cleanCacheAsync(this);
+        }
+    }
+    
+    @Override
+    public void onBackPressed() {
         Log.v(TAG, "Back button pressed. Leaving top component: " + ComponentFactory.getInstance().getTopHandle());
 
         // If drawer is open, intercept back press to close drawer
@@ -274,7 +274,7 @@ public class MainActivity extends FragmentActivity  implements
             return;
         }
 
-		// If web display is active, send back button presses to it for navigating browser history
+        // If web display is active, send back button presses to it for navigating browser history
         if(WebDisplay.HANDLE.equalsIgnoreCase(ComponentFactory.getInstance().getTopHandle())) {
             Fragment webView = getSupportFragmentManager().findFragmentByTag(WebDisplay.HANDLE);
             if (webView != null && webView.isVisible()) {
@@ -288,9 +288,9 @@ public class MainActivity extends FragmentActivity  implements
         // Default back press behavior (go back in fragments, etc.)
         ComponentFactory.getInstance().popHandleStack();
         super.onBackPressed();
-	}
-	
-	@Override
+    }
+    
+    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         
@@ -307,43 +307,43 @@ public class MainActivity extends FragmentActivity  implements
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-    	super.onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-    	super.onRestoreInstanceState(savedInstanceState);
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // See if ActionBarDrawerToggle will handle event
-    	if (mDrawerToggle.onOptionsItemSelected(item)) {
-        	return true;
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
         }
         
-    	// Handle event here or pass it on
+        // Handle event here or pass it on
         switch(item.getItemId()) {
         
-        	// Start the Settings activity
-	        case R.id.action_settings:
-	        	Intent intent = new Intent(this, SettingsActivity.class);
-	        	startActivity(intent);
-	        	return true;
-	        
-	        default:
-	        	return super.onOptionsItemSelected(item);
-	        	
+            // Start the Settings activity
+            case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            
+            default:
+                return super.onOptionsItemSelected(item);
+                
         }
         
     }
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
 
     /**
      * Register a child fragment with the main activity's location client.
@@ -384,38 +384,38 @@ public class MainActivity extends FragmentActivity  implements
      * Play services connected
      * @param connectionHint Bundle of data provided to clients by Google Play services. May be null if no content is provided by the service.
      */
-	@Override
-	public void onConnected(Bundle connectionHint) {
-		Log.i(TAG, "Connected to Google Play services.");
-	}
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        Log.i(TAG, "Connected to Google Play services.");
+    }
 
     /**
      * Play services disconnected
      */
-	@Override
-	public void onDisconnected() {
-		Log.i(TAG, "Disconnected from Google Play services");
-	}
-	
-	@Override
-	public void onConnectionFailed(ConnectionResult connectionResult) {
+    @Override
+    public void onDisconnected() {
+        Log.i(TAG, "Disconnected from Google Play services");
+    }
+    
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.w(TAG, "Attempting to resolve Play Services connection failure");
-		if(connectionResult.hasResolution()) {
-			try {
-				connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
-			} catch (SendIntentException e) {
-				Log.e(AppUtil.APPTAG, Log.getStackTraceString(e));
-			}
-		}
-		else {
+        if(connectionResult.hasResolution()) {
+            try {
+                connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+            } catch (SendIntentException e) {
+                Log.e(AppUtil.APPTAG, Log.getStackTraceString(e));
+            }
+        }
+        else {
             LocationUtils.showErrorDialog(this, connectionResult.getErrorCode());
-		}
-	}
+        }
+    }
 
     /**
      * Handle results from Google Play Services
      */
-	@Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         // Choose what to do based on the request code
@@ -453,24 +453,24 @@ public class MainActivity extends FragmentActivity  implements
         return LocationUtils.servicesConnected(this);
     }
 
-	/*
-	 * Nav drawer helpers
-	 */
-	
-	/**
-	 * Add native channel items to the menu.
-	 */
-	private void loadChannels() {
+    /*
+     * Nav drawer helpers
+     */
+    
+    /**
+     * Add native channel items to the menu.
+     */
+    private void loadChannels() {
         mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
         addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels("main"));
-	}
-	
-	/**
-	 * Grab web links and add them to the menu.
-	 */
-	private void loadWebShortcuts() {
+    }
+    
+    /**
+     * Grab web links and add them to the menu.
+     */
+    private void loadWebShortcuts() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
-		dm.when(Request.jsonArray(SC_API, Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
+        dm.when(Request.jsonArray(SC_API, Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray shortcutsArray) {
@@ -486,8 +486,8 @@ public class MainActivity extends FragmentActivity  implements
             }
 
         });
-		
-	}
+        
+    }
 
     /**
      * Create section header and load menu items from JSON.

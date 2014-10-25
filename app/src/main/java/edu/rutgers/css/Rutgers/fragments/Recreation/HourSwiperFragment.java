@@ -27,32 +27,32 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class HourSwiperFragment extends Fragment {
 
-	private static final String TAG = "HourSwiperFragment";
-	
-	public HourSwiperFragment() {
-		// Required empty public constructor
-	}
-	
-	public static HourSwiperFragment newInstance(String date, JSONArray locations) {
-		HourSwiperFragment newFrag =  new HourSwiperFragment();
-		Bundle args = new Bundle();
-		args.putString("date", date);
-		args.putString("locations", locations.toString());
-		newFrag.setArguments(args);
-		return newFrag;
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.hour_swiper, container, false);
-		Bundle args = getArguments();
-		
-		LinearLayout hourSwiperTableLayout = (LinearLayout) v.findViewById(R.id.hourSwiperTableLayout);
-		
-		// Add hours rows here
-		try {
-			JSONArray locations = new JSONArray(args.getString("locations"));
-			for(int i = 0; i < locations.length(); i++) {
+    private static final String TAG = "HourSwiperFragment";
+    
+    public HourSwiperFragment() {
+        // Required empty public constructor
+    }
+    
+    public static HourSwiperFragment newInstance(String date, JSONArray locations) {
+        HourSwiperFragment newFrag =  new HourSwiperFragment();
+        Bundle args = new Bundle();
+        args.putString("date", date);
+        args.putString("locations", locations.toString());
+        newFrag.setArguments(args);
+        return newFrag;
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.hour_swiper, container, false);
+        Bundle args = getArguments();
+        
+        LinearLayout hourSwiperTableLayout = (LinearLayout) v.findViewById(R.id.hourSwiperTableLayout);
+        
+        // Add hours rows here
+        try {
+            JSONArray locations = new JSONArray(args.getString("locations"));
+            for(int i = 0; i < locations.length(); i++) {
                 TableRow newTR = (TableRow) inflater.inflate(R.layout.hour_row, container, false);
                 JSONObject curLocation = locations.getJSONObject(i);
                 String locationTitle = curLocation.getString("location");
@@ -101,14 +101,14 @@ public class HourSwiperFragment extends Fragment {
                     }
                 }
 
-				hourSwiperTableLayout.addView(newTR);
-			}
-		} catch(JSONException e) {
-			Log.w(TAG, "onCreateView(): " + e.getMessage());
-		}
-		
-		return v;
-	}
+                hourSwiperTableLayout.addView(newTR);
+            }
+        } catch(JSONException e) {
+            Log.w(TAG, "onCreateView(): " + e.getMessage());
+        }
+        
+        return v;
+    }
 
     private void setHoursTextView(TextView hoursTextView, String string) {
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {

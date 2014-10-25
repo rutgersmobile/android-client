@@ -34,19 +34,19 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class FoodMain extends Fragment {
 
-	private static final String TAG = "FoodMain";
+    private static final String TAG = "FoodMain";
     public static final String HANDLE = "food";
 
     private ArrayList<RMenuRow> mData;
     private RMenuAdapter mAdapter;
 
-	public FoodMain() {
-		// Required empty public constructor
-	}
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    public FoodMain() {
+        // Required empty public constructor
+    }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         mData = new ArrayList<RMenuRow>(4);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title_centered, R.layout.row_section_header_centered, mData);
@@ -78,7 +78,7 @@ public class FoodMain extends Fragment {
 
         // Get dining hall data and populate the top-level menu with names of the dining halls
         AndroidDeferredManager dm = new AndroidDeferredManager();
-		dm.when(Dining.getDiningHalls()).done(new DoneCallback<List<DiningMenu>>() {
+        dm.when(Dining.getDiningHalls()).done(new DoneCallback<List<DiningMenu>>() {
 
             @Override
             public void onDone(List<DiningMenu> diningMenus) {
@@ -122,20 +122,20 @@ public class FoodMain extends Fragment {
                 AppUtil.showFailedLoadToast(getActivity());
             }
         });
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
-		ListView listView = (ListView) v.findViewById(R.id.dining_locations_list);
-		Bundle args = getArguments();
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
+        ListView listView = (ListView) v.findViewById(R.id.dining_locations_list);
+        Bundle args = getArguments();
 
         // Set title from JSON
-		if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
         else getActivity().setTitle(R.string.dining_title);
 
-		listView.setAdapter(mAdapter);
-		listView.setOnItemClickListener(new OnItemClickListener() {
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -151,8 +151,8 @@ public class FoodMain extends Fragment {
                 ComponentFactory.getInstance().switchFragments(hallArgs);
             }
         });
-		
-		return v;
-	}
+        
+        return v;
+    }
 
 }

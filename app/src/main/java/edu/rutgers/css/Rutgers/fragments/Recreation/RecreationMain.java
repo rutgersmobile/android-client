@@ -35,25 +35,25 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class RecreationMain extends Fragment {
 
-	private static final String TAG = "RecreationMain";
+    private static final String TAG = "RecreationMain";
     public static final String HANDLE = "recreation";
-	
-	private ArrayList<RMenuRow> mData;
-	private RMenuAdapter mAdapter;
-	
-	public RecreationMain() {
-		// Required empty public constructor
-	}
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		mData = new ArrayList<RMenuRow>();
-		mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+    
+    private ArrayList<RMenuRow> mData;
+    private RMenuAdapter mAdapter;
+    
+    public RecreationMain() {
+        // Required empty public constructor
+    }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        mData = new ArrayList<RMenuRow>();
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-		dm.when(Gyms.getGyms()).done(new DoneCallback<JSONArray>() {
+        dm.when(Gyms.getGyms()).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray gymsJson) {
@@ -88,22 +88,22 @@ public class RecreationMain extends Fragment {
             }
 
         });
-		
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		super.onCreateView(inflater, parent, savedInstanceState);
-		final View v = inflater.inflate(R.layout.fragment_recreation_main, parent, false);
+        
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        super.onCreateView(inflater, parent, savedInstanceState);
+        final View v = inflater.inflate(R.layout.fragment_recreation_main, parent, false);
         Bundle args = getArguments();
 
         // Set title from JSON
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
         else getActivity().setTitle(R.string.rec_title);
 
-		ListView listView = (ListView) v.findViewById(R.id.list);
-		listView.setAdapter(mAdapter);
-		listView.setOnItemClickListener(new OnItemClickListener() {
+        ListView listView = (ListView) v.findViewById(R.id.list);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -115,8 +115,8 @@ public class RecreationMain extends Fragment {
             }
 
         });
-		
-		return v;
-	}
-	
+        
+        return v;
+    }
+    
 }

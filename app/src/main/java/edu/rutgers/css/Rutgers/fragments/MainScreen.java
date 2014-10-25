@@ -14,15 +14,15 @@ import edu.rutgers.css.Rutgers2.R;
 
 public class MainScreen extends Fragment {
 
-	public MainScreen() {
-		// Required empty public constructor
-	}
-	
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		final View v = inflater.inflate(R.layout.fragment_main_screen, container, false);
-		
-		getActivity().setTitle(R.string.app_name);
+    public MainScreen() {
+        // Required empty public constructor
+    }
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final View v = inflater.inflate(R.layout.fragment_main_screen, container, false);
+        
+        getActivity().setTitle(R.string.app_name);
 
         // Set background after view is created and size is set
         v.post(new Runnable() {
@@ -41,7 +41,7 @@ public class MainScreen extends Fragment {
             }
         });
 
-		return v;
-	}
+        return v;
+    }
 
 }

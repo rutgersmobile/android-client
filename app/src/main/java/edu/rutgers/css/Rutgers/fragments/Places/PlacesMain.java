@@ -50,18 +50,18 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class PlacesMain extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
 
-	private static final String TAG = "PlacesMain";
+    private static final String TAG = "PlacesMain";
     public static final String HANDLE = "places";
 
-	private PlaceAutoCompleteAdapter mSearchAdapter;
-	private ArrayList<RMenuRow> mNearbyData;
+    private PlaceAutoCompleteAdapter mSearchAdapter;
+    private ArrayList<RMenuRow> mNearbyData;
     private RMenuAdapter mNearbyAdapter;
     private ProgressBar mProgressCircle;
     private LocationClientProvider mLocationClientProvider;
 
-	public PlacesMain() {
-		// Required empty public constructor
-	}
+    public PlacesMain() {
+        // Required empty public constructor
+    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -82,23 +82,23 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         mLocationClientProvider = null;
     }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
+        mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
 
         // Get nearby places & populate nearby places list
         mNearbyData = new ArrayList<RMenuRow>();
         mNearbyAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mNearbyData);
     }
-	
-	@Override
-	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		final View v = inflater.inflate(R.layout.fragment_places, parent, false);
-		Bundle args = getArguments();
+    
+    @Override
+    public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        final View v = inflater.inflate(R.layout.fragment_places, parent, false);
+        Bundle args = getArguments();
 
-		// Set title from JSON
+        // Set title from JSON
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
         else getActivity().setTitle(R.string.places_title);
 
@@ -107,37 +107,37 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         ListView listView = (ListView) v.findViewById(R.id.listView);
         listView.setAdapter(mNearbyAdapter);
 
-		final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
-		autoComp.setAdapter(mSearchAdapter);
+        final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
+        autoComp.setAdapter(mSearchAdapter);
 
-		// Item selected from auto-complete list
-		autoComp.setOnItemClickListener(new OnItemClickListener() {
+        // Item selected from auto-complete list
+        autoComp.setOnItemClickListener(new OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				// Launch Places display fragment
-				Bundle args = new Bundle();
-				KeyValPair placeStub = (KeyValPair) parent.getAdapter().getItem(position);
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Launch Places display fragment
+                Bundle args = new Bundle();
+                KeyValPair placeStub = (KeyValPair) parent.getAdapter().getItem(position);
 
-				args.putString("component", PlacesDisplay.HANDLE);
-				args.putString("placeKey", placeStub.getKey());
-				args.putString("title", placeStub.getValue());
-				
-				ComponentFactory.getInstance().switchFragments(args);
-			}
-			
-		});
-		
-		// Text placed in field from soft-keyboard/autocomplete (may happen in landscape)
-		autoComp.setOnEditorActionListener(new OnEditorActionListener() {
+                args.putString("component", PlacesDisplay.HANDLE);
+                args.putString("placeKey", placeStub.getKey());
+                args.putString("title", placeStub.getValue());
+                
+                ComponentFactory.getInstance().switchFragments(args);
+            }
+            
+        });
+        
+        // Text placed in field from soft-keyboard/autocomplete (may happen in landscape)
+        autoComp.setOnEditorActionListener(new OnEditorActionListener() {
 
-			@Override
-			public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-				if(actionId == EditorInfo.IME_ACTION_SEARCH) return true;
-				else return false;
-			}
-			
-		});
+            @Override
+            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
+                if(actionId == EditorInfo.IME_ACTION_SEARCH) return true;
+                else return false;
+            }
+            
+        });
 
         // Clear search bar
         ImageButton clearSearchButton = (ImageButton) v.findViewById(R.id.filterClearButton);
@@ -160,7 +160,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         });
 
         return v;
-	}
+    }
 
     @Override
     public void onResume() {

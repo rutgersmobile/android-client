@@ -38,8 +38,8 @@ import edu.rutgers.css.Rutgers2.R;
  * <p>Use {@link #dTag()} instead of TAG when logging</p>
  */
 public class DTable extends Fragment {
-	
-	private static final String TAG = "DTable";
+    
+    private static final String TAG = "DTable";
     public static final String HANDLE = "dtable";
 
     private static final String TAG_HANDLE = "mHandle";
@@ -48,13 +48,13 @@ public class DTable extends Fragment {
     private DTableRoot mDRoot;
     private List<DTableElement> mData;
     private DTableAdapter mAdapter;
-	private String mURL;
-	private String mAPI;
+    private String mURL;
+    private String mAPI;
     private String mHandle;
 
-	public DTable() {
-		// Required empty public constructor
-	}
+    public DTable() {
+        // Required empty public constructor
+    }
 
     /**
      * Get descriptive DTable tag to use for logging.
@@ -64,10 +64,10 @@ public class DTable extends Fragment {
         if(mHandle != null) return TAG + "_" + mHandle;
         else return TAG;
     }
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         if(savedInstanceState != null && savedInstanceState.getString("mData") != null) {
             Log.v(dTag(), "Restoring mData");
@@ -81,7 +81,7 @@ public class DTable extends Fragment {
         mData = new ArrayList<DTableElement>();
         mAdapter = new DTableAdapter(getActivity(), mData);
 
-		Bundle args = getArguments();
+        Bundle args = getArguments();
 
         // Get handle for this DTable instance
         if(args.getString("handle") != null) mHandle = args.getString("handle");
@@ -90,21 +90,21 @@ public class DTable extends Fragment {
         else mHandle = "null";
 
         // If a JSON array was provided in "data" field, load it
-		if (args.getSerializable("data") != null) {
-			try {
+        if (args.getSerializable("data") != null) {
+            try {
                 mDRoot = (DTableRoot) args.getSerializable("data");
                 mData = mDRoot.getChildren();
-				mAdapter.setData(mData);
+                mAdapter.setData(mData);
                 return;
-			} catch (ClassCastException e) {
-				Log.e(dTag(), "onCreateView(): " + e.getMessage());
-			}
-		}
+            } catch (ClassCastException e) {
+                Log.e(dTag(), "onCreateView(): " + e.getMessage());
+            }
+        }
 
         // Otherwise, check for URL or API argument
-		else if (args.getString("url") != null) mURL = args.getString("url");
-		else if (args.getString("api") != null) mAPI = args.getString("api");
-		else {
+        else if (args.getString("url") != null) mURL = args.getString("url");
+        else if (args.getString("api") != null) mAPI = args.getString("api");
+        else {
             Log.e(dTag(), "DTable must have URL, API, or data in its arguments bundle");
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
             return;
@@ -139,24 +139,24 @@ public class DTable extends Fragment {
             }
 
         });
-	}
-	
-	@Override
-	public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
-		ListView listView = (ListView) v.findViewById(R.id.dtable_list);
+    }
+    
+    @Override
+    public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
+        ListView listView = (ListView) v.findViewById(R.id.dtable_list);
 
-		final Bundle args = getArguments();
-		if(args.getString("title") != null) {
-			getActivity().setTitle(args.getString("title"));
-		}
-		
-		listView.setAdapter(mAdapter);
+        final Bundle args = getArguments();
+        if(args.getString("title") != null) {
+            getActivity().setTitle(args.getString("title"));
+        }
+        
+        listView.setAdapter(mAdapter);
 
         final String homeCampus = RutgersUtil.getHomeCampus(getActivity());
-		
-		// Clicks on DTable item launch component in "view" field with arguments
-		listView.setOnItemClickListener(new OnItemClickListener() {
+        
+        // Clicks on DTable item launch component in "view" field with arguments
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -192,9 +192,9 @@ public class DTable extends Fragment {
             }
 
         });
-		
-		return v;
-	}
+        
+        return v;
+    }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
