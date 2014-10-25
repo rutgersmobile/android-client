@@ -45,10 +45,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="edu.rutgers.css.Rutgers.SingleFragmentActivity"
-            android:label="@string/title_activity_single_fragment" >
-        </activity>
-        <activity
             android:name="edu.rutgers.css.Rutgers2.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
