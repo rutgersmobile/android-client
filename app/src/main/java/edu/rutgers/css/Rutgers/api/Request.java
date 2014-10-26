@@ -13,12 +13,12 @@ import org.json.JSONObject;
 import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
-// Convenience class for making requests
+/** Convenience class for making requests */
 public class Request {
     
     private static final String TAG = "Request";
-    private static AQuery aq;
-    private static boolean mSetupDone = false;
+
+    private static AQuery sAq;
     
     public static long CACHE_NEVER = -1; // -1 means always refresh -- never use cache
     public static long CACHE_ONE_MINUTE = 1000 * 60;
@@ -26,10 +26,8 @@ public class Request {
     public static long CACHE_ONE_DAY = CACHE_ONE_HOUR * 24;
     
     private static void setup () {
-        if (!mSetupDone) {
-            aq = new AQuery(RutgersApplication.getAppContext());
-            
-            mSetupDone = true;
+        if (sAq == null) {
+            sAq = new AQuery(RutgersApplication.getAppContext());
         }
     }
 
@@ -41,16 +39,6 @@ public class Request {
      */
     public static Promise<JSONObject, AjaxStatus, Double> api (String resource, long expire) {
         return json(AppUtil.API_BASE + resource, expire);
-    }
-
-    /**
-     * Get full AJAX callback object for JSON from mobile server.
-     * @param resource JSON file URL
-     * @param expire Cache time in milliseconds
-     * @return Promise for an AJAX callback object
-     */
-    public static Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> apiWithStatus(String resource, long expire) {
-        return jsonWithStatus(AppUtil.API_BASE + resource, expire);
     }
 
     /**
@@ -73,45 +61,19 @@ public class Request {
         setup();
         final DeferredObject<JSONObject, AjaxStatus, Double> deferred = new DeferredObject<JSONObject, AjaxStatus, Double>();
         
-        aq.ajax(resource, JSONObject.class, expire, new AjaxCallback<JSONObject>() {
+        sAq.ajax(resource, JSONObject.class, expire, new AjaxCallback<JSONObject>() {
 
             @Override
             public void callback(String url, JSONObject json, AjaxStatus status) {
                 // Don't cache if we didn't get a valid object
-                if(json == null) {
+                if (json == null) {
                     status.invalidate();
                     deferred.reject(status);
-                }
-                else deferred.resolve(json);
+                } else deferred.resolve(json);
             }
-            
+
         });
         
-        return deferred.promise();
-    }
-
-    /**
-     * Get arbitrary JSON, in full AJAX callback.
-     * @param resource
-     * @param expire
-     * @return
-     */
-    public static Promise<AjaxCallback<JSONObject>, AjaxStatus, Double> jsonWithStatus(String resource, long expire) {
-        setup();
-        final DeferredObject<AjaxCallback<JSONObject>, AjaxStatus, Double> deferred = new DeferredObject<AjaxCallback<JSONObject>, AjaxStatus, Double>();
-
-        aq.ajax(resource, JSONObject.class, expire, new AjaxCallback<JSONObject>() {
-            @Override
-            public void callback(String url, JSONObject json, AjaxStatus status) {
-                // Don't cache if we didn't get a valid object
-                if(json == null) {
-                    status.invalidate();
-                    deferred.reject(status);
-                }
-                else deferred.resolve(this);
-            }
-        });
-
         return deferred.promise();
     }
 
@@ -125,7 +87,7 @@ public class Request {
         setup();
         AjaxCallback<JSONObject> callback = new AjaxCallback<JSONObject>();
         callback.url(resource).expire(expire).type(JSONObject.class);
-        aq.sync(callback);
+        sAq.sync(callback);
         // Don't cache if we didn't get a valid object
         if(callback.getStatus().getCode() == AjaxStatus.TRANSFORM_ERROR) {
             callback.getStatus().invalidate();
@@ -143,18 +105,17 @@ public class Request {
         setup();
         final DeferredObject<JSONArray, AjaxStatus, Double> deferred = new DeferredObject<JSONArray, AjaxStatus, Double>();
         
-        aq.ajax(resource, JSONArray.class, expire, new AjaxCallback<JSONArray>() {
+        sAq.ajax(resource, JSONArray.class, expire, new AjaxCallback<JSONArray>() {
 
             @Override
             public void callback(String url, JSONArray jsonArray, AjaxStatus status) {
                 // Don't cache if we didn't get a valid object
-                if(jsonArray == null) {
+                if (jsonArray == null) {
                     status.invalidate();
                     deferred.reject(status);
-                }
-                else deferred.resolve(jsonArray);
+                } else deferred.resolve(jsonArray);
             }
-            
+
         });
         
         return deferred.promise();
@@ -170,18 +131,17 @@ public class Request {
         setup();
         final DeferredObject<XmlDom, AjaxStatus, Double> deferred = new DeferredObject<XmlDom, AjaxStatus, Double>();
         
-        aq.ajax(resource, XmlDom.class, expire, new AjaxCallback<XmlDom>() {
+        sAq.ajax(resource, XmlDom.class, expire, new AjaxCallback<XmlDom>() {
 
             @Override
             public void callback(String url, XmlDom xml, AjaxStatus status) {
                 // Don't cache if we didn't get a valid object
-                if(xml == null) {
+                if (xml == null) {
                     status.invalidate();
                     deferred.reject(status);
-                }
-                else deferred.resolve(xml);
+                } else deferred.resolve(xml);
             }
-            
+
         });
         
         return deferred.promise();
