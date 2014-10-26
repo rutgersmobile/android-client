@@ -3,14 +3,12 @@ package edu.rutgers.css.Rutgers.api;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.DeferredAsyncTask;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,11 +37,6 @@ public class Schedule {
     public static final String CODE_LEVEL_UNDERGRAD = "U";
     public static final String CODE_LEVEL_GRAD = "G";
 
-    private static class CallbackResults<T> {
-        T result;
-        AjaxStatus status;
-    }
-
     /**
      * Get current semester configuration from API.
      * @return SOC Conf API with semesters array and default semester setting
@@ -63,8 +56,7 @@ public class Schedule {
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineSubjects.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode;
-        }
-        else {
+        } else {
             reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode;
         }
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
@@ -82,8 +74,7 @@ public class Schedule {
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineCourses.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode + "&subject=" + subjectCode;
-        }
-        else {
+        } else {
             reqUrl = SOC_BASE_URL + "courses.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode + "&subject=" + subjectCode;
         }
         return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
@@ -101,8 +92,7 @@ public class Schedule {
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
-        }
-        else {
+        } else {
             reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         }
         return Request.json(reqUrl, Request.CACHE_ONE_DAY);
@@ -115,42 +105,24 @@ public class Schedule {
      * @param levelCode Level code (e.g. U for undergrad, G for graduate)
      * @return Promise for an SOCIndex
      */
-    public static Promise<SOCIndex, AjaxStatus, Double> getIndex(final String semesterCode, final String campusCode, final String levelCode) {
-        final Deferred<SOCIndex, AjaxStatus, Double> deferred = new DeferredObject<SOCIndex, AjaxStatus, Double>();
+    public static Promise<SOCIndex, Exception, Double> getIndex(final String semesterCode, final String campusCode, final String levelCode) {
+        final Deferred<SOCIndex, Exception, Double> deferred = new DeferredObject<SOCIndex, Exception, Double>();
 
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(new DeferredAsyncTask<Void, Double, CallbackResults<SOCIndex>>() {
+        Request.api("indexes/"+semesterCode+"_"+campusCode+"_"+levelCode+".json", Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
             @Override
-            protected CallbackResults<SOCIndex> doInBackgroundSafe(Void... nil) throws Exception {
-                AjaxCallback<JSONObject> cb = Request.apiSynchronous("indexes/" + semesterCode + "_" + campusCode + "_" + levelCode + ".json", Request.CACHE_ONE_DAY);
-
-                AjaxStatus status = cb.getStatus();
-                JSONObject result = cb.getResult();
-
-                CallbackResults<SOCIndex> results = new CallbackResults<SOCIndex>();
-
-                results.status = status;
-
-                if(result == null) {
-                    Log.e(TAG, "getIndex(): " + AppUtil.formatAjaxStatus(status));
-                    results.result = null;
+            public void onDone(JSONObject result) {
+                try {
+                    SOCIndex socIndex = new SOCIndex(campusCode, levelCode, semesterCode, result);
+                    deferred.resolve(socIndex);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "getIndex(): " + e.getMessage());
+                    deferred.reject(e);
                 }
-                else {
-                    try {
-                        results.result = new SOCIndex(campusCode, levelCode, semesterCode, result);
-                    } catch (IllegalArgumentException e) {
-                        Log.e(TAG, "getIndex(): " + e.getMessage());
-                        results.result = null;
-                    }
-                }
-
-                return results;
             }
-        }).done(new DoneCallback<CallbackResults<SOCIndex>>() {
+        }).fail(new FailCallback<AjaxStatus>() {
             @Override
-            public void onDone(CallbackResults<SOCIndex> results) {
-                if (results.result == null) deferred.reject(results.status);
-                else deferred.resolve(results.result);
+            public void onFail(AjaxStatus status) {
+                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
             }
         });
 

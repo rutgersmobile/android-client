@@ -43,7 +43,7 @@ public class SOCIndex {
     private HashMap<String, Subject> mSubjectsByCode;
     private HashMap<String, String> mSubjectsByName;
 
-    public SOCIndex(String campusCode, String levelCode, String semesterCode, JSONObject index) {
+    public SOCIndex(String campusCode, String levelCode, String semesterCode, JSONObject index) throws IllegalArgumentException {
         if(index.isNull("abbrevs") || index.isNull("courses") || index.isNull("ids") || index.isNull("names")) {
             throw new IllegalArgumentException("Invalid index, missing critical fields");
         }

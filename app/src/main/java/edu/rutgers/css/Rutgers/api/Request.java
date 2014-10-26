@@ -42,16 +42,6 @@ public class Request {
     }
 
     /**
-     * Get JSON from mobile server, synchronously (blocking).
-     * @param resource JSON file URL
-     * @param expire Cache time in milliseconds
-     * @return AjaxCallback for JSONObject
-     */
-    public static AjaxCallback<JSONObject> apiSynchronous(String resource, long expire) {
-        return jsonSynchronous(AppUtil.API_BASE + resource, expire);
-    }
-
-    /**
      * Get arbitrary JSON.
      * @param resource JSON file URL
      * @param expire Cache time in milliseconds
@@ -75,24 +65,6 @@ public class Request {
         });
         
         return deferred.promise();
-    }
-
-    /**
-     * Get arbitrary JSON synchronously (blocking).
-     * @param resource JSON file URL
-     * @param expire Cache time in milliseconds
-     * @return AjaxCallback for JSONObject
-     */
-    public static AjaxCallback<JSONObject> jsonSynchronous(String resource, long expire) {
-        setup();
-        AjaxCallback<JSONObject> callback = new AjaxCallback<JSONObject>();
-        callback.url(resource).expire(expire).type(JSONObject.class);
-        sAq.sync(callback);
-        // Don't cache if we didn't get a valid object
-        if(callback.getStatus().getCode() == AjaxStatus.TRANSFORM_ERROR) {
-            callback.getStatus().invalidate();
-        }
-        return callback;
     }
     
     /**
