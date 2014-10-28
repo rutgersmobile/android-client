@@ -32,6 +32,7 @@ public class SettingsActivity extends PreferenceActivity {
     public static final String KEY_PREF_SOC_CAMPUS      = "soc_campus";
     public static final String KEY_PREF_SOC_LEVEL       = "soc_level";
     public static final String KEY_PREF_SOC_SEMESTER    = "soc_semester";
+    public static final String KEY_PREFS_FIRST_LAUNCH   = "first_launch";
 
     /**
      * Determines whether to always show the simplified settings UI, where

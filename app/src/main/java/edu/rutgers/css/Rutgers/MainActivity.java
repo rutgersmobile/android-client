@@ -64,7 +64,6 @@ public class MainActivity extends LogoFragmentActivity  implements
     
     private static final String TAG = "MainActivity";
     private static final String SC_API = AppUtil.API_BASE + "shortcuts.txt";
-    private static final String KEY_PREFS_FIRST_LAUNCH = "first_launch";
 
     private ChannelManager mChannelManager;
     private LocationClient mLocationClient;
@@ -126,7 +125,7 @@ public class MainActivity extends LogoFragmentActivity  implements
 
         // Check if this is the first time the app is being launched
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(prefs.getBoolean(KEY_PREFS_FIRST_LAUNCH, true)) {
+        if(prefs.getBoolean(SettingsActivity.KEY_PREFS_FIRST_LAUNCH, true)) {
             Log.i(TAG, "First launch");
 
             // First launch, create analytics event & show settings screen
@@ -137,7 +136,7 @@ public class MainActivity extends LogoFragmentActivity  implements
             startActivity(settingsIntent);
             */
 
-            prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH, false).apply();
+            prefs.edit().putBoolean(SettingsActivity.KEY_PREFS_FIRST_LAUNCH, false).apply();
         }
 
         /*
