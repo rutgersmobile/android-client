@@ -18,10 +18,10 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -547,7 +547,8 @@ public class MainActivity extends FragmentActivity  implements
      */
     private void showLogoOverlay(int rootLayoutId) {
         // Get a layout that just contains the logo to display
-        final View logo = getLayoutInflater().inflate(R.layout.logo, null, false);
+        final View logo = getLayoutInflater().inflate(R.layout.logo_split, null, false);
+        final ImageView logoTop = (ImageView) logo.findViewById(R.id.seal_top);
         logo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
         // Get the the action bar, home button, and title text views
@@ -562,21 +563,20 @@ public class MainActivity extends FragmentActivity  implements
         findViewById(rootLayoutId).post(new Runnable() {
             public void run() {
                 int side = actionBarView.getHeight();
-                mLogoPopup = new PopupWindow(logo, side+16, side+16, false);
+                mLogoPopup = new PopupWindow(logo, side+16, side*2, false);
                 mLogoPopup.showAsDropDown(actionBarView, (int) home.getX(), -side);
-                mLogoPopup.setTouchInterceptor(new View.OnTouchListener() {
+
+                // Clicking the logo toggles drawer
+                logoTop.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        // Clicking the logo toggles drawer
+                    public void onClick(View view) {
                         if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
                             mDrawerLayout.closeDrawer(mDrawerListView);
                         } else {
-                            mDrawerLayout.openDrawer(Gravity.START);
+                            mDrawerLayout.openDrawer(Gravity.LEFT);
                         }
-                        return true;
                     }
                 });
-                mLogoPopup.setTouchable(true);
 
                 // Move the title text over so it's not obscured by the logo
                 int diff = Math.abs(mLogoPopup.getWidth() - home.getWidth());
