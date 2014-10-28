@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="AutoCompleteTextViewRutgersTheme" parent="android:Widget.Holo.Light.AutoCompleteTextView">
+      <item name="android:dropDownSelector">@drawable/rutgerstheme_list_selector_holo_light</item>
+	    <item name="android:background">@drawable/rutgerstheme_edit_text_holo_light</item>
+  </style>
+
+  <style name="ButtonRutgersTheme" parent="android:Widget.Holo.Light.Button">
+	  <item name="android:background">@drawable/rutgerstheme_btn_default_holo_light</item>
+  </style>
+
+  <style name="ImageButtonRutgersTheme" parent="android:Widget.Holo.Light.ImageButton">
+	  <item name="android:background">@drawable/rutgerstheme_btn_default_holo_light</item>
+  </style>
+
+  <style name="TabRutgersTheme">
+      <item name="android:gravity">center_horizontal</item>
+      <item name="android:paddingLeft">16dip</item>
+      <item name="android:paddingRight">16dip</item>
+      <item name="android:background">@drawable/rutgerstheme_tab_indicator_holo</item>
+      <item name="android:layout_width">0dip</item>
+      <item name="android:layout_weight">1</item>
+      <item name="android:minWidth">80dip</item>
+  </style>
+
+  <style name="TabTextRutgersTheme">
+	  <item name="android:textColor">#000000</item>
+      <item name="android:textSize">12sp</item>
+      <item name="android:textStyle">bold</item>
+      <!-- v14 <item name="android:textAllCaps">true</item> -->
+      <item name="android:ellipsize">marquee</item>
+      <item name="android:maxLines">2</item>
+      <item name="android:maxWidth">180dip</item>
+  </style>
+
+</resources>

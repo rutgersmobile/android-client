@@ -13,7 +13,7 @@
     </style>
 
     <!-- Application theme. -->
-    <style name="RutgersTheme" parent="RutgersBaseTheme">
+    <style name="RutgersTheme" parent="_RutgersTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
         <item name="android:actionBarStyle">@style/RutgersActionBar</item>
         <item name="android:actionMenuTextColor">@color/actbar_text</item>
