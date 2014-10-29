@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +12,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,15 +25,18 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.adapters.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Schedule;
+import edu.rutgers.css.Rutgers.items.Schedule.Course;
+import edu.rutgers.css.Rutgers.items.Schedule.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 public class SOCCourses extends Fragment {
 
     private static final String TAG = "SOCCourses";
+
     public static final String HANDLE = "soccourses";
 
-    private List<JSONObject> mData;
+    private List<ScheduleAdapterItem> mData;
     private ScheduleAdapter mAdapter;
     private EditText mFilterEditText;
     private String mFilterString;
@@ -51,7 +50,7 @@ public class SOCCourses extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        mData = new ArrayList<JSONObject>();
+        mData = new ArrayList<ScheduleAdapterItem>();
         mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, mData);
 
         // Restore filter
@@ -65,26 +64,20 @@ public class SOCCourses extends Fragment {
         final String subjectCode = args.getString("subjectCode");
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Schedule.getCourses(campus, level, semester, subjectCode)).done(new DoneCallback<JSONArray>() {
+        dm.when(Schedule.getCourses(campus, level, semester, subjectCode)).done(new DoneCallback<List<Course>>() {
 
             @Override
-            public void onDone(JSONArray result) {
-                for (int i = 0; i < result.length(); i++) {
-                    try {
-                        mAdapter.add(result.getJSONObject(i));
-                    } catch (JSONException e) {
-                        Log.w(TAG, "getSubjects(): " + e.getMessage());
-                    }
-                }
+            public void onDone(List<Course> result) {
+                mAdapter.addAll(result);
 
                 // Re-apply filter
                 if(mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
             }
 
-        }).fail(new FailCallback<AjaxStatus>() {
+        }).fail(new FailCallback<Exception>() {
 
             @Override
-            public void onFail(AjaxStatus result) {
+            public void onFail(Exception result) {
                 AppUtil.showFailedLoadToast(getActivity());
             }
 
@@ -107,12 +100,12 @@ public class SOCCourses extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
+                Course clickedCourse = (Course) parent.getItemAtPosition(position);
 
                 Bundle newArgs = new Bundle();
                 newArgs.putString("component", SOCSections.HANDLE);
-                newArgs.putString("title", clickedJSON.optString("courseNumber") + ": " + clickedJSON.optString("title"));
-                newArgs.putString("data", clickedJSON.toString());
+                newArgs.putString("title", clickedCourse.getDisplayTitle());
+                newArgs.putString("data", new Gson().toJson(clickedCourse));
                 newArgs.putString("semester", semester);
 
                 ComponentFactory.getInstance().switchFragments(newArgs);

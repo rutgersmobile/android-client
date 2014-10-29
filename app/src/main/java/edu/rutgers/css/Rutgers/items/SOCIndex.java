@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers.items;
 
-import android.util.Log;
-
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,21 +12,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.rutgers.css.Rutgers.items.Schedule.Course;
+import edu.rutgers.css.Rutgers.items.Schedule.Subject;
 import edu.rutgers.css.Rutgers.utils.JsonUtil;
 
 /**
- * Created by jamchamb on 8/21/14.
+ * SOC Index.
  */
 public class SOCIndex {
 
     private static final String TAG = "SOCIndex";
 
-    private static class Course {
+    private static class IndexCourse {
         String course;
         String subj;
     }
 
-    private static class Subject {
+    private static class IndexSubject {
         String id;
         String name;
         HashMap<String, String> courses;
@@ -39,8 +39,8 @@ public class SOCIndex {
     private String levelCode;
 
     private HashMap<String, String[]> mAbbreviations;
-    private HashMap<String, Course> mCoursesByName;
-    private HashMap<String, Subject> mSubjectsByCode;
+    private HashMap<String, IndexCourse> mCoursesByName;
+    private HashMap<String, IndexSubject> mSubjectsByCode;
     private HashMap<String, String> mSubjectsByName;
 
     public SOCIndex(String campusCode, String levelCode, String semesterCode, JSONObject index) throws IllegalArgumentException {
@@ -69,7 +69,7 @@ public class SOCIndex {
             }
 
             // Set up subject IDs hashtable
-            mSubjectsByCode = new HashMap<String, Subject>();
+            mSubjectsByCode = new HashMap<String, IndexSubject>();
             for(Iterator<String> idsIterator = ids.keys(); idsIterator.hasNext();) {
                 String curID = idsIterator.next();
                 JSONObject curContents = ids.getJSONObject(curID);
@@ -83,7 +83,7 @@ public class SOCIndex {
                     courseMap.put(curCourseID, curCourseName);
                 }
 
-                Subject newSubject = new Subject();
+                IndexSubject newSubject = new IndexSubject();
                 newSubject.id = curID;
                 newSubject.name = curContents.getString("name");
                 newSubject.courses = courseMap;
@@ -100,11 +100,11 @@ public class SOCIndex {
             }
 
             // Set up course names
-            mCoursesByName = new HashMap<String, Course>();
+            mCoursesByName = new HashMap<String, IndexCourse>();
             for(Iterator<String> coursesIterator = courses.keys(); coursesIterator.hasNext();) {
                 String curCourseName = coursesIterator.next();
                 JSONObject curContents = courses.getJSONObject(curCourseName);
-                Course newCourse = new Course();
+                IndexCourse newCourse = new IndexCourse();
                 newCourse.course = curContents.getString("course");
                 newCourse.subj = curContents.getString("subj");
                 mCoursesByName.put(curCourseName, newCourse);
@@ -119,21 +119,14 @@ public class SOCIndex {
      * @param abbrev Abbreviation
      * @return List of subject JSON objects (empty if no results found)
      */
-    public List<JSONObject> getSubjectsByAbbreviation(String abbrev) {
-        List<JSONObject> results = new ArrayList<JSONObject>();
+    public List<Subject> getSubjectsByAbbreviation(String abbrev) {
+        List<Subject> results = new ArrayList<Subject>();
         if(mAbbreviations.containsKey(abbrev)) {
             String[] subjCodes = mAbbreviations.get(abbrev);
             for(String subjCode: subjCodes) {
-                Subject curSubject = mSubjectsByCode.get(subjCode);
+                IndexSubject curSubject = mSubjectsByCode.get(subjCode);
                 if(curSubject != null) {
-                    try {
-                        JSONObject newSubjectJSON = new JSONObject();
-                        newSubjectJSON.put("description", curSubject.name.toUpperCase());
-                        newSubjectJSON.put("code", curSubject.id);
-                        results.add(newSubjectJSON);
-                    } catch (JSONException e) {
-                        Log.w(TAG, "getSubjectsByAbbreviation(): " + e.getMessage());
-                    }
+                    results.add(new Subject(curSubject.name, curSubject.id));
                 }
             }
         }
@@ -146,17 +139,11 @@ public class SOCIndex {
      * @param subjectCode Subject code
      * @return Subject JSON object
      */
-    public JSONObject getSubjectByCode(String subjectCode) {
-        Subject subject = mSubjectsByCode.get(subjectCode);
-        if(subject == null) return null;
-
-        try {
-            JSONObject newSubjectJSON = new JSONObject();
-            newSubjectJSON.put("description", subject.name.toUpperCase());
-            newSubjectJSON.put("code", subject.id);
-            return newSubjectJSON;
-        } catch (JSONException e) {
-            Log.w(TAG, "getSubjectByCode(): " + e.getMessage());
+    public Subject getSubjectByCode(String subjectCode) {
+        IndexSubject subject = mSubjectsByCode.get(subjectCode);
+        if(subject != null) {
+            return new Subject(subject.name, subject.id);
+        } else {
             return null;
         }
     }
@@ -167,20 +154,14 @@ public class SOCIndex {
      * @param courseCode Course code
      * @return Course-stub JSON object
      */
-    public JSONObject getCourseByCode(String subjectCode, String courseCode) {
-        Subject subject = mSubjectsByCode.get(subjectCode);
+    public Course getCourseByCode(String subjectCode, String courseCode) {
+        IndexSubject subject = mSubjectsByCode.get(subjectCode);
         if(subject == null) return null;
-        if(!subject.courses.containsKey(courseCode)) return null;
 
-        try {
-            JSONObject newCourseJSON = new JSONObject();
-            newCourseJSON.put("title", subject.courses.get(courseCode).toUpperCase());
-            newCourseJSON.put("subjectCode", subjectCode);
-            newCourseJSON.put("courseNumber", courseCode);
-            newCourseJSON.put("stub", true);
-            return newCourseJSON;
-        } catch (JSONException e) {
-            Log.w(TAG, "getCourseByCode(): " + e.getMessage());
+        String title = subject.courses.get(courseCode);
+        if(title != null) {
+            return new Course(title.toUpperCase(), subjectCode, courseCode);
+        } else {
             return null;
         }
     }
@@ -191,28 +172,19 @@ public class SOCIndex {
      * @param cap Maximum number of results (cutoff point)
      * @return List of course-stub JSON objects (empty if no results found)
      */
-    public List<JSONObject> getCoursesByName(String query, int cap) {
-        List<JSONObject> results = new ArrayList<JSONObject>();
+    public List<Course> getCoursesByName(String query, int cap) {
+        List<Course> results = new ArrayList<Course>();
 
-        Set<Map.Entry<String, Course>> courseEntries = mCoursesByName.entrySet();
-        for (Map.Entry<String, Course> curEntry: courseEntries) {
+        Set<Map.Entry<String, IndexCourse>> courseEntries = mCoursesByName.entrySet();
+        for (Map.Entry<String, IndexCourse> curEntry: courseEntries) {
             // If there's a partial match on the full course name...
             if(StringUtils.containsIgnoreCase(curEntry.getKey(), query)) {
-                Course curCourse = curEntry.getValue();
+                IndexCourse curCourse = curEntry.getValue();
                 String subjectCode = curCourse.subj;
                 String courseCode = curCourse.course;
 
-                try {
-                    JSONObject newCourseJSON = new JSONObject();
-                    newCourseJSON.put("title", curEntry.getKey().toUpperCase());
-                    newCourseJSON.put("subjectCode", subjectCode);
-                    newCourseJSON.put("courseNumber", courseCode);
-                    newCourseJSON.put("stub", true);
-                    results.add(newCourseJSON);
-                    if(results.size() >= cap) return results;
-                } catch (JSONException e) {
-                    Log.w(TAG, "getCoursesByName(): " + e.getMessage());
-                }
+                results.add(new Course(curEntry.getKey().toUpperCase(), subjectCode, courseCode));
+                if(results.size() >= cap) return results;
             }
         }
 

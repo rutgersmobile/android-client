@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
@@ -14,12 +16,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.items.SOCIndex;
+import edu.rutgers.css.Rutgers.items.Schedule.Course;
+import edu.rutgers.css.Rutgers.items.Schedule.Semesters;
+import edu.rutgers.css.Rutgers.items.Schedule.Subject;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
- * Created by jamchamb on 7/17/14.
+ * Schedule of Classes API
  */
 public class Schedule {
 
@@ -41,8 +49,28 @@ public class Schedule {
      * Get current semester configuration from API.
      * @return SOC Conf API with semesters array and default semester setting
      */
-    public static Promise<JSONObject, AjaxStatus, Double> getSemesters() {
-        return Request.api("soc_conf.txt", Request.CACHE_ONE_DAY);
+    public static Promise<Semesters, Exception, Void> getSemesters() {
+        final DeferredObject<Semesters, Exception, Void> deferred = new DeferredObject<Semesters, Exception, Void>();
+
+        Request.api("soc_conf.txt", Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
+            @Override
+            public void onDone(JSONObject result) {
+                Gson gson = new Gson();
+                try {
+                    deferred.resolve(gson.fromJson(result.toString(), Semesters.class));
+                } catch (JsonSyntaxException e) {
+                    Log.e(TAG, "getSemesters(): " + e.getMessage());
+                    deferred.reject(e);
+                }
+            }
+        }).fail(new FailCallback<AjaxStatus>() {
+            @Override
+            public void onFail(AjaxStatus status) {
+                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
+
+        return deferred.promise();
     }
 
     /**
@@ -50,34 +78,94 @@ public class Schedule {
      * @param campusCode Campus code (e.g. NB)
      * @param levelCode Level code (e.g. U for undergrad, G for graduate)
      * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
-     * @return Array of course subjects
+     * @return Promise for array of course subjects
      */
-    public static Promise<JSONArray, AjaxStatus, Double> getSubjects(String campusCode, String levelCode, String semesterCode) {
+    public static Promise<List<Subject>, Exception, Void> getSubjects(String campusCode, String levelCode, String semesterCode) {
+        final DeferredObject<List<Subject>, Exception, Void> deferred = new DeferredObject<List<Subject>, Exception, Void>();
+
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineSubjects.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode;
         } else {
             reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode;
         }
-        return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
+
+        Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONArray>() {
+            @Override
+            public void onDone(JSONArray result) {
+                Gson gson = new Gson();
+                ArrayList<Subject> subjects = new ArrayList<Subject>(result.length());
+
+                try {
+                    for(int i = 0; i < result.length(); i++) {
+                        Subject newSub = gson.fromJson(result.getJSONObject(i).toString(), Subject.class);
+                        subjects.add(newSub);
+                    }
+                    deferred.resolve(subjects);
+                } catch (JSONException e) {
+                    Log.e(TAG, "getSubjects(): " + e.getMessage());
+                    deferred.reject(e);
+                } catch (JsonSyntaxException e) {
+                    Log.e(TAG, "getSubjects(): " + e.getMessage());
+                    deferred.reject(e);
+                }
+            }
+        }).fail(new FailCallback<AjaxStatus>() {
+            @Override
+            public void onFail(AjaxStatus status) {
+                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
+
+        return deferred.promise();
     }
 
     /**
-     * Get course information for a subject
+     * Get all courses for a subject
      * @param campusCode Campus code (e.g. NB)
      * @param levelCode Level code (e.g. U for undergrad, G for graduate)
      * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
      * @param subjectCode Subject code (e.g. 010, 084)
      * @return Array of courses for a subject
      */
-    public static Promise<JSONArray, AjaxStatus, Double> getCourses(String campusCode, String levelCode, String semesterCode, String subjectCode) {
+    public static Promise<List<Course>, Exception, Void> getCourses(String campusCode, String levelCode, String semesterCode, String subjectCode) {
+        final DeferredObject<List<Course>, Exception, Void> deferred = new DeferredObject<List<Course>, Exception, Void>();
+
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineCourses.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode + "&subject=" + subjectCode;
         } else {
             reqUrl = SOC_BASE_URL + "courses.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode + "&subject=" + subjectCode;
         }
-        return Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY);
+
+        Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONArray>() {
+            @Override
+            public void onDone(JSONArray result) {
+                Gson gson = new Gson();
+                ArrayList<Course> courses = new ArrayList<Course>(result.length());
+
+                try {
+                    for(int i = 0; i < result.length(); i++) {
+                        Course newCourse = gson.fromJson(result.getJSONObject(i).toString(), Course.class);
+                        courses.add(newCourse);
+                    }
+                    deferred.resolve(courses);
+                } catch (JSONException e) {
+                    Log.e(TAG, "getCourses(): " + e.getMessage());
+                    deferred.reject(e);
+                } catch (JsonSyntaxException e) {
+                    Log.e(TAG, "getCourses(): " + e.getMessage());
+                    deferred.reject(e);
+                }
+            }
+        }).fail(new FailCallback<AjaxStatus>() {
+            @Override
+            public void onFail(AjaxStatus status) {
+                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
+
+        return deferred.promise();
     }
 
     /**
@@ -88,14 +176,35 @@ public class Schedule {
      * @param courseCode Course code (e.g. 101, 252, 344)
      * @return JSON Object for one course
      */
-    public static Promise<JSONObject, AjaxStatus, Double> getCourse(String campusCode, String semesterCode, String subjectCode, String courseCode) {
+    public static Promise<Course, Exception, Void> getCourse(String campusCode, String semesterCode, String subjectCode, String courseCode) {
+        final DeferredObject<Course, Exception, Void> deferred = new DeferredObject<Course, Exception, Void>();
+
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         } else {
             reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         }
-        return Request.json(reqUrl, Request.CACHE_ONE_DAY);
+
+        Request.json(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
+            @Override
+            public void onDone(JSONObject result) {
+                Gson gson = new Gson();
+                try {
+                    deferred.resolve(gson.fromJson(result.toString(), Course.class));
+                } catch (JsonSyntaxException e) {
+                    Log.e(TAG, "getCourse(): " + e.getMessage());
+                    deferred.reject(e);
+                }
+            }
+        }).fail(new FailCallback<AjaxStatus>() {
+            @Override
+            public void onFail(AjaxStatus status) {
+                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+            }
+        });
+
+        return deferred.promise();
     }
 
     /**
@@ -181,37 +290,6 @@ public class Schedule {
     }
 
     /**
-     * Get the number of open visible sections, as well as the total number of visible sections.
-     * @param courseJSON Course to count visible sections for
-     * @return Int array with index 0 being the number of open sections, and index 1 being the total
-     */
-    public static int[] countVisibleSections(JSONObject courseJSON) {
-        int count = 0;
-        int openCount = 0;
-
-        if(courseJSON != null) {
-            try {
-                JSONArray sections = courseJSON.getJSONArray("sections");
-                for (int i = 0; i < sections.length(); i++) {
-                    JSONObject section = sections.getJSONObject(i);
-                    if (section.getString("printed").equalsIgnoreCase("Y")) {
-                        if (section.getBoolean("openStatus")) openCount++;
-                        count++;
-                    }
-                }
-            } catch (JSONException e) {
-                Log.w(TAG, "countVisibleOpenSections(): " + e.getMessage());
-            }
-        }
-
-        int[] result = new int[2];
-        result[0] = openCount;
-        result[1] = count;
-
-        return result;
-    }
-
-    /**
      * Open WebReg registration for this course section in the browser.
      * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
      * @param courseIndex Section index number
@@ -224,24 +302,6 @@ public class Schedule {
         args.putString("url", url);
 
         ComponentFactory.getInstance().switchFragments(args);
-    }
-
-    /**
-     * Get display string for a course
-     * @param courseJSON Course JSON
-     * @return Display string, e.g. "112: DATA STRUCTURES"
-     */
-    public static String courseLine(JSONObject courseJSON) {
-        return courseJSON.optString("courseNumber") + ": " +courseJSON.optString("title");
-    }
-
-    /**
-     * Get display string for a subject
-     * @param subjectJSON Subject JSON
-     * @return Display string, e.g. "COMPUTER SCIENCE (198)"
-     */
-    public static String subjectLine(JSONObject subjectJSON) {
-        return subjectJSON.optString("description") + " (" + subjectJSON.optString("code") + ")";
     }
 
 }

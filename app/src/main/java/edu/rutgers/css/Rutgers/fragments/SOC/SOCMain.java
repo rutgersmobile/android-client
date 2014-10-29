@@ -19,16 +19,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +35,10 @@ import edu.rutgers.css.Rutgers.adapters.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.items.SOCIndex;
+import edu.rutgers.css.Rutgers.items.Schedule.Course;
+import edu.rutgers.css.Rutgers.items.Schedule.ScheduleAdapterItem;
+import edu.rutgers.css.Rutgers.items.Schedule.Semesters;
+import edu.rutgers.css.Rutgers.items.Schedule.Subject;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
@@ -47,10 +49,10 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     private static final String TAG = "SOCMain";
     public static final String HANDLE = "soc";
 
-    private List<JSONObject> mData;
+    private List<ScheduleAdapterItem> mData;
     private SOCIndex mSOCIndex;
     private ScheduleAdapter mAdapter;
-    private JSONArray mSemesters;
+    private List<String> mSemesters;
     private String mDefaultSemester;
     private String mSemester;
     private String mCampus;
@@ -66,7 +68,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        mData = new ArrayList<JSONObject>();
+        mData = new ArrayList<ScheduleAdapterItem>();
         mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, mData);
 
         // Load up schedule settings
@@ -86,50 +88,45 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
         // Get the available & current semesters
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Schedule.getSemesters()).done(new DoneCallback<JSONObject>() {
-
+        dm.when(Schedule.getSemesters()).done(new DoneCallback<Semesters>() {
             @Override
-            public void onDone(JSONObject result) {
+            public void onDone(Semesters result) {
+                int defaultIndex = result.getDefaultSemester();
+                List<String> semesters = result.getSemesters();
 
-                try {
-                    JSONArray semesters = result.getJSONArray("semesters");
-                    int defaultSemester = result.getInt("defaultSemester");
-
-                    mDefaultSemester = semesters.getString(defaultSemester);
-                    mSemesters = semesters;
-
-                    // If there is a saved semester setting, make sure it's valid
-                    if(mSemester != null) {
-                        boolean iTrulyLoveJSON = false;
-                        for(int i = 0; i < semesters.length(); i++) {
-                            // Found it
-                            if(mSemester.equals(semesters.optString(i))) iTrulyLoveJSON = true;
-                        }
-                        if(!iTrulyLoveJSON) mSemester = mDefaultSemester;
-                    }
-                    else mSemester = mDefaultSemester;
-
-                    if(BuildConfig.DEBUG) {
-                        for (int i = 0; i < semesters.length(); i++) {
-                            Log.v(TAG, "Got semester: " + Schedule.translateSemester(semesters.getString(i)));
-                        }
-                        Log.v(TAG, "Default semester: " + Schedule.translateSemester(semesters.getString(defaultSemester)));
-                    }
-
-                    // Campus, level, and semester have been set.
-                    loadSubjects();
-                } catch (JSONException e) {
-                    Log.w(TAG, "getSemesters(): " + e.getMessage());
+                if(semesters.isEmpty()) {
+                    Log.e(TAG, "Semesters list is empty");
+                    return;
                 }
+                if(defaultIndex < 0 || defaultIndex >= semesters.size()) {
+                    Log.w(TAG, "Invalid default index " + defaultIndex);
+                    defaultIndex = 0;
+                }
+
+                mDefaultSemester = semesters.get(defaultIndex);
+                mSemesters = semesters;
+
+                // If there is a saved semester setting, make sure it's valid
+                if(mSemester == null || !mSemesters.contains(mSemester)) {
+                    mSemester = mDefaultSemester;
+                }
+
+                if(BuildConfig.DEBUG) {
+                    for(String semester: mSemesters) {
+                        Log.v(TAG, "Got semester: " + Schedule.translateSemester(semester));
+                    }
+                    Log.v(TAG, "Default semester: " + Schedule.translateSemester(mDefaultSemester));
+                }
+
+                // Campus, level, and semester have been set.
+                loadSubjects();
+
             }
-
-        }).fail(new FailCallback<AjaxStatus>() {
-
+        }).fail(new FailCallback<Exception>() {
             @Override
-            public void onFail(AjaxStatus result) {
+            public void onFail(Exception result) {
                 AppUtil.showFailedLoadToast(getActivity());
             }
-
         });
 
     }
@@ -147,23 +144,22 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
+                ScheduleAdapterItem clickedItem = (ScheduleAdapterItem) parent.getItemAtPosition(position);
                 Bundle args = new Bundle();
                 args.putString("campus", mCampus);
                 args.putString("semester", mSemester);
                 args.putString("level", mLevel);
 
-                if (!clickedJSON.has("courseNumber")) {
+                if (clickedItem instanceof Subject) {
                     args.putString("component", SOCCourses.HANDLE);
-                    args.putString("title", Schedule.subjectLine(clickedJSON));
-                    args.putString("subjectCode", clickedJSON.optString("code"));
+                    args.putString("title", clickedItem.getDisplayTitle());
+                    args.putString("subjectCode", ((Subject) clickedItem).getCode());
                     ComponentFactory.getInstance().switchFragments(args);
-                }
-                else if(!clickedJSON.optBoolean("stub")) {
+                } else if(clickedItem instanceof Course && !((Course) clickedItem).isStub()) {
                     // This is for when a course is clicked if it comes up through special filter
                     args.putString("component", SOCSections.HANDLE);
-                    args.putString("title", Schedule.courseLine(clickedJSON));
-                    args.putString("data", clickedJSON.toString());
+                    args.putString("title", clickedItem.getDisplayTitle());
+                    args.putString("data", new Gson().toJson((Course)clickedItem));
                     ComponentFactory.getInstance().switchFragments(args);
                 }
             }
@@ -282,10 +278,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             return;
         }
 
-        ArrayList<String> semestersList = new ArrayList<String>(5);
-        for(int i = 0; i < mSemesters.length(); i++) {
-            semestersList.add(mSemesters.optString(i));
-        }
+        ArrayList<String> semestersList = new ArrayList<String>(mSemesters);
 
         DialogFragment newDialogFragment = SOCDialogFragment.newInstance(semestersList);
         ComponentFactory.getInstance().showDialogFragment(newDialogFragment, SOCDialogFragment.HANDLE);
@@ -307,23 +300,17 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             @Override
             public void onDone(MultipleResults results) {
                 SOCIndex index = (SOCIndex) results.get(0).getResult();
-                JSONArray subjects = (JSONArray) results.get(1).getResult();
+                List<Subject> subjects = (List<Subject>) results.get(1).getResult();
 
                 mSOCIndex = index;
                 mAdapter.setFilterIndex(mSOCIndex);
 
                 // Load subjects
                 mAdapter.clear();
-                for (int i = 0; i < subjects.length(); i++) {
-                    try {
-                        mAdapter.add(subjects.getJSONObject(i));
-                    } catch (JSONException e) {
-                        Log.w(TAG, "getSubjects(): " + e.getMessage());
-                    }
-                }
+                mAdapter.addAll(subjects);
 
                 // Re-apply filter
-                if (mFilterString != null && !mFilterString.isEmpty()) {
+                if (!StringUtils.isEmpty(mFilterString)) {
                     mAdapter.getFilter().filter(mFilterString);
                 }
             }

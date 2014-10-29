@@ -10,34 +10,30 @@ import android.widget.Filter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.androidquery.callback.AjaxStatus;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.items.SOCIndex;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.items.Schedule.Course;
+import edu.rutgers.css.Rutgers.items.Schedule.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Created by jamchamb on 7/24/14.
+ * Adapter for subjects and courses.
  */
-public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
+public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
 
     private static final String TAG = "ScheduleAdapter";
 
     private int mRowLayoutResId;
-    private List<JSONObject> mList;
-    private List<JSONObject> mOriginalList;
+    private List<ScheduleAdapterItem> mList;
+    private List<ScheduleAdapterItem> mOriginalList;
     private ScheduleFilter mFilter;
     private SOCIndex mSOCIndex;
     private final Object mLock = new Object();
@@ -49,7 +45,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
         ProgressBar progressBar;
     }
 
-    public ScheduleAdapter(Context context, int resource, List<JSONObject> objects) {
+    public ScheduleAdapter(Context context, int resource, List<ScheduleAdapterItem> objects) {
         super(context, resource, objects);
         this.mRowLayoutResId = resource;
         this.mList = objects;
@@ -68,68 +64,48 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             holder.sectionsTextView = (TextView) convertView.findViewById(R.id.sections);
             holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        final JSONObject jsonObject = getItem(position);
+        final ScheduleAdapterItem scheduleItem = getItem(position);
 
         // If it's a course
-        if(jsonObject.has("courseNumber")) {
-            holder.titleTextView.setText(Schedule.courseLine(jsonObject));
+        if(scheduleItem instanceof Course) {
+            final Course course = (Course) scheduleItem;
+            holder.titleTextView.setText(course.getDisplayTitle());
 
-            if(jsonObject.optBoolean("stub") && !jsonObject.optBoolean("failedLoad")) {
-                // Replace the stub JSON data
+            if(course.isStub()) {
+                // Replace the stub data
                 final ScheduleAdapter scheduleAdapter = this;
                 AndroidDeferredManager dm = new AndroidDeferredManager();
-                dm.when(Schedule.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), jsonObject.optString("subjectCode"), jsonObject.optString("courseNumber"))).done(new DoneCallback<JSONObject>() {
-
+                dm.when(Schedule.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), course.getSubject(), course.getCourseNumber())).done(new DoneCallback<Course>() {
                     @Override
-                    public void onDone(JSONObject result) {
-                        for(Iterator<String> keys = result.keys(); keys.hasNext();) {
-                            String curKey = keys.next();
-                            try {
-                                jsonObject.put(curKey, result.opt(curKey));
-                                jsonObject.put("stub", false);
-                            } catch(JSONException e) {
-                                Log.w(TAG, "getView(): " + e.getMessage());
-                            }
-                        }
+                    public void onDone(Course result) {
+                        course.updateFields(result);
                         scheduleAdapter.notifyDataSetChanged();
                     }
-
-                }).fail(new FailCallback<AjaxStatus>() {
-
+                }).fail(new FailCallback<Exception>() {
                     @Override
-                    public void onFail(AjaxStatus result) {
-                        Log.w(TAG, AppUtil.formatAjaxStatus(result));
-                        try {
-                            jsonObject.put("failedLoad", true);
-                        } catch (JSONException e) {
-                            Log.w(TAG, "getView(): " + e.getMessage());
-                        }
+                    public void onFail(Exception result) {
+                        Log.w(TAG, result.getMessage());
                     }
-
                 });
 
                 holder.creditsTextView.setVisibility(View.GONE);
                 holder.sectionsTextView.setVisibility(View.GONE);
                 holder.progressBar.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 // Get the number of open/total visible sections for this course
-                int[] counts = Schedule.countVisibleSections(jsonObject);
-                holder.creditsTextView.setText("credits: " + jsonObject.optInt("credits"));
-                holder.sectionsTextView.setText("sections: " + counts[0] + "/" + counts[1]);
+                holder.creditsTextView.setText("credits: " + course.getCredits());
+                holder.sectionsTextView.setText("sections: " + course.countOpenSections(false) + "/" + course.countTotalSections(false));
                 holder.creditsTextView.setVisibility(View.VISIBLE);
                 holder.sectionsTextView.setVisibility(View.VISIBLE);
                 holder.progressBar.setVisibility(View.GONE);
             }
-        }
-        // Assume it's a subject and hide the extra fields
-        else {
-            holder.titleTextView.setText(Schedule.subjectLine(jsonObject));
+        } else {
+            // Just put in the display title (probably a subject)
+            holder.titleTextView.setText(scheduleItem.getDisplayTitle());
             holder.creditsTextView.setVisibility(View.GONE);
             holder.sectionsTextView.setVisibility(View.GONE);
             holder.progressBar.setVisibility(View.GONE);
@@ -183,7 +159,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
                 }
             }
 
-            ArrayList<JSONObject> tempList; //will be a copy of original list
+            ArrayList<ScheduleAdapterItem> tempList; //will be a copy of original list
 
             // Save list of original values if it doesn't exist
             synchronized(mLock) {
@@ -193,13 +169,13 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
                         filterResults.count = 0;
                         return filterResults;
                     }
-                    else mOriginalList = new ArrayList<JSONObject>(mList);
+                    else mOriginalList = new ArrayList<ScheduleAdapterItem>(mList);
                 }
 
-                tempList = new ArrayList<JSONObject>(mOriginalList);
+                tempList = new ArrayList<ScheduleAdapterItem>(mOriginalList);
             }
 
-            ArrayList<JSONObject> passed = new ArrayList<JSONObject>();
+            ArrayList<ScheduleAdapterItem> passed = new ArrayList<ScheduleAdapterItem>();
             String query = constraint.toString().trim();
 
             // Consult the INDEX!!!
@@ -209,7 +185,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
                     String subjCode = query.substring(0,3);
                     String courseCode = query.substring(4,7);
                     if(allDigits(subjCode) && allDigits(courseCode)) {
-                        JSONObject course = socIndex.getCourseByCode(subjCode, courseCode);
+                        Course course = socIndex.getCourseByCode(subjCode, courseCode);
                         if(course != null) passed.add(course);
                     }
                 }
@@ -221,16 +197,14 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             }
 
             // Straight string comparison on original list
-            for(JSONObject jsonObject: tempList) {
-                String cmp;
-                if (jsonObject.has("courseNumber")) cmp = Schedule.courseLine(jsonObject);
-                else cmp = Schedule.subjectLine(jsonObject);
-                if (StringUtils.containsIgnoreCase(cmp, query)) passed.add(jsonObject);
+            for(ScheduleAdapterItem item: tempList) {
+                String cmp = item.getDisplayTitle();
+                if (StringUtils.containsIgnoreCase(cmp, query)) passed.add(item);
             }
 
             // If we didn't find anything.. CONSULT THE INDEX!! to search full course names
             if(passed.isEmpty() && socIndex != null) {
-                List<JSONObject> fuzzies = socIndex.getCoursesByName(query, 10);
+                List<Course> fuzzies = socIndex.getCoursesByName(query, 10);
                 passed.addAll(fuzzies);
             }
 
@@ -247,7 +221,7 @@ public class ScheduleAdapter extends ArrayAdapter<JSONObject> {
             // Replace current list with results
             synchronized (mLock) {
                 mList.clear();
-                if (filterResults.values != null) mList.addAll((ArrayList<JSONObject>) filterResults.values);
+                if (filterResults.values != null) mList.addAll((ArrayList<ScheduleAdapterItem>) filterResults.values);
                 notifyDataSetChanged();
             }
         }
