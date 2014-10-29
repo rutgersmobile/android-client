@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Gyms;
-import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.items.RMenuItemRow;
-import edu.rutgers.css.Rutgers.items.RMenuRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuHeaderRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuItemRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
 import edu.rutgers.css.Rutgers2.R;
 
 /**

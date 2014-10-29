@@ -35,9 +35,9 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.items.KeyValPair;
-import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.items.RMenuItemRow;
-import edu.rutgers.css.Rutgers.items.RMenuRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuHeaderRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuItemRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 

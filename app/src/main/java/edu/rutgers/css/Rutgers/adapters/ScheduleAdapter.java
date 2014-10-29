@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.Schedule;
-import edu.rutgers.css.Rutgers.items.SOCIndex;
 import edu.rutgers.css.Rutgers.items.Schedule.Course;
+import edu.rutgers.css.Rutgers.items.Schedule.SOCIndex;
 import edu.rutgers.css.Rutgers.items.Schedule.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers2.R;
 

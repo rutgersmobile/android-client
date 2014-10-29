@@ -11,10 +11,10 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.items.DTableChannel;
-import edu.rutgers.css.Rutgers.items.DTableElement;
-import edu.rutgers.css.Rutgers.items.DTableFAQ;
-import edu.rutgers.css.Rutgers.items.DTableRoot;
+import edu.rutgers.css.Rutgers.items.DTable.DTableChannel;
+import edu.rutgers.css.Rutgers.items.DTable.DTableElement;
+import edu.rutgers.css.Rutgers.items.DTable.DTableFAQ;
+import edu.rutgers.css.Rutgers.items.DTable.DTableRoot;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 

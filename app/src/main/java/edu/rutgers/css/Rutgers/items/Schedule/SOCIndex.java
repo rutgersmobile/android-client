@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers.items;
+package edu.rutgers.css.Rutgers.items.Schedule;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.rutgers.css.Rutgers.items.Schedule.Course;
-import edu.rutgers.css.Rutgers.items.Schedule.Subject;
 import edu.rutgers.css.Rutgers.utils.JsonUtil;
 
 /**

@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
-import edu.rutgers.css.Rutgers.items.SOCIndex;
 import edu.rutgers.css.Rutgers.items.Schedule.Course;
+import edu.rutgers.css.Rutgers.items.Schedule.SOCIndex;
 import edu.rutgers.css.Rutgers.items.Schedule.Semesters;
 import edu.rutgers.css.Rutgers.items.Schedule.Subject;
 import edu.rutgers.css.Rutgers.utils.AppUtil;

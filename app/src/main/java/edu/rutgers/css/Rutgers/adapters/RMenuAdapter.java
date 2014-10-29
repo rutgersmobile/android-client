@@ -13,8 +13,8 @@ import com.androidquery.AQuery;
 
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.items.RMenuImageRow;
-import edu.rutgers.css.Rutgers.items.RMenuRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuImageRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
 import edu.rutgers.css.Rutgers2.R;
 
 /**

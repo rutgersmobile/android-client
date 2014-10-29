@@ -33,9 +33,9 @@ import edu.rutgers.css.Rutgers.api.Places;
 import edu.rutgers.css.Rutgers.fragments.Bus.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.items.Place;
-import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.items.RMenuItemRow;
-import edu.rutgers.css.Rutgers.items.RMenuRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuHeaderRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuItemRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 

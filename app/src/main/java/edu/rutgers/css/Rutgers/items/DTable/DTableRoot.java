@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers.items;
+package edu.rutgers.css.Rutgers.items.DTable;
 
 import org.json.JSONArray;
 import org.json.JSONException;

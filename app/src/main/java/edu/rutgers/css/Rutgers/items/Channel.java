@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
+import edu.rutgers.css.Rutgers.items.DTable.VarTitle;
 
 /**
  * RU Mobile channel.

@@ -18,9 +18,9 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.Dining;
 import edu.rutgers.css.Rutgers.items.DiningMenu;
-import edu.rutgers.css.Rutgers.items.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.items.RMenuItemRow;
-import edu.rutgers.css.Rutgers.items.RMenuRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuHeaderRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuItemRow;
+import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
