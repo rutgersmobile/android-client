@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,7 +62,6 @@ public class MainActivity extends LogoFragmentActivity  implements
         LocationClientProvider, ChannelManagerProvider {
     
     private static final String TAG = "MainActivity";
-    private static final String SC_API = AppUtil.API_BASE + "shortcuts.txt";
 
     private ChannelManager mChannelManager;
     private LocationClient mLocationClient;
@@ -94,17 +92,7 @@ public class MainActivity extends LogoFragmentActivity  implements
         ComponentFactory.getInstance().setMainActivity(this);
 
         // Set up logo overlay
-        setRootLayoutId(R.id.main_content_frame);
-        setLogoClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
-                    mDrawerLayout.closeDrawer(mDrawerListView);
-                } else {
-                    mDrawerLayout.openDrawer(Gravity.LEFT);
-                }
-            }
-        });
+        setLogoRootLayoutId(R.id.main_content_frame);
 
         // This is usually created and populated before onCreate() is called so only initialize if
         // it's still null

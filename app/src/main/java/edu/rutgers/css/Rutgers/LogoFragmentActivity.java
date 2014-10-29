@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers;
 
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -15,7 +14,6 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
 
     private int mRootLayoutId;
     private PopupWindow mLogoPopup;
-    private View.OnClickListener mLogoClickListener;
 
     @Override
     protected void onStart() {
@@ -29,12 +27,8 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
         dismissLogoOverlay();
     }
 
-    public void setRootLayoutId(int rootLayoutId) {
+    public void setLogoRootLayoutId(int rootLayoutId) {
         mRootLayoutId = rootLayoutId;
-    }
-
-    public void setLogoClickListener(View.OnClickListener logoClickListener) {
-        mLogoClickListener = logoClickListener;
     }
 
     /**
@@ -49,8 +43,6 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
         final View logo = getLayoutInflater().inflate(R.layout.logo_split, null, false);
         logo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
-        final ImageView logoTop = (ImageView) logo.findViewById(R.id.seal_top);
-
         // Get the the action bar, home button, and title text views
         final View home = findViewById(android.R.id.home);
         final View decorView = getWindow().getDecorView();
@@ -63,11 +55,17 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
         findViewById(rootLayoutId).post(new Runnable() {
             public void run() {
                 int side = actionBarView.getHeight();
+
+                /*
+                 * The logo is split in half where the banner tapers off and transparency begins
+                 * so that the opaque section is flush with the action bar and the transparent
+                 * area hangs down past it. This is why height is set to twice that of the bar.
+                 */
                 mLogoPopup = new PopupWindow(logo, side+16, side*2, false);
                 mLogoPopup.showAsDropDown(actionBarView, (int) home.getX(), -side);
 
-                // Clicking the logo toggles drawer
-                logoTop.setOnClickListener(mLogoClickListener);
+                // Pass touch events through to the action bar
+                mLogoPopup.setTouchable(false);
 
                 // Move the title text over so it's not obscured by the logo
                 int diff = Math.abs(mLogoPopup.getWidth() - home.getWidth());
