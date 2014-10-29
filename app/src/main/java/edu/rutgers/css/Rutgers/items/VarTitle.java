@@ -23,6 +23,8 @@ public class VarTitle implements Serializable {
             homeCampus = ((JSONObject)titleObject).getString("homeCampus");
             homeTitle = ((JSONObject)titleObject).getString("homeTitle");
             foreignTitle = ((JSONObject)titleObject).getString("foreignTitle");
+        } else {
+            throw new IllegalArgumentException("Title must be a String or JSONObject");
         }
     }
 

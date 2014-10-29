@@ -21,7 +21,6 @@ import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import edu.rutgers.css.Rutgers.adapters.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
+import edu.rutgers.css.Rutgers.items.Channel;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
@@ -84,15 +84,11 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         mChannelSpinner = (Spinner) v.findViewById(R.id.channelSpinner);
         mChannelSpinner.setAdapter(mChannelSpinnerAdapter);
 
+        final String homeCampus = RutgersUtil.getHomeCampus(getActivity());
+
         ChannelManager channelManager = ((ChannelManagerProvider) getActivity()).getChannelManager();
-        JSONArray channels = channelManager.getChannels();
-        for(int i = 0; i < channels.length(); i++) {
-            try {
-                JSONObject channel = channels.getJSONObject(i);
-                mChannelSpinnerAdapter.add(RutgersUtil.getLocalTitle(getActivity(), channel.opt("title")));
-            } catch (JSONException e) {
-                Log.w(TAG, "onCreateView(): " + e.getMessage());
-            }
+        for(Channel channel: channelManager.getChannels()) {
+            mChannelSpinnerAdapter.add(channel.getTitle(homeCampus));
         }
         
         return v;

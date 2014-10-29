@@ -26,14 +26,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.Analytics;
@@ -44,6 +44,7 @@ import edu.rutgers.css.Rutgers.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
+import edu.rutgers.css.Rutgers.items.Channel;
 import edu.rutgers.css.Rutgers.items.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
@@ -78,6 +79,11 @@ public class MainActivity extends LogoFragmentActivity  implements
     @Override
     public LocationClient getLocationClient() {
         return mLocationClient;
+    }
+
+    @Override
+    public ChannelManager getChannelManager() {
+        return mChannelManager;
     }
 
     @Override
@@ -469,55 +475,30 @@ public class MainActivity extends LogoFragmentActivity  implements
     }
 
     /**
-     * Create section header and load menu items from JSON.
+     * Add channels to navigation drawer.
      * @param category Section title
-     * @param items Menu items JSON
+     * @param channels Channels to add to nav drawer
      */
-    private void addMenuSection(String category, JSONArray items) {
-        //mDrawerAdapter.add(new RMenuHeaderRow(category));
-        for(int i = 0; i < items.length(); i++) {
-            try {
-                // Create menu item
-                JSONObject cur = items.getJSONObject(i);
-                Bundle itemArgs = new Bundle();
+    private void addMenuSection(String category, List<Channel> channels) {
+        //mDrawerAdapter.add(new RMenuHeaderRow(category))
 
-                // Set title - may be a multi-title object
-                itemArgs.putString("title", RutgersUtil.getLocalTitle(this, cur.get("title")));
+        final String homeCampus = RutgersUtil.getHomeCampus(this);
 
-                // Set component to launch. Default to WWW for web shortcuts
-                if(cur.isNull("view") && !cur.isNull("url")) {
-                    itemArgs.putString("component", WebDisplay.HANDLE);
-                }
-                else {
-                    itemArgs.putString("component", cur.getString("view"));
-                }
+        for(Channel channel: channels) {
+            Bundle itemArgs = new Bundle();
+            itemArgs.putString("title", channel.getTitle(homeCampus));
+            itemArgs.putString("component", channel.getView());
+            if(!StringUtils.isEmpty(channel.getApi())) itemArgs.putString("api", channel.getApi());
+            if(!StringUtils.isEmpty(channel.getUrl())) itemArgs.putString("url", channel.getUrl());
+            if(channel.getData() != null) itemArgs.putString("data", channel.getData().toString());
 
-                // Set URL if available
-                if(!cur.isNull("url")) itemArgs.putString("url", cur.getString("url"));
+            RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
+            // Try to find icon for this item and set it
+            newSMI.setDrawable(AppUtil.getIcon(getResources(), channel.getHandle()));
 
-                // Set API if available
-                if(!cur.isNull("api")) itemArgs.putString("api", cur.getString("api"));
-
-                // Set data (JSON Array) if available
-                if(cur.optJSONArray("data") != null) itemArgs.putString("data", cur.getJSONArray("data").toString());
-
-                RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
-                // Try to find icon for this item and set it
-                if(!cur.isNull("handle")) {
-                    newSMI.setDrawable(AppUtil.getIcon(getResources(), cur.getString("handle")));
-                }
-
-                // Add the item to the drawer
-                mDrawerAdapter.add(newSMI);
-            } catch (JSONException e) {
-                Log.w(TAG, "loadChannels(): " + e.getMessage());
-            }
+            // Add the item to the drawer
+            mDrawerAdapter.add(newSMI);
         }
-    }
-
-    @Override
-    public ChannelManager getChannelManager() {
-        return mChannelManager;
     }
 
 }
