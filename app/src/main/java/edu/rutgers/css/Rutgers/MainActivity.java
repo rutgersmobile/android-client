@@ -461,7 +461,7 @@ public class MainActivity extends LogoFragmentActivity  implements
      */
     private void loadWebShortcuts() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Request.jsonArray(SC_API, Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
+        dm.when(Request.apiArray("shortcuts.txt", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray shortcutsArray) {

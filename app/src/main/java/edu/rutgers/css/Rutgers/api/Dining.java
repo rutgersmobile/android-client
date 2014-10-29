@@ -30,7 +30,7 @@ public class Dining {
 
     private static final String TAG = "DiningAPI";
 
-    private static final String API_URL = AppUtil.API_BASE + "rutgers-dining.txt";
+    private static final String API_PATH = "rutgers-dining.txt";
     private static long expire = Request.CACHE_ONE_HOUR; // Cache dining data for an hour
 
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
@@ -46,7 +46,7 @@ public class Dining {
         final Deferred<Object, Exception, Void> confd = new DeferredObject<Object, Exception, Void>();
         configured = confd.promise();
         
-        final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.jsonArray(API_URL, expire);
+        final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.apiArray(API_PATH, expire);
 
         sDM.when(promiseNBDining, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
 

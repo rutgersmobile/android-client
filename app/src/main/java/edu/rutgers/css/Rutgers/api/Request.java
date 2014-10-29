@@ -24,7 +24,8 @@ public class Request {
     public static long CACHE_ONE_MINUTE = 1000 * 60;
     public static long CACHE_ONE_HOUR = CACHE_ONE_MINUTE * 60;
     public static long CACHE_ONE_DAY = CACHE_ONE_HOUR * 24;
-    
+
+    /** Initialize the singleton AQuery object */
     private static void setup () {
         if (sAq == null) {
             sAq = new AQuery(RutgersApplication.getAppContext());
@@ -32,20 +33,30 @@ public class Request {
     }
 
     /**
-     * Get JSON from mobile server.
-     * @param resource JSON file URL
+     * Get JSON object from mobile server.
+     * @param resource JSON file to read from API directory
      * @param expire Cache time in milliseconds
-     * @return Promise for a JSONObject
+     * @return Promise for a JSON object
      */
     public static Promise<JSONObject, AjaxStatus, Double> api (String resource, long expire) {
         return json(AppUtil.API_BASE + resource, expire);
     }
 
     /**
+     * Get JSON array from mobile API.
+     * @param resource JSON file to read from API directory
+     * @param expire Cache time in milliseconds
+     * @return Promise for a JSON array
+     */
+    public static Promise<JSONArray, AjaxStatus, Double> apiArray(String resource, long expire) {
+        return jsonArray(AppUtil.API_BASE + resource, expire);
+    }
+
+    /**
      * Get arbitrary JSON.
      * @param resource JSON file URL
      * @param expire Cache time in milliseconds
-     * @return Promise for JSONObject
+     * @return Promise for a JSON object
      */
     public static Promise<JSONObject, AjaxStatus, Double> json (String resource, long expire) {
         setup();
@@ -71,7 +82,7 @@ public class Request {
      * Gets arbitrary JSON array.
      * @param resource JSON file URL
      * @param expire Cache time in milliseconds
-     * @return Promise for JSONArray
+     * @return Promise for a JSON array
      */
     public static Promise<JSONArray, AjaxStatus, Double> jsonArray (String resource, long expire) {
         setup();
