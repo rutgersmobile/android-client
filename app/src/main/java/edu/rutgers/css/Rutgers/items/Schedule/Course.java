@@ -16,9 +16,9 @@ public class Course extends ScheduleAdapterItem {
     private String courseNumber;
     private String courseDescription;
     private String preReqNotes;
+    private String synopsisUrl;
     private int credits;
     private List<Section> sections;
-    private List<MeetingTime> meetingTimes;
     private boolean stub;
 
     /** Create course stub. */
@@ -39,7 +39,6 @@ public class Course extends ScheduleAdapterItem {
         this.preReqNotes = other.getPreReqNotes();
         this.credits = other.getCredits();
         this.sections = other.getSections();
-        this.meetingTimes = other.getMeetingTimes();
         this.stub = false;
     }
 
@@ -112,85 +111,16 @@ public class Course extends ScheduleAdapterItem {
         return preReqNotes;
     }
 
+    public String getSynopsisUrl() {
+        return synopsisUrl;
+    }
+
     public int getCredits() {
         return credits;
     }
 
     public List<Section> getSections() {
         return sections;
-    }
-
-    public List<MeetingTime> getMeetingTimes() {
-        return meetingTimes;
-    }
-
-    public static class Section {
-        private String printed;
-        @SerializedName("openStatus") private boolean open;
-        private String sectionNotes;
-        private List<Instructor> instructors;
-
-        public String getPrinted() {
-            return printed;
-        }
-
-        public boolean isOpen() {
-            return open;
-        }
-
-        public String getSectionNotes() {
-            return sectionNotes;
-        }
-
-        public List<Instructor> getInstructors() {
-            return instructors;
-        }
-    }
-
-    public static class Instructor {
-        private String name;
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    public static class MeetingTime {
-        private String meetingDay;
-        private String startTime;
-        private String endTime;
-        private String pmCode;
-        private String campusAbbrev;
-        private String buildingCode;
-        private String roomNumber;
-
-        public String getMeetingDay() {
-            return meetingDay;
-        }
-
-        public String getStartTime() {
-            return startTime;
-        }
-
-        public String getEndTime() {
-            return endTime;
-        }
-
-        public String getPmCode() {
-            return pmCode;
-        }
-
-        public String getCampusAbbrev() {
-            return campusAbbrev;
-        }
-
-        public String getBuildingCode() {
-            return buildingCode;
-        }
-
-        public String getRoomNumber() {
-            return roomNumber;
-        }
     }
 
 }

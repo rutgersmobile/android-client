@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.adapters;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,9 +12,6 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.items.Schedule.Section;
+import edu.rutgers.css.Rutgers.items.Schedule.SectionAdapterItem;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -30,7 +30,7 @@ import edu.rutgers.css.Rutgers2.R;
  *
  * @author James Chambers
  */
-public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
+public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
 
     private static final String TAG = "CourseSectionAdapter";
 
@@ -66,7 +66,7 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                 put("S", 5);
             }});
 
-    public CourseSectionAdapter(Context context, int resource, List<JSONObject> objects) {
+    public CourseSectionAdapter(Context context, int resource, List<SectionAdapterItem> objects) {
         super(context, resource, objects);
         this.layoutResource = resource;
 
@@ -81,10 +81,12 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
     @Override
     public int getItemViewType(int position) {
-        JSONObject item = getItem(position);
-        if(item.optBoolean("isDescriptionRow") || item.optBoolean("isPreReqRow")
-                || item.optBoolean("isSynopsisRow")) return ViewTypes.BASIC_TYPE.ordinal();
-        else return ViewTypes.MEETTIME_TYPE.ordinal();
+        SectionAdapterItem item = getItem(position);
+        if(item instanceof Section) {
+            return ViewTypes.MEETTIME_TYPE.ordinal();
+        } else {
+            return ViewTypes.BASIC_TYPE.ordinal();
+        }
     }
 
     @Override
@@ -121,24 +123,12 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
             holder = new DescViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (DescViewHolder) convertView.getTag();
         }
 
-        JSONObject jsonObject = getItem(position);
-        String set = "";
-
-        if(jsonObject.optBoolean("isDescriptionRow")) {
-            set = StringUtils.remove(jsonObject.optString("courseDescription"), '\n').trim();
-        }
-        else if(jsonObject.optBoolean("isSynopsisRow")) {
-            set = "Synopsis";
-        }
-        else if(jsonObject.optBoolean("isPreReqRow")) {
-            set = "Prerequisites";
-        }
-        holder.titleTextView.setText(set);
+        SectionAdapterItem item = getItem(position);
+        holder.titleTextView.setText(item.getDisplayTitle());
 
         return convertView;
     }
@@ -162,34 +152,28 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
             holder = (MeetTimeViewHolder) convertView.getTag();
         }
 
-        JSONObject jsonObject = getItem(position);
+        Section section = (Section) getItem(position);
 
         // Open sections have a green background, closed sections have a red background
-        if(jsonObject.optBoolean("openStatus")) {
+        if(section.isOpen()) {
             convertView.setBackgroundColor(resolvedGreen);
         } else {
             convertView.setBackgroundColor(resolvedRed);
         }
 
         // Set section number & index number
-        holder.sectionIndexTextView.setText(jsonObject.optString("number") + " " + jsonObject.optString("index"));
+        holder.sectionIndexTextView.setText(section.getNumber() + " " + section.getIndex());
 
         // List instructors
         StringBuilder instructors = new StringBuilder();
-        try {
-            JSONArray instructorArray = jsonObject.getJSONArray("instructors");
-            for (int i = 0; i < instructorArray.length(); i++) {
-                instructors.append(instructorArray.getJSONObject(i).getString("name")).append("\n");
-            }
-        } catch (JSONException e) {
-            Log.w(TAG, "getView(): " + e.getMessage());
+        for(Section.Instructor instructor: section.getInstructors()) {
+            instructors.append(instructor.getName()).append('\n');
         }
         holder.instructorTextView.setText(StringUtils.chomp(instructors.toString()));
 
         // Set description
-        String desc = jsonObject.optString("sectionNotes");
-        if(!jsonObject.isNull("sectionNotes") && !desc.isEmpty()) {
-            holder.descriptionTextView.setText(desc);
+        if(section.getSectionNotes() != null) {
+            holder.descriptionTextView.setText(section.getSectionNotes());
             holder.descriptionTextView.setVisibility(View.VISIBLE);
         } else {
             holder.descriptionTextView.setVisibility(View.GONE);
@@ -197,10 +181,10 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
 
         // List meeting times
         holder.meetingTimesLayout.removeAllViews();
-        try {
-            List<JSONObject> sortedTimes = sortMeetingTimes(jsonObject.getJSONArray("meetingTimes"));
-            for(JSONObject meetingTime: sortedTimes) {
-                // If all the text is null, we should discard the view. Set this to true if any
+        if(section.getMeetingTimes() != null) {
+            List<Section.MeetingTime> meetingTimes = sortMeetingTimes(section.getMeetingTimes());
+            for (Section.MeetingTime meetingTime : meetingTimes) {
+                // If all the text is blank, we should discard the view. Set this to true if any
                 // actual text is added.
                 boolean keepView = false;
 
@@ -210,56 +194,41 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                 TextView timeTextView = (TextView) timeRow.findViewById(R.id.timeTextView);
                 TextView locationTextView = (TextView) timeRow.findViewById(R.id.locationTextView);
 
-                if(!meetingTime.isNull("meetingDay")) {
-                    dayTextView.setText(meetingTime.getString("meetingDay"));
+                if (meetingTime.getMeetingDay() != null) {
+                    dayTextView.setText(meetingTime.getMeetingDay());
                     keepView = true;
                 } else {
                     dayTextView.setText("");
                 }
 
                 // Format meeting times
-                if(!meetingTime.isNull("startTime") && !meetingTime.isNull("endTime") && !meetingTime.isNull("pmCode")) {
-                    timeTextView.setText(formatTimes(meetingTime.getString("startTime"), meetingTime.getString("endTime"), meetingTime.getString("pmCode")));
+                if (StringUtils.isNoneBlank(meetingTime.getStartTime(), meetingTime.getEndTime(), meetingTime.getPmCode())) {
+                    timeTextView.setText(formatTimes(meetingTime.getStartTime(), meetingTime.getEndTime(), meetingTime.getPmCode()));
                     keepView = true;
                 } else {
                     timeTextView.setText("Hours by arr.");
                 }
 
+                String[] locationElements = new String[]{
+                        meetingTime.getCampusAbbrev(),
+                        meetingTime.getBuildingCode(),
+                        meetingTime.getRoomNumber()
+                };
+
                 StringBuilder locationBuilder = new StringBuilder();
-                String[] fields = new String[3];
-                fields[0] = "campusAbbrev";
-                fields[1] = "buildingCode";
-                fields[2] = "roomNumber";
-
-                /*
-                    ___              |\            .---.             _
-                   ( o )            |'_\           \ V /            | |
-                   _| |_           _| |_           _| |_           _| |_
-                 .`_____`.       .`_____`.       .`_____`.       .`_____`.
-               |\ /     \ /|   |\ /     \ /|   |\ /     \ /|   |\ /     \ /|
-               |||  @ @  |||   |||  9 9  |||   |||  6 6  |||   |||  o o  |||
-               \_\   =   /_/   \_\   -   /_/   \_\   o   /_/   \_\  ._.  /_/
-                .-'-----'-.     .-'-----'-.     .-'-----'-.     .-'-----'-.
-               (_   ___   _)   (_   ___   _)   (_   ___   _)   (_   ___   _)
-                 | |___| |       | |___| |       | |___| |       | |___| |
-                 |       |       |       |       |       |       |       |
-                 (___|___)       (___|___)       (___|___)       (___|___)
-                */
-                for(String field: fields) {
-                    if(!meetingTime.isNull(field)) {
-                        locationBuilder.append(meetingTime.getString(field)).append(" ");
-                        keepView = true;
-                    }
+                for (String element : locationElements) {
+                    if (StringUtils.isNotBlank(element))
+                        locationBuilder.append(element).append(' ');
                 }
-
                 String location = StringUtils.trim(locationBuilder.toString());
 
-                if(!location.isEmpty()) locationTextView.setText(location);
+                if (StringUtils.isNotBlank(location)) {
+                    locationTextView.setText(location);
+                    keepView = true;
+                }
 
-                if(keepView) holder.meetingTimesLayout.addView(timeRow);
+                if (keepView) holder.meetingTimesLayout.addView(timeRow);
             }
-        } catch (JSONException e) {
-            Log.w(TAG, "getView(): " + e.getMessage());
         }
 
         return convertView;
@@ -270,26 +239,22 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
      * @param meetingTimes List of meeting times to sort
      * @return Meeting times sorted by day
      */
-    private List<JSONObject> sortMeetingTimes(JSONArray meetingTimes) {
-        if(meetingTimes == null) return null;
+    private List<Section.MeetingTime> sortMeetingTimes(@NonNull List<Section.MeetingTime> meetingTimes) {
+        List<Section.MeetingTime> result = new ArrayList<Section.MeetingTime>(meetingTimes);
 
-        List<JSONObject> result = new ArrayList<JSONObject>();
-        for(int i = 0; i < meetingTimes.length(); i++) {
-            result.add(meetingTimes.optJSONObject(i));
-        }
-
-        Comparator<JSONObject> meetingTimeComparator = new Comparator<JSONObject>() {
+        Comparator<Section.MeetingTime> meetingTimeComparator = new Comparator<Section.MeetingTime>() {
 
             @Override
-            public int compare(JSONObject lhs, JSONObject rhs) {
-                if(lhs.isNull("meetingDay") && rhs.isNull("meetingDay")) return 0;
-                else if(lhs.isNull("meetingDay") && !rhs.isNull("meetingDay")) return 1;
-                else if(!lhs.isNull("meetingDay") && rhs.isNull("meetingDay")) return -1;
-                else {
-                    String lhsDay = lhs.optString("meetingDay");
-                    String rhsDay = rhs.optString("meetingDay");
-                    Integer l = sDayMap.get(lhsDay);
-                    Integer r = sDayMap.get(rhsDay);
+            public int compare(Section.MeetingTime lhs, Section.MeetingTime rhs) {
+                if(StringUtils.isBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
+                    return 0;
+                } else if (StringUtils.isNotBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
+                    return 1;
+                } else if (StringUtils.isBlank(lhs.getMeetingDay()) && StringUtils.isNotBlank(rhs.getMeetingDay())) {
+                    return -1;
+                } else {
+                    Integer l = sDayMap.get(lhs.getMeetingDay());
+                    Integer r = sDayMap.get(rhs.getMeetingDay());
                     return l.compareTo(r);
                 }
             }
@@ -327,5 +292,13 @@ public class CourseSectionAdapter extends ArrayAdapter<JSONObject> {
                 " - " +
                 endHour + ":" + endTime.substring(2,4) + " " + endPmCode + "M";
     }
+
+    /*
+                 .-.
+                (o o) boo!
+                | O \
+                 \   \
+                  `~~~'
+    */
 
 }

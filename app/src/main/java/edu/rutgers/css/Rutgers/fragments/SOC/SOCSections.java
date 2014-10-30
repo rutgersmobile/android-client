@@ -10,6 +10,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +25,11 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.fragments.WebDisplay;
+import edu.rutgers.css.Rutgers.items.Schedule.Course;
+import edu.rutgers.css.Rutgers.items.Schedule.ScheduleText;
+import edu.rutgers.css.Rutgers.items.Schedule.Section;
+import edu.rutgers.css.Rutgers.items.Schedule.SectionAdapterItem;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -32,7 +40,7 @@ public class SOCSections extends Fragment {
     private static final String TAG = "SOCSections";
     public static final String HANDLE = "socsections";
 
-    private List<JSONObject> mData;
+    private List<SectionAdapterItem> mData;
     private CourseSectionAdapter mAdapter;
 
     public SOCSections() {
@@ -44,49 +52,41 @@ public class SOCSections extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        mData = new ArrayList<JSONObject>();
+        mData = new ArrayList<SectionAdapterItem>();
         mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, mData);
 
-        try {
-            JSONObject courseJSON = new JSONObject(args.getString("data"));
-
-            // Create a course description row, if a description is specified
-            if(!courseJSON.isNull("courseDescription") && !courseJSON.getString("courseDescription").isEmpty()) {
-                JSONObject descriptionRow = new JSONObject();
-                descriptionRow.put("isDescriptionRow", true);
-                descriptionRow.put("courseDescription", courseJSON.getString("courseDescription"));
-                mAdapter.add(descriptionRow);
-            }
-
-            // Create a synopsis link row, if a synopsis URL is set
-            /* Bring it back if these links are ever useful
-            if(!courseJSON.isNull("synopsisUrl")) {
-                JSONObject synopsisRow = new JSONObject();
-                synopsisRow.put("isSynopsisRow", true);
-                synopsisRow.put("synopsisUrl", courseJSON.getString("synopsisUrl"));
-                mAdapter.add(synopsisRow);
-            }
-            */
-
-            // Create pre-req row if pre-reqs are specified
-            if(!courseJSON.isNull("preReqNotes") && !courseJSON.getString("preReqNotes").isEmpty()) {
-                JSONObject preReqRow = new JSONObject();
-                preReqRow.put("isPreReqRow", true);
-                preReqRow.put("preReqNotes", courseJSON.getString("preReqNotes"));
-                mAdapter.add(preReqRow);
-            }
-
-            // Load the section rows
-            JSONArray sections = courseJSON.getJSONArray("sections");
-            for(int i = 0; i < sections.length(); i++) {
-                JSONObject section = sections.getJSONObject(i);
-                // Only add "visible" sections to list
-                if(section.getString("printed").equalsIgnoreCase("Y")) mAdapter.add(section);
-            }
-        } catch (JSONException e) {
-            Log.w(TAG, "onCreate(): " + e.getMessage());
-            Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
+        Gson gson = new Gson();
+        if(args.getString("data") == null) {
+            Log.e(TAG, "Course data not set");
+            AppUtil.showFailedLoadToast(getActivity());
+            return;
         }
+
+        // TODO Replace with just getting course from API
+        Course course = gson.fromJson(args.getString("data"), Course.class);
+
+        // Add course description if set
+        if(StringUtils.isNotBlank(course.getCourseDescription())) {
+            mAdapter.add(new ScheduleText(course.getCourseDescription(), ScheduleText.TextType.DESCRIPTION));
+        }
+
+        /*
+        // Add synopsis link if set
+        if(StringUtils.isNotBlank(course.getSynopsisUrl())) {
+            mAdapter.add(new ScheduleText("Synopsis", ScheduleText.TextType.SYNOPSIS));
+        }
+        */
+
+        // Add prerequisites button if set
+        if(StringUtils.isNotBlank(course.getPreReqNotes())) {
+            mAdapter.add(new ScheduleText("Prerequisites", ScheduleText.TextType.PREREQS));
+        }
+
+        // Add all visible sections to list
+        for(Section section: course.getSections()) {
+            if("Y".equalsIgnoreCase(section.getPrinted())) mAdapter.add(section);
+        }
+
     }
 
     @Override
@@ -103,8 +103,32 @@ public class SOCSections extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final JSONObject clickedJSON = (JSONObject) parent.getItemAtPosition(position);
+                final SectionAdapterItem clickedItem = (SectionAdapterItem) parent.getAdapter().getItem(position);
 
+                if(clickedItem instanceof ScheduleText) {
+                    ScheduleText scheduleText = (ScheduleText) clickedItem;
+
+                    // TODO implement this again
+                    return;
+                } else if(clickedItem instanceof Section) {
+                    Section section = (Section) clickedItem;
+
+                    if(StringUtils.isNotBlank(section.getIndex()) && semester != null) {
+                        String index = StringUtils.trim(section.getIndex());
+                        Schedule.openRegistrationWindow(semester, index);
+                    }
+                }
+
+                // It's a section row, open WebReg for this section
+                if (!clickedJSON.isNull("index") && semester != null) {
+                    String index = clickedJSON.optString("index");
+                    Schedule.openRegistrationWindow(semester, index);
+                } else {
+                    Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
+                    Log.w(TAG, "Section had no index field. Failed to launch webreg.");
+                }
+
+                /* OLD - don't uncomment
                 // Check if it's a synopsis row; send to synopsis URL
                 if(clickedJSON.optBoolean("isSynopsisRow")) {
                     Bundle args = new Bundle();
@@ -127,15 +151,7 @@ public class SOCSections extends Fragment {
                 else if(clickedJSON.optBoolean("isDescriptionRow")) {
                     return;
                 }
-
-                // It's a section row, open WebReg for this section
-                if (!clickedJSON.isNull("index") && semester != null) {
-                    String index = clickedJSON.optString("index");
-                    Schedule.openRegistrationWindow(semester, index);
-                } else {
-                    Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "Section had no index field. Failed to launch webreg.");
-                }
+                */
             }
         });
 
