@@ -44,12 +44,14 @@ import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
+/**
+ * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
+ */
 public class SOCMain extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "SOCMain";
     public static final String HANDLE = "soc";
 
-    private List<ScheduleAdapterItem> mData;
     private SOCIndex mSOCIndex;
     private ScheduleAdapter mAdapter;
     private List<String> mSemesters;
@@ -68,8 +70,8 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        mData = new ArrayList<ScheduleAdapterItem>();
-        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, mData);
+        List<ScheduleAdapterItem> data = new ArrayList<ScheduleAdapterItem>();
+        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, data);
 
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());

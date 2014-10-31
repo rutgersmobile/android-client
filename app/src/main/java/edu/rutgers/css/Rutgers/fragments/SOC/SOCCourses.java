@@ -30,13 +30,14 @@ import edu.rutgers.css.Rutgers.items.Schedule.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
+/**
+ * Lists courses under a subject/department.
+ */
 public class SOCCourses extends Fragment {
 
     private static final String TAG = "SOCCourses";
-
     public static final String HANDLE = "soccourses";
 
-    private List<ScheduleAdapterItem> mData;
     private ScheduleAdapter mAdapter;
     private EditText mFilterEditText;
     private String mFilterString;
@@ -50,8 +51,8 @@ public class SOCCourses extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        mData = new ArrayList<ScheduleAdapterItem>();
-        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, mData);
+        List<ScheduleAdapterItem> data = new ArrayList<ScheduleAdapterItem>();
+        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, data);
 
         // Restore filter
         if(savedInstanceState != null && savedInstanceState.getString("filter") != null) {
