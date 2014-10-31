@@ -102,10 +102,7 @@ public class Schedule {
                         subjects.add(newSub);
                     }
                     deferred.resolve(subjects);
-                } catch (JSONException e) {
-                    Log.e(TAG, "getSubjects(): " + e.getMessage());
-                    deferred.reject(e);
-                } catch (JsonSyntaxException e) {
+                } catch (JSONException | JsonSyntaxException e) {
                     Log.e(TAG, "getSubjects(): " + e.getMessage());
                     deferred.reject(e);
                 }
@@ -150,10 +147,7 @@ public class Schedule {
                         courses.add(newCourse);
                     }
                     deferred.resolve(courses);
-                } catch (JSONException e) {
-                    Log.e(TAG, "getCourses(): " + e.getMessage());
-                    deferred.reject(e);
-                } catch (JsonSyntaxException e) {
+                } catch (JSONException | JsonSyntaxException e) {
                     Log.e(TAG, "getCourses(): " + e.getMessage());
                     deferred.reject(e);
                 }

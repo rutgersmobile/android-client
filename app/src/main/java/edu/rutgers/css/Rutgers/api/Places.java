@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers.api;
 
-import android.util.Log;
-
 import com.androidquery.callback.AjaxStatus;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -59,17 +57,13 @@ public class Places {
                     JSONObject data = result.getJSONObject("data");
 
                     if (result.getString("status").equals("success")) {
-                        try {
-                            Gson gson = new Gson();
-                            Place place = gson.fromJson(data.getJSONObject("place").toString(), Place.class);
-                            d.resolve(place);
-                        } catch (JsonSyntaxException e) {
-                            d.reject(e);
-                        }
+                        Gson gson = new Gson();
+                        Place place = gson.fromJson(data.getJSONObject("place").toString(), Place.class);
+                        d.resolve(place);
                     } else {
                         d.reject(new Exception(data.getString("message")));
                     }
-                } catch (JSONException e) {
+                } catch (JSONException | JsonSyntaxException e) {
                     d.reject(e);
                 }
             }
@@ -98,24 +92,20 @@ public class Places {
                 try {
                     JSONObject data = result.getJSONObject("data");
 
-                    if(result.getString("status").equals("success")) {
+                    if (result.getString("status").equals("success")) {
                         JSONArray places = data.getJSONArray("places");
 
                         List<KeyValPair> stubs = new ArrayList<KeyValPair>();
                         for (int i = 0; i < places.length(); i++) {
-                            try {
-                                JSONObject place = places.getJSONObject(i);
-                                stubs.add(new KeyValPair(place.getString("id"), place.getString("title")));
-                            } catch (JSONException e) {
-                                Log.w(TAG, "getPlacesNear(): " + e.getMessage());
-                            }
+                            JSONObject place = places.getJSONObject(i);
+                            stubs.add(new KeyValPair(place.getString("id"), place.getString("title")));
                         }
 
                         deferred.resolve(stubs);
                     } else {
                         deferred.reject(new Exception(data.getString("message")));
                     }
-                } catch(JSONException e) {
+                } catch (JSONException e) {
                     deferred.reject(e);
                 }
             }

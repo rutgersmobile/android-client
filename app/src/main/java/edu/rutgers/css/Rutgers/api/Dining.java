@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
@@ -60,7 +61,7 @@ public class Dining {
                         DiningMenu diningMenu = gson.fromJson(res.getJSONObject(i).toString(), DiningMenu.class);
                         mNBDiningMenus.add(diningMenu);
                     }
-                } catch (JSONException e) {
+                } catch (JSONException | JsonSyntaxException e) {
                     Log.e(TAG, "setup(): " + e.getMessage());
                     confd.reject(e);
                 }
