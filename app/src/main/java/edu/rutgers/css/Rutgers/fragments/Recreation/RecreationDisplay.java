@@ -171,12 +171,12 @@ public class RecreationDisplay extends Fragment {
         String descriptionHtml =  StringEscapeUtils.unescapeHtml4(mFacility.getFullDescription());
 
         // Add "View Hours" row
-        if(mFacility.getDaySchedules() != null && !mFacility.getDaySchedules().isEmpty()) {
+        if(mFacility.getDailySchedules() != null && !mFacility.getDailySchedules().isEmpty()) {
             try {
                 Bundle rowArgs = new Bundle();
                 rowArgs.putInt(ID_KEY, HOURS_ROW);
                 rowArgs.putString("title", getString(R.string.rec_view_hours));
-                rowArgs.putSerializable(RecreationHoursDisplay.DATA_TAG, (Serializable) mFacility.getDaySchedules());
+                rowArgs.putSerializable(RecreationHoursDisplay.DATA_TAG, (Serializable) mFacility.getDailySchedules());
 
                 mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_hours_header)));
                 mAdapter.add(new RMenuItemRow(rowArgs));

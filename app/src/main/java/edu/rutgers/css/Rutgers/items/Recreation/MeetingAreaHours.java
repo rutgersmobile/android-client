@@ -7,11 +7,11 @@ import java.io.Serializable;
  */
 public class MeetingAreaHours implements Serializable {
 
-    private String location;
+    private String area;
     private String hours;
 
-    public String getLocation() {
-        return location;
+    public String getArea() {
+        return area;
     }
 
     public String getHours() {

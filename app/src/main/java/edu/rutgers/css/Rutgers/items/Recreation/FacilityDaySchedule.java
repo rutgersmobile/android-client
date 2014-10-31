@@ -11,7 +11,7 @@ import java.util.List;
 public class FacilityDaySchedule implements Serializable {
 
     private String date;
-    @SerializedName("locations") private List<MeetingAreaHours> areaHours;
+    @SerializedName("meeting_area_hours") private List<MeetingAreaHours> areaHours;
 
     public String getDate() {
         return date;

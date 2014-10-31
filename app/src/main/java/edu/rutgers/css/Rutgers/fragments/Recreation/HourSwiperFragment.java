@@ -63,7 +63,7 @@ public class HourSwiperFragment extends Fragment {
             TableRow newTR = (TableRow) inflater.inflate(R.layout.hour_row, container, false);
 
             // Set the sub-location title. Wrap at ~18 chars in portrait mode.
-            String locationTitle = area.getLocation();
+            String locationTitle = area.getArea();
 
             TextView sublocTextView = (TextView) newTR.findViewById(R.id.sublocTextView);
             switch(getResources().getConfiguration().orientation) {
