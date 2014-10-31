@@ -14,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -23,6 +22,7 @@ import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +63,7 @@ public class RecreationDisplay extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
+        final Bundle args = getArguments();
 
         List<RMenuRow> data = new ArrayList<RMenuRow>(10);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
@@ -167,13 +167,12 @@ public class RecreationDisplay extends Fragment {
         String descriptionHtml =  StringEscapeUtils.unescapeHtml4(mFacility.getFullDescription());
 
         // Add "View Hours" row
-        if(mFacility.getAreaHours() != null && !mFacility.getAreaHours().isEmpty()) {
-            Gson gson = new Gson();
+        if(mFacility.getDaySchedules() != null && !mFacility.getDaySchedules().isEmpty()) {
             try {
                 Bundle rowArgs = new Bundle();
                 rowArgs.putInt(ID_KEY, HOURS_ROW);
                 rowArgs.putString("title", getString(R.string.rec_view_hours));
-                rowArgs.putString("data", gson.toJson(mFacility.getAreaHours()));
+                rowArgs.putSerializable(RecreationHoursDisplay.DATA_TAG, (Serializable) mFacility.getDaySchedules());
 
                 mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_hours_header)));
                 mAdapter.add(new RMenuItemRow(rowArgs));

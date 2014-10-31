@@ -15,7 +15,7 @@ public class Facility {
     @SerializedName("business_number") private String businessNumber;
     @SerializedName("full_description") private String fullDescription;
     @SerializedName("brief_description") private String briefDescription;
-    @SerializedName("area_hours") private List<AreaHours> areaHours;
+    @SerializedName("area_hours") private List<FacilityDaySchedule> daySchedules;
 
     public String getTitle() {
         return title;
@@ -41,8 +41,8 @@ public class Facility {
         return briefDescription;
     }
 
-    public List<AreaHours> getAreaHours() {
-        return areaHours;
+    public List<FacilityDaySchedule> getDaySchedules() {
+        return daySchedules;
     }
 
 }

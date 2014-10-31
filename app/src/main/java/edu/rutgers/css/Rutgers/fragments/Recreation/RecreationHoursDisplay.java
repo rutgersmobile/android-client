@@ -11,26 +11,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.Gyms;
+import edu.rutgers.css.Rutgers.items.Recreation.FacilityDaySchedule;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Created by jamchamb on 9/10/14.
+ * Displays facility calendar of hours.
  */
-public class RecreationHoursDisplay extends Fragment {
+public class  RecreationHoursDisplay extends Fragment {
 
     private static final String TAG = "RecreationHoursDisplay";
     public static final String HANDLE = "rechoursdisplay";
 
-    private ViewPager mPager;
+    // Argument fields
+    public static final String DATA_TAG = "data";
+
     private PagerAdapter mPagerAdapter;
-    private JSONArray mLocationHours;
+    private List<FacilityDaySchedule> mSchedules;
 
     public RecreationHoursDisplay() {
         // Required empty public constructor
@@ -40,15 +41,16 @@ public class RecreationHoursDisplay extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        final Bundle args = getArguments();
+
         // Load location hours
-        Bundle args = getArguments();
-        if(args.getString("data") != null) {
-            try {
-                mLocationHours = new JSONArray(args.getString("data"));
-            } catch (JSONException e) {
-                Log.w(TAG, "onCreateView(): " + e.getMessage());
-            }
+        mSchedules = (List<FacilityDaySchedule>) args.getSerializable(DATA_TAG);
+        if(mSchedules == null) {
+            Log.e(TAG, "Hours data not set");
+            mSchedules = new ArrayList<>();
         }
+
+        mPagerAdapter = new HoursSlidePagerAdapter(getChildFragmentManager());
     }
 
     @Override
@@ -57,21 +59,12 @@ public class RecreationHoursDisplay extends Fragment {
         final View v = inflater.inflate(R.layout.fragment_recreation_hours_display, parent, false);
 
         // Set up pager for hours displays
-        mPager = (ViewPager) v.findViewById(R.id.hoursViewPager);
-        mPagerAdapter = new HoursSlidePagerAdapter(getChildFragmentManager());
-        mPager.setAdapter(mPagerAdapter);
+        ViewPager pager = (ViewPager) v.findViewById(R.id.hoursViewPager);
+        pager.setAdapter(mPagerAdapter);
 
-        // Generate hours array if it wasn't restored
-        if(mLocationHours != null) {
-            // Get hours data for sub-locations & create fragments
+        if(mSchedules != null) {
             mPagerAdapter.notifyDataSetChanged();
-
-            // Set swipe page to today's date
-            int pos = getCurrentPos(mLocationHours);
-            mPager.setCurrentItem(pos, false);
-
-            // Hide hours pager if there's nothing to display
-            if(mLocationHours.length() == 0) mPager.setVisibility(View.GONE);
+            pager.setCurrentItem(getCurrentPos(), false);
         }
 
         return v;
@@ -88,52 +81,40 @@ public class RecreationHoursDisplay extends Fragment {
 
         @Override
         public Fragment getItem(int position) {
-            try {
-                JSONObject data = mLocationHours.getJSONObject(position);
-                String date = data.getString("date");
-                JSONArray locations = data.getJSONArray("locations");
-                return HourSwiperFragment.newInstance(date, locations);
-            } catch (JSONException e) {
-                Log.w(TAG, "getItem(): " + e.getMessage());
-                return null;
-            }
+            FacilityDaySchedule schedule = mSchedules.get(position);
+            return HourSwiperFragment.newInstance(schedule.getDate(), schedule.getAreaHours());
         }
 
         @Override
         public int getCount() {
-            if(mLocationHours == null) return 0;
-            else return mLocationHours.length();
+            return mSchedules.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            try {
-                return mLocationHours.getJSONObject(position).getString("date");
-            } catch (JSONException e) {
-                Log.w(TAG, "getPageTitle(): " + e.getMessage());
-                return "";
-            }
+            return mSchedules.get(position).getDate();
         }
 
     }
 
     /**
      * Pick default page based on today's date
-     * @param locationHours Locations/hours array
      * @return Index of the page for today's date, or 0 if it's not found.
      */
-    private int getCurrentPos(JSONArray locationHours) {
+    private int getCurrentPos() {
         String todayString = Gyms.GYM_DATE_FORMAT.format(new Date());
-        for(int i = 0; i < locationHours.length(); i++) {
-            try {
-                if(locationHours.getJSONObject(i).getString("date").equals(todayString)) return i;
-            } catch (JSONException e) {
-                Log.w(TAG, "getCurrentPos(): " + e.getMessage());
-                return 0;
+
+        int i = 0;
+        for(FacilityDaySchedule schedule: mSchedules) {
+            if(todayString.equals(schedule.getDate())) {
+                return i;
+            } else {
+                i++;
             }
         }
 
-        return 0;
+        // Date not found, set to last page
+        return i;
     }
 
 }
