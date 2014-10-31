@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.fragments.Recreation;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,16 +9,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-import com.androidquery.callback.AjaxStatus;
-
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.adapters.RMenuAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -27,6 +22,9 @@ import edu.rutgers.css.Rutgers.api.Gyms;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
+import edu.rutgers.css.Rutgers.items.Recreation.Campus;
+import edu.rutgers.css.Rutgers.items.Recreation.Facility;
+import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -37,8 +35,7 @@ public class RecreationMain extends Fragment {
 
     private static final String TAG = "RecreationMain";
     public static final String HANDLE = "recreation";
-    
-    private ArrayList<RMenuRow> mData;
+
     private RMenuAdapter mAdapter;
     
     public RecreationMain() {
@@ -48,54 +45,43 @@ public class RecreationMain extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        mData = new ArrayList<RMenuRow>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+
+        ArrayList<RMenuRow> data = new ArrayList<RMenuRow>();
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Gyms.getGyms()).done(new DoneCallback<JSONArray>() {
-
+        dm.when(Gyms.getCampuses()).done(new DoneCallback<List<Campus>>() {
             @Override
-            public void onDone(JSONArray gymsJson) {
-                try {
-                    for (int i = 0; i < gymsJson.length(); i++) {
-                        JSONObject campus = gymsJson.getJSONObject(i);
+            public void onDone(List<Campus> result) {
+                // Populate list of facilities
+                for (Campus campus : result) {
+                    // Create campus header
+                    mAdapter.add(new RMenuHeaderRow(campus.getTitle()));
 
-                        // Create campus header
-                        mAdapter.add(new RMenuHeaderRow(campus.getString("title")));
-
-                        // Create facility rows
-                        JSONArray facilities = campus.getJSONArray("facilities");
-                        for (int j = 0; j < facilities.length(); j++) {
-                            JSONObject facility = facilities.getJSONObject(j);
-                            Bundle rowArgs = new Bundle();
-                            rowArgs.putString("title", facility.getString("title"));
-                            rowArgs.putString("campus", campus.getString("title"));
-                            rowArgs.putString("facility", facility.getString("title"));
-                            mAdapter.add(new RMenuItemRow(rowArgs));
-                        }
+                    // Create facility rows
+                    for (Facility facility : campus.getFacilities()) {
+                        Bundle rowArgs = new Bundle();
+                        rowArgs.putString("title", facility.getTitle());
+                        rowArgs.putString("campus", campus.getTitle());
+                        rowArgs.putString("facility", facility.getTitle());
+                        mAdapter.add(new RMenuItemRow(rowArgs));
                     }
-                } catch (JSONException e) {
-                    Log.w(TAG, "onCreate(): " + e.getMessage());
                 }
             }
-
-        }).fail(new FailCallback<AjaxStatus>() {
-
+        }).fail(new FailCallback<Exception>() {
             @Override
-            public void onFail(AjaxStatus status) {
-                Log.w(TAG, status.getMessage());
+            public void onFail(Exception result) {
+                AppUtil.showFailedLoadToast(getActivity());
             }
-
         });
-        
+
     }
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         super.onCreateView(inflater, parent, savedInstanceState);
         final View v = inflater.inflate(R.layout.fragment_recreation_main, parent, false);
-        Bundle args = getArguments();
+        final Bundle args = getArguments();
 
         // Set title from JSON
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
@@ -108,10 +94,10 @@ public class RecreationMain extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clicked = (RMenuItemRow) parent.getItemAtPosition(position);
-                Bundle args = clicked.getArgs();
-                args.putString("component", RecreationDisplay.HANDLE);
+                Bundle newArgs = new Bundle(clicked.getArgs());
+                newArgs.putString("component", RecreationDisplay.HANDLE);
 
-                ComponentFactory.getInstance().switchFragments(args);
+                ComponentFactory.getInstance().switchFragments(newArgs);
             }
 
         });

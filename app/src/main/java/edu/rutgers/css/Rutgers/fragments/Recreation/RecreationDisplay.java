@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,16 +14,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +33,7 @@ import edu.rutgers.css.Rutgers.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
+import edu.rutgers.css.Rutgers.items.Recreation.Facility;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -53,9 +53,8 @@ public class RecreationDisplay extends Fragment {
     private static final int DESCRIPTION_ROW = 3;
     private static final int HOURS_ROW = 4;
 
-    private JSONObject mLocationJSON;
+    private Facility mFacility;
     private RMenuAdapter mAdapter;
-    private List<RMenuRow> mData;
     
     public RecreationDisplay() {
         // Required empty public constructor
@@ -66,44 +65,31 @@ public class RecreationDisplay extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        mData = new ArrayList<RMenuRow>(10);
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+        List<RMenuRow> data = new ArrayList<RMenuRow>(10);
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
 
-        if(savedInstanceState != null) {
-            String jsonString = savedInstanceState.getString("mLocationJSON");
-
-            try {
-                if(jsonString != null) mLocationJSON = new JSONObject(jsonString);
-                addInfo();
-                return;
-            } catch (JSONException e) {
-                Log.w(TAG, "onCreate(): " + e.getMessage());
-            }
+        // Make sure necessary arguments were given
+        if(args.getString("campus") == null || args.getString("facility") == null) {
+            Log.e(TAG, "Missing campus/location arguments");
+            return;
         }
 
-        // Get the facility JSON
+        // Get the facility info
         final String campusTitle = args.getString("campus");
         final String facilityTitle = args.getString("facility");
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Gyms.getFacility(campusTitle, facilityTitle)).done(new DoneCallback<JSONObject>() {
-
+        dm.when(Gyms.getFacility(campusTitle, facilityTitle)).done(new DoneCallback<Facility>() {
             @Override
-            public void onDone(JSONObject result) {
-                if(result != null) {
-                    mLocationJSON = result;
-                    addInfo();
-                }
+            public void onDone(@NonNull Facility result) {
+                mFacility = result;
+                addInfo();
             }
-
-        }).fail(new FailCallback<AjaxStatus>() {
-
+        }).fail(new FailCallback<Exception>() {
             @Override
-            public void onFail(AjaxStatus status) {
+            public void onFail(Exception result) {
                 AppUtil.showFailedLoadToast(getActivity());
-                Log.w(TAG, AppUtil.formatAjaxStatus(status));
             }
-
         });
     }
     
@@ -116,8 +102,7 @@ public class RecreationDisplay extends Fragment {
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
 
         // Make sure necessary arguments were given
-        if(args.get("campus") == null || args.get("facility") == null) {
-            Log.w(TAG, "Missing campus/location arg");
+        if(args.getString("campus") == null || args.getString("facility") == null) {
             AppUtil.showFailedLoadToast(getActivity());
             return v;
         }
@@ -170,39 +155,41 @@ public class RecreationDisplay extends Fragment {
         return v;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if(mLocationJSON != null) outState.putString("mLocationJSON", mLocationJSON.toString());
-    }
-
     private void addInfo() {
-        if(getResources() == null) return;
+        // If resources aren't available when callback fires, exit
+        if(mFacility == null) return;
+        if(!isAdded() || getResources() == null) return;
 
         // Fill in location info
-        String infoDesk = mLocationJSON.optString("information_number");
-        String businessOffice = mLocationJSON.optString("business_number");
-        String address = mLocationJSON.optString("address");
-        //Spanned description = Html.fromHtml(StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description")));
-        String descriptionHtml =  StringEscapeUtils.unescapeHtml4(mLocationJSON.optString("full_description"));
+        String infoDesk = mFacility.getInformationNumber();
+        String businessOffice = mFacility.getBusinessNumber();
+        String address = mFacility.getAddress();
+        String descriptionHtml =  StringEscapeUtils.unescapeHtml4(mFacility.getFullDescription());
 
-        try {
-            JSONArray areaHours = mLocationJSON.getJSONArray("area_hours");
-            if(areaHours.length() > 0) {
+        // Add "View Hours" row
+        if(mFacility.getAreaHours() != null && !mFacility.getAreaHours().isEmpty()) {
+            Gson gson = new Gson();
+            try {
                 Bundle rowArgs = new Bundle();
                 rowArgs.putInt(ID_KEY, HOURS_ROW);
                 rowArgs.putString("title", getString(R.string.rec_view_hours));
-                rowArgs.putString("data", areaHours.toString());
+                rowArgs.putString("data", gson.toJson(mFacility.getAreaHours()));
+
                 mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_hours_header)));
                 mAdapter.add(new RMenuItemRow(rowArgs));
+            } catch (JsonSyntaxException e) {
+                Log.e(TAG, "addInfo(): " + e.getMessage());
             }
-        } catch (JSONException e) {
-            Log.w(TAG, "addInfo(): " + e.getMessage());
         }
 
-        if(!StringUtils.isEmpty(descriptionHtml)) {
-            // Decode HTML chars, remove HTML tags, remove whitespace from beginning and end, and then ellipsize the description
-            String desc = StringUtils.abbreviate(StringUtils.strip(AppUtil.stripTags(StringEscapeUtils.unescapeHtml4(descriptionHtml))), 100);
+        // Add "Description" row
+        if(StringUtils.isNotBlank(descriptionHtml)) {
+            // Decode HTML chars, remove HTML tags, remove whitespace from beginning and end, and
+            // then ellipsize the description for the description preview.
+            String desc = StringEscapeUtils.unescapeHtml4(descriptionHtml);
+            desc = AppUtil.stripTags(desc);
+            desc = StringUtils.strip(desc);
+            desc = StringUtils.abbreviate(desc, 100);
 
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, DESCRIPTION_ROW);
@@ -213,7 +200,7 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-        if(!StringUtils.isEmpty(address)) {
+        if(StringUtils.isNotBlank(address)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, ADDRESS_ROW);
             rowArgs.putString("title", address);
@@ -222,7 +209,7 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-        if(!StringUtils.isEmpty(infoDesk)) {
+        if(StringUtils.isNotBlank(infoDesk)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, INFO_ROW);
             rowArgs.putString("title", infoDesk);
@@ -231,7 +218,7 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-        if(!StringUtils.isEmpty(businessOffice)) {
+        if(StringUtils.isNotBlank(businessOffice)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, BUSINESS_ROW);
             rowArgs.putString("title", businessOffice);
