@@ -38,8 +38,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Recreation display fragment displays gym information
- *
+ * Facility information screen
  */
 public class RecreationDisplay extends Fragment {
 
@@ -107,6 +106,9 @@ public class RecreationDisplay extends Fragment {
             return v;
         }
 
+        // When view is recreated, populate list if we have facility info
+        if(mAdapter.isEmpty() && mFacility != null) addInfo();
+
         // Set up list adapter
         final ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
@@ -126,6 +128,7 @@ public class RecreationDisplay extends Fragment {
                             Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
                         }
                         break;
+
                     case INFO_ROW:
                     case BUSINESS_ROW:
                         Intent dialIntent = new Intent(Intent.ACTION_DIAL);
@@ -136,12 +139,14 @@ public class RecreationDisplay extends Fragment {
                             Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
                         }
                         break;
+
                     case DESCRIPTION_ROW:
                         Bundle descArgs = new Bundle(clickedArgs);
                         descArgs.putString("title", args.getString("title"));
                         descArgs.putString("component", TextDisplay.HANDLE);
                         ComponentFactory.getInstance().switchFragments(descArgs);
                         break;
+
                     case HOURS_ROW:
                         Bundle hoursArgs = new Bundle(clickedArgs);
                         hoursArgs.putString("title", args.getString("title") + " - Hours");
@@ -157,8 +162,7 @@ public class RecreationDisplay extends Fragment {
 
     private void addInfo() {
         // If resources aren't available when callback fires, exit
-        if(mFacility == null) return;
-        if(!isAdded() || getResources() == null) return;
+        if(mFacility == null || getResources() == null) return;
 
         // Fill in location info
         String infoDesk = mFacility.getInformationNumber();
