@@ -11,11 +11,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +22,6 @@ import edu.rutgers.css.Rutgers.adapters.CourseSectionAdapter;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.fragments.TextDisplay;
-import edu.rutgers.css.Rutgers.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.items.Schedule.Course;
 import edu.rutgers.css.Rutgers.items.Schedule.ScheduleText;
 import edu.rutgers.css.Rutgers.items.Schedule.Section;
@@ -40,8 +37,8 @@ public class SOCSections extends Fragment {
     private static final String TAG = "SOCSections";
     public static final String HANDLE = "socsections";
 
-    private List<SectionAdapterItem> mData;
     private CourseSectionAdapter mAdapter;
+    private Course mCourse;
 
     public SOCSections() {
         // Required empty public constructor
@@ -52,8 +49,8 @@ public class SOCSections extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        mData = new ArrayList<SectionAdapterItem>();
-        mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, mData);
+        List<SectionAdapterItem> data = new ArrayList<SectionAdapterItem>();
+        mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, data);
 
         Gson gson = new Gson();
         if(args.getString("data") == null) {
@@ -63,11 +60,16 @@ public class SOCSections extends Fragment {
         }
 
         // TODO Replace with just getting course from API
-        Course course = gson.fromJson(args.getString("data"), Course.class);
+        try {
+            mCourse = gson.fromJson(args.getString("data"), Course.class);
+        } catch (JsonSyntaxException e) {
+            Log.e(TAG, e.getMessage());
+            return;
+        }
 
         // Add course description if set
-        if(StringUtils.isNotBlank(course.getCourseDescription())) {
-            mAdapter.add(new ScheduleText(course.getCourseDescription(), ScheduleText.TextType.DESCRIPTION));
+        if(StringUtils.isNotBlank(mCourse.getCourseDescription())) {
+            mAdapter.add(new ScheduleText(mCourse.getCourseDescription(), ScheduleText.TextType.DESCRIPTION));
         }
 
         /*
@@ -78,12 +80,12 @@ public class SOCSections extends Fragment {
         */
 
         // Add prerequisites button if set
-        if(StringUtils.isNotBlank(course.getPreReqNotes())) {
+        if(StringUtils.isNotBlank(mCourse.getPreReqNotes())) {
             mAdapter.add(new ScheduleText("Prerequisites", ScheduleText.TextType.PREREQS));
         }
 
         // Add all visible sections to list
-        for(Section section: course.getSections()) {
+        for(Section section: mCourse.getSections()) {
             if("Y".equalsIgnoreCase(section.getPrinted())) mAdapter.add(section);
         }
 
@@ -108,50 +110,35 @@ public class SOCSections extends Fragment {
                 if(clickedItem instanceof ScheduleText) {
                     ScheduleText scheduleText = (ScheduleText) clickedItem;
 
-                    // TODO implement this again
-                    return;
+                    if(scheduleText.getType().equals(ScheduleText.TextType.PREREQS)) {
+                        Bundle newArgs = new Bundle();
+                        newArgs.putString("component", TextDisplay.HANDLE);
+                        newArgs.putString("title", mCourse.getSubject()+":"+mCourse.getCourseNumber()+" Prerequisites");
+                        newArgs.putString("data", mCourse.getPreReqNotes());
+                        ComponentFactory.getInstance().switchFragments(newArgs);
+                        return;
+                    }
+
+                    /*
+                    else if(scheduleText.getType().equals(ScheduleText.TextType.SYNOPSIS) && StringUtils.isNotBlank(mCourse.getSynopsisUrl())) {
+                        Bundle newArgs = new Bundle();
+                        newArgs.putString("component", WebDisplay.HANDLE);
+                        newArgs.putString("url", mCourse.getSynopsisUrl());
+                        ComponentFactory.getInstance().switchFragments(newArgs);
+                        return;
+                    }
+                    */
                 } else if(clickedItem instanceof Section) {
                     Section section = (Section) clickedItem;
 
                     if(StringUtils.isNotBlank(section.getIndex()) && semester != null) {
                         String index = StringUtils.trim(section.getIndex());
                         Schedule.openRegistrationWindow(semester, index);
+                    } else {
+                        Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
+                        Log.w(TAG, "Section had no index field. Failed to launch webreg.");
                     }
                 }
-
-                // It's a section row, open WebReg for this section
-                if (!clickedJSON.isNull("index") && semester != null) {
-                    String index = clickedJSON.optString("index");
-                    Schedule.openRegistrationWindow(semester, index);
-                } else {
-                    Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "Section had no index field. Failed to launch webreg.");
-                }
-
-                /* OLD - don't uncomment
-                // Check if it's a synopsis row; send to synopsis URL
-                if(clickedJSON.optBoolean("isSynopsisRow")) {
-                    Bundle args = new Bundle();
-                    args.putString("component", WebDisplay.HANDLE);
-                    args.putString("url", clickedJSON.optString("synopsisUrl"));
-                    ComponentFactory.getInstance().switchFragments(args);
-                    return;
-                }
-
-                // Check if it's a pre-req row, open pre-reqs if so
-                else if(clickedJSON.optBoolean("isPreReqRow")) {
-                    Bundle args = new Bundle();
-                    args.putString("component", TextDisplay.HANDLE);
-                    args.putString("data", clickedJSON.optString("preReqNotes"));
-                    ComponentFactory.getInstance().switchFragments(args);
-                    return;
-                }
-
-                // Check if it's a description row; do nothing
-                else if(clickedJSON.optBoolean("isDescriptionRow")) {
-                    return;
-                }
-                */
             }
         });
 

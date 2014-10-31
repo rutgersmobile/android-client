@@ -16,8 +16,6 @@ public class TextDisplay extends Fragment {
     private static final String TAG = "TextDisplay";
     public static final String HANDLE = "text";
 
-    private TextView mTextView;
-
     public TextDisplay() {
         // Required empty public constructor
     }
@@ -27,16 +25,15 @@ public class TextDisplay extends Fragment {
         View v = inflater.inflate(R.layout.fragment_text_display, parent, false);
         Bundle args = getArguments();
 
-        mTextView = (TextView) v.findViewById(R.id.text);
+        TextView textView = (TextView) v.findViewById(R.id.text);
 
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
 
         if(args.getString("data") == null) {
             Log.w(TAG, "No text set");
-            mTextView.setText("No text set");
-        }
-        else {
-            mTextView.setText(Html.fromHtml(args.getString("data")));
+            textView.setText("No text set");
+        } else {
+            textView.setText(Html.fromHtml(args.getString("data")));
         }
 
         return v;
