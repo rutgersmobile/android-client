@@ -6,7 +6,7 @@ package edu.rutgers.css.Rutgers.items.Schedule;
 public class ScheduleText extends SectionAdapterItem {
 
     public enum TextType {
-        DESCRIPTION, SYNOPSIS, PREREQS
+        DESCRIPTION, PREREQS
     }
 
     private String title;

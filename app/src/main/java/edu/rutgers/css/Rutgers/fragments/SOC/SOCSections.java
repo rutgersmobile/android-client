@@ -72,13 +72,6 @@ public class SOCSections extends Fragment {
             mAdapter.add(new ScheduleText(mCourse.getCourseDescription(), ScheduleText.TextType.DESCRIPTION));
         }
 
-        /*
-        // Add synopsis link if set
-        if(StringUtils.isNotBlank(course.getSynopsisUrl())) {
-            mAdapter.add(new ScheduleText("Synopsis", ScheduleText.TextType.SYNOPSIS));
-        }
-        */
-
         // Add prerequisites button if set
         if(StringUtils.isNotBlank(mCourse.getPreReqNotes())) {
             mAdapter.add(new ScheduleText("Prerequisites", ScheduleText.TextType.PREREQS));
@@ -118,16 +111,6 @@ public class SOCSections extends Fragment {
                         ComponentFactory.getInstance().switchFragments(newArgs);
                         return;
                     }
-
-                    /*
-                    else if(scheduleText.getType().equals(ScheduleText.TextType.SYNOPSIS) && StringUtils.isNotBlank(mCourse.getSynopsisUrl())) {
-                        Bundle newArgs = new Bundle();
-                        newArgs.putString("component", WebDisplay.HANDLE);
-                        newArgs.putString("url", mCourse.getSynopsisUrl());
-                        ComponentFactory.getInstance().switchFragments(newArgs);
-                        return;
-                    }
-                    */
                 } else if(clickedItem instanceof Section) {
                     Section section = (Section) clickedItem;
 
