@@ -45,7 +45,7 @@ public class Gyms {
         final DeferredObject<List<Campus>, Exception, Void> deferred = new DeferredObject<List<Campus>, Exception, Void>();
 
         // TODO Request.apiArray("gyms_array.txt", expire);
-        Promise<JSONArray, AjaxStatus, Double> p = Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.txt", expire);
+        Promise<JSONArray, AjaxStatus, Double> p = Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.json", expire);
 
         sDM.when(p, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
             @Override
@@ -69,6 +69,7 @@ public class Gyms {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus result) {
+                Log.e(TAG, AppUtil.formatAjaxStatus(result));
                 deferred.reject(new Exception(AppUtil.formatAjaxStatus(result)));
             }
         });
@@ -105,6 +106,7 @@ public class Gyms {
         }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception result) {
+                Log.e(TAG, result.getMessage());
                 deferred.reject(result);
             }
         });
