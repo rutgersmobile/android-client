@@ -124,7 +124,7 @@ public class SOCIndex {
             for(String subjCode: subjCodes) {
                 IndexSubject curSubject = mSubjectsByCode.get(subjCode);
                 if(curSubject != null) {
-                    results.add(new Subject(curSubject.name, curSubject.id));
+                    results.add(new Subject(curSubject.name.toUpperCase(), curSubject.id));
                 }
             }
         }
@@ -140,7 +140,7 @@ public class SOCIndex {
     public Subject getSubjectByCode(String subjectCode) {
         IndexSubject subject = mSubjectsByCode.get(subjectCode);
         if(subject != null) {
-            return new Subject(subject.name, subject.id);
+            return new Subject(subject.name.toUpperCase(), subject.id);
         } else {
             return null;
         }

@@ -2,8 +2,6 @@ package edu.rutgers.css.Rutgers.items.Schedule;
 
 import android.support.annotation.NonNull;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 
 /**
@@ -17,7 +15,7 @@ public class Course extends ScheduleAdapterItem {
     private String courseDescription;
     private String preReqNotes;
     private String synopsisUrl;
-    private int credits;
+    private float credits;
     private List<Section> sections;
     private boolean stub;
 
@@ -39,6 +37,7 @@ public class Course extends ScheduleAdapterItem {
         this.preReqNotes = other.getPreReqNotes();
         this.credits = other.getCredits();
         this.sections = other.getSections();
+        this.synopsisUrl = other.getSynopsisUrl();
         this.stub = false;
     }
 
@@ -115,7 +114,7 @@ public class Course extends ScheduleAdapterItem {
         return synopsisUrl;
     }
 
-    public int getCredits() {
+    public float getCredits() {
         return credits;
     }
 
