@@ -10,11 +10,12 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 /**
- * Created by jamchamb on 9/18/14.
+ * Utilities for Rutgers-specific data
  */
 public class RutgersUtil {
 
@@ -31,7 +32,7 @@ public class RutgersUtil {
 
         Resources res = context.getResources();
         try {
-            int id = res.getIdentifier("campus_"+campusTag+"_full", "string", AppUtil.PACKAGE_NAME);
+            int id = res.getIdentifier("campus_"+campusTag+"_full", "string", Config.PACKAGE_NAME);
             return res.getString(id);
         } catch (Resources.NotFoundException e) {
             return null;
@@ -49,7 +50,7 @@ public class RutgersUtil {
 
         Resources res = context.getResources();
         try {
-            int id = res.getIdentifier("role_"+roleTag+"_full", "string", AppUtil.PACKAGE_NAME);
+            int id = res.getIdentifier("role_"+roleTag+"_full", "string", Config.PACKAGE_NAME);
             return res.getString(id);
         } catch (Resources.NotFoundException e) {
             return null;

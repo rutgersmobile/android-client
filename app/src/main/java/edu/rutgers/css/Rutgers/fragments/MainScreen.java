@@ -9,7 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 public class MainScreen extends Fragment {
@@ -30,7 +30,7 @@ public class MainScreen extends Fragment {
             public void run() {
                 if(!isAdded()) return;
                 // Loads and resizes the background logo
-                Bitmap bg = AppUtil.decodeSampledBitmapFromResource(getResources(), R.drawable.background, v.getWidth(), v.getHeight());
+                Bitmap bg = ImageUtils.decodeSampledBitmapFromResource(getResources(), R.drawable.background, v.getWidth(), v.getHeight());
                 Drawable bgDrawable = new BitmapDrawable(getResources(), bg);
 
                 if (android.os.Build.VERSION.SDK_INT >= 16) {

@@ -48,6 +48,7 @@ import edu.rutgers.css.Rutgers.items.Channel;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
@@ -389,7 +390,7 @@ public class MainActivity extends LogoFragmentActivity  implements
             try {
                 connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
             } catch (SendIntentException e) {
-                Log.e(AppUtil.APPTAG, Log.getStackTraceString(e));
+                Log.e(Config.APPTAG, Log.getStackTraceString(e));
             }
         }
         else {
@@ -411,12 +412,12 @@ public class MainActivity extends LogoFragmentActivity  implements
                 switch (resultCode) {
                     // If Google Play services resolved the problem
                     case Activity.RESULT_OK:
-                        Log.w(AppUtil.APPTAG, "Connection failure resolved by Google Play");
+                        Log.w(Config.APPTAG, "Connection failure resolved by Google Play");
                         break;
 
                     // If any other result was returned by Google Play services
                     default:
-                        Log.w(AppUtil.APPTAG, "Connection failure not resolved by Google Play ("+resultCode+")");
+                        Log.w(Config.APPTAG, "Connection failure not resolved by Google Play ("+resultCode+")");
                         break;
                 }
                 break;
@@ -424,7 +425,7 @@ public class MainActivity extends LogoFragmentActivity  implements
             // If any other request code was received
             default:
                // Report that this Activity received an unknown requestCode
-               Log.w(AppUtil.APPTAG, "Unknown request code: " + requestCode);
+               Log.w(Config.APPTAG, "Unknown request code: " + requestCode);
                break;
         }
     }
@@ -494,7 +495,7 @@ public class MainActivity extends LogoFragmentActivity  implements
 
             RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
             // Try to find icon for this item and set it
-            newSMI.setDrawable(AppUtil.getIcon(getResources(), channel.getHandle()));
+            newSMI.setDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
 
             // Add the item to the drawer
             mDrawerAdapter.add(newSMI);

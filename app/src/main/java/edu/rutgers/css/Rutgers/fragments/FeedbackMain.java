@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.adapters.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -132,9 +133,9 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
             params.put("channel", mChannelSpinner.getSelectedItem());    
         }
         //params.put("debuglog", "");
-        params.put("version", AppUtil.VERSION);
-        params.put("osname", AppUtil.OSNAME);
-        params.put("betamode", AppUtil.BETAMODE);
+        params.put("version", Config.VERSION);
+        params.put("osname", Config.OSNAME);
+        params.put("betamode", Config.BETAMODE);
         
         // Lock send button until POST request goes through
         mLockSend = true;

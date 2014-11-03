@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.items.Prediction;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
@@ -447,7 +448,7 @@ public class Nextbus {
                             Location.distanceBetween(sourceLat, sourceLon, endLatitude, endLongitude, results);
                             
                             // If the stop is within range, add it to the list
-                            if(results[0] < AppUtil.NEARBY_RANGE) {
+                            if(results[0] < Config.NEARBY_RANGE) {
                                 nearStops.put(curTitle, curStopByTitle);
                                 break; // Skip to next stop title
                             }

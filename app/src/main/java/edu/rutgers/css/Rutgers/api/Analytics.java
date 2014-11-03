@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.items.AnalyticsOpenHelper;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
@@ -285,7 +286,7 @@ public class Analytics extends IntentService {
     private static JSONObject getPlatformJSON(Context context) {
         JSONObject platformJSON = new JSONObject();
         try {
-            platformJSON.put("os", AppUtil.OSNAME);
+            platformJSON.put("os", Config.OSNAME);
             platformJSON.put("version", Build.VERSION.RELEASE);
             platformJSON.put("model", Build.MANUFACTURER + " " + Build.MODEL);
             platformJSON.put("tablet", AppUtil.isTablet(context));
@@ -306,9 +307,9 @@ public class Analytics extends IntentService {
         JSONObject releaseJSON = new JSONObject();
         try {
             releaseJSON.put("debug", BuildConfig.DEBUG);
-            releaseJSON.put("beta", AppUtil.BETA);
-            releaseJSON.put("version", AppUtil.VERSION);
-            releaseJSON.put("api", AppUtil.API_LEVEL);
+            releaseJSON.put("beta", Config.BETA);
+            releaseJSON.put("version", Config.VERSION);
+            releaseJSON.put("api", Config.API_LEVEL);
         } catch (JSONException e) {
             Log.w(TAG, "getReleaseJSON(): " + e.getMessage());
         }

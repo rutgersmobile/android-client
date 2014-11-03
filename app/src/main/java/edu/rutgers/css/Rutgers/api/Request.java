@@ -10,8 +10,8 @@ import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.RutgersApplication;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /** Convenience class for making requests */
 public class Request {
@@ -39,7 +39,7 @@ public class Request {
      * @return Promise for a JSON object
      */
     public static Promise<JSONObject, AjaxStatus, Double> api (String resource, long expire) {
-        return json(AppUtil.API_BASE + resource, expire);
+        return json(Config.API_BASE + resource, expire);
     }
 
     /**
@@ -49,7 +49,7 @@ public class Request {
      * @return Promise for a JSON array
      */
     public static Promise<JSONArray, AjaxStatus, Double> apiArray(String resource, long expire) {
-        return jsonArray(AppUtil.API_BASE + resource, expire);
+        return jsonArray(Config.API_BASE + resource, expire);
     }
 
     /**

@@ -28,6 +28,7 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -56,11 +57,11 @@ public final class LocationUtils {
 
     // Name of shared preferences repository that stores persistent state
     public static final String SHARED_PREFERENCES =
-            AppUtil.PACKAGE_NAME + ".SHARED_PREFERENCES";
+            Config.PACKAGE_NAME + ".SHARED_PREFERENCES";
 
     // Key for storing the "updates requested" flag in shared preferences
     public static final String KEY_UPDATES_REQUESTED =
-            AppUtil.PACKAGE_NAME + ".KEY_UPDATES_REQUESTED";
+            Config.PACKAGE_NAME + ".KEY_UPDATES_REQUESTED";
 
     /*
      * Define a request code to send to Google Play services
