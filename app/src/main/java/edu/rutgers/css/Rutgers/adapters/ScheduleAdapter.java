@@ -168,8 +168,9 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                         filterResults.values = null;
                         filterResults.count = 0;
                         return filterResults;
+                    } else {
+                        mOriginalList = new ArrayList<ScheduleAdapterItem>(mList);
                     }
-                    else mOriginalList = new ArrayList<ScheduleAdapterItem>(mList);
                 }
 
                 tempList = new ArrayList<ScheduleAdapterItem>(mOriginalList);
@@ -188,8 +189,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                         Course course = socIndex.getCourseByCode(subjCode, courseCode);
                         if(course != null) passed.add(course);
                     }
-                }
-                else {
+                } else {
                     // Check abbreviations
                     passed.addAll(socIndex.getSubjectsByAbbreviation(query.toUpperCase()));
                 }

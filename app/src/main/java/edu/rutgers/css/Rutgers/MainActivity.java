@@ -392,8 +392,7 @@ public class MainActivity extends LogoFragmentActivity  implements
             } catch (SendIntentException e) {
                 Log.e(Config.APPTAG, Log.getStackTraceString(e));
             }
-        }
-        else {
+        } else {
             LocationUtils.showErrorDialog(this, connectionResult.getErrorCode());
         }
     }

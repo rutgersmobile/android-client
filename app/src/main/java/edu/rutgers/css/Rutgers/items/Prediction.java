@@ -78,12 +78,10 @@ public class Prediction implements Serializable {
                ((otherPrediction.getDirection() == null && this.getDirection() == null) ||
                 (this.getDirection() != null && this.getDirection().equals(otherPrediction.getDirection())))) {
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
-        }
-        else {
+        } else {
             return false;
         }
     }

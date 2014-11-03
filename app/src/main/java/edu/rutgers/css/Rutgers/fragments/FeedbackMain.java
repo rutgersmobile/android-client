@@ -201,8 +201,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
             // Channel feedback allows user to select a specific channel
             if(selection.equals(getString(R.string.feedback_channel_feedback))) {
                 mChannelSpinner.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 mChannelSpinner.setVisibility(View.GONE);
             }
             

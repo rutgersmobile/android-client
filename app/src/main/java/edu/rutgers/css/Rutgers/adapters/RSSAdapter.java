@@ -70,8 +70,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
             holder.descriptionTextView = (TextView) convertView.findViewById(R.id.rssRowDescView);
             //holder.authorTextView = (TextView) convertView.findViewById(R.id.rssRowAuthorView);
             convertView.setTag(holder);
-        }
-        else {    
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
     
@@ -83,8 +82,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
         if(curItem.getDate() != null && !curItem.getDate().isEmpty()) {
             holder.dateTextView.setText(curItem.getDate());
             holder.dateTextView.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             holder.dateTextView.setVisibility(View.GONE);
             holder.dateTextView.setText(null);
         }
@@ -97,8 +95,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
             // No image - clear the image view
             holder.iconImageView.setImageBitmap(null);
             holder.iconImageView.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             holder.iconImageView.setVisibility(View.VISIBLE);
             // Download the image
             AQuery cvAq = aq.recycle(convertView);

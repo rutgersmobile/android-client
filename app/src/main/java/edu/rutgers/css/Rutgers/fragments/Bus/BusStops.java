@@ -272,8 +272,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         if(data == null) {
             mAdapter.add(new RMenuItemRow(getString(R.string.failed_load_short)));
             return;
-        }
-        else if(data.length() == 0) {
+        } else if(data.length() == 0) {
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_stops)));
             return;
         }
@@ -403,8 +402,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                     addNearbyRow(1, new RMenuItemRow(failedLoadString));
                 }
             });
-        }
-        else {
+        } else {
             Log.w(TAG, "Couldn't get location provider, can't find nearby stops");
             addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
         }

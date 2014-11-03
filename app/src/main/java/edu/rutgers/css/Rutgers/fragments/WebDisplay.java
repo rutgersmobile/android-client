@@ -67,8 +67,7 @@ public class WebDisplay extends Fragment {
                 mCurrentURL = args.getString("url");
                 initialIntent();
                 mWebView.loadUrl(mCurrentURL);
-            }
-            else {
+            } else {
                 Log.w(TAG, "No URL supplied");
             }
         }
@@ -155,8 +154,7 @@ public class WebDisplay extends Fragment {
         if(shareItem != null) {
             mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
             initialIntent();
-        }
-        else {
+        } else {
             Log.w(TAG, "Could not find Share menu item");
         }
     }
@@ -203,8 +201,7 @@ public class WebDisplay extends Fragment {
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, url);
             mShareActionProvider.setShareIntent(intent);
-        }
-        else {
+        } else {
             if(mCurrentURL == null) Log.w(TAG, "No URL set");
             if(mShareActionProvider == null) Log.w(TAG, "Tried to set intent before action provider was set");
         }

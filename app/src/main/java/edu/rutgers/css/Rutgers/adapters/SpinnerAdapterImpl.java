@@ -32,8 +32,7 @@ public class SpinnerAdapterImpl<T> extends ArrayAdapter<T> {
             holder = new ViewHolder();
             holder.textView = (TextView) convertView.findViewById(android.R.id.text1);
             convertView.setTag(holder);
-        }
-        else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
 

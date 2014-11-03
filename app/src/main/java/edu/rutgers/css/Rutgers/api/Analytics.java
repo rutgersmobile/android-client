@@ -176,8 +176,7 @@ public class Analytics extends IntentService {
 
             if(cursor.getCount() == 0) {
                 Log.i(TAG, "No events to post.");
-            }
-            else {
+            } else {
                 while (cursor.moveToNext()) {
                     String type = cursor.getString(1);
                     String time = cursor.getString(2);

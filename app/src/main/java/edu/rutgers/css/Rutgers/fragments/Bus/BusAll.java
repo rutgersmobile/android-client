@@ -217,8 +217,7 @@ public class BusAll extends Fragment {
         if(data == null) {
             mAdapter.add(new RMenuItemRow(getString(R.string.failed_load_short)));
             return;
-        }
-        else if(data.length() == 0) {
+        } else if(data.length() == 0) {
             if(mode.equalsIgnoreCase("stop")) mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_stops)));
             else if(mode.equalsIgnoreCase("route")) mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_routes)));
             return;
