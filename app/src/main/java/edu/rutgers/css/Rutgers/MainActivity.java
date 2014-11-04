@@ -72,7 +72,7 @@ public class MainActivity extends LogoFragmentActivity  implements
     private ActionBarDrawerToggle mDrawerToggle;
     private RMenuAdapter mDrawerAdapter;
 
-    private ArrayList<GooglePlayServicesClient.ConnectionCallbacks> mLocationListeners;
+    private ArrayList<GooglePlayServicesClient.ConnectionCallbacks> mLocationListeners = new ArrayList<>(5);
     
     /**
      * For providing the location client to fragments
@@ -100,12 +100,6 @@ public class MainActivity extends LogoFragmentActivity  implements
 
         // Set up logo overlay
         setLogoRootLayoutId(R.id.main_content_frame);
-
-        // This is usually created and populated before onCreate() is called so only initialize if
-        // it's still null
-        if(mLocationListeners == null) {
-            mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
-        }
 
         /*
         if(BuildConfig.DEBUG) {
@@ -337,10 +331,6 @@ public class MainActivity extends LogoFragmentActivity  implements
      */
     @Override
     public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        if(mLocationListeners == null) {
-            mLocationListeners = new ArrayList<GooglePlayServicesClient.ConnectionCallbacks>(5);
-        }
-
         mLocationListeners.add(listener);
 
         if(mLocationClient != null) {
