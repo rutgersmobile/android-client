@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -28,7 +30,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -138,8 +139,26 @@ public class AppUtil {
      * @param handle Fragment handle
      * @return True if on top, false if not
      */
-    public static boolean isOnTop(@NonNull String handle) {
-        return handle.equalsIgnoreCase(ComponentFactory.getInstance().getTopHandle());
+    public static boolean isOnTop(FragmentActivity activity, @NonNull String handle) {
+        if(activity == null) return false;
+
+        FragmentManager fm = activity.getSupportFragmentManager();
+        if(fm.getBackStackEntryCount() > 0) {
+            return handle.equalsIgnoreCase(fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
+        } else {
+            return false;
+        }
+    }
+
+    public static String topHandle(FragmentActivity activity) {
+        if(activity == null) return null;
+
+        FragmentManager fm = activity.getSupportFragmentManager();
+        if(fm.getBackStackEntryCount() > 0) {
+            return fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName();
+        } else {
+            return null;
+        }
     }
 
     /**

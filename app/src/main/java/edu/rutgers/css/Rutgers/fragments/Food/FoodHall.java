@@ -112,7 +112,7 @@ public class FoodHall extends Fragment {
 
         // Set title to show timestamp for dining data
         mTitle = mLocation + " (" + dout.format(diningMenu.getDate()) + ")";
-        if(getActivity() != null && AppUtil.isOnTop(FoodHall.HANDLE)) {
+        if(getActivity() != null && AppUtil.isOnTop(getActivity(), FoodHall.HANDLE)) {
             getActivity().setTitle(mTitle);
         }
     }

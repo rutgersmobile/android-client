@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Stack;
 
 import edu.rutgers.css.Rutgers.fragments.Bus.BusDisplay;
 import edu.rutgers.css.Rutgers.fragments.Bus.BusMain;
@@ -51,7 +50,6 @@ public class ComponentFactory {
 
     private static ComponentFactory sSingletonInstance;
     private static WeakReference<FragmentActivity> sMainActivity;
-    private static Stack<String> sHandleStack;
 
     // Set up table of fragments that can be launched
     private static Map<String, Class<? extends Fragment>> sFragmentTable =
@@ -93,8 +91,8 @@ public class ComponentFactory {
     protected ComponentFactory() {
     }
 
-    public void setMainActivity(FragmentActivity fragmentActivity) {
-        sMainActivity = new WeakReference<FragmentActivity>(fragmentActivity);
+    public void setMainActivity(@NonNull FragmentActivity fragmentActivity) {
+        sMainActivity = new WeakReference<>(fragmentActivity);
     }
 
     /**
@@ -103,7 +101,6 @@ public class ComponentFactory {
      */
     public static ComponentFactory getInstance() {
         if(sSingletonInstance == null) sSingletonInstance = new ComponentFactory();
-        if(sHandleStack == null) sHandleStack = new Stack<String>();
         return sSingletonInstance;
     }
     
@@ -192,9 +189,6 @@ public class ComponentFactory {
             .addToBackStack(componentTag)
             .commit();
 
-        // Set tag of fragment that is on top
-        sHandleStack.push(componentTag);
-
         return true;
     }
 
@@ -216,18 +210,6 @@ public class ComponentFactory {
         }
         ft.addToBackStack(null); // TODO Also add tag to tag stack?
         dialogFragment.show(ft, tag);
-    }
-
-    /** Get tag of fragment that is on top */
-    public String getTopHandle() {
-        if(!sHandleStack.isEmpty()) return sHandleStack.peek();
-        else return null;
-    }
-
-    /** Pop fragment tag from stack */
-    public String popHandleStack() {
-        if(!sHandleStack.isEmpty()) return sHandleStack.pop();
-        else return null;
     }
 
 }

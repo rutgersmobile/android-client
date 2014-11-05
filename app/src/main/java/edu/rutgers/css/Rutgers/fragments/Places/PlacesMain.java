@@ -38,7 +38,6 @@ import edu.rutgers.css.Rutgers.items.KeyValPair;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -168,12 +167,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         if(mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
 
-        // Don't update the screen if the places fragment isn't on top
-        if(!AppUtil.isOnTop(PlacesMain.HANDLE)) {
-            Log.v(TAG, "onResume(): Not on top, not updating nearby places");
-        }
         // Reload nearby places
-        else loadNearbyPlaces();
+        loadNearbyPlaces();
     }
 
     @Override
@@ -191,11 +186,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         // Make sure this isn't called before the activity has been attached
         // or before onCreate() has ran.
         if(mNearbyData != null && isAdded()) {
-            // Don't update the screen if the places fragment isn't on top
-            if(!AppUtil.isOnTop(PlacesMain.HANDLE)) {
-                Log.v(TAG, "onConnected(): Not on top, not updating nearby places");
-            }
-            else loadNearbyPlaces();
+            loadNearbyPlaces();
         }
     }
 

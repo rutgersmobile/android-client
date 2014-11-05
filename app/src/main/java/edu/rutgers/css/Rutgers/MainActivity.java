@@ -256,7 +256,7 @@ public class MainActivity extends LogoFragmentActivity  implements
     
     @Override
     public void onBackPressed() {
-        Log.v(TAG, "Back button pressed. Leaving top component: " + ComponentFactory.getInstance().getTopHandle());
+        Log.v(TAG, "Back button pressed. Leaving top component: " + AppUtil.topHandle(this));
 
         // If drawer is open, intercept back press to close drawer
         if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
@@ -265,7 +265,7 @@ public class MainActivity extends LogoFragmentActivity  implements
         }
 
         // If web display is active, send back button presses to it for navigating browser history
-        if(WebDisplay.HANDLE.equalsIgnoreCase(ComponentFactory.getInstance().getTopHandle())) {
+        if(AppUtil.isOnTop(this, WebDisplay.HANDLE)) {
             Fragment webView = getSupportFragmentManager().findFragmentByTag(WebDisplay.HANDLE);
             if (webView != null && webView.isVisible()) {
                 if(((WebDisplay) webView).backPress()) {
@@ -275,8 +275,6 @@ public class MainActivity extends LogoFragmentActivity  implements
             }
         }
 
-        // Default back press behavior (go back in fragments, etc.)
-        ComponentFactory.getInstance().popHandleStack();
         super.onBackPressed();
     }
     
