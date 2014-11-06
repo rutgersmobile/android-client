@@ -56,7 +56,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 
         mDM = new AndroidDeferredManager();
 
-        mData = new ArrayList<RMenuRow>();
+        mData = new ArrayList<>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
     }
     
@@ -126,10 +126,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 JSONArray nbResult = null, nwkResult = null;
 
                 for (OneResult result : results) {
-                    if (result.getPromise() == nbActiveRoutes)
+                    if (result.getPromise() == nbActiveRoutes) {
                         nbResult = (JSONArray) result.getResult();
-                    else if (result.getPromise() == nwkActiveRoutes)
+                    } else if (result.getPromise() == nwkActiveRoutes) {
                         nwkResult = (JSONArray) result.getResult();
+                    }
                 }
 
                 if (nbHome) {
@@ -166,6 +167,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
      * @param agencyTitle Header title that goes above these routes
      */
     private void loadAgency(final String agencyTag, final String agencyTitle, final JSONArray data) {
+        if(!isAdded() || getResources() == null) return;
         if(data == null) return;
 
         mAdapter.add(new RMenuHeaderRow(agencyTitle));

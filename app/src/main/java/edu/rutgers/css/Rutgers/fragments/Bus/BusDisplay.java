@@ -54,11 +54,10 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 
         mDM = new AndroidDeferredManager();
 
-        mData = new ArrayList<Prediction>();
+        mData = new ArrayList<>();
         mAdapter = new PredictionAdapter(getActivity(), mData);
 
-        // Setup the timer stuff for updating the bus predictions
-        mUpdateTimer = new Timer();
+        // Set up handler for bus prediction update timer
         mUpdateHandler = new Handler();
 
         // Attempt to restore state
@@ -66,40 +65,38 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
             mAgency = savedInstanceState.getString("mAgency");
             mTag = savedInstanceState.getString("mTag");
             mMode = (Mode) savedInstanceState.getSerializable("mMode");
-            mData.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable("mData"));
-            mAdapter.notifyDataSetChanged();
+            mAdapter.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable("mData"));
             return;
         }
 
         // Load arguments anew
-        Bundle args = getArguments();
+        final Bundle args = getArguments();
 
-        // Get agency
-        if(args.getString("agency") == null) {
-            Log.e(TAG, "agency was not set");
-            return;
+        boolean missingArg = false;
+        String requiredArgs[] = {"agency", "mode", "tag"};
+        for(String argTag: requiredArgs) {
+            if(args.getString(argTag) == null) {
+                Log.e(TAG, "Argument \""+argTag+"\" not set");
+                missingArg = true;
+            }
         }
-        else mAgency = args.getString("agency");
-        
-        // Get mode (route or stop display)
-        if(args.getString("mode") == null) {
-            Log.e(TAG, "mode was not set");
-            return;
-        } else if(args.getString("mode").equalsIgnoreCase("route")) {
+        if(missingArg) return;
+
+        // Set route or stop display mode
+        String mode = args.getString("mode");
+        if("route".equalsIgnoreCase(mode)) {
             mMode = Mode.ROUTE;
-            mTag = args.getString("tag");
-            if(mTag == null) {
-                Log.e(TAG, "tag not set for route");
-                return;
-            }
-        } else if(args.getString("mode").equalsIgnoreCase("stop")) {
+        } else if("stop".equalsIgnoreCase(mode)) {
             mMode = Mode.STOP;
-            mTag = args.getString("title");
-            if(mTag == null) {
-                Log.e(TAG, "title tag not set for stop");
-                return;
-            }
+        } else {
+            Log.e(TAG, "Invalid mode \""+args.getString("mode")+"\"");
+            // End here and make sure mAgency and mTag are null to prevent update attempts
+            return;
         }
+
+        // Get agency and route/stop tag
+        mAgency = args.getString("agency");
+        mTag = args.getString("tag");
 
     }
     
@@ -190,7 +187,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
     public void onDone(ArrayList<Prediction> predictionArray) {
         // If no routes are running through this stop right now, show message
         if(mMode == Mode.STOP && predictionArray.isEmpty()) {
-            Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
+            if(isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
         }
 
         /*
@@ -203,10 +200,8 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
                 Log.w(TAG, "Size of updated list did not match original");
                 mAdapter.clear();
             }
-            
-            for(Prediction p: predictionArray) {
-                mAdapter.add(p);
-            }
+
+            mAdapter.addAll(predictionArray);
         }
 
         /*

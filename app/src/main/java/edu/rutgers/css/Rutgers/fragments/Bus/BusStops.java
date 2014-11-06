@@ -96,11 +96,10 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         
         mNearbyRowCount = 0;
         mNearbyHeaderAdded = false;
-        mData = new ArrayList<RMenuRow>();
+        mData = new ArrayList<>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
         
-        // Setup the timer stuff for updating the nearby stops
-        mUpdateTimer = new Timer();
+        // Set up handler for nearby stop update timer
         mUpdateHandler = new Handler();
     }
     
@@ -122,18 +121,20 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         listView.setOnItemClickListener(new OnItemClickListener() {
 
             /**
-             * Clicking on one of the stops will launch the bus display in stop mode, which lists routes going through that stop.
+             * Clicking on one of the stops will launch the bus display in stop mode, which lists
+             * routes going through that stop.
              */
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
                 Bundle clickedArgs = clickedItem.getArgs();
 
-                Bundle args = new Bundle(clickedArgs);
-                args.putString("component", BusDisplay.HANDLE);
-                args.putString("mode", "stop");
+                Bundle newArgs = new Bundle(clickedArgs);
+                newArgs.putString("component", BusDisplay.HANDLE);
+                newArgs.putString("mode", "stop");
+                newArgs.putString("tag", clickedArgs.getString("title"));
 
-                ComponentFactory.getInstance().switchFragments(args);
+                ComponentFactory.getInstance().switchFragments(newArgs);
             }
 
         });
@@ -183,7 +184,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             @Override
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
-                if(!isAdded()) return;
+                if(!isAdded() || getResources() == null) return;
 
                 JSONArray nbResult = null, nwkResult = null;
 
@@ -257,6 +258,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      * @param agencyTitle Header title that goes above these stops
      */
     private void loadAgency(final String agencyTag, final String agencyTitle, final JSONArray data) {
+        if(!isAdded() || getResources() == null) return;
+
         mAdapter.add(new RMenuHeaderRow(agencyTitle));
 
         if(data == null) {
@@ -325,7 +328,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      * Populate list with active nearby stops for an agency
      */
     private void loadNearbyStops() {
-        if(!isAdded()) return;
+        if(!isAdded() || getResources() == null) return;
 
         final String noneNearbyString = getString(R.string.bus_no_nearby_stops);
         final String failedLoadString = getString(R.string.failed_load_short);
@@ -357,7 +360,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                     JSONObject nwkStops = (JSONObject) results.get(1).getResult();
 
                     // Put all stop titles into one list
-                    List<KeyValPair> stopTitles = new ArrayList<KeyValPair>(nbStops.length() + nwkStops.length());
+                    List<KeyValPair> stopTitles = new ArrayList<>(nbStops.length() + nwkStops.length());
                     for(Iterator<String> stopsIter = nbStops.keys(); stopsIter.hasNext();) {
                         stopTitles.add(new KeyValPair(stopsIter.next(), "nb"));
                     }
