@@ -16,14 +16,14 @@ public class Prediction implements Serializable {
     public Prediction (String title, String tag) {
         this.tag = tag;
         this.title = title;
-        minutes = new ArrayList<Integer>();
+        minutes = new ArrayList<>();
     }
     
     public Prediction (String title, String tag, String direction) {
         this.tag = tag;
         this.title = title;
         this.direction = direction;
-        minutes = new ArrayList<Integer>();
+        minutes = new ArrayList<>();
     }
     
     public String getDirection() {
@@ -34,17 +34,18 @@ public class Prediction implements Serializable {
         this.direction = direction;
     }
 
-    public void addPrediction (int mins) { minutes.add(mins); }
-    
     public String getTag() {
         return tag;
     }
+
     public void setTag(String tag) {
         this.tag = tag;
     }
+
     public String getTitle() {
         return title;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -57,9 +58,11 @@ public class Prediction implements Serializable {
         this.minutes = minutes;
     }
 
+    public void addMinutes(int mins) { minutes.add(mins); }
+
     @Override
     public String toString() {
-        return this.title + "," + this.direction + "," + this.minutes.toString();
+        return this.title + ", " + this.direction + ", " + this.minutes.toString();
     }
 
     /**
@@ -70,20 +73,17 @@ public class Prediction implements Serializable {
     @Override
     public boolean equals(Object other) {
         if(other == null) return false;
-        
-        if(other instanceof Prediction) {
-            Prediction otherPrediction = (Prediction) other;
-            if(otherPrediction.getTag().equals(this.getTag()) &&
-               otherPrediction.getTitle().equals(this.getTitle()) &&
-               ((otherPrediction.getDirection() == null && this.getDirection() == null) ||
-                (this.getDirection() != null && this.getDirection().equals(otherPrediction.getDirection())))) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        if(!(other instanceof Prediction)) return false;
+
+        if(this.getTag() == null || this.getTitle() == null) return false;
+
+        Prediction otherPrediction = (Prediction) other;
+        return  this.getTag().equals(otherPrediction.getTag()) &&
+                this.getTitle().equals(otherPrediction.getTitle()) &&
+                (
+                        (otherPrediction.getDirection() == null && this.getDirection() == null) ||
+                        (this.getDirection() != null && this.getDirection().equals(otherPrediction.getDirection()))
+                );
     }
     
 }

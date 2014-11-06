@@ -349,8 +349,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
             Log.i(TAG, "Updating nearby active stops");
 
-            Promise<JSONObject, Exception, Double> nbNearbyStops = Nextbus.getActiveStopsByTitleNear("nb", (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
-            Promise<JSONObject, Exception, Double> nwkNearbyStops = Nextbus.getActiveStopsByTitleNear("nwk", (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
+            Promise<JSONObject, Exception, Void> nbNearbyStops = Nextbus.getActiveStopsByTitleNear("nb", (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
+            Promise<JSONObject, Exception, Void> nwkNearbyStops = Nextbus.getActiveStopsByTitleNear("nwk", (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
 
             // Look up nearby active bus stops
             mDM.when(nbNearbyStops, nwkNearbyStops).then(new DoneCallback<MultipleResults>() {
