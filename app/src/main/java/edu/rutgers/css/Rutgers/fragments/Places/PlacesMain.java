@@ -65,7 +65,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Log.i(TAG, "Attaching to activity");
+        Log.d(TAG, "Attaching to activity");
         try {
             mLocationClientProvider = (LocationClientProvider) activity;
         } catch(ClassCastException e) {
@@ -77,7 +77,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.i(TAG, "Detaching from activity");
+        Log.d(TAG, "Detaching from activity");
         mLocationClientProvider = null;
     }
 
@@ -88,7 +88,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
 
         // Get nearby places & populate nearby places list
-        mNearbyData = new ArrayList<RMenuRow>();
+        mNearbyData = new ArrayList<>();
         mNearbyAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mNearbyData);
     }
     
@@ -205,6 +205,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
     private void loadNearbyPlaces() {
         if(!isAdded()) return;
+
+        Log.i(TAG, "Updating nearby places");
 
         final String nearbyPlacesString = getString(R.string.places_nearby);
         final String noneNearbyString = getString(R.string.places_none_nearby);

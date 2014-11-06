@@ -72,19 +72,19 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Log.i(TAG, "Attaching to activity");
+        Log.d(TAG, "Attaching to activity");
         try {
             mLocationClientProvider = (LocationClientProvider) activity;
         } catch(ClassCastException e) {
             mLocationClientProvider = null;
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, "onAttach(): " + e.getMessage());
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.i(TAG, "Detaching from activity");
+        Log.d(TAG, "Detaching from activity");
         mLocationClientProvider = null;
     }
 
@@ -347,6 +347,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                 return;
             }
             if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
+            Log.i(TAG, "Updating nearby active stops");
 
             Promise<JSONObject, Exception, Double> nbNearbyStops = Nextbus.getActiveStopsByTitleNear("nb", (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
             Promise<JSONObject, Exception, Double> nwkNearbyStops = Nextbus.getActiveStopsByTitleNear("nwk", (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());

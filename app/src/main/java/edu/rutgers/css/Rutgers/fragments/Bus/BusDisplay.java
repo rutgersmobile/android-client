@@ -104,12 +104,12 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_bus_display, parent, false);
 
-        Bundle args = getArguments();
+        final Bundle args = getArguments();
         // Get title
         if(args.getString("title") != null) {
             getActivity().setTitle(args.getString("title"));
         } else {
-            Log.e(TAG, "title not set");
+            Log.e(TAG, "Argument \"title\" not set");
             getActivity().setTitle(getString(R.string.bus_title));
         }
 
@@ -168,10 +168,8 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
      * Load prediction data
      */
     private void loadPredictions() {
-        if(mAgency == null || mTag == null) {
-            Log.e(TAG, "loadPredictions(): agency or tag is null");
-            return;
-        }
+        // Don't run if required args aren't loaded
+        if(mAgency == null || mTag == null) return;
             
         if(mMode == Mode.ROUTE) {
             mDM.when(Nextbus.routePredict(mAgency, mTag)).then(this).fail(this);
