@@ -1,9 +1,0 @@
-<component name="CopyrightManager">
-  <copyright>
-    <option name="notice" value="Copyright (c) &amp;#36;today.year, Rutgers University&#10;All rights reserved.&#10;&#10;Redistribution and use in source and binary forms, with or without modification, are&#10;permitted provided that the following conditions are met:&#10;&#10;1. Redistributions of source code must retain the above copyright notice, this list of&#10;conditions and the following disclaimer.&#10;&#10;2. Redistributions in binary form must reproduce the above copyright notice, this list of&#10;conditions and the following disclaimer in the documentation and/or other materials&#10;provided with the distribution.&#10;&#10;3. Neither the name of the copyright holder nor the names of its contributors may be used&#10;to endorse or promote products derived from this software without specific prior written&#10;permission.&#10;&#10;THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY&#10;EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF&#10;MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE&#10;COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,&#10;EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF&#10;SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)&#10;HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR&#10;TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS&#10;SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." />
-    <option name="keyword" value="Copyright" />
-    <option name="allowReplaceKeyword" value="" />
-    <option name="myName" value="BSD 3 Clause" />
-    <option name="myLocal" value="true" />
-  </copyright>
-</component>
