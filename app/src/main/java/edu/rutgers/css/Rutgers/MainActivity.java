@@ -50,6 +50,7 @@ import edu.rutgers.css.Rutgers.items.RMenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
@@ -114,7 +115,7 @@ public class MainActivity extends LogoFragmentActivity  implements
 
         // Check if this is the first time the app is being launched
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(prefs.getBoolean(SettingsActivity.KEY_PREFS_FIRST_LAUNCH, true)) {
+        if(prefs.getBoolean(PrefUtils.KEY_PREFS_FIRST_LAUNCH, true)) {
             Log.i(TAG, "First launch");
 
             // First launch, create analytics event & show settings screen
@@ -125,7 +126,7 @@ public class MainActivity extends LogoFragmentActivity  implements
             startActivity(settingsIntent);
             */
 
-            prefs.edit().putBoolean(SettingsActivity.KEY_PREFS_FIRST_LAUNCH, false).apply();
+            prefs.edit().putBoolean(PrefUtils.KEY_PREFS_FIRST_LAUNCH, false).apply();
         }
 
         /*

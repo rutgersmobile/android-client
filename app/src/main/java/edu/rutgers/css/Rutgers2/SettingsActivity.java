@@ -13,6 +13,8 @@ import android.preference.PreferenceManager;
 
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
+
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
  * handset devices, settings are presented as a single list. On tablets,
@@ -25,14 +27,6 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends PreferenceActivity {
-
-    public static final String KEY_PREF_HOME_CAMPUS     = "campus_list";
-    public static final String KEY_PREF_USER_TYPE       = "user_type_list";
-    public static final String KEY_PREF_NOTIFICATIONS   = "notifications_new_message_ringtone";
-    public static final String KEY_PREF_SOC_CAMPUS      = "soc_campus";
-    public static final String KEY_PREF_SOC_LEVEL       = "soc_level";
-    public static final String KEY_PREF_SOC_SEMESTER    = "soc_semester";
-    public static final String KEY_PREFS_FIRST_LAUNCH   = "first_launch";
 
     /**
      * Determines whether to always show the simplified settings UI, where
@@ -69,8 +63,8 @@ public class SettingsActivity extends PreferenceActivity {
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
-        bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_HOME_CAMPUS));
-        bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_USER_TYPE));
+        bindPreferenceSummaryToValue(findPreference(PrefUtils.KEY_PREF_HOME_CAMPUS));
+        bindPreferenceSummaryToValue(findPreference(PrefUtils.KEY_PREF_USER_TYPE));
     }
 
     /** {@inheritDoc} */
@@ -180,8 +174,8 @@ public class SettingsActivity extends PreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_HOME_CAMPUS));
-            bindPreferenceSummaryToValue(findPreference(SettingsActivity.KEY_PREF_USER_TYPE));
+            bindPreferenceSummaryToValue(findPreference(PrefUtils.KEY_PREF_HOME_CAMPUS));
+            bindPreferenceSummaryToValue(findPreference(PrefUtils.KEY_PREF_USER_TYPE));
         }
     }
 

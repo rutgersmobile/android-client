@@ -40,9 +40,9 @@ import edu.rutgers.css.Rutgers.items.Schedule.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.items.Schedule.Semesters;
 import edu.rutgers.css.Rutgers.items.Schedule.Subject;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
-import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
@@ -76,9 +76,9 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         defaultSettings(sharedPref);
-        mLevel = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
-        mCampus = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
-        mSemester = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, null);
+        mLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
+        mCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
+        mSemester = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null);
 
         // Register settings listener
         sharedPref.registerOnSharedPreferenceChangeListener(this);
@@ -230,26 +230,26 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         // All 3 changes are submitted at once by the dialog. This gets all of the changes at once
         // in order to avoid calling loadSubjects() multiple times each time the config is changed.
         boolean somethingChanged = false;
-        if(key.equals(SettingsActivity.KEY_PREF_SOC_CAMPUS)
-                || key.equals(SettingsActivity.KEY_PREF_SOC_LEVEL)
-                || key.equals(SettingsActivity.KEY_PREF_SOC_SEMESTER)) {
+        if(key.equals(PrefUtils.KEY_PREF_SOC_CAMPUS)
+                || key.equals(PrefUtils.KEY_PREF_SOC_LEVEL)
+                || key.equals(PrefUtils.KEY_PREF_SOC_SEMESTER)) {
 
 
             String temp;
 
-            temp = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
+            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
             if(!mCampus.equals(temp)) {
                 somethingChanged = true;
                 mCampus = temp;
             }
 
-            temp = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
+            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
             if(!mLevel.equals(temp)) {
                 somethingChanged = true;
                 mLevel = temp;
             }
 
-            temp = sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, mDefaultSemester);
+            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, mDefaultSemester);
             if(!mSemester.equals(temp)) {
                 somethingChanged = true;
                 mSemester = temp;
@@ -335,13 +335,13 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      */
     private void defaultSettings(SharedPreferences sharedPref) {
         // If there are already prefs, exit
-        if(sharedPref.contains(SettingsActivity.KEY_PREF_SOC_LEVEL)) return;
+        if(sharedPref.contains(PrefUtils.KEY_PREF_SOC_LEVEL)) return;
 
         String campus, level;
 
         // Set default values for schedule preferences if nothing
-        String userHome = sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, getString(R.string.campus_nb_tag));
-        String userLevel = sharedPref.getString(SettingsActivity.KEY_PREF_USER_TYPE, getString(R.string.role_undergrad_tag));
+        String userHome = sharedPref.getString(PrefUtils.KEY_PREF_HOME_CAMPUS, getString(R.string.campus_nb_tag));
+        String userLevel = sharedPref.getString(PrefUtils.KEY_PREF_USER_TYPE, getString(R.string.role_undergrad_tag));
 
         // Pick default campus code based on prefs (fall back to New Brunswick)
         if(userHome.equals(getString(R.string.campus_nb_tag))) campus = Schedule.CODE_CAMPUS_NB;
@@ -355,8 +355,8 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         else level = Schedule.CODE_LEVEL_UNDERGRAD;
 
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(SettingsActivity.KEY_PREF_SOC_CAMPUS, campus);
-        editor.putString(SettingsActivity.KEY_PREF_SOC_LEVEL, level);
+        editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, campus);
+        editor.putString(PrefUtils.KEY_PREF_SOC_LEVEL, level);
         editor.commit();
     }
 

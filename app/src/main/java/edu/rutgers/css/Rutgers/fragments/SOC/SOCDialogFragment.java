@@ -24,8 +24,8 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.Schedule;
 import edu.rutgers.css.Rutgers.items.KeyValPair;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers2.R;
-import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 /**
  * Schedule of Classes catalogue selection menu.
@@ -87,9 +87,9 @@ public class SOCDialogFragment extends DialogFragment {
 
         // Set selections to user's configured options
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        setSelectionByConfig(sharedPref.getString(SettingsActivity.KEY_PREF_SOC_CAMPUS, null), mCampusSpinnerAdapter, campusSpinner);
-        setSelectionByConfig(sharedPref.getString(SettingsActivity.KEY_PREF_SOC_LEVEL, null), mLevelSpinnerAdapter, levelSpinner);
-        setSelectionByConfig(sharedPref.getString(SettingsActivity.KEY_PREF_SOC_SEMESTER, null), mSemesterSpinnerAdapter, semesterSpinner);
+        setSelectionByConfig(sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, null), mCampusSpinnerAdapter, campusSpinner);
+        setSelectionByConfig(sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, null), mLevelSpinnerAdapter, levelSpinner);
+        setSelectionByConfig(sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null), mSemesterSpinnerAdapter, semesterSpinner);
 
         builder.setView(view)
                 .setTitle(R.string.soc_select)
@@ -99,9 +99,9 @@ public class SOCDialogFragment extends DialogFragment {
                         // Save settings
                         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
                         SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString(SettingsActivity.KEY_PREF_SOC_CAMPUS, ((KeyValPair) campusSpinner.getSelectedItem()).getKey());
-                        editor.putString(SettingsActivity.KEY_PREF_SOC_LEVEL, ((KeyValPair) levelSpinner.getSelectedItem()).getKey());
-                        editor.putString(SettingsActivity.KEY_PREF_SOC_SEMESTER, ((KeyValPair) semesterSpinner.getSelectedItem()).getKey());
+                        editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, ((KeyValPair) campusSpinner.getSelectedItem()).getKey());
+                        editor.putString(PrefUtils.KEY_PREF_SOC_LEVEL, ((KeyValPair) levelSpinner.getSelectedItem()).getKey());
+                        editor.putString(PrefUtils.KEY_PREF_SOC_SEMESTER, ((KeyValPair) semesterSpinner.getSelectedItem()).getKey());
                         editor.apply();
                         Log.i(TAG, "Saved settings");
                     }

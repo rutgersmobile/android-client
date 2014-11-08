@@ -12,7 +12,6 @@ import org.json.JSONObject;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers2.R;
-import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 /**
  * Utilities for Rutgers-specific data
@@ -103,7 +102,7 @@ public class RutgersUtil {
     */
     public static String getHomeCampus(@NonNull Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        return getFullCampusTitle(context, sharedPref.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, context.getString(R.string.campus_nb_tag)));
+        return getFullCampusTitle(context, sharedPref.getString(PrefUtils.KEY_PREF_HOME_CAMPUS, context.getString(R.string.campus_nb_tag)));
     }
 
 }

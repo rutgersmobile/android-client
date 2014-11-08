@@ -32,9 +32,9 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.items.AnalyticsOpenHelper;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;
 import edu.rutgers.css.Rutgers2.BuildConfig;
-import edu.rutgers.css.Rutgers2.SettingsActivity;
 
 /**
  * Analytics service. Queues analytics events and flushes them to the server when the app is paused.
@@ -260,8 +260,8 @@ public class Analytics extends IntentService {
         JSONObject eventJSON = new JSONObject();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String userCampus = RutgersUtil.getFullCampusTitle(context, prefs.getString(SettingsActivity.KEY_PREF_HOME_CAMPUS, null));
-        String userRole = RutgersUtil.getFullRoleTitle(context, prefs.getString(SettingsActivity.KEY_PREF_USER_TYPE, null));
+        String userCampus = RutgersUtil.getFullCampusTitle(context, prefs.getString(PrefUtils.KEY_PREF_HOME_CAMPUS, null));
+        String userRole = RutgersUtil.getFullRoleTitle(context, prefs.getString(PrefUtils.KEY_PREF_USER_TYPE, null));
 
         try {
             eventJSON.put("type", eventType);
