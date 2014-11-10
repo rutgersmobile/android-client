@@ -74,7 +74,7 @@ public class PlacesDisplay extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mData = new ArrayList<RMenuRow>();
+        mData = new ArrayList<>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
         Bundle args = getArguments();
@@ -176,6 +176,7 @@ public class PlacesDisplay extends Fragment {
                                         stopArgs.putString("component", BusDisplay.HANDLE);
                                         stopArgs.putString("agency", agency);
                                         stopArgs.putString("mode", "stop");
+                                        stopArgs.putString("tag", title);
                                         mData.add(insertPos++, new RMenuItemRow(stopArgs));
                                         mAdapter.notifyDataSetChanged();
                                     }
