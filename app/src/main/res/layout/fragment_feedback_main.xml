@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="8dp"
-    tools:context="edu.rutgers.css.Rutgers.MainActivity" >
+    tools:context="edu.rutgers.css.Rutgers.ui.MainActivity" >
 
     <EditText
         android:layout_width="match_parent"

@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
-import edu.rutgers.css.Rutgers.items.AnalyticsOpenHelper;
+import edu.rutgers.css.Rutgers.model.AnalyticsOpenHelper;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtil;

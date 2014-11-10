@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.rutgers.css.Rutgers.items.Channel;
+import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.utils.AppUtil;
 
 /**
