@@ -266,7 +266,8 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      * Set title based on current campus, semester, and level configuration.
      */
     private void setScheduleTitle() {
-        if(!isAdded()) return;
+        // Only change title if SOC Main fragment or schedule selection dialog is on screen
+        if(!isAdded() || !(AppUtil.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtil.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
         if(mSemester == null) getActivity().setTitle(R.string.soc_title);
         else getActivity().setTitle(Schedule.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
@@ -291,7 +292,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      */
     private void loadSubjects() {
         Log.v(TAG, "Loading subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
-        if(isAdded() && AppUtil.isOnTop(getActivity(), SOCMain.HANDLE)) setScheduleTitle();
+        setScheduleTitle();
         mAdapter.clear();
         mAdapter.notifyDataSetChanged();
 

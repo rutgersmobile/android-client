@@ -197,7 +197,7 @@ public class ComponentFactory {
      * @param dialogFragment Dialog fragment to display
      * @param tag Tag for fragment transaction backstack
      */
-    public void showDialogFragment(DialogFragment dialogFragment, String tag) {
+    public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {
         if(sMainActivity.get() == null) {
             Log.e(TAG, "switchFragments(): Reference to main activity is null");
             return;
@@ -208,7 +208,7 @@ public class ComponentFactory {
         if(prev != null) {
             ft.remove(prev);
         }
-        ft.addToBackStack(null); // TODO Also add tag to tag stack?
+        ft.addToBackStack(tag);
         dialogFragment.show(ft, tag);
     }
 
