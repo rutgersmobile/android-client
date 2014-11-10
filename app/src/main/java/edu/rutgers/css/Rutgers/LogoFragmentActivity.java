@@ -54,6 +54,9 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
         // by the logo popup.
         findViewById(rootLayoutId).post(new Runnable() {
             public void run() {
+                // Don't execute if activity is finishing/not running
+                if(isFinishing()) return;
+
                 int side = actionBarView.getHeight();
 
                 /*
