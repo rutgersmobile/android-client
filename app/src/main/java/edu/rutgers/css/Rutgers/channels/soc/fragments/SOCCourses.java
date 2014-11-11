@@ -27,7 +27,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.Schedule;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -79,7 +79,7 @@ public class SOCCourses extends Fragment {
 
             @Override
             public void onFail(Exception result) {
-                AppUtil.showFailedLoadToast(getActivity());
+                AppUtils.showFailedLoadToast(getActivity());
             }
 
         });

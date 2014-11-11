@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.rutgers.css.Rutgers.model.Channel;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Maintains the list of loaded RU Mobile channels.
@@ -101,7 +101,7 @@ public class ChannelManager {
      * @param resourceId Raw resource file ID
      */
     public void loadChannelsFromResource(Resources resources, int resourceId) {
-        JSONArray jsonArray = AppUtil.loadRawJSONArray(resources, resourceId);
+        JSONArray jsonArray = AppUtils.loadRawJSONArray(resources, resourceId);
         loadChannelsFromJSONArray(jsonArray);
     }
 

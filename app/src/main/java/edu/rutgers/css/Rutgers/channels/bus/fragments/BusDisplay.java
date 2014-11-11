@@ -23,7 +23,7 @@ import java.util.TimerTask;
 import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
 import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Prediction>>, FailCallback<Exception> {
@@ -224,7 +224,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
 
     @Override
     public void onFail(Exception result) {
-        AppUtil.showFailedLoadToast(getActivity());
+        AppUtils.showFailedLoadToast(getActivity());
         mAdapter.clear();
     }
 

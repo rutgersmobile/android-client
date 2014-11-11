@@ -26,7 +26,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
 import edu.rutgers.css.Rutgers.channels.soc.model.Section;
 import edu.rutgers.css.Rutgers.channels.soc.model.SectionAdapterItem;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -55,7 +55,7 @@ public class SOCSections extends Fragment {
         Gson gson = new Gson();
         if(args.getString("data") == null) {
             Log.e(TAG, "Course data not set");
-            AppUtil.showFailedLoadToast(getActivity());
+            AppUtils.showFailedLoadToast(getActivity());
             return;
         }
 

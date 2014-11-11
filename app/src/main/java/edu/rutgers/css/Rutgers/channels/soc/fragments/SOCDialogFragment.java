@@ -23,7 +23,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.channels.soc.model.Schedule;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -140,7 +140,7 @@ public class SOCDialogFragment extends DialogFragment {
      */
     private ArrayList<KeyValPair> loadCampuses() {
         ArrayList<KeyValPair> results = new ArrayList<KeyValPair>();
-        JSONArray campusJSONArray = AppUtil.loadRawJSONArray(getResources(), R.raw.soc_campuses);
+        JSONArray campusJSONArray = AppUtils.loadRawJSONArray(getResources(), R.raw.soc_campuses);
         if(campusJSONArray == null) {
             Log.e(TAG, "Couldn't get list of campuses for SOC");
             return results;

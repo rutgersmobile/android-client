@@ -43,8 +43,8 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.utils.RutgersUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
 
@@ -171,7 +171,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         }, 0, 1000 * REFRESH_INTERVAL);
 
         // Get home campus for result ordering
-        String userHome = RutgersUtil.getHomeCampus(getActivity());
+        String userHome = RutgersUtils.getHomeCampus(getActivity());
         final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
 
         // Get promises for active stops
@@ -206,7 +206,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
             @Override
             public void onFail(OneReject result) {
-                AppUtil.showFailedLoadToast(getActivity());
+                AppUtils.showFailedLoadToast(getActivity());
             }
 
         });

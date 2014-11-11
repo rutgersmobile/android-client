@@ -31,9 +31,9 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.model.AnalyticsOpenHelper;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
-import edu.rutgers.css.Rutgers.utils.RutgersUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 
 /**
@@ -47,7 +47,7 @@ public class Analytics extends IntentService {
     public static final String TAG = "Analytics";
 
     private static final String POST_URL = "http://sauron.rutgers.edu/~jamchamb/analytics.php"; // TODO Replace
-    //private static final String POST_URL = AppUtil.API_BASE + "analytics.php";
+    //private static final String POST_URL = AppUtils.API_BASE + "analytics.php";
 
     // Event types
     public static final String NEW_INSTALL = "fresh_launch";
@@ -260,8 +260,8 @@ public class Analytics extends IntentService {
         JSONObject eventJSON = new JSONObject();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String userCampus = RutgersUtil.getFullCampusTitle(context, prefs.getString(PrefUtils.KEY_PREF_HOME_CAMPUS, null));
-        String userRole = RutgersUtil.getFullRoleTitle(context, prefs.getString(PrefUtils.KEY_PREF_USER_TYPE, null));
+        String userCampus = RutgersUtils.getFullCampusTitle(context, prefs.getString(PrefUtils.KEY_PREF_HOME_CAMPUS, null));
+        String userRole = RutgersUtils.getFullRoleTitle(context, prefs.getString(PrefUtils.KEY_PREF_USER_TYPE, null));
 
         try {
             eventJSON.put("type", eventType);
@@ -288,9 +288,9 @@ public class Analytics extends IntentService {
             platformJSON.put("os", Config.OSNAME);
             platformJSON.put("version", Build.VERSION.RELEASE);
             platformJSON.put("model", Build.MANUFACTURER + " " + Build.MODEL);
-            platformJSON.put("tablet", AppUtil.isTablet(context));
+            platformJSON.put("tablet", AppUtils.isTablet(context));
             platformJSON.put("android", Build.VERSION.SDK_INT);
-            platformJSON.put("id", AppUtil.getUUID(context));
+            platformJSON.put("id", AppUtils.getUUID(context));
         } catch (JSONException e) {
             Log.w(TAG, "getPlatformJSON(): " + e.getMessage());
         }

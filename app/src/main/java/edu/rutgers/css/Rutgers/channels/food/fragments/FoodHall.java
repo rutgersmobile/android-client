@@ -23,7 +23,7 @@ import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.channels.food.model.Dining;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -72,7 +72,7 @@ public class FoodHall extends Fragment {
         }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception result) {
-                AppUtil.showFailedLoadToast(getActivity());
+                AppUtils.showFailedLoadToast(getActivity());
             }
         });
     }
@@ -112,7 +112,7 @@ public class FoodHall extends Fragment {
 
         // Set title to show timestamp for dining data
         mTitle = mLocation + " (" + dout.format(diningMenu.getDate()) + ")";
-        if(getActivity() != null && AppUtil.isOnTop(getActivity(), FoodHall.HANDLE)) {
+        if(getActivity() != null && AppUtils.isOnTop(getActivity(), FoodHall.HANDLE)) {
             getActivity().setTitle(mTitle);
         }
     }

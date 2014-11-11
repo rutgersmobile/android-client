@@ -33,15 +33,15 @@ import edu.rutgers.css.Rutgers.channels.ruinfo.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.SpinnerAdapterImpl;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.utils.RutgersUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 
     private static final String TAG = "FeedbackMain";
     public static final String HANDLE = "feedback";
-    //private static final String API = AppUtil.API_BASE + "feedback.php";
+    //private static final String API = AppUtils.API_BASE + "feedback.php";
     private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php"; // TODO Replace
     
     private Spinner mSubjectSpinner;
@@ -86,7 +86,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         mChannelSpinner = (Spinner) v.findViewById(R.id.channelSpinner);
         mChannelSpinner.setAdapter(mChannelSpinnerAdapter);
 
-        final String homeCampus = RutgersUtil.getHomeCampus(getActivity());
+        final String homeCampus = RutgersUtils.getHomeCampus(getActivity());
 
         ChannelManager channelManager = ((ChannelManagerProvider) getActivity()).getChannelManager();
         for(Channel channel: channelManager.getChannels()) {
@@ -126,7 +126,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("subject", mSubjectSpinner.getSelectedItem());
         params.put("email", mEmailEditText.getText().toString());
-        params.put("uuid", AppUtil.getUUID(getActivity().getApplicationContext()) + "@android");
+        params.put("uuid", AppUtils.getUUID(getActivity().getApplicationContext()) + "@android");
         params.put("message", mMessageEditText.getText().toString().trim());
         params.put("wants_response", !mEmailEditText.getText().toString().isEmpty());
         // Post the selected channel if this is channel feedback
@@ -169,7 +169,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
                 }
                 // Didn't get JSON response
                 else {
-                    Log.w(TAG, AppUtil.formatAjaxStatus(status));
+                    Log.w(TAG, AppUtils.formatAjaxStatus(status));
                     Toast toast = Toast.makeText(getActivity(), R.string.failed_load_short, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 125);
                     toast.show();
@@ -191,7 +191,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         mMessageEditText.setText("");
 
         // Close soft keyboard
-        AppUtil.closeKeyboard(getActivity());
+        AppUtils.closeKeyboard(getActivity());
     }
 
     @Override

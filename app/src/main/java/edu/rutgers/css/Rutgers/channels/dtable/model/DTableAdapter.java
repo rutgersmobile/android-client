@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.utils.RutgersUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -43,7 +43,7 @@ public class DTableAdapter extends BaseAdapter {
     public DTableAdapter(@NonNull Context context, @NonNull List<DTableElement> elements) {
         mContext = context;
         mItems = elements;
-        mHomeCampus = RutgersUtil.getHomeCampus(mContext); // TODO listen for updates to home campus
+        mHomeCampus = RutgersUtils.getHomeCampus(mContext); // TODO listen for updates to home campus
     }
 
     public void setData(@NonNull List<DTableElement> elements) {

@@ -11,9 +11,9 @@ import java.util.Iterator;
 /**
  * Created by jamchamb on 8/21/14.
  */
-public class JsonUtil {
+public class JsonUtils {
 
-    private static final String TAG = "JsonUtil";
+    private static final String TAG = "JsonUtils";
 
     /**
      * Check if a JSON string is really empty - do not coerce null value into string "null".

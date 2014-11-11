@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
 
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Class for holding RSS item data
@@ -97,7 +97,7 @@ public class RSSItem implements Serializable {
                     Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
 
                     // If days match show day with start & end hours
-                    if(AppUtil.isSameDay(eventBegin, eventEnd)) this.date = eventOutDf.format(eventBegin) + " - " + eventOutEndDf.format(eventEnd);
+                    if(AppUtils.isSameDay(eventBegin, eventEnd)) this.date = eventOutDf.format(eventBegin) + " - " + eventOutEndDf.format(eventEnd);
                     // Otherwise show start and end dates
                     else this.date = eventOutDf.format(eventBegin) + " - " + eventOutDf.format(eventEnd);
                 } else {
@@ -126,7 +126,7 @@ public class RSSItem implements Serializable {
     }
 
     private String sanitizeStringWithTags(String string) {
-        return StringUtils.trim(StringUtils.chomp(AppUtil.stripTags(StringEscapeUtils.unescapeHtml4(string))));
+        return StringUtils.trim(StringUtils.chomp(AppUtils.stripTags(StringEscapeUtils.unescapeHtml4(string))));
     }
 
     /**

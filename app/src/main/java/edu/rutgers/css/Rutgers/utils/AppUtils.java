@@ -35,9 +35,9 @@ import edu.rutgers.css.Rutgers2.R;
 /**
  * General helper methods & global variables for the app
  */
-public class AppUtil {
+public class AppUtils {
 
-    private static final String TAG = "AppUtil";
+    private static final String TAG = "AppUtils";
 
     private static final String INSTALLATION = "INSTALLATION";
     private static String installID = null;

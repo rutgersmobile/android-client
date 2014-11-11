@@ -37,7 +37,7 @@ import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -172,7 +172,7 @@ public class ComponentFactory {
         if(fragment == null) return false;
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
-        AppUtil.closeKeyboard(sMainActivity.get());
+        AppUtils.closeKeyboard(sMainActivity.get());
 
         FragmentManager fm = sMainActivity.get().getSupportFragmentManager();
 

@@ -21,7 +21,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Provides access to the Places database.
@@ -70,7 +70,7 @@ public class Places {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus result) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(result)));
+                d.reject(new Exception(AppUtils.formatAjaxStatus(result)));
             }
         });
 
@@ -112,7 +112,7 @@ public class Places {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus result) {
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(result)));
+                deferred.reject(new Exception(AppUtils.formatAjaxStatus(result)));
             }
         });
 
@@ -157,7 +157,7 @@ public class Places {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus result) {
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(result)));
+                deferred.reject(new Exception(AppUtils.formatAjaxStatus(result)));
             }
         });
 

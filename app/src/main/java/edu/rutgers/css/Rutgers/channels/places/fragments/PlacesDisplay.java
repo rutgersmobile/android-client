@@ -36,7 +36,7 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -82,7 +82,7 @@ public class PlacesDisplay extends Fragment {
         // Get place key
         String key = args.getString("placeKey");
         if(key == null) {
-            AppUtil.showFailedLoadToast(getActivity());
+            AppUtils.showFailedLoadToast(getActivity());
             Log.e(TAG, "placeKey is null");
             return;
         }
@@ -214,7 +214,7 @@ public class PlacesDisplay extends Fragment {
         }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception e) {
-                AppUtil.showFailedLoadToast(getActivity());
+                AppUtils.showFailedLoadToast(getActivity());
                 Log.w(TAG, e.getMessage());
             }
         });

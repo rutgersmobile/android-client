@@ -34,7 +34,7 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -87,7 +87,7 @@ public class RecreationDisplay extends Fragment {
         }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception result) {
-                AppUtil.showFailedLoadToast(getActivity());
+                AppUtils.showFailedLoadToast(getActivity());
             }
         });
     }
@@ -102,7 +102,7 @@ public class RecreationDisplay extends Fragment {
 
         // Make sure necessary arguments were given
         if(args.getString("campus") == null || args.getString("facility") == null) {
-            AppUtil.showFailedLoadToast(getActivity());
+            AppUtils.showFailedLoadToast(getActivity());
             return v;
         }
 
@@ -190,7 +190,7 @@ public class RecreationDisplay extends Fragment {
             // Decode HTML chars, remove HTML tags, remove whitespace from beginning and end, and
             // then ellipsize the description for the description preview.
             String desc = StringEscapeUtils.unescapeHtml4(descriptionHtml);
-            desc = AppUtil.stripTags(desc);
+            desc = AppUtils.stripTags(desc);
             desc = StringUtils.strip(desc);
             desc = StringUtils.abbreviate(desc, 100);
 

@@ -39,7 +39,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers2.BuildConfig;
 import edu.rutgers.css.Rutgers2.R;
@@ -127,7 +127,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception result) {
-                AppUtil.showFailedLoadToast(getActivity());
+                AppUtils.showFailedLoadToast(getActivity());
             }
         });
 
@@ -267,7 +267,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      */
     private void setScheduleTitle() {
         // Only change title if SOC Main fragment or schedule selection dialog is on screen
-        if(!isAdded() || !(AppUtil.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtil.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
+        if(!isAdded() || !(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
         if(mSemester == null) getActivity().setTitle(R.string.soc_title);
         else getActivity().setTitle(Schedule.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
@@ -323,7 +323,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             @Override
             public void onFail(OneReject result) {
                 mAdapter.clear();
-                AppUtil.showFailedLoadToast(getActivity());
+                AppUtils.showFailedLoadToast(getActivity());
             }
 
         });

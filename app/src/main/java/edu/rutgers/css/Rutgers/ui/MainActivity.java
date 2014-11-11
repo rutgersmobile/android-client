@@ -48,11 +48,11 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
-import edu.rutgers.css.Rutgers.utils.RutgersUtil;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import edu.rutgers.css.Rutgers2.R;
 import edu.rutgers.css.Rutgers2.SettingsActivity;
 
@@ -95,7 +95,7 @@ public class MainActivity extends LogoFragmentActivity  implements
         setContentView(R.layout.activity_main);
 
         // This will create the UUID if one does not yet exist
-        Log.d(TAG, "UUID: " + AppUtil.getUUID(this));
+        Log.d(TAG, "UUID: " + AppUtils.getUUID(this));
 
         // Start Component Factory
         ComponentFactory.getInstance().setMainActivity(this);
@@ -258,7 +258,7 @@ public class MainActivity extends LogoFragmentActivity  implements
     
     @Override
     public void onBackPressed() {
-        Log.v(TAG, "Back button pressed. Leaving top component: " + AppUtil.topHandle(this));
+        Log.v(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
 
         // If drawer is open, intercept back press to close drawer
         if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
@@ -267,7 +267,7 @@ public class MainActivity extends LogoFragmentActivity  implements
         }
 
         // If web display is active, send back button presses to it for navigating browser history
-        if(AppUtil.isOnTop(this, WebDisplay.HANDLE)) {
+        if(AppUtils.isOnTop(this, WebDisplay.HANDLE)) {
             Fragment webView = getSupportFragmentManager().findFragmentByTag(WebDisplay.HANDLE);
             if (webView != null && webView.isVisible()) {
                 if(((WebDisplay) webView).backPress()) {
@@ -457,7 +457,7 @@ public class MainActivity extends LogoFragmentActivity  implements
 
             @Override
             public void onFail(AjaxStatus status) {
-                Log.e(TAG, "loadWebShortcuts(): " + AppUtil.formatAjaxStatus(status));
+                Log.e(TAG, "loadWebShortcuts(): " + AppUtils.formatAjaxStatus(status));
             }
 
         });
@@ -472,7 +472,7 @@ public class MainActivity extends LogoFragmentActivity  implements
     private void addMenuSection(String category, List<Channel> channels) {
         //mDrawerAdapter.add(new RMenuHeaderRow(category))
 
-        final String homeCampus = RutgersUtil.getHomeCampus(this);
+        final String homeCampus = RutgersUtils.getHomeCampus(this);
 
         for(Channel channel: channels) {
             Bundle itemArgs = new Bundle();

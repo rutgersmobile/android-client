@@ -26,7 +26,7 @@ import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSAdapter;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -85,8 +85,8 @@ public class RSSReader extends Fragment implements OnItemClickListener {
 
             @Override
             public void onFail(AjaxStatus e) {
-                Log.e(TAG, AppUtil.formatAjaxStatus(e));
-                AppUtil.showFailedLoadToast(getActivity());
+                Log.e(TAG, AppUtils.formatAjaxStatus(e));
+                AppUtils.showFailedLoadToast(getActivity());
             }
 
         });

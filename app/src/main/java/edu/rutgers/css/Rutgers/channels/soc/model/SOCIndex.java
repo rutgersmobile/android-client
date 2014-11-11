@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.rutgers.css.Rutgers.utils.JsonUtil;
+import edu.rutgers.css.Rutgers.utils.JsonUtils;
 
 /**
  * SOC Index.
@@ -62,7 +62,7 @@ public class SOCIndex {
             for(Iterator<String> abbrevsIterator = abbrevs.keys(); abbrevsIterator.hasNext();) {
                 String curAbbrev = abbrevsIterator.next();
                 JSONArray curContents = abbrevs.getJSONArray(curAbbrev);
-                String[] subIDStrings = JsonUtil.jsonToStringArray(curContents);
+                String[] subIDStrings = JsonUtils.jsonToStringArray(curContents);
                 mAbbreviations.put(curAbbrev, subIDStrings);
             }
 

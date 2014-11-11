@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Helper for getting data from dining API
@@ -73,8 +73,8 @@ public class Dining {
 
             @Override
             public void onFail(AjaxStatus e) {
-                Log.e(TAG, AppUtil.formatAjaxStatus(e));
-                confd.reject(new Exception(AppUtil.formatAjaxStatus(e)));
+                Log.e(TAG, AppUtils.formatAjaxStatus(e));
+                confd.reject(new Exception(AppUtils.formatAjaxStatus(e)));
             }
 
         });

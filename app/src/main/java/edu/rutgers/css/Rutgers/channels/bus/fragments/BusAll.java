@@ -34,8 +34,8 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.utils.RutgersUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 
@@ -68,7 +68,7 @@ public class BusAll extends Fragment {
         }
 
         // Get home campus for result ordering
-        String userHome = RutgersUtil.getHomeCampus(getActivity());
+        String userHome = RutgersUtils.getHomeCampus(getActivity());
         final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
 
         // Get promises for all route & stop information
@@ -122,7 +122,7 @@ public class BusAll extends Fragment {
 
             @Override
             public void onFail(OneReject result) {
-                AppUtil.showFailedLoadToast(getActivity());
+                AppUtils.showFailedLoadToast(getActivity());
                 Exception e = (Exception) result.getReject();
                 Log.w(TAG, e.getMessage());
             }

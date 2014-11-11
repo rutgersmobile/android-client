@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 public class Gyms {
     
@@ -68,8 +68,8 @@ public class Gyms {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus result) {
-                Log.e(TAG, AppUtil.formatAjaxStatus(result));
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(result)));
+                Log.e(TAG, AppUtils.formatAjaxStatus(result));
+                deferred.reject(new Exception(AppUtils.formatAjaxStatus(result)));
             }
         });
 

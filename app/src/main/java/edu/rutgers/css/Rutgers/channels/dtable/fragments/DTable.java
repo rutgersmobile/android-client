@@ -29,8 +29,8 @@ import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
-import edu.rutgers.css.Rutgers.utils.RutgersUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -126,7 +126,7 @@ public class DTable extends Fragment {
                     mAdapter.setData(mData);
                 } catch (JSONException e) {
                     Log.e(dTag(), "onCreate(): " + e.getMessage());
-                    AppUtil.showFailedLoadToast(getActivity());
+                    AppUtils.showFailedLoadToast(getActivity());
                 }
             }
 
@@ -134,8 +134,8 @@ public class DTable extends Fragment {
 
             @Override
             public void onFail(AjaxStatus status) {
-                Log.w(dTag(), AppUtil.formatAjaxStatus(status));
-                AppUtil.showFailedLoadToast(getActivity());
+                Log.w(dTag(), AppUtils.formatAjaxStatus(status));
+                AppUtils.showFailedLoadToast(getActivity());
             }
 
         });
@@ -153,7 +153,7 @@ public class DTable extends Fragment {
         
         listView.setAdapter(mAdapter);
 
-        final String homeCampus = RutgersUtil.getHomeCampus(getActivity());
+        final String homeCampus = RutgersUtils.getHomeCampus(getActivity());
         
         // Clicks on DTable item launch component in "view" field with arguments
         listView.setOnItemClickListener(new OnItemClickListener() {

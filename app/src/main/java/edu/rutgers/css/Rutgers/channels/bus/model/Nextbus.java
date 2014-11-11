@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Singleton class that provides access to the Nextbus API. Uses the JSON that nextbusjs generates to create requests
@@ -85,7 +85,7 @@ public class Nextbus {
             @Override
             public void onFail(OneReject reject) {
                 AjaxStatus r = (AjaxStatus) reject.getReject();
-                Log.e(TAG, AppUtil.formatAjaxStatus(r));
+                Log.e(TAG, AppUtils.formatAjaxStatus(r));
                 confd.reject(r);
             }
 
@@ -153,7 +153,7 @@ public class Nextbus {
                         
                         @Override
                         public void onFail(AjaxStatus status) {
-                            d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                            d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
                         }
 
                     });
@@ -169,7 +169,7 @@ public class Nextbus {
 
             @Override
             public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
 
         });
@@ -239,7 +239,7 @@ public class Nextbus {
                         
                         @Override
                         public void onFail(AjaxStatus status) {
-                            d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                            d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
                         }
 
                     });
@@ -255,7 +255,7 @@ public class Nextbus {
 
             @Override
             public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
 
         });
@@ -292,7 +292,7 @@ public class Nextbus {
 
             @Override
             public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
 
         });
@@ -329,7 +329,7 @@ public class Nextbus {
 
             @Override
             public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
 
         });
@@ -367,7 +367,7 @@ public class Nextbus {
 
             @Override
             public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
 
         });
@@ -405,7 +405,7 @@ public class Nextbus {
 
             @Override
             public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
 
         });
@@ -477,7 +477,7 @@ public class Nextbus {
 
             @Override
             public void onFail(AjaxStatus status) {
-                d.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
 
         });

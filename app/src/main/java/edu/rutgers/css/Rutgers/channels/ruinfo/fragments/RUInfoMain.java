@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 public class RUInfoMain extends Fragment {
@@ -127,7 +127,7 @@ public class RUInfoMain extends Fragment {
                 Bundle args = new Bundle();
                 args.putString("component", WebDisplay.HANDLE);
                 args.putString("title", getString(R.string.ruinfo_title));
-                if(AppUtil.isTablet(getActivity())) args.putString("url", mTabletURL);
+                if(AppUtils.isTablet(getActivity())) args.putString("url", mTabletURL);
                 else args.putString("url", mMobileURL);
                 ComponentFactory.getInstance().switchFragments(args);
             }

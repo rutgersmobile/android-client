@@ -22,7 +22,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtil;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Schedule of Classes API
@@ -64,7 +64,7 @@ public class Schedule {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
         });
 
@@ -108,7 +108,7 @@ public class Schedule {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
         });
 
@@ -153,7 +153,7 @@ public class Schedule {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
         });
 
@@ -192,7 +192,7 @@ public class Schedule {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
         });
 
@@ -223,7 +223,7 @@ public class Schedule {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtil.formatAjaxStatus(status)));
+                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
         });
 
