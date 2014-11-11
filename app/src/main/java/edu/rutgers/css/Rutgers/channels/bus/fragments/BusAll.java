@@ -59,7 +59,7 @@ public class BusAll extends Fragment {
 
         mDM = new AndroidDeferredManager();
 
-        mData = new ArrayList<RMenuRow>();
+        mData = new ArrayList<>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
         // Restore filter
@@ -174,23 +174,7 @@ public class BusAll extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
                 Bundle clickedArgs = clickedItem.getArgs();
-
-                try {
-                    JSONObject clickedJSON = new JSONObject(clickedArgs.getString("json"));
-
-                    Bundle args = new Bundle();
-                    args.putString("component", BusDisplay.HANDLE);
-                    args.putString("mode", clickedArgs.getString("mode"));
-                    args.putString("agency", clickedArgs.getString("agency"));
-                    args.putString("title", clickedJSON.getString("title"));
-                    if (clickedArgs.getString("mode").equalsIgnoreCase("route"))
-                        args.putString("tag", clickedJSON.getString("tag"));
-
-                    ComponentFactory.getInstance().switchFragments(args);
-                } catch (JSONException e) {
-                    Log.e(TAG, "onCreateView()" + e.getMessage());
-                }
-
+                ComponentFactory.getInstance().switchFragments(new Bundle(clickedArgs));
             }
 
         });
@@ -216,18 +200,16 @@ public class BusAll extends Fragment {
 
         if(data == null) {
             mAdapter.add(new RMenuItemRow(getString(R.string.failed_load_short)));
-            return;
         } else if(data.length() == 0) {
             if(mode.equalsIgnoreCase("stop")) mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_stops)));
             else if(mode.equalsIgnoreCase("route")) mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_routes)));
-            return;
-        }
-
-        for(int i = 0; i < data.length(); i++) {
-            try {
-                loadItem(data.getJSONObject(i), agencyTag, mode);
-            } catch (JSONException e) {
-                Log.e(TAG, "loadAllStops() " + e.getMessage());
+        } else {
+            for (int i = 0; i < data.length(); i++) {
+                try {
+                    loadItem(data.getJSONObject(i), agencyTag, mode);
+                } catch (JSONException e) {
+                    Log.e(TAG, "loadAllStops() " + e.getMessage());
+                }
             }
         }
     }
@@ -241,12 +223,18 @@ public class BusAll extends Fragment {
     private void loadItem(JSONObject jsonObj, String agencyTag, String mode) {
         try {
             Bundle menuBundle = new Bundle();
+            menuBundle.putString("component", BusDisplay.HANDLE);
             menuBundle.putString("title", jsonObj.getString("title"));
             menuBundle.putString("mode", mode);
             menuBundle.putString("json", jsonObj.toString());
             menuBundle.putString("agency", agencyTag);
-            RMenuItemRow newMenuItem = new RMenuItemRow(menuBundle);
-            mAdapter.add(newMenuItem);
+            if("route".equalsIgnoreCase(mode)) {
+                menuBundle.putString("tag", jsonObj.getString("tag"));
+            } else {
+                menuBundle.putString("tag", jsonObj.getString("title"));
+            }
+
+            mAdapter.add(new RMenuItemRow(menuBundle));
         } catch (JSONException e) {
             Log.w(TAG, "loadItem(): " + e.getMessage());
         }
