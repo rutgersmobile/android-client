@@ -32,10 +32,10 @@ import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
- * Singleton class that provides access to the Nextbus API. Uses the JSON that nextbusjs generates to create requests
- * against the official Nextbus API.
+ * Provides static methods for access to the Nextbus API.
+ * Uses nextbusjs data to create requests against the official Nextbus API.
  */
-public class Nextbus {
+public final class Nextbus {
 
     private static final String TAG = "Nextbus";
 
@@ -52,12 +52,15 @@ public class Nextbus {
 
     public static final String AGENCY_NB = "nb";
     public static final String AGENCY_NWK = "nwk";
-    
+
+    /** This class only contains static utility methods. */
+    private Nextbus() {}
+
     /**
-     * Load JSON data on active buses & the entire bus config.
+     * Load agency configurations and lists of active routes/stops for each campus.
      */
     private static void setup () {
-        // This promise is used to notify the other objects that the object has been configured.
+        // This promise is used to notify calling methods when the nextbus configuration has been loaded.
         final Deferred<Void, Exception, Void> confd = new DeferredObject<>();
         configured = confd.promise();
 
@@ -101,13 +104,13 @@ public class Nextbus {
     }
     
     /**
-     * Queries the Nextbus API for predictions for every stop in the given route.
-     * @param agency Agency (campus) to get bus data for
-     * @param routeKey Route to get prediction data for
-     * @return
+     * Get arrival time predictions for every stop on a route.
+     * @param agency Agency (campus) that the route belongs to.
+     * @param routeKey Route to get predictions for.
+     * @return Promise for list of arrival time predictions.
      */
-    public static Promise<ArrayList<Prediction>, Exception, Void> routePredict(@NonNull final String agency, @NonNull final String routeKey) {
-        final Deferred<ArrayList<Prediction>, Exception, Void> d = new DeferredObject<>();
+    public static Promise<List<Prediction>, Exception, Void> routePredict(@NonNull final String agency, @NonNull final String routeKey) {
+        final Deferred<List<Prediction>, Exception, Void> d = new DeferredObject<>();
         setup();
         
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
@@ -179,13 +182,13 @@ public class Nextbus {
     }
     
     /**
-     * Queries the Nextbus API for prediction data for every route going through given stop.
-     * @param agency Agency (campus) to get bus data for
-     * @param stopTitleKey Stop to get prediction data for
-     * @return
+     * Get arrival time predictions for every route going through a stop.
+     * @param agency Agency (campus) that the stop belongs to.
+     * @param stopTitleKey Full title of the stop to get predictions for.
+     * @return Promise for list of arrival time predictions.
      */
-    public static Promise<ArrayList<Prediction>, Exception, Void> stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) {
-        final Deferred<ArrayList<Prediction>, Exception, Void> d = new DeferredObject<>();
+    public static Promise<List<Prediction>, Exception, Void> stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) {
+        final Deferred<List<Prediction>, Exception, Void> d = new DeferredObject<>();
         setup();
         
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
@@ -266,9 +269,9 @@ public class Nextbus {
     }
     
     /**
-     * Get active routes for given agency (campus).
-     * @param agency Agency (campus) to get routes for
-     * @return
+     * Get active routes for an agency.
+     * @param agency Agency (campus) to get active routes for.
+     * @return Promise for list of route stubs (tags and titles).
      */
     public static Promise<List<RouteStub>, Exception, Void> getActiveRoutes(@NonNull final String agency) {
         final Deferred<List<RouteStub>, Exception, Void> d = new DeferredObject<>();
@@ -291,9 +294,9 @@ public class Nextbus {
     }
     
     /**
-     * Get all configured routes for given agency (campus).
-     * @param agency Agency (campus) to get routes for
-     * @return
+     * Get all routes from an agency's configuration.
+     * @param agency Agency (campus) to get all routes for.
+     * @return Promise for list of route stubs (tags and titles).
      */
     public static Promise<List<RouteStub>, Exception, Void> getAllRoutes(@NonNull final String agency) {
         final Deferred<List<RouteStub>, Exception, Void> d = new DeferredObject<>();
@@ -316,9 +319,9 @@ public class Nextbus {
     }
 
     /**
-     * Get active stops for a given agency (campus).
-     * @param agency Agency (campus) to get stops for
-     * @return
+     * Get active stops for an agency.
+     * @param agency Agency (campus) to active stops for.
+     * @return Promise for list of stop stubs (titles and geohashes).
      */
     public static Promise<List<StopStub>, Exception, Void> getActiveStops(@NonNull final String agency) {
         final Deferred<List<StopStub>, Exception, Void> d = new DeferredObject<>();
@@ -341,9 +344,9 @@ public class Nextbus {
     }
     
     /**
-     * Get all configured stops for a given agency (campus).
-     * @param agency Agency (campus) to get stops for
-     * @return
+     * Get all stops from an agency's configuration.
+     * @param agency Agency (campus) to get all stops for.
+     * @return Promise for list of stop stubs (titles and geohashes).
      */
     public static Promise<List<StopStub>, Exception, Void> getAllStops(@NonNull final String agency) {
         final Deferred<List<StopStub>, Exception, Void> d = new DeferredObject<>();
@@ -368,11 +371,11 @@ public class Nextbus {
     }
     
     /**
-     * Get all bus stops (by title) near a specific location.
-     * @param agency Agency (campus) to get stops for
-     * @param sourceLat Latitude of location
-     * @param sourceLon Longitude of location
-     * @return
+     * Get all bus stops (grouped by title) near a specific location.
+     * @param agency Agency (campus) to get stops for.
+     * @param sourceLat Latitude
+     * @param sourceLon Longitude
+     * @return Promise for list of stop groups (unique stops grouped by title).
      */
     public static Promise<List<StopGroup>, Exception, Void> getStopsByTitleNear(@NonNull final String agency, final double sourceLat, final double sourceLon) {
         final Deferred<List<StopGroup>, Exception, Void> d = new DeferredObject<>();
@@ -426,11 +429,11 @@ public class Nextbus {
     }
 
     /**
-     * Get all active bus stops (by title) near a specific location.
-     * @param agency Agency (campus) to get bus stops for
-     * @param sourceLat Latitude of location
-     * @param sourceLon Longitude of location
-     * @return
+     * Get all active bus stops (grouped by title) near a specific location.
+     * @param agency Agency (campus) to get stops for.
+     * @param sourceLat Latitude
+     * @param sourceLon Longitude
+     * @return Promise for list of stop groups (unique stops grouped by title).
      */
     public static Promise<List<StopGroup>, Exception, Void> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
         final Deferred<List<StopGroup>, Exception, Void> d = new DeferredObject<>();

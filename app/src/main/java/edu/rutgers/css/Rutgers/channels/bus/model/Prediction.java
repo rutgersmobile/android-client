@@ -2,16 +2,16 @@ package edu.rutgers.css.Rutgers.channels.bus.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Bus arrival time prediction
- *
+ * Arrival time predictions for a bus stop.
  */
 public class Prediction implements Serializable {
     private String tag;
     private String title;
     private String direction;
-    private ArrayList<Integer> minutes;
+    private List<Integer> minutes;
     
     public Prediction (String title, String tag) {
         this.tag = tag;
@@ -50,11 +50,11 @@ public class Prediction implements Serializable {
         this.title = title;
     }
     
-    public ArrayList<Integer> getMinutes() {
+    public List<Integer> getMinutes() {
         return minutes;
     }
     
-    public void setMinutes(ArrayList<Integer> minutes) {
+    public void setMinutes(List<Integer> minutes) {
         this.minutes = minutes;
     }
 
