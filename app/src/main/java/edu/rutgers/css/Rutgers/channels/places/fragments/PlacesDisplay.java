@@ -57,13 +57,13 @@ public class PlacesDisplay extends Fragment {
     private RMenuAdapter mAdapter;
 
     private static final Map<String, String> sAgencyMap = Collections.unmodifiableMap(new HashMap<String, String>() {{
-        put("Busch", "nb");
-        put("College Avenue", "nb");
-        put("Douglass", "nb");
-        put("Cook", "nb");
-        put("Livingston", "nb");
-        put("Newark", "nwk");
-        put("Health Sciences at Newark", "nwk");
+        put("Busch", Nextbus.AGENCY_NB);
+        put("College Avenue", Nextbus.AGENCY_NB);
+        put("Douglass", Nextbus.AGENCY_NB);
+        put("Cook", Nextbus.AGENCY_NB);
+        put("Livingston", Nextbus.AGENCY_NB);
+        put("Newark", Nextbus.AGENCY_NWK);
+        put("Health Sciences at Newark", Nextbus.AGENCY_NWK);
     }});
 
     public PlacesDisplay() {
