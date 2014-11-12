@@ -17,18 +17,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
+import edu.rutgers.css.Rutgers.channels.bus.model.StopGroup;
 import edu.rutgers.css.Rutgers.channels.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.Places;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
@@ -77,7 +76,7 @@ public class PlacesDisplay extends Fragment {
         mData = new ArrayList<>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
 
-        Bundle args = getArguments();
+        final Bundle args = getArguments();
 
         // Get place key
         String key = args.getString("placeKey");
@@ -153,30 +152,30 @@ public class PlacesDisplay extends Fragment {
                     final int startPos = mAdapter.getCount();
 
                     Place.Location location = mPlace.getLocation();
-                    double buildLon = location.getLongitude();
                     double buildLat = location.getLatitude();
+                    double buildLon = location.getLongitude();
 
                     // Determine Nextbus agency by campus
                     final String agency = sAgencyMap.get(mPlace.getCampusName());
 
                     if (agency != null) {
-                        dm.when(Nextbus.getStopsByTitleNear(agency, buildLat, buildLon)).then(new DoneCallback<JSONObject>() {
+                        dm.when(Nextbus.getStopsByTitleNear(agency, buildLat, buildLon)).then(new DoneCallback<List<StopGroup>>() {
                             @Override
-                            public void onDone(JSONObject result) {
-                                if (result.length() > 0) {
+                            public void onDone(List<StopGroup> result) {
+                                if (!result.isEmpty()) {
+                                    // There are nearby stops. Add header and all stops.
                                     int insertPos = startPos;
                                     mData.add(insertPos++, new RMenuHeaderRow(nearbyHeader));
                                     mAdapter.notifyDataSetChanged();
 
-                                    for (Iterator<String> stopTitleIter = result.keys(); stopTitleIter.hasNext(); ) {
-                                        String title = stopTitleIter.next();
+                                    for (StopGroup stopGroup : result) {
                                         Bundle stopArgs = new Bundle();
                                         stopArgs.putInt(ID_KEY, BUS_ROW);
-                                        stopArgs.putString("title", title);
                                         stopArgs.putString("component", BusDisplay.HANDLE);
                                         stopArgs.putString("agency", agency);
                                         stopArgs.putString("mode", "stop");
-                                        stopArgs.putString("tag", title);
+                                        stopArgs.putString("title", stopGroup.getTitle());
+                                        stopArgs.putString("tag", stopGroup.getTitle());
                                         mData.add(insertPos++, new RMenuItemRow(stopArgs));
                                         mAdapter.notifyDataSetChanged();
                                     }
@@ -184,8 +183,8 @@ public class PlacesDisplay extends Fragment {
                             }
                         }).fail(new FailCallback<Exception>() {
                             @Override
-                            public void onFail(Exception result) {
-                                Log.w(TAG, "Getting nearby buses: " + result.getMessage());
+                            public void onFail(Exception e) {
+                                Log.w(TAG, "Getting nearby buses failed: " + e.getMessage());
                             }
                         });
                     }

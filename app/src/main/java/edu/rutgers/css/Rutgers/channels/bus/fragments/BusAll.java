@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,15 +22,14 @@ import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
-import org.jdeferred.multiple.OneResult;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
+import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
+import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
@@ -45,9 +45,7 @@ public class BusAll extends Fragment {
     public static final String HANDLE = "busall";
 
     private RMenuAdapter mAdapter;
-    private ArrayList<RMenuRow> mData;
     private String mFilterString;
-    private AndroidDeferredManager mDM;
     
     public BusAll() {
         // Required empty public constructor
@@ -57,10 +55,8 @@ public class BusAll extends Fragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDM = new AndroidDeferredManager();
-
-        mData = new ArrayList<>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+        ArrayList<RMenuRow> data = new ArrayList<>();
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
 
         // Restore filter
         if(savedInstanceState != null) {
@@ -72,43 +68,35 @@ public class BusAll extends Fragment {
         final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
 
         // Get promises for all route & stop information
-        final Promise nbRoutes = Nextbus.getAllRoutes("nb");
-        final Promise nbStops = Nextbus.getAllStops("nb");
-        final Promise nwkRoutes = Nextbus.getAllRoutes("nwk");
-        final Promise nwkStops = Nextbus.getAllStops("nwk");
-
-        final String nbRoutesString = getString(R.string.bus_nb_all_routes_header);
-        final String nwkRoutesString = getString(R.string.bus_nwk_all_routes_header);
-        final String nbStopsString = getString(R.string.bus_nb_all_stops_header);
-        final String nwkStopsString = getString(R.string.bus_nwk_all_stops_header);
+        final Promise<List<RouteStub>, Exception, Void> nbRoutes = Nextbus.getAllRoutes(Nextbus.AGENCY_NB);
+        final Promise<List<StopStub>, Exception, Void> nbStops = Nextbus.getAllStops(Nextbus.AGENCY_NB);
+        final Promise<List<RouteStub>, Exception, Void> nwkRoutes = Nextbus.getAllRoutes(Nextbus.AGENCY_NWK);
+        final Promise<List<StopStub>, Exception, Void> nwkStops = Nextbus.getAllStops(Nextbus.AGENCY_NWK);
 
         // Synchronized load of all route & stop information
-        mDM.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new DoneCallback<MultipleResults>() {
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
                 if(!isAdded()) return;
 
-                JSONArray nbRoutesResult = null, nbStopsResult = null, nwkRoutesResult = null, nwkStopsResult = null;
-
-                for(OneResult result: results) {
-                    if(result.getPromise() == nbRoutes) nbRoutesResult = (JSONArray) result.getResult();
-                    else if(result.getPromise() == nwkRoutes) nwkRoutesResult = (JSONArray) result.getResult();
-                    else if(result.getPromise() == nbStops) nbStopsResult = (JSONArray) result.getResult();
-                    else if(result.getPromise() == nwkStops) nwkStopsResult = (JSONArray) result.getResult();
-                }
+                List<RouteStub> nbRoutesResult = (List<RouteStub>) results.get(0).getResult();
+                List<StopStub> nbStopsResult = (List<StopStub>) results.get(1).getResult();
+                List<RouteStub> nwkRoutesResult = (List<RouteStub>) results.get(2).getResult();
+                List<StopStub> nwkStopsResult = (List<StopStub>) results.get(3).getResult();
 
                 if(nbHome) {
-                    loadArray("nb", nbRoutesString, "route", nbRoutesResult);
-                    loadArray("nb", nbStopsString, "stop", nbStopsResult);
-                    loadArray("nwk", nwkRoutesString, "route", nwkRoutesResult);
-                    loadArray("nwk", nwkStopsString, "stop", nwkStopsResult);
+                    loadRoutes(Nextbus.AGENCY_NB, nbRoutesResult);
+                    loadStops(Nextbus.AGENCY_NB, nbStopsResult);
+                    loadRoutes(Nextbus.AGENCY_NWK, nwkRoutesResult);
+                    loadStops(Nextbus.AGENCY_NWK, nwkStopsResult);
                 } else {
-                    loadArray("nwk", nwkRoutesString, "route", nwkRoutesResult);
-                    loadArray("nwk", nwkStopsString, "stop", nwkStopsResult);
-                    loadArray("nb", nbRoutesString, "route", nbRoutesResult);
-                    loadArray("nb", nbStopsString, "stop", nbStopsResult);
+                    loadRoutes(Nextbus.AGENCY_NWK, nwkRoutesResult);
+                    loadStops(Nextbus.AGENCY_NWK, nwkStopsResult);
+                    loadRoutes(Nextbus.AGENCY_NB, nbRoutesResult);
+                    loadStops(Nextbus.AGENCY_NB, nbStopsResult);
                 }
 
                 // Set filter after info is re-loaded
@@ -188,55 +176,55 @@ public class BusAll extends Fragment {
         if(mFilterString != null) outState.putString("filter", mFilterString);
     }
 
-    /**
-     * Load array of bus stop or route info into the list.
-     * @param agencyTag Agency tag for API request
-     * @param agencyHeader Header title that goes above these stops/routes
-     * @param mode Specify "route" or "stop" mode
-     * @param data JSON array of bus info
-     */
-    private void loadArray(final String agencyTag, final String agencyHeader, final String mode, final JSONArray data) {
-        mAdapter.add(new RMenuHeaderRow(agencyHeader));
+    private void loadStops(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
+        if(getResources() == null) return;
 
-        if(data == null) {
-            mAdapter.add(new RMenuItemRow(getString(R.string.failed_load_short)));
-        } else if(data.length() == 0) {
-            if(mode.equalsIgnoreCase("stop")) mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_stops)));
-            else if(mode.equalsIgnoreCase("route")) mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_routes)));
+        // Get header for stops section
+        String header;
+        if(Nextbus.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_stops_header);
+        else if(Nextbus.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_stops_header);
+        else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
+
+        mAdapter.add(new RMenuHeaderRow(header));
+
+        if(stopStubs.isEmpty()) {
+            mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_stops)));
         } else {
-            for (int i = 0; i < data.length(); i++) {
-                try {
-                    loadItem(data.getJSONObject(i), agencyTag, mode);
-                } catch (JSONException e) {
-                    Log.e(TAG, "loadAllStops() " + e.getMessage());
-                }
+            for(StopStub stopStub: stopStubs) {
+                Bundle stopArgs = new Bundle();
+                stopArgs.putString("component", BusDisplay.HANDLE);
+                stopArgs.putString("title", stopStub.getTitle());
+                stopArgs.putString("tag", stopStub.getTitle());
+                stopArgs.putString("mode", "stop");
+                stopArgs.putString("agency", agency);
+                mAdapter.add(new RMenuItemRow(stopArgs));
             }
         }
     }
 
-    /**
-     * Load a single JSON item into the list
-     * @param jsonObj JSON object
-     * @param agencyTag Agency tag for API request
-     * @param mode Specify "route" or "stop" mode
-     */
-    private void loadItem(JSONObject jsonObj, String agencyTag, String mode) {
-        try {
-            Bundle menuBundle = new Bundle();
-            menuBundle.putString("component", BusDisplay.HANDLE);
-            menuBundle.putString("title", jsonObj.getString("title"));
-            menuBundle.putString("mode", mode);
-            menuBundle.putString("json", jsonObj.toString());
-            menuBundle.putString("agency", agencyTag);
-            if("route".equalsIgnoreCase(mode)) {
-                menuBundle.putString("tag", jsonObj.getString("tag"));
-            } else {
-                menuBundle.putString("tag", jsonObj.getString("title"));
-            }
+    private void loadRoutes(@NonNull String agency, @NonNull List<RouteStub> routeStubs) {
+        if(getResources() == null) return;
 
-            mAdapter.add(new RMenuItemRow(menuBundle));
-        } catch (JSONException e) {
-            Log.w(TAG, "loadItem(): " + e.getMessage());
+        // Get header for routes section
+        String header;
+        if(Nextbus.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_routes_header);
+        else if(Nextbus.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_routes_header);
+        else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
+
+        mAdapter.add(new RMenuHeaderRow(header));
+
+        if(routeStubs.isEmpty()) {
+            mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_routes)));
+        } else {
+            for(RouteStub routeStub: routeStubs) {
+                Bundle stopArgs = new Bundle();
+                stopArgs.putString("component", BusDisplay.HANDLE);
+                stopArgs.putString("title", routeStub.getTitle());
+                stopArgs.putString("tag", routeStub.getTag());
+                stopArgs.putString("mode", "stop");
+                stopArgs.putString("agency", agency);
+                mAdapter.add(new RMenuItemRow(stopArgs));
+            }
         }
     }
     
