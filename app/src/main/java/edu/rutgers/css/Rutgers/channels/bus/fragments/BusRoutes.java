@@ -23,9 +23,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
+import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
@@ -110,8 +112,8 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
 
         // Get promises for active routes
-        final Promise nbActiveRoutes = Nextbus.getActiveRoutes("nb");
-        final Promise nwkActiveRoutes = Nextbus.getActiveRoutes("nwk");
+        final Promise<List<RouteStub>, Exception, Void> nbActiveRoutes = Nextbus.getActiveRoutes(Nextbus.AGENCY_NB);
+        final Promise<List<RouteStub>, Exception, Void> nwkActiveRoutes = Nextbus.getActiveRoutes(Nextbus.AGENCY_NWK);
 
         final String nbString = getString(R.string.bus_nb_active_routes_header);
         final String nwkString =  getString(R.string.bus_nwk_active_routes_header);
@@ -134,11 +136,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 }
 
                 if (nbHome) {
-                    loadAgency("nb", nbString, nbResult);
-                    loadAgency("nwk", nwkString, nwkResult);
+                    loadAgency(Nextbus.AGENCY_NB, nbString, nbResult);
+                    loadAgency(Nextbus.AGENCY_NWK, nwkString, nwkResult);
                 } else {
-                    loadAgency("nwk", nwkString, nwkResult);
-                    loadAgency("nb", nbString, nbResult);
+                    loadAgency(Nextbus.AGENCY_NWK, nwkString, nwkResult);
+                    loadAgency(Nextbus.AGENCY_NB, nbString, nbResult);
                 }
             }
 
