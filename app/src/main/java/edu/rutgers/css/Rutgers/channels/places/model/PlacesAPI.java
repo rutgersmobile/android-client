@@ -27,14 +27,14 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
  * Provides access to the Places database.
  * @author James Chambers
  */
-public final class Places {
+public final class PlacesAPI {
     
     private static final String TAG = "PlacesAPI";
 
     private static final String API_URL = "https://oss-services.rutgers.edu/pq";
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 
-    private Places() {}
+    private PlacesAPI() {}
 
     /**
      * Get a specific place from the Places API.

@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
+import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -173,9 +173,9 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         if(mAgency == null || mTag == null) return;
             
         if(mMode == Mode.ROUTE) {
-            mDM.when(Nextbus.routePredict(mAgency, mTag)).then(this).fail(this);
+            mDM.when(NextbusAPI.routePredict(mAgency, mTag)).then(this).fail(this);
         } else if(mMode == Mode.STOP) {
-            mDM.when(Nextbus.stopPredict(mAgency, mTag)).then(this).fail(this);
+            mDM.when(NextbusAPI.stopPredict(mAgency, mTag)).then(this).fail(this);
         }
     }
 

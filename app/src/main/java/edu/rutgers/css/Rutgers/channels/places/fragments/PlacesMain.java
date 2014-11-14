@@ -31,7 +31,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
-import edu.rutgers.css.Rutgers.channels.places.model.Places;
+import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
@@ -235,7 +235,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         showProgressCircle();
 
-        Places.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<List<KeyValPair>>() {
+        PlacesAPI.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<List<KeyValPair>>() {
 
             @Override
             public void onDone(List<KeyValPair> result) {

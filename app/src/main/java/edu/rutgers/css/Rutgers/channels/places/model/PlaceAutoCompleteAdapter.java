@@ -15,14 +15,15 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 
 /**
- * Created by jamchamb on 9/23/14.
+ * Adapter for place auto-completion results. The filter executes queries on the Places API and
+ * the results are placed into the adapter so that they can be shown in some form of list.
  */
 public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
 
     private static final String TAG = "PlaceAutoCompleteAdapter";
 
     private PlaceWebFilter mFilter = new PlaceWebFilter();
-    private List<KeyValPair> mData = new ArrayList<KeyValPair>();
+    private List<KeyValPair> mData = new ArrayList<>();
 
     public PlaceAutoCompleteAdapter(Context context, int resource) {
         super(context, resource);
@@ -60,7 +61,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
             if(charSequence == null || charSequence.toString().isEmpty()) return results;
 
             // Do request for search results
-            Promise<List<KeyValPair>, Exception, Double> p = Places.searchPlaces(charSequence.toString());
+            Promise<List<KeyValPair>, Exception, Double> p = PlacesAPI.searchPlaces(charSequence.toString());
             p.done(new DoneCallback<List<KeyValPair>>() {
                 @Override
                 public void onDone(List<KeyValPair> result) {

@@ -26,7 +26,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 /**
  * Helper for getting data from dining API
  */
-public final class Dining {
+public final class DiningAPI {
 
     private static final String TAG = "DiningAPI";
 
@@ -37,7 +37,7 @@ public final class Dining {
     private static Promise<Object, Exception, Void> configured;
     private static List<DiningMenu> mNBDiningMenus;
 
-    private Dining() {}
+    private DiningAPI() {}
 
     /**
      * Grab the dining API data.

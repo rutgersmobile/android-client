@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import edu.rutgers.css.Rutgers.channels.food.model.Dining;
+import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
@@ -63,7 +63,7 @@ public class FoodHall extends Fragment {
         }
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
+        dm.when(DiningAPI.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
             @Override
             public void onDone(DiningMenu hall) {
                 mData = hall;
@@ -123,7 +123,7 @@ public class FoodHall extends Fragment {
 
         public MealPagerAdapter(FragmentManager fm) {
             super(fm);
-            mData = new ArrayList<DiningMenu.Meal>();
+            mData = new ArrayList<>();
         }
 
         @Override

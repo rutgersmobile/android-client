@@ -35,9 +35,9 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
  * Provides static methods for access to the Nextbus API.
  * Uses nextbusjs data to create requests against the official Nextbus API.
  */
-public final class Nextbus {
+public final class NextbusAPI {
 
-    private static final String TAG = "Nextbus";
+    private static final String TAG = "NextbusAPI";
 
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
     private static Promise<Void, Exception, Void> configured;
@@ -54,7 +54,7 @@ public final class Nextbus {
     public static final String AGENCY_NWK = "nwk";
 
     /** This class only contains static utility methods. */
-    private Nextbus() {}
+    private NextbusAPI() {}
 
     /**
      * Load agency configurations and lists of active routes/stops for each campus.

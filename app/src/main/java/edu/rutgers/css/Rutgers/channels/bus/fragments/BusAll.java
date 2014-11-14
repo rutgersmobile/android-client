@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
+import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
@@ -68,10 +68,10 @@ public class BusAll extends Fragment {
         final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
 
         // Get promises for all route & stop information
-        final Promise<List<RouteStub>, Exception, Void> nbRoutes = Nextbus.getAllRoutes(Nextbus.AGENCY_NB);
-        final Promise<List<StopStub>, Exception, Void> nbStops = Nextbus.getAllStops(Nextbus.AGENCY_NB);
-        final Promise<List<RouteStub>, Exception, Void> nwkRoutes = Nextbus.getAllRoutes(Nextbus.AGENCY_NWK);
-        final Promise<List<StopStub>, Exception, Void> nwkStops = Nextbus.getAllStops(Nextbus.AGENCY_NWK);
+        final Promise<List<RouteStub>, Exception, Void> nbRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NB);
+        final Promise<List<StopStub>, Exception, Void> nbStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NB);
+        final Promise<List<RouteStub>, Exception, Void> nwkRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NWK);
+        final Promise<List<StopStub>, Exception, Void> nwkStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NWK);
 
         // Synchronized load of all route & stop information
         AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -88,15 +88,15 @@ public class BusAll extends Fragment {
                 List<StopStub> nwkStopsResult = (List<StopStub>) results.get(3).getResult();
 
                 if(nbHome) {
-                    loadRoutes(Nextbus.AGENCY_NB, nbRoutesResult);
-                    loadStops(Nextbus.AGENCY_NB, nbStopsResult);
-                    loadRoutes(Nextbus.AGENCY_NWK, nwkRoutesResult);
-                    loadStops(Nextbus.AGENCY_NWK, nwkStopsResult);
+                    loadRoutes(NextbusAPI.AGENCY_NB, nbRoutesResult);
+                    loadStops(NextbusAPI.AGENCY_NB, nbStopsResult);
+                    loadRoutes(NextbusAPI.AGENCY_NWK, nwkRoutesResult);
+                    loadStops(NextbusAPI.AGENCY_NWK, nwkStopsResult);
                 } else {
-                    loadRoutes(Nextbus.AGENCY_NWK, nwkRoutesResult);
-                    loadStops(Nextbus.AGENCY_NWK, nwkStopsResult);
-                    loadRoutes(Nextbus.AGENCY_NB, nbRoutesResult);
-                    loadStops(Nextbus.AGENCY_NB, nbStopsResult);
+                    loadRoutes(NextbusAPI.AGENCY_NWK, nwkRoutesResult);
+                    loadStops(NextbusAPI.AGENCY_NWK, nwkStopsResult);
+                    loadRoutes(NextbusAPI.AGENCY_NB, nbRoutesResult);
+                    loadStops(NextbusAPI.AGENCY_NB, nbStopsResult);
                 }
 
                 // Set filter after info is re-loaded
@@ -181,8 +181,8 @@ public class BusAll extends Fragment {
 
         // Get header for stops section
         String header;
-        if(Nextbus.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_stops_header);
-        else if(Nextbus.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_stops_header);
+        if(NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_stops_header);
+        else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_stops_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
         mAdapter.add(new RMenuHeaderRow(header));
@@ -207,8 +207,8 @@ public class BusAll extends Fragment {
 
         // Get header for routes section
         String header;
-        if(Nextbus.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_routes_header);
-        else if(Nextbus.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_routes_header);
+        if(NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_routes_header);
+        else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_routes_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
         mAdapter.add(new RMenuHeaderRow(header));

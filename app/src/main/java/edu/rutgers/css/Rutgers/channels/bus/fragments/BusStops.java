@@ -30,7 +30,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
+import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopGroup;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
@@ -172,8 +172,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
 
         // Get promises for active stops
-        final Promise<List<StopStub>, Exception, Void> nbActiveStops = Nextbus.getActiveStops(Nextbus.AGENCY_NB);
-        final Promise<List<StopStub>, Exception, Void> nwkActiveStops = Nextbus.getActiveStops(Nextbus.AGENCY_NWK);
+        final Promise<List<StopStub>, Exception, Void> nbActiveStops = NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NB);
+        final Promise<List<StopStub>, Exception, Void> nwkActiveStops = NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NWK);
 
         // Synchronized load of active stops
         mDM.when(nbActiveStops, nwkActiveStops).done(new DoneCallback<MultipleResults>() {
@@ -187,11 +187,11 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                 List<StopStub> nwkResult = (List<StopStub>) results.get(1).getResult();
 
                 if(nbHome) {
-                    loadAgency(Nextbus.AGENCY_NB, nbResult);
-                    loadAgency(Nextbus.AGENCY_NWK, nwkResult);
+                    loadAgency(NextbusAPI.AGENCY_NB, nbResult);
+                    loadAgency(NextbusAPI.AGENCY_NWK, nwkResult);
                 } else {
-                    loadAgency(Nextbus.AGENCY_NWK, nwkResult);
-                    loadAgency(Nextbus.AGENCY_NB, nbResult);
+                    loadAgency(NextbusAPI.AGENCY_NWK, nwkResult);
+                    loadAgency(NextbusAPI.AGENCY_NB, nbResult);
                 }
             }
 
@@ -250,8 +250,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
         // Get header for active stops section
         String header;
-        if(Nextbus.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_active_stops_header);
-        else if(Nextbus.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_active_stops_header);
+        if(NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_active_stops_header);
+        else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_active_stops_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
         mAdapter.add(new RMenuHeaderRow(header));
@@ -332,8 +332,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
             Log.i(TAG, "Updating nearby active stops");
 
-            Promise<List<StopGroup>, Exception, Void> nbNearbyStops = Nextbus.getActiveStopsByTitleNear(Nextbus.AGENCY_NB, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
-            Promise<List<StopGroup>, Exception, Void> nwkNearbyStops = Nextbus.getActiveStopsByTitleNear(Nextbus.AGENCY_NWK, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
+            Promise<List<StopGroup>, Exception, Void> nbNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NB, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
+            Promise<List<StopGroup>, Exception, Void> nwkNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NWK, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
 
             // Look up nearby active bus stops
             mDM.when(nbNearbyStops, nwkNearbyStops).then(new DoneCallback<MultipleResults>() {
@@ -355,14 +355,14 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                         for(StopGroup stopGroup: nbStops) {
                             Bundle stopArgs = new Bundle();
                             stopArgs.putString("title", stopGroup.getTitle());
-                            stopArgs.putString("agency", Nextbus.AGENCY_NB);
+                            stopArgs.putString("agency", NextbusAPI.AGENCY_NB);
                             addNearbyRow(j++, new RMenuItemRow(stopArgs));
                         }
 
                         for(StopGroup stopGroup: nwkStops) {
                             Bundle stopArgs = new Bundle();
                             stopArgs.putString("title", stopGroup.getTitle());
-                            stopArgs.putString("agency", Nextbus.AGENCY_NWK);
+                            stopArgs.putString("agency", NextbusAPI.AGENCY_NWK);
                             addNearbyRow(j++, new RMenuItemRow(stopArgs));
                         }
                     }

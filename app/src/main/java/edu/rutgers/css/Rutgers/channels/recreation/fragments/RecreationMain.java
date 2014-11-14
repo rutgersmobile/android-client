@@ -19,7 +19,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Campus;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
-import edu.rutgers.css.Rutgers.channels.recreation.model.Gyms;
+import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
@@ -46,11 +46,11 @@ public class RecreationMain extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ArrayList<RMenuRow> data = new ArrayList<RMenuRow>();
+        List<RMenuRow> data = new ArrayList<>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Gyms.getCampuses()).done(new DoneCallback<List<Campus>>() {
+        dm.when(GymsAPI.getCampuses()).done(new DoneCallback<List<Campus>>() {
             @Override
             public void onDone(List<Campus> result) {
                 // Populate list of facilities

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.food.model.Dining;
+import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
@@ -48,7 +48,7 @@ public class FoodMain extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mData = new ArrayList<RMenuRow>(4);
+        mData = new ArrayList<>(4);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title_centered, R.layout.row_section_header_centered, mData);
 
         // Get user's home campus
@@ -64,7 +64,7 @@ public class FoodMain extends Fragment {
         nwkRow.putString("component", TextDisplay.HANDLE);
         nwkRow.putString("title", getString(R.string.dining_stonsby_title));
         nwkRow.putString("data", getString(R.string.dining_stonsby_description));
-        final ArrayList<RMenuRow> nwkRows = new ArrayList<RMenuRow>(2);
+        final ArrayList<RMenuRow> nwkRows = new ArrayList<>(2);
         nwkRows.add(new RMenuHeaderRow(nwkCampusFullString));
         nwkRows.add(new RMenuItemRow(nwkRow));
 
@@ -72,18 +72,18 @@ public class FoodMain extends Fragment {
         camRow.putString("component", TextDisplay.HANDLE);
         camRow.putString("title", getString(R.string.dining_gateway_title));
         camRow.putString("data", getString(R.string.dining_gateway_description));
-        final ArrayList<RMenuRow> camRows = new ArrayList<RMenuRow>(2);
+        final ArrayList<RMenuRow> camRows = new ArrayList<>(2);
         camRows.add(new RMenuHeaderRow(camCampusFullString));
         camRows.add(new RMenuItemRow(camRow));
 
         // Get dining hall data and populate the top-level menu with names of the dining halls
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Dining.getDiningHalls()).done(new DoneCallback<List<DiningMenu>>() {
+        dm.when(DiningAPI.getDiningHalls()).done(new DoneCallback<List<DiningMenu>>() {
 
             @Override
             public void onDone(List<DiningMenu> diningMenus) {
                 // Temporary NB results holder
-                List<RMenuRow> nbResults = new ArrayList<RMenuRow>();
+                List<RMenuRow> nbResults = new ArrayList<>();
                 nbResults.add(new RMenuHeaderRow(nbCampusFullString));
 
                 // Add dining halls - if they have no active meals, make them unclickable

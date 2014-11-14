@@ -15,7 +15,7 @@ import org.jdeferred.android.AndroidDeferredManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.channels.food.model.Dining;
+import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
@@ -45,7 +45,7 @@ public class FoodMeal extends Fragment {
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
         
-        foodItems = new ArrayList<RMenuRow>();
+        foodItems = new ArrayList<>();
         foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.row_title, R.layout.row_section_header, foodItems);
 
         if(args.getString("location") == null) {
@@ -57,7 +57,7 @@ public class FoodMeal extends Fragment {
         }
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Dining.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
+        dm.when(DiningAPI.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
 
             @Override
             public void onDone(DiningMenu diningMenu) {

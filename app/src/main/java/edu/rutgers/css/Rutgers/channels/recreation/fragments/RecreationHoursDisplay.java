@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
-import edu.rutgers.css.Rutgers.channels.recreation.model.Gyms;
+import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
@@ -102,7 +102,7 @@ public class  RecreationHoursDisplay extends Fragment {
      * @return Index of the page for today's date, or 0 if it's not found.
      */
     private int getCurrentPos() {
-        String todayString = Gyms.GYM_DATE_FORMAT.format(new Date());
+        String todayString = GymsAPI.GYM_DATE_FORMAT.format(new Date());
 
         int i = 0;
         for(FacilityDaySchedule schedule: mSchedules) {

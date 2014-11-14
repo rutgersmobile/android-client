@@ -26,10 +26,10 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
-import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
+import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopGroup;
 import edu.rutgers.css.Rutgers.channels.places.model.Place;
-import edu.rutgers.css.Rutgers.channels.places.model.Places;
+import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
@@ -57,13 +57,13 @@ public class PlacesDisplay extends Fragment {
     private RMenuAdapter mAdapter;
 
     private static final Map<String, String> sAgencyMap = Collections.unmodifiableMap(new HashMap<String, String>() {{
-        put("Busch", Nextbus.AGENCY_NB);
-        put("College Avenue", Nextbus.AGENCY_NB);
-        put("Douglass", Nextbus.AGENCY_NB);
-        put("Cook", Nextbus.AGENCY_NB);
-        put("Livingston", Nextbus.AGENCY_NB);
-        put("Newark", Nextbus.AGENCY_NWK);
-        put("Health Sciences at Newark", Nextbus.AGENCY_NWK);
+        put("Busch", NextbusAPI.AGENCY_NB);
+        put("College Avenue", NextbusAPI.AGENCY_NB);
+        put("Douglass", NextbusAPI.AGENCY_NB);
+        put("Cook", NextbusAPI.AGENCY_NB);
+        put("Livingston", NextbusAPI.AGENCY_NB);
+        put("Newark", NextbusAPI.AGENCY_NWK);
+        put("Health Sciences at Newark", NextbusAPI.AGENCY_NWK);
     }});
 
     public PlacesDisplay() {
@@ -95,7 +95,7 @@ public class PlacesDisplay extends Fragment {
         final String nearbyHeader = getString(R.string.nearby_bus_header);
 
         final AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Places.getPlace(key)).done(new DoneCallback<Place>() {
+        dm.when(PlacesAPI.getPlace(key)).done(new DoneCallback<Place>() {
             @Override
             public void onDone(Place result) {
                 mPlace = result;
@@ -159,7 +159,7 @@ public class PlacesDisplay extends Fragment {
                     final String agency = sAgencyMap.get(mPlace.getCampusName());
 
                     if (agency != null) {
-                        dm.when(Nextbus.getStopsByTitleNear(agency, buildLat, buildLon)).then(new DoneCallback<List<StopGroup>>() {
+                        dm.when(NextbusAPI.getStopsByTitleNear(agency, buildLat, buildLon)).then(new DoneCallback<List<StopGroup>>() {
                             @Override
                             public void onDone(List<StopGroup> result) {
                                 if (!result.isEmpty()) {

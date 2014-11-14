@@ -26,7 +26,7 @@ import java.util.Locale;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-public final class Gyms {
+public final class GymsAPI {
     
     private static final String TAG = "Gyms";
     
@@ -36,7 +36,7 @@ public final class Gyms {
 
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 
-    private Gyms() {}
+    private GymsAPI() {}
 
     /**
      * Get all campuses from the Gyms API.

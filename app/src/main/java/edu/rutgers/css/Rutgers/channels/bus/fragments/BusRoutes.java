@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.bus.model.Nextbus;
+import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
@@ -107,8 +107,8 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
 
         // Get promises for active routes
-        final Promise<List<RouteStub>, Exception, Void> nbActiveRoutes = Nextbus.getActiveRoutes(Nextbus.AGENCY_NB);
-        final Promise<List<RouteStub>, Exception, Void> nwkActiveRoutes = Nextbus.getActiveRoutes(Nextbus.AGENCY_NWK);
+        final Promise<List<RouteStub>, Exception, Void> nbActiveRoutes = NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NB);
+        final Promise<List<RouteStub>, Exception, Void> nwkActiveRoutes = NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NWK);
 
         // Synchronized load of active routes
         mDM.when(nbActiveRoutes, nwkActiveRoutes).done(new DoneCallback<MultipleResults>() {
@@ -122,11 +122,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 List<RouteStub> nwkResult = (List<RouteStub>) results.get(1).getResult();
 
                 if (nbHome) {
-                    loadAgency(Nextbus.AGENCY_NB, nbResult);
-                    loadAgency(Nextbus.AGENCY_NWK, nwkResult);
+                    loadAgency(NextbusAPI.AGENCY_NB, nbResult);
+                    loadAgency(NextbusAPI.AGENCY_NWK, nwkResult);
                 } else {
-                    loadAgency(Nextbus.AGENCY_NWK, nwkResult);
-                    loadAgency(Nextbus.AGENCY_NB, nbResult);
+                    loadAgency(NextbusAPI.AGENCY_NWK, nwkResult);
+                    loadAgency(NextbusAPI.AGENCY_NB, nbResult);
                 }
             }
 
@@ -158,8 +158,8 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 
         // Get header for routes section
         String header;
-        if (Nextbus.AGENCY_NB.equals(agencyTag)) header = getString(R.string.bus_nb_active_routes_header);
-        else if (Nextbus.AGENCY_NWK.equals(agencyTag)) header = getString(R.string.bus_nwk_active_routes_header);
+        if (NextbusAPI.AGENCY_NB.equals(agencyTag)) header = getString(R.string.bus_nb_active_routes_header);
+        else if (NextbusAPI.AGENCY_NWK.equals(agencyTag)) header = getString(R.string.bus_nwk_active_routes_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agencyTag+"\"");
 
         mAdapter.add(new RMenuHeaderRow(header));

@@ -28,7 +28,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
-import edu.rutgers.css.Rutgers.channels.recreation.model.Gyms;
+import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
@@ -64,7 +64,7 @@ public class RecreationDisplay extends Fragment {
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
 
-        List<RMenuRow> data = new ArrayList<RMenuRow>(10);
+        List<RMenuRow> data = new ArrayList<>(10);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
 
         // Make sure necessary arguments were given
@@ -78,7 +78,7 @@ public class RecreationDisplay extends Fragment {
         final String facilityTitle = args.getString("facility");
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Gyms.getFacility(campusTitle, facilityTitle)).done(new DoneCallback<Facility>() {
+        dm.when(GymsAPI.getFacility(campusTitle, facilityTitle)).done(new DoneCallback<Facility>() {
             @Override
             public void onDone(@NonNull Facility result) {
                 mFacility = result;
