@@ -42,7 +42,7 @@ import edu.rutgers.css.Rutgers2.BuildConfig;
  * The events are stored in a local SQLite database until they are successfully flushed to the server.
  * @author James Chambers
  */
-public class Analytics extends IntentService {
+public final class Analytics extends IntentService {
 
     public static final String TAG = "Analytics";
 
@@ -101,7 +101,7 @@ public class Analytics extends IntentService {
                 break;
 
             default:
-                Log.e(TAG, "Invalid mode supplied");
+                throw new IllegalArgumentException("Invalid mode supplied");
         }
 
     }
@@ -210,7 +210,7 @@ public class Analytics extends IntentService {
                 HttpPost httpPost = new HttpPost(POST_URL);
 
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+                    List<NameValuePair> nameValuePairs = new ArrayList<>();
                     nameValuePairs.add(new BasicNameValuePair("payload", eventOutQueue.toString()));
                     httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 

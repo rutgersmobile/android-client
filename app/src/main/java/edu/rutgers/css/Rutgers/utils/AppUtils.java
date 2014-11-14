@@ -35,12 +35,14 @@ import edu.rutgers.css.Rutgers2.R;
 /**
  * General helper methods & global variables for the app
  */
-public class AppUtils {
+public final class AppUtils {
 
     private static final String TAG = "AppUtils";
 
     private static final String INSTALLATION = "INSTALLATION";
     private static String installID = null;
+
+    private AppUtils() {}
 
     /**
      * Get (or create) UUID for the installation of this app.

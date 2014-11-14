@@ -27,7 +27,7 @@ import edu.rutgers.css.Rutgers2.R;
 /**
  * Map error codes to error messages.
  */
-public class LocationServiceErrorMessages {
+public final class LocationServiceErrorMessages {
 
     // Don't allow instantiation
     private LocationServiceErrorMessages() {}

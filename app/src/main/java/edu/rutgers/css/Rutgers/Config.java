@@ -5,7 +5,9 @@ import edu.rutgers.css.Rutgers2.BuildConfig;
 /**
  * App configuration
  */
-public class Config {
+public final class Config {
+
+    private Config() {}
 
     // Build info
     public static final String APPTAG = "Rutgers";

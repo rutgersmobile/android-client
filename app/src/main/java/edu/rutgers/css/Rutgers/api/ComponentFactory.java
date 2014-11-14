@@ -42,9 +42,8 @@ import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Singleton fragment builder
- *
  */
-public class ComponentFactory {
+public final class ComponentFactory {
 
     private static final String TAG = "ComponentFactory";
 
@@ -88,8 +87,7 @@ public class ComponentFactory {
         put(FeedbackMain.HANDLE, FeedbackMain.class);
     }});
 
-    protected ComponentFactory() {
-    }
+    private ComponentFactory() {}
 
     public void setMainActivity(@NonNull FragmentActivity fragmentActivity) {
         sMainActivity = new WeakReference<>(fragmentActivity);

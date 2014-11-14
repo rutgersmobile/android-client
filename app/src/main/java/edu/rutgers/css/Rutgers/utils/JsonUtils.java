@@ -9,11 +9,13 @@ import org.json.JSONObject;
 import java.util.Iterator;
 
 /**
- * Created by jamchamb on 8/21/14.
+ * JSON Utilities.
  */
-public class JsonUtils {
+public final class JsonUtils {
 
     private static final String TAG = "JsonUtils";
+
+    private JsonUtils() {}
 
     /**
      * Check if a JSON string is really empty - do not coerce null value into string "null".

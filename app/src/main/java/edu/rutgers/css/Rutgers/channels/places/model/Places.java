@@ -27,12 +27,14 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
  * Provides access to the Places database.
  * @author James Chambers
  */
-public class Places {
+public final class Places {
     
     private static final String TAG = "PlacesAPI";
 
     private static final String API_URL = "https://oss-services.rutgers.edu/pq";
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
+
+    private Places() {}
 
     /**
      * Get a specific place from the Places API.
@@ -40,7 +42,7 @@ public class Places {
      * @return Promise for a Place object representing the entry in the database
      */
     public static Promise<Place, Exception, Double> getPlace(final String placeKey) {
-        final Deferred<Place, Exception, Double> d = new DeferredObject<Place, Exception, Double>();
+        final Deferred<Place, Exception, Double> d = new DeferredObject<>();
 
         String parameter;
         try {
@@ -84,7 +86,7 @@ public class Places {
      * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
     public static Promise<List<KeyValPair>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
-        final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<List<KeyValPair>, Exception, Double>();
+        final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<>();
 
         sDM.when(Request.json(API_URL+"?latitude="+sourceLat+"&longitude="+sourceLon, Request.CACHE_ONE_MINUTE)).done(new DoneCallback<JSONObject>() {
             @Override
@@ -95,7 +97,7 @@ public class Places {
                     if (result.getString("status").equals("success")) {
                         JSONArray places = data.getJSONArray("places");
 
-                        List<KeyValPair> stubs = new ArrayList<KeyValPair>();
+                        List<KeyValPair> stubs = new ArrayList<>();
                         for (int i = 0; i < places.length(); i++) {
                             JSONObject place = places.getJSONObject(i);
                             stubs.add(new KeyValPair(place.getString("id"), place.getString("title")));
@@ -129,7 +131,7 @@ public class Places {
      * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
     public static Promise<List<KeyValPair>, Exception, Double> searchPlaces(final String query) {
-        final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<List<KeyValPair>, Exception, Double>();
+        final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<>();
 
         sDM.when(Request.json(API_URL+"?search="+query, Request.CACHE_ONE_MINUTE)).done(new DoneCallback<JSONObject>() {
             @Override
@@ -139,7 +141,7 @@ public class Places {
 
                     if (result.getString("status").equals("success")) {
                         JSONArray places = data.getJSONArray("places");
-                        List<KeyValPair> stubs = new ArrayList<KeyValPair>();
+                        List<KeyValPair> stubs = new ArrayList<>();
 
                         for (int i = 0; i < places.length(); i++) {
                             JSONObject place = places.getJSONObject(i);

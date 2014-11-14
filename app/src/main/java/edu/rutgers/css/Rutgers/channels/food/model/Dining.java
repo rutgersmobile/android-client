@@ -25,9 +25,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Helper for getting data from dining API
- *
  */
-public class Dining {
+public final class Dining {
 
     private static final String TAG = "DiningAPI";
 
@@ -38,13 +37,15 @@ public class Dining {
     private static Promise<Object, Exception, Void> configured;
     private static List<DiningMenu> mNBDiningMenus;
 
+    private Dining() {}
+
     /**
      * Grab the dining API data.
      * <p>(Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)</p>
      */
     private static void setup() {
         // Get JSON array from dining API
-        final Deferred<Object, Exception, Void> confd = new DeferredObject<Object, Exception, Void>();
+        final Deferred<Object, Exception, Void> confd = new DeferredObject<>();
         configured = confd.promise();
         
         final Promise<JSONArray, AjaxStatus, Double> promiseNBDining = Request.apiArray(API_PATH, expire);
@@ -55,7 +56,7 @@ public class Dining {
             public void onDone(JSONArray res) {
                 Gson gson = new Gson();
 
-                mNBDiningMenus = new ArrayList<DiningMenu>(4);
+                mNBDiningMenus = new ArrayList<>(4);
                 try {
                     for (int i = 0; i < res.length(); i++) {
                         DiningMenu diningMenu = gson.fromJson(res.getJSONObject(i).toString(), DiningMenu.class);
@@ -85,7 +86,7 @@ public class Dining {
      * @return List of all dining hall menus
      */
     public static Promise<List<DiningMenu>, Exception, Void> getDiningHalls() {
-        final Deferred<List<DiningMenu>, Exception, Void> d = new DeferredObject<List<DiningMenu>, Exception, Void>();
+        final Deferred<List<DiningMenu>, Exception, Void> d = new DeferredObject<>();
         setup();
         
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {
@@ -111,7 +112,7 @@ public class Dining {
      * @return Promise for the dining hall menu
      */
     public static Promise<DiningMenu, Exception, Void> getDiningLocation(@NonNull final String location) {
-        final Deferred<DiningMenu, Exception, Void> d = new DeferredObject<DiningMenu, Exception, Void>();
+        final Deferred<DiningMenu, Exception, Void> d = new DeferredObject<>();
         setup();
 
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Object>() {

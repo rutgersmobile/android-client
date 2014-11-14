@@ -26,7 +26,7 @@ import java.util.Locale;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-public class Gyms {
+public final class Gyms {
     
     private static final String TAG = "Gyms";
     
@@ -36,12 +36,14 @@ public class Gyms {
 
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 
+    private Gyms() {}
+
     /**
      * Get all campuses from the Gyms API.
      * @return Promise for list of Campuses
      */
     public static Promise<List<Campus>, Exception, Void> getCampuses() {
-        final DeferredObject<List<Campus>, Exception, Void> deferred = new DeferredObject<List<Campus>, Exception, Void>();
+        final DeferredObject<List<Campus>, Exception, Void> deferred = new DeferredObject<>();
 
         // TODO Request.apiArray("gyms_array.txt", expire);
         Promise<JSONArray, AjaxStatus, Double> p = Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.json", expire);
@@ -49,7 +51,7 @@ public class Gyms {
         sDM.when(p, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
             @Override
             public void onDone(JSONArray result) {
-                ArrayList<Campus> campuses = new ArrayList<Campus>(result.length());
+                ArrayList<Campus> campuses = new ArrayList<>(result.length());
                 Gson gson = new Gson();
 
                 try {
@@ -83,7 +85,7 @@ public class Gyms {
      * @return Promise for a facility. Fails if not found.
      */
     public static Promise<Facility, Exception, Void> getFacility(@NonNull final String campusTitle, @NonNull final String facilityTitle) {
-        final Deferred<Facility, Exception, Void> deferred = new DeferredObject<Facility, Exception, Void>();
+        final Deferred<Facility, Exception, Void> deferred = new DeferredObject<>();
 
         sDM.when(getCampuses(), AndroidExecutionScope.BACKGROUND).done(new DoneCallback<List<Campus>>() {
             @Override

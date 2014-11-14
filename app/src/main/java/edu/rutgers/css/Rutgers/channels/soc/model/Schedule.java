@@ -27,7 +27,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 /**
  * Schedule of Classes API
  */
-public class Schedule {
+public final class Schedule {
 
     private static final String TAG = "ScheduleAPI";
     private static final String SOC_BASE_URL = "https://sis.rutgers.edu/soc/";
@@ -43,12 +43,14 @@ public class Schedule {
     public static final String CODE_LEVEL_UNDERGRAD = "U";
     public static final String CODE_LEVEL_GRAD = "G";
 
+    private Schedule() {}
+
     /**
      * Get current semester configuration from API.
      * @return SOC Conf API with semesters array and default semester setting
      */
     public static Promise<Semesters, Exception, Void> getSemesters() {
-        final DeferredObject<Semesters, Exception, Void> deferred = new DeferredObject<Semesters, Exception, Void>();
+        final DeferredObject<Semesters, Exception, Void> deferred = new DeferredObject<>();
 
         Request.api("soc_conf.txt", Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
             @Override
@@ -79,7 +81,7 @@ public class Schedule {
      * @return Promise for array of course subjects
      */
     public static Promise<List<Subject>, Exception, Void> getSubjects(String campusCode, String levelCode, String semesterCode) {
-        final DeferredObject<List<Subject>, Exception, Void> deferred = new DeferredObject<List<Subject>, Exception, Void>();
+        final DeferredObject<List<Subject>, Exception, Void> deferred = new DeferredObject<>();
 
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
@@ -92,7 +94,7 @@ public class Schedule {
             @Override
             public void onDone(JSONArray result) {
                 Gson gson = new Gson();
-                ArrayList<Subject> subjects = new ArrayList<Subject>(result.length());
+                ArrayList<Subject> subjects = new ArrayList<>(result.length());
 
                 try {
                     for(int i = 0; i < result.length(); i++) {
@@ -124,7 +126,7 @@ public class Schedule {
      * @return Array of courses for a subject
      */
     public static Promise<List<Course>, Exception, Void> getCourses(String campusCode, String levelCode, String semesterCode, String subjectCode) {
-        final DeferredObject<List<Course>, Exception, Void> deferred = new DeferredObject<List<Course>, Exception, Void>();
+        final DeferredObject<List<Course>, Exception, Void> deferred = new DeferredObject<>();
 
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
@@ -137,7 +139,7 @@ public class Schedule {
             @Override
             public void onDone(JSONArray result) {
                 Gson gson = new Gson();
-                ArrayList<Course> courses = new ArrayList<Course>(result.length());
+                ArrayList<Course> courses = new ArrayList<>(result.length());
 
                 try {
                     for(int i = 0; i < result.length(); i++) {
@@ -169,7 +171,7 @@ public class Schedule {
      * @return JSON Object for one course
      */
     public static Promise<Course, Exception, Void> getCourse(String campusCode, String semesterCode, String subjectCode, String courseCode) {
-        final DeferredObject<Course, Exception, Void> deferred = new DeferredObject<Course, Exception, Void>();
+        final DeferredObject<Course, Exception, Void> deferred = new DeferredObject<>();
 
         String reqUrl;
         if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
@@ -207,7 +209,7 @@ public class Schedule {
      * @return Promise for an SOCIndex
      */
     public static Promise<SOCIndex, Exception, Double> getIndex(final String semesterCode, final String campusCode, final String levelCode) {
-        final Deferred<SOCIndex, Exception, Double> deferred = new DeferredObject<SOCIndex, Exception, Double>();
+        final Deferred<SOCIndex, Exception, Double> deferred = new DeferredObject<>();
 
         Request.api("indexes/"+semesterCode+"_"+campusCode+"_"+levelCode+".json", Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
             @Override

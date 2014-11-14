@@ -38,6 +38,8 @@ public final class LocationUtils {
 
     public static final String TAG = "LocationUtils";
 
+    private LocationUtils() {}
+
     public static class ErrorDialogFragment extends DialogFragment {
         private Dialog mDialog;
         public ErrorDialogFragment() {
@@ -50,6 +52,7 @@ public final class LocationUtils {
         }
 
         @Override
+        @NonNull
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return mDialog;
         }

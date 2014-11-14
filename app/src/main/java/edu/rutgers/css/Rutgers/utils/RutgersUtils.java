@@ -16,9 +16,11 @@ import edu.rutgers.css.Rutgers2.R;
 /**
  * Utilities for Rutgers-specific data
  */
-public class RutgersUtils {
+public final class RutgersUtils {
 
     private static final String TAG = "RutgersUtils";
+
+    private RutgersUtils() {}
 
     /**
      * Get full campus title from campus tag.

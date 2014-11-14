@@ -14,9 +14,11 @@ import edu.rutgers.css.Rutgers2.R;
 /**
  * Image utilities
  */
-public class ImageUtils {
+public final class ImageUtils {
 
     private static final String TAG = "ImageUtils";
+
+    private ImageUtils() {}
 
     /**
      * Get icon by resource ID, colored white

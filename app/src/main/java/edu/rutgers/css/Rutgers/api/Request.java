@@ -14,7 +14,7 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.RutgersApplication;
 
 /** Convenience class for making requests */
-public class Request {
+public final class Request {
     
     private static final String TAG = "Request";
 
@@ -24,6 +24,8 @@ public class Request {
     public static long CACHE_ONE_MINUTE = 1000 * 60;
     public static long CACHE_ONE_HOUR = CACHE_ONE_MINUTE * 60;
     public static long CACHE_ONE_DAY = CACHE_ONE_HOUR * 24;
+
+    private Request() {}
 
     /** Initialize the singleton AQuery object */
     private static void setup () {
@@ -60,7 +62,7 @@ public class Request {
      */
     public static Promise<JSONObject, AjaxStatus, Double> json (String resource, long expire) {
         setup();
-        final DeferredObject<JSONObject, AjaxStatus, Double> deferred = new DeferredObject<JSONObject, AjaxStatus, Double>();
+        final DeferredObject<JSONObject, AjaxStatus, Double> deferred = new DeferredObject<>();
         
         sAq.ajax(resource, JSONObject.class, expire, new AjaxCallback<JSONObject>() {
 
@@ -86,7 +88,7 @@ public class Request {
      */
     public static Promise<JSONArray, AjaxStatus, Double> jsonArray (String resource, long expire) {
         setup();
-        final DeferredObject<JSONArray, AjaxStatus, Double> deferred = new DeferredObject<JSONArray, AjaxStatus, Double>();
+        final DeferredObject<JSONArray, AjaxStatus, Double> deferred = new DeferredObject<>();
         
         sAq.ajax(resource, JSONArray.class, expire, new AjaxCallback<JSONArray>() {
 
@@ -112,7 +114,7 @@ public class Request {
      */
     public static Promise<XmlDom, AjaxStatus, Double> xml (String resource, long expire) {
         setup();
-        final DeferredObject<XmlDom, AjaxStatus, Double> deferred = new DeferredObject<XmlDom, AjaxStatus, Double>();
+        final DeferredObject<XmlDom, AjaxStatus, Double> deferred = new DeferredObject<>();
         
         sAq.ajax(resource, XmlDom.class, expire, new AjaxCallback<XmlDom>() {
 

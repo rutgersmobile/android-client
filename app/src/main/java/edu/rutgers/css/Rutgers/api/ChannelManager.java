@@ -21,7 +21,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 /**
  * Maintains the list of loaded RU Mobile channels.
  */
-public class ChannelManager {
+public final class ChannelManager {
 
     private static final String TAG = "ChannelManager";
 
@@ -36,7 +36,7 @@ public class ChannelManager {
      * @return JSON array of all channel objects
      */
     public List<Channel> getChannels() {
-        ArrayList<Channel> result = new ArrayList<Channel>();
+        ArrayList<Channel> result = new ArrayList<>();
 
         Set<Map.Entry<String, Channel>> set = channelsMap.entrySet();
         for(Map.Entry<String, Channel> entry: set) {
@@ -52,7 +52,7 @@ public class ChannelManager {
      * @return JSON array of all channel objects in category
      */
     public List<Channel> getChannels(@NonNull String category) {
-        ArrayList<Channel> result = new ArrayList<Channel>();
+        ArrayList<Channel> result = new ArrayList<>();
 
         Set<Map.Entry<String, Channel>> set = channelsMap.entrySet();
         for(Map.Entry<String, Channel> entry: set) {
