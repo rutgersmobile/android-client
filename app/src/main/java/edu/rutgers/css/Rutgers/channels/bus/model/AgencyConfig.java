@@ -41,7 +41,7 @@ public class AgencyConfig {
         JSONObject stopsJson = configJson.getJSONObject("stops");
         for(Iterator<String> stopTags = stopsJson.keys(); stopTags.hasNext();) {
             String stopTag = stopTags.next();
-            JSONObject stopJson = configJson.getJSONObject(stopTag);
+            JSONObject stopJson = stopsJson.getJSONObject(stopTag);
             Stop stop = gson.fromJson(stopJson.toString(), Stop.class);
             stop.setTitle(stopTag);
             this.stops.put(stopTag, stop);

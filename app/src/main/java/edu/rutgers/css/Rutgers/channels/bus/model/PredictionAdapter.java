@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -165,7 +164,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
      * @param minutes Array of arrival times in minutes
      * @return Formatted arrival time string
      */
-    private String formatMinutes(ArrayList<Integer> minutes) {
+    private String formatMinutes(List<Integer> minutes) {
         Resources resources = mContext.getResources();
         StringBuilder result = new StringBuilder(resources.getString(R.string.bus_prediction_begin));
         
@@ -190,7 +189,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
      * @param minutes Array of arrival times in minutes
      * @return Formatted and stylized arrival time details string
      */
-    private CharSequence formatMinutesDetails(ArrayList<Integer> minutes) {
+    private CharSequence formatMinutesDetails(List<Integer> minutes) {
         Resources resources = mContext.getResources();
         SpannableStringBuilder result = new SpannableStringBuilder();
 

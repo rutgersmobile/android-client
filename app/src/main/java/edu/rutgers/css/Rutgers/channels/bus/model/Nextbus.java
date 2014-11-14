@@ -87,8 +87,9 @@ public final class Nextbus {
                         }
                     }
                 } catch (JsonSyntaxException | JSONException e) {
-                    Log.e(TAG, e.getMessage());
+                    Log.e(TAG, Log.getStackTraceString(e));
                     confd.reject(e);
+                    return;
                 }
 
                 confd.resolve(null);
@@ -413,9 +414,9 @@ public final class Nextbus {
                             break; // Skip to next group
                         }
                     }
-
-                    d.resolve(nearStops);
                 }
+
+                d.resolve(nearStops);
             }
 
         }).fail(new FailCallback<Exception>() {

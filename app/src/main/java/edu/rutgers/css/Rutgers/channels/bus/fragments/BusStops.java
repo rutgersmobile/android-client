@@ -230,12 +230,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         Log.i(TAG, "Connected to services");
 
         // Location services reconnected - retry loading nearby stops
-        // Make sure this isn't called before the activity has been attached
-        // or before onCreate() has ran.
-        if(mData != null && isAdded()) {
-            loadNearbyStops();
-        }
-
+        // Make sure this isn't called before onCreate() has ran.
+        if(mAdapter != null) loadNearbyStops();
     }
 
     @Override
@@ -245,33 +241,31 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
     /**
      * Populate list with bus stops for agency, with a section header for that agency.
-     * @param agencyTag Agency tag
+     * @param agency Agency tag
      * @param stopStubs List of stop stubs (titles/geohashes) for that agency
      */
-    private void loadAgency(@NonNull String agencyTag, @NonNull List<StopStub> stopStubs) {
+    private void loadAgency(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
+        // Abort if resources can't be accessed
         if(!isAdded() || getResources() == null) return;
 
         // Get header for active stops section
         String header;
-        if(Nextbus.AGENCY_NB.equals(agencyTag)) header = getString(R.string.bus_nb_active_stops_header);
-        else if(Nextbus.AGENCY_NWK.equals(agencyTag)) header = getString(R.string.bus_nwk_active_stops_header);
-        else throw new IllegalArgumentException("Invalid Nextbus agency \""+agencyTag+"\"");
+        if(Nextbus.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_active_stops_header);
+        else if(Nextbus.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_active_stops_header);
+        else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
         mAdapter.add(new RMenuHeaderRow(header));
 
         if(stopStubs.isEmpty()) {
-            // If the list of stops is empty, show empty message
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_stops)));
         } else {
-            // Create an item in the list for each stop from the array
             for(StopStub stopStub: stopStubs) {
                 Bundle stopArgs = new Bundle();
                 stopArgs.putString("title", stopStub.getTitle());
-                stopArgs.putString("agency", agencyTag);
+                stopArgs.putString("agency", agency);
                 mAdapter.add(new RMenuItemRow(stopArgs));
             }
         }
-
     }
     
     /**

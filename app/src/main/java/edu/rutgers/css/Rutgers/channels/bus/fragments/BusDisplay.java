@@ -17,6 +17,7 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,7 +27,7 @@ import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Prediction>>, FailCallback<Exception> {
+public class BusDisplay extends Fragment implements DoneCallback<List<Prediction>>, FailCallback<Exception> {
 
     private static final String TAG = "BusDisplay";
     public static final String HANDLE = "busdisplay";
@@ -182,7 +183,7 @@ public class BusDisplay extends Fragment implements DoneCallback<ArrayList<Predi
      * Callback function for when nextbus data is loaded
      */
     @Override
-    public void onDone(ArrayList<Prediction> predictionArray) {
+    public void onDone(List<Prediction> predictionArray) {
         // If no routes are running through this stop right now, show message
         if(mMode == Mode.STOP && predictionArray.isEmpty()) {
             if(isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();

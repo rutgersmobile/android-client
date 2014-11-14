@@ -221,7 +221,7 @@ public class BusAll extends Fragment {
                 stopArgs.putString("component", BusDisplay.HANDLE);
                 stopArgs.putString("title", routeStub.getTitle());
                 stopArgs.putString("tag", routeStub.getTag());
-                stopArgs.putString("mode", "stop");
+                stopArgs.putString("mode", "route");
                 stopArgs.putString("agency", agency);
                 mAdapter.add(new RMenuItemRow(stopArgs));
             }

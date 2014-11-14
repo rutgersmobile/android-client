@@ -1,8 +1,8 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +17,6 @@ import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
-import org.jdeferred.multiple.OneResult;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +40,6 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     public static final String HANDLE = "busroutes";
 
     private RMenuAdapter mAdapter;
-    private ArrayList<RMenuRow> mData;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
     
@@ -58,7 +53,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 
         mDM = new AndroidDeferredManager();
 
-        mData = new ArrayList<>();
+        List<RMenuRow> mData = new ArrayList<>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
     }
     
@@ -84,11 +79,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
                 Bundle clickedArgs = clickedItem.getArgs();
 
-                Bundle args = new Bundle(clickedArgs);
-                args.putString("component", BusDisplay.HANDLE);
-                args.putString("mode", "route");
+                Bundle newArgs = new Bundle(clickedArgs);
+                newArgs.putString("component", BusDisplay.HANDLE);
+                newArgs.putString("mode", "route");
 
-                ComponentFactory.getInstance().switchFragments(args);
+                ComponentFactory.getInstance().switchFragments(newArgs);
             }
 
         });
@@ -115,9 +110,6 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         final Promise<List<RouteStub>, Exception, Void> nbActiveRoutes = Nextbus.getActiveRoutes(Nextbus.AGENCY_NB);
         final Promise<List<RouteStub>, Exception, Void> nwkActiveRoutes = Nextbus.getActiveRoutes(Nextbus.AGENCY_NWK);
 
-        final String nbString = getString(R.string.bus_nb_active_routes_header);
-        final String nwkString =  getString(R.string.bus_nwk_active_routes_header);
-
         // Synchronized load of active routes
         mDM.when(nbActiveRoutes, nwkActiveRoutes).done(new DoneCallback<MultipleResults>() {
 
@@ -125,22 +117,16 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
                 if (!isAdded()) return;
-                JSONArray nbResult = null, nwkResult = null;
 
-                for (OneResult result : results) {
-                    if (result.getPromise() == nbActiveRoutes) {
-                        nbResult = (JSONArray) result.getResult();
-                    } else if (result.getPromise() == nwkActiveRoutes) {
-                        nwkResult = (JSONArray) result.getResult();
-                    }
-                }
+                List<RouteStub> nbResult = (List<RouteStub>) results.get(0).getResult();
+                List<RouteStub> nwkResult = (List<RouteStub>) results.get(1).getResult();
 
                 if (nbHome) {
-                    loadAgency(Nextbus.AGENCY_NB, nbString, nbResult);
-                    loadAgency(Nextbus.AGENCY_NWK, nwkString, nwkResult);
+                    loadAgency(Nextbus.AGENCY_NB, nbResult);
+                    loadAgency(Nextbus.AGENCY_NWK, nwkResult);
                 } else {
-                    loadAgency(Nextbus.AGENCY_NWK, nwkString, nwkResult);
-                    loadAgency(Nextbus.AGENCY_NB, nbString, nbResult);
+                    loadAgency(Nextbus.AGENCY_NWK, nwkResult);
+                    loadAgency(Nextbus.AGENCY_NB, nbResult);
                 }
             }
 
@@ -149,8 +135,6 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
             @Override
             public void onFail(OneReject result) {
                 AppUtils.showFailedLoadToast(getActivity());
-                Exception e = (Exception) result.getReject();
-                Log.w(TAG, e.getMessage());
             }
 
         });
@@ -166,33 +150,31 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     /**
      * Populate list with bus routes for agency, with a section header for that agency
      * @param agencyTag Agency tag for API request
-     * @param agencyTitle Header title that goes above these routes
+     * @param routeStubs List of routes (stubs)
      */
-    private void loadAgency(final String agencyTag, final String agencyTitle, final JSONArray data) {
+    private void loadAgency(@NonNull String agencyTag, @NonNull List<RouteStub> routeStubs) {
+        // Abort if resources can't be accessed
         if(!isAdded() || getResources() == null) return;
-        if(data == null) return;
 
-        mAdapter.add(new RMenuHeaderRow(agencyTitle));
+        // Get header for routes section
+        String header;
+        if (Nextbus.AGENCY_NB.equals(agencyTag)) header = getString(R.string.bus_nb_active_routes_header);
+        else if (Nextbus.AGENCY_NWK.equals(agencyTag)) header = getString(R.string.bus_nwk_active_routes_header);
+        else throw new IllegalArgumentException("Invalid Nextbus agency \""+agencyTag+"\"");
 
-        if (data.length() == 0) {
+        mAdapter.add(new RMenuHeaderRow(header));
+
+        if (routeStubs.isEmpty()) {
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_routes)));
-            return;
-        }
-
-        for (int i = 0; i < data.length(); i++) {
-            try {
-                JSONObject jsonObj = data.getJSONObject(i);
-                Bundle menuBundle = new Bundle();
-                menuBundle.putString("title", jsonObj.getString("title"));
-                menuBundle.putString("tag", jsonObj.getString("tag"));
-                menuBundle.putString("agency", agencyTag);
-                RMenuItemRow newMenuItem = new RMenuItemRow(menuBundle);
-                mAdapter.add(newMenuItem);
-            } catch (JSONException e) {
-                Log.w(TAG, "loadAgency(): " + e.getMessage());
+        } else {
+            for(RouteStub routeStub: routeStubs) {
+                Bundle routeArgs = new Bundle();
+                routeArgs.putString("title", routeStub.getTitle());
+                routeArgs.putString("tag", routeStub.getTag());
+                routeArgs.putString("agency", agencyTag);
+                mAdapter.add(new RMenuItemRow(routeArgs));
             }
         }
-
     }
 
     @Override
