@@ -16,14 +16,14 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
     private PopupWindow mLogoPopup;
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         showLogoOverlay(mRootLayoutId);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         dismissLogoOverlay();
     }
 
@@ -40,8 +40,8 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
         if(findViewById(rootLayoutId) == null) throw new IllegalArgumentException("Invalid root layout ID");
 
         // Get a layout that just contains the logo to display
-        final View logo = getLayoutInflater().inflate(R.layout.logo_split, null, false);
-        logo.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        final View logoLayout = getLayoutInflater().inflate(R.layout.logo_split, null, false);
+        logoLayout.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
         // Get the the action bar, home button, and title text views
         final View home = findViewById(android.R.id.home);
@@ -64,7 +64,7 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
                  * so that the opaque section is flush with the action bar and the transparent
                  * area hangs down past it. This is why height is set to twice that of the bar.
                  */
-                mLogoPopup = new PopupWindow(logo, side+16, side*2, false);
+                mLogoPopup = new PopupWindow(logoLayout, side+16, side*2, false);
                 mLogoPopup.showAsDropDown(actionBarView, (int) home.getX(), -side);
 
                 // Pass touch events through to the action bar
