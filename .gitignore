@@ -1,5 +1,3 @@
-import-summary.txt
-
 # built application files
 *.apk
 *.ap_
@@ -16,24 +14,21 @@ import-summary.txt
 
 # generated files
 build/
-app/build
+app/build/
 gen/
 out/
 
 # Gradle cache
-.gradle
+.gradle/
 
 # Local configuration file (sdk path, etc)
 local.properties
 
 # IDEA/Android Studio project files, because
 # the project can be imported from settings.gradle
-.idea
+.idea/
 *.iml
 
 # Old-style IDEA project files
 *.ipr
 *.iws
-
-# Local IDEA workspace
-.idea/workspace.xml
