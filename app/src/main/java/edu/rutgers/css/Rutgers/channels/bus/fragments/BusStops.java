@@ -14,9 +14,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.common.GooglePlayServicesClient;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
@@ -53,15 +55,18 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
 
     private RMenuAdapter mAdapter;
-    private ArrayList<RMenuRow> mData;
     private LocationClientProvider mLocationClientProvider;
-    private int mNearbyRowCount; // Keep track of number of nearby stops displayed
-    private boolean mNearbyHeaderAdded;
-    private Timer mUpdateTimer;
-    private Handler mUpdateHandler;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
-    
+
+    private Timer mUpdateTimer;
+    private Handler mUpdateHandler;
+
+    private int mNearbyRowCount; // Keep track of number of nearby stops displayed
+    private boolean mNearbyHeaderAdded;
+
+    private ProgressBar mProgressCircle;
+
     public BusStops() {
         // Required empty public constructor
     }
@@ -93,7 +98,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         
         mNearbyRowCount = 0;
         mNearbyHeaderAdded = false;
-        mData = new ArrayList<>();
+        List<RMenuRow> mData = new ArrayList<>();
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
         
         // Set up handler for nearby stop update timer
@@ -103,6 +108,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_bus_stops, parent, false);
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
         // Get the filter field and add a listener to it
         EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -176,6 +183,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         final Promise<List<StopStub>, Exception, Void> nwkActiveStops = NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NWK);
 
         // Synchronized load of active stops
+        showProgressCircle();
         mDM.when(nbActiveStops, nwkActiveStops).done(new DoneCallback<MultipleResults>() {
 
             @Override
@@ -202,6 +210,11 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                 AppUtils.showFailedLoadToast(getActivity());
             }
 
+        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
+            @Override
+            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
+                hideProgressCircle();
+            }
         });
 
     }
@@ -222,7 +235,10 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        // Get rid of view references
         setFocusListener(null);
+        mProgressCircle = null;
     }
 
     @Override
@@ -384,6 +400,14 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     @Override
     public void setFocusListener(FilterFocusListener listener) {
         mFilterFocusListener = listener;
+    }
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

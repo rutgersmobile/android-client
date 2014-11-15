@@ -11,11 +11,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
+import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
@@ -55,6 +58,8 @@ public class PlacesDisplay extends Fragment {
     private Place mPlace;
     private List<RMenuRow> mData;
     private RMenuAdapter mAdapter;
+    private ProgressBar mProgressCircle;
+    private boolean mLoading;
 
     private static final Map<String, String> sAgencyMap = Collections.unmodifiableMap(new HashMap<String, String>() {{
         put("Busch", NextbusAPI.AGENCY_NB);
@@ -93,6 +98,9 @@ public class PlacesDisplay extends Fragment {
         final String descriptionHeader = getString(R.string.description_header);
         final String officesHeader = getString(R.string.offices_header);
         final String nearbyHeader = getString(R.string.nearby_bus_header);
+
+        // Keep track of whether place data is loading
+        mLoading = true;
 
         final AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(PlacesAPI.getPlace(key)).done(new DoneCallback<Place>() {
@@ -216,6 +224,12 @@ public class PlacesDisplay extends Fragment {
                 AppUtils.showFailedLoadToast(getActivity());
                 Log.w(TAG, e.getMessage());
             }
+        }).always(new AlwaysCallback<Place, Exception>() {
+            @Override
+            public void onAlways(Promise.State state, Place resolved, Exception rejected) {
+                mLoading = false;
+                hideProgressCircle();
+            }
         });
 
     }
@@ -223,9 +237,12 @@ public class PlacesDisplay extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_place_display, container, false);
-        Bundle args = getArguments();
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        if(mLoading) showProgressCircle();
 
         // Set title
+        final Bundle args = getArguments();
         if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
         else getActivity().setTitle(R.string.places_title);
 
@@ -253,6 +270,14 @@ public class PlacesDisplay extends Fragment {
         });
 
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mProgressCircle = null;
     }
 
     /**
@@ -295,6 +320,14 @@ public class PlacesDisplay extends Fragment {
                 location.getStateAbbr() + " " + location.getPostalCode();
 
         return StringUtils.trim(resultString);
+    }
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

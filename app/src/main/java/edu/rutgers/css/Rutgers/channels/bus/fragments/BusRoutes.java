@@ -10,7 +10,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
@@ -42,6 +44,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     private RMenuAdapter mAdapter;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
+    private ProgressBar mProgressCircle;
     
     public BusRoutes() {
         // Required empty public constructor
@@ -60,6 +63,8 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_bus_routes, parent, false);
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
         // Get the filter field and add a listener to it
         EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -111,6 +116,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         final Promise<List<RouteStub>, Exception, Void> nwkActiveRoutes = NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NWK);
 
         // Synchronized load of active routes
+        showProgressCircle();
         mDM.when(nbActiveRoutes, nwkActiveRoutes).done(new DoneCallback<MultipleResults>() {
 
             @Override
@@ -137,6 +143,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 AppUtils.showFailedLoadToast(getActivity());
             }
 
+        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
+            @Override
+            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
+                hideProgressCircle();
+            }
         });
 
     }
@@ -144,7 +155,10 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        // Get rid of view references
         setFocusListener(null);
+        mProgressCircle = null;
     }
 
     /**
@@ -180,6 +194,14 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     @Override
     public void setFocusListener(FilterFocusListener listener) {
         mFilterFocusListener = listener;
+    }
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

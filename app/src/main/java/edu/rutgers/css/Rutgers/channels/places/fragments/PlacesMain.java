@@ -95,13 +95,13 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_places, parent, false);
-        Bundle args = getArguments();
-
-        // Set title from JSON
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
-        else getActivity().setTitle(R.string.places_title);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+
+        // Set title from JSON
+        final Bundle args = getArguments();
+        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        else getActivity().setTitle(R.string.places_title);
 
         ListView listView = (ListView) v.findViewById(R.id.listView);
         listView.setAdapter(mNearbyAdapter);
@@ -115,14 +115,14 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Launch Places display fragment
-                Bundle args = new Bundle();
+                Bundle newArgs = new Bundle();
                 KeyValPair placeStub = (KeyValPair) parent.getAdapter().getItem(position);
 
-                args.putString("component", PlacesDisplay.HANDLE);
-                args.putString("placeKey", placeStub.getKey());
-                args.putString("title", placeStub.getValue());
+                newArgs.putString("component", PlacesDisplay.HANDLE);
+                newArgs.putString("placeKey", placeStub.getKey());
+                newArgs.putString("title", placeStub.getValue());
                 
-                ComponentFactory.getInstance().switchFragments(args);
+                ComponentFactory.getInstance().switchFragments(newArgs);
             }
             
         });

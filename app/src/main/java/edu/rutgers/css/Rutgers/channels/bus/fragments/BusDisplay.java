@@ -8,12 +8,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
+import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
@@ -27,7 +30,8 @@ import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
-public class BusDisplay extends Fragment implements DoneCallback<List<Prediction>>, FailCallback<Exception> {
+public class BusDisplay extends Fragment implements DoneCallback<List<Prediction>>,
+        FailCallback<Exception>, AlwaysCallback<List<Prediction>, Exception> {
 
     private static final String TAG = "BusDisplay";
     public static final String HANDLE = "busdisplay";
@@ -44,6 +48,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     private Timer mUpdateTimer;
     private String mAgency;
     private AndroidDeferredManager mDM;
+    private ProgressBar mProgressCircle;
     
     public BusDisplay() {
         // Required empty public constructor
@@ -105,6 +110,8 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_bus_display, parent, false);
 
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+
         final Bundle args = getArguments();
         // Get title
         if(args.getString("title") != null) {
@@ -165,17 +172,26 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         outState.putSerializable("mData", mData);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mProgressCircle = null;
+    }
+
     /**
      * Load prediction data
      */
     private void loadPredictions() {
         // Don't run if required args aren't loaded
         if(mAgency == null || mTag == null) return;
-            
+
+        showProgressCircle();
         if(mMode == Mode.ROUTE) {
-            mDM.when(NextbusAPI.routePredict(mAgency, mTag)).then(this).fail(this);
+            mDM.when(NextbusAPI.routePredict(mAgency, mTag)).then(this).fail(this).always(this);
         } else if(mMode == Mode.STOP) {
-            mDM.when(NextbusAPI.stopPredict(mAgency, mTag)).then(this).fail(this);
+            mDM.when(NextbusAPI.stopPredict(mAgency, mTag)).then(this).fail(this).always(this);
         }
     }
 
@@ -184,6 +200,8 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
      */
     @Override
     public void onDone(List<Prediction> predictionArray) {
+        hideProgressCircle();
+
         // If no routes are running through this stop right now, show message
         if(mMode == Mode.STOP && predictionArray.isEmpty()) {
             if(isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
@@ -227,6 +245,19 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     public void onFail(Exception result) {
         AppUtils.showFailedLoadToast(getActivity());
         mAdapter.clear();
+    }
+
+    @Override
+    public void onAlways(Promise.State state, List<Prediction> resolved, Exception rejected) {
+        hideProgressCircle();
+    }
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

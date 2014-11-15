@@ -15,7 +15,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
@@ -46,6 +48,8 @@ public class BusAll extends Fragment {
 
     private RMenuAdapter mAdapter;
     private String mFilterString;
+    private ProgressBar mProgressCircle;
+    private boolean mLoading;
     
     public BusAll() {
         // Required empty public constructor
@@ -73,12 +77,16 @@ public class BusAll extends Fragment {
         final Promise<List<RouteStub>, Exception, Void> nwkRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NWK);
         final Promise<List<StopStub>, Exception, Void> nwkStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NWK);
 
+        mLoading = true;
+
         // Synchronized load of all route & stop information
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
+                mLoading = false;
+
                 // Don't do anything if not attached to activity anymore
                 if(!isAdded()) return;
 
@@ -115,12 +123,20 @@ public class BusAll extends Fragment {
                 Log.w(TAG, e.getMessage());
             }
 
+        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
+            @Override
+            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
+                hideProgressCircle();
+            }
         });
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_bus_all, parent, false);
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        if(mLoading) showProgressCircle();
 
         // Get the filter field and add a listener to it
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -176,6 +192,14 @@ public class BusAll extends Fragment {
         if(mFilterString != null) outState.putString("filter", mFilterString);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mProgressCircle = null;
+    }
+
     private void loadStops(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
         if(getResources() == null) return;
 
@@ -227,5 +251,13 @@ public class BusAll extends Fragment {
             }
         }
     }
-    
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+    }
+
 }
