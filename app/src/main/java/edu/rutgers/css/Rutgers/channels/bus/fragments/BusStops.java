@@ -356,6 +356,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
                 @Override
                 public void onDone(MultipleResults results) {
+                    if(!isAdded() || getResources() == null) return;
+
                     List<StopGroup> nbStops = (List<StopGroup>) results.get(0).getResult();
                     List<StopGroup> nwkStops = (List<StopGroup>) results.get(1).getResult();
 
