@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
@@ -42,11 +43,11 @@ public class DTable extends Fragment {
     private static final String TAG = "DTable";
     public static final String HANDLE = "dtable";
 
-    private static final String TAG_HANDLE = "mHandle";
-    private static final String TAG_ROOT = "mDRoot";
+    /* Saved instance state tags */
+    private static final String SAVED_HANDLE_TAG = Config.PACKAGE_NAME + ".dtable.handle";
+    private static final String SAVED_ROOT_TAG = Config.PACKAGE_NAME + ".dtable.root";
 
     private DTableRoot mDRoot;
-    private List<DTableElement> mData;
     private DTableAdapter mAdapter;
     private String mURL;
     private String mAPI;
@@ -69,19 +70,18 @@ public class DTable extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(savedInstanceState != null && savedInstanceState.getString("mData") != null) {
+        final Bundle args = getArguments();
+
+        List<DTableElement> data = new ArrayList<>();
+        mAdapter = new DTableAdapter(getActivity(), data);
+
+        if(savedInstanceState != null && savedInstanceState.getSerializable(SAVED_ROOT_TAG) != null) {
             Log.v(dTag(), "Restoring mData");
-            mHandle = savedInstanceState.getString(TAG_HANDLE);
-            mDRoot = (DTableRoot) savedInstanceState.getSerializable(TAG_ROOT);
-            mAdapter = new DTableAdapter(getActivity(), mData);
+            mHandle = savedInstanceState.getString(SAVED_HANDLE_TAG);
+            mDRoot = (DTableRoot) savedInstanceState.getSerializable(SAVED_ROOT_TAG);
+            mAdapter.addAll(mDRoot.getChildren());
             return;
         }
-
-        // Didn't restore adapter & data from state; initialize here
-        mData = new ArrayList<DTableElement>();
-        mAdapter = new DTableAdapter(getActivity(), mData);
-
-        Bundle args = getArguments();
 
         // Get handle for this DTable instance
         if(args.getString("handle") != null) mHandle = args.getString("handle");
@@ -93,8 +93,7 @@ public class DTable extends Fragment {
         if (args.getSerializable("data") != null) {
             try {
                 mDRoot = (DTableRoot) args.getSerializable("data");
-                mData = mDRoot.getChildren();
-                mAdapter.setData(mData);
+                mAdapter.addAll(mDRoot.getChildren());
                 return;
             } catch (ClassCastException e) {
                 Log.e(dTag(), "onCreateView(): " + e.getMessage());
@@ -110,9 +109,9 @@ public class DTable extends Fragment {
             return;
         }
 
-        Promise<JSONObject, AjaxStatus, Double> promise;
-        if(mURL != null) promise = Request.json(mURL, Request.CACHE_ONE_HOUR);
-        else promise = Request.api(mAPI, Request.CACHE_ONE_HOUR);
+        Promise<JSONObject, AjaxStatus, Double> promise =
+                (mURL != null) ? Request.json(mURL, Request.CACHE_ONE_HOUR) :
+                                 Request.api(mAPI, Request.CACHE_ONE_HOUR);
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(promise).done(new DoneCallback<JSONObject>() {
@@ -122,8 +121,7 @@ public class DTable extends Fragment {
                 try {
                     mDRoot = new DTableRoot(result);
                     Log.v(dTag(), "Loaded DTable root: " + mDRoot.getTitle());
-                    mData = mDRoot.getChildren();
-                    mAdapter.setData(mData);
+                    mAdapter.addAll(mDRoot.getChildren());
                 } catch (JSONException e) {
                     Log.e(dTag(), "onCreate(): " + e.getMessage());
                     AppUtils.showFailedLoadToast(getActivity());
@@ -201,9 +199,9 @@ public class DTable extends Fragment {
         super.onSaveInstanceState(outState);
 
         // If any data was actually loaded, save it in state
-        if(mData != null && mData.size() > 0) {
-            outState.putSerializable(TAG_ROOT, mDRoot);
-            outState.putString(TAG_HANDLE, mHandle);
+        if(mDRoot != null) {
+            outState.putSerializable(SAVED_ROOT_TAG, mDRoot);
+            outState.putString(SAVED_HANDLE_TAG, mHandle);
         }
     }
 

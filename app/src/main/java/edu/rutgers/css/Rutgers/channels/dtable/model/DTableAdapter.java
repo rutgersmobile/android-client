@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -40,15 +41,29 @@ public class DTableAdapter extends BaseAdapter {
         LinearLayout popdownLayout;
     }
 
-    public DTableAdapter(@NonNull Context context, @NonNull List<DTableElement> elements) {
+    public DTableAdapter(@NonNull Context context, List<DTableElement> elements) {
         mContext = context;
-        mItems = elements;
+        setData(elements);
         mHomeCampus = RutgersUtils.getHomeCampus(mContext); // TODO listen for updates to home campus
     }
 
-    public void setData(@NonNull List<DTableElement> elements) {
-        mItems = elements;
+    public void setData(List<DTableElement> elements) {
+        if(elements == null) {
+            mItems = new ArrayList<>();
+        } else {
+            mItems = elements;
+        }
         notifyDataSetChanged();
+    }
+
+    public boolean addAll(List<DTableElement> elements) {
+        if(elements == null || elements.isEmpty()) return false;
+        if(mItems.addAll(elements)) {
+            notifyDataSetChanged();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -70,8 +85,7 @@ public class DTableAdapter extends BaseAdapter {
 
     @Override
     public int getCount () {
-        if(mItems == null) return 0;
-        else return mItems.size();
+        return mItems.size();
     }
 
     @Override
