@@ -467,11 +467,11 @@ public class MainActivity extends LogoFragmentActivity  implements
 
         for(Channel channel: channels) {
             Bundle itemArgs = new Bundle();
-            itemArgs.putString("title", channel.getTitle(homeCampus));
-            itemArgs.putString("component", channel.getView());
-            if(!StringUtils.isBlank(channel.getApi())) itemArgs.putString("api", channel.getApi());
-            if(!StringUtils.isBlank(channel.getUrl())) itemArgs.putString("url", channel.getUrl());
-            if(channel.getData() != null) itemArgs.putString("data", channel.getData().toString());
+            itemArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
+            itemArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
+            if(!StringUtils.isBlank(channel.getApi())) itemArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
+            if(!StringUtils.isBlank(channel.getUrl())) itemArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+            if(channel.getData() != null) itemArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData().toString());
 
             RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
             // Try to find icon for this item and set it

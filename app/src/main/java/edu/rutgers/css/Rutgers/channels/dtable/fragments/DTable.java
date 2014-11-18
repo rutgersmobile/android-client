@@ -46,14 +46,15 @@ public class DTable extends Fragment {
     public static final String HANDLE = "dtable";
 
     /* Argument bundle tags */
-    private static final String ARG_TITLE_TAG = Config.PACKAGE_NAME + ".dtable.title";
-    private static final String ARG_API_TAG = Config.PACKAGE_NAME + ".dtable.api";
-    private static final String ARG_URL_TAG = Config.PACKAGE_NAME + ".dtable.url";
-    private static final String ARG_DATA_TAG = Config.PACKAGE_NAME + ".dtable.data";
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    private static final String ARG_HANDLE_TAG      = ComponentFactory.ARG_HANDLE_TAG;
+    private static final String ARG_API_TAG         = ComponentFactory.ARG_API_TAG;
+    private static final String ARG_URL_TAG         = ComponentFactory.ARG_URL_TAG;
+    private static final String ARG_DATA_TAG        = "dtable.data";
 
     /* Saved instance state tags */
-    private static final String SAVED_HANDLE_TAG = Config.PACKAGE_NAME + ".dtable.saved.handle";
-    private static final String SAVED_ROOT_TAG = Config.PACKAGE_NAME + ".dtable.saved.root";
+    private static final String SAVED_HANDLE_TAG    = Config.PACKAGE_NAME + ".dtable.saved.handle";
+    private static final String SAVED_ROOT_TAG      = Config.PACKAGE_NAME + ".dtable.saved.root";
 
     private DTableRoot mDRoot;
     private DTableAdapter mAdapter;
@@ -66,30 +67,31 @@ public class DTable extends Fragment {
     }
 
     /** Creates basic argument bundle - fields common to all bundles */
-    private static Bundle baseArgs(@NonNull String title) {
+    private static Bundle baseArgs(@NonNull String title, @NonNull String handle) {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, DTable.HANDLE);
         bundle.putString(ARG_TITLE_TAG, title);
+        bundle.putString(ARG_HANDLE_TAG, handle);
         return bundle;
     }
 
     /** Create argument bundle for a DTable that loads from a URL. */
-    public static Bundle createArgs(@NonNull String title, @NonNull URL url) {
-        Bundle bundle = baseArgs(title);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull URL url) {
+        Bundle bundle = baseArgs(title, handle);
         bundle.putString(ARG_URL_TAG, url.toString());
         return bundle;
     }
 
     /** Create argument bundle for a DTable that loads from the RUMobile API. */
-    public static Bundle createArgs(@NonNull String title, @NonNull String api) {
-        Bundle bundle = baseArgs(title);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull String api) {
+        Bundle bundle = baseArgs(title, handle);
         bundle.putString(ARG_API_TAG, api);
         return bundle;
     }
 
     /** Create argument bundle for a DTable that launches with pre-loaded table data. */
-    public static Bundle createArgs(@NonNull String title, @NonNull DTableRoot tableRoot) {
-        Bundle bundle = baseArgs(title);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull DTableRoot tableRoot) {
+        Bundle bundle = baseArgs(title, handle);
         bundle.putSerializable(ARG_DATA_TAG, tableRoot);
         return bundle;
     }
@@ -122,15 +124,15 @@ public class DTable extends Fragment {
         }
 
         // Get handle for this DTable instance
-        if(args.getString("handle") != null) mHandle = args.getString("handle");
-        else if(args.getString("api") != null) mHandle = args.getString("api").replace(".txt","");
-        else if(args.getString("title") != null) mHandle = args.getString("title");
+        if(args.getString(ARG_HANDLE_TAG) != null) mHandle = args.getString(ARG_HANDLE_TAG);
+        else if(args.getString(ARG_API_TAG) != null) mHandle = args.getString(ARG_API_TAG).replace(".txt","");
+        else if(args.getString(ARG_TITLE_TAG) != null) mHandle = args.getString(ARG_TITLE_TAG);
         else mHandle = "invalid";
 
         // If table data was provided in "data" field, load it
-        if (args.getSerializable("data") != null) {
+        if (args.getSerializable(ARG_DATA_TAG) != null) {
             try {
-                mDRoot = (DTableRoot) args.getSerializable("data");
+                mDRoot = (DTableRoot) args.getSerializable(ARG_DATA_TAG);
                 mAdapter.addAll(mDRoot.getChildren());
                 return;
             } catch (ClassCastException e) {
@@ -139,8 +141,8 @@ public class DTable extends Fragment {
         }
 
         // Otherwise, check for URL or API to load table from
-        else if (args.getString("url") != null) mURL = args.getString("url");
-        else if (args.getString("api") != null) mAPI = args.getString("api");
+        else if (args.getString(ARG_URL_TAG) != null) mURL = args.getString(ARG_URL_TAG);
+        else if (args.getString(ARG_API_TAG) != null) mAPI = args.getString(ARG_API_TAG);
         else {
             Log.e(dTag(), "DTable must have URL, API, or data in its arguments bundle");
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
@@ -180,13 +182,13 @@ public class DTable extends Fragment {
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
-        ListView listView = (ListView) v.findViewById(R.id.dtable_list);
 
         final Bundle args = getArguments();
-        if(args.getString("title") != null) {
-            getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) {
+            getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
-        
+
+        ListView listView = (ListView) v.findViewById(R.id.dtable_list);
         listView.setAdapter(mAdapter);
 
         final String homeCampus = RutgersUtils.getHomeCampus(getActivity());
@@ -199,7 +201,7 @@ public class DTable extends Fragment {
 
                 // DTable root - launch a new DTable
                 if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.CAT_TYPE.ordinal()) {
-                    Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), (DTableRoot) element);
+                    Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), mHandle + element.getTitle(homeCampus).replace(" ","_"), (DTableRoot) element);
                     ComponentFactory.getInstance().switchFragments(newArgs);
                 }
                 // FAQ button - toggle pop-down visibility
