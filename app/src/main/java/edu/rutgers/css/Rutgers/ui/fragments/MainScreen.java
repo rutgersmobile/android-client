@@ -14,6 +14,9 @@ import edu.rutgers.css.Rutgers2.R;
 
 public class MainScreen extends Fragment {
 
+    private static final String TAG = "MainScreen";
+    public static final String HANDLE = "mainfrag";
+
     public MainScreen() {
         // Required empty public constructor
     }

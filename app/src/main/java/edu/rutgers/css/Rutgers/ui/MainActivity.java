@@ -32,6 +32,7 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,7 +75,7 @@ public class MainActivity extends LogoFragmentActivity  implements
     private ActionBarDrawerToggle mDrawerToggle;
     private RMenuAdapter mDrawerAdapter;
 
-    private ArrayList<GooglePlayServicesClient.ConnectionCallbacks> mLocationListeners = new ArrayList<>(5);
+    private List<WeakReference<GooglePlayServicesClient.ConnectionCallbacks>> mLocationListeners = new ArrayList<>(5);
     
     /**
      * For providing the location client to fragments
@@ -109,9 +110,7 @@ public class MainActivity extends LogoFragmentActivity  implements
         }
         */
 
-        /*
-         * Set default settings the first time the app is run
-         */
+        // Set default settings the first time the app is run
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 
         // Check if this is the first time the app is being launched
@@ -130,26 +129,20 @@ public class MainActivity extends LogoFragmentActivity  implements
             prefs.edit().putBoolean(PrefUtils.KEY_PREFS_FIRST_LAUNCH, false).apply();
         }
 
-        /*
-         * Connect to Google Play location services
-         */
+        // Connect to Google Play location services
         mLocationClient = new LocationClient(this, this, this);
 
-        /*
-         * Set up channel manager
-         */
+        // Set up channel manager
         mChannelManager = new ChannelManager();
 
-        /*
-         * Set up nav drawer
-         */
         // Enable drawer icon
         if(getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
-        
-        ArrayList<RMenuRow> menuArray = new ArrayList<RMenuRow>();
+
+        // Set up nav drawer
+        ArrayList<RMenuRow> menuArray = new ArrayList<>();
         mDrawerAdapter = new RMenuAdapter(this, R.layout.row_drawer_item, R.layout.row_drawer_header, menuArray);
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -199,23 +192,15 @@ public class MainActivity extends LogoFragmentActivity  implements
 
         });
         
-        /*
-         * Load nav drawer items
-         */
-
-        // Set up channel items in drawer
+        // Load nav drawer items
         loadChannels();
-        
-        // Set up web shortcut items in drawer
         loadWebShortcuts();
         
-        /*
-         * Set up main screen
-         */
+        // Set up initial fragment
         FragmentManager fm = getSupportFragmentManager();
         if(fm.getBackStackEntryCount() == 0) {
             fm.beginTransaction()
-                .replace(R.id.main_content_frame, new MainScreen(), "mainfrag")
+                .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                 .commit();
         }
 
@@ -226,9 +211,10 @@ public class MainActivity extends LogoFragmentActivity  implements
         super.onStart();
         
         // Connect to location services when activity becomes visible
-        for(GooglePlayServicesClient.ConnectionCallbacks listener: mLocationListeners) {
-            mLocationClient.registerConnectionCallbacks(listener);
+        for(WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
+            if(listener.get() != null) mLocationClient.registerConnectionCallbacks(listener.get());
         }
+
         mLocationClient.connect();
     }
 
@@ -237,9 +223,10 @@ public class MainActivity extends LogoFragmentActivity  implements
         super.onStop();
 
         // Disconnect from location services when activity is no longer visible
-        for(GooglePlayServicesClient.ConnectionCallbacks listener: mLocationListeners) {
-            mLocationClient.unregisterConnectionCallbacks(listener);
+        for(WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
+            if(listener.get() != null) mLocationClient.unregisterConnectionCallbacks(listener.get());
         }
+
         mLocationClient.disconnect();
 
         // Attempt to flush analytics events to server
@@ -331,7 +318,7 @@ public class MainActivity extends LogoFragmentActivity  implements
      */
     @Override
     public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        mLocationListeners.add(listener);
+        mLocationListeners.add(new WeakReference<>(listener));
 
         if(mLocationClient != null) {
             mLocationClient.registerConnectionCallbacks(listener);
@@ -347,9 +334,13 @@ public class MainActivity extends LogoFragmentActivity  implements
      */
     @Override
     public void unregisterListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        if(mLocationListeners != null) {
-            mLocationListeners.remove(listener);
+        for(WeakReference<GooglePlayServicesClient.ConnectionCallbacks> curRef: mLocationListeners) {
+            if(curRef.get() == listener) {
+                mLocationListeners.remove(curRef);
+                break;
+            }
         }
+
         if(mLocationClient != null) {
             mLocationClient.unregisterConnectionCallbacks(listener);
             Log.d(TAG, "Unregistered location listener: " + listener.toString());
@@ -441,7 +432,7 @@ public class MainActivity extends LogoFragmentActivity  implements
     }
     
     /**
-     * Grab web links and add them to the menu.
+     * Grab web channel links and add them to the menu.
      */
     private void loadWebShortcuts() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -478,8 +469,8 @@ public class MainActivity extends LogoFragmentActivity  implements
             Bundle itemArgs = new Bundle();
             itemArgs.putString("title", channel.getTitle(homeCampus));
             itemArgs.putString("component", channel.getView());
-            if(!StringUtils.isEmpty(channel.getApi())) itemArgs.putString("api", channel.getApi());
-            if(!StringUtils.isEmpty(channel.getUrl())) itemArgs.putString("url", channel.getUrl());
+            if(!StringUtils.isBlank(channel.getApi())) itemArgs.putString("api", channel.getApi());
+            if(!StringUtils.isBlank(channel.getUrl())) itemArgs.putString("url", channel.getUrl());
             if(channel.getData() != null) itemArgs.putString("data", channel.getData().toString());
 
             RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
