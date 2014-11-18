@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import org.jdeferred.android.AndroidDeferredManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
@@ -30,40 +32,61 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class FoodMeal extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "FoodMeal";
     public static final String HANDLE = "foodmeal";
 
-    private List<RMenuRow> foodItems;
-    private RMenuAdapter foodItemAdapter;
+    /* Argument bundle tags */
+    private static final String ARG_LOCATION_TAG    = "location";
+    private static final String ARG_MEAL_TAG        = "meal";
+
+    /* Member data */
+    private RMenuAdapter mAdapter;
 
     public FoodMeal() {
         // Required empty public constructor
     }
-    
+
+    public static FoodMeal newInstance(@NonNull String location, @NonNull String meal) {
+        FoodMeal foodMeal = new FoodMeal();
+        Bundle args = createArgs(location, meal);
+        args.remove(ComponentFactory.ARG_COMPONENT_TAG);
+        foodMeal.setArguments(args);
+        return foodMeal;
+    }
+
+    public static Bundle createArgs(@NonNull String location, @NonNull String meal) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, FoodMeal.HANDLE);
+        bundle.putString(ARG_LOCATION_TAG, location);
+        bundle.putString(ARG_MEAL_TAG, meal);
+        return bundle;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
         
-        foodItems = new ArrayList<>();
-        foodItemAdapter = new RMenuAdapter(this.getActivity(), R.layout.row_title, R.layout.row_section_header, foodItems);
+        List<RMenuRow> foodItems = new ArrayList<>();
+        mAdapter = new RMenuAdapter(this.getActivity(), R.layout.row_title, R.layout.row_section_header, foodItems);
 
-        if(args.getString("location") == null) {
+        if(args.getString(ARG_LOCATION_TAG) == null) {
             Log.e(TAG, "Location not set");
             return;
-        } else if(args.getString("meal") == null) {
+        } else if(args.getString(ARG_MEAL_TAG) == null) {
             Log.e(TAG, "Meal not set");
             return;
         }
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(DiningAPI.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
+        dm.when(DiningAPI.getDiningLocation(args.getString(ARG_LOCATION_TAG))).done(new DoneCallback<DiningMenu>() {
 
             @Override
             public void onDone(DiningMenu diningMenu) {
-                DiningMenu.Meal meal = diningMenu.getMeal(args.getString("meal"));
+                DiningMenu.Meal meal = diningMenu.getMeal(args.getString(ARG_MEAL_TAG));
                 if (meal == null) {
-                    Log.e(TAG, "Meal \"" + args.getString("meal") + "\" not found");
+                    Log.e(TAG, "Meal \"" + args.getString(ARG_MEAL_TAG) + "\" not found");
                     return;
                 }
 
@@ -71,12 +94,12 @@ public class FoodMeal extends Fragment {
                 List<DiningMenu.Genre> mealGenres = meal.getGenres();
                 for (DiningMenu.Genre genre : mealGenres) {
                     // Add category header
-                    foodItemAdapter.add(new RMenuHeaderRow(genre.getGenreName()));
+                    mAdapter.add(new RMenuHeaderRow(genre.getGenreName()));
 
                     // Add food items
                     List<String> items = genre.getItems();
                     for (String item : items) {
-                        foodItemAdapter.add(new RMenuItemRow(item));
+                        mAdapter.add(new RMenuItemRow(item));
                     }
                 }
             }
@@ -99,7 +122,7 @@ public class FoodMeal extends Fragment {
         View v = inflater.inflate(R.layout.fragment_food_meal, container, false);
 
         ListView listView = (ListView) v.findViewById(R.id.food_meal_list);
-        listView.setAdapter(foodItemAdapter);
+        listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(null);
 
         return v;

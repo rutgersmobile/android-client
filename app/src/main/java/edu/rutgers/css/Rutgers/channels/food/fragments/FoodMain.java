@@ -8,9 +8,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
+import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
@@ -34,22 +37,38 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class FoodMain extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "FoodMain";
     public static final String HANDLE = "food";
 
-    private ArrayList<RMenuRow> mData;
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+
+    /* Member data */
     private RMenuAdapter mAdapter;
+    private boolean mLoading;
+
+    /* View references */
+    private ProgressBar mProgressCircle;
 
     public FoodMain() {
         // Required empty public constructor
+    }
+
+    /** Create argument bundle for dining hall listing. */
+    public static Bundle createArgs(String title) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, FoodMain.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        return bundle;
     }
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mData = new ArrayList<>(4);
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title_centered, R.layout.row_section_header_centered, mData);
+        List<RMenuRow> data = new ArrayList<>(4);
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title_centered, R.layout.row_section_header_centered, data);
 
         // Get user's home campus
         final String userHome = RutgersUtils.getHomeCampus(getActivity());
@@ -77,6 +96,7 @@ public class FoodMain extends Fragment {
         camRows.add(new RMenuItemRow(camRow));
 
         // Get dining hall data and populate the top-level menu with names of the dining halls
+        mLoading = true;
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(DiningAPI.getDiningHalls()).done(new DoneCallback<List<DiningMenu>>() {
 
@@ -121,38 +141,57 @@ public class FoodMain extends Fragment {
             public void onFail(Exception result) {
                 AppUtils.showFailedLoadToast(getActivity());
             }
+        }).always(new AlwaysCallback<List<DiningMenu>, Exception>() {
+            @Override
+            public void onAlways(Promise.State state, List<DiningMenu> resolved, Exception rejected) {
+                mLoading = false;
+                hideProgressCircle();
+            }
         });
     }
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
-        ListView listView = (ListView) v.findViewById(R.id.dining_locations_list);
-        Bundle args = getArguments();
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        if(mLoading) showProgressCircle();
+
+        final Bundle args = getArguments();
 
         // Set title from JSON
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.dining_title);
 
+        ListView listView = (ListView) v.findViewById(R.id.dining_locations_list);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
-                if(!(clickedRow instanceof RMenuItemRow)) return;
-
-                Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
-
-                Bundle hallArgs = new Bundle(clickedArgs);
-                hallArgs.putString("location", clickedArgs.getString("title"));
-                hallArgs.putString("component", FoodHall.HANDLE);
-
+                Bundle hallArgs = FoodHall.createArgs(clickedRow.getTitle());
                 ComponentFactory.getInstance().switchFragments(hallArgs);
             }
         });
         
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mProgressCircle = null;
+    }
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

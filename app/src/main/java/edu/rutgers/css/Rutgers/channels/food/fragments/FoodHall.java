@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import edu.rutgers.css.Rutgers.Config;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -32,18 +35,35 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class FoodHall extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "FoodHall";
     public static final String HANDLE = "foodhall";
 
-    private final static DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    private static final String ARG_LOCATION_TAG    = "location";
 
+    /* Saved instance state tags */
+    private static final String SAVED_DATA_TAG    = Config.PACKAGE_NAME + ".dtable.saved.data";
+
+    /* Member data */
+    private String mTitle;
     private String mLocation;
     private MealPagerAdapter mPagerAdapter;
     private DiningMenu mData;
-    private String mTitle;
+
+    private final static DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
 
     public FoodHall() {
         // Required empty public constructor
+    }
+
+    public static Bundle createArgs(@NonNull String location) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, FoodHall.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, location);
+        bundle.putString(ARG_LOCATION_TAG, location);
+        return bundle;
     }
 
     @Override
@@ -51,19 +71,19 @@ public class FoodHall extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        mLocation = args.getString("location");
+        mLocation = args.getString(ARG_LOCATION_TAG);
         if(mLocation == null) return;
 
         mPagerAdapter = new MealPagerAdapter(getChildFragmentManager());
 
         if(savedInstanceState != null) {
-            mData = (DiningMenu) savedInstanceState.getSerializable("mData");
+            mData = (DiningMenu) savedInstanceState.getSerializable(SAVED_DATA_TAG);
             loadPages(mData);
             return;
         }
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(DiningAPI.getDiningLocation(args.getString("location"))).done(new DoneCallback<DiningMenu>() {
+        dm.when(DiningAPI.getDiningLocation(args.getString(ARG_LOCATION_TAG))).done(new DoneCallback<DiningMenu>() {
             @Override
             public void onDone(DiningMenu hall) {
                 mData = hall;
@@ -84,8 +104,8 @@ public class FoodHall extends Fragment {
 
         if(mTitle != null) {
             getActivity().setTitle(mTitle);
-        } else if(args.getString("location") != null) {
-            getActivity().setTitle(args.getString("location"));
+        } else if(args.getString(ARG_LOCATION_TAG) != null) {
+            getActivity().setTitle(args.getString(ARG_LOCATION_TAG));
         } else {
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Location not set");
@@ -101,7 +121,7 @@ public class FoodHall extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mData != null) outState.putSerializable("mData", mData);
+        if(mData != null) outState.putSerializable(SAVED_DATA_TAG, mData);
     }
 
     private void loadPages(DiningMenu diningMenu) {
@@ -130,15 +150,7 @@ public class FoodHall extends Fragment {
         public Fragment getItem(int i) {
             DiningMenu.Meal curMeal = mData.get(i);
             String mealName = curMeal.getMealName();
-
-            Bundle tabArgs = new Bundle();
-            tabArgs.putString("location", mLocation);
-            tabArgs.putString("meal", mealName);
-
-            Fragment fragment = new FoodMeal();
-            fragment.setArguments(tabArgs);
-
-            return fragment;
+            return FoodMeal.newInstance(mLocation, mealName);
         }
 
         @Override
