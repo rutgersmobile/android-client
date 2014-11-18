@@ -47,6 +47,12 @@ public final class ComponentFactory {
 
     private static final String TAG = "ComponentFactory";
 
+    public static final String ARG_COMPONENT_TAG = "component";
+    public static final String ARG_TITLE_TAG = "title";
+    public static final String ARG_DATA_TAG = "data";
+    public static final String ARG_URL_TAG = "url";
+    public static final String ARG_COUNT_TAG = "count";
+
     private static ComponentFactory sSingletonInstance;
     private static WeakReference<FragmentActivity> sMainActivity;
 
@@ -197,7 +203,7 @@ public final class ComponentFactory {
      */
     public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {
         if(sMainActivity.get() == null) {
-            Log.e(TAG, "switchFragments(): Reference to main activity is null");
+            Log.e(TAG, "switchFragments(): Reference to main activity lost");
             return;
         }
 

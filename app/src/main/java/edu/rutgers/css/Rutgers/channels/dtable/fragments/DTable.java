@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,9 +45,15 @@ public class DTable extends Fragment {
     private static final String TAG = "DTable";
     public static final String HANDLE = "dtable";
 
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG = Config.PACKAGE_NAME + ".dtable.title";
+    private static final String ARG_API_TAG = Config.PACKAGE_NAME + ".dtable.api";
+    private static final String ARG_URL_TAG = Config.PACKAGE_NAME + ".dtable.url";
+    private static final String ARG_DATA_TAG = Config.PACKAGE_NAME + ".dtable.data";
+
     /* Saved instance state tags */
-    private static final String SAVED_HANDLE_TAG = Config.PACKAGE_NAME + ".dtable.handle";
-    private static final String SAVED_ROOT_TAG = Config.PACKAGE_NAME + ".dtable.root";
+    private static final String SAVED_HANDLE_TAG = Config.PACKAGE_NAME + ".dtable.saved.handle";
+    private static final String SAVED_ROOT_TAG = Config.PACKAGE_NAME + ".dtable.saved.root";
 
     private DTableRoot mDRoot;
     private DTableAdapter mAdapter;
@@ -55,6 +63,35 @@ public class DTable extends Fragment {
 
     public DTable() {
         // Required empty public constructor
+    }
+
+    /** Creates basic argument bundle - fields common to all bundles */
+    private static Bundle baseArgs(@NonNull String title) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, DTable.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        return bundle;
+    }
+
+    /** Create argument bundle for a DTable that loads from a URL. */
+    public static Bundle createArgs(@NonNull String title, @NonNull URL url) {
+        Bundle bundle = baseArgs(title);
+        bundle.putString(ARG_URL_TAG, url.toString());
+        return bundle;
+    }
+
+    /** Create argument bundle for a DTable that loads from the RUMobile API. */
+    public static Bundle createArgs(@NonNull String title, @NonNull String api) {
+        Bundle bundle = baseArgs(title);
+        bundle.putString(ARG_API_TAG, api);
+        return bundle;
+    }
+
+    /** Create argument bundle for a DTable that launches with pre-loaded table data. */
+    public static Bundle createArgs(@NonNull String title, @NonNull DTableRoot tableRoot) {
+        Bundle bundle = baseArgs(title);
+        bundle.putSerializable(ARG_DATA_TAG, tableRoot);
+        return bundle;
     }
 
     /**
@@ -75,8 +112,9 @@ public class DTable extends Fragment {
         List<DTableElement> data = new ArrayList<>();
         mAdapter = new DTableAdapter(getActivity(), data);
 
+        // If recreating, restore state
         if(savedInstanceState != null && savedInstanceState.getSerializable(SAVED_ROOT_TAG) != null) {
-            Log.v(dTag(), "Restoring mData");
+            Log.d(dTag(), "Restoring mData");
             mHandle = savedInstanceState.getString(SAVED_HANDLE_TAG);
             mDRoot = (DTableRoot) savedInstanceState.getSerializable(SAVED_ROOT_TAG);
             mAdapter.addAll(mDRoot.getChildren());
@@ -87,9 +125,9 @@ public class DTable extends Fragment {
         if(args.getString("handle") != null) mHandle = args.getString("handle");
         else if(args.getString("api") != null) mHandle = args.getString("api").replace(".txt","");
         else if(args.getString("title") != null) mHandle = args.getString("title");
-        else mHandle = "null";
+        else mHandle = "invalid";
 
-        // If a JSON array was provided in "data" field, load it
+        // If table data was provided in "data" field, load it
         if (args.getSerializable("data") != null) {
             try {
                 mDRoot = (DTableRoot) args.getSerializable("data");
@@ -100,7 +138,7 @@ public class DTable extends Fragment {
             }
         }
 
-        // Otherwise, check for URL or API argument
+        // Otherwise, check for URL or API to load table from
         else if (args.getString("url") != null) mURL = args.getString("url");
         else if (args.getString("api") != null) mAPI = args.getString("api");
         else {
@@ -152,41 +190,36 @@ public class DTable extends Fragment {
         listView.setAdapter(mAdapter);
 
         final String homeCampus = RutgersUtils.getHomeCampus(getActivity());
-        
-        // Clicks on DTable item launch component in "view" field with arguments
+
         listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 DTableElement element = (DTableElement) parent.getAdapter().getItem(position);
-                Bundle newArgs = new Bundle();
 
-                // This is another DTable root
+                // DTable root - launch a new DTable
                 if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.CAT_TYPE.ordinal()) {
-                    newArgs.putString("component", "dtable");
-                    newArgs.putString("title", element.getTitle(homeCampus));
-                    newArgs.putSerializable("data", element);
+                    Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), (DTableRoot) element);
+                    ComponentFactory.getInstance().switchFragments(newArgs);
                 }
-                // This is a FAQ button
+                // FAQ button - toggle pop-down visibility
                 else if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
-                    // Toggle pop-down visibility
                     mAdapter.togglePopdown(position);
-                    return;
                 }
-                // This object has a channel
+                // Channel row - launch channel
                 else {
                     DTableChannel channel = (DTableChannel) element;
+                    Bundle newArgs = new Bundle();
                     // Must have view and title set to launch a channel
-                    newArgs.putString("component", channel.getView());
-                    newArgs.putString("title", channel.getChannelTitle(homeCampus));
+                    newArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
+                    newArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getChannelTitle(homeCampus));
 
-                    // Add the rest of the fields to the arg bundle
-                    if(channel.getUrl() != null) newArgs.putString("url", channel.getUrl());
-                    if(channel.getData() != null) newArgs.putString("data", channel.getData());
-                    if(channel.getCount() > 0) newArgs.putInt("count", channel.getCount());
+                    // Add optional fields to the arg bundle
+                    if(channel.getUrl() != null) newArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+                    if(channel.getData() != null) newArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
+                    if(channel.getCount() > 0) newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
+                    ComponentFactory.getInstance().switchFragments(newArgs);
                 }
-
-                ComponentFactory.getInstance().switchFragments(newArgs);
             }
 
         });
