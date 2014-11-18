@@ -10,10 +10,12 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
@@ -41,7 +43,8 @@ import edu.rutgers.css.Rutgers2.R;
  * <p>Use {@link #dTag()} instead of TAG when logging</p>
  */
 public class DTable extends Fragment {
-    
+
+    /* Log tag and component handle */
     private static final String TAG = "DTable";
     public static final String HANDLE = "dtable";
 
@@ -56,11 +59,16 @@ public class DTable extends Fragment {
     private static final String SAVED_HANDLE_TAG    = Config.PACKAGE_NAME + ".dtable.saved.handle";
     private static final String SAVED_ROOT_TAG      = Config.PACKAGE_NAME + ".dtable.saved.root";
 
+    /* Member data */
     private DTableRoot mDRoot;
     private DTableAdapter mAdapter;
     private String mURL;
     private String mAPI;
     private String mHandle;
+    private boolean mLoading;
+
+    /* View references */
+    private ProgressBar mProgressCircle;
 
     public DTable() {
         // Required empty public constructor
@@ -97,7 +105,7 @@ public class DTable extends Fragment {
     }
 
     /**
-     * Get descriptive DTable tag to use for logging.
+     * Get channel-specific DTable tag to use for logging.
      * @return DTable tag combined with current handle, if possible
      */
     private String dTag() {
@@ -116,10 +124,10 @@ public class DTable extends Fragment {
 
         // If recreating, restore state
         if(savedInstanceState != null && savedInstanceState.getSerializable(SAVED_ROOT_TAG) != null) {
-            Log.d(dTag(), "Restoring mData");
             mHandle = savedInstanceState.getString(SAVED_HANDLE_TAG);
             mDRoot = (DTableRoot) savedInstanceState.getSerializable(SAVED_ROOT_TAG);
             mAdapter.addAll(mDRoot.getChildren());
+            Log.d(dTag(), "Restoring mData");
             return;
         }
 
@@ -153,6 +161,8 @@ public class DTable extends Fragment {
                 (mURL != null) ? Request.json(mURL, Request.CACHE_ONE_HOUR) :
                                  Request.api(mAPI, Request.CACHE_ONE_HOUR);
 
+        mLoading = true;
+
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(promise).done(new DoneCallback<JSONObject>() {
 
@@ -176,12 +186,21 @@ public class DTable extends Fragment {
                 AppUtils.showFailedLoadToast(getActivity());
             }
 
+        }).always(new AlwaysCallback<JSONObject, AjaxStatus>() {
+            @Override
+            public void onAlways(Promise.State state, JSONObject resolved, AjaxStatus rejected) {
+                mLoading = false;
+                hideProgressCircle();
+            }
         });
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        if(mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
         if(args.getString(ARG_TITLE_TAG) != null) {
@@ -201,7 +220,8 @@ public class DTable extends Fragment {
 
                 // DTable root - launch a new DTable
                 if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.CAT_TYPE.ordinal()) {
-                    Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), mHandle + element.getTitle(homeCampus).replace(" ","_"), (DTableRoot) element);
+                    String newHandle = mHandle+"_"+element.getTitle(homeCampus).replace(" ","_").toLowerCase();
+                    Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), newHandle, (DTableRoot) element);
                     ComponentFactory.getInstance().switchFragments(newArgs);
                 }
                 // FAQ button - toggle pop-down visibility
@@ -238,6 +258,22 @@ public class DTable extends Fragment {
             outState.putSerializable(SAVED_ROOT_TAG, mDRoot);
             outState.putString(SAVED_HANDLE_TAG, mHandle);
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mProgressCircle = null;
+    }
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }
