@@ -75,7 +75,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                 // Replace the stub data
                 final ScheduleAdapter scheduleAdapter = this;
                 AndroidDeferredManager dm = new AndroidDeferredManager();
-                dm.when(Schedule.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), course.getSubject(), course.getCourseNumber())).done(new DoneCallback<Course>() {
+                dm.when(ScheduleAPI.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), course.getSubject(), course.getCourseNumber())).done(new DoneCallback<Course>() {
                     @Override
                     public void onDone(Course result) {
                         course.updateFields(result);

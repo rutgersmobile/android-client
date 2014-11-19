@@ -34,7 +34,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.SOCIndex;
-import edu.rutgers.css.Rutgers.channels.soc.model.Schedule;
+import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
@@ -76,8 +76,8 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         defaultSettings(sharedPref);
-        mLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
-        mCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
+        mLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
+        mCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
         mSemester = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null);
 
         // Register settings listener
@@ -90,7 +90,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
         // Get the available & current semesters
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Schedule.getSemesters()).done(new DoneCallback<Semesters>() {
+        dm.when(ScheduleAPI.getSemesters()).done(new DoneCallback<Semesters>() {
             @Override
             public void onDone(Semesters result) {
                 int defaultIndex = result.getDefaultSemester();
@@ -115,9 +115,9 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
                 if(BuildConfig.DEBUG) {
                     for(String semester: mSemesters) {
-                        Log.v(TAG, "Got semester: " + Schedule.translateSemester(semester));
+                        Log.v(TAG, "Got semester: " + ScheduleAPI.translateSemester(semester));
                     }
-                    Log.v(TAG, "Default semester: " + Schedule.translateSemester(mDefaultSemester));
+                    Log.v(TAG, "Default semester: " + ScheduleAPI.translateSemester(mDefaultSemester));
                 }
 
                 // Campus, level, and semester have been set.
@@ -237,13 +237,13 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
             String temp;
 
-            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, Schedule.CODE_CAMPUS_NB);
+            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
             if(!mCampus.equals(temp)) {
                 somethingChanged = true;
                 mCampus = temp;
             }
 
-            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, Schedule.CODE_LEVEL_UNDERGRAD);
+            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
             if(!mLevel.equals(temp)) {
                 somethingChanged = true;
                 mLevel = temp;
@@ -269,7 +269,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         // Only change title if SOC Main fragment or schedule selection dialog is on screen
         if(!isAdded() || !(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
         if(mSemester == null) getActivity().setTitle(R.string.soc_title);
-        else getActivity().setTitle(Schedule.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
+        else getActivity().setTitle(ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
 
     /**
@@ -298,7 +298,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
         // Get index & list of subjects
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Schedule.getIndex(mSemester, mCampus, mLevel),  Schedule.getSubjects(mCampus, mLevel, mSemester)).done(new DoneCallback<MultipleResults>() {
+        dm.when(ScheduleAPI.getIndex(mSemester, mCampus, mLevel),  ScheduleAPI.getSubjects(mCampus, mLevel, mSemester)).done(new DoneCallback<MultipleResults>() {
 
             @Override
             public void onDone(MultipleResults results) {
@@ -345,15 +345,15 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         String userLevel = sharedPref.getString(PrefUtils.KEY_PREF_USER_TYPE, getString(R.string.role_undergrad_tag));
 
         // Pick default campus code based on prefs (fall back to New Brunswick)
-        if(userHome.equals(getString(R.string.campus_nb_tag))) campus = Schedule.CODE_CAMPUS_NB;
-        else if(userHome.equals(getString(R.string.campus_nwk_tag))) campus = Schedule.CODE_CAMPUS_NWK;
-        else if(userHome.equals(getString(R.string.campus_cam_tag))) campus = Schedule.CODE_CAMPUS_CAM;
-        else campus = Schedule.CODE_CAMPUS_NB;
+        if(userHome.equals(getString(R.string.campus_nb_tag))) campus = ScheduleAPI.CODE_CAMPUS_NB;
+        else if(userHome.equals(getString(R.string.campus_nwk_tag))) campus = ScheduleAPI.CODE_CAMPUS_NWK;
+        else if(userHome.equals(getString(R.string.campus_cam_tag))) campus = ScheduleAPI.CODE_CAMPUS_CAM;
+        else campus = ScheduleAPI.CODE_CAMPUS_NB;
 
         // Pick default user-level code based on prefs (fall back to Undergrad)
-        if(userLevel.equals(getString(R.string.role_undergrad_tag))) level = Schedule.CODE_LEVEL_UNDERGRAD;
-        else if(userLevel.equals(getString(R.string.role_grad_tag))) level = Schedule.CODE_LEVEL_GRAD;
-        else level = Schedule.CODE_LEVEL_UNDERGRAD;
+        if(userLevel.equals(getString(R.string.role_undergrad_tag))) level = ScheduleAPI.CODE_LEVEL_UNDERGRAD;
+        else if(userLevel.equals(getString(R.string.role_grad_tag))) level = ScheduleAPI.CODE_LEVEL_GRAD;
+        else level = ScheduleAPI.CODE_LEVEL_UNDERGRAD;
 
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, campus);

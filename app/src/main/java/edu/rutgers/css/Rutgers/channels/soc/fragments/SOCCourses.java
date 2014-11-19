@@ -24,7 +24,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
-import edu.rutgers.css.Rutgers.channels.soc.model.Schedule;
+import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -65,7 +65,7 @@ public class SOCCourses extends Fragment {
         final String subjectCode = args.getString("subjectCode");
 
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Schedule.getCourses(campus, level, semester, subjectCode)).done(new DoneCallback<List<Course>>() {
+        dm.when(ScheduleAPI.getCourses(campus, level, semester, subjectCode)).done(new DoneCallback<List<Course>>() {
 
             @Override
             public void onDone(List<Course> result) {

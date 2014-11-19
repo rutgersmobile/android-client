@@ -21,7 +21,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
-import edu.rutgers.css.Rutgers.channels.soc.model.Schedule;
+import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
 import edu.rutgers.css.Rutgers.channels.soc.model.Section;
 import edu.rutgers.css.Rutgers.channels.soc.model.SectionAdapterItem;
@@ -113,7 +113,7 @@ public class SOCSections extends Fragment {
 
                     if(StringUtils.isNotBlank(section.getIndex()) && semester != null) {
                         String index = StringUtils.trim(section.getIndex());
-                        Schedule.openRegistrationWindow(semester, index);
+                        ScheduleAPI.openRegistrationWindow(semester, index);
                     } else {
                         Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
                         Log.w(TAG, "Section had no index field. Failed to launch webreg.");

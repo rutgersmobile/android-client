@@ -28,7 +28,7 @@ public class Course extends ScheduleAdapterItem {
     }
 
     /** Used for filling in stub course info. */
-    public void updateFields(@NonNull Course other) {
+    protected void updateFields(@NonNull Course other) {
         if(other.isStub()) throw new IllegalArgumentException("Can't update using a stub course");
         this.title = other.getTitle();
         this.subject = other.getSubject();

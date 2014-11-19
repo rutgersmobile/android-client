@@ -27,7 +27,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 /**
  * Schedule of Classes API
  */
-public final class Schedule {
+public final class ScheduleAPI {
 
     private static final String TAG = "ScheduleAPI";
     private static final String SOC_BASE_URL = "https://sis.rutgers.edu/soc/";
@@ -43,7 +43,7 @@ public final class Schedule {
     public static final String CODE_LEVEL_UNDERGRAD = "U";
     public static final String CODE_LEVEL_GRAD = "G";
 
-    private Schedule() {}
+    private ScheduleAPI() {}
 
     /**
      * Get current semester configuration from API.
