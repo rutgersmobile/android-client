@@ -50,7 +50,7 @@ public class PlacesDisplay extends Fragment {
     private static final String TAG = "PlacesDisplay";
     public static final String HANDLE = "placesdisplay";
 
-    private static final String ID_KEY = "id";
+    private static final String ID_KEY = "places.row.id";
     private static final int ADDRESS_ROW = 0;
     private static final int DESC_ROW = 1;
     private static final int BUS_ROW = 2;
@@ -149,7 +149,6 @@ public class PlacesDisplay extends Fragment {
                     Bundle descArgs = new Bundle();
                     descArgs.putInt(ID_KEY, DESC_ROW);
                     descArgs.putString("title", StringUtils.abbreviate(mPlace.getDescription(), 80));
-                    descArgs.putString("component", TextDisplay.HANDLE);
                     descArgs.putString("data", mPlace.getDescription());
                     mAdapter.add(new RMenuHeaderRow(descriptionHeader));
                     mAdapter.add(new RMenuItemRow(descArgs));
@@ -252,18 +251,18 @@ public class PlacesDisplay extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
-                Bundle newArgs = new Bundle(clicked.getArgs());
 
-                switch(newArgs.getInt(ID_KEY)) {
+                switch(clicked.getArgs().getInt(ID_KEY)) {
                     case ADDRESS_ROW:
                         launchMap();
                         break;
                     case DESC_ROW:
-                        newArgs.putString("title", mPlace.getTitle());
-                        ComponentFactory.getInstance().switchFragments(newArgs);
+                        Bundle textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
+                        ComponentFactory.getInstance().switchFragments(textArgs);
                         break;
                     case BUS_ROW:
-                        ComponentFactory.getInstance().switchFragments(newArgs);
+                        Bundle busArgs = new Bundle(clicked.getArgs());
+                        ComponentFactory.getInstance().switchFragments(busArgs);
                         break;
                 }
             }

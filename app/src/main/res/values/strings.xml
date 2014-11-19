@@ -20,6 +20,7 @@
     <string name="failed_load_short">Network error.</string>
     <string name="failed_location">Couldn\'t get location.</string>
     <string name="failed_no_url">No URL supplied.</string>
+    <string name="failed_no_text">No text supplied.</string>
     <string name="failed_internal">Internal error.</string>
     <string name="failed_uri">Couldn\'t find an activity to handle URI %1$s</string>
     <string name="failed_no_activity">No appropriate app found.</string>
@@ -172,6 +173,7 @@
     <string name="ralumni_title">R Alumni</string>
     <string name="sakai_title">Sakai</string>
     <string name="stud_life_title">Student Life</string>
+    <string name="text_title">Text Display</string>
 
     <!-- Web display -->
     <string name="www_handle_uri">Launching activity for %1$s</string>

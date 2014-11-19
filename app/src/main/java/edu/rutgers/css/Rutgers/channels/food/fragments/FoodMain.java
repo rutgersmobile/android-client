@@ -79,18 +79,12 @@ public class FoodMain extends Fragment {
         final String camCampusFullString = getString(R.string.campus_cam_full);
 
         // Static dining entries
-        Bundle nwkRow = new Bundle();
-        nwkRow.putString("component", TextDisplay.HANDLE);
-        nwkRow.putString("title", getString(R.string.dining_stonsby_title));
-        nwkRow.putString("data", getString(R.string.dining_stonsby_description));
+        Bundle nwkRow = TextDisplay.createArgs(getString(R.string.dining_stonsby_title), getString(R.string.dining_stonsby_description));
         final ArrayList<RMenuRow> nwkRows = new ArrayList<>(2);
         nwkRows.add(new RMenuHeaderRow(nwkCampusFullString));
         nwkRows.add(new RMenuItemRow(nwkRow));
 
-        Bundle camRow = new Bundle();
-        camRow.putString("component", TextDisplay.HANDLE);
-        camRow.putString("title", getString(R.string.dining_gateway_title));
-        camRow.putString("data", getString(R.string.dining_gateway_description));
+        Bundle camRow = TextDisplay.createArgs(getString(R.string.dining_gateway_title), getString(R.string.dining_gateway_description));
         final ArrayList<RMenuRow> camRows = new ArrayList<>(2);
         camRows.add(new RMenuHeaderRow(camCampusFullString));
         camRows.add(new RMenuItemRow(camRow));
@@ -108,7 +102,7 @@ public class FoodMain extends Fragment {
 
                 // Add dining halls - if they have no active meals, make them unclickable
                 for (DiningMenu diningMenu : diningMenus) {
-                    RMenuItemRow menuItemRow = new RMenuItemRow(diningMenu.getLocationName());
+                    RMenuItemRow menuItemRow = new RMenuItemRow(FoodHall.createArgs(diningMenu.getLocationName()));
 
                     if (!diningMenu.hasActiveMeals()) {
                         menuItemRow.setClickable(false);
@@ -170,8 +164,9 @@ public class FoodMain extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
-                Bundle hallArgs = FoodHall.createArgs(clickedRow.getTitle());
-                ComponentFactory.getInstance().switchFragments(hallArgs);
+                if(clickedRow instanceof RMenuItemRow) {
+                    ComponentFactory.getInstance().switchFragments(((RMenuItemRow) clickedRow).getArgs());
+                }
             }
         });
         
