@@ -16,18 +16,19 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
     private PopupWindow mLogoPopup;
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         showLogoOverlay(mRootLayoutId);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         dismissLogoOverlay();
     }
 
-    public void setLogoRootLayoutId(int rootLayoutId) {
+    /** Define the ID of the root layout for this activity's content view. */
+    protected void setLogoRootLayoutId(int rootLayoutId) {
         mRootLayoutId = rootLayoutId;
     }
 
@@ -49,21 +50,19 @@ public abstract class LogoFragmentActivity extends FragmentActivity {
         final View actionBarView = decorView.findViewById(getResources().getIdentifier("action_bar_container", "id", "android"));
         final TextView actionBarTitle = (TextView) decorView.findViewById(getResources().getIdentifier("action_bar_title", "id", "android"));
 
-        // Post an event so that after the layouts are drawn, a popup containing the logo displays
-        // over the normal action bar icon. Then add padding to the title so that it's not obscured
-        // by the logo popup.
+        /* Post an event so that after the layouts are drawn, a popup containing the logo displays
+         * over the normal action bar icon. Then add padding to the title so that it's not obscured
+         * by the logo popup.*/
         findViewById(rootLayoutId).post(new Runnable() {
             public void run() {
                 // Don't execute if activity is finishing/not running
                 if(isFinishing() || actionBarView.getWindowToken() == null) return;
+                dismissLogoOverlay();
 
-                int side = actionBarView.getHeight();
-
-                /*
-                 * The logo is split in half where the banner tapers off and transparency begins
+                /* The logo is split in half where the banner tapers off and transparency begins
                  * so that the opaque section is flush with the action bar and the transparent
-                 * area hangs down past it. This is why height is set to twice that of the bar.
-                 */
+                 * area hangs down past it. This is why height is set to twice that of the bar. */
+                int side = actionBarView.getHeight();
                 mLogoPopup = new PopupWindow(logoLayout, side+16, side*2, false);
                 mLogoPopup.showAsDropDown(actionBarView, (int) home.getX(), -side);
 
