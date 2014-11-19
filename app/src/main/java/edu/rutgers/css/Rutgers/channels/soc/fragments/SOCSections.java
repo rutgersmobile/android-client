@@ -49,7 +49,7 @@ public class SOCSections extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        List<SectionAdapterItem> data = new ArrayList<SectionAdapterItem>();
+        List<SectionAdapterItem> data = new ArrayList<>();
         mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, data);
 
         Gson gson = new Gson();
@@ -104,10 +104,7 @@ public class SOCSections extends Fragment {
                     ScheduleText scheduleText = (ScheduleText) clickedItem;
 
                     if(scheduleText.getType().equals(ScheduleText.TextType.PREREQS)) {
-                        Bundle newArgs = new Bundle();
-                        newArgs.putString("component", TextDisplay.HANDLE);
-                        newArgs.putString("title", mCourse.getSubject()+":"+mCourse.getCourseNumber()+" Prerequisites");
-                        newArgs.putString("data", mCourse.getPreReqNotes());
+                        Bundle newArgs = TextDisplay.createArgs(mCourse.getSubject()+":"+mCourse.getCourseNumber()+" Prerequisites", mCourse.getPreReqNotes());
                         ComponentFactory.getInstance().switchFragments(newArgs);
                         return;
                     }

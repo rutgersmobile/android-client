@@ -141,9 +141,7 @@ public class RecreationDisplay extends Fragment {
                         break;
 
                     case DESCRIPTION_ROW:
-                        Bundle descArgs = new Bundle(clickedArgs);
-                        descArgs.putString("title", args.getString("title"));
-                        descArgs.putString("component", TextDisplay.HANDLE);
+                        Bundle descArgs = TextDisplay.createArgs(args.getString("title"), clickedArgs.getString("data"));
                         ComponentFactory.getInstance().switchFragments(descArgs);
                         break;
 
