@@ -82,7 +82,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         mSubjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
         mSubjectSpinner.setOnItemSelectedListener(this);
 
-        mChannelSpinnerAdapter = new SpinnerAdapterImpl<String>(getActivity(), android.R.layout.simple_spinner_item);
+        mChannelSpinnerAdapter = new SpinnerAdapterImpl<>(getActivity(), android.R.layout.simple_spinner_item);
         mChannelSpinner = (Spinner) v.findViewById(R.id.channelSpinner);
         mChannelSpinner.setAdapter(mChannelSpinnerAdapter);
 
@@ -123,7 +123,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         }
         
         // Build POST request
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("subject", mSubjectSpinner.getSelectedItem());
         params.put("email", mEmailEditText.getText().toString());
         params.put("uuid", AppUtils.getUUID(getActivity().getApplicationContext()) + "@android");

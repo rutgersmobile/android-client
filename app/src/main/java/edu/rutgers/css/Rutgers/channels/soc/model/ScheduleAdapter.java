@@ -165,14 +165,14 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                         filterResults.count = 0;
                         return filterResults;
                     } else {
-                        mOriginalList = new ArrayList<ScheduleAdapterItem>(mList);
+                        mOriginalList = new ArrayList<>(mList);
                     }
                 }
 
-                tempList = new ArrayList<ScheduleAdapterItem>(mOriginalList);
+                tempList = new ArrayList<>(mOriginalList);
             }
 
-            ArrayList<ScheduleAdapterItem> passed = new ArrayList<ScheduleAdapterItem>();
+            ArrayList<ScheduleAdapterItem> passed = new ArrayList<>();
             String query = constraint.toString().trim();
 
             // Consult the INDEX!!!

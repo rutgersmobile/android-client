@@ -238,7 +238,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
      * @return Meeting times sorted by day
      */
     private List<Section.MeetingTime> sortMeetingTimes(@NonNull List<Section.MeetingTime> meetingTimes) {
-        List<Section.MeetingTime> result = new ArrayList<Section.MeetingTime>(meetingTimes);
+        List<Section.MeetingTime> result = new ArrayList<>(meetingTimes);
 
         Comparator<Section.MeetingTime> meetingTimeComparator = new Comparator<Section.MeetingTime>() {
 

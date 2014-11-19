@@ -70,7 +70,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        List<ScheduleAdapterItem> data = new ArrayList<ScheduleAdapterItem>();
+        List<ScheduleAdapterItem> data = new ArrayList<>();
         mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, data);
 
         // Load up schedule settings
@@ -281,7 +281,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             return;
         }
 
-        ArrayList<String> semestersList = new ArrayList<String>(mSemesters);
+        ArrayList<String> semestersList = new ArrayList<>(mSemesters);
 
         DialogFragment newDialogFragment = SOCDialogFragment.newInstance(semestersList);
         ComponentFactory.getInstance().showDialogFragment(newDialogFragment, SOCDialogFragment.HANDLE);

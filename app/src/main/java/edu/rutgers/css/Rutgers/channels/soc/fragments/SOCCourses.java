@@ -51,7 +51,7 @@ public class SOCCourses extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        List<ScheduleAdapterItem> data = new ArrayList<ScheduleAdapterItem>();
+        List<ScheduleAdapterItem> data = new ArrayList<>();
         mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, data);
 
         // Restore filter

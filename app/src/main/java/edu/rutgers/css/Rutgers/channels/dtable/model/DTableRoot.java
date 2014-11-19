@@ -25,7 +25,7 @@ public class DTableRoot extends DTableElement {
         window = jsonObject.optBoolean("window");
 
         JSONArray childrenJson = jsonObject.getJSONArray("children");
-        children = new ArrayList<DTableElement>(childrenJson.length());
+        children = new ArrayList<>(childrenJson.length());
 
         for(int i = 0; i < childrenJson.length(); i++) {
             JSONObject child = childrenJson.getJSONObject(i);
