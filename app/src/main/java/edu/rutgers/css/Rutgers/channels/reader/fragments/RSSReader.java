@@ -10,13 +10,16 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
+import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
@@ -34,7 +37,7 @@ import edu.rutgers.css.Rutgers2.R;
 /**
  * RSS feed reader
  */
-public class RSSReader extends Fragment implements OnItemClickListener {
+public class RSSReader extends Fragment {
 
     /* Log tag and component handle */
     private static final String TAG = "RSSReader";
@@ -53,6 +56,10 @@ public class RSSReader extends Fragment implements OnItemClickListener {
     /* Member data */
     private ArrayList<RSSItem> mData;
     private RSSAdapter mAdapter;
+    private boolean mLoading;
+
+    /* View references */
+    private ProgressBar mProgressCircle;
     
     public RSSReader() {
         // Required empty public constructor
@@ -82,12 +89,13 @@ public class RSSReader extends Fragment implements OnItemClickListener {
         }
 
         if(args.getString(ARG_URL_TAG) == null) {
-            Log.e(TAG, "RSS feed URL was not set");
+            Log.e(TAG, "URL argument not set");
             Toast.makeText(getActivity(), R.string.failed_no_url, Toast.LENGTH_SHORT).show();
             return;
         }
         
-        // Get RSS feed XML and add items through the array adapter\
+        // Get RSS feed XML and add items through the array adapter
+        mLoading = true;
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(Request.xml(args.getString(ARG_URL_TAG), RSSReader.EXPIRE)).done(new DoneCallback<XmlDom>() {
             
@@ -109,6 +117,12 @@ public class RSSReader extends Fragment implements OnItemClickListener {
                 AppUtils.showFailedLoadToast(getActivity());
             }
 
+        }).always(new AlwaysCallback<XmlDom, AjaxStatus>() {
+            @Override
+            public void onAlways(Promise.State state, XmlDom resolved, AjaxStatus rejected) {
+                mLoading = false;
+                hideProgressCircle();
+            }
         });
     }
 
@@ -116,11 +130,10 @@ public class RSSReader extends Fragment implements OnItemClickListener {
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_rss_reader, parent, false);
 
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        if(mLoading) showProgressCircle();
+
         final Bundle args = getArguments();
-        
-        Log.v(TAG, "RSS Reader launched for " + args.getString(ARG_URL_TAG));
-        
-        // Sets title to name of the RSS feed being displayed
         if(args.getString(ARG_TITLE_TAG) != null) {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
@@ -128,7 +141,21 @@ public class RSSReader extends Fragment implements OnItemClickListener {
         // Adapter & click listener for RSS list view
         ListView listView = (ListView) v.findViewById(R.id.rssreader_list);
         listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(this);
+        listView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                RSSItem item = mAdapter.getItem(position);
+
+                if(item.getLink() != null) {
+                    // Open web display fragment
+                    Bundle args = new Bundle();
+                    args.putString("component", WebDisplay.HANDLE);
+                    args.putString("url", item.getLink());
+
+                    ComponentFactory.getInstance().switchFragments(args);
+                }
+            }
+        });
         
         return v;
     }
@@ -140,17 +167,19 @@ public class RSSReader extends Fragment implements OnItemClickListener {
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        RSSItem item = mAdapter.getItem(position);
+    public void onDestroyView() {
+        super.onDestroyView();
 
-        if(item.getLink() != null) {
-            // Open web display fragment
-            Bundle args = new Bundle();
-            args.putString("component", WebDisplay.HANDLE);
-            args.putString("url", item.getLink());
-
-            ComponentFactory.getInstance().switchFragments(args);
-        }
+        // Get rid of view references
+        mProgressCircle = null;
     }
-    
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+    }
+
 }
