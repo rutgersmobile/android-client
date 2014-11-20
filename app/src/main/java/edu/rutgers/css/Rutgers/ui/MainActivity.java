@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -61,21 +62,24 @@ import edu.rutgers.css.Rutgers2.SettingsActivity;
  * RU Mobile main activity
  *
  */
-public class MainActivity extends LogoFragmentActivity  implements
+public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
         LocationClientProvider, ChannelManagerProvider {
-    
+
+    /* Log tag */
     private static final String TAG = "MainActivity";
 
+    /* Member data */
     private ChannelManager mChannelManager;
     private LocationClient mLocationClient;
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerListView;
     private ActionBarDrawerToggle mDrawerToggle;
     private RMenuAdapter mDrawerAdapter;
-
     private List<WeakReference<GooglePlayServicesClient.ConnectionCallbacks>> mLocationListeners = new ArrayList<>(5);
+
+    /* View references */
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerListView;
     
     /**
      * For providing the location client to fragments
@@ -102,7 +106,7 @@ public class MainActivity extends LogoFragmentActivity  implements
         ComponentFactory.getInstance().setMainActivity(this);
 
         // Set up logo overlay
-        setLogoRootLayoutId(R.id.main_content_frame);
+        //setLogoRootLayoutId(R.id.main_content_frame);
 
         /*
         if(BuildConfig.DEBUG) {
