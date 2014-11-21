@@ -9,11 +9,17 @@
         android:layout_height="wrap_content"
         layout="@layout/search_field"/>
 
-    <ListView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/list">
+        android:layout_height="match_parent">
 
-    </ListView>
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/list" />
+
+        <include layout="@layout/progress_circle" />
+
+    </FrameLayout>
 
 </LinearLayout>

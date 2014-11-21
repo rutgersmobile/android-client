@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,14 +35,31 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class SOCSections extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "SOCSections";
     public static final String HANDLE = "socsections";
 
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    private static final String ARG_DATA_TAG        = "soc.sections.data";
+    private static final String ARG_SEMESTER_TAG    = "semester";
+
+    /* Member data */
     private CourseSectionAdapter mAdapter;
     private Course mCourse;
 
     public SOCSections() {
         // Required empty public constructor
+    }
+
+    /** Create argument bundle for course sections display. */
+    public static Bundle createArgs(@NonNull String title, @NonNull String semester, @NonNull Course course) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, SOCSections.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        bundle.putString(ARG_SEMESTER_TAG, semester);
+        bundle.putString(ARG_DATA_TAG, new Gson().toJson(course));
+        return bundle;
     }
 
     @Override
@@ -53,7 +71,7 @@ public class SOCSections extends Fragment {
         mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, data);
 
         Gson gson = new Gson();
-        if(args.getString("data") == null) {
+        if(args.getString(ARG_DATA_TAG) == null) {
             Log.e(TAG, "Course data not set");
             AppUtils.showFailedLoadToast(getActivity());
             return;
@@ -61,7 +79,7 @@ public class SOCSections extends Fragment {
 
         // TODO Replace with just getting course from API
         try {
-            mCourse = gson.fromJson(args.getString("data"), Course.class);
+            mCourse = gson.fromJson(args.getString(ARG_DATA_TAG), Course.class);
         } catch (JsonSyntaxException e) {
             Log.e(TAG, e.getMessage());
             return;
@@ -89,9 +107,9 @@ public class SOCSections extends Fragment {
         View v = inflater.inflate(R.layout.fragment_soc_sections, parent, false);
         Bundle args = getArguments();
 
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
-        final String semester = args.getString("semester");
+        final String semester = args.getString(ARG_SEMESTER_TAG);
 
         ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);

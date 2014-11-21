@@ -18,12 +18,13 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-
-import com.google.gson.Gson;
+import android.widget.ProgressBar;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
+import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
@@ -49,9 +50,14 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class SOCMain extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    /* Log tag and component handle */
     private static final String TAG = "SOCMain";
     public static final String HANDLE = "soc";
 
+    /* Saved instance state tags */
+    private static final String SAVED_FILTER_TAG    = "filter";
+
+    /* Member data */
     private SOCIndex mSOCIndex;
     private ScheduleAdapter mAdapter;
     private List<String> mSemesters;
@@ -60,9 +66,21 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     private String mCampus;
     private String mLevel;
     private String mFilterString;
+    private boolean mLoadingSemesters;
+    private boolean mLoadingSubjects;
+
+    /* View references */
+    private ProgressBar mProgressCircle;
 
     public SOCMain() {
         // Required empty public constructor
+    }
+
+    /** Create argument bundle for SOC subjects/departments display. */
+    public static Bundle createArgs() {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, SOCMain.HANDLE);
+        return bundle;
     }
 
     @Override
@@ -85,10 +103,11 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
         // Restore filter
         if(savedInstanceState != null) {
-            mFilterString = savedInstanceState.getString("filter");
+            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
         // Get the available & current semesters
+        mLoadingSemesters = true;
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(ScheduleAPI.getSemesters()).done(new DoneCallback<Semesters>() {
             @Override
@@ -99,8 +118,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
                 if(semesters.isEmpty()) {
                     Log.e(TAG, "Semesters list is empty");
                     return;
-                }
-                if(defaultIndex < 0 || defaultIndex >= semesters.size()) {
+                } else if(defaultIndex < 0 || defaultIndex >= semesters.size()) {
                     Log.w(TAG, "Invalid default index " + defaultIndex);
                     defaultIndex = 0;
                 }
@@ -129,6 +147,12 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             public void onFail(Exception result) {
                 AppUtils.showFailedLoadToast(getActivity());
             }
+        }).always(new AlwaysCallback<Semesters, Exception>() {
+            @Override
+            public void onAlways(Promise.State state, Semesters resolved, Exception rejected) {
+                mLoadingSemesters = false;
+                if(!mLoadingSubjects) hideProgressCircle();
+            }
         });
 
     }
@@ -137,6 +161,9 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_soc_main, parent, false);
         setScheduleTitle();
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        if(mLoadingSemesters || mLoadingSubjects) showProgressCircle();
 
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
@@ -147,22 +174,16 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ScheduleAdapterItem clickedItem = (ScheduleAdapterItem) parent.getItemAtPosition(position);
-                Bundle args = new Bundle();
-                args.putString("campus", mCampus);
-                args.putString("semester", mSemester);
-                args.putString("level", mLevel);
 
                 if (clickedItem instanceof Subject) {
-                    args.putString("component", SOCCourses.HANDLE);
-                    args.putString("title", clickedItem.getDisplayTitle());
-                    args.putString("subjectCode", ((Subject) clickedItem).getCode());
-                    ComponentFactory.getInstance().switchFragments(args);
-                } else if(clickedItem instanceof Course && !((Course) clickedItem).isStub()) {
-                    // This is for when a course is clicked if it comes up through special filter
-                    args.putString("component", SOCSections.HANDLE);
-                    args.putString("title", clickedItem.getDisplayTitle());
-                    args.putString("data", new Gson().toJson((Course)clickedItem));
-                    ComponentFactory.getInstance().switchFragments(args);
+                    Bundle coursesArgs = SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
+                            mSemester, mLevel, ((Subject) clickedItem).getCode());
+                    ComponentFactory.getInstance().switchFragments(coursesArgs);
+                } else if(clickedItem instanceof Course) {
+                    // This is for when courses are loaded into the list by user-supplied filter
+                    if(((Course) clickedItem).isStub()) return; // Stub course hasn't loaded data yet
+                    Bundle courseArgs = SOCSections.createArgs(clickedItem.getDisplayTitle(), mSemester, (Course) clickedItem);
+                    ComponentFactory.getInstance().switchFragments(courseArgs);
                 }
             }
 
@@ -220,7 +241,15 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFilterString != null) outState.putString("filter", mFilterString);
+        if(mFilterString != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mProgressCircle = null;
     }
 
     @Override
@@ -266,8 +295,9 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      * Set title based on current campus, semester, and level configuration.
      */
     private void setScheduleTitle() {
-        // Only change title if SOC Main fragment or schedule selection dialog is on screen
-        if(!isAdded() || !(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
+        // Only change title if SOC Main fragment on screen (possibly covered by selection dialog)
+        if(!isAdded() || getResources() == null) return;
+        if(!(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
         if(mSemester == null) getActivity().setTitle(R.string.soc_title);
         else getActivity().setTitle(ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
@@ -297,6 +327,8 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         mAdapter.notifyDataSetChanged();
 
         // Get index & list of subjects
+        mLoadingSubjects = true;
+        showProgressCircle();
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(ScheduleAPI.getIndex(mSemester, mCampus, mLevel),  ScheduleAPI.getSubjects(mCampus, mLevel, mSemester)).done(new DoneCallback<MultipleResults>() {
 
@@ -326,6 +358,12 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
                 AppUtils.showFailedLoadToast(getActivity());
             }
 
+        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
+            @Override
+            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
+                mLoadingSubjects = false;
+                if(!mLoadingSemesters) hideProgressCircle();
+            }
         });
 
     }
@@ -359,6 +397,14 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, campus);
         editor.putString(PrefUtils.KEY_PREF_SOC_LEVEL, level);
         editor.commit();
+    }
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }
