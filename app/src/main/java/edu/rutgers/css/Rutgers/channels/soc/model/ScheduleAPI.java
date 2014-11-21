@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.channels.soc.model;
 
-import android.os.Bundle;
 import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
@@ -290,12 +289,7 @@ public final class ScheduleAPI {
      */
     public static void openRegistrationWindow(String semesterCode, String courseIndex) {
         String url = WEBREG_BASE_URL + "editSchedule.htm?login=cas&semesterSelection=" + semesterCode + "&indexList=" + courseIndex;
-
-        Bundle args = new Bundle();
-        args.putString("component", WebDisplay.HANDLE);
-        args.putString("url", url);
-
-        ComponentFactory.getInstance().switchFragments(args);
+        ComponentFactory.getInstance().switchFragments(WebDisplay.createArgs("WebReg", url));
     }
 
 }

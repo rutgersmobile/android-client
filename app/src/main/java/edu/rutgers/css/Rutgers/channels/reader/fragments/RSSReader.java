@@ -148,10 +148,7 @@ public class RSSReader extends Fragment {
 
                 if(item.getLink() != null) {
                     // Open web display fragment
-                    Bundle webArgs = new Bundle();
-                    webArgs.putString("component", WebDisplay.HANDLE);
-                    webArgs.putString("url", item.getLink());
-
+                    Bundle webArgs = WebDisplay.createArgs(args.getString(ARG_TITLE_TAG), item.getLink());
                     ComponentFactory.getInstance().switchFragments(webArgs);
                 }
             }

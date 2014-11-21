@@ -124,12 +124,9 @@ public class RUInfoMain extends Fragment {
 
             @Override
             public void onClick(View v) {
-                Bundle args = new Bundle();
-                args.putString("component", WebDisplay.HANDLE);
-                args.putString("title", getString(R.string.ruinfo_title));
-                if(AppUtils.isTablet(getActivity())) args.putString("url", mTabletURL);
-                else args.putString("url", mMobileURL);
-                ComponentFactory.getInstance().switchFragments(args);
+                String url = AppUtils.isTablet(getActivity()) ? mTabletURL : mMobileURL;
+                Bundle webArgs = WebDisplay.createArgs(getString(R.string.ruinfo_title), url);
+                ComponentFactory.getInstance().switchFragments(webArgs);
             }
 
         });
