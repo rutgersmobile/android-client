@@ -56,7 +56,7 @@ public class RecreationDisplay extends Fragment {
     public static final String ARG_FACILITY_TAG     = "facility";
 
     /* Constants */
-    private static final String ID_KEY = "id";
+    private static final String ID_KEY = "rec.row.id";
     private static final int ADDRESS_ROW = 0;
     private static final int INFO_ROW = 1;
     private static final int BUSINESS_ROW = 2;
