@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,20 +48,30 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class PlacesDisplay extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "PlacesDisplay";
     public static final String HANDLE = "placesdisplay";
 
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    private static final String ARG_PLACEKEY_TAG    = "placekey";
+
+    /* Constants */
     private static final String ID_KEY = "places.row.id";
     private static final int ADDRESS_ROW = 0;
     private static final int DESC_ROW = 1;
     private static final int BUS_ROW = 2;
 
+    /* Member data */
     private Place mPlace;
     private List<RMenuRow> mData;
     private RMenuAdapter mAdapter;
-    private ProgressBar mProgressCircle;
     private boolean mLoading;
 
+    /* View references */
+    private ProgressBar mProgressCircle;
+
+    // Maps campuses to Nextbus agencies. Used for listing nearby bus stops.
     private static final Map<String, String> sAgencyMap = Collections.unmodifiableMap(new HashMap<String, String>() {{
         put("Busch", NextbusAPI.AGENCY_NB);
         put("College Avenue", NextbusAPI.AGENCY_NB);
@@ -75,6 +86,15 @@ public class PlacesDisplay extends Fragment {
         // Required empty public constructor
     }
 
+    /** Create argument bundle for Rutgers place/building display. */
+    public static Bundle createArgs(@NonNull String title, @NonNull String placeKey) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, PlacesDisplay.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        bundle.putString(ARG_PLACEKEY_TAG, placeKey);
+        return bundle;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,10 +104,10 @@ public class PlacesDisplay extends Fragment {
         final Bundle args = getArguments();
 
         // Get place key
-        String key = args.getString("placeKey");
+        String key = args.getString(ARG_PLACEKEY_TAG);
         if(key == null) {
             AppUtils.showFailedLoadToast(getActivity());
-            Log.e(TAG, "placeKey is null");
+            Log.e(TAG, ARG_PLACEKEY_TAG + " is null");
             return;
         }
 
@@ -242,7 +262,7 @@ public class PlacesDisplay extends Fragment {
 
         // Set title
         final Bundle args = getArguments();
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.places_title);
 
         final ListView listView = (ListView) v.findViewById(R.id.list);

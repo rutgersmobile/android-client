@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.channels.places.fragments;
 import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -49,17 +50,32 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class PlacesMain extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
 
+    /* Log tag and component handle */
     private static final String TAG = "PlacesMain";
     public static final String HANDLE = "places";
 
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+
+    /* Member data */
     private PlaceAutoCompleteAdapter mSearchAdapter;
     private ArrayList<RMenuRow> mNearbyData;
     private RMenuAdapter mNearbyAdapter;
-    private ProgressBar mProgressCircle;
     private LocationClientProvider mLocationClientProvider;
+
+    /* View references */
+    private ProgressBar mProgressCircle;
 
     public PlacesMain() {
         // Required empty public constructor
+    }
+
+    /** Create argument bundle for main places screen. */
+    public static Bundle createArgs(@NonNull String title) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, PlacesMain.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        return bundle;
     }
 
     @Override
@@ -100,7 +116,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         // Set title from JSON
         final Bundle args = getArguments();
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.places_title);
 
         ListView listView = (ListView) v.findViewById(R.id.listView);
@@ -114,14 +130,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Launch Places display fragment
-                Bundle newArgs = new Bundle();
                 KeyValPair placeStub = (KeyValPair) parent.getAdapter().getItem(position);
-
-                newArgs.putString("component", PlacesDisplay.HANDLE);
-                newArgs.putString("placeKey", placeStub.getKey());
-                newArgs.putString("title", placeStub.getValue());
-                
+                Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
                 ComponentFactory.getInstance().switchFragments(newArgs);
             }
             
@@ -246,11 +256,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
                     mNearbyAdapter.add(new RMenuItemRow(noneNearbyString));
                 else {
                     for (KeyValPair placeStub : result) {
-                        Bundle args = new Bundle();
-                        args.putString("component", PlacesDisplay.HANDLE);
-                        args.putString("title", placeStub.getValue());
-                        args.putString("placeKey", placeStub.getKey());
-                        mNearbyAdapter.add(new RMenuItemRow(args));
+                        Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
+                        mNearbyAdapter.add(new RMenuItemRow(newArgs));
                     }
                 }
 
