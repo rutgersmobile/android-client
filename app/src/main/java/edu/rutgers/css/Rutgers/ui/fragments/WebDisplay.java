@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,20 +24,42 @@ import android.widget.ProgressBar;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
+import edu.rutgers.css.Rutgers.Config;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers2.R;
 
 public class WebDisplay extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "WebDisplay";
     public static final String HANDLE = "www";
 
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    private static final String ARG_URL_TAG         = ComponentFactory.ARG_URL_TAG;
+
+    /* Saved instance state tags */
+    private static final String SAVED_URL_TAG       = Config.PACKAGE_NAME + "webdisplay.url";
+
+    /* Member data */
     private ShareActionProvider mShareActionProvider;
     private String mCurrentURL;
+    private int mSetupCount = 0;
+
+    /* View references */
     private WebView mWebView;
-    private int setupCount = 0;
 
     public WebDisplay() {
         // Required empty public constructor
+    }
+
+    /** Create argument bundle for in-app browser. */
+    public static Bundle createArgs(@NonNull String title, @NonNull String url) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, WebDisplay.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        bundle.putString(ARG_URL_TAG, url);
+        return bundle;
     }
     
     @Override
@@ -52,23 +75,24 @@ public class WebDisplay extends Fragment {
         mWebView = (WebView) v.findViewById(R.id.webView);
         Bundle args = getArguments();
 
-        if(args.getString("title") != null) {
-            getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) {
+            getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
 
         // Check for saved web view state first
-        if(savedInstanceState != null && savedInstanceState.containsKey("mCurrentURL")) {
-            mCurrentURL = savedInstanceState.getString("mCurrentURL");
+        if(savedInstanceState != null) {
+            if(savedInstanceState.getString(SAVED_URL_TAG) != null) mCurrentURL = savedInstanceState.getString(SAVED_URL_TAG);
             mWebView.restoreState(savedInstanceState);
         }
+
         // Check initially supplied URL
         else {
-            if(args.getString("url") != null) {
-                mCurrentURL = args.getString("url");
+            if(args.getString(ARG_URL_TAG) != null) {
+                mCurrentURL = args.getString(ARG_URL_TAG);
                 initialIntent();
                 mWebView.loadUrl(mCurrentURL);
             } else {
-                Log.w(TAG, "No URL supplied");
+                Log.e(TAG, "No URL supplied");
             }
         }
 
@@ -176,17 +200,25 @@ public class WebDisplay extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if(mWebView != null) {
-            outState.putString("mCurrentURL", mCurrentURL);
+            outState.putString(SAVED_URL_TAG, mCurrentURL);
             mWebView.saveState(outState);
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mWebView = null;
     }
 
     /**
      * Set up the first Share intent only after the URL and share handler have been set.
      */
     private synchronized void initialIntent() {
-        if(setupCount < 2) setupCount++;
-        if(setupCount == 2) {
+        if(mSetupCount < 2) mSetupCount++;
+        if(mSetupCount == 2) {
             setShareIntent(mCurrentURL);
         }
     }
