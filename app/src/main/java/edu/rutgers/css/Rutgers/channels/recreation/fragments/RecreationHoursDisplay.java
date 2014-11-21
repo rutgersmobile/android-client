@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.recreation.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -11,10 +12,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
 import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
 import edu.rutgers.css.Rutgers2.R;
@@ -24,17 +27,40 @@ import edu.rutgers.css.Rutgers2.R;
  */
 public class  RecreationHoursDisplay extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "RecreationHoursDisplay";
     public static final String HANDLE = "rechoursdisplay";
 
-    // Argument fields
-    public static final String DATA_TAG = "data";
+    /* Argument bundle tags */
+    public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;
+    public static final String ARG_DATA_TAG         = "rechours.data";
 
+    /* Member data */
     private PagerAdapter mPagerAdapter;
     private List<FacilityDaySchedule> mSchedules;
 
     public RecreationHoursDisplay() {
         // Required empty public constructor
+    }
+
+    /**
+     * Create argument bundle for recreation hours display.
+     * @param title Title to display (e.g. "$FacilityName - Hours")
+     * @param schedules Daily schedules for facility
+     */
+    public static Bundle createArgs(@NonNull String title, @NonNull List<FacilityDaySchedule> schedules) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, RecreationHoursDisplay.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+
+        // Convert schedules to ArrayList if necessary to ensure that it is serializable
+        if(schedules instanceof Serializable) {
+            bundle.putSerializable(ARG_DATA_TAG, (Serializable) schedules);
+        } else {
+            bundle.putSerializable(ARG_DATA_TAG, new ArrayList<>(schedules));
+        }
+
+        return bundle;
     }
 
     @Override
@@ -44,7 +70,7 @@ public class  RecreationHoursDisplay extends Fragment {
         final Bundle args = getArguments();
 
         // Load location hours
-        mSchedules = (List<FacilityDaySchedule>) args.getSerializable(DATA_TAG);
+        mSchedules = (List<FacilityDaySchedule>) args.getSerializable(ARG_DATA_TAG);
         if(mSchedules == null) {
             Log.e(TAG, "Hours data not set");
             mSchedules = new ArrayList<>();
@@ -55,7 +81,6 @@ public class  RecreationHoursDisplay extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        super.onCreateView(inflater, parent, savedInstanceState);
         final View v = inflater.inflate(R.layout.fragment_recreation_hours_display, parent, false);
 
         // Set up pager for hours displays

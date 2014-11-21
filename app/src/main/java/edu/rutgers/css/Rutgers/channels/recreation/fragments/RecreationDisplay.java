@@ -12,14 +12,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
+import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
 import java.io.Serializable;
@@ -28,6 +31,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
+import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
 import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
@@ -38,13 +42,20 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 /**
- * Facility information screen
+ * Facility information: hours, address, phone numbers, etc.
  */
 public class RecreationDisplay extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "RecreationDisplay";
     public static final String HANDLE = "recdisplay";
 
+    /* Argument bundle tags */
+    public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;
+    public static final String ARG_CAMPUS_TAG       = "campus";
+    public static final String ARG_FACILITY_TAG     = "facility";
+
+    /* Constants */
     private static final String ID_KEY = "id";
     private static final int ADDRESS_ROW = 0;
     private static final int INFO_ROW = 1;
@@ -52,12 +63,27 @@ public class RecreationDisplay extends Fragment {
     private static final int DESCRIPTION_ROW = 3;
     private static final int HOURS_ROW = 4;
 
+    /* Member data */
     private Facility mFacility;
     private RMenuAdapter mAdapter;
+    private boolean mLoading;
+
+    /* View references */
+    private ProgressBar mProgressCircle;
     
     public RecreationDisplay() {
         // Required empty public constructor
     }    
+
+    /** Create argument bundle for a facility information display. */
+    public static Bundle createArgs(@NonNull String title, @NonNull String campus, @NonNull String facility) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, RecreationDisplay.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        bundle.putString(ARG_CAMPUS_TAG, campus);
+        bundle.putString(ARG_FACILITY_TAG, facility);
+        return bundle;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,15 +94,16 @@ public class RecreationDisplay extends Fragment {
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
 
         // Make sure necessary arguments were given
-        if(args.getString("campus") == null || args.getString("facility") == null) {
+        if(args.getString(ARG_CAMPUS_TAG) == null || args.getString(ARG_FACILITY_TAG) == null) {
             Log.e(TAG, "Missing campus/location arguments");
             return;
         }
 
         // Get the facility info
-        final String campusTitle = args.getString("campus");
-        final String facilityTitle = args.getString("facility");
+        final String campusTitle = args.getString(ARG_CAMPUS_TAG);
+        final String facilityTitle = args.getString(ARG_FACILITY_TAG);
 
+        mLoading = true;
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(GymsAPI.getFacility(campusTitle, facilityTitle)).done(new DoneCallback<Facility>() {
             @Override
@@ -89,19 +116,27 @@ public class RecreationDisplay extends Fragment {
             public void onFail(Exception result) {
                 AppUtils.showFailedLoadToast(getActivity());
             }
+        }).always(new AlwaysCallback<Facility, Exception>() {
+            @Override
+            public void onAlways(Promise.State state, Facility resolved, Exception rejected) {
+                mLoading = false;
+                hideProgressCircle();
+            }
         });
     }
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        super.onCreateView(inflater, parent, savedInstanceState);
         final View v = inflater.inflate(R.layout.fragment_recreation_display, parent, false);
 
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        if(mLoading) showProgressCircle();
+
         final Bundle args = getArguments();
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
         // Make sure necessary arguments were given
-        if(args.getString("campus") == null || args.getString("facility") == null) {
+        if(args.getString(ARG_CAMPUS_TAG) == null || args.getString(ARG_FACILITY_TAG) == null) {
             AppUtils.showFailedLoadToast(getActivity());
             return v;
         }
@@ -141,14 +176,13 @@ public class RecreationDisplay extends Fragment {
                         break;
 
                     case DESCRIPTION_ROW:
-                        Bundle descArgs = TextDisplay.createArgs(args.getString("title"), clickedArgs.getString("data"));
+                        Bundle descArgs = TextDisplay.createArgs(args.getString(ARG_TITLE_TAG), clickedArgs.getString("data"));
                         ComponentFactory.getInstance().switchFragments(descArgs);
                         break;
 
                     case HOURS_ROW:
-                        Bundle hoursArgs = new Bundle(clickedArgs);
-                        hoursArgs.putString("title", args.getString("title") + " - Hours");
-                        hoursArgs.putString("component", RecreationHoursDisplay.HANDLE);
+                        Bundle hoursArgs = RecreationHoursDisplay.createArgs(args.getString(ARG_TITLE_TAG) + " - Hours",
+                                (List<FacilityDaySchedule>) clickedArgs.getSerializable("data"));
                         ComponentFactory.getInstance().switchFragments(hoursArgs);
                         break;
                 }
@@ -156,6 +190,14 @@ public class RecreationDisplay extends Fragment {
         });
 
         return v;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mProgressCircle = null;
     }
 
     private void addInfo() {
@@ -174,7 +216,7 @@ public class RecreationDisplay extends Fragment {
                 Bundle rowArgs = new Bundle();
                 rowArgs.putInt(ID_KEY, HOURS_ROW);
                 rowArgs.putString("title", getString(R.string.rec_view_hours));
-                rowArgs.putSerializable(RecreationHoursDisplay.DATA_TAG, (Serializable) mFacility.getDailySchedules());
+                rowArgs.putSerializable("data", (Serializable) mFacility.getDailySchedules());
 
                 mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_hours_header)));
                 mAdapter.add(new RMenuItemRow(rowArgs));
@@ -228,6 +270,14 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
+    }
+
+    private void showProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressCircle() {
+        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }
