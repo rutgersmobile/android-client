@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import edu.rutgers.css.Rutgers.Config;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
@@ -33,13 +36,31 @@ import edu.rutgers.css.Rutgers2.R;
 public class BusDisplay extends Fragment implements DoneCallback<List<Prediction>>,
         FailCallback<Exception>, AlwaysCallback<List<Prediction>, Exception> {
 
+    /* Log tag and component handle */
     private static final String TAG = "BusDisplay";
     public static final String HANDLE = "busdisplay";
 
+    /* Constants */
     private enum Mode {ROUTE, STOP}
-    
     private static final int REFRESH_INTERVAL = 30; // refresh interval in seconds
-    
+
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    private static final String ARG_AGENCY_TAG      = "agency";
+    private static final String ARG_MODE_TAG        = "mode";
+    private static final String ARG_TAG_TAG         = "tag";
+
+    /* Argument options */
+    public static final String STOP_MODE = "stop";
+    public static final String ROUTE_MODE = "route";
+
+    /* Saved instance state tags */
+    private static final String SAVED_AGENCY_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".agency";
+    private static final String SAVED_TAG_TAG       = Config.PACKAGE_NAME+"."+HANDLE+".tag";
+    private static final String SAVED_MODE_TAG      = Config.PACKAGE_NAME+"."+HANDLE+".mode";
+    private static final String SAVED_DATA_TAG      = Config.PACKAGE_NAME+"."+HANDLE+".data";
+
+    /* Member data */
     private ArrayList<Prediction> mData;
     private PredictionAdapter mAdapter;
     private Mode mMode;
@@ -48,10 +69,24 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     private Timer mUpdateTimer;
     private String mAgency;
     private AndroidDeferredManager mDM;
+
+    /* View references */
     private ProgressBar mProgressCircle;
     
     public BusDisplay() {
         // Required empty public constructor
+    }
+
+    /** Create argument bundle for bus arrival time display. */
+    public static Bundle createArgs(@NonNull String title, @NonNull String mode,
+                                    @NonNull String agency, @NonNull String tag) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, BusDisplay.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        bundle.putString(ARG_AGENCY_TAG, agency);
+        bundle.putString(ARG_MODE_TAG, mode);
+        bundle.putString(ARG_TAG_TAG, tag);
+        return bundle;
     }
     
     @Override
@@ -68,10 +103,10 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
 
         // Attempt to restore state
         if(savedInstanceState != null) {
-            mAgency = savedInstanceState.getString("mAgency");
-            mTag = savedInstanceState.getString("mTag");
-            mMode = (Mode) savedInstanceState.getSerializable("mMode");
-            mAdapter.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable("mData"));
+            mAgency = savedInstanceState.getString(SAVED_AGENCY_TAG);
+            mTag = savedInstanceState.getString(SAVED_TAG_TAG);
+            mMode = (Mode) savedInstanceState.getSerializable(SAVED_MODE_TAG);
+            mAdapter.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable(SAVED_DATA_TAG));
             return;
         }
 
@@ -79,7 +114,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         final Bundle args = getArguments();
 
         boolean missingArg = false;
-        String requiredArgs[] = {"agency", "mode", "tag"};
+        String requiredArgs[] = {ARG_AGENCY_TAG, ARG_MODE_TAG, ARG_TAG_TAG};
         for(String argTag: requiredArgs) {
             if(args.getString(argTag) == null) {
                 Log.e(TAG, "Argument \""+argTag+"\" not set");
@@ -89,21 +124,20 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         if(missingArg) return;
 
         // Set route or stop display mode
-        String mode = args.getString("mode");
-        if("route".equalsIgnoreCase(mode)) {
+        String mode = args.getString(ARG_MODE_TAG);
+        if(BusDisplay.ROUTE_MODE.equalsIgnoreCase(mode)) {
             mMode = Mode.ROUTE;
-        } else if("stop".equalsIgnoreCase(mode)) {
+        } else if(BusDisplay.STOP_MODE.equalsIgnoreCase(mode)) {
             mMode = Mode.STOP;
         } else {
-            Log.e(TAG, "Invalid mode \""+args.getString("mode")+"\"");
+            Log.e(TAG, "Invalid mode \""+args.getString(ARG_MODE_TAG)+"\"");
             // End here and make sure mAgency and mTag are null to prevent update attempts
             return;
         }
 
         // Get agency and route/stop tag
-        mAgency = args.getString("agency");
-        mTag = args.getString("tag");
-
+        mAgency = args.getString(ARG_AGENCY_TAG);
+        mTag = args.getString(ARG_TAG_TAG);
     }
     
     @Override
@@ -114,8 +148,8 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
 
         final Bundle args = getArguments();
         // Get title
-        if(args.getString("title") != null) {
-            getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) {
+            getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         } else {
             Log.e(TAG, "Argument \"title\" not set");
             getActivity().setTitle(getString(R.string.bus_title));
@@ -166,10 +200,10 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("mAgency", mAgency);
-        outState.putString("mTag", mTag);
-        outState.putSerializable("mMode", mMode);
-        outState.putSerializable("mData", mData);
+        outState.putString(SAVED_AGENCY_TAG, mAgency);
+        outState.putString(SAVED_TAG_TAG, mTag);
+        outState.putSerializable(SAVED_MODE_TAG, mMode);
+        outState.putSerializable(SAVED_DATA_TAG, mData);
     }
 
     @Override
@@ -199,11 +233,11 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
      * Callback function for when nextbus data is loaded
      */
     @Override
-    public void onDone(List<Prediction> predictionArray) {
+    public void onDone(List<Prediction> newPredictions) {
         hideProgressCircle();
 
         // If no routes are running through this stop right now, show message
-        if(mMode == Mode.STOP && predictionArray.isEmpty()) {
+        if(mMode == Mode.STOP && newPredictions.isEmpty()) {
             if(isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
         }
 
@@ -212,23 +246,24 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
          * the updated JSON doesn't seem to match and the list should be
          * cleared and repopulated.
          */
-        if(mAdapter.getCount() != predictionArray.size()) {
+        if(mAdapter.getCount() != newPredictions.size()) {
             if(mAdapter.getCount() != 0) {
-                Log.w(TAG, "Size of updated list did not match original");
+                Log.d(TAG, "Size of updated list did not match original");
                 mAdapter.clear();
             }
 
-            mAdapter.addAll(predictionArray);
+            mAdapter.addAll(newPredictions);
         }
 
         /*
          * Update items individually if the list is already populated
-         * and the returned JSON seems valid (matches in size).
+         * and the new results correspond to currently displayed stops.
          */
         else {
             for(int i = 0; i < mAdapter.getCount(); i++) {    
-                Prediction newPrediction = predictionArray.get(i);
+                Prediction newPrediction = newPredictions.get(i);
                 Prediction oldPrediction = mAdapter.getItem(i);
+
                 if(!newPrediction.equals(oldPrediction)) {
                     Log.d(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());
                     oldPrediction.setTitle(newPrediction.getTitle());

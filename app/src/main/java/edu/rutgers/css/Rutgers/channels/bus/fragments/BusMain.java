@@ -7,18 +7,32 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusMain extends Fragment implements FilterFocusListener {
 
+    /* Log tag and component handle */
     private static final String TAG = "BusMain";
     public static final String HANDLE = "bus";
 
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+
+    /* Member data */
     private FragmentTabHost mTabHost;
 
     public BusMain() {
         // Required empty public constructor
+    }
+
+    /** Create argument bundle for main bus screen. */
+    public static Bundle createArgs(String title) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, BusMain.HANDLE);
+        if(title != null) bundle.putString(ARG_TITLE_TAG, title);
+        return bundle;
     }
 
     @Override
@@ -27,7 +41,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
         Bundle args = getArguments();
 
         // Set title from JSON
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.bus_title);
 
         mTabHost = (FragmentTabHost) v.findViewById(R.id.bus_tabhost);

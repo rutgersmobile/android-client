@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
@@ -57,7 +58,7 @@ public class PlacesDisplay extends Fragment {
     private static final String ARG_PLACEKEY_TAG    = "placekey";
 
     /* Constants */
-    private static final String ID_KEY = "places.row.id";
+    private static final String ID_KEY = Config.PACKAGE_NAME+"."+HANDLE+".row.id";
     private static final int ADDRESS_ROW = 0;
     private static final int DESC_ROW = 1;
     private static final int BUS_ROW = 2;
@@ -196,13 +197,8 @@ public class PlacesDisplay extends Fragment {
                                     mAdapter.notifyDataSetChanged();
 
                                     for (StopGroup stopGroup : result) {
-                                        Bundle stopArgs = new Bundle();
+                                        Bundle stopArgs = BusDisplay.createArgs(stopGroup.getTitle(), BusDisplay.STOP_MODE, agency, stopGroup.getTitle());
                                         stopArgs.putInt(ID_KEY, BUS_ROW);
-                                        stopArgs.putString("component", BusDisplay.HANDLE);
-                                        stopArgs.putString("agency", agency);
-                                        stopArgs.putString("mode", "stop");
-                                        stopArgs.putString("title", stopGroup.getTitle());
-                                        stopArgs.putString("tag", stopGroup.getTitle());
                                         mData.add(insertPos++, new RMenuItemRow(stopArgs));
                                         mAdapter.notifyDataSetChanged();
                                     }
@@ -282,6 +278,7 @@ public class PlacesDisplay extends Fragment {
                         break;
                     case BUS_ROW:
                         Bundle busArgs = new Bundle(clicked.getArgs());
+                        busArgs.remove(ID_KEY);
                         ComponentFactory.getInstance().switchFragments(busArgs);
                         break;
                 }

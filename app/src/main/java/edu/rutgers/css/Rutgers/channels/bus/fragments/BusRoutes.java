@@ -37,13 +37,17 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import edu.rutgers.css.Rutgers2.R;
 
 public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
-    
+
+    /* Log tag and component handle */
     private static final String TAG = "BusRoutes";
     public static final String HANDLE = "busroutes";
 
+    /* Member data */
     private RMenuAdapter mAdapter;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
+
+    /* View references */
     private ProgressBar mProgressCircle;
     
     public BusRoutes() {
@@ -83,12 +87,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
                 Bundle clickedArgs = clickedItem.getArgs();
-
-                Bundle newArgs = new Bundle(clickedArgs);
-                newArgs.putString("component", BusDisplay.HANDLE);
-                newArgs.putString("mode", "route");
-
-                ComponentFactory.getInstance().switchFragments(newArgs);
+                ComponentFactory.getInstance().switchFragments(new Bundle(clickedArgs));
             }
 
         });
@@ -182,10 +181,8 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_routes)));
         } else {
             for(RouteStub routeStub: routeStubs) {
-                Bundle routeArgs = new Bundle();
-                routeArgs.putString("title", routeStub.getTitle());
-                routeArgs.putString("tag", routeStub.getTag());
-                routeArgs.putString("agency", agencyTag);
+                Bundle routeArgs = BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
+                        agencyTag, routeStub.getTag());
                 mAdapter.add(new RMenuItemRow(routeArgs));
             }
         }

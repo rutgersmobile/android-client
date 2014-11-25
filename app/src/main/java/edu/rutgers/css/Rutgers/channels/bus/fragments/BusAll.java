@@ -28,6 +28,7 @@ import org.jdeferred.multiple.OneReject;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
@@ -43,13 +44,20 @@ import edu.rutgers.css.Rutgers2.R;
 
 public class BusAll extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "BusAll";
     public static final String HANDLE = "busall";
 
+    /* Saved instance state tags */
+    private static final String SAVED_FILTER_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".filter";
+
+    /* Member data */
     private RMenuAdapter mAdapter;
     private String mFilterString;
-    private ProgressBar mProgressCircle;
     private boolean mLoading;
+
+    /* View references */
+    private ProgressBar mProgressCircle;
     
     public BusAll() {
         // Required empty public constructor
@@ -64,7 +72,7 @@ public class BusAll extends Fragment {
 
         // Restore filter
         if(savedInstanceState != null) {
-            mFilterString = savedInstanceState.getString("filter");
+            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
         // Get home campus for result ordering
@@ -189,7 +197,7 @@ public class BusAll extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFilterString != null) outState.putString("filter", mFilterString);
+        if(mFilterString != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
     }
 
     @Override
@@ -215,12 +223,8 @@ public class BusAll extends Fragment {
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_stops)));
         } else {
             for(StopStub stopStub: stopStubs) {
-                Bundle stopArgs = new Bundle();
-                stopArgs.putString("component", BusDisplay.HANDLE);
-                stopArgs.putString("title", stopStub.getTitle());
-                stopArgs.putString("tag", stopStub.getTitle());
-                stopArgs.putString("mode", "stop");
-                stopArgs.putString("agency", agency);
+                Bundle stopArgs = BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
+                        agency, stopStub.getTitle());
                 mAdapter.add(new RMenuItemRow(stopArgs));
             }
         }
@@ -241,13 +245,9 @@ public class BusAll extends Fragment {
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_routes)));
         } else {
             for(RouteStub routeStub: routeStubs) {
-                Bundle stopArgs = new Bundle();
-                stopArgs.putString("component", BusDisplay.HANDLE);
-                stopArgs.putString("title", routeStub.getTitle());
-                stopArgs.putString("tag", routeStub.getTag());
-                stopArgs.putString("mode", "route");
-                stopArgs.putString("agency", agency);
-                mAdapter.add(new RMenuItemRow(stopArgs));
+                Bundle routeArgs = BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
+                        agency, routeStub.getTag());
+                mAdapter.add(new RMenuItemRow(routeArgs));
             }
         }
     }

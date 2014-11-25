@@ -49,11 +49,14 @@ import edu.rutgers.css.Rutgers2.R;
 
 public class BusStops extends Fragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
+    /* Log tag and component handle */
     private static final String TAG = "BusStops";
     public static final String HANDLE = "busstops";
 
+    /* Constants */
     private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
 
+    /* Member data */
     private RMenuAdapter mAdapter;
     private LocationClientProvider mLocationClientProvider;
     private FilterFocusListener mFilterFocusListener;
@@ -65,6 +68,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     private int mNearbyRowCount; // Keep track of number of nearby stops displayed
     private boolean mNearbyHeaderAdded;
 
+    /* View references */
     private ProgressBar mProgressCircle;
 
     public BusStops() {
@@ -132,13 +136,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
                 Bundle clickedArgs = clickedItem.getArgs();
-
-                Bundle newArgs = new Bundle(clickedArgs);
-                newArgs.putString("component", BusDisplay.HANDLE);
-                newArgs.putString("mode", "stop");
-                newArgs.putString("tag", clickedArgs.getString("title"));
-
-                ComponentFactory.getInstance().switchFragments(newArgs);
+                ComponentFactory.getInstance().switchFragments(new Bundle(clickedArgs));
             }
 
         });
@@ -276,9 +274,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_stops)));
         } else {
             for(StopStub stopStub: stopStubs) {
-                Bundle stopArgs = new Bundle();
-                stopArgs.putString("title", stopStub.getTitle());
-                stopArgs.putString("agency", agency);
+                Bundle stopArgs = BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
+                        agency, stopStub.getTitle());
                 mAdapter.add(new RMenuItemRow(stopArgs));
             }
         }
@@ -371,16 +368,14 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                         // Add all the stops
                         int j = 1;
                         for(StopGroup stopGroup: nbStops) {
-                            Bundle stopArgs = new Bundle();
-                            stopArgs.putString("title", stopGroup.getTitle());
-                            stopArgs.putString("agency", NextbusAPI.AGENCY_NB);
+                            Bundle stopArgs = BusDisplay.createArgs(stopGroup.getTitle(), BusDisplay.STOP_MODE,
+                                    NextbusAPI.AGENCY_NB, stopGroup.getTitle());
                             addNearbyRow(j++, new RMenuItemRow(stopArgs));
                         }
 
                         for(StopGroup stopGroup: nwkStops) {
-                            Bundle stopArgs = new Bundle();
-                            stopArgs.putString("title", stopGroup.getTitle());
-                            stopArgs.putString("agency", NextbusAPI.AGENCY_NWK);
+                            Bundle stopArgs = BusDisplay.createArgs(stopGroup.getTitle(), BusDisplay.STOP_MODE,
+                                    NextbusAPI.AGENCY_NWK, stopGroup.getTitle());
                             addNearbyRow(j++, new RMenuItemRow(stopArgs));
                         }
                     }
