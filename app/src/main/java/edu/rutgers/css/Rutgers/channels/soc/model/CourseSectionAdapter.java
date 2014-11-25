@@ -163,11 +163,14 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
         holder.sectionIndexTextView.setText(section.getNumber() + " " + section.getIndex());
 
         // List instructors
-        StringBuilder instructors = new StringBuilder();
-        for(Section.Instructor instructor: section.getInstructors()) {
-            instructors.append(instructor.getName()).append('\n');
+        List<Section.Instructor> instructors = section.getInstructors();
+        StringBuilder instructorString = new StringBuilder();
+        for(int i = 0; i < instructors.size(); i++) {
+            Section.Instructor instructor = instructors.get(i);
+            instructorString.append(instructor.getName());
+            if(i != instructors.size() - 1) instructorString.append("; ");
         }
-        holder.instructorTextView.setText(StringUtils.chomp(instructors.toString()));
+        holder.instructorTextView.setText(StringUtils.chomp(instructorString.toString()));
 
         // Set description
         if(section.getSectionNotes() != null) {
