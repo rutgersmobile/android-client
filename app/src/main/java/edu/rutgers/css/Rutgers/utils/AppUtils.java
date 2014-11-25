@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -55,7 +58,12 @@ public final class AppUtils {
             try {
                 if(!installation.exists()) {
                     FileOutputStream out = new FileOutputStream(installation);
-                    out.write(UUID.randomUUID().toString().getBytes());
+
+                    // Either recover UUID from Titanium app or generate a new one
+                    String uuid = recoverTitaniumID(context) != null ?
+                            recoverTitaniumID(context) : UUID.randomUUID().toString();
+
+                    out.write(uuid.getBytes());
                     out.close();
                 }
                 installID = readInstallationFile(installation);
@@ -79,6 +87,38 @@ public final class AppUtils {
         f.readFully(bytes);
         f.close();
         return new String(bytes);
+    }
+
+    /**
+     * Attempt to read unique ID from Titanium database, if one is leftover from an older RUMobile
+     * installation.
+     * @return UUID as String if successful, null if not found.
+     */
+    private static String recoverTitaniumID(@NonNull Context context) {
+        String result = null;
+
+        try {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(context.getDatabasePath("Titanium").getPath(), null, 0);
+
+            // SELECT value FROM platform WHERE name = 'unique_machine_id' LIMIT 1
+            String[] columns = {"value"};
+            Cursor dbCursor = db.query("platform", columns, "name = 'unique_machine_id'",
+                    null, null, null, null, "1");
+
+            if(dbCursor.getCount() > 0) {
+                dbCursor.moveToFirst();
+                result = dbCursor.getString(dbCursor.getColumnIndex("value"));
+                Log.i(TAG, "Recovered Titanium UUID: " + result);
+            } else {
+                Log.i(TAG, "Zero results");
+            }
+
+            db.close();
+        } catch (SQLiteException e) {
+            Log.w(TAG, e.getMessage());
+        }
+
+        return result;
     }
 
     /**
