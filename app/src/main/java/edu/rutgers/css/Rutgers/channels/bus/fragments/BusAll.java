@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
@@ -95,9 +96,6 @@ public class BusAll extends Fragment {
             public void onDone(MultipleResults results) {
                 mLoading = false;
 
-                // Don't do anything if not attached to activity anymore
-                if(!isAdded()) return;
-
                 List<RouteStub> nbRoutesResult = (List<RouteStub>) results.get(0).getResult();
                 List<StopStub> nbStopsResult = (List<StopStub>) results.get(1).getResult();
                 List<RouteStub> nwkRoutesResult = (List<RouteStub>) results.get(2).getResult();
@@ -173,7 +171,7 @@ public class BusAll extends Fragment {
         filterClearButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                filterEditText.setText("");
+                filterEditText.setText(null);
             }
         });
 
@@ -197,7 +195,7 @@ public class BusAll extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFilterString != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
+        if(StringUtils.isNotBlank(mFilterString)) outState.putString(SAVED_FILTER_TAG, mFilterString);
     }
 
     @Override
