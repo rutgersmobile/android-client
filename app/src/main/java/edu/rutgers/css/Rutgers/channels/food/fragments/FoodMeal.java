@@ -16,6 +16,7 @@ import org.jdeferred.android.AndroidDeferredManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
@@ -24,7 +25,6 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Displays all food items available for a specific meal at a specific dining location.

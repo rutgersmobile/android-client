@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="edu.rutgers.css.Rutgers2"
+    package="edu.rutgers.css.Rutgers"
     android:versionCode="16"
     android:versionName="4.0" >
 
@@ -45,7 +45,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="edu.rutgers.css.Rutgers2.SettingsActivity"
+            android:name="edu.rutgers.css.Rutgers.ui.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
     </application>

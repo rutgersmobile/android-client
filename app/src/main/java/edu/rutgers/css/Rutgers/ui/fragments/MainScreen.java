@@ -9,8 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
-import edu.rutgers.css.Rutgers2.R;
 
 public class MainScreen extends Fragment {
 

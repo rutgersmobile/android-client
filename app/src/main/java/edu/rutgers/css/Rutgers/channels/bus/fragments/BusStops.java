@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import edu.rutgers.css.Rutgers.BuildConfig;
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopGroup;
@@ -44,8 +46,6 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
-import edu.rutgers.css.Rutgers2.BuildConfig;
-import edu.rutgers.css.Rutgers2.R;
 
 public class BusStops extends Fragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 

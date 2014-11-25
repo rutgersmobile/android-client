@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.recreation.model.MeetingAreaHours;
-import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Fragment for an individual page of facility hours.

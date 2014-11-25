@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers;
 
-import edu.rutgers.css.Rutgers2.BuildConfig;
-
 /**
  * App configuration
  */

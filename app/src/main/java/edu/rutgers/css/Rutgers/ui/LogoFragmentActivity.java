@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
-import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers.R;
 
 /**
  * FragmentActivity with special logo overlay on the action bar.

@@ -22,7 +22,7 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.common.ConnectionResult;
 
-import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers.R;
 
 /**
  * Map error codes to error messages.

@@ -30,7 +30,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers.R;
 
 /**
  * General helper methods & global variables for the app

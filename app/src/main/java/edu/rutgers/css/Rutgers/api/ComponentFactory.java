@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusMain;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
@@ -38,7 +39,6 @@ import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Singleton fragment builder

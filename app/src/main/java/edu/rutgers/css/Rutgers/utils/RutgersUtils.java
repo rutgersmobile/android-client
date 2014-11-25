@@ -11,7 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.rutgers.css.Rutgers.Config;
-import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers.R;
 
 /**
  * Utilities for Rutgers-specific data

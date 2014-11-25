@@ -7,9 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
-import edu.rutgers.css.Rutgers2.R;
 
 public class BusMain extends Fragment implements FilterFocusListener {
 

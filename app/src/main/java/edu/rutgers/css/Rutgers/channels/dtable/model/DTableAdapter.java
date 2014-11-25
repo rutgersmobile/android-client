@@ -12,8 +12,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
-import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Adapter for making menus from DTable roots.

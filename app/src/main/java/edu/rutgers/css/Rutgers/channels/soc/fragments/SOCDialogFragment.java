@@ -22,11 +22,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
-import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Schedule of Classes catalogue selection menu.

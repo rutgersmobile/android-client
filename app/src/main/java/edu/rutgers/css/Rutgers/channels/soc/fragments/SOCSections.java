@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
@@ -28,7 +29,6 @@ import edu.rutgers.css.Rutgers.channels.soc.model.Section;
 import edu.rutgers.css.Rutgers.channels.soc.model.SectionAdapterItem;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Display description and section information for a course.

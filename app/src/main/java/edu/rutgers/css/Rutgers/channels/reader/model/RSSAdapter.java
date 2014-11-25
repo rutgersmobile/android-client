@@ -12,7 +12,7 @@ import com.androidquery.AQuery;
 
 import java.util.List;
 
-import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers.R;
 
 /**
  * Array adapter extended for RSS items

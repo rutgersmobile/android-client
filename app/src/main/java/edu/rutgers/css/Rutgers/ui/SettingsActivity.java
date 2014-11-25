@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers2;
+package edu.rutgers.css.Rutgers.ui;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**

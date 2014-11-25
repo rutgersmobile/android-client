@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.rutgers.css.Rutgers.Config;
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.ruinfo.fragments.RUInfoMain;
@@ -35,7 +36,6 @@ import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
-import edu.rutgers.css.Rutgers2.R;
 
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 

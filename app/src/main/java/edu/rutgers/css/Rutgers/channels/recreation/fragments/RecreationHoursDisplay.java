@@ -17,10 +17,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
 import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
-import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Displays facility calendar of hours.

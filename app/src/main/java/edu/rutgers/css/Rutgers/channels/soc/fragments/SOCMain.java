@@ -32,6 +32,8 @@ import org.jdeferred.multiple.OneReject;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.BuildConfig;
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.SOCIndex;
@@ -42,8 +44,6 @@ import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
-import edu.rutgers.css.Rutgers2.BuildConfig;
-import edu.rutgers.css.Rutgers2.R;
 
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.

@@ -26,12 +26,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import edu.rutgers.css.Rutgers.Config;
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers2.R;
 
 public class BusDisplay extends Fragment implements DoneCallback<List<Prediction>>,
         FailCallback<Exception>, AlwaysCallback<List<Prediction>, Exception> {

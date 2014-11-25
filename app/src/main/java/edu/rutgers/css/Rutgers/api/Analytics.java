@@ -29,12 +29,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.BuildConfig;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.model.AnalyticsOpenHelper;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
-import edu.rutgers.css.Rutgers2.BuildConfig;
 
 /**
  * Analytics service. Queues analytics events and flushes them to the server when the app is paused.

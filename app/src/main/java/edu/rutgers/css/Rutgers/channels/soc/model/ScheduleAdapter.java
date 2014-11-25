@@ -18,7 +18,7 @@ import org.jdeferred.android.AndroidDeferredManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers2.R;
+import edu.rutgers.css.Rutgers.R;
 
 /**
  * Adapter for subjects and courses.

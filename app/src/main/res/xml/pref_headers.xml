@@ -3,7 +3,7 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="edu.rutgers.css.Rutgers2.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="edu.rutgers.css.Rutgers.ui.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_user" />
 
 </preference-headers>
