@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -117,8 +116,7 @@ public class MainActivity extends FragmentActivity implements
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 
         // Check if this is the first time the app is being launched
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(prefs.getBoolean(PrefUtils.KEY_PREFS_FIRST_LAUNCH, true)) {
+        if(PrefUtils.isFirstLaunch(this)) {
             Log.i(TAG, "First launch");
 
             // First launch, create analytics event & show settings screen
@@ -129,7 +127,7 @@ public class MainActivity extends FragmentActivity implements
             startActivity(settingsIntent);
             */
 
-            prefs.edit().putBoolean(PrefUtils.KEY_PREFS_FIRST_LAUNCH, false).apply();
+            PrefUtils.markFirstLaunch(this);
         }
 
         // Connect to Google Play location services

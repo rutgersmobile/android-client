@@ -2,7 +2,7 @@
 
     <!-- Home campus setting -->
 	<ListPreference
-        android:defaultValue="nb"
+        android:defaultValue="@string/campus_nb_tag"
         android:entries="@array/pref_campus_strings"
         android:entryValues="@array/pref_campus_values"
         android:key="pref_home_campus"
@@ -10,9 +10,9 @@
         android:positiveButtonText="@null"
         android:title="@string/pref_campus_title" />
         
-	<!-- User demographic settings -->
+	<!-- User role settings -->
 	<ListPreference
-        android:defaultValue="undergrad"
+        android:defaultValue="@string/role_undergrad_tag"
         android:entries="@array/pref_user_type_strings"
         android:entryValues="@array/pref_user_type_values"
         android:key="pref_user_type"
