@@ -60,8 +60,8 @@ public final class AppUtils {
                     FileOutputStream out = new FileOutputStream(installation);
 
                     // Either recover UUID from Titanium app or generate a new one
-                    String uuid = recoverTitaniumID(context) != null ?
-                            recoverTitaniumID(context) : UUID.randomUUID().toString();
+                    String uuid = recoverTitaniumID(context);
+                    if(uuid == null) uuid = UUID.randomUUID().toString();
 
                     out.write(uuid.getBytes());
                     out.close();
