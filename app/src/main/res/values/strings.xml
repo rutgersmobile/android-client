@@ -72,6 +72,7 @@
     <!-- Dining channel -->
     <string name="dining_title">Food</string>
     <string name="no_halls_available">No dining halls available.</string>
+    <string name="dining_no_food_items">No items on the menu.</string>
     <string name="dining_stonsby_title">Stonsby Commons &amp; Eatery</string>
     <string name="dining_stonsby_description">Students enjoy all-you-care-to-eat dining in a contemporary setting. This exciting location offers fresh made menu items, cutting-edge American entrees, ethnically-inspired foods, vegetarian selections and lots more&#8230;\n\nThe Commons also features upscale Premium entrees and fresh baked goods from our in house bakery or local vendors.</string>
     <string name="dining_gateway_title">Gateway Cafe</string>

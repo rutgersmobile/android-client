@@ -35,6 +35,11 @@ public class DiningMenu implements Serializable{
         public List<Genre> getGenres() {
             return genres;
         }
+
+        @Override
+        public String toString() {
+            return getMealName();
+        }
     }
 
     /** List of foods of a certain category on the dining menu. */
@@ -48,6 +53,11 @@ public class DiningMenu implements Serializable{
 
         public List<String> getItems() {
             return items;
+        }
+
+        @Override
+        public String toString() {
+            return getGenreName();
         }
     }
 

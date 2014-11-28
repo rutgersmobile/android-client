@@ -7,24 +7,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
  * Displays all food items available for a specific meal at a specific dining location.
@@ -41,12 +37,13 @@ public class FoodMeal extends Fragment {
     private static final String ARG_MEAL_TAG        = "meal";
 
     /* Member data */
-    private RMenuAdapter mAdapter;
+    private DiningMenuAdapter mAdapter;
 
     public FoodMeal() {
         // Required empty public constructor
     }
 
+    /** Create a new instance of the meal display fragment. */
     public static FoodMeal newInstance(@NonNull String location, @NonNull String meal) {
         FoodMeal foodMeal = new FoodMeal();
         Bundle args = createArgs(location, meal);
@@ -55,6 +52,7 @@ public class FoodMeal extends Fragment {
         return foodMeal;
     }
 
+    /** Create argument bundle for a dining hall meal display. */
     public static Bundle createArgs(@NonNull String location, @NonNull String meal) {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, FoodMeal.HANDLE);
@@ -68,8 +66,7 @@ public class FoodMeal extends Fragment {
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
         
-        List<RMenuRow> foodItems = new ArrayList<>();
-        mAdapter = new RMenuAdapter(this.getActivity(), R.layout.row_title, R.layout.row_section_header, foodItems);
+        mAdapter = new DiningMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header);
 
         if(args.getString(ARG_LOCATION_TAG) == null) {
             Log.e(TAG, "Location not set");
@@ -92,16 +89,7 @@ public class FoodMeal extends Fragment {
 
                 // Populate the menu with categories and food items
                 List<DiningMenu.Genre> mealGenres = meal.getGenres();
-                for (DiningMenu.Genre genre : mealGenres) {
-                    // Add category header
-                    mAdapter.add(new RMenuHeaderRow(genre.getGenreName()));
-
-                    // Add food items
-                    List<String> items = genre.getItems();
-                    for (String item : items) {
-                        mAdapter.add(new RMenuItemRow(item));
-                    }
-                }
+                mAdapter.addAll(mealGenres);
             }
 
         }).fail(new FailCallback<Exception>() {
@@ -115,17 +103,14 @@ public class FoodMeal extends Fragment {
         });
         
     }
-    
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_food_meal, container, false);
 
-        ListView listView = (ListView) v.findViewById(R.id.food_meal_list);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        final View v = inflater.inflate(R.layout.fragment_food_meal, parent, false);
+
+        StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(null);
 
         return v;
     }
-    
 }
