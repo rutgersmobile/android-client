@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import org.jdeferred.AlwaysCallback;
@@ -16,20 +15,20 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
  * Displays dining halls that have menus available in the Dining API.
@@ -45,7 +44,7 @@ public class FoodMain extends Fragment {
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
 
     /* Member data */
-    private RMenuAdapter mAdapter;
+    private SchoolFacilitiesAdapter mAdapter;
     private boolean mLoading;
 
     /* View references */
@@ -67,8 +66,8 @@ public class FoodMain extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        List<RMenuRow> data = new ArrayList<>(4);
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title_centered, R.layout.row_section_header_centered, data);
+        mAdapter = new SchoolFacilitiesAdapter(getActivity(),
+                R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         // Get user's home campus
         final String userHome = RutgersUtils.getHomeCampus(getActivity());
@@ -78,16 +77,17 @@ public class FoodMain extends Fragment {
         final String nwkCampusFullString = getString(R.string.campus_nwk_full);
         final String camCampusFullString = getString(R.string.campus_cam_full);
 
-        // Static dining entries
-        Bundle nwkRow = TextDisplay.createArgs(getString(R.string.dining_stonsby_title), getString(R.string.dining_stonsby_description));
-        final ArrayList<RMenuRow> nwkRows = new ArrayList<>(2);
-        nwkRows.add(new RMenuHeaderRow(nwkCampusFullString));
-        nwkRows.add(new RMenuItemRow(nwkRow));
+        // Static dining hall entries
+        List<DiningMenu.Meal> dummyMeal = new ArrayList<>(1);
+        dummyMeal.add(new DiningMenu.Meal("fake", true, null)); // Prevents static entries from being grayed out
 
-        Bundle camRow = TextDisplay.createArgs(getString(R.string.dining_gateway_title), getString(R.string.dining_gateway_description));
-        final ArrayList<RMenuRow> camRows = new ArrayList<>(2);
-        camRows.add(new RMenuHeaderRow(camCampusFullString));
-        camRows.add(new RMenuItemRow(camRow));
+        List<DiningMenu> stonsby = new ArrayList<>(1);
+        stonsby.add(new DiningMenu(getString(R.string.dining_stonsby_title), 0, dummyMeal));
+        final Map.Entry<String, List<DiningMenu>> newarkHalls = new AbstractMap.SimpleEntry<>(nwkCampusFullString, stonsby);
+
+        List<DiningMenu> gateway = new ArrayList<>(1);
+        gateway.add(new DiningMenu(getString(R.string.dining_gateway_title), 0, dummyMeal));
+        final Map.Entry<String, List<DiningMenu>> camdenHalls = new AbstractMap.SimpleEntry<>(camCampusFullString, gateway);
 
         // Get dining hall data and populate the top-level menu with names of the dining halls
         mLoading = true;
@@ -96,37 +96,21 @@ public class FoodMain extends Fragment {
 
             @Override
             public void onDone(List<DiningMenu> diningMenus) {
-                // Temporary NB results holder
-                List<RMenuRow> nbResults = new ArrayList<>();
-                nbResults.add(new RMenuHeaderRow(nbCampusFullString));
-
-                // Add dining halls - if they have no active meals, make them unclickable
-                for (DiningMenu diningMenu : diningMenus) {
-                    RMenuItemRow menuItemRow = new RMenuItemRow(FoodHall.createArgs(diningMenu.getLocationName()));
-
-                    if (!diningMenu.hasActiveMeals()) {
-                        menuItemRow.setClickable(false);
-                        menuItemRow.setColorResId(R.color.light_gray);
-                    } else {
-                        menuItemRow.setClickable(true);
-                    }
-
-                    nbResults.add(menuItemRow);
-                }
+                Map.Entry<String, List<DiningMenu>> nbHalls = new AbstractMap.SimpleEntry<>(nbCampusFullString, diningMenus);
 
                 // Determine campus ordering
                 if (userHome.equals(nwkCampusFullString)) {
-                    mAdapter.addAll(nwkRows);
-                    mAdapter.addAll(camRows);
-                    mAdapter.addAll(nbResults);
+                    mAdapter.add(newarkHalls);
+                    mAdapter.add(camdenHalls);
+                    mAdapter.add(nbHalls);
                 } else if (userHome.equals(camCampusFullString)) {
-                    mAdapter.addAll(camRows);
-                    mAdapter.addAll(nwkRows);
-                    mAdapter.addAll(nbResults);
+                    mAdapter.add(camdenHalls);
+                    mAdapter.add(newarkHalls);
+                    mAdapter.add(nbHalls);
                 } else {
-                    mAdapter.addAll(nbResults);
-                    mAdapter.addAll(camRows);
-                    mAdapter.addAll(nwkRows);
+                    mAdapter.add(nbHalls);
+                    mAdapter.add(camdenHalls);
+                    mAdapter.add(newarkHalls);
                 }
             }
 
@@ -146,7 +130,7 @@ public class FoodMain extends Fragment {
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if(mLoading) showProgressCircle();
@@ -157,15 +141,31 @@ public class FoodMain extends Fragment {
         if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.dining_title);
 
-        ListView listView = (ListView) v.findViewById(R.id.dining_locations_list);
+        StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
-                if(clickedRow instanceof RMenuItemRow) {
-                    ComponentFactory.getInstance().switchFragments(((RMenuItemRow) clickedRow).getArgs());
+                DiningMenu clickedMenu = (DiningMenu) parent.getAdapter().getItem(position);
+
+                // Check for static halls first
+                if(clickedMenu.getLocationName().equals(getString(R.string.dining_stonsby_title))) {
+                    ComponentFactory.getInstance().switchFragments(
+                            TextDisplay.createArgs(getString(R.string.dining_stonsby_title),
+                                    getString(R.string.dining_stonsby_description))
+                    );
+                } else if (clickedMenu.getLocationName().equals(getString(R.string.dining_gateway_title))) {
+                    ComponentFactory.getInstance().switchFragments(
+                            TextDisplay.createArgs(getString(R.string.dining_gateway_title),
+                                    getString(R.string.dining_gateway_description))
+                    );
+                } else {
+                    if(clickedMenu.hasActiveMeals()) {
+                        ComponentFactory.getInstance().switchFragments(
+                                FoodHall.createArgs(clickedMenu.getLocationName())
+                        );
+                    }
                 }
             }
         });

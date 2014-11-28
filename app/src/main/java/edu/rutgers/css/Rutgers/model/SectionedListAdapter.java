@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.R;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 /**
@@ -24,18 +23,19 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter implements 
     private LayoutInflater mInflater;
     private int mItemResource;
     private int mHeaderResource;
+    private int mTextViewId;
     private List<T> mSections;
 
-    protected static class ViewHolder {
+    private static class ViewHolder {
         TextView textView;
     }
 
-    public SectionedListAdapter(@NonNull Context context, int itemResource, int headerResource) {
+    public SectionedListAdapter(@NonNull Context context, int itemResource, int headerResource, int textViewId) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mItemResource = itemResource;
         mHeaderResource = headerResource;
-
+        mTextViewId = textViewId;
         mSections = new ArrayList<>();
     }
 
@@ -114,9 +114,9 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter implements 
         ViewHolder holder;
 
         if(convertView == null) {
-            convertView = getLayoutInflater().inflate(mItemResource, null);
+            convertView = getLayoutInflater().inflate(getItemResource(), null);
             holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById(R.id.title);
+            holder.textView = (TextView) convertView.findViewById(getTextViewId());
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -132,9 +132,9 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter implements 
         ViewHolder holder;
 
         if(convertView == null) {
-            convertView = getLayoutInflater().inflate(mHeaderResource, null);
+            convertView = getLayoutInflater().inflate(getHeaderResource(), null);
             holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById(R.id.title);
+            holder.textView = (TextView) convertView.findViewById(getTextViewId());
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -176,6 +176,18 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter implements 
 
     protected LayoutInflater getLayoutInflater() {
         return mInflater;
+    }
+
+    protected int getItemResource() {
+        return mItemResource;
+    }
+
+    protected int getHeaderResource() {
+        return mHeaderResource;
+    }
+
+    protected int getTextViewId() {
+        return mTextViewId;
     }
 
 }

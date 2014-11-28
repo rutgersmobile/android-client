@@ -69,10 +69,13 @@ public class FoodHall extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
+        final Bundle args = getArguments();
 
         mLocation = args.getString(ARG_LOCATION_TAG);
-        if(mLocation == null) return;
+        if(mLocation == null) {
+            Log.e(TAG, "location argument not set");
+            return;
+        }
 
         mPagerAdapter = new MealPagerAdapter(getChildFragmentManager());
 
@@ -104,8 +107,8 @@ public class FoodHall extends Fragment {
 
         if(mTitle != null) {
             getActivity().setTitle(mTitle);
-        } else if(args.getString(ARG_LOCATION_TAG) != null) {
-            getActivity().setTitle(args.getString(ARG_LOCATION_TAG));
+        } else if(args.getString(ARG_TITLE_TAG) != null) {
+            getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         } else {
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Location not set");

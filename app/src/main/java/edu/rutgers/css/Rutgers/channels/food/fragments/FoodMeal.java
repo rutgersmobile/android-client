@@ -66,7 +66,8 @@ public class FoodMeal extends Fragment {
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
         
-        mAdapter = new DiningMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header);
+        mAdapter = new DiningMenuAdapter(getActivity(),
+                R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         if(args.getString(ARG_LOCATION_TAG) == null) {
             Log.e(TAG, "Location not set");

@@ -11,8 +11,8 @@ import edu.rutgers.css.Rutgers.model.SectionedListAdapter;
  */
 public class DiningMenuAdapter extends SectionedListAdapter<DiningMenu.Genre, String> {
 
-    public DiningMenuAdapter(@NonNull Context context, int itemResource, int headerResource) {
-        super(context, itemResource, headerResource);
+    public DiningMenuAdapter(@NonNull Context context, int itemResource, int headerResource, int textViewId) {
+        super(context, itemResource, headerResource, textViewId);
     }
 
     @Override

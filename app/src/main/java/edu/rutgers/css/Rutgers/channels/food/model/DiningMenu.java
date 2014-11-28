@@ -18,11 +18,23 @@ public class DiningMenu implements Serializable{
     private long date;
     private List<Meal> meals;
 
+    public DiningMenu(@NonNull String locationName, long date, List<Meal> meals) {
+        this.locationName = locationName;
+        this.date = date;
+        this.meals = meals;
+    }
+
     /** A single meal on the dining menu (breakfast, lunch, etc.). */
     public static class Meal implements Serializable {
         @SerializedName("meal_name") private String mealName;
         @SerializedName("meal_avail") private boolean mealAvailable;
         private List<Genre> genres;
+
+        public Meal(String mealName, boolean mealAvailable, List<Genre> genres) {
+            this.mealName = mealName;
+            this.mealAvailable = mealAvailable;
+            this.genres = genres;
+        }
 
         public String getMealName() {
             return mealName;
@@ -102,6 +114,11 @@ public class DiningMenu implements Serializable{
 
     public List<Meal> getMeals() {
         return meals;
+    }
+
+    @Override
+    public String toString() {
+        return getLocationName();
     }
 
 }
