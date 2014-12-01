@@ -25,6 +25,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
+import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -83,11 +84,11 @@ public class FoodMain extends Fragment {
 
         List<DiningMenu> stonsby = new ArrayList<>(1);
         stonsby.add(new DiningMenu(getString(R.string.dining_stonsby_title), 0, dummyMeal));
-        final Map.Entry<String, List<DiningMenu>> newarkHalls = new AbstractMap.SimpleEntry<>(nwkCampusFullString, stonsby);
+        final SimpleSection<DiningMenu> newarkHalls = new SimpleSection<>(nwkCampusFullString, stonsby);
 
         List<DiningMenu> gateway = new ArrayList<>(1);
         gateway.add(new DiningMenu(getString(R.string.dining_gateway_title), 0, dummyMeal));
-        final Map.Entry<String, List<DiningMenu>> camdenHalls = new AbstractMap.SimpleEntry<>(camCampusFullString, gateway);
+        final SimpleSection<DiningMenu> camdenHalls = new SimpleSection<>(camCampusFullString, gateway);
 
         // Get dining hall data and populate the top-level menu with names of the dining halls
         mLoading = true;
@@ -96,7 +97,7 @@ public class FoodMain extends Fragment {
 
             @Override
             public void onDone(List<DiningMenu> diningMenus) {
-                Map.Entry<String, List<DiningMenu>> nbHalls = new AbstractMap.SimpleEntry<>(nbCampusFullString, diningMenus);
+                SimpleSection<DiningMenu> nbHalls = new SimpleSection<>(nbCampusFullString, diningMenus);
 
                 // Determine campus ordering
                 if (userHome.equals(nwkCampusFullString)) {

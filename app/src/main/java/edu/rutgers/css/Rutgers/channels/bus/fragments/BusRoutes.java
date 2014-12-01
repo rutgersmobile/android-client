@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import org.jdeferred.AlwaysCallback;
@@ -20,7 +19,6 @@ import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.multiple.MultipleResults;
 import org.jdeferred.multiple.OneReject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
@@ -29,12 +27,11 @@ import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 
@@ -43,7 +40,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     public static final String HANDLE = "busroutes";
 
     /* Member data */
-    private RMenuAdapter mAdapter;
+    private SimpleSectionedAdapter<RouteStub> mAdapter;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
 
@@ -57,21 +54,18 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mDM = new AndroidDeferredManager();
-
-        List<RMenuRow> mData = new ArrayList<>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+        mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_bus_routes, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_bus_routes, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
         // Get the filter field and add a listener to it
-        EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
         filterEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
@@ -79,15 +73,16 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
             }
         });
         
-        ListView listView = (ListView) v.findViewById(R.id.list);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
-                Bundle clickedArgs = clickedItem.getArgs();
-                ComponentFactory.getInstance().switchFragments(new Bundle(clickedArgs));
+                RouteStub routeStub = (RouteStub) parent.getAdapter().getItem(position);
+                Bundle displayArgs = BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
+                        routeStub.getAgencyTag(), routeStub.getTag());
+                ComponentFactory.getInstance().switchFragments(displayArgs);
             }
 
         });
@@ -120,8 +115,8 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 
             @Override
             public void onDone(MultipleResults results) {
-                // Don't do anything if not attached to activity anymore
-                if (!isAdded()) return;
+                // Abort if resources can't be accessed
+                if (getResources() == null) return;
 
                 List<RouteStub> nbResult = (List<RouteStub>) results.get(0).getResult();
                 List<RouteStub> nwkResult = (List<RouteStub>) results.get(1).getResult();
@@ -167,7 +162,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
      */
     private void loadAgency(@NonNull String agencyTag, @NonNull List<RouteStub> routeStubs) {
         // Abort if resources can't be accessed
-        if(!isAdded() || getResources() == null) return;
+        if(getResources() == null) return;
 
         // Get header for routes section
         String header;
@@ -175,17 +170,13 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         else if (NextbusAPI.AGENCY_NWK.equals(agencyTag)) header = getString(R.string.bus_nwk_active_routes_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agencyTag+"\"");
 
-        mAdapter.add(new RMenuHeaderRow(header));
+        mAdapter.add(new SimpleSection<>(header, routeStubs));
 
+        /*
         if (routeStubs.isEmpty()) {
             mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_routes)));
-        } else {
-            for(RouteStub routeStub: routeStubs) {
-                Bundle routeArgs = BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
-                        agencyTag, routeStub.getTag());
-                mAdapter.add(new RMenuItemRow(routeArgs));
-            }
         }
+        */
     }
 
     @Override

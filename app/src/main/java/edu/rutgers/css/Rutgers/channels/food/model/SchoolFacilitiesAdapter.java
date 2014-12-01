@@ -12,11 +12,13 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.model.SectionedListAdapter;
+import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 
 /**
  * Adapter for listing dining hall facilities in a school.
  */
-public class SchoolFacilitiesAdapter extends SectionedListAdapter<Map.Entry<String, List<DiningMenu>>, DiningMenu> {
+public class SchoolFacilitiesAdapter extends SimpleSectionedAdapter<DiningMenu> {
 
     static class ViewHolder {
         TextView textView;
@@ -27,18 +29,18 @@ public class SchoolFacilitiesAdapter extends SectionedListAdapter<Map.Entry<Stri
     }
 
     @Override
-    public String getSectionHeader(Map.Entry<String, List<DiningMenu>> section) {
-        return section.getKey();
+    public String getSectionHeader(SimpleSection<DiningMenu> section) {
+        return section.getHeader();
     }
 
     @Override
-    public DiningMenu getSectionItem(Map.Entry<String, List<DiningMenu>> section, int position) {
-        return section.getValue().get(position);
+    public DiningMenu getSectionItem(SimpleSection<DiningMenu> section, int position) {
+        return section.getItems().get(position);
     }
 
     @Override
-    public int getSectionItemCount(Map.Entry<String, List<DiningMenu>> section) {
-        return section.getValue().size();
+    public int getSectionItemCount(SimpleSection<DiningMenu> section) {
+        return section.getItems().size();
     }
 
     @Override
@@ -55,6 +57,7 @@ public class SchoolFacilitiesAdapter extends SectionedListAdapter<Map.Entry<Stri
         }
 
         final Resources res = getContext().getResources();
+
         DiningMenu dm = getItem(position);
         holder.textView.setText(dm.getLocationName());
 

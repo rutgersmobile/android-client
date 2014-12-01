@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -40,12 +39,11 @@ import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class BusStops extends Fragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
@@ -57,16 +55,14 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
 
     /* Member data */
-    private RMenuAdapter mAdapter;
+    private SimpleSectionedAdapter<StopStub> mAdapter;
+    private List<StopStub> mNearbyStops;
     private LocationClientProvider mLocationClientProvider;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
 
     private Timer mUpdateTimer;
     private Handler mUpdateHandler;
-
-    private int mNearbyRowCount; // Keep track of number of nearby stops displayed
-    private boolean mNearbyHeaderAdded;
 
     /* View references */
     private ProgressBar mProgressCircle;
@@ -99,11 +95,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         super.onCreate(savedInstanceState);
 
         mDM = new AndroidDeferredManager();
-        
-        mNearbyRowCount = 0;
-        mNearbyHeaderAdded = false;
-        List<RMenuRow> mData = new ArrayList<>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mData);
+        mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
+        mNearbyStops = new ArrayList<>();
         
         // Set up handler for nearby stop update timer
         mUpdateHandler = new Handler();
@@ -111,12 +104,12 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_bus_stops, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_bus_stops, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
         // Get the filter field and add a listener to it
-        EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
         filterEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
@@ -124,7 +117,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             }
         });
 
-        ListView listView = (ListView) v.findViewById(R.id.list);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -134,9 +127,10 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
              */
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
-                Bundle clickedArgs = clickedItem.getArgs();
-                ComponentFactory.getInstance().switchFragments(new Bundle(clickedArgs));
+                StopStub stopStub = (StopStub) parent.getAdapter().getItem(position);
+                Bundle displayArgs = BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
+                        stopStub.getAgencyTag(), stopStub.getTitle());
+                ComponentFactory.getInstance().switchFragments(displayArgs);
             }
 
         });
@@ -154,9 +148,10 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
         if(mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
 
-        // Clear out everything
-        clearNearbyRows();
+        // Clear out everything & add in empty nearby stops section as a placeholder
         mAdapter.clear();
+        mNearbyStops.clear();
+        mAdapter.add(new SimpleSection<>(getString(R.string.nearby_bus_header), mNearbyStops));
 
         // Start the update thread when screen is active
         mUpdateTimer = new Timer();
@@ -187,7 +182,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             @Override
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
-                if(!isAdded() || getResources() == null) return;
+                if(getResources() == null) return;
 
                 List<StopStub> nbResult = (List<StopStub>) results.get(0).getResult();
                 List<StopStub> nwkResult = (List<StopStub>) results.get(1).getResult();
@@ -260,7 +255,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      */
     private void loadAgency(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
         // Abort if resources can't be accessed
-        if(!isAdded() || getResources() == null) return;
+        if(getResources() == null) return;
 
         // Get header for active stops section
         String header;
@@ -268,62 +263,15 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_active_stops_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
-        mAdapter.add(new RMenuHeaderRow(header));
-
-        if(stopStubs.isEmpty()) {
-            mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_stops)));
-        } else {
-            for(StopStub stopStub: stopStubs) {
-                Bundle stopArgs = BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
-                        agency, stopStub.getTitle());
-                mAdapter.add(new RMenuItemRow(stopArgs));
-            }
-        }
-    }
-    
-    /**
-     * Remove rows related to nearby stops
-     */
-    private void clearNearbyRows() {
-        for(int i = 0; i < mNearbyRowCount; i++) {
-            mAdapter.remove(1);
-        }
-        mNearbyRowCount = 0;
-        removeNearbyHeader();
-    }
-
-    /**
-     * Add a nearby stop row
-     * @param pos position
-     * @param row value
-     */
-    private void addNearbyRow(int pos, RMenuRow row) {
-        addNearbyHeader(); // Add header if it's not in yet
-        mAdapter.insert(row, pos);
-        mNearbyRowCount++;
-    }
-
-    /** Add "nearby stops" header */
-    private void addNearbyHeader() {
-        if(!mNearbyHeaderAdded) {
-            mAdapter.insert(new RMenuHeaderRow(getString(R.string.bus_nearby_active_stops_header)), 0);
-            mNearbyHeaderAdded = true;
-        }
-    }
-
-    /** Remove "nearby stops" header */
-    private void removeNearbyHeader() {
-        if(mNearbyHeaderAdded) {
-            mAdapter.remove(0);
-            mNearbyHeaderAdded = false;
-        }
+        SimpleSection<StopStub> section = new SimpleSection<>(header, stopStubs);
+        mAdapter.add(section);
     }
 
     /**
      * Populate list with active nearby stops for an agency
      */
     private void loadNearbyStops() {
-        if(!isAdded() || getResources() == null) return;
+        if(getResources() == null) return;
 
         final String noneNearbyString = getString(R.string.bus_no_nearby_stops);
         final String failedLoadString = getString(R.string.failed_load_short);
@@ -338,7 +286,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             if(lastLoc == null) {
                 Log.w(TAG, "Could not get location");
                 clearNearbyRows();
-                addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
+                //addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
                 return;
             }
 
@@ -353,7 +301,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
                 @Override
                 public void onDone(MultipleResults results) {
-                    if(!isAdded() || getResources() == null) return;
+                    if(getResources() == null) return;
 
                     List<StopGroup> nbStops = (List<StopGroup>) results.get(0).getResult();
                     List<StopGroup> nwkStops = (List<StopGroup>) results.get(1).getResult();
@@ -363,35 +311,36 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
                     if(nbStops.isEmpty() && nwkStops.isEmpty()) {
                         // If there aren't any results, put a "no stops nearby" message
-                        addNearbyRow(1, new RMenuItemRow(noneNearbyString));
+                        //addNearbyRow(1, new RMenuItemRow(noneNearbyString));
                     } else {
                         // Add all the stops
-                        int j = 1;
-                        for(StopGroup stopGroup: nbStops) {
-                            Bundle stopArgs = BusDisplay.createArgs(stopGroup.getTitle(), BusDisplay.STOP_MODE,
-                                    NextbusAPI.AGENCY_NB, stopGroup.getTitle());
-                            addNearbyRow(j++, new RMenuItemRow(stopArgs));
-                        }
-
-                        for(StopGroup stopGroup: nwkStops) {
-                            Bundle stopArgs = BusDisplay.createArgs(stopGroup.getTitle(), BusDisplay.STOP_MODE,
-                                    NextbusAPI.AGENCY_NWK, stopGroup.getTitle());
-                            addNearbyRow(j++, new RMenuItemRow(stopArgs));
-                        }
+                        for(StopGroup stopGroup: nbStops) addNearbyRow(new StopStub(stopGroup));
+                        for(StopGroup stopGroup: nwkStops) addNearbyRow(new StopStub(stopGroup));
                     }
                 }
 
             }).fail(new FailCallback<OneReject>() {
                 @Override
                 public void onFail(OneReject result) {
-                    addNearbyRow(1, new RMenuItemRow(failedLoadString));
+                    if(getResources() == null) return;
+                    //addNearbyRow(1, new RMenuItemRow(failedLoadString));
                 }
             });
         } else {
             Log.w(TAG, "Couldn't get location provider, can't find nearby stops");
-            addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
+            //addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
         }
 
+    }
+
+    private void addNearbyRow(StopStub stopStub) {
+        mNearbyStops.add(stopStub);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void clearNearbyRows() {
+        mNearbyStops.clear();
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

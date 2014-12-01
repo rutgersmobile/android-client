@@ -25,4 +25,9 @@ public final class RouteStub {
     void setAgencyTag(@NonNull String agencyTag) {
         this.agencyTag = agencyTag;
     }
+
+    @Override
+    public String toString() {
+        return getTitle();
+    }
 }
