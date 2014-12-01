@@ -72,18 +72,16 @@ public final class NextbusAPI {
         sDM.when(AndroidExecutionScope.BACKGROUND, promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new DoneCallback<MultipleResults>() {
             @Override
             public void onDone(MultipleResults results) {
-                Gson gson = new Gson();
-
                 try {
                     for (OneResult result: results) {
                         if (result.getPromise() == promiseNBActive) {
-                            mNBActive = gson.fromJson(result.getResult().toString(), ActiveStops.class);
+                            mNBActive = new ActiveStops(AGENCY_NB, (JSONObject) result.getResult());
                         } else if (result.getPromise() == promiseNWKActive) {
-                            mNWKActive = gson.fromJson(result.getResult().toString(), ActiveStops.class);
+                            mNWKActive = new ActiveStops(AGENCY_NWK, (JSONObject) result.getResult());
                         } else if (result.getPromise() == promiseNBConf) {
-                            mNBConf = new AgencyConfig((JSONObject) result.getResult());
+                            mNBConf = new AgencyConfig(AGENCY_NB, (JSONObject) result.getResult());
                         } else if (result.getPromise() == promiseNWKConf) {
-                            mNWKConf = new AgencyConfig((JSONObject) result.getResult());
+                            mNWKConf = new AgencyConfig(AGENCY_NWK, (JSONObject) result.getResult());
                         }
                     }
                 } catch (JsonSyntaxException | JSONException e) {

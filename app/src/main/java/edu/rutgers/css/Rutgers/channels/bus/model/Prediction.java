@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Arrival time predictions for a bus stop.
  */
-public class Prediction implements Serializable {
+public final class Prediction implements Serializable {
     private String tag;
     private String title;
     private String direction;

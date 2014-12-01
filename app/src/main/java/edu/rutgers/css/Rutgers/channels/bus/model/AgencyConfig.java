@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.bus.model;
 
+import android.support.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -15,14 +17,17 @@ import java.util.List;
 /**
  * Nextbus agency configuration.
  */
-public class AgencyConfig {
+public final class AgencyConfig {
     private HashMap<String, Route> routes;
     private HashMap<String, Stop> stops;
     private HashMap<String, StopGroup> stopsByTitle;
     private List<StopStub> sortedStops;
     private List<RouteStub> sortedRoutes;
+    private String agencyTag; // Not part of Nextbus results
 
-    public AgencyConfig(JSONObject configJson) throws JSONException, JsonSyntaxException {
+    public AgencyConfig(@NonNull String agencyTag, @NonNull JSONObject configJson) throws JSONException, JsonSyntaxException {
+        setAgencyTag(agencyTag);
+
         Gson gson = new Gson();
 
         // Deserialize the routes table
@@ -33,6 +38,7 @@ public class AgencyConfig {
             JSONObject routeJson = routesJson.getJSONObject(routeTag);
             Route route = gson.fromJson(routeJson.toString(), Route.class);
             route.setTitle(routeTag);
+            route.setAgencyTag(getAgencyTag());
             this.routes.put(routeTag, route);
         }
 
@@ -44,6 +50,7 @@ public class AgencyConfig {
             JSONObject stopJson = stopsJson.getJSONObject(stopTag);
             Stop stop = gson.fromJson(stopJson.toString(), Stop.class);
             stop.setTitle(stopTag);
+            stop.setAgencyTag(getAgencyTag());
             this.stops.put(stopTag, stop);
         }
 
@@ -55,6 +62,7 @@ public class AgencyConfig {
             JSONObject stopGroupJson = stopGroupsJson.getJSONObject(stopGroupTag);
             StopGroup stopGroup = gson.fromJson(stopGroupJson.toString(), StopGroup.class);
             stopGroup.setTitle(stopGroupTag);
+            stopGroup.setAgencyTag(getAgencyTag());
             this.stopsByTitle.put(stopGroupTag, stopGroup);
         }
 
@@ -62,11 +70,13 @@ public class AgencyConfig {
         JSONArray sortedStopsJson = configJson.getJSONArray("sortedStops");
         StopStub stopStubs[] = gson.fromJson(sortedStopsJson.toString(), StopStub[].class);
         this.sortedStops = Arrays.asList(stopStubs);
+        for(StopStub stopStub: sortedStops) stopStub.setAgencyTag(getAgencyTag());
 
         // Deserialize the sorted route stubs
         JSONArray sortedRoutesJson = configJson.getJSONArray("sortedRoutes");
         RouteStub routeStubs[] = gson.fromJson(sortedRoutesJson.toString(), RouteStub[].class);
         this.sortedRoutes = Arrays.asList(routeStubs);
+        for(RouteStub routeStub: sortedRoutes) routeStub.setAgencyTag(getAgencyTag());
     }
 
     public HashMap<String, Route> getRoutes() {
@@ -87,5 +97,13 @@ public class AgencyConfig {
 
     public List<RouteStub> getSortedRoutes() {
         return sortedRoutes;
+    }
+
+    public String getAgencyTag() {
+        return agencyTag;
+    }
+
+    private void setAgencyTag(@NonNull String agencyTag) {
+        this.agencyTag = agencyTag;
     }
 }
