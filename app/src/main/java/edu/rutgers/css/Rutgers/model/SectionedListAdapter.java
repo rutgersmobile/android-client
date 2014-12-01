@@ -50,8 +50,6 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter implements 
 
     /** Get the sum of the collection sizes for each section. */
     public int getCount() {
-        if(mSections == null) return 0;
-
         int total = 0;
         for(T section: mSections) total += getSectionItemCount(section);
         return total;
