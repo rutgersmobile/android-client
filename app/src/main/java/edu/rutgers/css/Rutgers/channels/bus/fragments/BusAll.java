@@ -14,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,14 +32,14 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
+import edu.rutgers.css.Rutgers.channels.bus.model.NextbusItem;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 
 public class BusAll extends Fragment {
@@ -53,7 +52,7 @@ public class BusAll extends Fragment {
     private static final String SAVED_FILTER_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".filter";
 
     /* Member data */
-    private RMenuAdapter mAdapter;
+    private SimpleSectionedAdapter<NextbusItem> mAdapter;
     private String mFilterString;
     private boolean mLoading;
 
@@ -68,8 +67,7 @@ public class BusAll extends Fragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ArrayList<RMenuRow> data = new ArrayList<>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
+        mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         // Restore filter
         if(savedInstanceState != null) {
@@ -115,7 +113,7 @@ public class BusAll extends Fragment {
 
                 // Set filter after info is re-loaded
                 if(mFilterString != null) {
-                    mAdapter.getFilter().filter(mFilterString);
+                    //mAdapter.getFilter().filter(mFilterString);
                 }
 
             }
@@ -139,7 +137,7 @@ public class BusAll extends Fragment {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_bus_all, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_bus_all, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if(mLoading) showProgressCircle();
@@ -156,7 +154,7 @@ public class BusAll extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Set filter for list adapter
                 mFilterString = s.toString().trim();
-                mAdapter.getFilter().filter(mFilterString);
+                //mAdapter.getFilter().filter(mFilterString);
             }
 
             @Override
@@ -167,7 +165,7 @@ public class BusAll extends Fragment {
         filterEditText.requestFocus();
 
         // Get clear button and set listener
-        ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
+        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
         filterClearButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -176,15 +174,19 @@ public class BusAll extends Fragment {
         });
 
         // Set up list to accept clicks on route or stop rows
-        ListView listView = (ListView) v.findViewById(R.id.list);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuItemRow clickedItem = (RMenuItemRow) parent.getAdapter().getItem(position);
-                Bundle clickedArgs = clickedItem.getArgs();
-                ComponentFactory.getInstance().switchFragments(new Bundle(clickedArgs));
+                NextbusItem clickedItem = (NextbusItem) parent.getAdapter().getItem(position);
+                String mode = clickedItem.getClass() == RouteStub.class ?
+                        BusDisplay.ROUTE_MODE : BusDisplay.STOP_MODE;
+
+                ComponentFactory.getInstance().switchFragments(
+                        BusDisplay.createArgs(clickedItem.getTitle(), mode,
+                                clickedItem.getAgencyTag(), clickedItem.getTag()));
             }
 
         });
@@ -215,17 +217,10 @@ public class BusAll extends Fragment {
         else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_stops_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
-        mAdapter.add(new RMenuHeaderRow(header));
+        List<NextbusItem> nextbusItems = new ArrayList<>(stopStubs.size());
+        nextbusItems.addAll(stopStubs);
 
-        if(stopStubs.isEmpty()) {
-            mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_stops)));
-        } else {
-            for(StopStub stopStub: stopStubs) {
-                Bundle stopArgs = BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
-                        agency, stopStub.getTitle());
-                mAdapter.add(new RMenuItemRow(stopArgs));
-            }
-        }
+        mAdapter.add(new SimpleSection<>(header, nextbusItems));
     }
 
     private void loadRoutes(@NonNull String agency, @NonNull List<RouteStub> routeStubs) {
@@ -237,17 +232,10 @@ public class BusAll extends Fragment {
         else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_routes_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
-        mAdapter.add(new RMenuHeaderRow(header));
+        List<NextbusItem> nextbusItems = new ArrayList<>(routeStubs.size());
+        nextbusItems.addAll(routeStubs);
 
-        if(routeStubs.isEmpty()) {
-            mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_configured_routes)));
-        } else {
-            for(RouteStub routeStub: routeStubs) {
-                Bundle routeArgs = BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
-                        agency, routeStub.getTag());
-                mAdapter.add(new RMenuItemRow(routeArgs));
-            }
-        }
+        mAdapter.add(new SimpleSection<>(header, nextbusItems));
     }
 
     private void showProgressCircle() {

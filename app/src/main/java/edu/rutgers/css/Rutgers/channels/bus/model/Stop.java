@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Nextbus stop. Contains stop location and serviced routes.
  */
-public final class Stop {
+public final class Stop implements NextbusItem {
     private String title;
     @SerializedName("routes") private List<String> routeTags;
     @SerializedName("lat") private String latitude;
@@ -21,8 +21,14 @@ public final class Stop {
         this.title = title;
     }
 
+    @Override
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String getTag() {
+        return getTitle();
     }
 
     public List<String> getRouteTags() {
@@ -41,11 +47,17 @@ public final class Stop {
         return stopId;
     }
 
+    @Override
     public String getAgencyTag() {
         return agencyTag;
     }
 
     void setAgencyTag(@NonNull String agencyTag) {
         this.agencyTag = agencyTag;
+    }
+
+    @Override
+    public String toString() {
+        return getTitle();
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Nextbus stop tags grouped by stop title.
  */
-public final class StopGroup {
+public final class StopGroup implements NextbusItem {
     private String title;
     @SerializedName("tags") private List<String> stopTags;
     private String geoHash;
@@ -19,8 +19,14 @@ public final class StopGroup {
         this.title = title;
     }
 
+    @Override
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String getTag() {
+        return getTitle();
     }
 
     public List<String> getStopTags() {
@@ -31,11 +37,17 @@ public final class StopGroup {
         return geoHash;
     }
 
+    @Override
     public String getAgencyTag() {
         return agencyTag;
     }
 
     void setAgencyTag(@NonNull String agencyTag) {
         this.agencyTag = agencyTag;
+    }
+
+    @Override
+    public String toString() {
+        return getTitle();
     }
 }

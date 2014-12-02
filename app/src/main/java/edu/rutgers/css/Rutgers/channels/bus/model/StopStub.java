@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 /**
  * Nextbus stop stub.
  */
-public final class StopStub {
+public final class StopStub implements NextbusItem {
     private String title;
     private String geoHash;
     private String agencyTag; // Not part of Nextbus results
@@ -17,14 +17,21 @@ public final class StopStub {
         this.agencyTag = stopGroup.getAgencyTag();
     }
 
+    @Override
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String getTag() {
+        return getTitle();
     }
 
     public String getGeoHash() {
         return geoHash;
     }
 
+    @Override
     public String getAgencyTag() {
         return agencyTag;
     }
