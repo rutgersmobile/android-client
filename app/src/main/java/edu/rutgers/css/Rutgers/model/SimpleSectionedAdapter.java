@@ -4,7 +4,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 /**
- * Simple sectioned adapter implementation.
+ * Simple {@link edu.rutgers.css.Rutgers.model.SectionedListAdapter} implementation that should
+ * be suitable for most general uses.
+ * Uses the {@link SimpleSection} class to represent sections.
  */
 public class SimpleSectionedAdapter<U> extends SectionedListAdapter<SimpleSection<U>, U> {
 

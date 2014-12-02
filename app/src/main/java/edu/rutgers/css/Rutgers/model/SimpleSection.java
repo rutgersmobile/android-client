@@ -5,7 +5,8 @@ import android.support.annotation.NonNull;
 import java.util.List;
 
 /**
- * Simple collection of items with header.
+ * Simple collection of items with a header string.
+ * Used in the implementation of {@link edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter}.
  */
 public class SimpleSection<T> {
 

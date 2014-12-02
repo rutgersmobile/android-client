@@ -16,20 +16,51 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 /**
  * Adapter for data that is grouped by sections.
+ *
+ * <p>This abstract class defines three abstract methods
+ * that make it easy to add multiple objects that represent or contain some kind of collection
+ * to an adapter. The contents of each collection can then be displayed in order with header
+ * separators. This avoids the need to mix header objects and data objects in an adapter/list, and
+ * allows for the nice "sticky headers" behavior.
+ *
+ * <p>For simple usage, this class can already inflate the given item and header layout views and
+ * use the toString() method of the item or header class to populate the specified TextView. For
+ * more advanced usage, override the {@link #getView(int position, View convertView, ViewGroup parent)}
+ * and {@link #getHeaderView(int, android.view.View, android.view.ViewGroup)} methods.
  */
-public abstract class SectionedListAdapter<T, U> extends BaseAdapter implements StickyListHeadersAdapter {
+public abstract class SectionedListAdapter<T, U> extends BaseAdapter
+        implements StickyListHeadersAdapter {
 
     private Context mContext;
     private LayoutInflater mInflater;
+
+    /** Resource ID of view to inflate for displaying an item. */
     private int mItemResource;
+
+    /** Resource ID of view to inflate for displaying a header. */
     private int mHeaderResource;
+
+    /** Resource ID of TextView to display header or item string representation in. */
     private int mTextViewId;
+
+    /** Contains the objects representing each section in the list. */
     private List<T> mSections;
 
+    /** Lock used to modify the content of {@link #mSections}. */
+    protected final Object mLock = new Object();
+
+    /** Holder for default getView() implementations. */
     private static class ViewHolder {
         TextView textView;
     }
 
+    /**
+     * Constructor
+     * @param context Context
+     * @param itemResource Layout resource for item views
+     * @param headerResource Layout resource for header views
+     * @param textViewId ID of text view to populate in the item and header layouts
+     */
     public SectionedListAdapter(@NonNull Context context, int itemResource, int headerResource, int textViewId) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
@@ -55,18 +86,27 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter implements 
         return total;
     }
 
+    /** Add the specified object to the end of the list. */
     public void add(T section) {
-        mSections.add(section);
+        synchronized (mLock) {
+            mSections.add(section);
+        }
         notifyDataSetChanged();
     }
 
+    /** Add the group of specified objects to the end of the list. */
     public void addAll(Collection<T> sections) {
-        mSections.addAll(sections);
+        synchronized (mLock) {
+            mSections.addAll(sections);
+        }
         notifyDataSetChanged();
     }
 
+    /** Remove all objects from the list. */
     public void clear() {
-        mSections.clear();
+        synchronized (mLock) {
+            mSections.clear();
+        }
         notifyDataSetChanged();
     }
 
@@ -186,6 +226,10 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter implements 
 
     protected int getTextViewId() {
         return mTextViewId;
+    }
+
+    protected List<T> getSections() {
+        return mSections;
     }
 
 }
