@@ -116,7 +116,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
             @Override
             public void onDone(MultipleResults results) {
                 // Abort if resources can't be accessed
-                if (getResources() == null) return;
+                if (!isAdded() || getResources() == null) return;
 
                 List<RouteStub> nbResult = (List<RouteStub>) results.get(0).getResult();
                 List<RouteStub> nwkResult = (List<RouteStub>) results.get(1).getResult();
@@ -162,7 +162,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
      */
     private void loadAgency(@NonNull String agencyTag, @NonNull List<RouteStub> routeStubs) {
         // Abort if resources can't be accessed
-        if(getResources() == null) return;
+        if(!isAdded() || getResources() == null) return;
 
         // Get header for routes section
         String header;

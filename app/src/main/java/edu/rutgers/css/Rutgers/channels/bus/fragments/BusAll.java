@@ -207,7 +207,7 @@ public class BusAll extends Fragment {
     }
 
     private void loadStops(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
-        if(getResources() == null) return;
+        if(!isAdded() || getResources() == null) return;
 
         // Get header for stops section
         String header;
@@ -229,7 +229,7 @@ public class BusAll extends Fragment {
     }
 
     private void loadRoutes(@NonNull String agency, @NonNull List<RouteStub> routeStubs) {
-        if(getResources() == null) return;
+        if(!isAdded() || getResources() == null) return;
 
         // Get header for routes section
         String header;

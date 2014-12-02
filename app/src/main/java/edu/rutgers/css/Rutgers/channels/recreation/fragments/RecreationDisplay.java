@@ -202,7 +202,7 @@ public class RecreationDisplay extends Fragment {
 
     private void addInfo() {
         // If resources aren't available when callback fires, exit
-        if(mFacility == null || getResources() == null) return;
+        if(mFacility == null || !isAdded() || getResources() == null) return;
 
         // Fill in location info
         String infoDesk = mFacility.getInformationNumber();

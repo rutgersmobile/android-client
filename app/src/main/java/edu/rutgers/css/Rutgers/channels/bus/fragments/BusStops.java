@@ -182,7 +182,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             @Override
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
-                if(getResources() == null) return;
+                if(!isAdded() || getResources() == null) return;
 
                 List<StopStub> nbResult = (List<StopStub>) results.get(0).getResult();
                 List<StopStub> nwkResult = (List<StopStub>) results.get(1).getResult();
@@ -255,7 +255,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      */
     private void loadAgency(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
         // Abort if resources can't be accessed
-        if(getResources() == null) return;
+        if(!isAdded() || getResources() == null) return;
 
         // Get header for active stops section
         String header;
@@ -271,7 +271,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      * Populate list with active nearby stops for an agency
      */
     private void loadNearbyStops() {
-        if(getResources() == null) return;
+        if(!isAdded() || getResources() == null) return;
 
         final String noneNearbyString = getString(R.string.bus_no_nearby_stops);
         final String failedLoadString = getString(R.string.failed_load_short);
@@ -301,7 +301,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
                 @Override
                 public void onDone(MultipleResults results) {
-                    if(getResources() == null) return;
+                    if(!isAdded() || getResources() == null) return;
 
                     List<StopGroup> nbStops = (List<StopGroup>) results.get(0).getResult();
                     List<StopGroup> nwkStops = (List<StopGroup>) results.get(1).getResult();
@@ -322,7 +322,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             }).fail(new FailCallback<OneReject>() {
                 @Override
                 public void onFail(OneReject result) {
-                    if(getResources() == null) return;
+                    if(!isAdded() || getResources() == null) return;
                     //addNearbyRow(1, new RMenuItemRow(failedLoadString));
                 }
             });
