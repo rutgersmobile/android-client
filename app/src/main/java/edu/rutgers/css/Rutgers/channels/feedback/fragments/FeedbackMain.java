@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.feedback.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Gravity;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -20,6 +22,7 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,45 +36,58 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.ruinfo.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
-import edu.rutgers.css.Rutgers.model.SpinnerAdapterImpl;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
+/** Feedback form. */
 public class FeedbackMain extends Fragment implements OnItemSelectedListener {
 
+    /* Log tag and component handle */
     private static final String TAG = "FeedbackMain";
     public static final String HANDLE = "feedback";
+
     //private static final String API = AppUtils.API_BASE + "feedback.php";
     private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php"; // TODO Replace
-    
+
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+
+    /* Member data */
+    private AQuery mAQ;
+    private boolean mLockSend;
+
+    /* View references */
     private Spinner mSubjectSpinner;
     private Spinner mChannelSpinner;
     private EditText mMessageEditText;
     private EditText mEmailEditText;
-    private SpinnerAdapterImpl<String> mChannelSpinnerAdapter;
-    private boolean mLockSend;
-    
-    private AQuery aq;
-    
+
     public FeedbackMain() {
         // Required empty public constructor
     }
-    
+
+    public static Bundle createArgs(@NonNull String title) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, FeedbackMain.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        return bundle;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         
-        aq = new AQuery(getActivity().getApplicationContext());
+        mAQ = new AQuery(getActivity().getApplicationContext());
     }
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_feedback_main, container, false);
-        Bundle args = getArguments();
+        final View v = inflater.inflate(R.layout.fragment_feedback_main, container, false);
+        final Bundle args = getArguments();
 
         // Set title from JSON
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.feedback_title);
         
         mLockSend = false;
@@ -80,17 +96,23 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         mEmailEditText = (EditText) v.findViewById(R.id.emailEditText);
 
         mSubjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
+        ArrayAdapter<CharSequence> subjectAdapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.feedback_subjects, android.R.layout.simple_spinner_item);
+        subjectAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        mSubjectSpinner.setAdapter(subjectAdapter);
         mSubjectSpinner.setOnItemSelectedListener(this);
 
-        mChannelSpinnerAdapter = new SpinnerAdapterImpl<>(getActivity(), android.R.layout.simple_spinner_item);
+        ArrayAdapter<String> channelAdapter = new ArrayAdapter<>(getActivity(),
+                android.R.layout.simple_spinner_item);
+        channelAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         mChannelSpinner = (Spinner) v.findViewById(R.id.channelSpinner);
-        mChannelSpinner.setAdapter(mChannelSpinnerAdapter);
+        mChannelSpinner.setAdapter(channelAdapter);
 
         final String homeCampus = RutgersUtils.getHomeCampus(getActivity());
 
         ChannelManager channelManager = ((ChannelManagerProvider) getActivity()).getChannelManager();
         for(Channel channel: channelManager.getChannels()) {
-            mChannelSpinnerAdapter.add(channel.getTitle(homeCampus));
+            channelAdapter.add(channel.getTitle(homeCampus));
         }
         
         return v;
@@ -112,23 +134,36 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         
         return false;
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // Get rid of view references
+        mSubjectSpinner = null;
+        mChannelSpinner = null;
+        mMessageEditText = null;
+        mEmailEditText = null;
+    }
         
     /**
      * Submit the feedback
      */
     private void sendFeedback() {
         // Empty message - do nothing
-        if(mMessageEditText.getText().toString().trim().isEmpty()) {
+        if(StringUtils.isBlank(mMessageEditText.getText().toString())) {
             return;
         }
+
+        // TODO Validate email address format
         
         // Build POST request
         Map<String, Object> params = new HashMap<>();
         params.put("subject", mSubjectSpinner.getSelectedItem());
-        params.put("email", mEmailEditText.getText().toString());
-        params.put("uuid", AppUtils.getUUID(getActivity().getApplicationContext()) + "@android");
+        params.put("email", mEmailEditText.getText().toString().trim());
+        params.put("uuid", AppUtils.getUUID(getActivity().getApplicationContext()));
         params.put("message", mMessageEditText.getText().toString().trim());
-        params.put("wants_response", !mEmailEditText.getText().toString().isEmpty());
+        params.put("wants_response", StringUtils.isNotBlank(mEmailEditText.getText().toString()));
         // Post the selected channel if this is channel feedback
         if(mSubjectSpinner.getSelectedItem().equals(getString(R.string.feedback_channel_feedback))) {
             params.put("channel", mChannelSpinner.getSelectedItem());    
@@ -144,39 +179,35 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
         final String feedbackErrorString = getString(R.string.feedback_error);
         final String feedbackSuccessString = getString(R.string.feedback_success);
 
-        aq.ajax(API, params, JSONObject.class, new AjaxCallback<JSONObject>() {
-            
+        mAQ.ajax(API, params, JSONObject.class, new AjaxCallback<JSONObject>() {
+
             @Override
             public void callback(String url, JSONObject json, AjaxStatus status) {
                 // Unlock send button
                 mLockSend = false;
-                
+
                 // Check the response JSON
-                if(json != null) {
-                    // Errors - invalid input
-                    if(json.optJSONArray("errors") != null) {
+                if (json != null) {
+                    if (json.optJSONArray("errors") != null) {
                         JSONArray response = json.optJSONArray("errors");
                         Toast.makeText(getActivity(), response.optString(0, feedbackErrorString), Toast.LENGTH_SHORT).show();
-                    }
-                    // Success - input went through
-                    else if(!json.isNull("success")) {
+                    } else if (!json.isNull("success")) {
                         String response = json.optString("success", feedbackSuccessString);
                         Toast.makeText(getActivity(), response, Toast.LENGTH_SHORT).show();
-                        
+
                         // Only reset forms after message has gone through
                         resetForm();
                     }
-                }
-                // Didn't get JSON response
-                else {
+                } else {
+                    // No response
                     Log.w(TAG, AppUtils.formatAjaxStatus(status));
                     Toast toast = Toast.makeText(getActivity(), R.string.failed_load_short, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 125);
                     toast.show();
                 }
-                
+
             }
-            
+
         });
 
     }
@@ -185,10 +216,10 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
      * Reset the feedback forms.
      */
     private void resetForm() {
-        mSubjectSpinner.setSelection(0);
-        mChannelSpinner.setSelection(0);
-        mEmailEditText.setText("");
-        mMessageEditText.setText("");
+        if(mSubjectSpinner != null) mSubjectSpinner.setSelection(0);
+        if(mChannelSpinner != null) mChannelSpinner.setSelection(0);
+        if(mEmailEditText != null) mEmailEditText.setText("");
+        if(mMessageEditText != null) mMessageEditText.setText("");
 
         // Close soft keyboard
         AppUtils.closeKeyboard(getActivity());
@@ -201,9 +232,9 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
             
             // Channel feedback allows user to select a specific channel
             if(selection.equals(getString(R.string.feedback_channel_feedback))) {
-                mChannelSpinner.setVisibility(View.VISIBLE);
+                if(mChannelSpinner != null) mChannelSpinner.setVisibility(View.VISIBLE);
             } else {
-                mChannelSpinner.setVisibility(View.GONE);
+                if(mChannelSpinner != null) mChannelSpinner.setVisibility(View.GONE);
             }
             
             // "General questions" boots you to RU-info. BURNNNN!!!
@@ -214,7 +245,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
                 
                 // Launch RU-info channel
                 Bundle args = new Bundle();
-                args.putString("component", RUInfoMain.HANDLE);
+                args.putString(ComponentFactory.ARG_COMPONENT_TAG, RUInfoMain.HANDLE);
                 ComponentFactory.getInstance().switchFragments(args);
             }
 

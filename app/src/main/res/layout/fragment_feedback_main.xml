@@ -21,7 +21,6 @@
         android:id="@+id/subjectSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/feedback_subjects"
         android:gravity="fill_horizontal"
         android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
 
