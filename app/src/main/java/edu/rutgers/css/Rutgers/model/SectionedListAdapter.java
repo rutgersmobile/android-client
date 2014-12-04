@@ -23,9 +23,11 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
  * separators. This avoids the need to mix header objects and data objects in an adapter/list, and
  * allows for the nice "sticky headers" behavior.
  *
- * <p>For simple usage, this class can already inflate the given item and header layout views and
- * use the toString() method of the item or header class to populate the specified TextView. For
- * more advanced usage, override the {@link #getView(int position, View convertView, ViewGroup parent)}
+ * <p>For simple usage, this class has default methods for inflating the given item and header layouts
+ * and populating a TextView using the {@link #toString()} method for items and the
+ * {@link #getSectionHeader(T section)} method for headers.
+ * 
+ * <p>For more advanced usage, you can override the {@link #getView(int position, View convertView, ViewGroup parent)}
  * and {@link #getHeaderView(int, android.view.View, android.view.ViewGroup)} methods.
  */
 public abstract class SectionedListAdapter<T, U> extends BaseAdapter
