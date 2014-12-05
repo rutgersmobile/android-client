@@ -41,25 +41,45 @@ import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
- * Singleton fragment builder
+ * Singleton component builder
  */
 public final class ComponentFactory {
 
+    /* Log tag. */
     private static final String TAG = "ComponentFactory";
 
     /* Standard argument bundle tags */
+
+    /** Handle of fragment to launch. */
     public static final String ARG_COMPONENT_TAG    = "component";
+
+    /** Title to display in action bar. */
     public static final String ARG_TITLE_TAG        = "title";
+
+    /** Channel handle, usually JSON-defined. */
     public static final String ARG_HANDLE_TAG       = "handle";
+
+    /** JSON data passed as a string. */
     public static final String ARG_DATA_TAG         = "data";
+
+    /** URL argument. */
     public static final String ARG_URL_TAG          = "url";
+
+    /** RUMobile API file argument. */
     public static final String ARG_API_TAG          = "api";
+
+    /** Count argument. For example, the number of events to grab in Events. */
     public static final String ARG_COUNT_TAG        = "count";
 
+    /* Static data. */
+
+    /** Component factory singleton. */
     private static ComponentFactory sSingletonInstance;
+
+    /** Reference to the activity to switch fragments for. */
     private static WeakReference<FragmentActivity> sMainActivity;
 
-    // Set up table of fragments that can be launched
+    /** Table of fragments that can be launched. Handles must be lowercase. */
     private static Map<String, Class<? extends Fragment>> sFragmentTable =
             Collections.unmodifiableMap(new HashMap<String, Class<? extends Fragment>>() {{
         // General views
@@ -96,6 +116,7 @@ public final class ComponentFactory {
         put(FeedbackMain.HANDLE, FeedbackMain.class);
     }});
 
+    /** Private constructor to enforce singleton usage. */
     private ComponentFactory() {}
 
     public void setMainActivity(@NonNull FragmentActivity fragmentActivity) {
@@ -103,8 +124,8 @@ public final class ComponentFactory {
     }
 
     /**
-     * Get singleton sSingletonInstance
-     * @return Component factory singleton sSingletonInstance
+     * Get singleton instance.
+     * @return Component factory singleton instance
      */
     public static ComponentFactory getInstance() {
         if(sSingletonInstance == null) sSingletonInstance = new ComponentFactory();
@@ -121,12 +142,11 @@ public final class ComponentFactory {
         Fragment fragment;
         String component;
         
-        if(options.getString("component") == null || options.getString("component").isEmpty()) {
-            Log.e(TAG, "Component argument not set");
-            return null;
+        if(options.getString(ARG_COMPONENT_TAG) == null || options.getString(ARG_COMPONENT_TAG).isEmpty()) {
+            throw new IllegalArgumentException("\"" + ARG_COMPONENT_TAG + "\" must be set");
         }
         
-        component = options.getString("component").toLowerCase(Locale.US);
+        component = options.getString(ARG_COMPONENT_TAG).toLowerCase(Locale.US);
         Class<? extends Fragment> componentClass = sFragmentTable.get(component);
         if(componentClass != null) {
             Log.v(TAG, "Creating a " + componentClass.getSimpleName());
@@ -137,11 +157,14 @@ public final class ComponentFactory {
                 return null;
             }    
         } else {
-            Log.e(TAG, "Component \"" + component + "\" is undefined");
+            Log.e(TAG, "Component \"" + component + "\" not found");
             return null;
         }
-        
-        fragment.setArguments(options);
+
+        Bundle optionsCopy = new Bundle(options);
+        optionsCopy.remove(ARG_COMPONENT_TAG);
+
+        fragment.setArguments(optionsCopy);
         return fragment;
     }
     
@@ -159,23 +182,23 @@ public final class ComponentFactory {
             return false;
         }
 
-        String componentTag = args.getString("component");
-        boolean isTopLevel = args.getBoolean("topLevel");
+        final String componentTag = args.getString(ARG_COMPONENT_TAG);
+        final boolean isTopLevel = args.getBoolean("topLevel");
 
         // Create analytics event
         JSONObject extras = new JSONObject();
         try {
             extras.put("handle", componentTag);
-            if(args.getString("url") != null) extras.put("url", args.getString("url"));
-            if(args.getString("api") != null) extras.put("api", args.getString("api"));
-            if(args.getString("title") != null) extras.put("title", args.getString("title"));
+            if(args.getString(ARG_URL_TAG) != null) extras.put("url", args.getString(ARG_URL_TAG));
+            if(args.getString(ARG_API_TAG) != null) extras.put("api", args.getString(ARG_API_TAG));
+            if(args.getString(ARG_TITLE_TAG) != null) extras.put("title", args.getString(ARG_TITLE_TAG));
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
         Analytics.queueEvent(sMainActivity.get(), Analytics.CHANNEL_OPENED, extras.toString());
 
         // Attempt to create the fragment
-        Fragment fragment = createFragment(args);
+        final Fragment fragment = createFragment(args);
         if(fragment == null) return false;
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
@@ -191,7 +214,8 @@ public final class ComponentFactory {
                 
         // Switch the main content fragment
         fm.beginTransaction()
-            .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left, R.animator.slide_in_left, R.animator.slide_out_right)
+            .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left,
+                    R.animator.slide_in_left, R.animator.slide_out_right)
             .replace(R.id.main_content_frame, fragment, componentTag)
             .addToBackStack(componentTag)
             .commit();
