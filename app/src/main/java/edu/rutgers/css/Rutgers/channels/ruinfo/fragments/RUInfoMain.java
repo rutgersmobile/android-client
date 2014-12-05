@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +20,14 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 public class RUInfoMain extends Fragment {
 
+    /* Log tag and component handle */
     private static final String TAG = "RUInfoMain";
     public static final String HANDLE = "ruinfo";
-    
-    // Can possibly grab these from a resource file or API later on
+
+    /* Argument bundle tags */
+    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+
+    /* Can possibly grab these from a resource file or API later on */
     private String mPhoneNumber = "tel:7324454636";
     private String mTextNumber = "66746";
     private String mEmailAddress = "colhenry@rci.rutgers.edu";
@@ -32,14 +37,21 @@ public class RUInfoMain extends Fragment {
     public RUInfoMain() {
         // Required empty public constructor
     }
+
+    public static Bundle createArgs(@Nullable String title) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, RUInfoMain.HANDLE);
+        bundle.putString(ARG_TITLE_TAG, title);
+        return bundle;
+    }
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_ruinfo_main, container, false);
-        Bundle args = getArguments();
+        final View v = inflater.inflate(R.layout.fragment_ruinfo_main, container, false);
+        final Bundle args = getArguments();
 
         // Set title from JSON
-        if(args.getString("title") != null) getActivity().setTitle(args.getString("title"));
+        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.ruinfo_title);
 
         //final LinearLayout telephonyLayout = (LinearLayout) v.findViewById(R.id.telephonyLayout);

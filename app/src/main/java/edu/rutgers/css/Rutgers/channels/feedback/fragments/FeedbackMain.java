@@ -244,8 +244,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
                 parent.setSelection(0);
                 
                 // Launch RU-info channel
-                Bundle args = new Bundle();
-                args.putString(ComponentFactory.ARG_COMPONENT_TAG, RUInfoMain.HANDLE);
+                Bundle args = RUInfoMain.createArgs(null);
                 ComponentFactory.getInstance().switchFragments(args);
             }
 
