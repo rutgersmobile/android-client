@@ -9,7 +9,7 @@ public final class Config {
 
     // Build info
     public static final String APPTAG = "Rutgers";
-    public static final String PACKAGE_NAME = BuildConfig.PACKAGE_NAME;
+    public static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
     public static final String VERSION = "4.0";
     public static final String OSNAME = "android";
     public static final String BETAMODE = "dev";
