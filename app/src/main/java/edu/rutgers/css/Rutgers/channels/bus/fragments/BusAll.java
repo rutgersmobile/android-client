@@ -50,7 +50,6 @@ public class BusAll extends BaseChannelFragment
 
     /* View references */
     private ProgressBar mProgressCircle;
-    private StickyListHeadersListView mListView;
     private EditText mFilterEditText;
     
     public BusAll() {
@@ -70,7 +69,7 @@ public class BusAll extends BaseChannelFragment
 
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
-    
+
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
@@ -108,9 +107,9 @@ public class BusAll extends BaseChannelFragment
         });
 
         // Set up list to accept clicks on route or stop rows
-        mListView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
-        mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new OnItemClickListener() {
+        StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -150,7 +149,6 @@ public class BusAll extends BaseChannelFragment
 
         // Get rid of view references
         mProgressCircle = null;
-        mListView = null;
         mFilterEditText = null;
     }
 
