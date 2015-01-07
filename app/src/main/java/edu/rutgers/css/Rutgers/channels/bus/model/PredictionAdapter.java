@@ -10,7 +10,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
@@ -32,6 +31,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
 
     private static final SimpleDateFormat arriveDf12 = new SimpleDateFormat("h:mm a", Locale.US);
     private static final SimpleDateFormat arriveDf24 = new SimpleDateFormat("H:mm", Locale.US);
+    private static final Calendar cal = Calendar.getInstance(Locale.US);
 
     private Context mContext;
     
@@ -43,7 +43,6 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
 
     static class PopViewHolder {
         TextView popdownTextView;
-        LinearLayout popdownLayout;
     }
     
     public PredictionAdapter(Context context, List<Prediction> objects) {
@@ -133,14 +132,13 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         if(convertView == null) {
             convertView = layoutInflater.inflate(R.layout.popdown, null);
             holder = new PopViewHolder();
-            holder.popdownLayout = (LinearLayout) convertView.findViewById(R.id.popdownLayout);
             holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
             convertView.setTag(holder);
         } else {
             holder = (PopViewHolder) convertView.getTag();
         }
 
-        Prediction prediction = this.getItem(position);
+        Prediction prediction = getItem(position);
 
         // Set prediction minutes
         if(!prediction.getMinutes().isEmpty()) {
@@ -200,7 +198,6 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
 
             // Determine bus arrival time
             Date date = new Date();
-            Calendar cal = Calendar.getInstance(Locale.US);
             cal.setTime(date);
             cal.add(Calendar.MINUTE, minutes.get(i));
             String arrivalTime = android.text.format.DateFormat.is24HourFormat(mContext) ?

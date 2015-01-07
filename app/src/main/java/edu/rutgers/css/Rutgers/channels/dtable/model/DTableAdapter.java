@@ -2,12 +2,13 @@ package edu.rutgers.css.Rutgers.channels.dtable.model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 /**
  * Adapter for making menus from DTable roots.
  */
-public class DTableAdapter extends BaseAdapter {
+public class DTableAdapter extends ExpandableListItemAdapter<DTableElement> {
 
     private final static String TAG = "DTableAdapter";
 
@@ -35,13 +36,12 @@ public class DTableAdapter extends BaseAdapter {
         TextView titleTextView;
     }
 
-    static class FAQViewHolder {
-        TextView titleTextView;
+    static class PopViewHolder {
         TextView popdownTextView;
-        LinearLayout popdownLayout;
     }
 
     public DTableAdapter(@NonNull Context context, List<DTableElement> elements) {
+        super(context, R.layout.row_bus_prediction, R.id.titleFrame, R.id.contentFrame);
         mContext = context;
         setData(elements);
         mHomeCampus = RutgersUtils.getHomeCampus(mContext); // TODO listen for updates to home campus
@@ -66,20 +66,8 @@ public class DTableAdapter extends BaseAdapter {
         }
     }
 
-    /**
-     * Toggle DTable row pop-down view
-     */
-    public void togglePopdown(int position) {
-        if(getItemViewType(position) == ViewTypes.FAQ_TYPE.ordinal()) {
-            DTableFAQ selectedFAQ = (DTableFAQ) mItems.get(position);
-            if (selectedFAQ.isOpened()) selectedFAQ.setOpened(false);
-            else selectedFAQ.setOpened(true);
-            notifyDataSetChanged();
-        }
-    }
-
     @Override
-    public Object getItem (int pos) {
+    public DTableElement getItem (int pos) {
        return mItems.get(pos);
     }
 
@@ -100,7 +88,7 @@ public class DTableAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        DTableElement element = (DTableElement) getItem(position);
+        DTableElement element = getItem(position);
 
         if(element instanceof DTableFAQ) return ViewTypes.FAQ_TYPE.ordinal();
         else if(element instanceof DTableRoot) return ViewTypes.CAT_TYPE.ordinal();
@@ -108,23 +96,51 @@ public class DTableAdapter extends BaseAdapter {
         else return ViewTypes.TEXT_TYPE.ordinal();
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getTitleView(final int position, @Nullable View convertView, @NonNull ViewGroup viewGroup) {
         switch(viewTypes[getItemViewType(position)]) {
-            case FAQ_TYPE:
-                return getFAQView(position, convertView, parent);
             case CAT_TYPE:
-                return getCategoryView(position, convertView, parent);
+                return getCategoryView(position, convertView, viewGroup);
             case ROOT_TYPE:
+            case FAQ_TYPE:
             default:
-                return getDefaultView(position, convertView, parent);
+                return getDefaultView(position, convertView, viewGroup);
         }
+    }
+
+    @NonNull
+    @Override
+    public View getContentView(final int position, @Nullable View convertView, @NonNull ViewGroup viewGroup) {
+        PopViewHolder holder;
+
+        if(convertView == null) {
+            LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = layoutInflater.inflate(R.layout.popdown, null);
+            holder = new PopViewHolder();
+            holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
+            convertView.setTag(holder);
+        } else {
+            holder = (PopViewHolder) convertView.getTag();
+        }
+
+        DTableElement element = getItem(position);
+
+        if(element instanceof DTableFAQ) {
+            DTableFAQ faqElement = (DTableFAQ) element;
+            holder.popdownTextView.setText(faqElement.getAnswer());
+        } else {
+            holder.popdownTextView.setText(null);
+        }
+
+        return convertView;
     }
 
     /**
      * Basic row with a line of text. Will display the appropriate "local" title based on
      * user's home campus if home and away strings are specified.
      */
+    @NonNull
     private View getDefaultView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
@@ -149,6 +165,7 @@ public class DTableAdapter extends BaseAdapter {
      * Category row with category title. Will display the appropriate "local" title based on
      * user's home campus if home and away strings are specified.
      */
+    @NonNull
     private View getCategoryView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
@@ -166,40 +183,6 @@ public class DTableAdapter extends BaseAdapter {
         DTableRoot rootElement = (DTableRoot) mItems.get(position);
 
         holder.titleTextView.setText(rootElement.getTitle(mHomeCampus));
-        return convertView;
-    }
-
-    /**
-     * FAQ row, which displays a line of text and can be clicked on to open a pop-down which
-     * displays further text.
-     */
-    public View getFAQView(int position, View convertView, ViewGroup parent) {
-        FAQViewHolder holder;
-
-        // If we aren't given a view, inflate one. Get special layout for sub-menu items.
-        if (convertView == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = layoutInflater.inflate(R.layout.row_dtable_popdown, null);
-            holder = new FAQViewHolder();
-            holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
-            holder.popdownLayout = (LinearLayout) convertView.findViewById(R.id.popdownLayout);
-            holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
-            convertView.setTag(holder);
-        } else {
-            holder = (FAQViewHolder) convertView.getTag();
-        }
-
-        DTableFAQ faqElement = (DTableFAQ) mItems.get(position);
-
-        holder.titleTextView.setText(faqElement.getTitle(mHomeCampus));
-
-        // Set pop-down contents
-        holder.popdownTextView.setText(faqElement.getAnswer());
-
-        // Toggle pop-down visibility
-        if(faqElement.isOpened()) holder.popdownLayout.setVisibility(View.VISIBLE);
-        else holder.popdownLayout.setVisibility(View.GONE);
-
         return convertView;
     }
 

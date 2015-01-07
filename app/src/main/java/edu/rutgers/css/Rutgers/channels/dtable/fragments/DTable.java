@@ -7,13 +7,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
+import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
 import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
@@ -53,7 +53,7 @@ public class DTable extends Fragment {
     private static final String ARG_HANDLE_TAG      = ComponentFactory.ARG_HANDLE_TAG;
     private static final String ARG_API_TAG         = ComponentFactory.ARG_API_TAG;
     private static final String ARG_URL_TAG         = ComponentFactory.ARG_URL_TAG;
-    private static final String ARG_DATA_TAG        = "dtable.data";
+    private static final String ARG_DATA_TAG        = Config.PACKAGE_NAME + ".dtable.data";
 
     /* Saved instance state tags */
     private static final String SAVED_HANDLE_TAG    = Config.PACKAGE_NAME + ".dtable.saved.handle";
@@ -197,7 +197,7 @@ public class DTable extends Fragment {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if(mLoading) showProgressCircle();
@@ -207,26 +207,32 @@ public class DTable extends Fragment {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
 
-        ListView listView = (ListView) v.findViewById(R.id.dtable_list);
+        final ListView listView = (ListView) v.findViewById(R.id.dtable_list);
+        AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(mAdapter);
+        alphaInAnimationAdapter.setAbsListView(listView);
+        assert alphaInAnimationAdapter.getViewAnimator() != null;
+        alphaInAnimationAdapter.getViewAnimator().setInitialDelayMillis(500);
         listView.setAdapter(mAdapter);
 
         final String homeCampus = RutgersUtils.getHomeCampus(getActivity());
 
-        listView.setOnItemClickListener(new OnItemClickListener() {
-
+        mAdapter.setExpandCollapseListener(new ExpandableListItemAdapter.ExpandCollapseListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DTableElement element = (DTableElement) parent.getAdapter().getItem(position);
+            public void onItemExpanded(int position) {
+                DTableElement element = mAdapter.getItem(position);
+
+                // FAQ View expansion is handled by adapter. If it's not a FAQ row, don't expand it.
+                if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
+                    return;
+                } else {
+                    mAdapter.collapse(position);
+                }
 
                 // DTable root - launch a new DTable
                 if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.CAT_TYPE.ordinal()) {
-                    String newHandle = mHandle+"_"+element.getTitle(homeCampus).replace(" ","_").toLowerCase();
+                    String newHandle = mHandle + "_" + element.getTitle(homeCampus).replace(" ", "_").toLowerCase();
                     Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), newHandle, (DTableRoot) element);
                     ComponentFactory.getInstance().switchFragments(newArgs);
-                }
-                // FAQ button - toggle pop-down visibility
-                else if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
-                    mAdapter.togglePopdown(position);
                 }
                 // Channel row - launch channel
                 else {
@@ -237,15 +243,19 @@ public class DTable extends Fragment {
                     newArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getChannelTitle(homeCampus));
 
                     // Add optional fields to the arg bundle
-                    if(channel.getUrl() != null) newArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
-                    if(channel.getData() != null) newArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
-                    if(channel.getCount() > 0) newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
+                    if (channel.getUrl() != null) newArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+                    if (channel.getData() != null) newArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
+                    if (channel.getCount() > 0) newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
                     ComponentFactory.getInstance().switchFragments(newArgs);
                 }
             }
 
+            @Override
+            public void onItemCollapsed(int position) {
+
+            }
         });
-        
+
         return v;
     }
 

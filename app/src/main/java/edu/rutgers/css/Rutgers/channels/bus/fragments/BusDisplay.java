@@ -13,7 +13,9 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
+import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
@@ -116,7 +118,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         boolean missingArg = false;
         String requiredArgs[] = {ARG_AGENCY_TAG, ARG_MODE_TAG, ARG_TAG_TAG};
         for(String argTag: requiredArgs) {
-            if(args.getString(argTag) == null) {
+            if(StringUtils.isBlank(args.getString(argTag))) {
                 Log.e(TAG, "Argument \""+argTag+"\" not set");
                 missingArg = true;
             }
@@ -142,7 +144,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_bus_display, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_bus_display, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
@@ -151,15 +153,26 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         if(args.getString(ARG_TITLE_TAG) != null) {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         } else {
-            Log.e(TAG, "Argument \"title\" not set");
+            Log.e(TAG, "Argument \""+ARG_TITLE_TAG+"\" not set");
             getActivity().setTitle(getString(R.string.bus_title));
         }
 
-        ListView listView = (ListView) v.findViewById(R.id.busDisplayList);
+        final ListView listView = (ListView) v.findViewById(R.id.busDisplayList);
 
-        ScaleInAnimationAdapter scaleInAnimationAdapter = new ScaleInAnimationAdapter(mAdapter);
+        final ScaleInAnimationAdapter scaleInAnimationAdapter = new ScaleInAnimationAdapter(mAdapter);
         scaleInAnimationAdapter.setAbsListView(listView);
         listView.setAdapter(scaleInAnimationAdapter);
+
+        mAdapter.setExpandCollapseListener(new ExpandableListItemAdapter.ExpandCollapseListener() {
+            @Override
+            public void onItemExpanded(int position) {
+                // Don't expand the view if there are no predictions to display
+                if(mAdapter.getItem(position).getMinutes().isEmpty()) mAdapter.collapse(position);
+            }
+
+            @Override
+            public void onItemCollapsed(int position) {}
+        });
 
         return v;
     }
