@@ -38,7 +38,7 @@ public class BusAll extends BaseChannelFragment
     private static final String TAG                 = "BusAll";
     public static final String HANDLE               = "busall";
 
-    private static final int LOADER_ID = 100;
+    private static final int LOADER_ID = 0;
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".filter";
@@ -162,14 +162,16 @@ public class BusAll extends BaseChannelFragment
     @Override
     public void onLoadFinished(Loader<List<SimpleSection<NextbusItem>>> listLoader, List<SimpleSection<NextbusItem>> simpleSections) {
         mAdapter.clear();
-        mAdapter.addAll(simpleSections);
         mLoading = false;
         hideProgressCircle();
+        mAdapter.addAll(simpleSections);
     }
 
     @Override
     public void onLoaderReset(Loader<List<SimpleSection<NextbusItem>>> listLoader) {
         mAdapter.clear();
+        mLoading = false;
+        hideProgressCircle();
     }
 
 }

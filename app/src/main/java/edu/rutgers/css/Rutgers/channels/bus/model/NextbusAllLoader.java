@@ -17,7 +17,6 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
@@ -76,7 +75,8 @@ public class NextbusAllLoader extends AsyncTaskLoader<List<SimpleSection<Nextbus
 
                 @Override
                 public void onFail(OneReject result) {
-                    AppUtils.showFailedLoadToast(getContext());
+                    Exception e = (Exception) result.getReject();
+                    Log.e(TAG, e.getMessage()); // TODO Toast on UI thread
                 }
 
             }).waitSafely();
@@ -92,11 +92,9 @@ public class NextbusAllLoader extends AsyncTaskLoader<List<SimpleSection<Nextbus
         if (isReset()) {
             Log.d(TAG, "Received async query while loader was reset");
             return;
-        }
-
-        List<SimpleSection<NextbusItem>> oldItems = mData;
-        mData = simpleSections;
-        if (isStarted()) {
+        } else if (isStarted()) {
+            List<SimpleSection<NextbusItem>> oldItems = mData; // keep ref to old
+            mData = simpleSections;
             super.deliverResult(mData);
         }
     }
