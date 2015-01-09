@@ -41,11 +41,11 @@ public final class RutgersUtils {
     }
 
     /**
-    * Get full role title from role tag.
-    * @param context App context
-    * @param roleTag Role tag
-    * @return Full role title
-    */
+     * Get full role title from role tag.
+     * @param context App context
+     * @param roleTag Role tag
+     * @return Full role title
+     */
     public static String getFullRoleTitle(@NonNull Context context, String roleTag) {
         if(roleTag == null) return null;
 
@@ -98,10 +98,10 @@ public final class RutgersUtils {
     }
 
     /**
-    * Get the full name of the user's home campus (defaults to New Brunswick if no prefs are set)
-    * @param context App context
-    * @return Full title of user's home campus
-    */
+     * Get the full name of the user's home campus (defaults to New Brunswick if no prefs are set)
+     * @param context App context
+     * @return Full title of user's home campus
+     */
     public static String getHomeCampus(@NonNull Context context) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         return getFullCampusTitle(context, sharedPref.getString(PrefUtils.KEY_PREF_HOME_CAMPUS, context.getString(R.string.campus_nb_tag)));

@@ -45,4 +45,9 @@ public class Facility {
         return dailySchedules;
     }
 
+    @Override
+    public String toString() {
+        return getTitle();
+    }
+
 }

@@ -35,4 +35,9 @@ public class Campus {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return getTitle();
+    }
+
 }

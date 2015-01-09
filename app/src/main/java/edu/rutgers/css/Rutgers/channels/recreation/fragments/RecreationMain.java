@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import org.jdeferred.AlwaysCallback;
@@ -17,19 +16,16 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Campus;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
+import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityAdapter;
 import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
  * Display gyms and facilities for each campus
@@ -44,7 +40,7 @@ public class RecreationMain extends Fragment {
     public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;
 
     /* Member data */
-    private RMenuAdapter mAdapter;
+    private FacilityAdapter mAdapter;
     private boolean mLoading;
 
     /* View references */
@@ -66,26 +62,14 @@ public class RecreationMain extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        List<RMenuRow> data = new ArrayList<>();
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
+        mAdapter = new FacilityAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         mLoading = true;
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(GymsAPI.getCampuses()).done(new DoneCallback<List<Campus>>() {
             @Override
             public void onDone(List<Campus> result) {
-                // Populate list of facilities
-                for (Campus campus : result) {
-                    // Create campus header
-                    mAdapter.add(new RMenuHeaderRow(campus.getTitle()));
-
-                    // Create facility rows
-                    for (Facility facility : campus.getFacilities()) {
-                        Bundle rowArgs = RecreationDisplay.createArgs(facility.getTitle(),
-                                campus.getTitle(), facility.getTitle());
-                        mAdapter.add(new RMenuItemRow(rowArgs));
-                    }
-                }
+                mAdapter.addAll(result);
             }
         }).fail(new FailCallback<Exception>() {
             @Override
@@ -115,14 +99,17 @@ public class RecreationMain extends Fragment {
         if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.rec_title);
 
-        ListView listView = (ListView) v.findViewById(R.id.list);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuItemRow clicked = (RMenuItemRow) parent.getItemAtPosition(position);
-                Bundle newArgs = new Bundle(clicked.getArgs());
+                Facility facility = mAdapter.getItem(position);
+                Campus campus = mAdapter.getSectionContainingItem(position);
+
+                Bundle newArgs = RecreationDisplay.createArgs(facility.getTitle(),
+                        campus.getTitle(), facility.getTitle());
                 ComponentFactory.getInstance().switchFragments(newArgs);
             }
 

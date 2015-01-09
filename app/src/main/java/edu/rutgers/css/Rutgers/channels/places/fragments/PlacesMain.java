@@ -15,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -36,10 +35,9 @@ import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
 import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
  * <p>The main Places fragment displays nearby Rutgers locations (buildings, parks, etc.), as well as
@@ -59,8 +57,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
     /* Member data */
     private PlaceAutoCompleteAdapter mSearchAdapter;
-    private ArrayList<RMenuRow> mNearbyData;
-    private RMenuAdapter mNearbyAdapter;
+    private SimpleSectionedAdapter<KeyValPair> mAdapter;
     private LocationClientProvider mLocationClientProvider;
 
     /* View references */
@@ -102,10 +99,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         super.onCreate(savedInstanceState);
 
         mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
-
-        // Get nearby places & populate nearby places list
-        mNearbyData = new ArrayList<>();
-        mNearbyAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, mNearbyData);
+        mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
     }
     
     @Override
@@ -119,8 +113,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.places_title);
 
-        ListView listView = (ListView) v.findViewById(R.id.listView);
-        listView.setAdapter(mNearbyAdapter);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
+        listView.setAdapter(mAdapter);
 
         final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
         autoComp.setAdapter(mSearchAdapter);
@@ -149,7 +143,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         });
 
         // Clear search bar
-        ImageButton clearSearchButton = (ImageButton) v.findViewById(R.id.filterClearButton);
+        final ImageButton clearSearchButton = (ImageButton) v.findViewById(R.id.filterClearButton);
         clearSearchButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -163,8 +157,12 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuItemRow clickedItem = (RMenuItemRow) parent.getItemAtPosition(position);
-                ComponentFactory.getInstance().switchFragments(clickedItem.getArgs());
+                KeyValPair placeStub = (KeyValPair) parent.getItemAtPosition(position);
+
+                if(placeStub.getKey() != null) {
+                    Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
+                    ComponentFactory.getInstance().switchFragments(newArgs);
+                }
             }
         });
 
@@ -195,7 +193,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         // When location services are restored, retry loading nearby places.
         // Make sure this isn't called before the activity has been attached
         // or before onCreate() has ran.
-        if(mNearbyData != null && isAdded()) {
+        if(mAdapter != null && isAdded()) {
             loadNearbyPlaces();
         }
     }
@@ -224,13 +222,17 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         final String failedLocationString = getString(R.string.failed_location);
         final String connectingString = getString(R.string.location_connecting);
 
-        mNearbyAdapter.clear();
+        final ArrayList<KeyValPair> nearbyPlaces = new ArrayList<>();
+        final SimpleSection<KeyValPair> nearbyPlacesSection = new SimpleSection<>(nearbyPlacesString, nearbyPlaces);
+
+        mAdapter.clear();
+        mAdapter.add(nearbyPlacesSection);
 
         // Check for location services
         if(mLocationClientProvider == null || !mLocationClientProvider.getLocationClient().isConnected()) {
             Log.w(TAG, "Location services not connected");
-            mNearbyAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-            mNearbyAdapter.add(new RMenuItemRow(connectingString));
+            nearbyPlaces.add(new KeyValPair(null, connectingString));
+            mAdapter.notifyDataSetChanged();
             return;
         }
 
@@ -238,8 +240,8 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
         if (lastLoc == null) {
             Log.w(TAG, "Couldn't get location");
-            mNearbyAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-            mNearbyAdapter.add(new RMenuItemRow(failedLocationString));
+            nearbyPlaces.add(new KeyValPair(null, failedLocationString));
+            mAdapter.notifyDataSetChanged();
             return;
         }
 
@@ -249,18 +251,15 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
             @Override
             public void onDone(List<KeyValPair> result) {
-                mNearbyAdapter.clear();
-                mNearbyAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
+                mAdapter.clear();
 
-                if (result.isEmpty())
-                    mNearbyAdapter.add(new RMenuItemRow(noneNearbyString));
-                else {
-                    for (KeyValPair placeStub : result) {
-                        Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
-                        mNearbyAdapter.add(new RMenuItemRow(newArgs));
-                    }
+                if (result.isEmpty()) {
+                    nearbyPlaces.add(new KeyValPair(null, noneNearbyString));
+                } else {
+                    nearbyPlaces.addAll(result);
                 }
 
+                mAdapter.add(nearbyPlacesSection);
             }
 
         }).fail(new FailCallback<Exception>() {
@@ -268,9 +267,9 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
             @Override
             public void onFail(Exception result) {
                 Log.e(TAG, result.getMessage());
-                mNearbyAdapter.clear();
-                mNearbyAdapter.add(new RMenuHeaderRow(nearbyPlacesString));
-                mNearbyAdapter.add(new RMenuItemRow(failedLoadString));
+                mAdapter.clear();
+                nearbyPlaces.add(new KeyValPair(null, failedLoadString));
+                mAdapter.add(nearbyPlacesSection);
             }
 
         }).always(new AlwaysCallback<List<KeyValPair>, Exception>() {

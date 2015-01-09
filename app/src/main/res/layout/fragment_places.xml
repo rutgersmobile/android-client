@@ -40,10 +40,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ListView
+        <se.emilsjolander.stickylistheaders.StickyListHeadersListView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/listView" />
+            android:id="@+id/stickyList" />
 
         <include layout="@layout/progress_circle" />
 
