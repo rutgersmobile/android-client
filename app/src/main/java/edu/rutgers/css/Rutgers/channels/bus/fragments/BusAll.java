@@ -113,7 +113,7 @@ public class BusAll extends Fragment {
 
                 // Set filter after info is re-loaded
                 if(mFilterString != null) {
-                    //mAdapter.getFilter().filter(mFilterString);
+                    mAdapter.getFilter().filter(mFilterString);
                 }
 
             }
@@ -154,7 +154,7 @@ public class BusAll extends Fragment {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Set filter for list adapter
                 mFilterString = s.toString().trim();
-                //mAdapter.getFilter().filter(mFilterString);
+                mAdapter.getFilter().filter(mFilterString);
             }
 
             @Override

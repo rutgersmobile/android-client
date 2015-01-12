@@ -6,7 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +35,7 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
  * and {@link #getHeaderView(int, android.view.View, android.view.ViewGroup)} methods.
  */
 public abstract class SectionedListAdapter<T, U> extends BaseAdapter
-        implements StickyListHeadersAdapter {
+        implements StickyListHeadersAdapter, Filterable {
 
     private Context mContext;
     private LayoutInflater mInflater;
@@ -55,6 +59,12 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
     private static class ViewHolder {
         TextView textView;
     }
+
+    /**
+     * Copy of the original sections, initialized once the filter is in use.
+     */
+    private List<FilteredSection> mFilteredSections;
+    private SectionAdapterFilter mFilter;
 
     /**
      * Constructor
@@ -84,7 +94,17 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
     /** Get the sum of the collection sizes for each section. */
     public int getCount() {
         int total = 0;
-        for(T section: mSections) total += getSectionItemCount(section);
+
+        if(mFilteredSections != null) {
+            // If filter is active, get count from filtered sections
+            for(FilteredSection filteredSection: mFilteredSections) {
+                total += filteredSection.matches.size();
+            }
+        } else {
+            // Filter not active, get count from regular section list.
+            for (T section : mSections) total += getSectionItemCount(section);
+        }
+
         return total;
     }
 
@@ -119,13 +139,26 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
     public U getItem(int position) {
         if((position+1) > getCount()) throw new IndexOutOfBoundsException("Tried to access item " + (position+1) + " out of " + getCount());
 
-        int i = 0;
-        for(T section: mSections) {
-            int count = getSectionItemCount(section);
-            if(i+count <= position) {
-                i += count;
-            } else {
-                return getSectionItem(section, position - i);
+        if(mFilteredSections != null) {
+            // Filter active, get item from filtered sections list
+            int i = 0;
+            for(FilteredSection filteredSection: mFilteredSections) {
+                int count = filteredSection.matches.size();
+                if(i + count <= position) {
+                    i += count;
+                } else {
+                    return filteredSection.matches.get(position - i);
+                }
+            }
+        } else {
+            int i = 0;
+            for (T section : mSections) {
+                int count = getSectionItemCount(section);
+                if (i + count <= position) {
+                    i += count;
+                } else {
+                    return getSectionItem(section, position - i);
+                }
             }
         }
 
@@ -136,13 +169,26 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
     protected T getSectionContainingItem(int position) {
         if((position+1) > getCount()) throw new IndexOutOfBoundsException("Tried to access item " + (position+1) + " out of " + getCount());
 
-        int i = 0;
-        for(T section: mSections) {
-            int count = getSectionItemCount(section);
-            if(i+count <= position) {
-                i += count;
-            } else {
-                return section;
+        if(mFilteredSections != null) {
+            // Filter active, get section from filtered sections list
+            int i = 0;
+            for(FilteredSection filteredSection: mFilteredSections) {
+                int count = filteredSection.matches.size();
+                if (i + count <= position) {
+                    i += count;
+                } else {
+                    return filteredSection.section;
+                }
+            }
+        } else {
+            int i = 0;
+            for (T section : mSections) {
+                int count = getSectionItemCount(section);
+                if (i + count <= position) {
+                    i += count;
+                } else {
+                    return section;
+                }
             }
         }
 
@@ -232,6 +278,92 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
 
     protected List<T> getSections() {
         return mSections;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Filter getFilter() {
+        if (mFilter == null) {
+            mFilter = new SectionAdapterFilter();
+        }
+        return mFilter;
+    }
+
+    private class FilteredSection {
+        T section;
+        ArrayList<U> matches;
+    }
+
+    /**
+     * Like {@link android.widget.ArrayAdapter}'s filter, uses the prefix to filter values.
+     */
+    private class SectionAdapterFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence prefix) {
+            final FilterResults results = new FilterResults();
+
+            // If the prefix is blank, return the original values.
+            if (StringUtils.isBlank(prefix)) {
+                results.values = null;
+                results.count = 0;
+            } else {
+                final ArrayList<T> originalSections;
+                synchronized (mLock) {
+                    originalSections = new ArrayList<>(mSections);
+                }
+
+                final ArrayList<FilteredSection> filteredSections = new ArrayList<>();
+
+                // Filter the items of each section.
+                for(T section: originalSections) {
+                    final ArrayList<U> sectionMatches = new ArrayList<>();
+                    for(int i = 0; i < getSectionItemCount(section); i++) {
+                        final U value = getSectionItem(section, i);
+                        final String valueText = value.toString();
+
+                        if(StringUtils.startsWithIgnoreCase(valueText, prefix)) {
+                            sectionMatches.add(value);
+                        } else {
+                            final String[] words = StringUtils.split(valueText, ' ');
+
+                            for(String word: words) {
+                                if(StringUtils.startsWithIgnoreCase(word, prefix)) {
+                                    sectionMatches.add(value);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // If this section had matches, include it.
+                    if(!sectionMatches.isEmpty()) {
+                        FilteredSection filteredSection = new FilteredSection();
+                        filteredSection.section = section;
+                        filteredSection.matches = sectionMatches;
+                        filteredSections.add(filteredSection);
+                    }
+                }
+
+                results.values = filteredSections;
+                results.count = filteredSections.size();
+            }
+
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence prefix, FilterResults filterResults) {
+            if (filterResults.count > 0) {
+                mFilteredSections = (List<FilteredSection>) filterResults.values;
+                notifyDataSetChanged();
+            } else {
+                mFilteredSections = null;
+                notifyDataSetInvalidated();
+            }
+        }
     }
 
 }
