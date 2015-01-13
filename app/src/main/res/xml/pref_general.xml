@@ -1,23 +1,40 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory
+        android:title="@string/pref_header_user"
+        android:key="pref_key_user_settings">
 
-    <!-- Home campus setting -->
-	<ListPreference
-        android:defaultValue="@string/campus_nb_tag"
-        android:entries="@array/pref_campus_strings"
-        android:entryValues="@array/pref_campus_values"
-        android:key="pref_home_campus"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_campus_title" />
-        
-	<!-- User role settings -->
-	<ListPreference
-        android:defaultValue="@string/role_undergrad_tag"
-        android:entries="@array/pref_user_type_strings"
-        android:entryValues="@array/pref_user_type_values"
-        android:key="pref_user_type"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_user_type_title" />
+        <!-- Home campus setting -->
+        <ListPreference
+            android:defaultValue="@string/campus_nb_tag"
+            android:entries="@array/pref_campus_strings"
+            android:entryValues="@array/pref_campus_values"
+            android:key="pref_home_campus"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_campus_title" />
+
+        <!-- User role settings -->
+        <ListPreference
+            android:defaultValue="@string/role_undergrad_tag"
+            android:entries="@array/pref_user_type_strings"
+            android:entryValues="@array/pref_user_type_values"
+            android:key="pref_user_type"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_user_type_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_header_other"
+        android:key="pref_key_other_settings">
+
+        <!-- About -->
+        <Preference android:title="@string/pref_title_about"/>
+
+        <!-- Legal -->
+        <Preference android:title="@string/pref_title_legal"/>
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
