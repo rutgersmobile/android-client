@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Schedule of Classes -->
+    <string name="soc_title">Schedule of Classes</string>
+    <string name="soc_error_index">Invalid course index.</string>
+    <string name="soc_select">Select schedule</string>
+    <string name="soc_select_semester">Select semester</string>
+    <string name="soc_select_campus">Select campus</string>
+    <string name="soc_select_level">Select level</string>
+    <string name="soc_undergrad">Undergraduate</string>
+    <string name="soc_grad">Graduate</string>
+
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Places channel -->
+    <string name="places_title">Places</string>
+    <string name="places_nearby">Nearby Places</string>
+    <string name="places_none_nearby">No nearby places.</string>
+    <string name="building_search">Building Search</string>
+    <string name="explain_building_search">Search for a building by typing a building name or abbreviation.</string>
+    <string name="address_header">Address</string>
+    <string name="description_header">Description</string>
+    <string name="nearby_bus_header">Nearby Bus Stops</string>
+    <string name="offices_header">Offices</string>
+    <string name="building_no_header">Building Number</string>
+    <string name="campus_header">Campus</string>
+
+</resources>

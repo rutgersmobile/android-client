@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Recreation channel -->
+    <string name="rec_title">Recreation</string>
+    <string name="rec_info_desk_header">Information Desk</string>
+    <string name="rec_business_office_header">Business Office</string>
+    <string name="rec_hours_header">Hours</string>
+    <string name="rec_description_header">Description</string>
+    <string name="rec_address_header">Address</string>
+    <string name="rec_view_hours">View Hours</string>
+    <string name="rec_view_description">View Description</string>
+
+</resources>
