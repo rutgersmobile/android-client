@@ -25,16 +25,4 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/pref_header_other"
-        android:key="pref_key_other_settings">
-
-        <!-- About -->
-        <Preference android:title="@string/pref_title_about"/>
-
-        <!-- Legal -->
-        <Preference android:title="@string/pref_title_legal"/>
-
-    </PreferenceCategory>
-
 </PreferenceScreen>

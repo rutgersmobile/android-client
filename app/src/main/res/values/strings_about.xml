@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="about_title">About</string>
+    <string name="about_header">RU Mobile</string>
+    <string name="about_version">v%1$s</string>
+    <string name="about_text"><![CDATA[
+        Copyright 2015, Rutgers, The State University of New Jersey.<br><br>
+
+        RU Mobile is an open-source project developed by <a href="http://oss.rutgers.edu">Rutgers OSS</a>.<br><br>
+
+        Visit us on GitHub at <a href="https://github.com/rutgersmobile">github.com/rutgersmobile</a>.<br><br>
+
+        RU Mobile for Android uses the following open-source libraries:<br><br>
+
+        <b>Android Query</b><br><br>
+
+        <b>Apache Commons Lang</b><br><br>
+
+        <b>JDeferred</b><br><br>
+
+        <b>GSON</b><br><br>
+
+        <b>ListViewAnimations</b><br><br>
+
+        <b>StickyListHeaders</b><br><br>
+
+        Legal Notices
+    ]]></string>
+
+</resources>

@@ -289,14 +289,17 @@ public class MainActivity extends FragmentActivity implements
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        
+
         // Handle event here or pass it on
         switch(item.getItemId()) {
-        
+
             // Start the Settings activity
             case R.id.action_settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+
+            case R.id.action_about:
+                startActivity(new Intent(this, AboutActivity.class));
                 return true;
             
             default:
