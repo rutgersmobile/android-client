@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.ui.fragments;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ public class AboutDisplay extends Fragment {
         titleText.setText(Html.fromHtml(getString(R.string.about_header)));
         versionText.setText(Html.fromHtml(getString(R.string.about_version, Config.VERSION)));
         bodyText.setText(Html.fromHtml(getString(R.string.about_text)));
+        bodyText.setMovementMethod(LinkMovementMethod.getInstance());
 
         return v;
     }
