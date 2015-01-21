@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,10 +39,12 @@ public class TextDisplay extends Fragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_text_display, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_text_display, parent, false);
         final Bundle args = getArguments();
 
-        TextView textView = (TextView) v.findViewById(R.id.text);
+        final TextView textView = (TextView) v.findViewById(R.id.text);
+
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
 
         if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
