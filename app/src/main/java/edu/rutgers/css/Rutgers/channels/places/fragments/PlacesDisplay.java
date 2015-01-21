@@ -299,7 +299,7 @@ public class PlacesDisplay extends Fragment {
     /**
      * Start a map activity intent for this address/location
      */
-    public void launchMap() {
+    private void launchMap() {
         if(mPlace == null || mPlace.getLocation() == null) return;
         Place.Location location = mPlace.getLocation();
 
