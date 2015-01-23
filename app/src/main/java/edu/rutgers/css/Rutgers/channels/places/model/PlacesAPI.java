@@ -17,6 +17,7 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.impl.DefaultDeferredManager;
 import org.jdeferred.impl.DeferredObject;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,6 +28,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.Request;
@@ -44,10 +47,16 @@ public final class PlacesAPI {
     private static final DeferredManager sDM = new DefaultDeferredManager();
     private static Promise<Void, Exception, Void> configured;
     private static boolean sIsSettingUp;
-    private static HashMap<String, Place> sPlaces;
+
+    /** Map of Place keys to Place objects. Initialized in {@link #setup()}. */
+    private static Map<String, Place> sPlaces;
+    private static Map<String, Place> sTokens;
 
     private PlacesAPI() {}
 
+    /**
+     * Grab the places flat-file from the API and convert it into a map.
+     */
     private synchronized static void setup() {
         if(sIsSettingUp || sPlaces != null) return;
         else sIsSettingUp = true;
@@ -57,22 +66,41 @@ public final class PlacesAPI {
         sDM.when(Request.api("places.txt", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONObject>() {
             @Override
             public void onDone(JSONObject result) {
+                // There are 1,286 places in the database as of Jan '15
+                sPlaces = new HashMap<>(1300);
+                sTokens = new HashMap<>(1300);
+                Gson gson = new Gson();
+
                 try {
+                    // Get the place documents and build the places map.
                     JSONObject allPlaces = result.getJSONObject("all");
-
-                    sPlaces = new HashMap<>();
-                    Gson gson = new Gson();
-
                     for(Iterator<String> placeKeyIter = allPlaces.keys(); placeKeyIter.hasNext();) {
                         String placeKey = placeKeyIter.next();
                         Place place = gson.fromJson(allPlaces.getJSONObject(placeKey).toString(), Place.class);
                         sPlaces.put(placeKey, place);
                     }
 
+                    // Get the lunr.js document tokens and build the special token map.
+                    JSONObject docStore = result.getJSONObject("lunr").getJSONObject("documentStore").getJSONObject("store");
+                    for (Iterator<String> docKeyIter = docStore.keys(); docKeyIter.hasNext();) {
+                        String docKey = docKeyIter.next();
+                        Place place = sPlaces.get(docKey);
+                        if (place != null) {
+                            JSONArray tokens = docStore.getJSONArray(docKey);
+                            for (int i = 0; i < tokens.length(); i++) {
+                                sTokens.put(tokens.getString(i), place);
+                            }
+                        } else {
+                            Log.e(TAG, "No document found for key from lunr.documentStore: \""+docKey+"\"");
+                        }
+                    }
+
+
                     confd.resolve(null);
                 } catch (JSONException | JsonSyntaxException e) {
                     Log.e(TAG, "setup(): " + e.getMessage());
                     confd.reject(e);
+                    sPlaces = null;
                 }
             }
         }).fail(new FailCallback<AjaxStatus>() {
@@ -176,6 +204,11 @@ public final class PlacesAPI {
             @Override
             public void onDone(Void none) {
                 List<KeyValPair> results = new ArrayList<>();
+
+                Place p = sTokens.get(query.toLowerCase(Locale.US));
+                if (p != null) {
+                    results.add(new KeyValPair(p.getId(), p.getTitle()));
+                }
 
                 // Split each place title up into individual words and see if the query is a prefix of any of them
                 for (Place place : sPlaces.values()) {
