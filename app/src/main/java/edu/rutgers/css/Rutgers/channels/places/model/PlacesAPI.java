@@ -33,7 +33,6 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
@@ -123,8 +122,8 @@ public final class PlacesAPI {
      * @param placeKey Key for place entry, returned from search results
      * @return Promise for a Place object representing the entry in the database
      */
-    public static Promise<Place, Exception, Double> getPlace(@NonNull final String placeKey) {
-        final Deferred<Place, Exception, Double> deferred = new DeferredObject<>();
+    public static Promise<Place, Exception, Void> getPlace(@NonNull final String placeKey) {
+        final Deferred<Place, Exception, Void> deferred = new DeferredObject<>();
 
         setup();
         sDM.when(configured).done(new DoneCallback<Void>() {
@@ -148,14 +147,14 @@ public final class PlacesAPI {
      * @param sourceLon Longitude
      * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
-    public static Promise<List<KeyValPair>, Exception, Double> getPlacesNear(final double sourceLat, final double sourceLon) {
-        final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<>();
+    public static Promise<List<Place>, Exception, Void> getPlacesNear(final double sourceLat, final double sourceLon) {
+        final Deferred<List<Place>, Exception, Void> deferred = new DeferredObject<>();
 
         setup();
         sDM.when(configured).done(new DoneCallback<Void>() {
             @Override
             public void onDone(Void nothing) {
-                List<KeyValPair> results = new ArrayList<>();
+                List<Place> results = new ArrayList<>();
                 List<AbstractMap.SimpleEntry<Float, Place>> nearbyPlaces = new ArrayList<>();
 
                 for (Place place : sPlaces.values()) {
@@ -176,7 +175,7 @@ public final class PlacesAPI {
                 });
 
                 for (AbstractMap.SimpleEntry<Float, Place> entry : nearbyPlaces) {
-                    results.add(new KeyValPair(entry.getValue().getId(), entry.getValue().getTitle()));
+                    results.add(entry.getValue());
                 }
 
                 deferred.resolve(results);
@@ -196,18 +195,18 @@ public final class PlacesAPI {
      * @param query Query string
      * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
-    public static Promise<List<KeyValPair>, Exception, Double> searchPlaces(final String query) {
-        final Deferred<List<KeyValPair>, Exception, Double> deferred = new DeferredObject<>();
+    public static Promise<List<Place>, Exception, Void> searchPlaces(final String query) {
+        final Deferred<List<Place>, Exception, Void> deferred = new DeferredObject<>();
 
         setup();
         sDM.when(configured).done(new DoneCallback<Void>() {
             @Override
             public void onDone(Void none) {
-                List<KeyValPair> results = new ArrayList<>();
+                List<Place> results = new ArrayList<>();
 
                 Place p = sTokens.get(query.toLowerCase(Locale.US));
                 if (p != null) {
-                    results.add(new KeyValPair(p.getId(), p.getTitle()));
+                    results.add(p);
                 }
 
                 // Split each place title up into individual words and see if the query is a prefix of any of them
@@ -215,7 +214,7 @@ public final class PlacesAPI {
                     String parts[] = StringUtils.split(place.getTitle(), ' ');
                     for (String part : parts) {
                         if (StringUtils.startsWithIgnoreCase(part, query)) {
-                            results.add(new KeyValPair(place.getId(), place.getTitle()));
+                            results.add(place);
                             break;
                         }
                     }

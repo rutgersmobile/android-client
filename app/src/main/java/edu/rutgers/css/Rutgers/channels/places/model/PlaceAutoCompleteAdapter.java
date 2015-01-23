@@ -22,7 +22,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
 
     private static final String TAG = "PlaceAutoCompleteAdapter";
 
-    private PlaceWebFilter mFilter = new PlaceWebFilter();
+    private PlaceSearchFilter mFilter = new PlaceSearchFilter();
     private List<KeyValPair> mData = new ArrayList<>();
 
     public PlaceAutoCompleteAdapter(Context context, int resource) {
@@ -49,7 +49,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
         return mFilter;
     }
 
-    private class PlaceWebFilter extends Filter {
+    private class PlaceSearchFilter extends Filter {
 
         @Override
         protected FilterResults performFiltering(CharSequence charSequence) {
@@ -61,12 +61,17 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
             if(charSequence == null || charSequence.toString().isEmpty()) return results;
 
             // Do request for search results
-            Promise<List<KeyValPair>, Exception, Double> p = PlacesAPI.searchPlaces(charSequence.toString());
-            p.done(new DoneCallback<List<KeyValPair>>() {
+            Promise<List<Place>, Exception, Void> p = PlacesAPI.searchPlaces(charSequence.toString());
+            p.done(new DoneCallback<List<Place>>() {
                 @Override
-                public void onDone(List<KeyValPair> result) {
-                    results.values = result;
-                    results.count = result.size();
+                public void onDone(List<Place> result) {
+                    List<KeyValPair> keyValPairs = new ArrayList<>(result.size());
+                    for (Place place: result) {
+                        keyValPairs.add(new KeyValPair(place.getId(), place.getTitle()));
+                    }
+
+                    results.values = keyValPairs;
+                    results.count = keyValPairs.size();
                 }
             }).fail(new FailCallback<Exception>() {
                 @Override

@@ -31,6 +31,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
 import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
@@ -136,7 +137,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                if(actionId == EditorInfo.IME_ACTION_SEARCH) return true;
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) return true;
                 else return false;
             }
             
@@ -159,7 +160,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 KeyValPair placeStub = (KeyValPair) parent.getItemAtPosition(position);
 
-                if(placeStub.getKey() != null) {
+                if (placeStub.getKey() != null) {
                     Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
                     ComponentFactory.getInstance().switchFragments(newArgs);
                 }
@@ -173,7 +174,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     public void onResume() {
         super.onResume();
 
-        if(mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
+        if (mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
 
         // Reload nearby places
         loadNearbyPlaces();
@@ -183,7 +184,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     public void onPause() {
         super.onPause();
 
-        if(mLocationClientProvider != null) mLocationClientProvider.unregisterListener(this);
+        if (mLocationClientProvider != null) mLocationClientProvider.unregisterListener(this);
     }
 
     @Override
@@ -193,7 +194,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         // When location services are restored, retry loading nearby places.
         // Make sure this isn't called before the activity has been attached
         // or before onCreate() has ran.
-        if(mAdapter != null && isAdded()) {
+        if (mAdapter != null && isAdded()) {
             loadNearbyPlaces();
         }
     }
@@ -229,7 +230,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         mAdapter.add(nearbyPlacesSection);
 
         // Check for location services
-        if(mLocationClientProvider == null || !mLocationClientProvider.getLocationClient().isConnected()) {
+        if (mLocationClientProvider == null || !mLocationClientProvider.getLocationClient().isConnected()) {
             Log.w(TAG, "Location services not connected");
             nearbyPlaces.add(new KeyValPair(null, connectingString));
             mAdapter.notifyDataSetChanged();
@@ -247,16 +248,18 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         showProgressCircle();
 
-        PlacesAPI.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<List<KeyValPair>>() {
+        PlacesAPI.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<List<Place>>() {
 
             @Override
-            public void onDone(List<KeyValPair> result) {
+            public void onDone(List<Place> result) {
                 mAdapter.clear();
 
                 if (result.isEmpty()) {
                     nearbyPlaces.add(new KeyValPair(null, noneNearbyString));
                 } else {
-                    nearbyPlaces.addAll(result);
+                    for (Place place: result) {
+                        nearbyPlaces.add(new KeyValPair(place.getId(), place.getTitle()));
+                    }
                 }
 
                 mAdapter.add(nearbyPlacesSection);
@@ -265,17 +268,17 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
         }).fail(new FailCallback<Exception>() {
 
             @Override
-            public void onFail(Exception result) {
-                Log.e(TAG, result.getMessage());
+            public void onFail(Exception e) {
+                Log.e(TAG, e.getMessage());
                 mAdapter.clear();
                 nearbyPlaces.add(new KeyValPair(null, failedLoadString));
                 mAdapter.add(nearbyPlacesSection);
             }
 
-        }).always(new AlwaysCallback<List<KeyValPair>, Exception>() {
+        }).always(new AlwaysCallback<List<Place>, Exception>() {
 
             @Override
-            public void onAlways(Promise.State state, List<KeyValPair> resolved, Exception rejected) {
+            public void onAlways(Promise.State state, List<Place> resolved, Exception rejected) {
                 hideProgressCircle();
             }
 
@@ -284,11 +287,11 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

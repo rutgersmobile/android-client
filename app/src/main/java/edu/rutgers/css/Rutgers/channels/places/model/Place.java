@@ -122,4 +122,9 @@ public class Place {
         return location;
     }
 
+    @Override
+    public String toString() {
+        return getTitle();
+    }
+
 }
