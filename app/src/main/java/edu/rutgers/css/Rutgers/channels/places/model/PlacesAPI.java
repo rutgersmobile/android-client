@@ -214,7 +214,8 @@ public final class PlacesAPI {
                     String parts[] = StringUtils.split(place.getTitle(), ' ');
                     for (String part : parts) {
                         if (StringUtils.startsWithIgnoreCase(part, query)) {
-                            results.add(place);
+                            // The check makes sure we don't duplicate the special token match 'p'
+                            if (place != p) results.add(place);
                             break;
                         }
                     }
