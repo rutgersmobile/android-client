@@ -12,7 +12,7 @@ public final class Config {
     public static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
     public static final String VERSION = BuildConfig.VERSION_NAME;
     public static final String OSNAME = "android";
-    public static final String BETAMODE = "dev";
+    public static final String BETAMODE = "beta";
     public static final Boolean BETA = true;
 
     // Server and API level
