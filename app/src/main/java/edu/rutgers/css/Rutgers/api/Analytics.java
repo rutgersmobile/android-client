@@ -10,11 +10,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -67,13 +68,13 @@ public final class Analytics extends IntentService {
      * Queue an analytics event.
      * @param context App context
      * @param eventType Event type
-     * @param extra Extra information, in a string
+     * @param extra Extra string fields, contained in JSON object
      */
-    public static void queueEvent(Context context, String eventType, String extra) {
+    public static void queueEvent(@NonNull Context context, @NonNull String eventType, @Nullable JSONObject extra) {
         Intent analyticsIntent = new Intent(context, Analytics.class);
         analyticsIntent.putExtra("mode", QUEUE_MODE);
         analyticsIntent.putExtra("type", eventType);
-        analyticsIntent.putExtra("extra", extra);
+        if (extra != null) analyticsIntent.putExtra("extra", extra.toString());
         context.startService(analyticsIntent);
     }
 
@@ -169,6 +170,9 @@ public final class Analytics extends IntentService {
             return;
         }
 
+        JSONObject platform = getPlatformJSON(this);
+        JSONObject release = getReleaseJSON(this);
+
         // Read out events and construct POST request
         database.beginTransaction();
         try {
@@ -183,7 +187,7 @@ public final class Analytics extends IntentService {
                     String extra = cursor.getString(3);
 
                     // Get JSON object of analytics event
-                    JSONObject eventJSON = getEventJSON(type, time, this);
+                    JSONObject eventJSON = getEventJSON(this, type, time, platform, release);
 
                     // Load extra fields
                     if(extra != null) {
@@ -194,7 +198,7 @@ public final class Analytics extends IntentService {
                                 eventJSON.put(curKey, extraJSON.get(curKey));
                             }
                         } catch (JSONException e) {
-                            Log.e(TAG, "doPost(): " + e.getMessage());
+                            Log.e(TAG, Log.getStackTraceString(e));
                         }
                     }
 
@@ -219,12 +223,10 @@ public final class Analytics extends IntentService {
                     // Successful POST - commit transaction to remove rows
                     Log.i(TAG, httpResponse.getStatusLine().toString());
                     int responseCode = httpResponse.getStatusLine().getStatusCode();
-                    if(responseCode >= 200 && responseCode <= 299) {
+                    if (responseCode >= 200 && responseCode <= 299) {
                         database.setTransactionSuccessful();
                         Log.i(TAG, cursor.getCount() + " events posted.");
                     }
-                } catch (ClientProtocolException e) {
-                    Log.e(TAG, e.getMessage());
                 } catch (IOException e) {
                     Log.e(TAG, e.getMessage());
                 }
@@ -256,7 +258,8 @@ public final class Analytics extends IntentService {
      * @param context App context
      * @return JSON object describing the analytics event.
      */
-    private static JSONObject getEventJSON(String eventType, String timestamp, Context context) {
+    private static JSONObject getEventJSON(Context context, String eventType, String timestamp,
+                                           JSONObject platform, JSONObject release) {
         JSONObject eventJSON = new JSONObject();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -268,8 +271,8 @@ public final class Analytics extends IntentService {
             eventJSON.put("role", userRole);
             eventJSON.put("campus", userCampus);
             eventJSON.put("date", timestamp);
-            eventJSON.put("platform", getPlatformJSON(context));
-            eventJSON.put("release", getReleaseJSON(context));
+            eventJSON.put("platform", platform);
+            eventJSON.put("release", release);
         } catch (JSONException e) {
             Log.w(TAG, "getJSON(): " + e.getMessage());
         }

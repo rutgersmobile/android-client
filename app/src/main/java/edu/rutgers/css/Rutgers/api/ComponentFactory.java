@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,7 +46,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
  */
 public final class ComponentFactory {
 
-    /* Log tag. */
+    /** Log tag. */
     private static final String TAG = "ComponentFactory";
 
     /* Standard argument bundle tags */
@@ -128,27 +129,27 @@ public final class ComponentFactory {
      * @return Component factory singleton instance
      */
     public static ComponentFactory getInstance() {
-        if(sSingletonInstance == null) sSingletonInstance = new ComponentFactory();
+        if (sSingletonInstance == null) sSingletonInstance = new ComponentFactory();
         return sSingletonInstance;
     }
     
     /**
      * Create component fragment
-     * @param options Argument bundle with at least 'component' argument set to describe which
+     * @param args Argument bundle with at least 'component' argument set to describe which
      *                component to build. The options bundle will be passed to the new fragment.
      * @return Built fragment
      */
-    public Fragment createFragment(@NonNull Bundle options) {
+    private Fragment createFragment(@NonNull Bundle args) {
         Fragment fragment;
         String component;
         
-        if(options.getString(ARG_COMPONENT_TAG) == null || options.getString(ARG_COMPONENT_TAG).isEmpty()) {
+        if (StringUtils.isBlank(args.getString(ARG_COMPONENT_TAG))) {
             throw new IllegalArgumentException("\"" + ARG_COMPONENT_TAG + "\" must be set");
         }
         
-        component = options.getString(ARG_COMPONENT_TAG).toLowerCase(Locale.US);
+        component = args.getString(ARG_COMPONENT_TAG).toLowerCase(Locale.US);
         Class<? extends Fragment> componentClass = sFragmentTable.get(component);
-        if(componentClass != null) {
+        if (componentClass != null) {
             Log.v(TAG, "Creating a " + componentClass.getSimpleName());
             try {
                 fragment = componentClass.newInstance();
@@ -161,10 +162,10 @@ public final class ComponentFactory {
             return null;
         }
 
-        Bundle optionsCopy = new Bundle(options);
-        optionsCopy.remove(ARG_COMPONENT_TAG);
+        Bundle argsCopy = new Bundle(args);
+        argsCopy.remove(ARG_COMPONENT_TAG);
+        fragment.setArguments(argsCopy);
 
-        fragment.setArguments(optionsCopy);
         return fragment;
     }
     
@@ -177,7 +178,7 @@ public final class ComponentFactory {
      * @return True if the new fragment was successfully created, false if not.
      */
     public boolean switchFragments(@NonNull Bundle args) {
-        if(sMainActivity.get() == null) {
+        if (sMainActivity.get() == null) {
             Log.e(TAG, "switchFragments(): Reference to main activity is null");
             return false;
         }
@@ -185,21 +186,14 @@ public final class ComponentFactory {
         final String componentTag = args.getString(ARG_COMPONENT_TAG);
         final boolean isTopLevel = args.getBoolean("topLevel");
 
-        // Create analytics event
-        JSONObject extras = new JSONObject();
-        try {
-            extras.put("handle", componentTag);
-            if(args.getString(ARG_URL_TAG) != null) extras.put("url", args.getString(ARG_URL_TAG));
-            if(args.getString(ARG_API_TAG) != null) extras.put("api", args.getString(ARG_API_TAG));
-            if(args.getString(ARG_TITLE_TAG) != null) extras.put("title", args.getString(ARG_TITLE_TAG));
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-        }
-        Analytics.queueEvent(sMainActivity.get(), Analytics.CHANNEL_OPENED, extras.toString());
-
         // Attempt to create the fragment
         final Fragment fragment = createFragment(args);
-        if(fragment == null) return false;
+        if (fragment == null) {
+            sendChannelErrorEvent(args); // Channel launch failure analytics event
+            return false;
+        } else {
+            sendChannelEvent(args); // Channel launch analytics event
+        }
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(sMainActivity.get());
@@ -208,8 +202,8 @@ public final class ComponentFactory {
 
         // If this is a top level (nav drawer) press, find the last time this channel was launched
         // and pop backstack to it
-        if(isTopLevel && fm.findFragmentByTag(componentTag) != null) {
-            fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE); // TODO Not synced with handle stack
+        if (isTopLevel && fm.findFragmentByTag(componentTag) != null) {
+            fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
                 
         // Switch the main content fragment
@@ -229,18 +223,45 @@ public final class ComponentFactory {
      * @param tag Tag for fragment transaction backstack
      */
     public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {
-        if(sMainActivity.get() == null) {
+        if (sMainActivity.get() == null) {
             Log.e(TAG, "switchFragments(): Reference to main activity lost");
             return;
         }
 
         FragmentTransaction ft = sMainActivity.get().getSupportFragmentManager().beginTransaction();
         Fragment prev = sMainActivity.get().getSupportFragmentManager().findFragmentByTag(tag);
-        if(prev != null) {
+        if (prev != null) {
             ft.remove(prev);
         }
         ft.addToBackStack(tag);
         dialogFragment.show(ft, tag);
+    }
+
+    private void sendChannelEvent(@NonNull Bundle args) {
+        JSONObject extras = new JSONObject();
+        try {
+            extras.put("handle", args.getString(ARG_COMPONENT_TAG));
+            if(args.getString(ARG_URL_TAG) != null) extras.put("url", args.getString(ARG_URL_TAG));
+            if(args.getString(ARG_API_TAG) != null) extras.put("api", args.getString(ARG_API_TAG));
+            if(args.getString(ARG_TITLE_TAG) != null) extras.put("title", args.getString(ARG_TITLE_TAG));
+        } catch (JSONException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+        Analytics.queueEvent(sMainActivity.get(), Analytics.CHANNEL_OPENED, extras);
+    }
+
+    private void sendChannelErrorEvent(@NonNull Bundle args) {
+        JSONObject extras = new JSONObject();
+        try {
+            extras.put("description","failed to open channel");
+            extras.put("handle", args.getString(ARG_COMPONENT_TAG));
+            if(args.getString(ARG_URL_TAG) != null) extras.put("url", args.getString(ARG_URL_TAG));
+            if(args.getString(ARG_API_TAG) != null) extras.put("api", args.getString(ARG_API_TAG));
+            if(args.getString(ARG_TITLE_TAG) != null) extras.put("title", args.getString(ARG_TITLE_TAG));
+        } catch (JSONException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+        Analytics.queueEvent(sMainActivity.get(), Analytics.ERROR, extras);
     }
 
 }
