@@ -127,22 +127,22 @@ public class RecreationDisplay extends Fragment {
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_recreation_display, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        if(mLoading) showProgressCircle();
+        if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
         // Make sure necessary arguments were given
-        if(args.getString(ARG_CAMPUS_TAG) == null || args.getString(ARG_FACILITY_TAG) == null) {
+        if (args.getString(ARG_CAMPUS_TAG) == null || args.getString(ARG_FACILITY_TAG) == null) {
             AppUtils.showFailedLoadToast(getActivity());
             return v;
         }
 
         // When view is recreated, populate list if we have facility info
-        if(mAdapter.isEmpty() && mFacility != null) addInfo();
+        if (mAdapter.isEmpty() && mFacility != null) addInfo();
 
         // Set up list adapter
         final ListView listView = (ListView) v.findViewById(R.id.list);
@@ -202,7 +202,7 @@ public class RecreationDisplay extends Fragment {
 
     private void addInfo() {
         // If resources aren't available when callback fires, exit
-        if(mFacility == null || !isAdded() || getResources() == null) return;
+        if (mFacility == null || !isAdded() || getResources() == null) return;
 
         // Fill in location info
         String infoDesk = mFacility.getInformationNumber();
@@ -211,7 +211,7 @@ public class RecreationDisplay extends Fragment {
         String descriptionHtml =  StringEscapeUtils.unescapeHtml4(mFacility.getFullDescription());
 
         // Add "View Hours" row
-        if(mFacility.getDailySchedules() != null && !mFacility.getDailySchedules().isEmpty()) {
+        if (mFacility.getDailySchedules() != null && !mFacility.getDailySchedules().isEmpty()) {
             try {
                 Bundle rowArgs = new Bundle();
                 rowArgs.putInt(ID_KEY, HOURS_ROW);
@@ -226,7 +226,7 @@ public class RecreationDisplay extends Fragment {
         }
 
         // Add "Description" row
-        if(StringUtils.isNotBlank(descriptionHtml)) {
+        if (StringUtils.isNotBlank(descriptionHtml)) {
             // Decode HTML chars, remove HTML tags, remove whitespace from beginning and end, and
             // then ellipsize the description for the description preview.
             String desc = StringEscapeUtils.unescapeHtml4(descriptionHtml);
@@ -243,7 +243,7 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-        if(StringUtils.isNotBlank(address)) {
+        if (StringUtils.isNotBlank(address)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, ADDRESS_ROW);
             rowArgs.putString("title", address);
@@ -252,7 +252,7 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-        if(StringUtils.isNotBlank(infoDesk)) {
+        if (StringUtils.isNotBlank(infoDesk)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, INFO_ROW);
             rowArgs.putString("title", infoDesk);
@@ -261,7 +261,7 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-        if(StringUtils.isNotBlank(businessOffice)) {
+        if (StringUtils.isNotBlank(businessOffice)) {
             Bundle rowArgs = new Bundle();
             rowArgs.putInt(ID_KEY, BUSINESS_ROW);
             rowArgs.putString("title", businessOffice);
@@ -273,11 +273,11 @@ public class RecreationDisplay extends Fragment {
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

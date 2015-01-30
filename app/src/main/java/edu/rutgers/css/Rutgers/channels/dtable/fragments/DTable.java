@@ -197,17 +197,17 @@ public class DTable extends Fragment {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_dtable, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        if(mLoading) showProgressCircle();
+        if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
-        if(args.getString(ARG_TITLE_TAG) != null) {
+        if (args.getString(ARG_TITLE_TAG) != null) {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
 
-        final ListView listView = (ListView) v.findViewById(R.id.dtable_list);
+        final ListView listView = (ListView) v.findViewById(R.id.list);
         AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(mAdapter);
         alphaInAnimationAdapter.setAbsListView(listView);
         assert alphaInAnimationAdapter.getViewAnimator() != null;
@@ -264,7 +264,7 @@ public class DTable extends Fragment {
         super.onSaveInstanceState(outState);
 
         // If any data was actually loaded, save it in state
-        if(mDRoot != null) {
+        if (mDRoot != null) {
             outState.putSerializable(SAVED_ROOT_TAG, mDRoot);
             outState.putString(SAVED_HANDLE_TAG, mHandle);
         }
@@ -279,11 +279,11 @@ public class DTable extends Fragment {
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

@@ -15,10 +15,8 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -131,15 +129,15 @@ public class FoodMain extends Fragment {
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_food_main, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_stickylist_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        if(mLoading) showProgressCircle();
+        if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
 
         // Set title from JSON
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.dining_title);
 
         StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
@@ -151,7 +149,7 @@ public class FoodMain extends Fragment {
                 DiningMenu clickedMenu = (DiningMenu) parent.getAdapter().getItem(position);
 
                 // Check for static halls first
-                if(clickedMenu.getLocationName().equals(getString(R.string.dining_stonsby_title))) {
+                if (clickedMenu.getLocationName().equals(getString(R.string.dining_stonsby_title))) {
                     ComponentFactory.getInstance().switchFragments(
                             TextDisplay.createArgs(getString(R.string.dining_stonsby_title),
                                     getString(R.string.dining_stonsby_description))
@@ -162,7 +160,7 @@ public class FoodMain extends Fragment {
                                     getString(R.string.dining_gateway_description))
                     );
                 } else {
-                    if(clickedMenu.hasActiveMeals()) {
+                    if (clickedMenu.hasActiveMeals()) {
                         ComponentFactory.getInstance().switchFragments(
                                 FoodHall.createArgs(clickedMenu.getLocationName())
                         );
@@ -183,11 +181,11 @@ public class FoodMain extends Fragment {
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

@@ -54,7 +54,7 @@ public class  RecreationHoursDisplay extends Fragment {
         bundle.putString(ARG_TITLE_TAG, title);
 
         // Convert schedules to ArrayList if necessary to ensure that it is serializable
-        if(schedules instanceof Serializable) {
+        if (schedules instanceof Serializable) {
             bundle.putSerializable(ARG_DATA_TAG, (Serializable) schedules);
         } else {
             bundle.putSerializable(ARG_DATA_TAG, new ArrayList<>(schedules));
@@ -71,7 +71,7 @@ public class  RecreationHoursDisplay extends Fragment {
 
         // Load location hours
         mSchedules = (List<FacilityDaySchedule>) args.getSerializable(ARG_DATA_TAG);
-        if(mSchedules == null) {
+        if (mSchedules == null) {
             Log.e(TAG, "Hours data not set");
             mSchedules = new ArrayList<>();
         }
@@ -81,13 +81,13 @@ public class  RecreationHoursDisplay extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_recreation_hours_display, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_pager, parent, false);
 
         // Set up pager for hours displays
-        ViewPager pager = (ViewPager) v.findViewById(R.id.hoursViewPager);
+        final ViewPager pager = (ViewPager) v.findViewById(R.id.viewPager);
         pager.setAdapter(mPagerAdapter);
 
-        if(mSchedules != null) {
+        if (mSchedules != null) {
             mPagerAdapter.notifyDataSetChanged();
             pager.setCurrentItem(getCurrentPos(), false);
         }
@@ -130,8 +130,8 @@ public class  RecreationHoursDisplay extends Fragment {
         String todayString = GymsAPI.GYM_DATE_FORMAT.format(new Date());
 
         int i = 0;
-        for(FacilityDaySchedule schedule: mSchedules) {
-            if(todayString.equals(schedule.getDate())) {
+        for (FacilityDaySchedule schedule: mSchedules) {
+            if (todayString.equals(schedule.getDate())) {
                 return i;
             } else {
                 i++;

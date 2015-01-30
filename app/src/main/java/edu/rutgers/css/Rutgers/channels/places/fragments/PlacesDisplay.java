@@ -251,14 +251,14 @@ public class PlacesDisplay extends Fragment {
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_place_display, container, false);
+        final View v = inflater.inflate(R.layout.fragment_list_progress, container, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        if(mLoading) showProgressCircle();
+        if (mLoading) showProgressCircle();
 
         // Set title
         final Bundle args = getArguments();
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.places_title);
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
@@ -300,13 +300,13 @@ public class PlacesDisplay extends Fragment {
      * Start a map activity intent for this address/location
      */
     private void launchMap() {
-        if(mPlace == null || mPlace.getLocation() == null) return;
+        if (mPlace == null || mPlace.getLocation() == null) return;
         Place.Location location = mPlace.getLocation();
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
 
         // Create the maps query. Prefer addresses for user readability.
-        if(!StringUtils.isEmpty(location.getStreet()) && !StringUtils.isEmpty(location.getCity()) && !StringUtils.isEmpty(location.getStateAbbr())) {
+        if (!StringUtils.isEmpty(location.getStreet()) && !StringUtils.isEmpty(location.getCity()) && !StringUtils.isEmpty(location.getStateAbbr())) {
             intent.setData(Uri.parse("geo:0,0?q=" + location.getStreet() + ", " + location.getCity() + ", " + location.getStateAbbr()));
         } else {
             intent.setData(Uri.parse("geo:0,0?q=" + Double.toString(location.getLatitude()) + "," + Double.toString(location.getLongitude())));
@@ -326,24 +326,24 @@ public class PlacesDisplay extends Fragment {
      * @return Multi-line string containing address
      */
     private static String formatAddress(Place.Location location) {
-        if(location == null) return null;
+        if (location == null) return null;
 
         String resultString = "";
-        if(!StringUtils.isEmpty(location.getName())) resultString += location.getName() + "\n";
-        if(!StringUtils.isEmpty(location.getStreet())) resultString += location.getStreet() + "\n";
-        if(!StringUtils.isEmpty(location.getAdditional())) resultString += location.getAdditional() + "\n";
-        if(!StringUtils.isEmpty(location.getCity())) resultString += location.getCity() + ", " +
+        if (!StringUtils.isEmpty(location.getName())) resultString += location.getName() + "\n";
+        if (!StringUtils.isEmpty(location.getStreet())) resultString += location.getStreet() + "\n";
+        if (!StringUtils.isEmpty(location.getAdditional())) resultString += location.getAdditional() + "\n";
+        if (!StringUtils.isEmpty(location.getCity())) resultString += location.getCity() + ", " +
                 location.getStateAbbr() + " " + location.getPostalCode();
 
         return StringUtils.trim(resultString);
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

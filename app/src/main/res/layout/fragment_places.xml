@@ -36,17 +36,6 @@
 
     </LinearLayout>
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <se.emilsjolander.stickylistheaders.StickyListHeadersListView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/stickyList" />
-
-        <include layout="@layout/progress_circle" />
-
-    </FrameLayout>
+    <include layout="@layout/fragment_stickylist_progress" />
 
 </LinearLayout>

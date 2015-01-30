@@ -65,13 +65,13 @@ public class SOCSections extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
+        final Bundle args = getArguments();
 
+        Gson gson = new Gson();
         List<SectionAdapterItem> data = new ArrayList<>();
         mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, data);
 
-        Gson gson = new Gson();
-        if(args.getString(ARG_DATA_TAG) == null) {
+        if (args.getString(ARG_DATA_TAG) == null) {
             Log.e(TAG, "Course data not set");
             AppUtils.showFailedLoadToast(getActivity());
             return;
@@ -86,28 +86,28 @@ public class SOCSections extends Fragment {
         }
 
         // Add course description if set
-        if(StringUtils.isNotBlank(mCourse.getCourseDescription())) {
+        if (StringUtils.isNotBlank(mCourse.getCourseDescription())) {
             mAdapter.add(new ScheduleText(mCourse.getCourseDescription(), ScheduleText.TextType.DESCRIPTION));
         }
 
         // Add prerequisites button if set
-        if(StringUtils.isNotBlank(mCourse.getPreReqNotes())) {
+        if (StringUtils.isNotBlank(mCourse.getPreReqNotes())) {
             mAdapter.add(new ScheduleText("Prerequisites", ScheduleText.TextType.PREREQS));
         }
 
         // Add all visible sections to list
         for(Section section: mCourse.getSections()) {
-            if("Y".equalsIgnoreCase(section.getPrinted())) mAdapter.add(section);
+            if ("Y".equalsIgnoreCase(section.getPrinted())) mAdapter.add(section);
         }
 
     }
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_soc_sections, parent, false);
-        Bundle args = getArguments();
+        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
+        final Bundle args = getArguments();
 
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
         final String semester = args.getString(ARG_SEMESTER_TAG);
 
@@ -118,18 +118,18 @@ public class SOCSections extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final SectionAdapterItem clickedItem = (SectionAdapterItem) parent.getAdapter().getItem(position);
 
-                if(clickedItem instanceof ScheduleText) {
+                if (clickedItem instanceof ScheduleText) {
                     ScheduleText scheduleText = (ScheduleText) clickedItem;
 
-                    if(scheduleText.getType().equals(ScheduleText.TextType.PREREQS)) {
+                    if (scheduleText.getType().equals(ScheduleText.TextType.PREREQS)) {
                         Bundle newArgs = TextDisplay.createArgs(mCourse.getSubject()+":"+mCourse.getCourseNumber()+" Prerequisites", mCourse.getPreReqNotes());
                         ComponentFactory.getInstance().switchFragments(newArgs);
                         return;
                     }
-                } else if(clickedItem instanceof Section) {
+                } else if (clickedItem instanceof Section) {
                     Section section = (Section) clickedItem;
 
-                    if(StringUtils.isNotBlank(section.getIndex()) && semester != null) {
+                    if (StringUtils.isNotBlank(section.getIndex()) && semester != null) {
                         String index = StringUtils.trim(section.getIndex());
                         ScheduleAPI.openRegistrationWindow(semester, index);
                     } else {

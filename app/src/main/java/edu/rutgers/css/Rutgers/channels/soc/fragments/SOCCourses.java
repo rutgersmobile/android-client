@@ -86,7 +86,7 @@ public class SOCCourses extends Fragment {
         mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, data);
 
         // Restore filter
-        if(savedInstanceState != null && savedInstanceState.getString(SAVED_FILTER_TAG) != null) {
+        if (savedInstanceState != null && savedInstanceState.getString(SAVED_FILTER_TAG) != null) {
             mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
@@ -104,7 +104,7 @@ public class SOCCourses extends Fragment {
                 mAdapter.addAll(result);
 
                 // Re-apply filter
-                if(mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
+                if (mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
             }
 
         }).fail(new FailCallback<Exception>() {
@@ -125,19 +125,19 @@ public class SOCCourses extends Fragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_soc_main, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_search_list_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        if(mLoading) showProgressCircle();
+        if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString(ARG_TITLE_TAG)));
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString(ARG_TITLE_TAG)));
 
         final String semester = args.getString(ARG_SEMESTER_TAG);
 
         mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
-        ListView listView = (ListView) v.findViewById(R.id.list);
+        final ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -184,7 +184,7 @@ public class SOCCourses extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFilterEditText != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
+        if (mFilterEditText != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
     }
 
     @Override
@@ -196,11 +196,11 @@ public class SOCCourses extends Fragment {
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

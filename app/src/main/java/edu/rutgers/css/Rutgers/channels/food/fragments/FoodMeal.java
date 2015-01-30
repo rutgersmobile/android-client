@@ -69,10 +69,10 @@ public class FoodMeal extends Fragment {
         mAdapter = new DiningMenuAdapter(getActivity(),
                 R.layout.row_title, R.layout.row_section_header, R.id.title);
 
-        if(args.getString(ARG_LOCATION_TAG) == null) {
+        if (args.getString(ARG_LOCATION_TAG) == null) {
             Log.e(TAG, "Location not set");
             return;
-        } else if(args.getString(ARG_MEAL_TAG) == null) {
+        } else if (args.getString(ARG_MEAL_TAG) == null) {
             Log.e(TAG, "Meal not set");
             return;
         }
@@ -107,9 +107,9 @@ public class FoodMeal extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_food_meal, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_stickylist_progress, parent, false);
 
-        StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
 
         return v;

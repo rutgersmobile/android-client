@@ -77,18 +77,18 @@ public class RSSReader extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle args = getArguments();
+        final Bundle args = getArguments();
         
         mData = new ArrayList<>();
         mAdapter = new RSSAdapter(this.getActivity(), R.layout.row_rss, mData);
 
-        if(savedInstanceState != null && savedInstanceState.getSerializable(SAVED_DATA_TAG) != null) {
+        if (savedInstanceState != null && savedInstanceState.getSerializable(SAVED_DATA_TAG) != null) {
             Log.d(TAG, "Restoring mData");
             mAdapter.addAll((ArrayList<RSSItem>) savedInstanceState.getSerializable(SAVED_DATA_TAG));
             return;
         }
 
-        if(args.getString(ARG_URL_TAG) == null) {
+        if (args.getString(ARG_URL_TAG) == null) {
             Log.e(TAG, "URL argument not set");
             Toast.makeText(getActivity(), R.string.failed_no_url, Toast.LENGTH_SHORT).show();
             return;
@@ -128,25 +128,25 @@ public class RSSReader extends Fragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_rss_reader, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        if(mLoading) showProgressCircle();
+        if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
-        if(args.getString(ARG_TITLE_TAG) != null) {
+        if (args.getString(ARG_TITLE_TAG) != null) {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
 
         // Adapter & click listener for RSS list view
-        ListView listView = (ListView) v.findViewById(R.id.rssreader_list);
+        final ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RSSItem item = mAdapter.getItem(position);
 
-                if(item.getLink() != null) {
+                if (item.getLink() != null) {
                     // Open web display fragment
                     Bundle webArgs = WebDisplay.createArgs(args.getString(ARG_TITLE_TAG), item.getLink());
                     ComponentFactory.getInstance().switchFragments(webArgs);
@@ -160,7 +160,7 @@ public class RSSReader extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(!mData.isEmpty()) outState.putSerializable(SAVED_DATA_TAG, mData);
+        if (!mData.isEmpty()) outState.putSerializable(SAVED_DATA_TAG, mData);
     }
 
     @Override
@@ -172,11 +172,11 @@ public class RSSReader extends Fragment {
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

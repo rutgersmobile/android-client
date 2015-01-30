@@ -60,7 +60,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_bus_routes, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_search_stickylist_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
@@ -69,7 +69,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
         filterEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                if(mFilterFocusListener != null) mFilterFocusListener.focusEvent();
+                if (mFilterFocusListener != null) mFilterFocusListener.focusEvent();
             }
         });
         
@@ -162,7 +162,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
      */
     private void loadAgency(@NonNull String agencyTag, @NonNull List<RouteStub> routeStubs) {
         // Abort if resources can't be accessed
-        if(!isAdded() || getResources() == null) return;
+        if (!isAdded() || getResources() == null) return;
 
         // Get header for routes section
         String header;
@@ -185,11 +185,11 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

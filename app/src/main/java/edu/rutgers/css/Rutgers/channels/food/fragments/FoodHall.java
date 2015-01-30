@@ -72,14 +72,14 @@ public class FoodHall extends Fragment {
         final Bundle args = getArguments();
 
         mLocation = args.getString(ARG_LOCATION_TAG);
-        if(mLocation == null) {
+        if (mLocation == null) {
             Log.e(TAG, "location argument not set");
             return;
         }
 
         mPagerAdapter = new MealPagerAdapter(getChildFragmentManager());
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mData = (DiningMenu) savedInstanceState.getSerializable(SAVED_DATA_TAG);
             loadPages(mData);
             return;
@@ -102,12 +102,12 @@ public class FoodHall extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_food_hall, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_pager, parent, false);
         final Bundle args = getArguments();
 
-        if(mTitle != null) {
+        if (mTitle != null) {
             getActivity().setTitle(mTitle);
-        } else if(args.getString(ARG_TITLE_TAG) != null) {
+        } else if (args.getString(ARG_TITLE_TAG) != null) {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         } else {
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
@@ -124,18 +124,18 @@ public class FoodHall extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mData != null) outState.putSerializable(SAVED_DATA_TAG, mData);
+        if (mData != null) outState.putSerializable(SAVED_DATA_TAG, mData);
     }
 
     private void loadPages(DiningMenu diningMenu) {
         List<DiningMenu.Meal> meals = diningMenu.getMeals();
         for(DiningMenu.Meal meal: meals) {
-            if(meal.isMealAvailable()) mPagerAdapter.add(meal);
+            if (meal.isMealAvailable()) mPagerAdapter.add(meal);
         }
 
         // Set title to show timestamp for dining data
         mTitle = mLocation + " (" + dout.format(diningMenu.getDate()) + ")";
-        if(getActivity() != null && AppUtils.isOnTop(getActivity(), FoodHall.HANDLE)) {
+        if (getActivity() != null && AppUtils.isOnTop(getActivity(), FoodHall.HANDLE)) {
             getActivity().setTitle(mTitle);
         }
     }

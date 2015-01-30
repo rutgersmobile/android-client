@@ -104,7 +104,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_bus_stops, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_search_stickylist_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
@@ -113,7 +113,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         filterEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                if(mFilterFocusListener != null) mFilterFocusListener.focusEvent();
+                if (mFilterFocusListener != null) mFilterFocusListener.focusEvent();
             }
         });
 
@@ -146,7 +146,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     public void onResume() {
         super.onResume();
 
-        if(mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
+        if (mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
 
         // Clear out everything & add in empty nearby stops section as a placeholder
         mAdapter.clear();
@@ -182,12 +182,12 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             @Override
             public void onDone(MultipleResults results) {
                 // Don't do anything if not attached to activity anymore
-                if(!isAdded() || getResources() == null) return;
+                if (!isAdded() || getResources() == null) return;
 
                 List<StopStub> nbResult = (List<StopStub>) results.get(0).getResult();
                 List<StopStub> nwkResult = (List<StopStub>) results.get(1).getResult();
 
-                if(nbHome) {
+                if (nbHome) {
                     loadAgency(NextbusAPI.AGENCY_NB, nbResult);
                     loadAgency(NextbusAPI.AGENCY_NWK, nwkResult);
                 } else {
@@ -217,12 +217,12 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         super.onPause();
 
         // Stop the update thread from running when screen isn't active
-        if(mUpdateTimer != null) {
+        if (mUpdateTimer != null) {
             mUpdateTimer.cancel();
             mUpdateTimer = null;
         }
 
-        if(mLocationClientProvider != null) mLocationClientProvider.unregisterListener(this);
+        if (mLocationClientProvider != null) mLocationClientProvider.unregisterListener(this);
     }
 
     @Override
@@ -240,7 +240,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
         // Location services reconnected - retry loading nearby stops
         // Make sure this isn't called before onCreate() has ran.
-        if(mAdapter != null) loadNearbyStops();
+        if (mAdapter != null) loadNearbyStops();
     }
 
     @Override
@@ -255,12 +255,12 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      */
     private void loadAgency(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
         // Abort if resources can't be accessed
-        if(!isAdded() || getResources() == null) return;
+        if (!isAdded() || getResources() == null) return;
 
         // Get header for active stops section
         String header;
-        if(NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_active_stops_header);
-        else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_active_stops_header);
+        if (NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_active_stops_header);
+        else if (NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_active_stops_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
         SimpleSection<StopStub> section = new SimpleSection<>(header, stopStubs);
@@ -271,7 +271,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
      * Populate list with active nearby stops for an agency
      */
     private void loadNearbyStops() {
-        if(!isAdded() || getResources() == null) return;
+        if (!isAdded() || getResources() == null) return;
 
         final String noneNearbyString = getString(R.string.bus_no_nearby_stops);
         final String failedLoadString = getString(R.string.failed_load_short);
@@ -280,17 +280,17 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
         clearNearbyRows();
 
         // Check for location services
-        if(mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
+        if (mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
             // Get last location
             Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
-            if(lastLoc == null) {
+            if (lastLoc == null) {
                 Log.w(TAG, "Could not get location");
                 clearNearbyRows();
                 //addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
                 return;
             }
 
-            if(BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
+            if (BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
             Log.i(TAG, "Updating nearby active stops");
 
             Promise<List<StopGroup>, Exception, Void> nbNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NB, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
@@ -301,7 +301,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
                 @Override
                 public void onDone(MultipleResults results) {
-                    if(!isAdded() || getResources() == null) return;
+                    if (!isAdded() || getResources() == null) return;
 
                     List<StopGroup> nbStops = (List<StopGroup>) results.get(0).getResult();
                     List<StopGroup> nwkStops = (List<StopGroup>) results.get(1).getResult();
@@ -309,7 +309,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                     // Clear previous rows
                     clearNearbyRows();
 
-                    if(nbStops.isEmpty() && nwkStops.isEmpty()) {
+                    if (nbStops.isEmpty() && nwkStops.isEmpty()) {
                         // If there aren't any results, put a "no stops nearby" message
                         //addNearbyRow(1, new RMenuItemRow(noneNearbyString));
                     } else {
@@ -322,7 +322,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
             }).fail(new FailCallback<OneReject>() {
                 @Override
                 public void onFail(OneReject result) {
-                    if(!isAdded() || getResources() == null) return;
+                    if (!isAdded() || getResources() == null) return;
                     //addNearbyRow(1, new RMenuItemRow(failedLoadString));
                 }
             });
@@ -349,11 +349,11 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

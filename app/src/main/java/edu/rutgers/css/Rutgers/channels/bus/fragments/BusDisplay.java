@@ -144,20 +144,20 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_bus_display, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
 
         final Bundle args = getArguments();
         // Get title
-        if(args.getString(ARG_TITLE_TAG) != null) {
+        if (args.getString(ARG_TITLE_TAG) != null) {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         } else {
             Log.e(TAG, "Argument \""+ARG_TITLE_TAG+"\" not set");
             getActivity().setTitle(getString(R.string.bus_title));
         }
 
-        final ListView listView = (ListView) v.findViewById(R.id.busDisplayList);
+        final ListView listView = (ListView) v.findViewById(R.id.list);
 
         final ScaleInAnimationAdapter scaleInAnimationAdapter = new ScaleInAnimationAdapter(mAdapter);
         scaleInAnimationAdapter.setAbsListView(listView);
@@ -167,7 +167,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
             @Override
             public void onItemExpanded(int position) {
                 // Don't expand the view if there are no predictions to display
-                if(mAdapter.getItem(position).getMinutes().isEmpty()) mAdapter.collapse(position);
+                if (mAdapter.getItem(position).getMinutes().isEmpty()) mAdapter.collapse(position);
             }
 
             @Override
@@ -182,7 +182,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         super.onResume();
         
         // Don't run if required args aren't loaded
-        if(mAgency == null || mTag == null) return;
+        if (mAgency == null || mTag == null) return;
         
         // Start the update thread when screen is active
         mUpdateTimer = new Timer();
@@ -204,7 +204,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         super.onPause();
         
         // Stop the update thread from running when screen isn't active
-        if(mUpdateTimer != null) {
+        if (mUpdateTimer != null) {
             mUpdateTimer.cancel();
             mUpdateTimer = null;
         }
@@ -232,12 +232,12 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
      */
     private void loadPredictions() {
         // Don't run if required args aren't loaded
-        if(mAgency == null || mTag == null) return;
+        if (mAgency == null || mTag == null) return;
 
         showProgressCircle();
-        if(mMode == Mode.ROUTE) {
+        if (mMode == Mode.ROUTE) {
             mDM.when(NextbusAPI.routePredict(mAgency, mTag)).then(this).fail(this).always(this);
-        } else if(mMode == Mode.STOP) {
+        } else if (mMode == Mode.STOP) {
             mDM.when(NextbusAPI.stopPredict(mAgency, mTag)).then(this).fail(this).always(this);
         }
     }
@@ -250,8 +250,8 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         hideProgressCircle();
 
         // If no routes are running through this stop right now, show message
-        if(mMode == Mode.STOP && newPredictions.isEmpty()) {
-            if(isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
+        if (mMode == Mode.STOP && newPredictions.isEmpty()) {
+            if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
         }
 
         /*
@@ -259,8 +259,8 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
          * the updated JSON doesn't seem to match and the list should be
          * cleared and repopulated.
          */
-        if(mAdapter.getCount() != newPredictions.size()) {
-            if(mAdapter.getCount() != 0) {
+        if (mAdapter.getCount() != newPredictions.size()) {
+            if (mAdapter.getCount() != 0) {
                 Log.d(TAG, "Size of updated list did not match original");
                 mAdapter.clear();
             }
@@ -277,7 +277,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
                 Prediction newPrediction = newPredictions.get(i);
                 Prediction oldPrediction = mAdapter.getItem(i);
 
-                if(!newPrediction.equals(oldPrediction)) {
+                if (!newPrediction.equals(oldPrediction)) {
                     Log.d(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());
                     oldPrediction.setTitle(newPrediction.getTitle());
                     oldPrediction.setTag(newPrediction.getTag());
@@ -301,11 +301,11 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

@@ -137,7 +137,7 @@ public class BusAll extends Fragment {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_bus_all, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_search_stickylist_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if(mLoading) showProgressCircle();

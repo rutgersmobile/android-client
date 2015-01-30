@@ -102,7 +102,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
         // Restore filter
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
@@ -115,10 +115,10 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
                 int defaultIndex = result.getDefaultSemester();
                 List<String> semesters = result.getSemesters();
 
-                if(semesters.isEmpty()) {
+                if (semesters.isEmpty()) {
                     Log.e(TAG, "Semesters list is empty");
                     return;
-                } else if(defaultIndex < 0 || defaultIndex >= semesters.size()) {
+                } else if (defaultIndex < 0 || defaultIndex >= semesters.size()) {
                     Log.w(TAG, "Invalid default index " + defaultIndex);
                     defaultIndex = 0;
                 }
@@ -127,11 +127,11 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
                 mSemesters = semesters;
 
                 // If there is a saved semester setting, make sure it's valid
-                if(mSemester == null || !mSemesters.contains(mSemester)) {
+                if (mSemester == null || !mSemesters.contains(mSemester)) {
                     mSemester = mDefaultSemester;
                 }
 
-                if(BuildConfig.DEBUG) {
+                if (BuildConfig.DEBUG) {
                     for(String semester: mSemesters) {
                         Log.v(TAG, "Got semester: " + ScheduleAPI.translateSemester(semester));
                     }
@@ -151,7 +151,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             @Override
             public void onAlways(Promise.State state, Semesters resolved, Exception rejected) {
                 mLoadingSemesters = false;
-                if(!mLoadingSubjects) hideProgressCircle();
+                if (!mLoadingSubjects) hideProgressCircle();
             }
         });
 
@@ -159,15 +159,15 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_soc_main, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_search_list_progress, parent, false);
         setScheduleTitle();
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        if(mLoadingSemesters || mLoadingSubjects) showProgressCircle();
+        if (mLoadingSemesters || mLoadingSubjects) showProgressCircle();
 
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
-        ListView listView = (ListView) v.findViewById(R.id.list);
+        final ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -179,9 +179,9 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
                     Bundle coursesArgs = SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
                             mSemester, mLevel, ((Subject) clickedItem).getCode());
                     ComponentFactory.getInstance().switchFragments(coursesArgs);
-                } else if(clickedItem instanceof Course) {
+                } else if (clickedItem instanceof Course) {
                     // This is for when courses are loaded into the list by user-supplied filter
-                    if(((Course) clickedItem).isStub()) return; // Stub course hasn't loaded data yet
+                    if (((Course) clickedItem).isStub()) return; // Stub course hasn't loaded data yet
                     Bundle courseArgs = SOCSections.createArgs(clickedItem.getDisplayTitle(), mSemester, (Course) clickedItem);
                     ComponentFactory.getInstance().switchFragments(courseArgs);
                 }
@@ -230,7 +230,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     public boolean onOptionsItemSelected(MenuItem item) {
 
         // Handle options button
-        if(item.getItemId() == R.id.action_options) {
+        if (item.getItemId() == R.id.action_options) {
             showSelectDialog();
             return true;
         }
@@ -241,7 +241,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mFilterString != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
+        if (mFilterString != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
     }
 
     @Override
@@ -259,7 +259,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         // All 3 changes are submitted at once by the dialog. This gets all of the changes at once
         // in order to avoid calling loadSubjects() multiple times each time the config is changed.
         boolean somethingChanged = false;
-        if(key.equals(PrefUtils.KEY_PREF_SOC_CAMPUS)
+        if (key.equals(PrefUtils.KEY_PREF_SOC_CAMPUS)
                 || key.equals(PrefUtils.KEY_PREF_SOC_LEVEL)
                 || key.equals(PrefUtils.KEY_PREF_SOC_SEMESTER)) {
 
@@ -267,25 +267,25 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             String temp;
 
             temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
-            if(!mCampus.equals(temp)) {
+            if (!mCampus.equals(temp)) {
                 somethingChanged = true;
                 mCampus = temp;
             }
 
             temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
-            if(!mLevel.equals(temp)) {
+            if (!mLevel.equals(temp)) {
                 somethingChanged = true;
                 mLevel = temp;
             }
 
             temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, mDefaultSemester);
-            if(!mSemester.equals(temp)) {
+            if (!mSemester.equals(temp)) {
                 somethingChanged = true;
                 mSemester = temp;
             }
         }
 
-        if(somethingChanged) {
+        if (somethingChanged) {
             Log.v(TAG, "Loading new subjects");
             loadSubjects();
         }
@@ -296,9 +296,9 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      */
     private void setScheduleTitle() {
         // Only change title if SOC Main fragment on screen (possibly covered by selection dialog)
-        if(!isAdded() || getResources() == null) return;
-        if(!(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
-        if(mSemester == null) getActivity().setTitle(R.string.soc_title);
+        if (!isAdded() || getResources() == null) return;
+        if (!(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
+        if (mSemester == null) getActivity().setTitle(R.string.soc_title);
         else getActivity().setTitle(ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
 
@@ -306,7 +306,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      * Show dialog for choosing semester, campus, level.
      */
     private void showSelectDialog() {
-        if(mSemesters == null) {
+        if (mSemesters == null) {
             Log.e(TAG, "No list of semesters to display for dialog");
             return;
         }
@@ -362,7 +362,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
             @Override
             public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
                 mLoadingSubjects = false;
-                if(!mLoadingSemesters) hideProgressCircle();
+                if (!mLoadingSemesters) hideProgressCircle();
             }
         });
 
@@ -374,7 +374,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
      */
     private void defaultSettings(SharedPreferences sharedPref) {
         // If there are already prefs, exit
-        if(sharedPref.contains(PrefUtils.KEY_PREF_SOC_LEVEL)) return;
+        if (sharedPref.contains(PrefUtils.KEY_PREF_SOC_LEVEL)) return;
 
         String campus, level;
 
@@ -383,14 +383,14 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         String userLevel = sharedPref.getString(PrefUtils.KEY_PREF_USER_TYPE, getString(R.string.role_undergrad_tag));
 
         // Pick default campus code based on prefs (fall back to New Brunswick)
-        if(userHome.equals(getString(R.string.campus_nb_tag))) campus = ScheduleAPI.CODE_CAMPUS_NB;
-        else if(userHome.equals(getString(R.string.campus_nwk_tag))) campus = ScheduleAPI.CODE_CAMPUS_NWK;
-        else if(userHome.equals(getString(R.string.campus_cam_tag))) campus = ScheduleAPI.CODE_CAMPUS_CAM;
+        if (userHome.equals(getString(R.string.campus_nb_tag))) campus = ScheduleAPI.CODE_CAMPUS_NB;
+        else if (userHome.equals(getString(R.string.campus_nwk_tag))) campus = ScheduleAPI.CODE_CAMPUS_NWK;
+        else if (userHome.equals(getString(R.string.campus_cam_tag))) campus = ScheduleAPI.CODE_CAMPUS_CAM;
         else campus = ScheduleAPI.CODE_CAMPUS_NB;
 
         // Pick default user-level code based on prefs (fall back to Undergrad)
-        if(userLevel.equals(getString(R.string.role_undergrad_tag))) level = ScheduleAPI.CODE_LEVEL_UNDERGRAD;
-        else if(userLevel.equals(getString(R.string.role_grad_tag))) level = ScheduleAPI.CODE_LEVEL_GRAD;
+        if (userLevel.equals(getString(R.string.role_undergrad_tag))) level = ScheduleAPI.CODE_LEVEL_UNDERGRAD;
+        else if (userLevel.equals(getString(R.string.role_grad_tag))) level = ScheduleAPI.CODE_LEVEL_GRAD;
         else level = ScheduleAPI.CODE_LEVEL_UNDERGRAD;
 
         SharedPreferences.Editor editor = sharedPref.edit();
@@ -400,11 +400,11 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }
