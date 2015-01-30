@@ -14,9 +14,11 @@
 
     <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewRutgersTheme</item>
 
+    <!--
     <item name="android:buttonStyle">@style/ButtonRutgersTheme</item>
 
     <item name="android:imageButtonStyle">@style/ImageButtonRutgersTheme</item>
+    //-->
 
   </style>
 
