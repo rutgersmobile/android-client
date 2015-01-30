@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentTabHost;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TabWidget;
+import android.widget.TextView;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -37,19 +39,36 @@ public class BusMain extends Fragment implements FilterFocusListener {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_bus_main, parent, false);
-        Bundle args = getArguments();
+        final View v = inflater.inflate(R.layout.fragment_bus_main, parent, false);
+        final Bundle args = getArguments();
 
         // Set title from JSON
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
-        else getActivity().setTitle(R.string.bus_title);
+        if (args.getString(ARG_TITLE_TAG) != null) {
+            getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        } else {
+            getActivity().setTitle(R.string.bus_title);
+        }
 
         mTabHost = (FragmentTabHost) v.findViewById(R.id.bus_tabhost);
         mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
 
-        mTabHost.addTab(mTabHost.newTabSpec(BusRoutes.HANDLE).setIndicator(getString(R.string.bus_routes_tab)), BusRoutes.class, null);
-        mTabHost.addTab(mTabHost.newTabSpec(BusStops.HANDLE).setIndicator(getString(R.string.bus_stops_tab)), BusStops.class, null);
-        mTabHost.addTab(mTabHost.newTabSpec(BusAll.HANDLE).setIndicator(getString(R.string.bus_all_tab)), BusAll.class, null);
+        final TabWidget tabWidget = mTabHost.getTabWidget();
+
+        mTabHost.addTab(
+                mTabHost.newTabSpec(BusRoutes.HANDLE)
+                    .setIndicator(themedIndicator(inflater, tabWidget, getString(R.string.bus_routes_tab))),
+                BusRoutes.class, null
+        );
+        mTabHost.addTab(
+                mTabHost.newTabSpec(BusStops.HANDLE)
+                    .setIndicator(themedIndicator(inflater, tabWidget, getString(R.string.bus_stops_tab))),
+                BusStops.class, null
+        );
+        mTabHost.addTab(
+                mTabHost.newTabSpec(BusAll.HANDLE)
+                    .setIndicator(themedIndicator(inflater, tabWidget, getString(R.string.bus_all_tab))),
+                BusAll.class, null
+        );
 
         return v;
     }
@@ -65,6 +84,13 @@ public class BusMain extends Fragment implements FilterFocusListener {
         if(mTabHost != null) {
             mTabHost.setCurrentTab(2);
         }
+    }
+
+    private View themedIndicator(LayoutInflater inflater, TabWidget tabWidget, String label) {
+        final View v = inflater.inflate(R.layout.rutgerstheme_tab_indicator_holo, tabWidget, false);
+        final TextView textView = (TextView) v.findViewById(android.R.id.title);
+        textView.setText(label);
+        return v;
     }
 
 }
