@@ -75,12 +75,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         Log.d(TAG, "Attaching to activity");
-        try {
-            mLocationClientProvider = (LocationClientProvider) activity;
-        } catch(ClassCastException e) {
-            mLocationClientProvider = null;
-            Log.e(TAG, "onAttach(): " + e.getMessage());
-        }
+        mLocationClientProvider = (LocationClientProvider) activity;
     }
 
     @Override

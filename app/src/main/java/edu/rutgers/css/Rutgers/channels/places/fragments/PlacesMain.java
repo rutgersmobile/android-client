@@ -80,12 +80,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         Log.d(TAG, "Attaching to activity");
-        try {
-            mLocationClientProvider = (LocationClientProvider) activity;
-        } catch(ClassCastException e) {
-            mLocationClientProvider = null;
-            Log.e(TAG, e.getMessage());
-        }
+        mLocationClientProvider = (LocationClientProvider) activity;
     }
 
     @Override

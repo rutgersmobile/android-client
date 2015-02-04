@@ -1,14 +1,11 @@
 package edu.rutgers.css.Rutgers.ui;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.IntentSender.SendIntentException;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -22,9 +19,6 @@ import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.LocationClient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
@@ -32,18 +26,15 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
-import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
@@ -53,39 +44,26 @@ import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
-import edu.rutgers.css.Rutgers.utils.LocationUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
  * RU Mobile main activity
  */
-public class MainActivity extends FragmentActivity implements
-        GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener,
-        LocationClientProvider, ChannelManagerProvider {
+public class MainActivity extends LocationProviderActivity implements
+        ChannelManagerProvider {
 
     /** Log tag */
     private static final String TAG = "MainActivity";
 
     /* Member data */
     private ChannelManager mChannelManager;
-    private LocationClient mLocationClient;
     private ActionBarDrawerToggle mDrawerToggle;
     private RMenuAdapter mDrawerAdapter;
-    private List<WeakReference<GooglePlayServicesClient.ConnectionCallbacks>> mLocationListeners = new ArrayList<>(5);
 
     /* View references */
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
-    
-    /**
-     * For providing the location client to fragments
-     */
-    @Override
-    public LocationClient getLocationClient() {
-        return mLocationClient;
-    }
 
     @Override
     public ChannelManager getChannelManager() {
@@ -93,7 +71,7 @@ public class MainActivity extends FragmentActivity implements
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -126,9 +104,6 @@ public class MainActivity extends FragmentActivity implements
 
             PrefUtils.markFirstLaunch(this);
         }
-
-        // Connect to Google Play location services
-        mLocationClient = new LocationClient(this, this, this);
 
         // Set up channel manager
         mChannelManager = new ChannelManager();
@@ -203,29 +178,18 @@ public class MainActivity extends FragmentActivity implements
         }
 
     }
-    
-    @Override
-    protected void onStart() {
-        super.onStart();
-        
-        // Connect to location services when activity becomes visible
-        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
-            if (listener.get() != null) mLocationClient.registerConnectionCallbacks(listener.get());
-        }
 
-        mLocationClient.connect();
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
-        // Disconnect from location services when activity is no longer visible
-        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
-            if (listener.get() != null) mLocationClient.unregisterConnectionCallbacks(listener.get());
-        }
-
-        mLocationClient.disconnect();
 
         // Attempt to flush analytics events to server
         Analytics.postEvents(this);
@@ -263,14 +227,6 @@ public class MainActivity extends FragmentActivity implements
         }
 
         super.onBackPressed();
-    }
-    
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
     }
 
     @Override
@@ -311,113 +267,6 @@ public class MainActivity extends FragmentActivity implements
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
-    }
-
-    /**
-     * Register a child fragment with the main activity's location client.
-     * @param listener Fragment that uses the location client.
-     */
-    @Override
-    public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        mLocationListeners.add(new WeakReference<>(listener));
-
-        if (mLocationClient != null) {
-            mLocationClient.registerConnectionCallbacks(listener);
-            Log.d(TAG, "Registered location listener: " + listener.toString());
-        } else {
-            Log.w(TAG, "Failed to register listener: " + listener.toString());
-        }
-    }
-
-    /**
-     * Unregister a child fragment from the main activity's location client.
-     * @param listener Play services Connection Callbacks listener
-     */
-    @Override
-    public void unregisterListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> curRef: mLocationListeners) {
-            if (curRef.get() == listener) {
-                mLocationListeners.remove(curRef);
-                break;
-            }
-        }
-
-        if (mLocationClient != null) {
-            mLocationClient.unregisterConnectionCallbacks(listener);
-            Log.d(TAG, "Unregistered location listener: " + listener.toString());
-        }
-    }
-
-    /**
-     * Play services connected
-     * @param connectionHint Bundle of data provided to clients by Google Play services. May be null if no content is provided by the service.
-     */
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        Log.i(TAG, "Connected to Google Play services.");
-    }
-
-    /**
-     * Play services disconnected
-     */
-    @Override
-    public void onDisconnected() {
-        Log.i(TAG, "Disconnected from Google Play services");
-    }
-    
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.w(TAG, "Attempting to resolve Play Services connection failure");
-        if (connectionResult.hasResolution()) {
-            try {
-                connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
-            } catch (SendIntentException e) {
-                Log.e(Config.APPTAG, Log.getStackTraceString(e));
-            }
-        } else {
-            LocationUtils.showErrorDialog(this, connectionResult.getErrorCode());
-        }
-    }
-
-    /**
-     * Handle results from Google Play Services
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
-        // Choose what to do based on the request code
-        switch (requestCode) {
-
-            // If the request code matches the code sent in onConnectionFailed
-            case LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST :
-                switch (resultCode) {
-                    // If Google Play services resolved the problem
-                    case Activity.RESULT_OK:
-                        Log.w(Config.APPTAG, "Connection failure resolved by Google Play");
-                        break;
-
-                    // If any other result was returned by Google Play services
-                    default:
-                        Log.w(Config.APPTAG, "Connection failure not resolved by Google Play ("+resultCode+")");
-                        break;
-                }
-                break;
-
-            // If any other request code was received
-            default:
-               // Report that this Activity received an unknown requestCode
-               Log.w(Config.APPTAG, "Unknown request code: " + requestCode);
-               break;
-        }
-    }
-
-    /**
-     * Check if Google Play Services are connected.
-     * @return True if connected, false if not.
-     */
-    @Override
-    public boolean servicesConnected() {
-        return LocationUtils.servicesConnected(this);
     }
 
     /*

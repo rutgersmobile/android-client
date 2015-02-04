@@ -18,6 +18,7 @@ package edu.rutgers.css.Rutgers.utils;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -30,6 +31,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.ui.LocationProviderActivity;
 
 /**
  * Defines app-wide constants and utilities
@@ -42,9 +44,9 @@ public final class LocationUtils {
 
     public static class ErrorDialogFragment extends DialogFragment {
         private Dialog mDialog;
+
         public ErrorDialogFragment() {
             super();
-            mDialog = null;
         }
 
         public void setDialog(Dialog dialog) {
@@ -55,6 +57,11 @@ public final class LocationUtils {
         @NonNull
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return mDialog;
+        }
+
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            ((LocationProviderActivity)getActivity()).onDialogDismissed();
         }
     }
 
@@ -70,7 +77,7 @@ public final class LocationUtils {
      * Define a request code to send to Google Play services
      * This code is returned in Activity.onActivityResult
      */
-    public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    public final static int REQUEST_RESOLVE_ERROR = 9000;
 
     /*
      * Constants for location update parameters
@@ -142,7 +149,7 @@ public final class LocationUtils {
         Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
                 errorCode,
                 activity,
-                CONNECTION_FAILURE_RESOLUTION_REQUEST
+                LocationUtils.REQUEST_RESOLVE_ERROR
         );
 
         if(errorDialog != null) {
