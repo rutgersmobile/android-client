@@ -10,9 +10,9 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,14 +59,13 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
  * RU Mobile main activity
- *
  */
 public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
         LocationClientProvider, ChannelManagerProvider {
 
-    /* Log tag */
+    /** Log tag */
     private static final String TAG = "MainActivity";
 
     /* Member data */
@@ -104,11 +103,8 @@ public class MainActivity extends FragmentActivity implements
         // Start Component Factory
         ComponentFactory.getInstance().setMainActivity(this);
 
-        // Set up logo overlay
-        //setLogoRootLayoutId(R.id.main_content_frame);
-
         /*
-        if(BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             getSupportFragmentManager().enableDebugLogging(true);
         }
         */
@@ -117,7 +113,7 @@ public class MainActivity extends FragmentActivity implements
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 
         // Check if this is the first time the app is being launched
-        if(PrefUtils.isFirstLaunch(this)) {
+        if (PrefUtils.isFirstLaunch(this)) {
             Log.i(TAG, "First launch");
 
             // First launch, create analytics event & show settings screen
@@ -138,7 +134,7 @@ public class MainActivity extends FragmentActivity implements
         mChannelManager = new ChannelManager();
 
         // Enable drawer icon
-        if(getActionBar() != null) {
+        if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
@@ -171,7 +167,7 @@ public class MainActivity extends FragmentActivity implements
         };
         
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
         
         mDrawerListView.setAdapter(mDrawerAdapter);
         mDrawerListView.setOnItemClickListener(new OnItemClickListener() {
@@ -179,7 +175,7 @@ public class MainActivity extends FragmentActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
-                if(!(clickedRow instanceof RMenuItemRow)) return;
+                if (!(clickedRow instanceof RMenuItemRow)) return;
 
                 Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
                 clickedArgs.putBoolean("topLevel", true); // This is a top level menu press
@@ -193,14 +189,14 @@ public class MainActivity extends FragmentActivity implements
             }
 
         });
-        
+
         // Load nav drawer items
         loadChannels();
         loadWebShortcuts();
         
         // Set up initial fragment
         FragmentManager fm = getSupportFragmentManager();
-        if(fm.getBackStackEntryCount() == 0) {
+        if (fm.getBackStackEntryCount() == 0) {
             fm.beginTransaction()
                 .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                 .commit();
@@ -213,8 +209,8 @@ public class MainActivity extends FragmentActivity implements
         super.onStart();
         
         // Connect to location services when activity becomes visible
-        for(WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
-            if(listener.get() != null) mLocationClient.registerConnectionCallbacks(listener.get());
+        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
+            if (listener.get() != null) mLocationClient.registerConnectionCallbacks(listener.get());
         }
 
         mLocationClient.connect();
@@ -225,8 +221,8 @@ public class MainActivity extends FragmentActivity implements
         super.onStop();
 
         // Disconnect from location services when activity is no longer visible
-        for(WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
-            if(listener.get() != null) mLocationClient.unregisterConnectionCallbacks(listener.get());
+        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
+            if (listener.get() != null) mLocationClient.unregisterConnectionCallbacks(listener.get());
         }
 
         mLocationClient.disconnect();
@@ -240,7 +236,7 @@ public class MainActivity extends FragmentActivity implements
         super.onDestroy();
         
         // Clear AQuery cache on exit
-        if(isTaskRoot()) {
+        if (isTaskRoot()) {
             AQUtility.cleanCacheAsync(this);
         }
     }
@@ -250,16 +246,16 @@ public class MainActivity extends FragmentActivity implements
         Log.v(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
 
         // If drawer is open, intercept back press to close drawer
-        if(mDrawerLayout.isDrawerOpen(mDrawerListView)) {
+        if (mDrawerLayout.isDrawerOpen(mDrawerListView)) {
             mDrawerLayout.closeDrawer(mDrawerListView);
             return;
         }
 
         // If web display is active, send back button presses to it for navigating browser history
-        if(AppUtils.isOnTop(this, WebDisplay.HANDLE)) {
+        if (AppUtils.isOnTop(this, WebDisplay.HANDLE)) {
             Fragment webView = getSupportFragmentManager().findFragmentByTag(WebDisplay.HANDLE);
             if (webView != null && webView.isVisible()) {
-                if(((WebDisplay) webView).backPress()) {
+                if (((WebDisplay) webView).backPress()) {
                     Log.d(TAG, "Triggered WebView back button");
                     return;
                 }
@@ -325,7 +321,7 @@ public class MainActivity extends FragmentActivity implements
     public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
         mLocationListeners.add(new WeakReference<>(listener));
 
-        if(mLocationClient != null) {
+        if (mLocationClient != null) {
             mLocationClient.registerConnectionCallbacks(listener);
             Log.d(TAG, "Registered location listener: " + listener.toString());
         } else {
@@ -339,14 +335,14 @@ public class MainActivity extends FragmentActivity implements
      */
     @Override
     public void unregisterListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        for(WeakReference<GooglePlayServicesClient.ConnectionCallbacks> curRef: mLocationListeners) {
-            if(curRef.get() == listener) {
+        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> curRef: mLocationListeners) {
+            if (curRef.get() == listener) {
                 mLocationListeners.remove(curRef);
                 break;
             }
         }
 
-        if(mLocationClient != null) {
+        if (mLocationClient != null) {
             mLocationClient.unregisterConnectionCallbacks(listener);
             Log.d(TAG, "Unregistered location listener: " + listener.toString());
         }
@@ -372,7 +368,7 @@ public class MainActivity extends FragmentActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.w(TAG, "Attempting to resolve Play Services connection failure");
-        if(connectionResult.hasResolution()) {
+        if (connectionResult.hasResolution()) {
             try {
                 connectionResult.startResolutionForResult(this, LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
             } catch (SendIntentException e) {
@@ -470,13 +466,22 @@ public class MainActivity extends FragmentActivity implements
 
         final String homeCampus = RutgersUtils.getHomeCampus(this);
 
-        for(Channel channel: channels) {
+        for (Channel channel: channels) {
             Bundle itemArgs = new Bundle();
             itemArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
             itemArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
-            if(!StringUtils.isBlank(channel.getApi())) itemArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
-            if(!StringUtils.isBlank(channel.getUrl())) itemArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
-            if(channel.getData() != null) itemArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData().toString());
+
+            if (StringUtils.isNotBlank(channel.getApi())) {
+                itemArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
+            }
+
+            if (StringUtils.isNotBlank(channel.getUrl())) {
+                itemArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+            }
+
+            if (channel.getData() != null) {
+                itemArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData().toString());
+            }
 
             RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
             // Try to find icon for this item and set it
