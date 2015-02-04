@@ -11,11 +11,12 @@ import android.widget.TextView;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 
 /**
  * About RUMobile display fragment.
  */
-public class AboutDisplay extends Fragment {
+public final class AboutDisplay extends Fragment {
 
     /* Log tag and component handle */
     private static final String TAG = "AboutDisplay";
@@ -25,9 +26,17 @@ public class AboutDisplay extends Fragment {
         // Required empty public constructor
     }
 
+    public static Bundle createArgs() {
+        Bundle args = new Bundle();
+        args.putString(ComponentFactory.ARG_COMPONENT_TAG, AboutDisplay.HANDLE);
+        return args;
+    }
+
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_about, parent, false);
+
+        getActivity().setTitle(R.string.about_title);
 
         final TextView titleText = (TextView) v.findViewById(R.id.titleText);
         final TextView versionText = (TextView) v.findViewById(R.id.versionText);

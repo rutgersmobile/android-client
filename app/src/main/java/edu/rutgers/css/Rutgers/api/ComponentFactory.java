@@ -37,6 +37,7 @@ import edu.rutgers.css.Rutgers.channels.ruinfo.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCCourses;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
+import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -115,6 +116,7 @@ public final class ComponentFactory {
         // Other views
         put(RUInfoMain.HANDLE, RUInfoMain.class);
         put(FeedbackMain.HANDLE, FeedbackMain.class);
+        put(AboutDisplay.HANDLE, AboutDisplay.class);
     }});
 
     /** Private constructor to enforce singleton usage. */

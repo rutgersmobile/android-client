@@ -48,6 +48,7 @@ import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -299,7 +300,7 @@ public class MainActivity extends FragmentActivity implements
                 return true;
 
             case R.id.action_about:
-                startActivity(new Intent(this, AboutActivity.class));
+                ComponentFactory.getInstance().switchFragments(AboutDisplay.createArgs());
                 return true;
             
             default:
