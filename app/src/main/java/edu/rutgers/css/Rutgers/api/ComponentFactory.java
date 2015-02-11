@@ -73,6 +73,9 @@ public final class ComponentFactory {
     /** Count argument. For example, the number of events to grab in Events. */
     public static final String ARG_COUNT_TAG        = "count";
 
+    /** Boolean flag used to indicate whether component was launched from a menu. */
+    public static final String ARG_TOP_LEVEL        = "topLevel";
+
     /* Static data. */
 
     /** Component factory singleton. */
@@ -166,6 +169,7 @@ public final class ComponentFactory {
 
         Bundle argsCopy = new Bundle(args);
         argsCopy.remove(ARG_COMPONENT_TAG);
+        argsCopy.remove(ARG_TOP_LEVEL);
         fragment.setArguments(argsCopy);
 
         return fragment;
@@ -186,7 +190,7 @@ public final class ComponentFactory {
         }
 
         final String componentTag = args.getString(ARG_COMPONENT_TAG);
-        final boolean isTopLevel = args.getBoolean("topLevel");
+        final boolean isTopLevel = args.getBoolean(ARG_TOP_LEVEL);
 
         // Attempt to create the fragment
         final Fragment fragment = createFragment(args);

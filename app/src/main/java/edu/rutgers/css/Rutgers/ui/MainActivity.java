@@ -153,7 +153,8 @@ public class MainActivity extends LocationProviderActivity implements
                 if (!(clickedRow instanceof RMenuItemRow)) return;
 
                 Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
-                clickedArgs.putBoolean("topLevel", true); // This is a top level menu press
+                // This is a top level menu press
+                clickedArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                 
                 // Launch component
                 ComponentFactory.getInstance().switchFragments(clickedArgs);
@@ -252,7 +253,9 @@ public class MainActivity extends LocationProviderActivity implements
                 return true;
 
             case R.id.action_about:
-                ComponentFactory.getInstance().switchFragments(AboutDisplay.createArgs());
+                Bundle aboutArgs = AboutDisplay.createArgs();
+                aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                ComponentFactory.getInstance().switchFragments(aboutArgs);
                 return true;
             
             default:
