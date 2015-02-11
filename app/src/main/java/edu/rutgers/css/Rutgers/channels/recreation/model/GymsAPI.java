@@ -45,8 +45,7 @@ public final class GymsAPI {
     public static Promise<List<Campus>, Exception, Void> getCampuses() {
         final DeferredObject<List<Campus>, Exception, Void> deferred = new DeferredObject<>();
 
-        // TODO Request.apiArray("gyms_array.txt", expire);
-        Promise<JSONArray, AjaxStatus, Double> p = Request.jsonArray("http://sauron.rutgers.edu/~jamchamb/new_gyms.json", expire);
+        Promise<JSONArray, AjaxStatus, Double> p = Request.apiArray("gyms_array.txt", expire);
 
         sDM.when(p, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
             @Override
