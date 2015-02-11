@@ -5,21 +5,31 @@
     <string name="about_header">RU Mobile</string>
     <string name="about_version">v%1$s</string>
     <string name="about_text"><![CDATA[
-        Copyright 2015, Rutgers, The State University of New Jersey.<br/><br/>
-
         RU Mobile is an open-source project developed by <a href="http://oss.rutgers.edu">Rutgers OSS</a>.<br/><br/>
 
-        Visit us on GitHub at <a href="https://github.com/rutgersmobile">github.com/rutgersmobile</a>.<br/><br/>
+        Visit us on GitHub at <a href="https://github.com/rutgersmobile">github.com/rutgersmobile</a>!<br/><br/>
 
-        RU Mobile for Android uses the following open-source libraries:<br/>
-        \t* Android Query<br/>
-        \t* Apache Commons Lang<br/>
-        \t* JDeferred<br/>
-        \t* GSON<br/>
-        \t* ListViewAnimations<br/>
-        \t* StickyListHeaders<br/>
-        <br/>
-        <b>Legal Notices</b>
+        Copyright 2015, Rutgers, The State University of New Jersey.<br/><br/>
+
+        RU Mobile for Android uses the following open-source libraries:<br/><br/>
+
+        \t <a href="http://androidquery.com">Android Query</a><br/>
+        \t <i>by AndroidQuery.com</i><br/><br/>
+
+        \t <a href="http://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a><br/>
+        \t <i>by the Apache Software Foundation</i><br/><br/>
+
+        \t <a href="https://github.com/jdeferred/jdeferred">JDeferred</a><br/>
+        \t <i>by Ray Tsang</i><br/><br/>
+
+        \t <a href="https://code.google.com/p/google-gson/">GSON</a><br/>
+        \t <i>by Google Inc.</i><br/><br/>
+
+        \t <a href="http://nhaarman.github.io/ListViewAnimations/">ListViewAnimations</a><br/>
+        \t <i>by Niek Haarman</i><br/><br/>
+
+        \t <a href="https://github.com/emilsjolander/StickyListHeaders">StickyListHeaders</a><br/>
+        \t <i>by Emil Sj&#246;lander</i><br/><br/>
     ]]></string>
 
 </resources>

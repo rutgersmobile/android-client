@@ -256,6 +256,7 @@ public class MainActivity extends LocationProviderActivity implements
                 Bundle aboutArgs = AboutDisplay.createArgs();
                 aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                 ComponentFactory.getInstance().switchFragments(aboutArgs);
+                mDrawerLayout.closeDrawer(mDrawerListView);
                 return true;
             
             default:
