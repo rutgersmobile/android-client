@@ -1,22 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/arrow_up"
+        android:src="@drawable/arrow_up"
+        android:layout_marginBottom="-2dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/tooltip_bg"
-        android:scrollbars="vertical"
-        android:text="@string/replace_me"
-        android:padding="8dp"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:gravity="center"
-        android:minWidth="75dp"
-        android:maxWidth="150dp"
-        android:minHeight="50dp"/>
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"/>
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/arrow_left"
+            android:src="@drawable/arrow_left"
+            android:layout_marginRight="-2dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_vertical"/>
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/tooltip_bg"
+            android:scrollbars="vertical"
+            android:text="@string/replace_me"
+            android:padding="8dp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:gravity="center"
+            android:minWidth="75dp"
+            android:maxWidth="150dp"
+            android:minHeight="50dp"/>
+
+        <ImageView
+            android:id="@+id/arrow_right"
+            android:src="@drawable/arrow_right"
+            android:layout_marginLeft="-2dp"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_vertical"/>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/arrow_down"
+        android:src="@drawable/arrow_down"
+        android:layout_marginTop="-2dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>
