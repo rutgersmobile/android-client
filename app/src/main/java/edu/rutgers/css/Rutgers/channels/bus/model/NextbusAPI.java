@@ -436,12 +436,13 @@ public final class NextbusAPI {
      */
     public static Promise<List<StopGroup>, Exception, Void> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
         final Deferred<List<StopGroup>, Exception, Void> d = new DeferredObject<>();
-        final ActiveStops active = AGENCY_NB.equals(agency) ? mNBActive : mNWKActive;
+        setup();
 
         final Promise<List<StopGroup>, Exception, Void> allNearStops = getStopsByTitleNear(agency, sourceLat, sourceLon);
         sDM.when(allNearStops, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<List<StopGroup>>() {
             @Override
             public void onDone(List<StopGroup> nearbyStops) {
+                final ActiveStops active = AGENCY_NB.equals(agency) ? mNBActive : mNWKActive;
                 List<StopGroup> results = new ArrayList<>();
 
                 for (StopGroup stopGroup : nearbyStops) {
