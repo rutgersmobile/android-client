@@ -1,1 +1,3 @@
-include ':app'
+include ':app', ':PagerSlidingTabStrip'
+project(':PagerSlidingTabStrip').projectDir = new File('libs/pagerslidingtabstrip/library')
+
