@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -145,7 +145,7 @@ public class FoodHall extends Fragment {
         }
     }
 
-    private class MealPagerAdapter extends FragmentStatePagerAdapter {
+    private class MealPagerAdapter extends FragmentPagerAdapter {
 
         private List<DiningMenu.Meal> mData;
 

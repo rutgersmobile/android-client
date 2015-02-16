@@ -9,7 +9,8 @@
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        com.astuetz.PagerSlidingTabStrip:pstsIndicatorColor="@color/drawer_selected"/>
+        com.astuetz.PagerSlidingTabStrip:pstsIndicatorColor="@color/drawer_selected"
+        com.astuetz.PagerSlidingTabStrip:pstsShouldExpand="true"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewPager"
