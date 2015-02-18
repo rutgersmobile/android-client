@@ -136,14 +136,20 @@ public final class AppUtils {
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
-    /**
-     * Close soft keyboard
-     * @param activity App activity
-     */
+    /** Close soft keyboard */
     public static void closeKeyboard(Activity activity) {
-        if(activity != null && activity.getCurrentFocus() != null) {
+        if (activity != null && activity.getCurrentFocus() != null) {
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+
+    /** Open soft keyboard */
+    public static void openKeyboard(Activity activity) {
+        if (activity != null && activity.getCurrentFocus() != null) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+            imm.toggleSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), InputMethodManager.SHOW_IMPLICIT, 0);
         }
     }
 

@@ -11,9 +11,12 @@ import android.view.ViewGroup;
 
 import com.astuetz.PagerSlidingTabStrip;
 
+import java.lang.ref.WeakReference;
+
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 public class BusMain extends Fragment implements FilterFocusListener {
 
@@ -26,6 +29,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
 
     /* Member data */
     private ViewPager mViewPager;
+    private WeakReference<BusAll> mAllTab;
 
     public BusMain() {
         // Required empty public constructor
@@ -52,10 +56,26 @@ public class BusMain extends Fragment implements FilterFocusListener {
         }
 
         mViewPager = (ViewPager) v.findViewById(R.id.viewPager);
-        mViewPager.setAdapter(new BusFragmentPager(getChildFragmentManager(), this));
+        mViewPager.setAdapter(new BusFragmentPager(getChildFragmentManager()));
 
         final PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
         tabs.setViewPager(mViewPager);
+        tabs.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (position == 2) {
+                    // When "All" tab is selected, focus the search field and open keyboard
+                    if (mAllTab != null && mAllTab.get() != null) {
+                        mAllTab.get().focusFilter();
+                    }
+                } else {
+                    // When another tab is scrolled to, close the keyboard
+                    AppUtils.closeKeyboard(getActivity());
+                }
+            }
+        });
 
         return v;
     }
@@ -63,6 +83,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
     @Override
     public void onDestroyView() {
         mViewPager = null;
+        mAllTab = null;
         super.onDestroyView();
     }
 
@@ -73,26 +94,24 @@ public class BusMain extends Fragment implements FilterFocusListener {
         }
     }
 
+    @Override
+    public void registerAllTab(BusAll allTab) {
+        mAllTab = new WeakReference<>(allTab);
+    }
+
     private class BusFragmentPager extends FragmentPagerAdapter {
 
-        private FilterFocusListener focusListener;
-
-        public BusFragmentPager(FragmentManager fm, FilterFocusListener focusListener) {
+        public BusFragmentPager(FragmentManager fm) {
             super(fm);
-            this.focusListener = focusListener;
         }
 
         @Override
         public Fragment getItem(int position) {
             switch(position) {
                 case 0:
-                    BusRoutes busRoutes = new BusRoutes();
-                    busRoutes.setFocusListener(focusListener);
-                    return busRoutes;
+                    return new BusRoutes();
                 case 1:
-                    BusStops busStops = new BusStops();
-                    busStops.setFocusListener(focusListener);
-                    return busStops;
+                    return new BusStops();
                 case 2:
                     return new BusAll();
                 default:
