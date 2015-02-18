@@ -2,16 +2,21 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTabHost;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TabWidget;
-import android.widget.TextView;
+
+import com.astuetz.PagerSlidingTabStrip;
+
+import java.lang.ref.WeakReference;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 public class BusMain extends Fragment implements FilterFocusListener {
 
@@ -23,7 +28,8 @@ public class BusMain extends Fragment implements FilterFocusListener {
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
 
     /* Member data */
-    private FragmentTabHost mTabHost;
+    private ViewPager mViewPager;
+    private WeakReference<BusAll> mAllTab;
 
     public BusMain() {
         // Required empty public constructor
@@ -39,7 +45,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_bus_main, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_tabbed_pager, parent, false);
         final Bundle args = getArguments();
 
         // Set title from JSON
@@ -49,48 +55,89 @@ public class BusMain extends Fragment implements FilterFocusListener {
             getActivity().setTitle(R.string.bus_title);
         }
 
-        mTabHost = (FragmentTabHost) v.findViewById(R.id.bus_tabhost);
-        mTabHost.setup(getActivity(), getChildFragmentManager(), R.id.realtabcontent);
+        mViewPager = (ViewPager) v.findViewById(R.id.viewPager);
+        mViewPager.setAdapter(new BusFragmentPager(getChildFragmentManager()));
 
-        final TabWidget tabWidget = mTabHost.getTabWidget();
+        final PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
+        tabs.setViewPager(mViewPager);
+        tabs.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
-        mTabHost.addTab(
-                mTabHost.newTabSpec(BusRoutes.HANDLE)
-                    .setIndicator(themedIndicator(inflater, tabWidget, getString(R.string.bus_routes_tab))),
-                BusRoutes.class, null
-        );
-        mTabHost.addTab(
-                mTabHost.newTabSpec(BusStops.HANDLE)
-                    .setIndicator(themedIndicator(inflater, tabWidget, getString(R.string.bus_stops_tab))),
-                BusStops.class, null
-        );
-        mTabHost.addTab(
-                mTabHost.newTabSpec(BusAll.HANDLE)
-                    .setIndicator(themedIndicator(inflater, tabWidget, getString(R.string.bus_all_tab))),
-                BusAll.class, null
-        );
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (position == 2) {
+                    // When "All" tab is selected, focus the search field and open keyboard
+                    if (mAllTab != null && mAllTab.get() != null) {
+                        mAllTab.get().focusFilter();
+                    }
+                } else {
+                    // When another tab is scrolled to, close the keyboard
+                    AppUtils.closeKeyboard(getActivity());
+                }
+            }
+        });
 
         return v;
     }
 
     @Override
     public void onDestroyView() {
-        mTabHost = null;
+        mViewPager = null;
+        mAllTab = null;
         super.onDestroyView();
     }
 
     @Override
     public void focusEvent() {
-        if(mTabHost != null) {
-            mTabHost.setCurrentTab(2);
+        if(mViewPager != null) {
+            mViewPager.setCurrentItem(2, true);
         }
     }
 
-    private View themedIndicator(LayoutInflater inflater, TabWidget tabWidget, String label) {
-        final View v = inflater.inflate(R.layout.rutgerstheme_tab_indicator_holo, tabWidget, false);
-        final TextView textView = (TextView) v.findViewById(android.R.id.title);
-        textView.setText(label);
-        return v;
+    @Override
+    public void registerAllTab(BusAll allTab) {
+        mAllTab = new WeakReference<>(allTab);
+    }
+
+    private class BusFragmentPager extends FragmentPagerAdapter {
+
+        public BusFragmentPager(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch(position) {
+                case 0:
+                    return new BusRoutes();
+                case 1:
+                    return new BusStops();
+                case 2:
+                    return new BusAll();
+                default:
+                    throw new IndexOutOfBoundsException();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch(position) {
+                case 0:
+                    return getString(R.string.bus_routes_tab);
+                case 1:
+                    return getString(R.string.bus_stops_tab);
+                case 2:
+                    return getString(R.string.bus_all_tab);
+                default:
+                    throw new IndexOutOfBoundsException();
+            }
+        }
+
     }
 
 }

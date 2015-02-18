@@ -35,6 +35,7 @@ import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusItem;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
+import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -58,6 +59,7 @@ public class BusAll extends Fragment {
 
     /* View references */
     private ProgressBar mProgressCircle;
+    private EditText mFilterEditText;
     
     public BusAll() {
         // Required empty public constructor
@@ -143,8 +145,8 @@ public class BusAll extends Fragment {
         if(mLoading) showProgressCircle();
 
         // Get the filter field and add a listener to it
-        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
-        filterEditText.addTextChangedListener(new TextWatcher() {
+        mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        mFilterEditText.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -162,14 +164,13 @@ public class BusAll extends Fragment {
             }
 
         });
-        filterEditText.requestFocus();
 
         // Get clear button and set listener
         final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
         filterClearButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                filterEditText.setText(null);
+                mFilterEditText.setText(null);
             }
         });
 
@@ -190,8 +191,19 @@ public class BusAll extends Fragment {
             }
 
         });
-        
+
+        // Set main bus fragment as focus listener, for giving focus to search field
+        FilterFocusListener mainFragment = (BusMain) getParentFragment();
+        mainFragment.registerAllTab(this);
+
         return v;
+    }
+
+    public void focusFilter() {
+        if (mFilterEditText != null) {
+            mFilterEditText.requestFocus();
+            AppUtils.openKeyboard(getActivity());
+        }
     }
 
     @Override
@@ -206,6 +218,7 @@ public class BusAll extends Fragment {
 
         // Get rid of view references
         mProgressCircle = null;
+        mFilterEditText = null;
     }
 
     private void loadStops(@NonNull String agency, @NonNull List<StopStub> stopStubs) {

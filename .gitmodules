@@ -1,0 +1,3 @@
+[submodule "libs/pagerslidingtabstrip"]
+	path = libs/pagerslidingtabstrip
+	url = https://github.com/jamchamb/PagerSlidingTabStrip.git

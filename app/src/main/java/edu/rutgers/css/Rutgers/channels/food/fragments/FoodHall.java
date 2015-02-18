@@ -4,13 +4,15 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import com.astuetz.PagerSlidingTabStrip;
 
 import org.apache.commons.lang3.time.DatePrinter;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -102,7 +104,7 @@ public class FoodHall extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_pager, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_tabbed_pager, parent, false);
         final Bundle args = getArguments();
 
         if (mTitle != null) {
@@ -117,6 +119,9 @@ public class FoodHall extends Fragment {
 
         final ViewPager viewPager = (ViewPager) v.findViewById(R.id.viewPager);
         viewPager.setAdapter(mPagerAdapter);
+
+        final PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
+        tabs.setViewPager(viewPager);
 
         return v;
     }
@@ -140,7 +145,7 @@ public class FoodHall extends Fragment {
         }
     }
 
-    private class MealPagerAdapter extends FragmentStatePagerAdapter {
+    private class MealPagerAdapter extends FragmentPagerAdapter {
 
         private List<DiningMenu.Meal> mData;
 
