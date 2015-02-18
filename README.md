@@ -11,6 +11,7 @@ This is an Android Studio project using Gradle for dependency management.
 * [GSON](https://code.google.com/p/google-gson/)
 * [JDeferred](http://jdeferred.org/)
 * [ListViewAnimations](http://nhaarman.github.io/ListViewAnimations/)
+* [PagerSlidingTabStrip](https://github.com/astuetz/PagerSlidingTabStrip)
 * [StickyListHeaders](https://github.com/emilsjolander/StickyListHeaders)
 
 ## Third-party Images
