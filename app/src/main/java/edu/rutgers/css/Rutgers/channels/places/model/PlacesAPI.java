@@ -45,7 +45,7 @@ public final class PlacesAPI {
 
     private static final DeferredManager sDM = new DefaultDeferredManager();
     private static Promise<Void, Exception, Void> configured;
-    private static boolean sIsSettingUp;
+    private static boolean sSettingUp;
 
     /** Map of Place keys to Place objects. Initialized in {@link #setup()}. */
     private static Map<String, Place> sPlaces;
@@ -57,8 +57,8 @@ public final class PlacesAPI {
      * Grab the places flat-file from the API and convert it into a map.
      */
     private synchronized static void setup() {
-        if(sIsSettingUp || sPlaces != null) return;
-        else sIsSettingUp = true;
+        if(sSettingUp || sPlaces != null) return;
+        else sSettingUp = true;
 
         final Deferred<Void, Exception, Void> confd = new DeferredObject<>();
 
@@ -110,7 +110,7 @@ public final class PlacesAPI {
         }).always(new AlwaysCallback<JSONObject, AjaxStatus>() {
             @Override
             public void onAlways(Promise.State state, JSONObject resolved, AjaxStatus rejected) {
-                sIsSettingUp = false;
+                sSettingUp = false;
             }
         });
 

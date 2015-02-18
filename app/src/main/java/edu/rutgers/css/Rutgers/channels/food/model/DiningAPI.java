@@ -7,6 +7,7 @@ import com.androidquery.callback.AjaxStatus;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
@@ -35,7 +36,9 @@ public final class DiningAPI {
 
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
     private static Promise<Object, Exception, Void> configured;
-    private static List<DiningMenu> mNBDiningMenus;
+    private static List<DiningMenu> sNBDiningMenus;
+
+    private static boolean sSettingUp = false;
 
     private DiningAPI() {}
 
@@ -44,6 +47,9 @@ public final class DiningAPI {
      * <p>(Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)</p>
      */
     private static void setup() {
+        if (sSettingUp) return;
+        else sSettingUp = true;
+
         // Get JSON array from dining API
         final Deferred<Object, Exception, Void> confd = new DeferredObject<>();
         configured = confd.promise();
@@ -56,11 +62,11 @@ public final class DiningAPI {
             public void onDone(JSONArray res) {
                 Gson gson = new Gson();
 
-                mNBDiningMenus = new ArrayList<>(4);
+                sNBDiningMenus = new ArrayList<>(4);
                 try {
                     for (int i = 0; i < res.length(); i++) {
                         DiningMenu diningMenu = gson.fromJson(res.getJSONObject(i).toString(), DiningMenu.class);
-                        mNBDiningMenus.add(diningMenu);
+                        sNBDiningMenus.add(diningMenu);
                     }
                 } catch (JSONException | JsonSyntaxException e) {
                     Log.e(TAG, "setup(): " + e.getMessage());
@@ -78,6 +84,11 @@ public final class DiningAPI {
                 confd.reject(new Exception(AppUtils.formatAjaxStatus(e)));
             }
 
+        }).always(new AlwaysCallback<JSONArray, AjaxStatus>() {
+            @Override
+            public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
+                sSettingUp = false;
+            }
         });
     }
     
@@ -93,7 +104,7 @@ public final class DiningAPI {
             
             @Override
             public void onDone(Object o) {
-                d.resolve(mNBDiningMenus);
+                d.resolve(sNBDiningMenus);
             }
 
         }).fail(new FailCallback<Exception>() {
@@ -120,7 +131,7 @@ public final class DiningAPI {
             @Override
             public void onDone(Object o) {
                 // Get the dining hall menu with matching name
-                for (DiningMenu diningMenu : mNBDiningMenus) {
+                for (DiningMenu diningMenu : sNBDiningMenus) {
                     if (diningMenu.getLocationName().equalsIgnoreCase(location)) {
                         d.resolve(diningMenu);
                         return;

@@ -6,10 +6,10 @@ import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.Deferred;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
@@ -41,10 +41,10 @@ public final class NextbusAPI {
 
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
     private static Promise<Void, Exception, Void> configured;
-    private static AgencyConfig mNBConf;
-    private static AgencyConfig mNWKConf;
-    private static ActiveStops mNBActive;
-    private static ActiveStops mNWKActive;
+    private static AgencyConfig sNBConf;
+    private static AgencyConfig sNWKConf;
+    private static ActiveStops sNBActive;
+    private static ActiveStops sNWKActive;
     
     private static final String BASE_URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=";
     private static final long activeExpireTime = Request.CACHE_ONE_MINUTE * 10; // active bus data cached ten minutes
@@ -53,6 +53,8 @@ public final class NextbusAPI {
     public static final String AGENCY_NB = "nb";
     public static final String AGENCY_NWK = "nwk";
 
+    private static boolean sSettingUp = false;
+
     /** This class only contains static utility methods. */
     private NextbusAPI() {}
 
@@ -60,6 +62,9 @@ public final class NextbusAPI {
      * Load agency configurations and lists of active routes/stops for each campus.
      */
     private static void setup () {
+        if (sSettingUp) return;
+        else sSettingUp = true;
+
         // This promise is used to notify calling methods when the nextbus configuration has been loaded.
         final Deferred<Void, Exception, Void> confd = new DeferredObject<>();
         configured = confd.promise();
@@ -75,13 +80,13 @@ public final class NextbusAPI {
                 try {
                     for (OneResult result: results) {
                         if (result.getPromise() == promiseNBActive) {
-                            mNBActive = new ActiveStops(AGENCY_NB, (JSONObject) result.getResult());
+                            sNBActive = new ActiveStops(AGENCY_NB, (JSONObject) result.getResult());
                         } else if (result.getPromise() == promiseNWKActive) {
-                            mNWKActive = new ActiveStops(AGENCY_NWK, (JSONObject) result.getResult());
+                            sNWKActive = new ActiveStops(AGENCY_NWK, (JSONObject) result.getResult());
                         } else if (result.getPromise() == promiseNBConf) {
-                            mNBConf = new AgencyConfig(AGENCY_NB, (JSONObject) result.getResult());
+                            sNBConf = new AgencyConfig(AGENCY_NB, (JSONObject) result.getResult());
                         } else if (result.getPromise() == promiseNWKConf) {
-                            mNWKConf = new AgencyConfig(AGENCY_NWK, (JSONObject) result.getResult());
+                            sNWKConf = new AgencyConfig(AGENCY_NWK, (JSONObject) result.getResult());
                         }
                     }
                 } catch (JsonSyntaxException | JSONException e) {
@@ -98,6 +103,11 @@ public final class NextbusAPI {
                 AjaxStatus status = (AjaxStatus) reject.getReject();
                 Log.e(TAG, AppUtils.formatAjaxStatus(status));
                 confd.reject(new Exception(AppUtils.formatAjaxStatus(status)));
+            }
+        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
+            @Override
+            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
+                sSettingUp = false;
             }
         });
     }
@@ -118,7 +128,7 @@ public final class NextbusAPI {
                 Log.v(TAG, "routePredict: " + agency + ", " + routeKey);
 
                 // Get agency configuration
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? mNBConf : mNWKConf;
+                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
 
                 // Start building Nextbus query with predictionsForMultiStops command
                 // Returns predictions for a set of route/stop combinations. Direction is optional and can be null.
@@ -196,7 +206,7 @@ public final class NextbusAPI {
                 Log.v(TAG, "stopPredict: " + agency + ", " + stopTitleKey);
 
                 // Get agency configuration
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? mNBConf : mNWKConf;
+                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
 
                 StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=" + (AGENCY_NB.equals(agency)? "rutgers" : "rutgers-newark"));
 
@@ -279,7 +289,7 @@ public final class NextbusAPI {
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
             @Override
             public void onDone(Void v) {
-                ActiveStops active = AGENCY_NB.equals(agency) ? mNBActive : mNWKActive;
+                ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
                 d.resolve(active.getRoutes());
             }
         }).fail(new FailCallback<Exception>() {
@@ -304,7 +314,7 @@ public final class NextbusAPI {
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
             @Override
             public void onDone(Void v) {
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? mNBConf : mNWKConf;
+                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
                 d.resolve(conf.getSortedRoutes());
             }
         }).fail(new FailCallback<Exception>() {
@@ -329,7 +339,7 @@ public final class NextbusAPI {
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
             @Override
             public void onDone(Void v) {
-                ActiveStops active = AGENCY_NB.equals(agency) ? mNBActive : mNWKActive;
+                ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
                 d.resolve(active.getStops());
             }
         }).fail(new FailCallback<Exception>() {
@@ -355,7 +365,7 @@ public final class NextbusAPI {
             
             @Override
             public void onDone(Void v) {
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? mNBConf : mNWKConf;
+                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
                 d.resolve(conf.getSortedStops());
             }
 
@@ -384,7 +394,7 @@ public final class NextbusAPI {
             
             @Override
             public void onDone(Void v) {
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? mNBConf : mNWKConf;
+                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
                 HashMap<String, StopGroup> stopsByTitle = conf.getStopsByTitle();
 
                 List<StopGroup> nearStops = new ArrayList<>();
@@ -442,7 +452,7 @@ public final class NextbusAPI {
         sDM.when(allNearStops, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<List<StopGroup>>() {
             @Override
             public void onDone(List<StopGroup> nearbyStops) {
-                final ActiveStops active = AGENCY_NB.equals(agency) ? mNBActive : mNWKActive;
+                final ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
                 List<StopGroup> results = new ArrayList<>();
 
                 for (StopGroup stopGroup : nearbyStops) {
