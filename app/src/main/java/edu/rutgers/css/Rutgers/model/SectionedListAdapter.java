@@ -356,12 +356,20 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
 
         @Override
         protected void publishResults(CharSequence prefix, FilterResults filterResults) {
-            if (filterResults.count > 0) {
-                mFilteredSections = (List<FilteredSection>) filterResults.values;
+            if (filterResults.values == null) {
+                // The constraint was null or blank; show original values.
+                mFilteredSections = null;
                 notifyDataSetChanged();
             } else {
-                mFilteredSections = null;
-                notifyDataSetInvalidated();
+                // Show filter results
+                mFilteredSections = (List<FilteredSection>) filterResults.values;
+                if (filterResults.count > 0) {
+                    // call dataSetChanged if there are results to display
+                    notifyDataSetChanged();
+                } else {
+                    // call dataSetInvalidated when there are no matching results
+                    notifyDataSetInvalidated();
+                }
             }
         }
     }
