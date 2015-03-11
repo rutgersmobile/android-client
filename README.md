@@ -18,7 +18,6 @@ This is an Android Studio project using Gradle for dependency management.
 The following icons are from third-parties and are licensed under
 [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/us/):
 
-* `ic_ecollege` - "Computer" by Geovani Almeida
 * `ic_kiosk` - "Thumbtack" by Geovani Almeida
 * `ic_stud_life` - "Globe" by Edward Boatman
 
