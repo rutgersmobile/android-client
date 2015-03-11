@@ -97,10 +97,8 @@ public class MainActivity extends LocationProviderActivity implements
             // First launch, create analytics event & show settings screen
             Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
 
-            /*
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingsIntent);
-            */
 
             PrefUtils.markFirstLaunch(this);
         }

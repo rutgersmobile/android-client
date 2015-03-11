@@ -45,10 +45,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="edu.rutgers.css.Rutgers.ui.SettingsActivity"
-            android:label="@string/title_activity_settings" >
+            android:label="@string/title_activity_settings"
+            android:theme="@android:style/Theme.Holo.Light.Dialog">
         </activity>
+
     </application>
 
 </manifest>
