@@ -1,9 +1,11 @@
-Rutgers Mobile Android
-======================
+Rutgers Mobile - Android
+========================
 
 The new RU Mobile client for Android.
 
-This is an Android Studio project using Gradle for dependency management.
+This is an Android Studio project using Gradle for dependency management. Make sure to initialize submodules with `git submodule update --init` before building.
+
+![App demo](http://rutgersmobile.github.io/android-client/images/food_demo.gif)
 
 ## Libraries Used
 * [Android Query](https://code.google.com/p/android-query/)
