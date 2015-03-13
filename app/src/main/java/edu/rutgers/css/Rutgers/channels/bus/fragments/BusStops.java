@@ -5,7 +5,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +42,9 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 public class BusStops extends BaseChannelFragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
@@ -124,6 +125,7 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
             }
 
         });
+        listView.setEmptyView(v.findViewById(R.id.emptyView));
 
         // Set main bus fragment as focus listener, for switching to All tab
         FilterFocusListener mainFragment = (BusMain) getParentFragment();

@@ -187,6 +187,7 @@ public class BusAll extends BaseChannelFragment {
             }
 
         });
+        listView.setEmptyView(v.findViewById(R.id.emptyView));
 
         // Set main bus fragment as focus listener, for giving focus to search field
         FilterFocusListener mainFragment = (BusMain) getParentFragment();

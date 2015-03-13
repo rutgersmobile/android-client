@@ -79,6 +79,7 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
             }
 
         });
+        listView.setEmptyView(v.findViewById(R.id.emptyView));
 
         // Set main bus fragment as focus listener, for switching to All tab
         FilterFocusListener mainFragment = (BusMain) getParentFragment();
