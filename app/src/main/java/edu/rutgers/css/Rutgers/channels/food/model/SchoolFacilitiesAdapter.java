@@ -7,11 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.List;
-import java.util.Map;
-
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.model.SectionedListAdapter;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 
@@ -47,7 +43,7 @@ public class SchoolFacilitiesAdapter extends SimpleSectionedAdapter<DiningMenu> 
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = getLayoutInflater().inflate(getItemResource(), null);
             holder = new ViewHolder();
             holder.textView = (TextView) convertView.findViewById(getTextViewId());
@@ -61,7 +57,7 @@ public class SchoolFacilitiesAdapter extends SimpleSectionedAdapter<DiningMenu> 
         DiningMenu dm = getItem(position);
         holder.textView.setText(dm.getLocationName());
 
-        if(!dm.hasActiveMeals()) {
+        if (!dm.hasActiveMeals()) {
             holder.textView.setTextColor(res.getColor(R.color.light_gray));
         } else {
             holder.textView.setTextColor(res.getColor(R.color.black));

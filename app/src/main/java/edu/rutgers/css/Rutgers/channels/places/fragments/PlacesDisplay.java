@@ -50,8 +50,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public class PlacesDisplay extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "PlacesDisplay";
-    public static final String HANDLE = "placesdisplay";
+    private static final String TAG                 = "PlacesDisplay";
+    public static final String HANDLE               = "placesdisplay";
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -106,7 +106,7 @@ public class PlacesDisplay extends Fragment {
 
         // Get place key
         String key = args.getString(ARG_PLACEKEY_TAG);
-        if(key == null) {
+        if (key == null) {
             AppUtils.showFailedLoadToast(getActivity());
             Log.e(TAG, ARG_PLACEKEY_TAG + " is null");
             return;
@@ -144,7 +144,7 @@ public class PlacesDisplay extends Fragment {
                         // Note: The maximum dimensions for free requests is 640x640
                         int width = size.x;
                         int height;
-                        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                             height = width / 4;
                         } else {
                             height = width / 2;

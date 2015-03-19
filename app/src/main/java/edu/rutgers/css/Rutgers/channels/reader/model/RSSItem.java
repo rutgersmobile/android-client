@@ -47,7 +47,7 @@ public class RSSItem implements Serializable {
      * @param item RSS item in XML form
      */
     public RSSItem(XmlDom item) {
-        if(item == null) return;
+        if (item == null) return;
 
         // RSS 2.0 required fields
         this.title = sanitizeString(item.text("title"));
@@ -58,7 +58,7 @@ public class RSSItem implements Serializable {
         this.author = sanitizeString(item.text("author"));
         
         // Get date - check pubDate for news or event:xxxDateTime for events
-        if(item.text("pubDate") != null) {
+        if (item.text("pubDate") != null) {
             // Try to parse the pubDate
             Date parsed = null;
             
@@ -67,25 +67,25 @@ public class RSSItem implements Serializable {
                 parsed = rssDf.parse(item.text("pubDate"));
             } catch(ParseException e) {}
              
-            if(parsed == null) {
+            if (parsed == null) {
                 try {
                     parsed = rssDf2.parse(item.text("pubDate"));
                 } catch(ParseException e) {}
             }
             
-            if(parsed == null) {
+            if (parsed == null) {
                 try {
                     parsed = rssDf3.parse(item.text("pubDate"));
                 } catch(ParseException e) {}
             }
             
-            if(parsed != null) {
+            if (parsed != null) {
                 this.date = rssOutFormat.format(parsed);
             } else {
                 // Couldn't parse the date, just display it as is
                 this.date = item.text("pubDate");
             }
-        } else if(item.text("event:beginDateTime") != null) {
+        } else if (item.text("event:beginDateTime") != null) {
             // Event time - parse start & end timestamps and produce an output string that gives
             // the date and beginning and end times, e.g. "Fri, Apr 18, 10:00 AM - 11:00 AM"
             // Events feed dates are in Eastern time.
@@ -93,11 +93,11 @@ public class RSSItem implements Serializable {
                 Date eventBegin = eventDf.parse(item.text("event:beginDateTime"));
 
                 // Not all feeds supply endDateTime ¯\_(ツ)_/¯
-                if(item.text("event:endDateTime") != null) {
+                if (item.text("event:endDateTime") != null) {
                     Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
 
                     // If days match show day with start & end hours
-                    if(AppUtils.isSameDay(eventBegin, eventEnd)) this.date = eventOutDf.format(eventBegin) + " - " + eventOutEndDf.format(eventEnd);
+                    if (AppUtils.isSameDay(eventBegin, eventEnd)) this.date = eventOutDf.format(eventBegin) + " - " + eventOutEndDf.format(eventEnd);
                     // Otherwise show start and end dates
                     else this.date = eventOutDf.format(eventBegin) + " - " + eventOutDf.format(eventEnd);
                 } else {
@@ -111,9 +111,9 @@ public class RSSItem implements Serializable {
         
         // Image may be in url field (enclosure url attribute in the Rutgers feed)
         try {
-            if(item.child("enclosure") != null) this.imgUrl = new URL(item.child("enclosure").attr("url"));
-            else if(item.child("media:thumbnail") != null) this.imgUrl = new URL(item.child("media:thumbnail").attr("url"));
-            else if(item.child("url") != null) this.imgUrl = new URL(item.text("url"));
+            if (item.child("enclosure") != null) this.imgUrl = new URL(item.child("enclosure").attr("url"));
+            else if (item.child("media:thumbnail") != null) this.imgUrl = new URL(item.child("media:thumbnail").attr("url"));
+            else if (item.child("url") != null) this.imgUrl = new URL(item.text("url"));
             else this.imgUrl = null;
         } catch (MalformedURLException e) {
             Log.e(TAG, e.getMessage());

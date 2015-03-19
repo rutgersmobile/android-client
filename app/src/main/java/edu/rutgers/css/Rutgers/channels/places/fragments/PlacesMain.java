@@ -50,8 +50,8 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 public class PlacesMain extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
 
     /* Log tag and component handle */
-    private static final String TAG = "PlacesMain";
-    public static final String HANDLE = "places";
+    private static final String TAG                 = "PlacesMain";
+    public static final String HANDLE               = "places";
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -106,7 +106,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         // Set title from JSON
         final Bundle args = getArguments();
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.places_title);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
@@ -208,7 +208,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     }
 
     private void loadNearbyPlaces() {
-        if(!isAdded()) return;
+        if (!isAdded()) return;
 
         Log.i(TAG, "Updating nearby places");
 

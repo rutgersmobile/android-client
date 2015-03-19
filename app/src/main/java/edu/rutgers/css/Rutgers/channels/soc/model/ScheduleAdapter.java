@@ -52,7 +52,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
         LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewHolder holder;
 
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = layoutInflater.inflate(mRowLayoutResId, null);
             holder = new ViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
@@ -67,11 +67,11 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
         final ScheduleAdapterItem scheduleItem = getItem(position);
 
         // If it's a course
-        if(scheduleItem instanceof Course) {
+        if (scheduleItem instanceof Course) {
             final Course course = (Course) scheduleItem;
             holder.titleTextView.setText(course.getDisplayTitle());
 
-            if(course.isStub()) {
+            if (course.isStub()) {
                 // Replace the stub data
                 final ScheduleAdapter scheduleAdapter = this;
                 AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -113,14 +113,14 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
     public void setFilterIndex(SOCIndex socIndex) {
         mSOCIndex = socIndex;
 
-        if(mFilter != null) {
+        if (mFilter != null) {
             mFilter.setSocIndex(socIndex);
         }
     }
 
     @Override
     public Filter getFilter() {
-        if(mFilter == null) {
+        if (mFilter == null) {
             mFilter = new ScheduleFilter();
             mFilter.setSocIndex(mSOCIndex);
         }
@@ -140,10 +140,10 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             FilterResults filterResults = new FilterResults();
 
             // If constraint is null/empty, return original list
-            if(constraint == null || constraint.toString().trim().isEmpty()) {
+            if (constraint == null || constraint.toString().trim().isEmpty()) {
                 synchronized (mLock) {
                     // A filter has been applied before and there is a backup list, restore it
-                    if(mOriginalList != null) {
+                    if (mOriginalList != null) {
                         filterResults.values = mOriginalList;
                         filterResults.count = mOriginalList.size();
                         return filterResults;
@@ -176,14 +176,14 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             String query = constraint.toString().trim();
 
             // Consult the INDEX!!!
-            if(socIndex != null) {
+            if (socIndex != null) {
                 // Check if it's a full course code 000:000
-                if(query.length() == 7 && query.charAt(3) == ':') {
+                if (query.length() == 7 && query.charAt(3) == ':') {
                     String subjCode = query.substring(0,3);
                     String courseCode = query.substring(4,7);
-                    if(allDigits(subjCode) && allDigits(courseCode)) {
+                    if (allDigits(subjCode) && allDigits(courseCode)) {
                         Course course = socIndex.getCourseByCode(subjCode, courseCode);
-                        if(course != null) passed.add(course);
+                        if (course != null) passed.add(course);
                     }
                 } else {
                     // Check abbreviations
@@ -193,13 +193,13 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             }
 
             // Straight string comparison on original list
-            for(ScheduleAdapterItem item: tempList) {
+            for (ScheduleAdapterItem item: tempList) {
                 String cmp = item.getDisplayTitle();
                 if (StringUtils.containsIgnoreCase(cmp, query)) passed.add(item);
             }
 
             // If we didn't find anything.. CONSULT THE INDEX!! to search full course names
-            if(passed.isEmpty() && socIndex != null) {
+            if (passed.isEmpty() && socIndex != null) {
                 List<Course> fuzzies = socIndex.getCoursesByName(query, 10);
                 passed.addAll(fuzzies);
             }
@@ -212,7 +212,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
         @Override
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             // If filterResults is null, leave the current list alone.
-            if(filterResults == null) return;
+            if (filterResults == null) return;
 
             // Replace current list with results
             synchronized (mLock) {
@@ -224,8 +224,8 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
     }
 
     private static boolean allDigits(String string) {
-        for(int i = 0; i < string.length(); i++) {
-            if(!Character.isDigit(string.charAt(i))) return false;
+        for (int i = 0; i < string.length(); i++) {
+            if (!Character.isDigit(string.charAt(i))) return false;
         }
         return true;
     }

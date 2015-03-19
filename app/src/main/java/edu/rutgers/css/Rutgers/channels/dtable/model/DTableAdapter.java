@@ -48,7 +48,7 @@ public class DTableAdapter extends ExpandableListItemAdapter<DTableElement> {
     }
 
     public void setData(List<DTableElement> elements) {
-        if(elements == null) {
+        if (elements == null) {
             mItems = new ArrayList<>();
         } else {
             mItems = elements;
@@ -57,8 +57,8 @@ public class DTableAdapter extends ExpandableListItemAdapter<DTableElement> {
     }
 
     public boolean addAll(List<DTableElement> elements) {
-        if(elements == null || elements.isEmpty()) return false;
-        if(mItems.addAll(elements)) {
+        if (elements == null || elements.isEmpty()) return false;
+        if (mItems.addAll(elements)) {
             notifyDataSetChanged();
             return true;
         } else {
@@ -90,9 +90,9 @@ public class DTableAdapter extends ExpandableListItemAdapter<DTableElement> {
     public int getItemViewType(int position) {
         DTableElement element = getItem(position);
 
-        if(element instanceof DTableFAQ) return ViewTypes.FAQ_TYPE.ordinal();
-        else if(element instanceof DTableRoot) return ViewTypes.CAT_TYPE.ordinal();
-        else if(element instanceof DTableChannel) return ViewTypes.ROOT_TYPE.ordinal();
+        if (element instanceof DTableFAQ) return ViewTypes.FAQ_TYPE.ordinal();
+        else if (element instanceof DTableRoot) return ViewTypes.CAT_TYPE.ordinal();
+        else if (element instanceof DTableChannel) return ViewTypes.ROOT_TYPE.ordinal();
         else return ViewTypes.TEXT_TYPE.ordinal();
     }
 
@@ -114,7 +114,7 @@ public class DTableAdapter extends ExpandableListItemAdapter<DTableElement> {
     public View getContentView(final int position, @Nullable View convertView, @NonNull ViewGroup viewGroup) {
         PopViewHolder holder;
 
-        if(convertView == null) {
+        if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.popdown, null);
             holder = new PopViewHolder();
@@ -126,7 +126,7 @@ public class DTableAdapter extends ExpandableListItemAdapter<DTableElement> {
 
         DTableElement element = getItem(position);
 
-        if(element instanceof DTableFAQ) {
+        if (element instanceof DTableFAQ) {
             DTableFAQ faqElement = (DTableFAQ) element;
             holder.popdownTextView.setText(faqElement.getAnswer());
         } else {

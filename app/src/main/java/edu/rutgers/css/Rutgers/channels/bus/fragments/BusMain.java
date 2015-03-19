@@ -21,8 +21,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public class BusMain extends Fragment implements FilterFocusListener {
 
     /* Log tag and component handle */
-    private static final String TAG = "BusMain";
-    public static final String HANDLE = "bus";
+    private static final String TAG                 = "BusMain";
+    public static final String HANDLE               = "bus";
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -39,7 +39,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
     public static Bundle createArgs(String title) {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, BusMain.HANDLE);
-        if(title != null) bundle.putString(ARG_TITLE_TAG, title);
+        if (title != null) bundle.putString(ARG_TITLE_TAG, title);
         return bundle;
     }
 
@@ -89,7 +89,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
 
     @Override
     public void focusEvent() {
-        if(mViewPager != null) {
+        if (mViewPager != null) {
             mViewPager.setCurrentItem(2, true);
         }
     }

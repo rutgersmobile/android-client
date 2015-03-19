@@ -27,12 +27,12 @@ public class DTableRoot extends DTableElement {
         JSONArray childrenJson = jsonObject.getJSONArray("children");
         children = new ArrayList<>(childrenJson.length());
 
-        for(int i = 0; i < childrenJson.length(); i++) {
+        for (int i = 0; i < childrenJson.length(); i++) {
             JSONObject child = childrenJson.getJSONObject(i);
-            if(child.has("answer")) children.add(new DTableFAQ(child));
-            else if(child.has("children") && child.opt("children") instanceof JSONArray) children.add(new DTableRoot(child));
-            else if(child.has("channel")) children.add(new DTableChannel(child));
-            else if(child.has("title")) children.add(new DTableElement(child));
+            if (child.has("answer")) children.add(new DTableFAQ(child));
+            else if (child.has("children") && child.opt("children") instanceof JSONArray) children.add(new DTableRoot(child));
+            else if (child.has("channel")) children.add(new DTableChannel(child));
+            else if (child.has("title")) children.add(new DTableElement(child));
         }
     }
 

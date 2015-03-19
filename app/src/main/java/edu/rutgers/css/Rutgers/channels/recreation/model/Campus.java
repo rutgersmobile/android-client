@@ -26,10 +26,10 @@ public class Campus {
      * @return Facility with matching title if found, null if not.
      */
     public Facility getFacility(@NonNull String facilityTitle) {
-        if(facilities == null) return null;
+        if (facilities == null) return null;
 
-        for(Facility facility: facilities) {
-            if(facilityTitle.equalsIgnoreCase(facility.getTitle())) return facility;
+        for (Facility facility: facilities) {
+            if (facilityTitle.equalsIgnoreCase(facility.getTitle())) return facility;
         }
 
         return null;

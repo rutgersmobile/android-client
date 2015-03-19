@@ -25,7 +25,7 @@ public class Section extends SectionAdapterItem {
 
     @Override
     public String getDisplayTitle() {
-        if(open) return "Open Section";
+        if (open) return "Open Section";
         else return "Closed Section";
     }
 

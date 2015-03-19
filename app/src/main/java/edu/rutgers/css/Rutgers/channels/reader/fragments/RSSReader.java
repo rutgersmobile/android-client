@@ -40,11 +40,11 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public class RSSReader extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "RSSReader";
-    public static final String HANDLE = "reader";
+    private static final String TAG                 = "RSSReader";
+    public static final String HANDLE               = "reader";
 
     /* Constants */
-    private static final long EXPIRE = Request.CACHE_ONE_MINUTE;
+    private static final long EXPIRE                = Request.CACHE_ONE_MINUTE;
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -103,7 +103,7 @@ public class RSSReader extends Fragment {
             public void onDone(XmlDom xml) {
                 List<XmlDom> items = xml.tags("item");
                 
-                for(XmlDom item: items) {
+                for (XmlDom item: items) {
                     RSSItem newItem = new RSSItem(item);
                     mAdapter.add(newItem);
                 }

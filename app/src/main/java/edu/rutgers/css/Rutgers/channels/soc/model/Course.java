@@ -29,7 +29,7 @@ public class Course extends ScheduleAdapterItem {
 
     /** Used for filling in stub course info. */
     protected void updateFields(@NonNull Course other) {
-        if(other.isStub()) throw new IllegalArgumentException("Can't update using a stub course");
+        if (other.isStub()) throw new IllegalArgumentException("Can't update using a stub course");
         this.title = other.getTitle();
         this.subject = other.getSubject();
         this.courseNumber = other.getCourseNumber();
@@ -62,9 +62,9 @@ public class Course extends ScheduleAdapterItem {
     public int countOpenSections(boolean hidden) {
         int result = 0;
 
-        for(Section section: sections) {
-            if(section.isOpen()) {
-                if(hidden || "Y".equalsIgnoreCase(section.getPrinted())) {
+        for (Section section: sections) {
+            if (section.isOpen()) {
+                if (hidden || "Y".equalsIgnoreCase(section.getPrinted())) {
                     result++;
                 }
             }
@@ -81,8 +81,8 @@ public class Course extends ScheduleAdapterItem {
     public int countTotalSections(boolean hidden) {
         int result = 0;
 
-        for(Section section: sections) {
-            if(hidden || "Y".equalsIgnoreCase(section.getPrinted())) {
+        for (Section section: sections) {
+            if (hidden || "Y".equalsIgnoreCase(section.getPrinted())) {
                 result++;
             }
         }

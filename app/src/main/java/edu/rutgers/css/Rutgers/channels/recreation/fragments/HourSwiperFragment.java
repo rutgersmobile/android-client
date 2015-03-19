@@ -27,10 +27,10 @@ import edu.rutgers.css.Rutgers.channels.recreation.model.MeetingAreaHours;
  */
 public class HourSwiperFragment extends Fragment {
 
-    private static final String TAG = "HourSwiperFragment";
+    private static final String TAG                 = "HourSwiperFragment";
 
-    public static final String DATE_TAG = "date";
-    public static final String LOCATIONS_TAG = "locations";
+    public static final String DATE_TAG             = "date";
+    public static final String LOCATIONS_TAG        = "locations";
     
     public HourSwiperFragment() {
         // Required empty public constructor
@@ -53,13 +53,13 @@ public class HourSwiperFragment extends Fragment {
         LinearLayout hourSwiperTableLayout = (LinearLayout) v.findViewById(R.id.hourSwiperTableLayout);
 
         List<MeetingAreaHours> areaHours = (List<MeetingAreaHours>) args.getSerializable(LOCATIONS_TAG);
-        if(areaHours == null) {
+        if (areaHours == null) {
             Log.e(TAG, "Area hours not set");
             return v;
         }
 
         // Create new table row for each area listing
-        for(MeetingAreaHours area: areaHours) {
+        for (MeetingAreaHours area: areaHours) {
             TableRow newTR = (TableRow) inflater.inflate(R.layout.hour_row, container, false);
 
             // Set the sub-location title. Wrap at ~18 chars in portrait mode.
@@ -82,9 +82,9 @@ public class HourSwiperFragment extends Fragment {
             // Sometimes these are comma separated, sometimes not  ¯\_(ツ)_/¯
             String hoursString = StringUtils.trim(area.getHours());
 
-            if(StringUtils.startsWithIgnoreCase(hoursString, "closed")) {
+            if (StringUtils.startsWithIgnoreCase(hoursString, "closed")) {
                 setHoursTextView(hoursTextView, hoursString);
-            } else if(StringUtils.countMatches(hoursString, ",") > 0) {
+            } else if (StringUtils.countMatches(hoursString, ",") > 0) {
                 setHoursTextView(hoursTextView, hoursString.replace(",", "\n"));
             } else {
                 StringBuilder builder = new StringBuilder();
@@ -101,7 +101,7 @@ public class HourSwiperFragment extends Fragment {
                     matches++;
                 }
 
-                if(matches > 0) {
+                if (matches > 0) {
                     setHoursTextView(hoursTextView, StringUtils.chomp(builder.toString()));
                 } else {
                     // :'( All is lost. A single tear is shed.
@@ -116,7 +116,7 @@ public class HourSwiperFragment extends Fragment {
     }
 
     private void setHoursTextView(TextView hoursTextView, String string) {
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             hoursTextView.setText(string);
         } else {
             hoursTextView.setText(WordUtils.wrap(string, 18).replaceAll("\\n\\n","\n"));

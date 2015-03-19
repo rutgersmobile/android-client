@@ -51,8 +51,8 @@ import edu.rutgers.css.Rutgers.utils.PrefUtils;
 public class SOCMain extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     /* Log tag and component handle */
-    private static final String TAG = "SOCMain";
-    public static final String HANDLE = "soc";
+    private static final String TAG                 = "SOCMain";
+    public static final String HANDLE               = "soc";
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = "filter";
@@ -132,7 +132,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
                 }
 
                 if (BuildConfig.DEBUG) {
-                    for(String semester: mSemesters) {
+                    for (String semester: mSemesters) {
                         Log.v(TAG, "Got semester: " + ScheduleAPI.translateSemester(semester));
                     }
                     Log.v(TAG, "Default semester: " + ScheduleAPI.translateSemester(mDefaultSemester));

@@ -39,7 +39,7 @@ public final class ChannelManager {
         ArrayList<Channel> result = new ArrayList<>();
 
         Set<Map.Entry<String, Channel>> set = channelsMap.entrySet();
-        for(Map.Entry<String, Channel> entry: set) {
+        for (Map.Entry<String, Channel> entry: set) {
             result.add(entry.getValue());
         }
 
@@ -55,9 +55,9 @@ public final class ChannelManager {
         ArrayList<Channel> result = new ArrayList<>();
 
         Set<Map.Entry<String, Channel>> set = channelsMap.entrySet();
-        for(Map.Entry<String, Channel> entry: set) {
+        for (Map.Entry<String, Channel> entry: set) {
             Channel curChannel = entry.getValue();
-            if(category.equalsIgnoreCase(curChannel.getCategory())) result.add(curChannel);
+            if (category.equalsIgnoreCase(curChannel.getCategory())) result.add(curChannel);
         }
 
         return result;
@@ -68,7 +68,7 @@ public final class ChannelManager {
      * @param array Channel data JSON Array
      */
     public void loadChannelsFromJSONArray(@NonNull JSONArray array) {
-        for(int i = 0; i < array.length(); i++) {
+        for (int i = 0; i < array.length(); i++) {
             try {
                 JSONObject cur = array.getJSONObject(i);
                 addChannel(cur);
@@ -84,7 +84,7 @@ public final class ChannelManager {
      * @param category Category name
      */
     public void loadChannelsFromJSONArray(@NonNull JSONArray array, @NonNull String category) {
-        for(int i = 0; i < array.length(); i++) {
+        for (int i = 0; i < array.length(); i++) {
             try {
                 JSONObject cur = array.getJSONObject(i);
                 cur.putOpt("category", category);
@@ -116,9 +116,9 @@ public final class ChannelManager {
 
             // See if there is already a channel mapped to this handle
             final String handle = channel.getHandle();
-            if(channelsMap.get(handle) != null) {
+            if (channelsMap.get(handle) != null) {
                 // If the new channel has override permission, insert it over the old one
-                if(channel.canOverride()) {
+                if (channel.canOverride()) {
                     Log.i(TAG, "Overriding channel " + handle);
                     channelsMap.put(handle, channel);
                 } else {

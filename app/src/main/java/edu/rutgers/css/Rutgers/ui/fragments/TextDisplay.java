@@ -46,9 +46,9 @@ public class TextDisplay extends Fragment {
 
         textView.setMovementMethod(LinkMovementMethod.getInstance());
 
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
-        if(args.getString(ARG_DATA_TAG) == null) {
+        if (args.getString(ARG_DATA_TAG) == null) {
             Log.w(TAG, "No text set");
             textView.setText(getString(R.string.failed_no_text));
         } else {

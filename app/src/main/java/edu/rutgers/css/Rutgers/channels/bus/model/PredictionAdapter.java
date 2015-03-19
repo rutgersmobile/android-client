@@ -68,7 +68,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         ViewHolder holder;
 
         // Make new data holder or get existing one
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.row_bus_prediction_title, null);
             holder = new ViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
@@ -86,7 +86,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         holder.titleTextView.setText(prediction.getTitle());
 
         // Set prediction minutes
-        if(!prediction.getMinutes().isEmpty()) {
+        if (!prediction.getMinutes().isEmpty()) {
             // Reset title color to default
             holder.titleTextView.setTextColor(res.getColor(R.color.black));
             holder.directionTextView.setTextColor(res.getColor(R.color.black));
@@ -94,9 +94,9 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
             // Change color of text based on how much time is remaining before the first bus arrives
             int first = prediction.getMinutes().get(0);
 
-            if(first < 2) {
+            if (first < 2) {
                 holder.minutesTextView.setTextColor(res.getColor(R.color.bus_soonest));
-            } else if(first < 6) {
+            } else if (first < 6) {
                 holder.minutesTextView.setTextColor(res.getColor(R.color.bus_soon));
             } else {
                 holder.minutesTextView.setTextColor(res.getColor(R.color.bus_later));
@@ -111,7 +111,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         }
 
         // Set direction
-        if(prediction.getDirection() == null || prediction.getDirection().isEmpty()) {
+        if (prediction.getDirection() == null || prediction.getDirection().isEmpty()) {
             // If there's no direction string, don't let that text field take up space
             holder.directionTextView.setVisibility(View.GONE);
         } else {
@@ -129,7 +129,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         PopViewHolder holder;
 
         // Make new data holder or get existing one
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.popdown, null);
             holder = new PopViewHolder();
             holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
@@ -141,7 +141,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         Prediction prediction = getItem(position);
 
         // Set prediction minutes
-        if(!prediction.getMinutes().isEmpty()) {
+        if (!prediction.getMinutes().isEmpty()) {
             // Set pop-down contents
             holder.popdownTextView.setText(formatMinutesDetails(prediction.getMinutes()));
             holder.popdownTextView.setGravity(Gravity.RIGHT);
@@ -166,16 +166,16 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         Resources resources = mContext.getResources();
         StringBuilder result = new StringBuilder(resources.getString(R.string.bus_prediction_begin));
         
-        for(int i = 0; i < minutes.size(); i++) {
-            if(i != 0 && i == minutes.size() - 1) result.append(resources.getString(R.string.bus_and));
+        for (int i = 0; i < minutes.size(); i++) {
+            if (i != 0 && i == minutes.size() - 1) result.append(resources.getString(R.string.bus_and));
             
-            if(minutes.get(i) < 1) result.append(" <1");
+            if (minutes.get(i) < 1) result.append(" <1");
             else result.append(" ").append(minutes.get(i));
             
-            if(minutes.size() > 2 && i != minutes.size() - 1) result.append(",");
+            if (minutes.size() > 2 && i != minutes.size() - 1) result.append(",");
         }
         
-        if(minutes.size() == 1 && minutes.get(0) == 1) result.append(resources.getString(R.string.bus_minute_singular));
+        if (minutes.size() == 1 && minutes.get(0) == 1) result.append(resources.getString(R.string.bus_minute_singular));
         else result.append(resources.getString(R.string.bus_minute_plural));
         
         return result.toString();
@@ -191,7 +191,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         Resources resources = mContext.getResources();
         SpannableStringBuilder result = new SpannableStringBuilder();
 
-        for(int i = 0; i < minutes.size(); i++) {
+        for (int i = 0; i < minutes.size(); i++) {
             // Hack so that it displays "<1 minute" instead of "0 minutes"
             int mins = minutes.get(i) == 0 ? 1 : minutes.get(i);
             String minString = minutes.get(i) < 1 ? "&lt;1" : Integer.toString(mins);
@@ -208,7 +208,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
             String line = resources.getQuantityString(R.plurals.bus_minute_details, mins, minString, arrivalTime);
             CharSequence styledLine = Html.fromHtml(line);
             result.append(styledLine);
-            if(i != minutes.size() - 1) result.append("\n");
+            if (i != minutes.size() - 1) result.append("\n");
         }
 
         return result;

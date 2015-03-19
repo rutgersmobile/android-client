@@ -19,9 +19,9 @@ public class DTableChannel extends DTableElement {
 
         JSONObject channel = jsonObject.getJSONObject("channel");
         view = channel.getString("view");
-        if(!channel.isNull("title")) channelTitle = new VarTitle(channel.get("title"));
-        if(!channel.isNull("url")) url = channel.getString("url");
-        if(!channel.isNull("data")) data = channel.getString("data");
+        if (!channel.isNull("title")) channelTitle = new VarTitle(channel.get("title"));
+        if (!channel.isNull("url")) url = channel.getString("url");
+        if (!channel.isNull("data")) data = channel.getString("data");
         count = channel.optInt("count");
     }
 
@@ -30,7 +30,7 @@ public class DTableChannel extends DTableElement {
      * @return Channel display title, default to home title if campus-localized.
      */
     public String getChannelTitle() {
-        if(channelTitle == null) return getTitle();
+        if (channelTitle == null) return getTitle();
         else return channelTitle.getTitle();
     }
 
@@ -40,7 +40,7 @@ public class DTableChannel extends DTableElement {
      * @return Campus-localized channel display title
      */
     public String getChannelTitle(String homeCampus) {
-        if(channelTitle == null) return getTitle(homeCampus);
+        if (channelTitle == null) return getTitle(homeCampus);
         else return channelTitle.getTitle(homeCampus);
     }
 

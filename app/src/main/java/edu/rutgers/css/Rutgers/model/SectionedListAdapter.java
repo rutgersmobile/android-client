@@ -95,9 +95,9 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
     public int getCount() {
         int total = 0;
 
-        if(mFilteredSections != null) {
+        if (mFilteredSections != null) {
             // If filter is active, get count from filtered sections
-            for(FilteredSection filteredSection: mFilteredSections) {
+            for (FilteredSection filteredSection: mFilteredSections) {
                 total += filteredSection.matches.size();
             }
         } else {
@@ -137,14 +137,14 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
      * all items from all sections contained in this adapter.
      */
     public U getItem(int position) {
-        if((position+1) > getCount()) throw new IndexOutOfBoundsException("Tried to access item " + (position+1) + " out of " + getCount());
+        if ((position+1) > getCount()) throw new IndexOutOfBoundsException("Tried to access item " + (position+1) + " out of " + getCount());
 
-        if(mFilteredSections != null) {
+        if (mFilteredSections != null) {
             // Filter active, get item from filtered sections list
             int i = 0;
-            for(FilteredSection filteredSection: mFilteredSections) {
+            for (FilteredSection filteredSection: mFilteredSections) {
                 int count = filteredSection.matches.size();
-                if(i + count <= position) {
+                if (i + count <= position) {
                     i += count;
                 } else {
                     return filteredSection.matches.get(position - i);
@@ -167,12 +167,12 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
 
     /** Get section that contains the item returned by {@link #getItem(int position)}. */
     protected T getSectionContainingItem(int position) {
-        if((position+1) > getCount()) throw new IndexOutOfBoundsException("Tried to access item " + (position+1) + " out of " + getCount());
+        if ((position+1) > getCount()) throw new IndexOutOfBoundsException("Tried to access item " + (position+1) + " out of " + getCount());
 
-        if(mFilteredSections != null) {
+        if (mFilteredSections != null) {
             // Filter active, get section from filtered sections list
             int i = 0;
-            for(FilteredSection filteredSection: mFilteredSections) {
+            for (FilteredSection filteredSection: mFilteredSections) {
                 int count = filteredSection.matches.size();
                 if (i + count <= position) {
                     i += count;
@@ -199,7 +199,7 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = getLayoutInflater().inflate(getItemResource(), null);
             holder = new ViewHolder();
             holder.textView = (TextView) convertView.findViewById(getTextViewId());
@@ -217,7 +217,7 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
     public View getHeaderView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = getLayoutInflater().inflate(getHeaderResource(), null);
             holder = new ViewHolder();
             holder.textView = (TextView) convertView.findViewById(getTextViewId());
@@ -318,19 +318,19 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
                 final ArrayList<FilteredSection> filteredSections = new ArrayList<>();
 
                 // Filter the items of each section.
-                for(T section: originalSections) {
+                for (T section: originalSections) {
                     final ArrayList<U> sectionMatches = new ArrayList<>();
-                    for(int i = 0; i < getSectionItemCount(section); i++) {
+                    for (int i = 0; i < getSectionItemCount(section); i++) {
                         final U value = getSectionItem(section, i);
                         final String valueText = value.toString();
 
-                        if(StringUtils.startsWithIgnoreCase(valueText, prefix)) {
+                        if (StringUtils.startsWithIgnoreCase(valueText, prefix)) {
                             sectionMatches.add(value);
                         } else {
                             final String[] words = StringUtils.split(valueText, ' ');
 
-                            for(String word: words) {
-                                if(StringUtils.startsWithIgnoreCase(word, prefix)) {
+                            for (String word: words) {
+                                if (StringUtils.startsWithIgnoreCase(word, prefix)) {
                                     sectionMatches.add(value);
                                     break;
                                 }
@@ -339,7 +339,7 @@ public abstract class SectionedListAdapter<T, U> extends BaseAdapter
                     }
 
                     // If this section had matches, include it.
-                    if(!sectionMatches.isEmpty()) {
+                    if (!sectionMatches.isEmpty()) {
                         FilteredSection filteredSection = new FilteredSection();
                         filteredSection.section = section;
                         filteredSection.matches = sectionMatches;

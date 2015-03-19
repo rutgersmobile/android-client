@@ -48,8 +48,8 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 public class BusStops extends Fragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
     /* Log tag and component handle */
-    private static final String TAG = "BusStops";
-    public static final String HANDLE = "busstops";
+    private static final String TAG                 = "BusStops";
+    public static final String HANDLE               = "busstops";
 
     /* Constants */
     private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
@@ -309,8 +309,8 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                         //addNearbyRow(1, new RMenuItemRow(noneNearbyString));
                     } else {
                         // Add all the stops
-                        for(StopGroup stopGroup: nbStops) addNearbyRow(new StopStub(stopGroup));
-                        for(StopGroup stopGroup: nwkStops) addNearbyRow(new StopStub(stopGroup));
+                        for (StopGroup stopGroup: nbStops) addNearbyRow(new StopStub(stopGroup));
+                        for (StopGroup stopGroup: nwkStops) addNearbyRow(new StopStub(stopGroup));
                     }
                 }
 

@@ -136,12 +136,12 @@ public final class NextbusAPI {
 
                 // Find route in agency config, and get its stop tags
                 Route route = conf.getRoutes().get(routeKey);
-                if(route == null) {
+                if (route == null) {
                     d.reject(new IllegalArgumentException("Invalid route tag \""+routeKey+"\""));
                     return;
                 }
 
-                for(String stopTag: route.getStopTags()) {
+                for (String stopTag: route.getStopTags()) {
                     // multiple 'stops' parameters, these are: routeTag|dirTag|stopId
                     queryBuilder.append("&stops=").append(routeKey).append("|null|").append(stopTag);
                 }
@@ -212,21 +212,21 @@ public final class NextbusAPI {
 
                 // Get group of stop IDs by stop title
                 StopGroup stopsByTitle = conf.getStopsByTitle().get(stopTitleKey);
-                if(stopsByTitle == null) {
+                if (stopsByTitle == null) {
                     d.reject(new IllegalArgumentException("Invalid stop tag \""+stopTitleKey+"\""));
                     return;
                 }
 
                 // For every stop tag with the given stop title, get all its routes
-                for(String stopTag: stopsByTitle.getStopTags()) {
+                for (String stopTag: stopsByTitle.getStopTags()) {
                     Stop stop = conf.getStops().get(stopTag);
-                    if(stop == null) {
+                    if (stop == null) {
                         d.reject(new Exception("Stop tag \""+stopTag+"\" in stopsByTitle but not stops"));
                         return;
                     }
 
                     // Then use the route tags to build the query
-                    for(String routeTag: stop.getRouteTags()) {
+                    for (String routeTag: stop.getRouteTags()) {
                         // multiple 'stops' parameters, these are: routeTag|dirTag|stopId
                         queryBuilder.append("&stops=").append(routeTag).append("|null|").append(stopTag);
                     }
@@ -400,13 +400,13 @@ public final class NextbusAPI {
                 List<StopGroup> nearStops = new ArrayList<>();
 
                 // Loop through stop groups
-                for(StopGroup stopGroup: stopsByTitle.values()) {
+                for (StopGroup stopGroup: stopsByTitle.values()) {
                     // TODO Decode the geohash into long/lat and just compare with that
 
                     // Get stop data for each stop tag and check the distance.
-                    for(String stopTag: stopGroup.getStopTags()) {
+                    for (String stopTag: stopGroup.getStopTags()) {
                         Stop stop = conf.getStops().get(stopTag);
-                        if(stop == null) {
+                        if (stop == null) {
                             Log.w(TAG, "Stop tag \""+stopTag+"\" found in stopsByTitle not in stops");
                             continue; // Check next tag
                         }
@@ -417,7 +417,7 @@ public final class NextbusAPI {
                         float[] results = new float[1];
                         Location.distanceBetween(sourceLat, sourceLon, stopLat, stopLon, results);
 
-                        if(results[0] < Config.NEARBY_RANGE) {
+                        if (results[0] < Config.NEARBY_RANGE) {
                             nearStops.add(stopGroup);
                             break; // Skip to next group
                         }

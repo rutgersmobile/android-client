@@ -42,7 +42,7 @@ public class SOCIndex {
     private HashMap<String, String> mSubjectsByName;
 
     public SOCIndex(String campusCode, String levelCode, String semesterCode, JSONObject index) throws IllegalArgumentException {
-        if(index.isNull("abbrevs") || index.isNull("courses") || index.isNull("ids") || index.isNull("names")) {
+        if (index.isNull("abbrevs") || index.isNull("courses") || index.isNull("ids") || index.isNull("names")) {
             throw new IllegalArgumentException("Invalid index, missing critical fields");
         }
 
@@ -59,7 +59,7 @@ public class SOCIndex {
 
             // Set up abbreviations hashtable
             mAbbreviations = new HashMap<>();
-            for(Iterator<String> abbrevsIterator = abbrevs.keys(); abbrevsIterator.hasNext();) {
+            for (Iterator<String> abbrevsIterator = abbrevs.keys(); abbrevsIterator.hasNext();) {
                 String curAbbrev = abbrevsIterator.next();
                 JSONArray curContents = abbrevs.getJSONArray(curAbbrev);
                 String[] subIDStrings = JsonUtils.jsonToStringArray(curContents);
@@ -68,14 +68,14 @@ public class SOCIndex {
 
             // Set up subject IDs hashtable
             mSubjectsByCode = new HashMap<>();
-            for(Iterator<String> idsIterator = ids.keys(); idsIterator.hasNext();) {
+            for (Iterator<String> idsIterator = ids.keys(); idsIterator.hasNext();) {
                 String curID = idsIterator.next();
                 JSONObject curContents = ids.getJSONObject(curID);
 
                 // Set up the list of CourseID:CourseName mappings for this Subject ID entry
                 JSONObject curCourses = curContents.getJSONObject("courses");
                 HashMap<String, String> courseMap = new HashMap<>();
-                for(Iterator<String> courseIDIterator = curCourses.keys(); courseIDIterator.hasNext();) {
+                for (Iterator<String> courseIDIterator = curCourses.keys(); courseIDIterator.hasNext();) {
                     String curCourseID = courseIDIterator.next();
                     String curCourseName = curCourses.getString(curCourseID);
                     courseMap.put(curCourseID, curCourseName);
@@ -91,7 +91,7 @@ public class SOCIndex {
 
             // Set up subject names hashtable
             mSubjectsByName = new HashMap<>();
-            for(Iterator<String> namesIterator = names.keys(); namesIterator.hasNext();) {
+            for (Iterator<String> namesIterator = names.keys(); namesIterator.hasNext();) {
                 String curName = namesIterator.next();
                 String curContents = names.getString(curName);
                 mSubjectsByName.put(curName, curContents);
@@ -99,7 +99,7 @@ public class SOCIndex {
 
             // Set up course names
             mCoursesByName = new HashMap<>();
-            for(Iterator<String> coursesIterator = courses.keys(); coursesIterator.hasNext();) {
+            for (Iterator<String> coursesIterator = courses.keys(); coursesIterator.hasNext();) {
                 String curCourseName = coursesIterator.next();
                 JSONObject curContents = courses.getJSONObject(curCourseName);
                 IndexCourse newCourse = new IndexCourse();
@@ -119,11 +119,11 @@ public class SOCIndex {
      */
     public List<Subject> getSubjectsByAbbreviation(String abbrev) {
         List<Subject> results = new ArrayList<>();
-        if(mAbbreviations.containsKey(abbrev)) {
+        if (mAbbreviations.containsKey(abbrev)) {
             String[] subjCodes = mAbbreviations.get(abbrev);
-            for(String subjCode: subjCodes) {
+            for (String subjCode: subjCodes) {
                 IndexSubject curSubject = mSubjectsByCode.get(subjCode);
-                if(curSubject != null) {
+                if (curSubject != null) {
                     results.add(new Subject(curSubject.name.toUpperCase(), curSubject.id));
                 }
             }
@@ -139,7 +139,7 @@ public class SOCIndex {
      */
     public Subject getSubjectByCode(String subjectCode) {
         IndexSubject subject = mSubjectsByCode.get(subjectCode);
-        if(subject != null) {
+        if (subject != null) {
             return new Subject(subject.name.toUpperCase(), subject.id);
         } else {
             return null;
@@ -154,10 +154,10 @@ public class SOCIndex {
      */
     public Course getCourseByCode(String subjectCode, String courseCode) {
         IndexSubject subject = mSubjectsByCode.get(subjectCode);
-        if(subject == null) return null;
+        if (subject == null) return null;
 
         String title = subject.courses.get(courseCode);
-        if(title != null) {
+        if (title != null) {
             return new Course(title.toUpperCase(), subjectCode, courseCode);
         } else {
             return null;
@@ -176,13 +176,13 @@ public class SOCIndex {
         Set<Map.Entry<String, IndexCourse>> courseEntries = mCoursesByName.entrySet();
         for (Map.Entry<String, IndexCourse> curEntry: courseEntries) {
             // If there's a partial match on the full course name...
-            if(StringUtils.containsIgnoreCase(curEntry.getKey(), query)) {
+            if (StringUtils.containsIgnoreCase(curEntry.getKey(), query)) {
                 IndexCourse curCourse = curEntry.getValue();
                 String subjectCode = curCourse.subj;
                 String courseCode = curCourse.course;
 
                 results.add(new Course(curEntry.getKey().toUpperCase(), subjectCode, courseCode));
-                if(results.size() >= cap) return results;
+                if (results.size() >= cap) return results;
             }
         }
 

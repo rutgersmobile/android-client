@@ -46,8 +46,8 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 public class BusAll extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "BusAll";
-    public static final String HANDLE = "busall";
+    private static final String TAG                 = "BusAll";
+    public static final String HANDLE               = "busall";
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".filter";
@@ -72,7 +72,7 @@ public class BusAll extends Fragment {
         mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         // Restore filter
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
@@ -101,7 +101,7 @@ public class BusAll extends Fragment {
                 List<RouteStub> nwkRoutesResult = (List<RouteStub>) results.get(2).getResult();
                 List<StopStub> nwkStopsResult = (List<StopStub>) results.get(3).getResult();
 
-                if(nbHome) {
+                if (nbHome) {
                     loadRoutes(NextbusAPI.AGENCY_NB, nbRoutesResult);
                     loadStops(NextbusAPI.AGENCY_NB, nbStopsResult);
                     loadRoutes(NextbusAPI.AGENCY_NWK, nwkRoutesResult);
@@ -114,7 +114,7 @@ public class BusAll extends Fragment {
                 }
 
                 // Set filter after info is re-loaded
-                if(mFilterString != null) {
+                if (mFilterString != null) {
                     mAdapter.getFilter().filter(mFilterString);
                 }
 
@@ -142,7 +142,7 @@ public class BusAll extends Fragment {
         final View v = inflater.inflate(R.layout.fragment_search_stickylist_progress, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        if(mLoading) showProgressCircle();
+        if (mLoading) showProgressCircle();
 
         // Get the filter field and add a listener to it
         mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -209,7 +209,7 @@ public class BusAll extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(StringUtils.isNotBlank(mFilterString)) outState.putString(SAVED_FILTER_TAG, mFilterString);
+        if (StringUtils.isNotBlank(mFilterString)) outState.putString(SAVED_FILTER_TAG, mFilterString);
     }
 
     @Override
@@ -222,12 +222,12 @@ public class BusAll extends Fragment {
     }
 
     private void loadStops(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
-        if(!isAdded() || getResources() == null) return;
+        if (!isAdded() || getResources() == null) return;
 
         // Get header for stops section
         String header;
-        if(NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_stops_header);
-        else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_stops_header);
+        if (NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_stops_header);
+        else if (NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_stops_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
         List<NextbusItem> nextbusItems = new ArrayList<>(stopStubs.size());
@@ -237,12 +237,12 @@ public class BusAll extends Fragment {
     }
 
     private void loadRoutes(@NonNull String agency, @NonNull List<RouteStub> routeStubs) {
-        if(!isAdded() || getResources() == null) return;
+        if (!isAdded() || getResources() == null) return;
 
         // Get header for routes section
         String header;
-        if(NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_routes_header);
-        else if(NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_routes_header);
+        if (NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_routes_header);
+        else if (NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_routes_header);
         else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
 
         List<NextbusItem> nextbusItems = new ArrayList<>(routeStubs.size());
@@ -252,11 +252,11 @@ public class BusAll extends Fragment {
     }
 
     private void showProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressCircle() {
-        if(mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

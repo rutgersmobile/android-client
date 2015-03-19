@@ -108,7 +108,7 @@ public final class LocationUtils {
      */
     public static boolean servicesConnected(@NonNull FragmentActivity activity) {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
-        if(resultCode == ConnectionResult.SUCCESS) {
+        if (resultCode == ConnectionResult.SUCCESS) {
             Log.v(TAG, "Google Play services available.");
             return true;
         } else {
@@ -152,7 +152,7 @@ public final class LocationUtils {
                 LocationUtils.REQUEST_RESOLVE_ERROR
         );
 
-        if(errorDialog != null) {
+        if (errorDialog != null) {
             ErrorDialogFragment errorDialogFragment = new ErrorDialogFragment();
             errorDialogFragment.setDialog(errorDialog);
             errorDialogFragment.show(

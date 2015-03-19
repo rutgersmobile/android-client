@@ -106,7 +106,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         mTag = null;
 
         // Attempt to restore state
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mAgency = savedInstanceState.getString(SAVED_AGENCY_TAG);
             mTag = savedInstanceState.getString(SAVED_TAG_TAG);
             mMode = savedInstanceState.getString(SAVED_MODE_TAG);
@@ -120,7 +120,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         boolean missingArg = false;
         String requiredArgs[] = {ARG_AGENCY_TAG, ARG_MODE_TAG, ARG_TAG_TAG};
         for (String argTag: requiredArgs) {
-            if(StringUtils.isBlank(args.getString(argTag))) {
+            if (StringUtils.isBlank(args.getString(argTag))) {
                 Log.e(TAG, "Argument \""+argTag+"\" not set");
                 missingArg = true;
             }
@@ -129,9 +129,9 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
 
         // Set route or stop display mode
         String mode = args.getString(ARG_MODE_TAG);
-        if(BusDisplay.ROUTE_MODE.equalsIgnoreCase(mode)) {
+        if (BusDisplay.ROUTE_MODE.equalsIgnoreCase(mode)) {
             mMode = BusDisplay.ROUTE_MODE;
-        } else if(BusDisplay.STOP_MODE.equalsIgnoreCase(mode)) {
+        } else if (BusDisplay.STOP_MODE.equalsIgnoreCase(mode)) {
             mMode = BusDisplay.STOP_MODE;
         } else {
             Log.e(TAG, "Invalid mode \""+args.getString(ARG_MODE_TAG)+"\"");
@@ -269,7 +269,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         } else {
             /* Update items individually if the list is already populated
              * and the new results correspond to currently displayed stops. */
-            for(int i = 0; i < mAdapter.getCount(); i++) {    
+            for (int i = 0; i < mAdapter.getCount(); i++) {
                 Prediction newPrediction = newPredictions.get(i);
                 Prediction oldPrediction = mAdapter.getItem(i);
 

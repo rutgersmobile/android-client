@@ -29,7 +29,7 @@ public final class RutgersUtils {
      * @return Full campus title
      */
     public static String getFullCampusTitle(@NonNull Context context, String campusTag) {
-        if(campusTag == null) return null;
+        if (campusTag == null) return null;
 
         Resources res = context.getResources();
         try {
@@ -47,7 +47,7 @@ public final class RutgersUtils {
      * @return Full role title
      */
     public static String getFullRoleTitle(@NonNull Context context, String roleTag) {
-        if(roleTag == null) return null;
+        if (roleTag == null) return null;
 
         Resources res = context.getResources();
         try {
@@ -66,12 +66,12 @@ public final class RutgersUtils {
      */
     @NonNull
     public static String getLocalTitle(@NonNull Context context, Object title) {
-        if(title == null) {
+        if (title == null) {
             return "(No title)";
-        } else if(title.getClass() == String.class) {
+        } else if (title.getClass() == String.class) {
             // "title" is just a string - nothing to do
             return (String) title;
-        } else if(title.getClass() == JSONObject.class) {
+        } else if (title.getClass() == JSONObject.class) {
             // "title" is a JSON Object - figure out which string to display
             JSONObject titles = (JSONObject) title;
             String userHome = getHomeCampus(context);
@@ -79,7 +79,7 @@ public final class RutgersUtils {
             try {
                 String titleHome = titles.getString("homeCampus");
                 // If user config home matches title's home, show home title
-                if(titleHome.equalsIgnoreCase(userHome)) {
+                if (titleHome.equalsIgnoreCase(userHome)) {
                     return titles.getString("homeTitle");
                 }
                 // If not, use foreign title

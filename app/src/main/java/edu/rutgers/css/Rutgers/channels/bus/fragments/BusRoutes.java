@@ -36,8 +36,8 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 
     /* Log tag and component handle */
-    private static final String TAG = "BusRoutes";
-    public static final String HANDLE = "busroutes";
+    private static final String TAG                 = "BusRoutes";
+    public static final String HANDLE               = "busroutes";
 
     /* Member data */
     private SimpleSectionedAdapter<RouteStub> mAdapter;

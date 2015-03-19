@@ -57,7 +57,7 @@ public final class PlacesAPI {
      * Grab the places flat-file from the API and convert it into a map.
      */
     private synchronized static void setup() {
-        if(sSettingUp || sPlaces != null) return;
+        if (sSettingUp || sPlaces != null) return;
         else sSettingUp = true;
 
         final Deferred<Void, Exception, Void> confd = new DeferredObject<>();
@@ -73,7 +73,7 @@ public final class PlacesAPI {
                 try {
                     // Get the place documents and build the places map.
                     JSONObject allPlaces = result.getJSONObject("all");
-                    for(Iterator<String> placeKeyIter = allPlaces.keys(); placeKeyIter.hasNext();) {
+                    for (Iterator<String> placeKeyIter = allPlaces.keys(); placeKeyIter.hasNext();) {
                         String placeKey = placeKeyIter.next();
                         Place place = gson.fromJson(allPlaces.getJSONObject(placeKey).toString(), Place.class);
                         sPlaces.put(placeKey, place);

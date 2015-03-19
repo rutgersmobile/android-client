@@ -75,19 +75,19 @@ public class WebDisplay extends Fragment {
         mWebView = (WebView) v.findViewById(R.id.webView);
         Bundle args = getArguments();
 
-        if(args.getString(ARG_TITLE_TAG) != null) {
+        if (args.getString(ARG_TITLE_TAG) != null) {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
 
         // Check for saved web view state first
-        if(savedInstanceState != null) {
-            if(savedInstanceState.getString(SAVED_URL_TAG) != null) mCurrentURL = savedInstanceState.getString(SAVED_URL_TAG);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getString(SAVED_URL_TAG) != null) mCurrentURL = savedInstanceState.getString(SAVED_URL_TAG);
             mWebView.restoreState(savedInstanceState);
         }
 
         // Check initially supplied URL
         else {
-            if(args.getString(ARG_URL_TAG) != null) {
+            if (args.getString(ARG_URL_TAG) != null) {
                 mCurrentURL = args.getString(ARG_URL_TAG);
                 initialIntent();
                 mWebView.loadUrl(mCurrentURL);
@@ -96,7 +96,7 @@ public class WebDisplay extends Fragment {
             }
         }
 
-        if(mCurrentURL == null) {
+        if (mCurrentURL == null) {
             String msg = getString(R.string.failed_no_url);
             mWebView.loadData(msg, "text/plain", null);
             return v;
@@ -109,8 +109,8 @@ public class WebDisplay extends Fragment {
             @Override
             public void onProgressChanged(WebView view, int progress) {
                 progressBar.setProgress(progress);
-                if(progress != 100 && progressBar.getVisibility() == View.GONE) progressBar.setVisibility(View.VISIBLE);
-                else if(progress == 100) progressBar.setVisibility(View.GONE);
+                if (progress != 100 && progressBar.getVisibility() == View.GONE) progressBar.setVisibility(View.VISIBLE);
+                else if (progress == 100) progressBar.setVisibility(View.GONE);
             }
         });
         
@@ -130,7 +130,7 @@ public class WebDisplay extends Fragment {
                 Log.w(TAG, "WebViewClient error: code " + errorCode + ": " + description + " @ " + failingUrl);
 
                 // Can't handle this URI scheme, try a view intent
-                if(errorCode == WebViewClient.ERROR_UNSUPPORTED_SCHEME) {
+                if (errorCode == WebViewClient.ERROR_UNSUPPORTED_SCHEME) {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(failingUrl));
                     try {
                         startActivity(intent);
@@ -175,7 +175,7 @@ public class WebDisplay extends Fragment {
         inflater.inflate(R.menu.web_menu, menu);
 
         MenuItem shareItem = menu.findItem(R.id.action_share);
-        if(shareItem != null) {
+        if (shareItem != null) {
             mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
             initialIntent();
         } else {
@@ -187,7 +187,7 @@ public class WebDisplay extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_refresh:
-                if(mWebView != null) {
+                if (mWebView != null) {
                     mWebView.loadUrl("javascript:window.location.reload(true)");
                 }
                 return true;
@@ -199,7 +199,7 @@ public class WebDisplay extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if(mWebView != null) {
+        if (mWebView != null) {
             outState.putString(SAVED_URL_TAG, mCurrentURL);
             mWebView.saveState(outState);
         }
@@ -217,8 +217,8 @@ public class WebDisplay extends Fragment {
      * Set up the first Share intent only after the URL and share handler have been set.
      */
     private synchronized void initialIntent() {
-        if(mSetupCount < 2) mSetupCount++;
-        if(mSetupCount == 2) {
+        if (mSetupCount < 2) mSetupCount++;
+        if (mSetupCount == 2) {
             setShareIntent(mCurrentURL);
         }
     }
@@ -228,14 +228,14 @@ public class WebDisplay extends Fragment {
      * @param url URL string
      */
     private void setShareIntent(String url) {
-        if(mShareActionProvider != null && mCurrentURL != null) {
+        if (mShareActionProvider != null && mCurrentURL != null) {
             Intent intent = new Intent(android.content.Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, url);
             mShareActionProvider.setShareIntent(intent);
         } else {
-            if(mCurrentURL == null) Log.w(TAG, "No URL set");
-            if(mShareActionProvider == null) Log.w(TAG, "Tried to set intent before action provider was set");
+            if (mCurrentURL == null) Log.w(TAG, "No URL set");
+            if (mShareActionProvider == null) Log.w(TAG, "Tried to set intent before action provider was set");
         }
     }
     /**
@@ -244,7 +244,7 @@ public class WebDisplay extends Fragment {
      * Fragment must be added with "www" tag for this to be called.
      */
     public boolean backPress() {
-        if(mWebView != null && mWebView.canGoBack()) {
+        if (mWebView != null && mWebView.canGoBack()) {
             mWebView.goBack();
             return true;
         }

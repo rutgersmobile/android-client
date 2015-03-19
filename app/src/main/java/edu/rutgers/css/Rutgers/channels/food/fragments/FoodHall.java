@@ -38,8 +38,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public class FoodHall extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "FoodHall";
-    public static final String HANDLE = "foodhall";
+    private static final String TAG                 = "FoodHall";
+    public static final String HANDLE               = "foodhall";
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -134,7 +134,7 @@ public class FoodHall extends Fragment {
 
     private void loadPages(DiningMenu diningMenu) {
         List<DiningMenu.Meal> meals = diningMenu.getMeals();
-        for(DiningMenu.Meal meal: meals) {
+        for (DiningMenu.Meal meal: meals) {
             if (meal.isMealAvailable()) mPagerAdapter.add(meal);
         }
 

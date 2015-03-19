@@ -72,10 +72,10 @@ public final class Prediction implements Serializable {
      */
     @Override
     public boolean equals(Object other) {
-        if(other == null) return false;
-        if(!(other instanceof Prediction)) return false;
+        if (other == null) return false;
+        if (!(other instanceof Prediction)) return false;
 
-        if(this.getTag() == null || this.getTitle() == null) return false;
+        if (this.getTag() == null || this.getTitle() == null) return false;
 
         Prediction otherPrediction = (Prediction) other;
         return  this.getTag().equals(otherPrediction.getTag()) &&

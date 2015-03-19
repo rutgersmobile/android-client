@@ -58,7 +58,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
             results.count = 0;
 
             // Empty or null constraint returns nothing
-            if(charSequence == null || charSequence.toString().isEmpty()) return results;
+            if (charSequence == null || charSequence.toString().isEmpty()) return results;
 
             // Do request for search results
             Promise<List<Place>, Exception, Void> p = PlacesAPI.searchPlaces(charSequence.toString());
@@ -93,7 +93,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
         @Override
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
             mData.clear();
-            if(filterResults.values != null) mData.addAll((List<KeyValPair>) filterResults.values);
+            if (filterResults.values != null) mData.addAll((List<KeyValPair>) filterResults.values);
             notifyDataSetChanged();
         }
     }

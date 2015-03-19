@@ -24,8 +24,8 @@ public final class JsonUtils {
      * @return True if there are no contents for the string, false if there are.
      */
     public static boolean stringIsReallyEmpty(@NonNull JSONObject jsonObject, @NonNull String field) {
-        if(jsonObject.isNull(field)) return true;
-        else if(jsonObject.optString(field).isEmpty()) return true;
+        if (jsonObject.isNull(field)) return true;
+        else if (jsonObject.optString(field).isEmpty()) return true;
         else return false;
     }
 
@@ -38,7 +38,7 @@ public final class JsonUtils {
         final int size = strings.length();
         String[] result = new String[size];
 
-        for(int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             result[i] = strings.optString(i);
         }
 
@@ -55,8 +55,8 @@ public final class JsonUtils {
     public static JSONObject combineJSONObjs(@NonNull JSONObject... objects) throws JSONException {
         JSONObject result = new JSONObject();
 
-        for(JSONObject curObj: objects) {
-            for(Iterator<String> keys = curObj.keys(); keys.hasNext();) {
+        for (JSONObject curObj: objects) {
+            for (Iterator<String> keys = curObj.keys(); keys.hasNext();) {
                 String curKey = keys.next();
                 Object curVal = curObj.get(curKey);
                 result.put(curKey, curVal);

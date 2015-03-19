@@ -29,8 +29,8 @@ public final class ActiveStops {
         this.stops = temp.getStops();
         this.timestamp = temp.getTimestamp();
 
-        for(RouteStub routeStub: routes) routeStub.setAgencyTag(getAgencyTag());
-        for(StopStub stopStub: stops) stopStub.setAgencyTag(getAgencyTag());
+        for (RouteStub routeStub: routes) routeStub.setAgencyTag(getAgencyTag());
+        for (StopStub stopStub: stops) stopStub.setAgencyTag(getAgencyTag());
     }
 
     public List<RouteStub> getRoutes() {

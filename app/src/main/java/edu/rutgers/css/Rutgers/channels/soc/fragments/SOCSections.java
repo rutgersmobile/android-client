@@ -36,8 +36,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public class SOCSections extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "SOCSections";
-    public static final String HANDLE = "socsections";
+    private static final String TAG                 = "SOCSections";
+    public static final String HANDLE               = "socsections";
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -96,7 +96,7 @@ public class SOCSections extends Fragment {
         }
 
         // Add all visible sections to list
-        for(Section section: mCourse.getSections()) {
+        for (Section section: mCourse.getSections()) {
             if ("Y".equalsIgnoreCase(section.getPrinted())) mAdapter.add(section);
         }
 

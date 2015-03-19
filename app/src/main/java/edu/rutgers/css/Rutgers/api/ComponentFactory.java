@@ -48,7 +48,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public final class ComponentFactory {
 
     /** Log tag. */
-    private static final String TAG = "ComponentFactory";
+    private static final String TAG                 = "ComponentFactory";
 
     /* Standard argument bundle tags */
 
@@ -247,9 +247,9 @@ public final class ComponentFactory {
         JSONObject extras = new JSONObject();
         try {
             extras.put("handle", args.getString(ARG_COMPONENT_TAG));
-            if(args.getString(ARG_URL_TAG) != null) extras.put("url", args.getString(ARG_URL_TAG));
-            if(args.getString(ARG_API_TAG) != null) extras.put("api", args.getString(ARG_API_TAG));
-            if(args.getString(ARG_TITLE_TAG) != null) extras.put("title", args.getString(ARG_TITLE_TAG));
+            if (args.getString(ARG_URL_TAG) != null) extras.put("url", args.getString(ARG_URL_TAG));
+            if (args.getString(ARG_API_TAG) != null) extras.put("api", args.getString(ARG_API_TAG));
+            if (args.getString(ARG_TITLE_TAG) != null) extras.put("title", args.getString(ARG_TITLE_TAG));
         } catch (JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
@@ -261,9 +261,9 @@ public final class ComponentFactory {
         try {
             extras.put("description","failed to open channel");
             extras.put("handle", args.getString(ARG_COMPONENT_TAG));
-            if(args.getString(ARG_URL_TAG) != null) extras.put("url", args.getString(ARG_URL_TAG));
-            if(args.getString(ARG_API_TAG) != null) extras.put("api", args.getString(ARG_API_TAG));
-            if(args.getString(ARG_TITLE_TAG) != null) extras.put("title", args.getString(ARG_TITLE_TAG));
+            if (args.getString(ARG_URL_TAG) != null) extras.put("url", args.getString(ARG_URL_TAG));
+            if (args.getString(ARG_API_TAG) != null) extras.put("api", args.getString(ARG_API_TAG));
+            if (args.getString(ARG_TITLE_TAG) != null) extras.put("title", args.getString(ARG_TITLE_TAG));
         } catch (JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }

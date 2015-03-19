@@ -17,9 +17,9 @@ public class VarTitle implements Serializable {
     public String foreignTitle;
 
     public VarTitle(Object titleObject) throws JSONException {
-        if(titleObject.getClass() == String.class) {
+        if (titleObject.getClass() == String.class) {
             homeTitle = (String) titleObject;
-        } else if(titleObject.getClass() == JSONObject.class) {
+        } else if (titleObject.getClass() == JSONObject.class) {
             homeCampus = ((JSONObject)titleObject).getString("homeCampus");
             homeTitle = ((JSONObject)titleObject).getString("homeTitle");
             foreignTitle = ((JSONObject)titleObject).getString("foreignTitle");
@@ -42,9 +42,9 @@ public class VarTitle implements Serializable {
      * @return Campus-localized element title
      */
     public String getTitle(@NonNull String homeCampus) {
-        if(this.homeCampus == null) {
+        if (this.homeCampus == null) {
             return homeTitle;
-        } else if(this.homeCampus.equalsIgnoreCase(homeCampus)) {
+        } else if (this.homeCampus.equalsIgnoreCase(homeCampus)) {
             return homeTitle;
         } else {
             return foreignTitle;

@@ -50,8 +50,8 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
     @Override
     public boolean isEnabled(int position) {
         RSSItem curItem = this.getItem(position);
-        if(curItem == null) return false;
-        else if(curItem.getLink() == null) return false;
+        if (curItem == null) return false;
+        else if (curItem.getLink() == null) return false;
         else return true;
     }
 
@@ -60,7 +60,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
         LayoutInflater mLayoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewHolder holder;
 
-        if(convertView == null) { 
+        if (convertView == null) {
             convertView = mLayoutInflater.inflate(this.mLayoutResource, null);
             holder = new ViewHolder();
             holder.iconImageView = (ImageView) convertView.findViewById(R.id.rssRowIconView);
@@ -78,7 +78,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
         // Populate RSS row layout elements
         holder.titleTextView.setText(curItem.getTitle());
 
-        if(curItem.getDate() != null && !curItem.getDate().isEmpty()) {
+        if (curItem.getDate() != null && !curItem.getDate().isEmpty()) {
             holder.dateTextView.setText(curItem.getDate());
             holder.dateTextView.setVisibility(View.VISIBLE);
         } else {
@@ -90,7 +90,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
         //holder.authorTextView.setText(curItem.getAuthor());
         
         // Download image
-        if(curItem.getImgUrl() == null) {
+        if (curItem.getImgUrl() == null) {
             // No image - clear the image view
             holder.iconImageView.setImageBitmap(null);
             holder.iconImageView.setVisibility(View.GONE);

@@ -38,8 +38,8 @@ public final class ImageUtils {
      * @return Icon drawable
      */
     public static Drawable getIcon(@NonNull Resources resources, int drawableResource, int colorResource) {
-        if(drawableResource == 0) return null;
-        if(colorResource == 0) colorResource = R.color.white;
+        if (drawableResource == 0) return null;
+        if (colorResource == 0) colorResource = R.color.white;
 
         try {
             Drawable drawable = resources.getDrawable(drawableResource);
@@ -94,7 +94,7 @@ public final class ImageUtils {
         final int width = options.outWidth;
         int inSampleSize = 1;
 
-        if(height > reqHeight || width > reqWidth) {
+        if (height > reqHeight || width > reqWidth) {
             final int halfHeight = height / 2;
             final int halfWidth = width / 2;
 

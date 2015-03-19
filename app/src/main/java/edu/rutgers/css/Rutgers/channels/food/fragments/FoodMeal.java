@@ -29,8 +29,8 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 public class FoodMeal extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "FoodMeal";
-    public static final String HANDLE = "foodmeal";
+    private static final String TAG                 = "FoodMeal";
+    public static final String HANDLE               = "foodmeal";
 
     /* Argument bundle tags */
     private static final String ARG_LOCATION_TAG    = "location";

@@ -33,8 +33,8 @@ import edu.rutgers.css.Rutgers.utils.PrefUtils;
  */
 public class SOCDialogFragment extends DialogFragment {
 
-    private static final String TAG = "SOCDialog";
-    public static final String HANDLE = "socconfdialog";
+    private static final String TAG                 = "SOCDialog";
+    public static final String HANDLE               = "socconfdialog";
 
     private SpinnerAdapter mSemesterSpinnerAdapter;
     private SpinnerAdapter mCampusSpinnerAdapter;
@@ -55,7 +55,7 @@ public class SOCDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             mSemesters = (ArrayList<KeyValPair>) savedInstanceState.getSerializable("semesters");
         }
 
@@ -130,7 +130,7 @@ public class SOCDialogFragment extends DialogFragment {
      */
     public void setSemesters(List<String> semesterCodes) {
         ArrayList<KeyValPair> semesters = new ArrayList<KeyValPair>(5);
-        for(String code: semesterCodes) {
+        for (String code: semesterCodes) {
             semesters.add(new KeyValPair(code, ScheduleAPI.translateSemester(code)));
         }
         mSemesters = semesters;
@@ -143,12 +143,12 @@ public class SOCDialogFragment extends DialogFragment {
     private ArrayList<KeyValPair> loadCampuses() {
         ArrayList<KeyValPair> results = new ArrayList<KeyValPair>();
         JSONArray campusJSONArray = AppUtils.loadRawJSONArray(getResources(), R.raw.soc_campuses);
-        if(campusJSONArray == null) {
+        if (campusJSONArray == null) {
             Log.e(TAG, "Couldn't get list of campuses for SOC");
             return results;
         }
 
-        for(int i = 0; i < campusJSONArray.length(); i++) {
+        for (int i = 0; i < campusJSONArray.length(); i++) {
             try {
                 JSONObject campusJSON = campusJSONArray.getJSONObject(i);
                 results.add(new KeyValPair(campusJSON.getString("tag"), campusJSON.getString("title")));
@@ -167,10 +167,10 @@ public class SOCDialogFragment extends DialogFragment {
      * @param spinner Spinner view to perform selection for
      */
     private void setSelectionByConfig(String configString, SpinnerAdapter spinnerAdapter, Spinner spinner) {
-        if(configString == null) return;
-        for(int i = 0; i < spinnerAdapter.getCount(); i++) {
+        if (configString == null) return;
+        for (int i = 0; i < spinnerAdapter.getCount(); i++) {
             KeyValPair pair = (KeyValPair) spinnerAdapter.getItem(i);
-            if(configString.equals(pair.getKey())) {
+            if (configString.equals(pair.getKey())) {
                 spinner.setSelection(i);
                 return;
             }

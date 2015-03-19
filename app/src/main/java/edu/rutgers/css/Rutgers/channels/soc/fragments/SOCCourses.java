@@ -38,8 +38,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public class SOCCourses extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "SOCCourses";
-    public static final String HANDLE = "soccourses";
+    private static final String TAG                 = "SOCCourses";
+    public static final String HANDLE               = "soccourses";
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;

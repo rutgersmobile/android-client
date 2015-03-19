@@ -79,10 +79,10 @@ public class DiningMenu implements Serializable{
      * @return Meal from dining menu
      */
     public Meal getMeal(@NonNull String mealName) {
-        if(meals == null) return null;
+        if (meals == null) return null;
 
-        for(Meal meal: meals) {
-            if(meal.getMealName().equalsIgnoreCase(mealName)) return meal;
+        for (Meal meal: meals) {
+            if (meal.getMealName().equalsIgnoreCase(mealName)) return meal;
         }
 
         return null;
@@ -93,10 +93,10 @@ public class DiningMenu implements Serializable{
      * @return True if there are available meals, false if not.
      */
     public boolean hasActiveMeals() {
-        if(meals == null) return false;
+        if (meals == null) return false;
 
-        for(Meal meal: meals) {
-            if(meal.isMealAvailable()) return true;
+        for (Meal meal: meals) {
+            if (meal.isMealAvailable()) return true;
         }
 
         return false;

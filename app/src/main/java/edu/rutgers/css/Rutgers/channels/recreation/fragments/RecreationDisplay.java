@@ -47,8 +47,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public class RecreationDisplay extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "RecreationDisplay";
-    public static final String HANDLE = "recdisplay";
+    private static final String TAG                 = "RecreationDisplay";
+    public static final String HANDLE               = "recdisplay";
 
     /* Argument bundle tags */
     public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;
@@ -94,7 +94,7 @@ public class RecreationDisplay extends Fragment {
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, data);
 
         // Make sure necessary arguments were given
-        if(args.getString(ARG_CAMPUS_TAG) == null || args.getString(ARG_FACILITY_TAG) == null) {
+        if (args.getString(ARG_CAMPUS_TAG) == null || args.getString(ARG_FACILITY_TAG) == null) {
             Log.e(TAG, "Missing campus/location arguments");
             return;
         }

@@ -83,7 +83,7 @@ public final class ScheduleAPI {
         final DeferredObject<List<Subject>, Exception, Void> deferred = new DeferredObject<>();
 
         String reqUrl;
-        if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
+        if (CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineSubjects.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode;
         } else {
             reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode;
@@ -96,7 +96,7 @@ public final class ScheduleAPI {
                 ArrayList<Subject> subjects = new ArrayList<>(result.length());
 
                 try {
-                    for(int i = 0; i < result.length(); i++) {
+                    for (int i = 0; i < result.length(); i++) {
                         Subject newSub = gson.fromJson(result.getJSONObject(i).toString(), Subject.class);
                         subjects.add(newSub);
                     }
@@ -128,7 +128,7 @@ public final class ScheduleAPI {
         final DeferredObject<List<Course>, Exception, Void> deferred = new DeferredObject<>();
 
         String reqUrl;
-        if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
+        if (CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineCourses.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode + "&subject=" + subjectCode;
         } else {
             reqUrl = SOC_BASE_URL + "courses.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode + "&subject=" + subjectCode;
@@ -141,7 +141,7 @@ public final class ScheduleAPI {
                 ArrayList<Course> courses = new ArrayList<>(result.length());
 
                 try {
-                    for(int i = 0; i < result.length(); i++) {
+                    for (int i = 0; i < result.length(); i++) {
                         Course newCourse = gson.fromJson(result.getJSONObject(i).toString(), Course.class);
                         courses.add(newCourse);
                     }
@@ -173,7 +173,7 @@ public final class ScheduleAPI {
         final DeferredObject<Course, Exception, Void> deferred = new DeferredObject<>();
 
         String reqUrl;
-        if(CODE_CAMPUS_ONLINE.equals(campusCode)) {
+        if (CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         } else {
             reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
@@ -237,13 +237,13 @@ public final class ScheduleAPI {
      * @return Human-readable semester name
      */
     public static String translateSemester(String semesterCode) {
-        if(semesterCode == null) return null;
-        if(semesterCode.length() != 5) {
+        if (semesterCode == null) return null;
+        if (semesterCode.length() != 5) {
             return invalidSemester(semesterCode);
         }
 
         int leadingDigit = Character.getNumericValue(semesterCode.charAt(0));
-        if(leadingDigit < 0) {
+        if (leadingDigit < 0) {
             return invalidSemester(semesterCode);
         }
 

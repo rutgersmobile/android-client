@@ -45,17 +45,17 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
  */
 public final class Analytics extends IntentService {
 
-    public static final String TAG = "Analytics";
+    public static final String TAG                  = "Analytics";
 
     private static final String POST_URL = "http://sauron.rutgers.edu/~jamchamb/analytics.php"; // TODO Replace
     //private static final String POST_URL = AppUtils.API_BASE + "analytics.php";
 
     // Event types
-    public static final String NEW_INSTALL = "fresh_launch";
-    public static final String LAUNCH = "launch";
-    public static final String ERROR = "error";
-    public static final String CHANNEL_OPENED = "channel";
-    public static final String DEFAULT_TYPE = "event";
+    public static final String NEW_INSTALL          = "fresh_launch";
+    public static final String LAUNCH               = "launch";
+    public static final String ERROR                = "error";
+    public static final String CHANNEL_OPENED       = "channel";
+    public static final String DEFAULT_TYPE         = "event";
 
     private static final int QUEUE_MODE = 0;
     private static final int POST_MODE = 1;
@@ -115,7 +115,7 @@ public final class Analytics extends IntentService {
         String eventType = workIntent.getStringExtra("type");
         String extraString = workIntent.getStringExtra("extra");
 
-        if(eventType != null) {
+        if (eventType != null) {
             Log.v(TAG, "Queueing " + eventType + " event");
 
             // Open the event database
@@ -178,7 +178,7 @@ public final class Analytics extends IntentService {
         try {
             Cursor cursor = database.rawQuery("SELECT * FROM " + AnalyticsOpenHelper.TABLE_NAME, null);
 
-            if(cursor.getCount() == 0) {
+            if (cursor.getCount() == 0) {
                 Log.i(TAG, "No events to post.");
             } else {
                 while (cursor.moveToNext()) {
@@ -190,10 +190,10 @@ public final class Analytics extends IntentService {
                     JSONObject eventJSON = getEventJSON(this, type, time, platform, release);
 
                     // Load extra fields
-                    if(extra != null) {
+                    if (extra != null) {
                         try {
                             JSONObject extraJSON = new JSONObject(extra);
-                            for(Iterator<String> keys = extraJSON.keys(); keys.hasNext();) {
+                            for (Iterator<String> keys = extraJSON.keys(); keys.hasNext();) {
                                 String curKey = keys.next();
                                 eventJSON.put(curKey, extraJSON.get(curKey));
                             }

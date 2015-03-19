@@ -29,15 +29,15 @@ public class Channel {
         this.title = new VarTitle(channelJson.get("title"));
         this.handle = channelJson.getString("handle");
 
-        if(channelJson.isNull("view") && !channelJson.isNull("url")) {
+        if (channelJson.isNull("view") && !channelJson.isNull("url")) {
             this.view = WebDisplay.HANDLE;
         } else {
             this.view = channelJson.getString("view");
         }
 
-        if(!channelJson.isNull("api")) this.api = channelJson.getString("api");
-        if(!channelJson.isNull("url")) this.url = channelJson.getString("url");
-        if(!channelJson.isNull("data")) this.data = channelJson.getJSONArray("data");
+        if (!channelJson.isNull("api")) this.api = channelJson.getString("api");
+        if (!channelJson.isNull("url")) this.url = channelJson.getString("url");
+        if (!channelJson.isNull("data")) this.data = channelJson.getJSONArray("data");
 
         this.canOverride = channelJson.optBoolean("canOverride");
     }

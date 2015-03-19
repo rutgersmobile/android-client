@@ -21,8 +21,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 public class RUInfoMain extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "RUInfoMain";
-    public static final String HANDLE = "ruinfo";
+    private static final String TAG                 = "RUInfoMain";
+    public static final String HANDLE               = "ruinfo";
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -51,7 +51,7 @@ public class RUInfoMain extends Fragment {
         final Bundle args = getArguments();
 
         // Set title from JSON
-        if(args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.ruinfo_title);
 
         //final LinearLayout telephonyLayout = (LinearLayout) v.findViewById(R.id.telephonyLayout);

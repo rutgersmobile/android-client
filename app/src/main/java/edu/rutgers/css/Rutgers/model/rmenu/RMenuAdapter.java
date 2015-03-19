@@ -62,7 +62,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
      * @param index Index of item to remove
      */
     public void remove(int index) {
-        if(mData == null) return;
+        if (mData == null) return;
         mData.remove(index);
         notifyDataSetChanged();
     }
@@ -80,9 +80,9 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
 
     @Override
     public int getItemViewType(int position) {
-        if(getItem(position).getIsCategory()) return ViewTypes.HEADER.ordinal();
-        else if(getItem(position).getIsClickable()) return ViewTypes.CLICKABLE.ordinal();
-        else if(getItem(position) instanceof RMenuImageRow) return ViewTypes.IMAGE.ordinal();
+        if (getItem(position).getIsCategory()) return ViewTypes.HEADER.ordinal();
+        else if (getItem(position).getIsClickable()) return ViewTypes.CLICKABLE.ordinal();
+        else if (getItem(position) instanceof RMenuImageRow) return ViewTypes.IMAGE.ordinal();
         else return ViewTypes.UNCLICKABLE.ordinal();
     }
 
@@ -94,8 +94,8 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
     @Override
     public boolean isEnabled(int position) {
         RMenuRow curItem = this.getItem(position);
-        if(curItem == null) return false;
-        else if(!curItem.getIsClickable()) return false;
+        if (curItem == null) return false;
+        else if (!curItem.getIsClickable()) return false;
         else return true;
     }
 
@@ -105,7 +105,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
         RMenuRow curItem = this.getItem(position);
         ViewHolder holder;
 
-        if(convertView == null) {
+        if (convertView == null) {
             // Choose appropriate layout
             switch(viewTypes[getItemViewType(position)]) {
                 // Section headers
@@ -129,25 +129,25 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
         }
         
         // Set item text
-        if(holder.titleTextView != null) {
+        if (holder.titleTextView != null) {
             holder.titleTextView.setText(curItem.getTitle());
 
             // Set item text color
-            if(curItem.getColorResId() != 0) {
+            if (curItem.getColorResId() != 0) {
                 holder.titleTextView.setTextColor(getContext().getResources().getColor(curItem.getColorResId()));
             } else {
                 holder.titleTextView.setTextColor(holder.titleTextView.getTextColors().getDefaultColor());
             }
-        } else if(viewTypes[getItemViewType(position)] != ViewTypes.IMAGE) {
+        } else if (viewTypes[getItemViewType(position)] != ViewTypes.IMAGE) {
             Log.e(TAG, "R.id.title not found for view at position " + position);
         }
         
         // Set image
-        if(holder.imageView != null){
-            if(curItem.getDrawable() != null) {
+        if (holder.imageView != null){
+            if (curItem.getDrawable() != null) {
                 holder.imageView.setImageDrawable(curItem.getDrawable());
                 holder.imageView.setVisibility(View.VISIBLE);
-            } else if(curItem instanceof RMenuImageRow) {
+            } else if (curItem instanceof RMenuImageRow) {
                 // Get image from network
                 RMenuImageRow imageRowItem = (RMenuImageRow) curItem;
                 AQuery cvAq = aq.recycle(convertView);

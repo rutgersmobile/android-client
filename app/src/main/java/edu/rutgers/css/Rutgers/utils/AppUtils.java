@@ -53,15 +53,15 @@ public final class AppUtils {
      * @return UUID string
      */
     public synchronized static String getUUID(@NonNull Context context) {
-        if(installID == null) {
+        if (installID == null) {
             File installation = new File(context.getFilesDir(), INSTALLATION);
             try {
-                if(!installation.exists()) {
+                if (!installation.exists()) {
                     FileOutputStream out = new FileOutputStream(installation);
 
                     // Either recover UUID from Titanium app or generate a new one
                     String uuid = recoverTitaniumID(context);
-                    if(uuid == null) uuid = UUID.randomUUID().toString();
+                    if (uuid == null) uuid = UUID.randomUUID().toString();
 
                     out.write(uuid.getBytes());
                     out.close();
@@ -98,7 +98,7 @@ public final class AppUtils {
         String result = null;
 
         File titaniumDB = context.getDatabasePath("Titanium");
-        if(titaniumDB.exists()) {
+        if (titaniumDB.exists()) {
             try {
                 SQLiteDatabase db = SQLiteDatabase.openDatabase(titaniumDB.getPath(), null, 0);
 
@@ -182,7 +182,7 @@ public final class AppUtils {
      * @param context App's context (activity)
      */
     public static void showFailedLoadToast(Context context) {
-        if(context != null) Toast.makeText(context, R.string.failed_load, Toast.LENGTH_SHORT).show();
+        if (context != null) Toast.makeText(context, R.string.failed_load, Toast.LENGTH_SHORT).show();
         else Log.w(TAG, "showFailedLoadToast(): context null");
     }
 
@@ -192,10 +192,10 @@ public final class AppUtils {
      * @return True if on top, false if not
      */
     public static boolean isOnTop(FragmentActivity activity, @NonNull String handle) {
-        if(activity == null) return false;
+        if (activity == null) return false;
 
         FragmentManager fm = activity.getSupportFragmentManager();
-        if(fm.getBackStackEntryCount() > 0) {
+        if (fm.getBackStackEntryCount() > 0) {
             return handle.equalsIgnoreCase(fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
         } else {
             return false;
@@ -203,10 +203,10 @@ public final class AppUtils {
     }
 
     public static String topHandle(FragmentActivity activity) {
-        if(activity == null) return null;
+        if (activity == null) return null;
 
         FragmentManager fm = activity.getSupportFragmentManager();
-        if(fm.getBackStackEntryCount() > 0) {
+        if (fm.getBackStackEntryCount() > 0) {
             return fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName();
         } else {
             return null;
@@ -237,7 +237,7 @@ public final class AppUtils {
         }
 
         String contentString = stringBuilder.toString();
-        if(contentString.isEmpty()) return null;
+        if (contentString.isEmpty()) return null;
         else return contentString;
     }
 
@@ -249,7 +249,7 @@ public final class AppUtils {
      */
     public static JSONArray loadRawJSONArray(@NonNull Resources resources, int resourceId) {
         String jsonString = loadRawResource(resources, resourceId);
-        if(jsonString == null) return null;
+        if (jsonString == null) return null;
 
         try {
             return new JSONArray(jsonString);
@@ -267,7 +267,7 @@ public final class AppUtils {
      */
     public static JSONObject loadRawJSONObject(@NonNull Resources resources, int resourceId) {
         String jsonString = loadRawResource(resources, resourceId);
-        if(jsonString == null) return null;
+        if (jsonString == null) return null;
 
         try {
             return new JSONObject(jsonString);
@@ -299,7 +299,7 @@ public final class AppUtils {
      * @return Cleansed string, or null if string was null
      */
     public static String stripTags(String string) {
-        if(string == null) return null;
+        if (string == null) return null;
         return string.replaceAll("\\<.*?\\>", "");
     }
 

@@ -80,7 +80,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
     @Override
     public int getItemViewType(int position) {
         SectionAdapterItem item = getItem(position);
-        if(item instanceof Section) {
+        if (item instanceof Section) {
             return ViewTypes.MEETTIME_TYPE.ordinal();
         } else {
             return ViewTypes.BASIC_TYPE.ordinal();
@@ -116,7 +116,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
         LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         DescViewHolder holder;
 
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.row_title, null);
             holder = new DescViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
@@ -138,7 +138,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
         LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         MeetTimeViewHolder holder;
 
-        if(convertView == null) {
+        if (convertView == null) {
             convertView = layoutInflater.inflate(layoutResource, null);
             holder = new MeetTimeViewHolder();
             holder.sectionIndexTextView = (TextView) convertView.findViewById(R.id.sectionIndexTextView);
@@ -153,7 +153,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
         Section section = (Section) getItem(position);
 
         // Open sections have a green background, closed sections have a red background
-        if(section.isOpen()) {
+        if (section.isOpen()) {
             convertView.setBackgroundColor(resolvedGreen);
         } else {
             convertView.setBackgroundColor(resolvedRed);
@@ -165,15 +165,15 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
         // List instructors
         List<Section.Instructor> instructors = section.getInstructors();
         StringBuilder instructorString = new StringBuilder();
-        for(int i = 0; i < instructors.size(); i++) {
+        for (int i = 0; i < instructors.size(); i++) {
             Section.Instructor instructor = instructors.get(i);
             instructorString.append(instructor.getName());
-            if(i != instructors.size() - 1) instructorString.append("; ");
+            if (i != instructors.size() - 1) instructorString.append("; ");
         }
         holder.instructorTextView.setText(StringUtils.chomp(instructorString.toString()));
 
         // Set description
-        if(section.getSectionNotes() != null) {
+        if (section.getSectionNotes() != null) {
             holder.descriptionTextView.setText(section.getSectionNotes());
             holder.descriptionTextView.setVisibility(View.VISIBLE);
         } else {
@@ -182,7 +182,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
 
         // List meeting times
         holder.meetingTimesLayout.removeAllViews();
-        if(section.getMeetingTimes() != null) {
+        if (section.getMeetingTimes() != null) {
             List<Section.MeetingTime> meetingTimes = sortMeetingTimes(section.getMeetingTimes());
             for (Section.MeetingTime meetingTime : meetingTimes) {
                 // If all the text is blank, we should discard the view. Set this to true if any
@@ -247,7 +247,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
 
             @Override
             public int compare(Section.MeetingTime lhs, Section.MeetingTime rhs) {
-                if(StringUtils.isBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
+                if (StringUtils.isBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
                     return 0;
                 } else if (StringUtils.isNotBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
                     return 1;
@@ -284,7 +284,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
         try {
             Integer beginInt = Integer.parseInt(beginHour);
             Integer endInt = Integer.parseInt(endHour);
-            if(endInt == 12 || endInt < beginInt) endPmCode = "P";
+            if (endInt == 12 || endInt < beginInt) endPmCode = "P";
         } catch (NumberFormatException e) {
             Log.w(TAG, "Couldn't parse ints");
         }

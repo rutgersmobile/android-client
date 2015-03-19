@@ -45,8 +45,8 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 public class DTable extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "DTable";
-    public static final String HANDLE = "dtable";
+    private static final String TAG                 = "DTable";
+    public static final String HANDLE               = "dtable";
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -109,7 +109,7 @@ public class DTable extends Fragment {
      * @return DTable tag combined with current handle, if possible
      */
     private String dTag() {
-        if(mHandle != null) return TAG + "_" + mHandle;
+        if (mHandle != null) return TAG + "_" + mHandle;
         else return TAG;
     }
     
@@ -123,7 +123,7 @@ public class DTable extends Fragment {
         mAdapter = new DTableAdapter(getActivity(), data);
 
         // If recreating, restore state
-        if(savedInstanceState != null && savedInstanceState.getSerializable(SAVED_ROOT_TAG) != null) {
+        if (savedInstanceState != null && savedInstanceState.getSerializable(SAVED_ROOT_TAG) != null) {
             mHandle = savedInstanceState.getString(SAVED_HANDLE_TAG);
             mDRoot = (DTableRoot) savedInstanceState.getSerializable(SAVED_ROOT_TAG);
             mAdapter.addAll(mDRoot.getChildren());
@@ -132,9 +132,9 @@ public class DTable extends Fragment {
         }
 
         // Get handle for this DTable instance
-        if(args.getString(ARG_HANDLE_TAG) != null) mHandle = args.getString(ARG_HANDLE_TAG);
-        else if(args.getString(ARG_API_TAG) != null) mHandle = args.getString(ARG_API_TAG).replace(".txt","");
-        else if(args.getString(ARG_TITLE_TAG) != null) mHandle = args.getString(ARG_TITLE_TAG);
+        if (args.getString(ARG_HANDLE_TAG) != null) mHandle = args.getString(ARG_HANDLE_TAG);
+        else if (args.getString(ARG_API_TAG) != null) mHandle = args.getString(ARG_API_TAG).replace(".txt","");
+        else if (args.getString(ARG_TITLE_TAG) != null) mHandle = args.getString(ARG_TITLE_TAG);
         else mHandle = "invalid";
 
         // If table data was provided in "data" field, load it

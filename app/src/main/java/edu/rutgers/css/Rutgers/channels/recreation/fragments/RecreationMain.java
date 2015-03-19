@@ -33,8 +33,8 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 public class RecreationMain extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "RecreationMain";
-    public static final String HANDLE = "recreation";
+    private static final String TAG                 = "RecreationMain";
+    public static final String HANDLE               = "recreation";
 
     /* Argument bundle tags */
     public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;

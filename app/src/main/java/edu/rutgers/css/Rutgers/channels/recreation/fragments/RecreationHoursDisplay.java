@@ -28,8 +28,8 @@ import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
 public class  RecreationHoursDisplay extends Fragment {
 
     /* Log tag and component handle */
-    private static final String TAG = "RecreationHoursDisplay";
-    public static final String HANDLE = "rechoursdisplay";
+    private static final String TAG                 = "RecreationHoursDisplay";
+    public static final String HANDLE               = "rechoursdisplay";
 
     /* Argument bundle tags */
     public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;
