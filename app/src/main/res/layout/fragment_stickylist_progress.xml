@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|center_horizontal"
         android:background="@drawable/no_data"
+        android:visibility="gone"
         android:contentDescription="No data" />
 
     <include layout="@layout/progress_circle" />
