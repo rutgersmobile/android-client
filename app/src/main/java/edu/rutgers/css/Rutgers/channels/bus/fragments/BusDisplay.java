@@ -39,12 +39,11 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         FailCallback<Exception>, AlwaysCallback<List<Prediction>, Exception> {
 
     /* Log tag and component handle */
-    private static final String TAG = "BusDisplay";
-    public static final String HANDLE = "busdisplay";
+    private static final String TAG                 = "BusDisplay";
+    public static final String HANDLE               = "busdisplay";
 
     /* Constants */
-    private enum Mode {ROUTE, STOP}
-    private static final int REFRESH_INTERVAL = 30; // refresh interval in seconds
+    private static final int REFRESH_INTERVAL       = 30; // refresh interval in seconds
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -53,8 +52,8 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     private static final String ARG_TAG_TAG         = "tag";
 
     /* Argument options */
-    public static final String STOP_MODE = "stop";
-    public static final String ROUTE_MODE = "route";
+    public static final String STOP_MODE            = "stop";
+    public static final String ROUTE_MODE           = "route";
 
     /* Saved instance state tags */
     private static final String SAVED_AGENCY_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".agency";
@@ -65,7 +64,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     /* Member data */
     private ArrayList<Prediction> mData;
     private PredictionAdapter mAdapter;
-    private Mode mMode;
+    private String mMode;
     private String mTag;
     private Handler mUpdateHandler;
     private Timer mUpdateTimer;
@@ -103,11 +102,14 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         // Set up handler for bus prediction update timer
         mUpdateHandler = new Handler();
 
+        mAgency = null;
+        mTag = null;
+
         // Attempt to restore state
         if(savedInstanceState != null) {
             mAgency = savedInstanceState.getString(SAVED_AGENCY_TAG);
             mTag = savedInstanceState.getString(SAVED_TAG_TAG);
-            mMode = (Mode) savedInstanceState.getSerializable(SAVED_MODE_TAG);
+            mMode = savedInstanceState.getString(SAVED_MODE_TAG);
             mAdapter.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable(SAVED_DATA_TAG));
             return;
         }
@@ -117,20 +119,20 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
 
         boolean missingArg = false;
         String requiredArgs[] = {ARG_AGENCY_TAG, ARG_MODE_TAG, ARG_TAG_TAG};
-        for(String argTag: requiredArgs) {
+        for (String argTag: requiredArgs) {
             if(StringUtils.isBlank(args.getString(argTag))) {
                 Log.e(TAG, "Argument \""+argTag+"\" not set");
                 missingArg = true;
             }
         }
-        if(missingArg) return;
+        if (missingArg) return;
 
         // Set route or stop display mode
         String mode = args.getString(ARG_MODE_TAG);
         if(BusDisplay.ROUTE_MODE.equalsIgnoreCase(mode)) {
-            mMode = Mode.ROUTE;
+            mMode = BusDisplay.ROUTE_MODE;
         } else if(BusDisplay.STOP_MODE.equalsIgnoreCase(mode)) {
-            mMode = Mode.STOP;
+            mMode = BusDisplay.STOP_MODE;
         } else {
             Log.e(TAG, "Invalid mode \""+args.getString(ARG_MODE_TAG)+"\"");
             // End here and make sure mAgency and mTag are null to prevent update attempts
@@ -215,7 +217,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         super.onSaveInstanceState(outState);
         outState.putString(SAVED_AGENCY_TAG, mAgency);
         outState.putString(SAVED_TAG_TAG, mTag);
-        outState.putSerializable(SAVED_MODE_TAG, mMode);
+        outState.putString(SAVED_MODE_TAG, mMode);
         outState.putSerializable(SAVED_DATA_TAG, mData);
     }
 
@@ -235,9 +237,9 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         if (mAgency == null || mTag == null) return;
 
         showProgressCircle();
-        if (mMode == Mode.ROUTE) {
+        if (BusDisplay.ROUTE_MODE.equals(mMode)) {
             mDM.when(NextbusAPI.routePredict(mAgency, mTag)).then(this).fail(this).always(this);
-        } else if (mMode == Mode.STOP) {
+        } else if (BusDisplay.STOP_MODE.equals(mMode)) {
             mDM.when(NextbusAPI.stopPredict(mAgency, mTag)).then(this).fail(this).always(this);
         }
     }
@@ -249,30 +251,24 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     public void onDone(List<Prediction> newPredictions) {
         hideProgressCircle();
 
-        // If no routes are running through this stop right now, show message
-        if (mMode == Mode.STOP && newPredictions.isEmpty()) {
-            if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
-        }
-
-        /*
-         * Add items if the list is being newly populated, or
-         * the updated JSON doesn't seem to match and the list should be
-         * cleared and repopulated.
-         */
-        if (mAdapter.getCount() != newPredictions.size()) {
-            if (mAdapter.getCount() != 0) {
-                Log.d(TAG, "Size of updated list did not match original");
-                mAdapter.clear();
+        // If there are no active routes or stops, show a message
+        if (newPredictions.isEmpty()) {
+            if (BusDisplay.STOP_MODE.equals(mMode)) {
+                if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
+            } else {
+                if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
             }
-
-            mAdapter.addAll(newPredictions);
         }
 
-        /*
-         * Update items individually if the list is already populated
-         * and the new results correspond to currently displayed stops.
-         */
-        else {
+        if (mAdapter.getCount() != newPredictions.size()) {
+            /* Add items if the list is being newly populated, or
+             * the updated JSON doesn't seem to match and the list should be
+             * cleared and repopulated. */
+            mAdapter.clear();
+            mAdapter.addAll(newPredictions);
+        } else {
+            /* Update items individually if the list is already populated
+             * and the new results correspond to currently displayed stops. */
             for(int i = 0; i < mAdapter.getCount(); i++) {    
                 Prediction newPrediction = newPredictions.get(i);
                 Prediction oldPrediction = mAdapter.getItem(i);
