@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 
 import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
@@ -135,9 +136,17 @@ public class RSSReader extends BaseChannelFragment {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
 
-        // Adapter & click listener for RSS list view
         final ListView listView = (ListView) v.findViewById(R.id.list);
-        listView.setAdapter(mAdapter);
+
+        final AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(mAdapter);
+        alphaInAnimationAdapter.setAbsListView(listView);
+        assert alphaInAnimationAdapter.getViewAnimator() != null;
+        alphaInAnimationAdapter.getViewAnimator().setInitialDelayMillis(100);
+        alphaInAnimationAdapter.getViewAnimator().setAnimationDelayMillis(75);
+        alphaInAnimationAdapter.getViewAnimator().setAnimationDurationMillis(200);
+
+        listView.setAdapter(alphaInAnimationAdapter);
+
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

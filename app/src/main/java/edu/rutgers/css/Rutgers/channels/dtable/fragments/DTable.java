@@ -205,10 +205,14 @@ public class DTable extends BaseChannelFragment {
         }
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
-        AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(mAdapter);
+
+        final AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(mAdapter);
         alphaInAnimationAdapter.setAbsListView(listView);
         assert alphaInAnimationAdapter.getViewAnimator() != null;
-        alphaInAnimationAdapter.getViewAnimator().disableAnimations();
+        alphaInAnimationAdapter.getViewAnimator().setInitialDelayMillis(100);
+        alphaInAnimationAdapter.getViewAnimator().setAnimationDelayMillis(25);
+        alphaInAnimationAdapter.getViewAnimator().setAnimationDurationMillis(200);
+
         listView.setAdapter(alphaInAnimationAdapter);
 
         final String homeCampus = RutgersUtils.getHomeCampus(getActivity());

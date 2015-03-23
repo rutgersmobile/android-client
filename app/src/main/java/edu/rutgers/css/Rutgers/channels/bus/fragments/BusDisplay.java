@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
 import org.apache.commons.lang3.StringUtils;
@@ -157,9 +157,14 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
 
-        final ScaleInAnimationAdapter scaleInAnimationAdapter = new ScaleInAnimationAdapter(mAdapter);
-        scaleInAnimationAdapter.setAbsListView(listView);
-        listView.setAdapter(scaleInAnimationAdapter);
+        final AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(mAdapter);
+        alphaInAnimationAdapter.setAbsListView(listView);
+        assert alphaInAnimationAdapter.getViewAnimator() != null;
+        alphaInAnimationAdapter.getViewAnimator().setInitialDelayMillis(100);
+        alphaInAnimationAdapter.getViewAnimator().setAnimationDelayMillis(50);
+        alphaInAnimationAdapter.getViewAnimator().setAnimationDurationMillis(250);
+
+        listView.setAdapter(alphaInAnimationAdapter);
 
         mAdapter.setExpandCollapseListener(new ExpandableListItemAdapter.ExpandCollapseListener() {
             @Override
