@@ -60,6 +60,7 @@ public class MainActivity extends LocationProviderActivity implements
     private ChannelManager mChannelManager;
     private ActionBarDrawerToggle mDrawerToggle;
     private RMenuAdapter mDrawerAdapter;
+    private boolean mLoadedShortcuts;
 
     /* View references */
     private DrawerLayout mDrawerLayout;
@@ -129,13 +130,12 @@ public class MainActivity extends LocationProviderActivity implements
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                //getActionBar().setTitle(mTitle);
             }
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                //getActionBar().setTitle(mDrawerTitle);
+                if (!mLoadedShortcuts) loadWebShortcuts();
             }
         };
         
@@ -165,6 +165,7 @@ public class MainActivity extends LocationProviderActivity implements
         });
 
         // Load nav drawer items
+        mLoadedShortcuts = false;
         loadChannels();
         loadWebShortcuts();
         
@@ -292,6 +293,7 @@ public class MainActivity extends LocationProviderActivity implements
 
             @Override
             public void onDone(JSONArray shortcutsArray) {
+                mLoadedShortcuts = true;
                 mChannelManager.loadChannelsFromJSONArray(shortcutsArray, "shortcuts");
                 addMenuSection(getString(R.string.drawer_shortcuts), mChannelManager.getChannels("shortcuts"));
             }
