@@ -1,5 +1,20 @@
+import org.gradle.api.JavaVersion
+
 apply plugin: 'com.android.application'
 apply plugin: 'idea'
+
+def getVersionName = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags', '--dirty'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    } catch (ignored) {
+        return null;
+    }
+}
 
 android {
     compileSdkVersion 19
@@ -22,11 +37,11 @@ android {
 
     productFlavors {
         alpha {
-            versionName "4.0-alpha"
+            versionName getVersionName()
             applicationId "edu.rutgers.css.Rutgers.alpha"
         }
         beta {
-            versionName "4.0-beta"
+            versionName getVersionName()
             applicationId "edu.rutgers.css.Rutgers.beta"
         }
         production {
