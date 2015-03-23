@@ -211,8 +211,8 @@ public class DTable extends Fragment {
         AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(mAdapter);
         alphaInAnimationAdapter.setAbsListView(listView);
         assert alphaInAnimationAdapter.getViewAnimator() != null;
-        alphaInAnimationAdapter.getViewAnimator().setInitialDelayMillis(500);
-        listView.setAdapter(mAdapter);
+        alphaInAnimationAdapter.getViewAnimator().disableAnimations();
+        listView.setAdapter(alphaInAnimationAdapter);
 
         final String homeCampus = RutgersUtils.getHomeCampus(getActivity());
 
