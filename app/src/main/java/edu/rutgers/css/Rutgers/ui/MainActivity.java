@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
@@ -26,6 +28,8 @@ import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +63,7 @@ public class MainActivity extends LocationProviderActivity implements
 
     /* Member data */
     private ChannelManager mChannelManager;
+    private ComponentFactory mComponentFactory;
     private ActionBarDrawerToggle mDrawerToggle;
     private RMenuAdapter mDrawerAdapter;
     private boolean mLoadedShortcuts;
@@ -72,14 +77,6 @@ public class MainActivity extends LocationProviderActivity implements
         return mChannelManager;
     }
 
-    public void switchFragments(Bundle args) {
-        ComponentFactory.getInstance().switchFragments(args);
-    }
-
-    public void showDialogFragment(DialogFragment dialogFragment, String tag) {
-        ComponentFactory.getInstance().showDialogFragment(dialogFragment, tag);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,8 +85,8 @@ public class MainActivity extends LocationProviderActivity implements
         // This will create the UUID if one does not yet exist
         Log.d(TAG, "UUID: " + AppUtils.getUUID(this));
 
-        // Start Component Factory
-        ComponentFactory.getInstance().setMainActivity(this);
+        mComponentFactory = new ComponentFactory();
+        mChannelManager = new ChannelManager();
 
         /*
         if (BuildConfig.DEBUG) {
@@ -97,7 +94,7 @@ public class MainActivity extends LocationProviderActivity implements
         }
         */
 
-        // Set default settings the first time the app is run
+        // Initialize settings, if necessary
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
 
         // Check if this is the first time the app is being launched
@@ -112,9 +109,6 @@ public class MainActivity extends LocationProviderActivity implements
 
             PrefUtils.markFirstLaunch(this);
         }
-
-        // Set up channel manager
-        mChannelManager = new ChannelManager();
 
         // Enable drawer icon
         if (getActionBar() != null) {
@@ -164,7 +158,7 @@ public class MainActivity extends LocationProviderActivity implements
                 clickedArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                 
                 // Launch component
-                ComponentFactory.getInstance().switchFragments(clickedArgs);
+                switchFragments(clickedArgs);
                 
                 //mDrawerAdapter.setSelectedPos(position);
                 mDrawerListView.invalidateViews();
@@ -178,7 +172,7 @@ public class MainActivity extends LocationProviderActivity implements
         loadChannels();
         loadWebShortcuts();
         
-        // Set up initial fragment
+        // Display initial fragment
         FragmentManager fm = getSupportFragmentManager();
         if (fm.getBackStackEntryCount() == 0) {
             fm.beginTransaction()
@@ -263,7 +257,7 @@ public class MainActivity extends LocationProviderActivity implements
             case R.id.action_about:
                 Bundle aboutArgs = AboutDisplay.createArgs();
                 aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                ComponentFactory.getInstance().switchFragments(aboutArgs);
+                switchFragments(aboutArgs);
                 mDrawerLayout.closeDrawer(mDrawerListView);
                 return true;
             
@@ -352,6 +346,95 @@ public class MainActivity extends LocationProviderActivity implements
             // Add the item to the drawer
             mDrawerAdapter.add(newSMI);
         }
+    }
+
+    /*
+     * Fragment display methods
+     */
+
+    /**
+     * Add current fragment to the backstack and switch to the new one defined by given arguments.
+     * For calls from the nav drawer, this will attempt to pop all backstack history until the last
+     * time the desired channel was launched.
+     * @param args Argument bundle with at least 'component' argument set to describe which
+     *             component to build. All other arguments will be passed to the new fragment.
+     * @return True if the new fragment was successfully created, false if not.
+     */
+    public boolean switchFragments(@NonNull Bundle args) {
+        final String componentTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
+        final boolean isTopLevel = args.getBoolean(ComponentFactory.ARG_TOP_LEVEL);
+
+        // Attempt to create the fragment
+        final Fragment fragment = mComponentFactory.createFragment(args);
+        if (fragment == null) {
+            sendChannelErrorEvent(args); // Channel launch failure analytics event
+            return false;
+        } else {
+            sendChannelEvent(args); // Channel launch analytics event
+        }
+
+        // Close soft keyboard, it's usually annoying when it stays open after changing screens
+        AppUtils.closeKeyboard(this);
+
+        final FragmentManager fm = getSupportFragmentManager();
+
+        // If this is a top level (nav drawer) press, find the last time this channel was launched
+        // and pop backstack to it
+        if (isTopLevel && fm.findFragmentByTag(componentTag) != null) {
+            fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+
+        // Switch the main content fragment
+        fm.beginTransaction()
+                .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left,
+                        R.animator.slide_in_left, R.animator.slide_out_right)
+                .replace(R.id.main_content_frame, fragment, componentTag)
+                .addToBackStack(componentTag)
+                .commit();
+
+        return true;
+    }
+
+    /**
+     * Show a dialog fragment and add it to backstack
+     * @param dialogFragment Dialog fragment to display
+     * @param tag Tag for fragment transaction backstack
+     */
+    public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {
+        final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        final Fragment prev = getSupportFragmentManager().findFragmentByTag(tag);
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(tag);
+        dialogFragment.show(ft, tag);
+    }
+
+    private void sendChannelEvent(@NonNull Bundle args) {
+        JSONObject extras = new JSONObject();
+        try {
+            extras.put("handle", args.getString(ComponentFactory.ARG_COMPONENT_TAG));
+            extras.put("url", args.getString(ComponentFactory.ARG_URL_TAG));
+            extras.put("api", args.getString(ComponentFactory.ARG_API_TAG));
+            extras.put("title", args.getString(ComponentFactory.ARG_TITLE_TAG));
+        } catch (JSONException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+        Analytics.queueEvent(this, Analytics.CHANNEL_OPENED, extras);
+    }
+
+    private void sendChannelErrorEvent(@NonNull Bundle args) {
+        JSONObject extras = new JSONObject();
+        try {
+            extras.put("description","failed to open channel");
+            extras.put("handle", args.getString(ComponentFactory.ARG_COMPONENT_TAG));
+            extras.put("url", args.getString(ComponentFactory.ARG_URL_TAG));
+            extras.put("api", args.getString(ComponentFactory.ARG_API_TAG));
+            extras.put("title", args.getString(ComponentFactory.ARG_TITLE_TAG));
+        } catch (JSONException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+        }
+        Analytics.queueEvent(this, Analytics.ERROR, extras);
     }
 
 }
