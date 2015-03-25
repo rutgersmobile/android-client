@@ -5,7 +5,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 
 import com.google.android.gms.common.GooglePlayServicesClient;
 
@@ -32,7 +30,6 @@ import java.util.TimerTask;
 
 import edu.rutgers.css.Rutgers.BuildConfig;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopGroup;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
@@ -41,11 +38,12 @@ import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-public class BusStops extends Fragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
+public class BusStops extends BaseChannelFragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusStops";
@@ -63,9 +61,6 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
     private Timer mUpdateTimer;
     private Handler mUpdateHandler;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
 
     public BusStops() {
         // Required empty public constructor
@@ -99,9 +94,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_search_stickylist_progress, parent, false);
-
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
 
         // Get the filter field and add a listener to it
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -125,7 +118,7 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
                 StopStub stopStub = (StopStub) parent.getAdapter().getItem(position);
                 Bundle displayArgs = BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
                         stopStub.getAgencyTag(), stopStub.getTitle());
-                ComponentFactory.getInstance().switchFragments(displayArgs);
+                switchFragments(displayArgs);
             }
 
         });
@@ -226,7 +219,6 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
 
         // Get rid of view references
         setFocusListener(null);
-        mProgressCircle = null;
     }
 
     @Override
@@ -341,14 +333,6 @@ public class BusStops extends Fragment implements FilterFocusBroadcaster, Google
     @Override
     public void setFocusListener(FilterFocusListener listener) {
         mFilterFocusListener = listener;
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

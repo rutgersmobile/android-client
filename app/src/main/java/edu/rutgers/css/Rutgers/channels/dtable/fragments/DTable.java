@@ -2,13 +2,11 @@ package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
@@ -35,6 +33,7 @@ import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
@@ -42,7 +41,7 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
  * Dynamic Table
  * <p>Use {@link #dTag()} instead of TAG when logging</p>
  */
-public class DTable extends Fragment {
+public class DTable extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "DTable";
@@ -66,9 +65,6 @@ public class DTable extends Fragment {
     private String mAPI;
     private String mHandle;
     private boolean mLoading;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
 
     public DTable() {
         // Required empty public constructor
@@ -197,9 +193,8 @@ public class DTable extends Fragment {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -228,14 +223,14 @@ public class DTable extends Fragment {
                     mAdapter.collapse(position);
                 }
 
-                // DTable root - launch a new DTable
+
                 if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.CAT_TYPE.ordinal()) {
+                    // DTable root - launch a new DTable
                     String newHandle = mHandle + "_" + element.getTitle(homeCampus).replace(" ", "_").toLowerCase();
                     Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), newHandle, (DTableRoot) element);
-                    ComponentFactory.getInstance().switchFragments(newArgs);
-                }
-                // Channel row - launch channel
-                else {
+                    switchFragments(newArgs);
+                } else {
+                    // Channel row - launch channel
                     DTableChannel channel = (DTableChannel) element;
                     Bundle newArgs = new Bundle();
                     // Must have view and title set to launch a channel
@@ -246,7 +241,7 @@ public class DTable extends Fragment {
                     if (channel.getUrl() != null) newArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
                     if (channel.getData() != null) newArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
                     if (channel.getCount() > 0) newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
-                    ComponentFactory.getInstance().switchFragments(newArgs);
+                    switchFragments(newArgs);
                 }
             }
 
@@ -268,22 +263,6 @@ public class DTable extends Fragment {
             outState.putSerializable(SAVED_ROOT_TAG, mDRoot);
             outState.putString(SAVED_HANDLE_TAG, mHandle);
         }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

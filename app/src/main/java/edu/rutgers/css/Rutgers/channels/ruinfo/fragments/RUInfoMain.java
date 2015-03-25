@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,10 +14,11 @@ import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-public class RUInfoMain extends Fragment {
+public class RUInfoMain extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "RUInfoMain";
@@ -138,7 +138,7 @@ public class RUInfoMain extends Fragment {
             public void onClick(View v) {
                 String url = AppUtils.isTablet(getActivity()) ? mTabletURL : mMobileURL;
                 Bundle webArgs = WebDisplay.createArgs(getString(R.string.ruinfo_title), url);
-                ComponentFactory.getInstance().switchFragments(webArgs);
+                switchFragments(webArgs);
             }
 
         });

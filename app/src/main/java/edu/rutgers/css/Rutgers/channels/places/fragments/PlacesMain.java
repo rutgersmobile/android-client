@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -15,7 +14,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -38,6 +36,7 @@ import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
@@ -47,7 +46,7 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
  * <p>Places selected from this fragment are displayed with {@link PlacesDisplay}.</p>
  * @author James Chambers
  */
-public class PlacesMain extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks {
+public class PlacesMain extends BaseChannelFragment implements GooglePlayServicesClient.ConnectionCallbacks {
 
     /* Log tag and component handle */
     private static final String TAG                 = "PlacesMain";
@@ -60,9 +59,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     private PlaceAutoCompleteAdapter mSearchAdapter;
     private SimpleSectionedAdapter<KeyValPair> mAdapter;
     private LocationClientProvider mLocationClientProvider;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -100,9 +96,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_places, parent, false);
-
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places);
 
         // Set title from JSON
         final Bundle args = getArguments();
@@ -122,7 +116,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 KeyValPair placeStub = (KeyValPair) parent.getAdapter().getItem(position);
                 Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
-                ComponentFactory.getInstance().switchFragments(newArgs);
+                switchFragments(newArgs);
             }
             
         });
@@ -157,7 +151,7 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
                 if (placeStub.getKey() != null) {
                     Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
-                    ComponentFactory.getInstance().switchFragments(newArgs);
+                    switchFragments(newArgs);
                 }
             }
         });
@@ -197,14 +191,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
     @Override
     public void onDisconnected() {
         Log.i(TAG, "Disconnected from services");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
     }
 
     private void loadNearbyPlaces() {
@@ -279,14 +265,6 @@ public class PlacesMain extends Fragment implements GooglePlayServicesClient.Con
 
         });
 
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

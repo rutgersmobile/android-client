@@ -1,13 +1,11 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ProgressBar;
 
 import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
@@ -24,6 +22,7 @@ import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -33,7 +32,7 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
  * Displays dining halls that have menus available in the Dining API.
  * @author James Chambers
  */
-public class FoodMain extends Fragment {
+public class FoodMain extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "FoodMain";
@@ -45,9 +44,6 @@ public class FoodMain extends Fragment {
     /* Member data */
     private SchoolFacilitiesAdapter mAdapter;
     private boolean mLoading;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
 
     public FoodMain() {
         // Required empty public constructor
@@ -129,9 +125,8 @@ public class FoodMain extends Fragment {
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_stickylist_progress, parent, false);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress);
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -148,44 +143,22 @@ public class FoodMain extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 DiningMenu clickedMenu = (DiningMenu) parent.getAdapter().getItem(position);
 
-                // Check for static halls first
+                // Launch text display if static hall is clicked. Otherwise, regular menu display.
                 if (clickedMenu.getLocationName().equals(getString(R.string.dining_stonsby_title))) {
-                    ComponentFactory.getInstance().switchFragments(
-                            TextDisplay.createArgs(getString(R.string.dining_stonsby_title),
-                                    getString(R.string.dining_stonsby_description))
-                    );
+                    switchFragments(TextDisplay.createArgs(getString(R.string.dining_stonsby_title),
+                            getString(R.string.dining_stonsby_description)));
                 } else if (clickedMenu.getLocationName().equals(getString(R.string.dining_gateway_title))) {
-                    ComponentFactory.getInstance().switchFragments(
-                            TextDisplay.createArgs(getString(R.string.dining_gateway_title),
-                                    getString(R.string.dining_gateway_description))
-                    );
+                    switchFragments(TextDisplay.createArgs(getString(R.string.dining_gateway_title),
+                            getString(R.string.dining_gateway_description)));
                 } else {
                     if (clickedMenu.hasActiveMeals()) {
-                        ComponentFactory.getInstance().switchFragments(
-                                FoodHall.createArgs(clickedMenu.getLocationName())
-                        );
+                        switchFragments(FoodHall.createArgs(clickedMenu.getLocationName()));
                     }
                 }
             }
         });
         
         return v;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

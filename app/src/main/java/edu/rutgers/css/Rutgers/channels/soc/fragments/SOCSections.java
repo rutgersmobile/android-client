@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,13 +26,15 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
 import edu.rutgers.css.Rutgers.channels.soc.model.Section;
 import edu.rutgers.css.Rutgers.channels.soc.model.SectionAdapterItem;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
+import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Display description and section information for a course.
  */
-public class SOCSections extends Fragment {
+public class SOCSections extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "SOCSections";
@@ -123,7 +124,7 @@ public class SOCSections extends Fragment {
 
                     if (scheduleText.getType().equals(ScheduleText.TextType.PREREQS)) {
                         Bundle newArgs = TextDisplay.createArgs(mCourse.getSubject()+":"+mCourse.getCourseNumber()+" Prerequisites", mCourse.getPreReqNotes());
-                        ComponentFactory.getInstance().switchFragments(newArgs);
+                        switchFragments(newArgs);
                         return;
                     }
                 } else if (clickedItem instanceof Section) {
@@ -131,7 +132,7 @@ public class SOCSections extends Fragment {
 
                     if (StringUtils.isNotBlank(section.getIndex()) && semester != null) {
                         String index = StringUtils.trim(section.getIndex());
-                        ScheduleAPI.openRegistrationWindow(semester, index);
+                        switchFragments(WebDisplay.createArgs("WebReg", ScheduleAPI.getRegistrationLink(semester, index)));
                     } else {
                         Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
                         Log.w(TAG, "Section had no index field. Failed to launch webreg.");

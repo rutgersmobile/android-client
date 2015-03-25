@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.AlwaysCallback;
@@ -42,13 +40,14 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
  */
-public class SOCMain extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SOCMain extends BaseChannelFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     /* Log tag and component handle */
     private static final String TAG                 = "SOCMain";
@@ -68,9 +67,6 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     private String mFilterString;
     private boolean mLoadingSemesters;
     private boolean mLoadingSubjects;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
 
     public SOCMain() {
         // Required empty public constructor
@@ -159,10 +155,9 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_search_list_progress, parent, false);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_list_progress);
         setScheduleTitle();
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if (mLoadingSemesters || mLoadingSubjects) showProgressCircle();
 
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -178,12 +173,12 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
                 if (clickedItem instanceof Subject) {
                     Bundle coursesArgs = SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
                             mSemester, mLevel, ((Subject) clickedItem).getCode());
-                    ComponentFactory.getInstance().switchFragments(coursesArgs);
+                    switchFragments(coursesArgs);
                 } else if (clickedItem instanceof Course) {
                     // This is for when courses are loaded into the list by user-supplied filter
                     if (((Course) clickedItem).isStub()) return; // Stub course hasn't loaded data yet
                     Bundle courseArgs = SOCSections.createArgs(clickedItem.getDisplayTitle(), mSemester, (Course) clickedItem);
-                    ComponentFactory.getInstance().switchFragments(courseArgs);
+                    switchFragments(courseArgs);
                 }
             }
 
@@ -242,14 +237,6 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mFilterString != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
     }
 
     @Override
@@ -314,7 +301,7 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         ArrayList<String> semestersList = new ArrayList<>(mSemesters);
 
         DialogFragment newDialogFragment = SOCDialogFragment.newInstance(semestersList);
-        ComponentFactory.getInstance().showDialogFragment(newDialogFragment, SOCDialogFragment.HANDLE);
+        showDialogFragment(newDialogFragment, SOCDialogFragment.HANDLE);
     }
 
     /**
@@ -397,14 +384,6 @@ public class SOCMain extends Fragment implements SharedPreferences.OnSharedPrefe
         editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, campus);
         editor.putString(PrefUtils.KEY_PREF_SOC_LEVEL, level);
         editor.commit();
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

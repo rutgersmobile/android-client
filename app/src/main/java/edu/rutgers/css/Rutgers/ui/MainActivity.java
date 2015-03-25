@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -69,6 +70,14 @@ public class MainActivity extends LocationProviderActivity implements
     @Override
     public ChannelManager getChannelManager() {
         return mChannelManager;
+    }
+
+    public void switchFragments(Bundle args) {
+        ComponentFactory.getInstance().switchFragments(args);
+    }
+
+    public void showDialogFragment(DialogFragment dialogFragment, String tag) {
+        ComponentFactory.getInstance().showDialogFragment(dialogFragment, tag);
     }
 
     @Override

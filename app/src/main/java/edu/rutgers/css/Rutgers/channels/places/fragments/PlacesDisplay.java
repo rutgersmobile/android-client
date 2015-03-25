@@ -5,14 +5,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +38,7 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
@@ -47,7 +46,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
  * Display information about a Rutgers location from the Places database.
  * @author James Chambers
  */
-public class PlacesDisplay extends Fragment {
+public class PlacesDisplay extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "PlacesDisplay";
@@ -68,9 +67,6 @@ public class PlacesDisplay extends Fragment {
     private List<RMenuRow> mData;
     private RMenuAdapter mAdapter;
     private boolean mLoading;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
 
     // Maps campuses to Nextbus agencies. Used for listing nearby bus stops.
     private static final Map<String, String> sAgencyMap = Collections.unmodifiableMap(new HashMap<String, String>() {{
@@ -251,9 +247,8 @@ public class PlacesDisplay extends Fragment {
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_list_progress, container, false);
+        final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_list_progress);
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if (mLoading) showProgressCircle();
 
         // Set title
@@ -274,26 +269,18 @@ public class PlacesDisplay extends Fragment {
                         break;
                     case DESC_ROW:
                         Bundle textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
-                        ComponentFactory.getInstance().switchFragments(textArgs);
+                        switchFragments(textArgs);
                         break;
                     case BUS_ROW:
                         Bundle busArgs = new Bundle(clicked.getArgs());
                         busArgs.remove(ID_KEY);
-                        ComponentFactory.getInstance().switchFragments(busArgs);
+                        switchFragments(busArgs);
                         break;
                 }
             }
         });
 
         return v;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
     }
 
     /**
@@ -336,14 +323,6 @@ public class PlacesDisplay extends Fragment {
                 location.getStateAbbr() + " " + location.getPostalCode();
 
         return StringUtils.trim(resultString);
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

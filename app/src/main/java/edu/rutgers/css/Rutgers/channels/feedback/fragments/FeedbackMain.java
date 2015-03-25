@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.feedback.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,11 +35,12 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.ruinfo.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /** Feedback form. */
-public class FeedbackMain extends Fragment implements OnItemSelectedListener {
+public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedListener {
 
     /* Log tag and component handle */
     private static final String TAG = "FeedbackMain";
@@ -244,8 +244,7 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
                 parent.setSelection(0);
                 
                 // Launch RU-info channel
-                Bundle args = RUInfoMain.createArgs(null);
-                ComponentFactory.getInstance().switchFragments(args);
+                switchFragments(RUInfoMain.createArgs(null));
             }
 
         }
@@ -253,9 +252,6 @@ public class FeedbackMain extends Fragment implements OnItemSelectedListener {
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-        // TODO Auto-generated method stub
-        
-    }
+    public void onNothingSelected(AdapterView<?> parent) {}
     
 }

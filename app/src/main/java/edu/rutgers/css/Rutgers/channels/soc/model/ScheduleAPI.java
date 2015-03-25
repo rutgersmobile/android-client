@@ -18,9 +18,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
@@ -287,9 +285,8 @@ public final class ScheduleAPI {
      * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
      * @param courseIndex Section index number
      */
-    public static void openRegistrationWindow(String semesterCode, String courseIndex) {
-        String url = WEBREG_BASE_URL + "editSchedule.htm?login=cas&semesterSelection=" + semesterCode + "&indexList=" + courseIndex;
-        ComponentFactory.getInstance().switchFragments(WebDisplay.createArgs("WebReg", url));
+    public static String getRegistrationLink(String semesterCode, String courseIndex) {
+        return WEBREG_BASE_URL + "editSchedule.htm?login=cas&semesterSelection=" + semesterCode + "&indexList=" + courseIndex;
     }
 
 }

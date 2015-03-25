@@ -3,13 +3,11 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
@@ -33,9 +31,10 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-public class BusDisplay extends Fragment implements DoneCallback<List<Prediction>>,
+public class BusDisplay extends BaseChannelFragment implements DoneCallback<List<Prediction>>,
         FailCallback<Exception>, AlwaysCallback<List<Prediction>, Exception> {
 
     /* Log tag and component handle */
@@ -70,9 +69,6 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     private Timer mUpdateTimer;
     private String mAgency;
     private AndroidDeferredManager mDM;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
     
     public BusDisplay() {
         // Required empty public constructor
@@ -146,9 +142,7 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
-
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
 
         final Bundle args = getArguments();
         // Get title
@@ -221,14 +215,6 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
         outState.putSerializable(SAVED_DATA_TAG, mData);
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
-    }
-
     /**
      * Load prediction data
      */
@@ -294,14 +280,6 @@ public class BusDisplay extends Fragment implements DoneCallback<List<Prediction
     @Override
     public void onAlways(Promise.State state, List<Prediction> resolved, Exception rejected) {
         hideProgressCircle();
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

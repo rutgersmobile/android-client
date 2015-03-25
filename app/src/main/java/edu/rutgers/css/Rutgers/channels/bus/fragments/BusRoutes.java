@@ -2,14 +2,12 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 
 import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
@@ -22,18 +20,18 @@ import org.jdeferred.multiple.OneReject;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
+public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadcaster {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusRoutes";
@@ -43,9 +41,6 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     private SimpleSectionedAdapter<RouteStub> mAdapter;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
     
     public BusRoutes() {
         // Required empty public constructor
@@ -60,9 +55,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_search_stickylist_progress, parent, false);
-
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
 
         // Get the filter field and add a listener to it
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
@@ -82,7 +75,7 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
                 RouteStub routeStub = (RouteStub) parent.getAdapter().getItem(position);
                 Bundle displayArgs = BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
                         routeStub.getAgencyTag(), routeStub.getTag());
-                ComponentFactory.getInstance().switchFragments(displayArgs);
+                switchFragments(displayArgs);
             }
 
         });
@@ -152,7 +145,6 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
 
         // Get rid of view references
         setFocusListener(null);
-        mProgressCircle = null;
     }
 
     /**
@@ -182,14 +174,6 @@ public class BusRoutes extends Fragment implements FilterFocusBroadcaster {
     @Override
     public void setFocusListener(FilterFocusListener listener) {
         mFilterFocusListener = listener;
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

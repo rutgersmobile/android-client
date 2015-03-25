@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -14,7 +13,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.AlwaysCallback;
@@ -30,7 +28,6 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusItem;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
@@ -38,12 +35,13 @@ import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 
-public class BusAll extends Fragment {
+public class BusAll extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusAll";
@@ -58,7 +56,6 @@ public class BusAll extends Fragment {
     private boolean mLoading;
 
     /* View references */
-    private ProgressBar mProgressCircle;
     private EditText mFilterEditText;
     
     public BusAll() {
@@ -139,9 +136,8 @@ public class BusAll extends Fragment {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_search_stickylist_progress, parent, false);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if (mLoading) showProgressCircle();
 
         // Get the filter field and add a listener to it
@@ -185,9 +181,8 @@ public class BusAll extends Fragment {
                 String mode = clickedItem.getClass() == RouteStub.class ?
                         BusDisplay.ROUTE_MODE : BusDisplay.STOP_MODE;
 
-                ComponentFactory.getInstance().switchFragments(
-                        BusDisplay.createArgs(clickedItem.getTitle(), mode,
-                                clickedItem.getAgencyTag(), clickedItem.getTag()));
+                switchFragments(BusDisplay.createArgs(clickedItem.getTitle(), mode,
+                        clickedItem.getAgencyTag(), clickedItem.getTag()));
             }
 
         });
@@ -217,7 +212,6 @@ public class BusAll extends Fragment {
         super.onDestroyView();
 
         // Get rid of view references
-        mProgressCircle = null;
         mFilterEditText = null;
     }
 
@@ -249,14 +243,6 @@ public class BusAll extends Fragment {
         nextbusItems.addAll(routeStubs);
 
         mAdapter.add(new SimpleSection<>(header, nextbusItems));
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

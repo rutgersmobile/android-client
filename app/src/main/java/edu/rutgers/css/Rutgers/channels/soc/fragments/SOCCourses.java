@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -12,7 +11,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.jdeferred.AlwaysCallback;
@@ -30,12 +28,13 @@ import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Lists courses under a subject/department.
  */
-public class SOCCourses extends Fragment {
+public class SOCCourses extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "SOCCourses";
@@ -56,9 +55,6 @@ public class SOCCourses extends Fragment {
     private EditText mFilterEditText;
     private String mFilterString;
     private boolean mLoading;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
 
     public SOCCourses() {
         // Required empty public constructor
@@ -125,9 +121,8 @@ public class SOCCourses extends Fragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_search_list_progress, parent, false);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_list_progress);
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -145,7 +140,7 @@ public class SOCCourses extends Fragment {
                 Course clickedCourse = (Course) parent.getItemAtPosition(position);
 
                 Bundle newArgs = SOCSections.createArgs(clickedCourse.getDisplayTitle(), semester, clickedCourse);
-                ComponentFactory.getInstance().switchFragments(newArgs);
+                switchFragments(newArgs);
             }
         });
 
@@ -185,22 +180,6 @@ public class SOCCourses extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mFilterEditText != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

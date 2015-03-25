@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.reader.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
@@ -31,13 +29,14 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSAdapter;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * RSS feed reader
  */
-public class RSSReader extends Fragment {
+public class RSSReader extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "RSSReader";
@@ -58,9 +57,6 @@ public class RSSReader extends Fragment {
     private RSSAdapter mAdapter;
     private boolean mLoading;
 
-    /* View references */
-    private ProgressBar mProgressCircle;
-    
     public RSSReader() {
         // Required empty public constructor
     }
@@ -128,9 +124,8 @@ public class RSSReader extends Fragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -148,8 +143,7 @@ public class RSSReader extends Fragment {
 
                 if (item.getLink() != null) {
                     // Open web display fragment
-                    Bundle webArgs = WebDisplay.createArgs(args.getString(ARG_TITLE_TAG), item.getLink());
-                    ComponentFactory.getInstance().switchFragments(webArgs);
+                    switchFragments(WebDisplay.createArgs(args.getString(ARG_TITLE_TAG), item.getLink()));
                 }
             }
         });
@@ -161,22 +155,6 @@ public class RSSReader extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (!mData.isEmpty()) outState.putSerializable(SAVED_DATA_TAG, mData);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }

@@ -5,14 +5,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.gson.JsonSyntaxException;
@@ -38,13 +36,14 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 /**
  * Facility information: hours, address, phone numbers, etc.
  */
-public class RecreationDisplay extends Fragment {
+public class RecreationDisplay extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "RecreationDisplay";
@@ -67,9 +66,6 @@ public class RecreationDisplay extends Fragment {
     private Facility mFacility;
     private RMenuAdapter mAdapter;
     private boolean mLoading;
-
-    /* View references */
-    private ProgressBar mProgressCircle;
     
     public RecreationDisplay() {
         // Required empty public constructor
@@ -127,9 +123,8 @@ public class RecreationDisplay extends Fragment {
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -177,27 +172,19 @@ public class RecreationDisplay extends Fragment {
 
                     case DESCRIPTION_ROW:
                         Bundle descArgs = TextDisplay.createArgs(args.getString(ARG_TITLE_TAG), clickedArgs.getString("data"));
-                        ComponentFactory.getInstance().switchFragments(descArgs);
+                        switchFragments(descArgs);
                         break;
 
                     case HOURS_ROW:
                         Bundle hoursArgs = RecreationHoursDisplay.createArgs(args.getString(ARG_TITLE_TAG) + " - Hours",
                                 (List<FacilityDaySchedule>) clickedArgs.getSerializable("data"));
-                        ComponentFactory.getInstance().switchFragments(hoursArgs);
+                        switchFragments(hoursArgs);
                         break;
                 }
             }
         });
 
         return v;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mProgressCircle = null;
     }
 
     private void addInfo() {
@@ -270,14 +257,6 @@ public class RecreationDisplay extends Fragment {
             mAdapter.add(new RMenuItemRow(rowArgs));
         }
 
-    }
-
-    private void showProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
-    }
-
-    private void hideProgressCircle() {
-        if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
 }
