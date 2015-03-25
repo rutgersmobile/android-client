@@ -27,16 +27,32 @@ public final class PrefUtils {
     public static final String KEY_PREF_SOC_SEMESTER    = "pref_soc_semester";
 
     /** Key for boolean "first launch" flag. */
-    public static final String KEY_PREFS_FIRST_LAUNCH   = "pref_first_launch";
+    public static final String KEY_PREF_FIRST_LAUNCH = "pref_first_launch";
+
+    /** Key for boolean "first drawer open" flag. */
+    public static final String KEY_PREF_FIRST_DRAWER    = "pref_first_drawer";
 
     public static boolean isFirstLaunch(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(KEY_PREFS_FIRST_LAUNCH, true);
+        return prefs.getBoolean(KEY_PREF_FIRST_LAUNCH, true);
     }
 
     public static void markFirstLaunch(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(KEY_PREFS_FIRST_LAUNCH, false).apply();
+        prefs.edit().putBoolean(KEY_PREF_FIRST_LAUNCH, false).apply();
+    }
+
+    /** True if the user has opened the navigation at least once (for tutorial purposes). */
+    public static boolean hasDrawerBeenUsed(@NonNull Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(KEY_PREF_FIRST_DRAWER, false);
+    }
+
+    /** Call when the navigation drawer has been opened to indicate that the
+     * user has opened the navigation drawer at least once (for tutorial purposes). */
+    public static void markDrawerUsed(@NonNull Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(KEY_PREF_FIRST_DRAWER, true).apply();
     }
 
 }

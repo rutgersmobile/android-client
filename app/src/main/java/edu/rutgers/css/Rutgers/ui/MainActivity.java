@@ -67,6 +67,7 @@ public class MainActivity extends LocationProviderActivity implements
     private ActionBarDrawerToggle mDrawerToggle;
     private RMenuAdapter mDrawerAdapter;
     private boolean mLoadedShortcuts;
+    private boolean mTutorialDrawerCheck;
 
     /* View references */
     private DrawerLayout mDrawerLayout;
@@ -110,6 +111,14 @@ public class MainActivity extends LocationProviderActivity implements
             PrefUtils.markFirstLaunch(this);
         }
 
+        // Determine whether to run nav drawer tutorial
+        if (PrefUtils.hasDrawerBeenUsed(this)) {
+            mTutorialDrawerCheck = false;
+        } else {
+            mTutorialDrawerCheck = true;
+            Log.i(TAG, "Drawer never opened before, show tutorial!");
+        }
+
         // Enable drawer icon
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -139,6 +148,11 @@ public class MainActivity extends LocationProviderActivity implements
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 if (!mLoadedShortcuts) loadWebShortcuts();
+                if (mTutorialDrawerCheck) {
+                    PrefUtils.markDrawerUsed(getApplicationContext());
+                    mTutorialDrawerCheck = false;
+                    Log.i(TAG, "Drawer opened for first time.");
+                }
             }
         };
         
