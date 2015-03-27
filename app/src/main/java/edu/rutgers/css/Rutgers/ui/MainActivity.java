@@ -22,6 +22,8 @@ import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
@@ -53,7 +55,7 @@ import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
- * RU Mobile main activity
+ * Main activity. Handles navigation drawer, displayed fragments, and connection to location services.
  */
 public class MainActivity extends LocationProviderActivity implements
         ChannelManagerProvider {
@@ -66,7 +68,11 @@ public class MainActivity extends LocationProviderActivity implements
     private ComponentFactory mComponentFactory;
     private ActionBarDrawerToggle mDrawerToggle;
     private RMenuAdapter mDrawerAdapter;
+
+    /** Flags whether drawer shortcuts have been loaded. */
     private boolean mLoadedShortcuts;
+
+    /** Flags whether the user has ever opened the drawer. */
     private boolean mTutorialDrawerCheck;
 
     /* View references */
@@ -83,7 +89,6 @@ public class MainActivity extends LocationProviderActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // This will create the UUID if one does not yet exist
         Log.d(TAG, "UUID: " + AppUtils.getUUID(this));
 
         mComponentFactory = new ComponentFactory();
@@ -95,21 +100,7 @@ public class MainActivity extends LocationProviderActivity implements
         }
         */
 
-        // Initialize settings, if necessary
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
-
-        // Check if this is the first time the app is being launched
-        if (PrefUtils.isFirstLaunch(this)) {
-            Log.i(TAG, "First launch");
-
-            // First launch, create analytics event & show settings screen
-            Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
-
-            Intent settingsIntent = new Intent(this, SettingsActivity.class);
-            startActivity(settingsIntent);
-
-            PrefUtils.markFirstLaunch(this);
-        }
+        firstLaunchChecks();
 
         // Determine whether to run nav drawer tutorial
         if (PrefUtils.hasDrawerBeenUsed(this)) {
@@ -205,6 +196,20 @@ public class MainActivity extends LocationProviderActivity implements
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mTutorialDrawerCheck || true) {
+            new ShowcaseView.Builder(this)
+                    .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
+                    .setContentTitle("Testing")
+                    .setContentText("Open the drawer to begin")
+                    .hideOnTouchOutside()
+                    .build();
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
 
@@ -287,6 +292,28 @@ public class MainActivity extends LocationProviderActivity implements
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    /** Initialize settings, display tutorial, etc. */
+    private void firstLaunchChecks() {
+        // Creates UUID if one does not exist yet
+        AppUtils.getUUID(this);
+
+        // Initialize settings, if necessary
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+
+        // Check if this is the first time the app is being launched
+        if (PrefUtils.isFirstLaunch(this)) {
+            Log.i(TAG, "First launch");
+
+            // First launch, create analytics event & show settings screen
+            Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
+
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+
+            PrefUtils.markFirstLaunch(this);
+        }
     }
 
     /*
