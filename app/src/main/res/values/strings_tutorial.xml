@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Tutorial text -->
+    <string name="tutorial_welcome_title">Welcome to RU Mobile!</string>
+    <string name="tutorial_welcome_text">Tap the drawer icon to begin.</string>
+
+</resources>

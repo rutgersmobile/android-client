@@ -1,8 +1,10 @@
 package edu.rutgers.css.Rutgers.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -199,13 +201,20 @@ public class MainActivity extends LocationProviderActivity implements
     protected void onResume() {
         super.onResume();
 
-        if (mTutorialDrawerCheck || true) {
-            new ShowcaseView.Builder(this)
-                    .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
-                    .setContentTitle("Testing")
-                    .setContentText("Open the drawer to begin")
-                    .hideOnTouchOutside()
-                    .build();
+        if (mTutorialDrawerCheck) {
+            final Activity activityRef = this;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    new ShowcaseView.Builder(activityRef)
+                            .setTarget(new ActionViewTarget(activityRef, ActionViewTarget.Type.HOME))
+                            .setContentTitle(R.string.tutorial_welcome_title)
+                            .setContentText(R.string.tutorial_welcome_text)
+                            .setStyle(R.style.RutgersShowcaseTheme)
+                            .hideOnTouchOutside()
+                            .build();
+                }
+            }, 150);
         }
     }
 
