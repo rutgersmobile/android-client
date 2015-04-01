@@ -1,10 +1,8 @@
 package edu.rutgers.css.Rutgers.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -75,7 +73,7 @@ public class MainActivity extends LocationProviderActivity implements
     private boolean mLoadedShortcuts;
 
     /** Flags whether the user has ever opened the drawer. */
-    private boolean mTutorialDrawerCheck;
+    private boolean mShowDrawerTutorial;
 
     /* View references */
     private DrawerLayout mDrawerLayout;
@@ -106,9 +104,9 @@ public class MainActivity extends LocationProviderActivity implements
 
         // Determine whether to run nav drawer tutorial
         if (PrefUtils.hasDrawerBeenUsed(this)) {
-            mTutorialDrawerCheck = false;
+            mShowDrawerTutorial = false;
         } else {
-            mTutorialDrawerCheck = true;
+            mShowDrawerTutorial = true;
             Log.i(TAG, "Drawer never opened before, show tutorial!");
         }
 
@@ -141,9 +139,9 @@ public class MainActivity extends LocationProviderActivity implements
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 if (!mLoadedShortcuts) loadWebShortcuts();
-                if (mTutorialDrawerCheck) {
+                if (mShowDrawerTutorial) {
                     PrefUtils.markDrawerUsed(getApplicationContext());
-                    mTutorialDrawerCheck = false;
+                    mShowDrawerTutorial = false;
                     Log.i(TAG, "Drawer opened for first time.");
                 }
             }
@@ -201,20 +199,14 @@ public class MainActivity extends LocationProviderActivity implements
     protected void onResume() {
         super.onResume();
 
-        if (mTutorialDrawerCheck) {
-            final Activity activityRef = this;
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    new ShowcaseView.Builder(activityRef)
-                            .setTarget(new ActionViewTarget(activityRef, ActionViewTarget.Type.HOME))
-                            .setContentTitle(R.string.tutorial_welcome_title)
-                            .setContentText(R.string.tutorial_welcome_text)
-                            .setStyle(R.style.RutgersShowcaseTheme)
-                            .hideOnTouchOutside()
-                            .build();
-                }
-            }, 150);
+        if (mShowDrawerTutorial) {
+            new ShowcaseView.Builder(this)
+                    .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
+                    .setContentTitle(R.string.tutorial_welcome_title)
+                    .setContentText(R.string.tutorial_welcome_text)
+                    .setStyle(R.style.RutgersShowcaseTheme)
+                    .hideOnTouchOutside()
+                    .build();
         }
     }
 

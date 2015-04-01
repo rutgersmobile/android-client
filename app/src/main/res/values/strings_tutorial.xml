@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Tutorial text -->
-    <string name="tutorial_welcome_title">Welcome to RU Mobile!</string>
+    <string name="tutorial_welcome_title">Welcome to the Rutgers Mobile app!</string>
     <string name="tutorial_welcome_text">Tap the drawer icon to begin.</string>
 
 </resources>
