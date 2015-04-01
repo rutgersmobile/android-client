@@ -22,6 +22,7 @@ import android.widget.ListView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
+import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
@@ -75,6 +76,9 @@ public class MainActivity extends LocationProviderActivity implements
     /** Flags whether the user has ever opened the drawer. */
     private boolean mShowDrawerTutorial;
 
+    /** Flags whether the tutorial is currently being displayed. */
+    private boolean mDisplayingTutorial;
+
     /* View references */
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
@@ -94,21 +98,7 @@ public class MainActivity extends LocationProviderActivity implements
         mComponentFactory = new ComponentFactory();
         mChannelManager = new ChannelManager();
 
-        /*
-        if (BuildConfig.DEBUG) {
-            getSupportFragmentManager().enableDebugLogging(true);
-        }
-        */
-
         firstLaunchChecks();
-
-        // Determine whether to run nav drawer tutorial
-        if (PrefUtils.hasDrawerBeenUsed(this)) {
-            mShowDrawerTutorial = false;
-        } else {
-            mShowDrawerTutorial = true;
-            Log.i(TAG, "Drawer never opened before, show tutorial!");
-        }
 
         // Enable drawer icon
         if (getActionBar() != null) {
@@ -116,12 +106,11 @@ public class MainActivity extends LocationProviderActivity implements
             getActionBar().setHomeButtonEnabled(true);
         }
 
-        // Set up nav drawer
-        ArrayList<RMenuRow> menuArray = new ArrayList<>();
-        mDrawerAdapter = new RMenuAdapter(this, R.layout.row_drawer_item, R.layout.row_drawer_header, menuArray);
+        // Set up navigation drawer
+        mDrawerAdapter = new RMenuAdapter(this, R.layout.row_drawer_item, R.layout.row_drawer_header, new ArrayList<RMenuRow>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        
+
         mDrawerToggle = new ActionBarDrawerToggle(        
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
@@ -199,12 +188,29 @@ public class MainActivity extends LocationProviderActivity implements
     protected void onResume() {
         super.onResume();
 
-        if (mShowDrawerTutorial) {
+        if (mShowDrawerTutorial && !mDisplayingTutorial) {
             new ShowcaseView.Builder(this)
                     .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
                     .setContentTitle(R.string.tutorial_welcome_title)
                     .setContentText(R.string.tutorial_welcome_text)
                     .setStyle(R.style.RutgersShowcaseTheme)
+                    .setShowcaseEventListener(new OnShowcaseEventListener() {
+                        @Override
+                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                            // ShowcaseView was told to hide.
+                        }
+
+                        @Override
+                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                            // ShowcaseView has been fully hidden.
+                            mDisplayingTutorial = false;
+                        }
+
+                        @Override
+                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
+                            mDisplayingTutorial = true;
+                        }
+                    })
                     .hideOnTouchOutside()
                     .build();
         }
@@ -314,6 +320,15 @@ public class MainActivity extends LocationProviderActivity implements
             startActivity(settingsIntent);
 
             PrefUtils.markFirstLaunch(this);
+        }
+
+
+        // Determine whether to run nav drawer tutorial
+        if (PrefUtils.hasDrawerBeenUsed(getApplicationContext())) {
+            mShowDrawerTutorial = false;
+        } else {
+            mShowDrawerTutorial = true;
+            Log.i(TAG, "Drawer never opened before, show tutorial!");
         }
     }
 
