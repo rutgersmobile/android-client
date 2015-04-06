@@ -19,17 +19,20 @@
         \t <a href="http://commons.apache.org/proper/commons-lang/">Apache Commons Lang</a><br/>
         \t <i>by the Apache Software Foundation</i><br/><br/>
 
-        \t <a href="https://github.com/jdeferred/jdeferred">JDeferred</a><br/>
-        \t <i>by Ray Tsang</i><br/><br/>
-
         \t <a href="https://code.google.com/p/google-gson/">GSON</a><br/>
         \t <i>by Google Inc.</i><br/><br/>
+
+        \t <a href="https://github.com/jdeferred/jdeferred">JDeferred</a><br/>
+        \t <i>by Ray Tsang</i><br/><br/>
 
         \t <a href="http://nhaarman.github.io/ListViewAnimations/">ListViewAnimations</a><br/>
         \t <i>by Niek Haarman</i><br/><br/>
 
-        \t <a href="https://github.com/astuetz/PagerSlidingTabStrip">PagerSlidingTabStrip</a><br>
+        \t <a href="https://github.com/astuetz/PagerSlidingTabStrip">PagerSlidingTabStrip</a><br/>
         \t <i>by Andreas Stuetz</i><br/><br/>
+
+        \t <a href="https://github.com/amlcurran/ShowcaseView">ShowcaseView</a><br/>
+        \t <i>by Alex Curran</i><br/><br/>
 
         \t <a href="https://github.com/emilsjolander/StickyListHeaders">StickyListHeaders</a><br/>
         \t <i>by Emil Sj&#246;lander</i><br/><br/>
