@@ -6,6 +6,6 @@
         android:id="@+id/action_options"
         android:showAsAction="always"
         android:title="@string/soc_select"
-        android:icon="@drawable/ic_action_settings" />
+        android:icon="@drawable/ic_soc_settings" />
 
 </menu>
