@@ -39,6 +39,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /** Feedback form. */
 public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedListener {
 
@@ -200,7 +202,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
                     }
                 } else {
                     // No response
-                    Log.w(TAG, AppUtils.formatAjaxStatus(status));
+                    LOGW(TAG, AppUtils.formatAjaxStatus(status));
                     Toast toast = Toast.makeText(getActivity(), R.string.failed_load_short, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 125);
                     toast.show();

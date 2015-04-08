@@ -28,6 +28,8 @@ import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Schedule of Classes catalogue selection menu.
  */
@@ -105,7 +107,7 @@ public class SOCDialogFragment extends DialogFragment {
                         editor.putString(PrefUtils.KEY_PREF_SOC_LEVEL, ((KeyValPair) levelSpinner.getSelectedItem()).getKey());
                         editor.putString(PrefUtils.KEY_PREF_SOC_SEMESTER, ((KeyValPair) semesterSpinner.getSelectedItem()).getKey());
                         editor.apply();
-                        Log.i(TAG, "Saved settings");
+                        LOGI(TAG, "Saved settings");
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -144,7 +146,7 @@ public class SOCDialogFragment extends DialogFragment {
         ArrayList<KeyValPair> results = new ArrayList<KeyValPair>();
         JSONArray campusJSONArray = AppUtils.loadRawJSONArray(getResources(), R.raw.soc_campuses);
         if (campusJSONArray == null) {
-            Log.e(TAG, "Couldn't get list of campuses for SOC");
+            LOGE(TAG, "Couldn't get list of campuses for SOC");
             return results;
         }
 
@@ -153,7 +155,7 @@ public class SOCDialogFragment extends DialogFragment {
                 JSONObject campusJSON = campusJSONArray.getJSONObject(i);
                 results.add(new KeyValPair(campusJSON.getString("tag"), campusJSON.getString("title")));
             } catch(JSONException e) {
-                Log.w(TAG, "loadCampuses(): " + e.getMessage());
+                LOGW(TAG, "loadCampuses(): " + e.getMessage());
             }
         }
 

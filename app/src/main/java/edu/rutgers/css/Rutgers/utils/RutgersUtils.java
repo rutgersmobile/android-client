@@ -13,6 +13,8 @@ import org.json.JSONObject;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Utilities for Rutgers-specific data
  */
@@ -87,12 +89,12 @@ public final class RutgersUtils {
                     return titles.getString("foreignTitle");
                 }
             } catch (JSONException e) {
-                Log.w(TAG, "getLocalTitle(): " + e.getMessage());
-                Log.w(TAG, "title JSON: " + title.toString());
+                LOGW(TAG, "getLocalTitle(): " + e.getMessage());
+                LOGW(TAG, "title JSON: " + title.toString());
                 return title.toString();
             }
         } else {
-            Log.e(TAG, "Unexpected class for title: " + title.getClass().getSimpleName());
+            LOGE(TAG, "Unexpected class for title: " + title.getClass().getSimpleName());
             return "(Invalid title)";
         }
     }

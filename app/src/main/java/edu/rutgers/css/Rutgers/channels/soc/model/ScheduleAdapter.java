@@ -20,6 +20,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Adapter for subjects and courses.
  */
@@ -84,7 +86,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                 }).fail(new FailCallback<Exception>() {
                     @Override
                     public void onFail(Exception result) {
-                        Log.w(TAG, result.getMessage());
+                        LOGW(TAG, result.getMessage());
                     }
                 });
 

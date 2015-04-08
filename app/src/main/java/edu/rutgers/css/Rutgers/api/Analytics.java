@@ -37,6 +37,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Analytics service. Queues analytics events and flushes them to the server when the app is paused.
  * <p>
@@ -116,7 +118,7 @@ public final class Analytics extends IntentService {
         String extraString = workIntent.getStringExtra("extra");
 
         if (eventType != null) {
-            Log.v(TAG, "Queueing " + eventType + " event");
+            LOGV(TAG, "Queueing " + eventType + " event");
 
             // Open the event database
             AnalyticsOpenHelper analyticsOpenHelper = new AnalyticsOpenHelper(this);
@@ -124,7 +126,7 @@ public final class Analytics extends IntentService {
             try {
                 database = analyticsOpenHelper.getWritableDatabase();
             } catch (SQLiteException sqle) {
-                Log.e(TAG, sqle.getMessage());
+                LOGE(TAG, sqle.getMessage());
                 return;
             }
 
@@ -139,9 +141,9 @@ public final class Analytics extends IntentService {
             try {
                 database.insertOrThrow(AnalyticsOpenHelper.TABLE_NAME, null, newEntry);
                 database.setTransactionSuccessful();
-                Log.v(TAG, "Event queued");
+                LOGV(TAG, "Event queued");
             } catch (SQLiteException sqle) {
-                Log.e(TAG, "Failed to queue event: " + sqle.getMessage());
+                LOGE(TAG, "Failed to queue event: " + sqle.getMessage());
             } finally {
                 database.endTransaction();
             }
@@ -158,7 +160,7 @@ public final class Analytics extends IntentService {
     private void doPost(Intent workIntent) {
         JSONArray eventOutQueue = new JSONArray();
 
-        Log.i(TAG, "Attempting to post events");
+        LOGI(TAG, "Attempting to post events");
 
         // Open the event database
         AnalyticsOpenHelper analyticsOpenHelper = new AnalyticsOpenHelper(this);
@@ -166,7 +168,7 @@ public final class Analytics extends IntentService {
         try {
             database = analyticsOpenHelper.getWritableDatabase();
         } catch (SQLiteException sqle) {
-            Log.e(TAG, sqle.getMessage());
+            LOGE(TAG, sqle.getMessage());
             return;
         }
 
@@ -179,7 +181,7 @@ public final class Analytics extends IntentService {
             Cursor cursor = database.rawQuery("SELECT * FROM " + AnalyticsOpenHelper.TABLE_NAME, null);
 
             if (cursor.getCount() == 0) {
-                Log.i(TAG, "No events to post.");
+                LOGI(TAG, "No events to post.");
             } else {
                 while (cursor.moveToNext()) {
                     String type = cursor.getString(1);
@@ -198,7 +200,7 @@ public final class Analytics extends IntentService {
                                 eventJSON.put(curKey, extraJSON.get(curKey));
                             }
                         } catch (JSONException e) {
-                            Log.e(TAG, Log.getStackTraceString(e));
+                            LOGE(TAG, Log.getStackTraceString(e));
                         }
                     }
 
@@ -221,20 +223,20 @@ public final class Analytics extends IntentService {
                     HttpResponse httpResponse = httpClient.execute(httpPost);
 
                     // Successful POST - commit transaction to remove rows
-                    Log.i(TAG, httpResponse.getStatusLine().toString());
+                    LOGI(TAG, httpResponse.getStatusLine().toString());
                     int responseCode = httpResponse.getStatusLine().getStatusCode();
                     if (responseCode >= 200 && responseCode <= 299) {
                         database.setTransactionSuccessful();
-                        Log.i(TAG, cursor.getCount() + " events posted.");
+                        LOGI(TAG, cursor.getCount() + " events posted.");
                     }
                 } catch (IOException e) {
-                    Log.e(TAG, e.getMessage());
+                    LOGE(TAG, e.getMessage());
                 }
 
             }
 
         } catch (SQLiteException sqle) {
-            Log.e(TAG, "Failed to post events: " + sqle.getMessage());
+            LOGE(TAG, "Failed to post events: " + sqle.getMessage());
         } finally {
             database.endTransaction();
         }
@@ -274,7 +276,7 @@ public final class Analytics extends IntentService {
             eventJSON.put("platform", platform);
             eventJSON.put("release", release);
         } catch (JSONException e) {
-            Log.w(TAG, "getJSON(): " + e.getMessage());
+            LOGW(TAG, "getJSON(): " + e.getMessage());
         }
 
         return eventJSON;
@@ -295,7 +297,7 @@ public final class Analytics extends IntentService {
             platformJSON.put("android", Build.VERSION.SDK_INT);
             platformJSON.put("id", AppUtils.getUUID(context));
         } catch (JSONException e) {
-            Log.w(TAG, "getPlatformJSON(): " + e.getMessage());
+            LOGW(TAG, "getPlatformJSON(): " + e.getMessage());
         }
         return platformJSON;
     }
@@ -313,7 +315,7 @@ public final class Analytics extends IntentService {
             releaseJSON.put("version", Config.VERSION);
             releaseJSON.put("api", Config.API_LEVEL);
         } catch (JSONException e) {
-            Log.w(TAG, "getReleaseJSON(): " + e.getMessage());
+            LOGW(TAG, "getReleaseJSON(): " + e.getMessage());
         }
         return releaseJSON;
     }

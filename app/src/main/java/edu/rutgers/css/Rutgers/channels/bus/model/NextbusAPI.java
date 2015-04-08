@@ -31,6 +31,8 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Provides static methods for access to the Nextbus API.
  * Uses nextbusjs data to create requests against the official Nextbus API.
@@ -90,7 +92,7 @@ public final class NextbusAPI {
                         }
                     }
                 } catch (JsonSyntaxException | JSONException e) {
-                    Log.e(TAG, Log.getStackTraceString(e));
+                    LOGE(TAG, Log.getStackTraceString(e));
                     confd.reject(e);
                     return;
                 }
@@ -101,7 +103,7 @@ public final class NextbusAPI {
             @Override
             public void onFail(OneReject reject) {
                 AjaxStatus status = (AjaxStatus) reject.getReject();
-                Log.e(TAG, AppUtils.formatAjaxStatus(status));
+                LOGE(TAG, AppUtils.formatAjaxStatus(status));
                 confd.reject(new Exception(AppUtils.formatAjaxStatus(status)));
             }
         }).always(new AlwaysCallback<MultipleResults, OneReject>() {
@@ -125,7 +127,7 @@ public final class NextbusAPI {
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
             
             public void onDone(Void v) {
-                Log.v(TAG, "routePredict: " + agency + ", " + routeKey);
+                LOGV(TAG, "routePredict: " + agency + ", " + routeKey);
 
                 // Get agency configuration
                 AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
@@ -203,7 +205,7 @@ public final class NextbusAPI {
         sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
             
             public void onDone(Void v) {
-                Log.v(TAG, "stopPredict: " + agency + ", " + stopTitleKey);
+                LOGV(TAG, "stopPredict: " + agency + ", " + stopTitleKey);
 
                 // Get agency configuration
                 AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
@@ -407,7 +409,7 @@ public final class NextbusAPI {
                     for (String stopTag: stopGroup.getStopTags()) {
                         Stop stop = conf.getStops().get(stopTag);
                         if (stop == null) {
-                            Log.w(TAG, "Stop tag \""+stopTag+"\" found in stopsByTitle not in stops");
+                            LOGW(TAG, "Stop tag \""+stopTag+"\" found in stopsByTitle not in stops");
                             continue; // Check next tag
                         }
 

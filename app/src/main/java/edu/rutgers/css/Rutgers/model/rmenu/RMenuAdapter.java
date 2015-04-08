@@ -15,6 +15,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Array adapter for menus with items and section headers.
  * Takes items which implement the RMenuPart interface. The text for the item
@@ -139,7 +141,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
                 holder.titleTextView.setTextColor(holder.titleTextView.getTextColors().getDefaultColor());
             }
         } else if (viewTypes[getItemViewType(position)] != ViewTypes.IMAGE) {
-            Log.e(TAG, "R.id.title not found for view at position " + position);
+            LOGE(TAG, "R.id.title not found for view at position " + position);
         }
         
         // Set image

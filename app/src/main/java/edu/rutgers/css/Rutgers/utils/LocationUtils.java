@@ -33,6 +33,8 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.ui.LocationProviderActivity;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Defines app-wide constants and utilities
  */
@@ -109,11 +111,11 @@ public final class LocationUtils {
     public static boolean servicesConnected(@NonNull FragmentActivity activity) {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
         if (resultCode == ConnectionResult.SUCCESS) {
-            Log.v(TAG, "Google Play services available.");
+            LOGV(TAG, "Google Play services available.");
             return true;
         } else {
             showErrorDialog(activity, resultCode);
-            Log.w(TAG, LocationServiceErrorMessages.getErrorString(activity, resultCode));
+            LOGW(TAG, LocationServiceErrorMessages.getErrorString(activity, resultCode));
             return false;
         }
     }

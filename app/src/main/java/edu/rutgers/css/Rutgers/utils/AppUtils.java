@@ -35,6 +35,8 @@ import java.util.UUID;
 
 import edu.rutgers.css.Rutgers.R;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * General helper methods & global variables for the app
  */
@@ -68,7 +70,7 @@ public final class AppUtils {
                 }
                 installID = readInstallationFile(installation);
             } catch (Exception e) {
-                Log.e(TAG, Log.getStackTraceString(e));
+                LOGE(TAG, Log.getStackTraceString(e));
                 throw new RuntimeException(e);
             }
         }
@@ -109,17 +111,17 @@ public final class AppUtils {
                 if (dbCursor.getCount() > 0) {
                     dbCursor.moveToFirst();
                     result = dbCursor.getString(dbCursor.getColumnIndex("value"));
-                    Log.i(TAG, "Recovered Titanium UUID: " + result);
+                    LOGI(TAG, "Recovered Titanium UUID: " + result);
                 } else {
-                    Log.i(TAG, "Zero results");
+                    LOGI(TAG, "Zero results");
                 }
 
                 db.close();
             } catch (SQLiteException e) {
-                Log.w(TAG, e.getMessage());
+                LOGW(TAG, e.getMessage());
             }
         } else {
-            Log.i(TAG, "No Titanium database found.");
+            LOGI(TAG, "No Titanium database found.");
         }
 
         return result;
@@ -183,7 +185,7 @@ public final class AppUtils {
      */
     public static void showFailedLoadToast(Context context) {
         if (context != null) Toast.makeText(context, R.string.failed_load, Toast.LENGTH_SHORT).show();
-        else Log.w(TAG, "showFailedLoadToast(): context null");
+        else LOGW(TAG, "showFailedLoadToast(): context null");
     }
 
     /**
@@ -232,7 +234,7 @@ public final class AppUtils {
             is.close();
             br.close();
         } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
+            LOGE(TAG, e.getMessage());
             return null;
         }
 
@@ -253,8 +255,8 @@ public final class AppUtils {
 
         try {
             return new JSONArray(jsonString);
-        } catch(JSONException e) {
-            Log.e(TAG, "loadRawJSONArray(): " + e.getMessage());
+        } catch (JSONException e) {
+            LOGE(TAG, "loadRawJSONArray(): " + e.getMessage());
             return null;
         }
     }
@@ -271,8 +273,8 @@ public final class AppUtils {
 
         try {
             return new JSONObject(jsonString);
-        } catch(JSONException e) {
-            Log.e(TAG, "loadRawJSONObject(): " + e.getMessage());
+        } catch (JSONException e) {
+            LOGE(TAG, "loadRawJSONObject(): " + e.getMessage());
             return null;
         }
     }

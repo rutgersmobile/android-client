@@ -33,6 +33,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * RSS feed reader
  */
@@ -79,13 +81,13 @@ public class RSSReader extends BaseChannelFragment {
         mAdapter = new RSSAdapter(this.getActivity(), R.layout.row_rss, mData);
 
         if (savedInstanceState != null && savedInstanceState.getSerializable(SAVED_DATA_TAG) != null) {
-            Log.d(TAG, "Restoring mData");
+            LOGD(TAG, "Restoring mData");
             mAdapter.addAll((ArrayList<RSSItem>) savedInstanceState.getSerializable(SAVED_DATA_TAG));
             return;
         }
 
         if (args.getString(ARG_URL_TAG) == null) {
-            Log.e(TAG, "URL argument not set");
+            LOGE(TAG, "URL argument not set");
             Toast.makeText(getActivity(), R.string.failed_no_url, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -109,7 +111,7 @@ public class RSSReader extends BaseChannelFragment {
 
             @Override
             public void onFail(AjaxStatus e) {
-                Log.e(TAG, AppUtils.formatAjaxStatus(e));
+                LOGE(TAG, AppUtils.formatAjaxStatus(e));
                 AppUtils.showFailedLoadToast(getActivity());
             }
 

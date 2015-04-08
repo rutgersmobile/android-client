@@ -44,6 +44,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
  */
@@ -112,10 +114,10 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
                 List<String> semesters = result.getSemesters();
 
                 if (semesters.isEmpty()) {
-                    Log.e(TAG, "Semesters list is empty");
+                    LOGE(TAG, "Semesters list is empty");
                     return;
                 } else if (defaultIndex < 0 || defaultIndex >= semesters.size()) {
-                    Log.w(TAG, "Invalid default index " + defaultIndex);
+                    LOGW(TAG, "Invalid default index " + defaultIndex);
                     defaultIndex = 0;
                 }
 
@@ -129,9 +131,9 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
                 if (BuildConfig.DEBUG) {
                     for (String semester: mSemesters) {
-                        Log.v(TAG, "Got semester: " + ScheduleAPI.translateSemester(semester));
+                        LOGV(TAG, "Got semester: " + ScheduleAPI.translateSemester(semester));
                     }
-                    Log.v(TAG, "Default semester: " + ScheduleAPI.translateSemester(mDefaultSemester));
+                    LOGV(TAG, "Default semester: " + ScheduleAPI.translateSemester(mDefaultSemester));
                 }
 
                 // Campus, level, and semester have been set.
@@ -241,7 +243,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPref, String key) {
-        Log.v(TAG, "Setting changed: " + key);
+        LOGV(TAG, "Setting changed: " + key);
 
         // All 3 changes are submitted at once by the dialog. This gets all of the changes at once
         // in order to avoid calling loadSubjects() multiple times each time the config is changed.
@@ -273,7 +275,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         }
 
         if (somethingChanged) {
-            Log.v(TAG, "Loading new subjects");
+            LOGV(TAG, "Loading new subjects");
             loadSubjects();
         }
     }
@@ -294,7 +296,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
      */
     private void showSelectDialog() {
         if (mSemesters == null) {
-            Log.e(TAG, "No list of semesters to display for dialog");
+            LOGE(TAG, "No list of semesters to display for dialog");
             return;
         }
 
@@ -308,7 +310,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
      * Load list of subjects based on current configuration for campus, level, and semester.
      */
     private void loadSubjects() {
-        Log.v(TAG, "Loading subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
+        LOGV(TAG, "Loading subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
         setScheduleTitle();
         mAdapter.clear();
         mAdapter.notifyDataSetChanged();

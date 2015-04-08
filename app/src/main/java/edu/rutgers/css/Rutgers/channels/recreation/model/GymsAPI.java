@@ -26,6 +26,8 @@ import java.util.Locale;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 public final class GymsAPI {
     
     private static final String TAG = "Gyms";
@@ -61,7 +63,7 @@ public final class GymsAPI {
 
                     deferred.resolve(campuses);
                 } catch (JSONException | JsonSyntaxException e) {
-                    Log.e(TAG, e.getMessage());
+                    LOGE(TAG, e.getMessage());
                     deferred.reject(e);
                 }
 
@@ -69,7 +71,7 @@ public final class GymsAPI {
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus result) {
-                Log.e(TAG, AppUtils.formatAjaxStatus(result));
+                LOGE(TAG, AppUtils.formatAjaxStatus(result));
                 deferred.reject(new Exception(AppUtils.formatAjaxStatus(result)));
             }
         });
@@ -106,7 +108,7 @@ public final class GymsAPI {
         }).fail(new FailCallback<Exception>() {
             @Override
             public void onFail(Exception result) {
-                Log.e(TAG, result.getMessage());
+                LOGE(TAG, result.getMessage());
                 deferred.reject(result);
             }
         });

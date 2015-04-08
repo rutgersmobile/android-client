@@ -2,11 +2,12 @@ package edu.rutgers.css.Rutgers;
 
 import android.app.Application;
 import android.content.Context;
-import android.util.Log;
 
 import com.androidquery.callback.BitmapAjaxCallback;
 
 import edu.rutgers.css.Rutgers.api.Analytics;
+
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 public class RutgersApplication extends Application {
 
@@ -19,7 +20,7 @@ public class RutgersApplication extends Application {
         super.onCreate();
         RutgersApplication.context = getApplicationContext();
 
-        Log.v(TAG, "Application started");
+        LOGV(TAG, "Application started");
 
         // Queue "app launched" event
         Analytics.queueEvent(this, Analytics.LAUNCH, null);

@@ -14,6 +14,8 @@ import android.widget.TextView;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 public class TextDisplay extends Fragment {
 
     /* Log tag and component handle */
@@ -49,7 +51,7 @@ public class TextDisplay extends Fragment {
         if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
         if (args.getString(ARG_DATA_TAG) == null) {
-            Log.w(TAG, "No text set");
+            LOGW(TAG, "No text set");
             textView.setText(getString(R.string.failed_no_text));
         } else {
             textView.setText(Html.fromHtml(args.getString(ARG_DATA_TAG)));

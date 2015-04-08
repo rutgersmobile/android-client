@@ -28,6 +28,8 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 public class WebDisplay extends Fragment {
 
     /* Log tag and component handle */
@@ -92,7 +94,7 @@ public class WebDisplay extends Fragment {
                 initialIntent();
                 mWebView.loadUrl(mCurrentURL);
             } else {
-                Log.e(TAG, "No URL supplied");
+                LOGE(TAG, "No URL supplied");
             }
         }
 
@@ -128,7 +130,7 @@ public class WebDisplay extends Fragment {
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                Log.w(TAG, "WebViewClient error: code " + errorCode + ": " + description + " @ " + failingUrl);
+                LOGW(TAG, "WebViewClient error: code " + errorCode + ": " + description + " @ " + failingUrl);
 
                 // Can't handle this URI scheme, try a view intent
                 if (errorCode == WebViewClient.ERROR_UNSUPPORTED_SCHEME) {
@@ -140,7 +142,7 @@ public class WebDisplay extends Fragment {
                         }
                         startActivity(intent);
                     } catch(ActivityNotFoundException e) {
-                        Log.e(TAG, e.getMessage());
+                        LOGE(TAG, e.getMessage());
                     }
                 }
             }
@@ -150,7 +152,7 @@ public class WebDisplay extends Fragment {
         mWebView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType, long length) {
-                Log.i(TAG, "Downloading an " + mimeType);
+                LOGI(TAG, "Downloading an " + mimeType);
 
                 // Add cookies from current page to download request to maintain session
                 // (otherwise download may fail)
@@ -182,7 +184,7 @@ public class WebDisplay extends Fragment {
             mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
             initialIntent();
         } else {
-            Log.w(TAG, "Could not find Share menu item");
+            LOGW(TAG, "Could not find Share menu item");
         }
     }
 
@@ -237,8 +239,8 @@ public class WebDisplay extends Fragment {
             intent.putExtra(Intent.EXTRA_TEXT, url);
             mShareActionProvider.setShareIntent(intent);
         } else {
-            if (mCurrentURL == null) Log.w(TAG, "No URL set");
-            if (mShareActionProvider == null) Log.w(TAG, "Tried to set intent before action provider was set");
+            if (mCurrentURL == null) LOGW(TAG, "No URL set");
+            if (mShareActionProvider == null) LOGW(TAG, "Tried to set intent before action provider was set");
         }
     }
     /**

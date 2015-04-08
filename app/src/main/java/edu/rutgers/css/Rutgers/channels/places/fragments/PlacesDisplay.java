@@ -42,6 +42,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Display information about a Rutgers location from the Places database.
  * @author James Chambers
@@ -104,7 +106,7 @@ public class PlacesDisplay extends BaseChannelFragment {
         String key = args.getString(ARG_PLACEKEY_TAG);
         if (key == null) {
             AppUtils.showFailedLoadToast(getActivity());
-            Log.e(TAG, ARG_PLACEKEY_TAG + " is null");
+            LOGE(TAG, ARG_PLACEKEY_TAG + " is null");
             return;
         }
 
@@ -150,7 +152,7 @@ public class PlacesDisplay extends BaseChannelFragment {
                         RMenuImageRow staticMapRow = new RMenuImageRow(imgUrl, width, height);
                         mAdapter.add(staticMapRow);
                     } catch (MalformedURLException e) {
-                        Log.e(TAG, e.getMessage());
+                        LOGE(TAG, e.getMessage());
                     }
                     */
 
@@ -203,7 +205,7 @@ public class PlacesDisplay extends BaseChannelFragment {
                         }).fail(new FailCallback<Exception>() {
                             @Override
                             public void onFail(Exception e) {
-                                Log.w(TAG, "Getting nearby buses failed: " + e.getMessage());
+                                LOGW(TAG, "Getting nearby buses failed: " + e.getMessage());
                             }
                         });
                     }
@@ -233,7 +235,7 @@ public class PlacesDisplay extends BaseChannelFragment {
             @Override
             public void onFail(Exception e) {
                 AppUtils.showFailedLoadToast(getActivity());
-                Log.w(TAG, e.getMessage());
+                LOGW(TAG, e.getMessage());
             }
         }).always(new AlwaysCallback<Place, Exception>() {
             @Override

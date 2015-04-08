@@ -20,6 +20,8 @@ import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Class for holding RSS item data
  *
@@ -114,7 +116,7 @@ public class RSSItem implements Serializable {
                     this.date = eventOutDf.format(eventBegin);
                 }
             } catch (ParseException e) {
-                Log.w(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime") + "\"");
+                LOGW(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
                 this.date = item.text("event:beginDateTime");
             }
         }
@@ -126,7 +128,7 @@ public class RSSItem implements Serializable {
             else if (item.child("url") != null) this.imgUrl = new URL(item.text("url"));
             else this.imgUrl = null;
         } catch (MalformedURLException e) {
-            Log.e(TAG, e.getMessage());
+            LOGE(TAG, e.getMessage());
             this.imgUrl = null;
         }
     }

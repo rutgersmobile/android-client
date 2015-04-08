@@ -19,6 +19,8 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Base for an activity that can connect to Google location services and provide location
  * information to child fragments.
@@ -84,9 +86,9 @@ public abstract class LocationProviderActivity extends FragmentActivity implemen
         if (mLocationClient != null) {
             mLocationClient.registerConnectionCallbacks(listener);
             mLocationListeners.add(new WeakReference<>(listener));
-            Log.d(Config.APPTAG, "Registered location listener: " + listener.toString());
+            LOGD(Config.APPTAG, "Registered location listener: " + listener.toString());
         } else {
-            Log.e(Config.APPTAG, "Location client not set. Failed to register listener: " + listener.toString());
+            LOGE(Config.APPTAG, "Location client not set. Failed to register listener: " + listener.toString());
         }
     }
 
@@ -105,7 +107,7 @@ public abstract class LocationProviderActivity extends FragmentActivity implemen
 
         if (mLocationClient != null) {
             mLocationClient.unregisterConnectionCallbacks(listener);
-            Log.d(Config.APPTAG, "Unregistered location listener: " + listener.toString());
+            LOGD(Config.APPTAG, "Unregistered location listener: " + listener.toString());
         }
     }
 
@@ -115,7 +117,7 @@ public abstract class LocationProviderActivity extends FragmentActivity implemen
      */
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.i(Config.APPTAG, "Connected to Google Play services.");
+        LOGI(Config.APPTAG, "Connected to Google Play services.");
     }
 
     /**
@@ -123,7 +125,7 @@ public abstract class LocationProviderActivity extends FragmentActivity implemen
      */
     @Override
     public void onDisconnected() {
-        Log.i(Config.APPTAG, "Disconnected from Google Play services");
+        LOGI(Config.APPTAG, "Disconnected from Google Play services");
     }
 
     /**
@@ -133,14 +135,14 @@ public abstract class LocationProviderActivity extends FragmentActivity implemen
     public void onConnectionFailed(ConnectionResult result) {
         if (mResolvingError) return;
 
-        Log.w(Config.APPTAG, "Attempting to resolve Play Services connection failure");
+        LOGW(Config.APPTAG, "Attempting to resolve Play Services connection failure");
 
         if (result.hasResolution()) {
             try {
                 mResolvingError = true;
                 result.startResolutionForResult(this, LocationUtils.REQUEST_RESOLVE_ERROR);
             } catch (IntentSender.SendIntentException e) {
-                Log.e(Config.APPTAG, Log.getStackTraceString(e));
+                LOGE(Config.APPTAG, Log.getStackTraceString(e));
                 mLocationClient.connect(); // Try again
             }
         } else {
@@ -163,15 +165,15 @@ public abstract class LocationProviderActivity extends FragmentActivity implemen
             case LocationUtils.REQUEST_RESOLVE_ERROR:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
-                        Log.w(Config.APPTAG, "Connection failure resolved by Google Play");
+                        LOGW(Config.APPTAG, "Connection failure resolved by Google Play");
                         if (!mLocationClient.isConnecting() && !mLocationClient.isConnected()) {
-                            Log.w(Config.APPTAG, "Attempting to reconnect to Play Services...");
+                            LOGW(Config.APPTAG, "Attempting to reconnect to Play Services...");
                             mLocationClient.connect();
                         }
                         break;
 
                     default:
-                        Log.w(Config.APPTAG, "Connection failure not resolved by Google Play (result: "+resultCode+")");
+                        LOGW(Config.APPTAG, "Connection failure not resolved by Google Play (result: "+resultCode+")");
                         break;
                 }
                 break;
@@ -179,7 +181,7 @@ public abstract class LocationProviderActivity extends FragmentActivity implemen
             // If any other request code was received
             default:
                 // Report that this Activity received an unknown requestCode
-                Log.w(Config.APPTAG, "Unknown request code: " + requestCode);
+                LOGW(Config.APPTAG, "Unknown request code: " + requestCode);
                 break;
         }
     }

@@ -55,6 +55,8 @@ import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Main activity. Handles navigation drawer, displayed fragments, and connection to location services.
  */
@@ -93,7 +95,7 @@ public class MainActivity extends LocationProviderActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d(TAG, "UUID: " + AppUtils.getUUID(this));
+        LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
 
         mComponentFactory = new ComponentFactory();
         mChannelManager = new ChannelManager();
@@ -131,7 +133,7 @@ public class MainActivity extends LocationProviderActivity implements
                 if (mShowDrawerTutorial) {
                     PrefUtils.markDrawerUsed(getApplicationContext());
                     mShowDrawerTutorial = false;
-                    Log.i(TAG, "Drawer opened for first time.");
+                    LOGI(TAG, "Drawer opened for first time.");
                 }
             }
         };
@@ -236,7 +238,7 @@ public class MainActivity extends LocationProviderActivity implements
     
     @Override
     public void onBackPressed() {
-        Log.v(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
+        LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
 
         // If drawer is open, intercept back press to close drawer
         if (mDrawerLayout.isDrawerOpen(mDrawerListView)) {
@@ -249,7 +251,7 @@ public class MainActivity extends LocationProviderActivity implements
             Fragment webView = getSupportFragmentManager().findFragmentByTag(WebDisplay.HANDLE);
             if (webView != null && webView.isVisible()) {
                 if (((WebDisplay) webView).backPress()) {
-                    Log.d(TAG, "Triggered WebView back button");
+                    LOGD(TAG, "Triggered WebView back button");
                     return;
                 }
             }
@@ -311,7 +313,7 @@ public class MainActivity extends LocationProviderActivity implements
 
         // Check if this is the first time the app is being launched
         if (PrefUtils.isFirstLaunch(this)) {
-            Log.i(TAG, "First launch");
+            LOGI(TAG, "First launch");
 
             // First launch, create analytics event & show settings screen
             Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
@@ -328,7 +330,7 @@ public class MainActivity extends LocationProviderActivity implements
             mShowDrawerTutorial = false;
         } else {
             mShowDrawerTutorial = true;
-            Log.i(TAG, "Drawer never opened before, show tutorial!");
+            LOGI(TAG, "Drawer never opened before, show tutorial!");
         }
     }
 
@@ -362,7 +364,7 @@ public class MainActivity extends LocationProviderActivity implements
 
             @Override
             public void onFail(AjaxStatus status) {
-                Log.e(TAG, "loadWebShortcuts(): " + AppUtils.formatAjaxStatus(status));
+                LOGE(TAG, "loadWebShortcuts(): " + AppUtils.formatAjaxStatus(status));
             }
 
         });
@@ -475,7 +477,7 @@ public class MainActivity extends LocationProviderActivity implements
             extras.put("api", args.getString(ComponentFactory.ARG_API_TAG));
             extras.put("title", args.getString(ComponentFactory.ARG_TITLE_TAG));
         } catch (JSONException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            LOGE(TAG, Log.getStackTraceString(e));
         }
         Analytics.queueEvent(this, Analytics.CHANNEL_OPENED, extras);
     }
@@ -489,7 +491,7 @@ public class MainActivity extends LocationProviderActivity implements
             extras.put("api", args.getString(ComponentFactory.ARG_API_TAG));
             extras.put("title", args.getString(ComponentFactory.ARG_TITLE_TAG));
         } catch (JSONException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            LOGE(TAG, Log.getStackTraceString(e));
         }
         Analytics.queueEvent(this, Analytics.ERROR, extras);
     }

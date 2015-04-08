@@ -33,6 +33,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Component builder
  */
@@ -126,15 +128,15 @@ public final class ComponentFactory {
         component = args.getString(ARG_COMPONENT_TAG).toLowerCase(Locale.US);
         final Class<? extends Fragment> componentClass = sFragmentTable.get(component);
         if (componentClass != null) {
-            Log.v(TAG, "Creating a " + componentClass.getSimpleName());
+            LOGV(TAG, "Creating a " + componentClass.getSimpleName());
             try {
                 fragment = componentClass.newInstance();
             } catch (Exception e) {
-                Log.e(TAG, Log.getStackTraceString(e));
+                LOGE(TAG, Log.getStackTraceString(e));
                 return null;
             }    
         } else {
-            Log.e(TAG, "Component \"" + component + "\" not found");
+            LOGE(TAG, "Component \"" + component + "\" not found");
             return null;
         }
 

@@ -22,6 +22,8 @@ import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Displays all food items available for a specific meal at a specific dining location.
  * @author James Chambers
@@ -70,10 +72,10 @@ public class FoodMeal extends Fragment {
                 R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         if (args.getString(ARG_LOCATION_TAG) == null) {
-            Log.e(TAG, "Location not set");
+            LOGE(TAG, "Location not set");
             return;
         } else if (args.getString(ARG_MEAL_TAG) == null) {
-            Log.e(TAG, "Meal not set");
+            LOGE(TAG, "Meal not set");
             return;
         }
 
@@ -84,7 +86,7 @@ public class FoodMeal extends Fragment {
             public void onDone(DiningMenu diningMenu) {
                 DiningMenu.Meal meal = diningMenu.getMeal(args.getString(ARG_MEAL_TAG));
                 if (meal == null) {
-                    Log.e(TAG, "Meal \"" + args.getString(ARG_MEAL_TAG) + "\" not found");
+                    LOGE(TAG, "Meal \"" + args.getString(ARG_MEAL_TAG) + "\" not found");
                     return;
                 }
 
@@ -97,7 +99,7 @@ public class FoodMeal extends Fragment {
 
             @Override
             public void onFail(Exception e) {
-                Log.e(TAG, e.getMessage());
+                LOGE(TAG, e.getMessage());
                 AppUtils.showFailedLoadToast(getActivity());
             }
 

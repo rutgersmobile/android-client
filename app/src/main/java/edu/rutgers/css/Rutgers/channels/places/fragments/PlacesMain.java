@@ -39,6 +39,8 @@ import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * <p>The main Places fragment displays nearby Rutgers locations (buildings, parks, etc.), as well as
  * a search bar allowing the user to find places by name or building code.</p>
@@ -75,14 +77,14 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Log.d(TAG, "Attaching to activity");
+        LOGD(TAG, "Attaching to activity");
         mLocationClientProvider = (LocationClientProvider) activity;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d(TAG, "Detaching from activity");
+        LOGD(TAG, "Detaching from activity");
         mLocationClientProvider = null;
     }
 
@@ -178,7 +180,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.i(TAG, "Connected to services");
+        LOGI(TAG, "Connected to services");
 
         // When location services are restored, retry loading nearby places.
         // Make sure this isn't called before the activity has been attached
@@ -190,13 +192,13 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
 
     @Override
     public void onDisconnected() {
-        Log.i(TAG, "Disconnected from services");
+        LOGI(TAG, "Disconnected from services");
     }
 
     private void loadNearbyPlaces() {
         if (!isAdded()) return;
 
-        Log.i(TAG, "Updating nearby places");
+        LOGI(TAG, "Updating nearby places");
 
         final String nearbyPlacesString = getString(R.string.places_nearby);
         final String noneNearbyString = getString(R.string.places_none_nearby);
@@ -212,7 +214,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
 
         // Check for location services
         if (mLocationClientProvider == null || !mLocationClientProvider.getLocationClient().isConnected()) {
-            Log.w(TAG, "Location services not connected");
+            LOGW(TAG, "Location services not connected");
             nearbyPlaces.add(new KeyValPair(null, connectingString));
             mAdapter.notifyDataSetChanged();
             return;
@@ -221,7 +223,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
         // Get last location
         final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
         if (lastLoc == null) {
-            Log.w(TAG, "Couldn't get location");
+            LOGW(TAG, "Couldn't get location");
             nearbyPlaces.add(new KeyValPair(null, failedLocationString));
             mAdapter.notifyDataSetChanged();
             return;
@@ -250,7 +252,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
 
             @Override
             public void onFail(Exception e) {
-                Log.e(TAG, e.getMessage());
+                LOGE(TAG, e.getMessage());
                 mAdapter.clear();
                 nearbyPlaces.add(new KeyValPair(null, failedLoadString));
                 mAdapter.add(nearbyPlacesSection);

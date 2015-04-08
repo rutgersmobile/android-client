@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.recreation.model.MeetingAreaHours;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Fragment for an individual page of facility hours.
  */
@@ -54,7 +56,7 @@ public class HourSwiperFragment extends Fragment {
 
         List<MeetingAreaHours> areaHours = (List<MeetingAreaHours>) args.getSerializable(LOCATIONS_TAG);
         if (areaHours == null) {
-            Log.e(TAG, "Area hours not set");
+            LOGE(TAG, "Area hours not set");
             return v;
         }
 
@@ -96,7 +98,7 @@ public class HourSwiperFragment extends Fragment {
                 Pattern pattern = Pattern.compile("\\d{1,2}(\\:\\d{2})?\\s?((A|P)M)?\\s?-\\s?\\d{1,2}(\\:\\d{2})?\\s?(A|P)M");
                 Matcher matcher = pattern.matcher(hoursString);
                 while(matcher.find()) {
-                    //Log.v(TAG, "Found " + matcher.group() + " at ("+matcher.start()+","+matcher.end()+")");
+                    //LOGV(TAG, "Found " + matcher.group() + " at ("+matcher.start()+","+matcher.end()+")");
                     builder.append(StringUtils.trim(matcher.group())).append("\n");
                     matches++;
                 }

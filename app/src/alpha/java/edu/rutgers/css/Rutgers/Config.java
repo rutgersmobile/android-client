@@ -14,6 +14,7 @@ public final class Config {
     public static final String OSNAME = "android";
     public static final String BETAMODE = "dev";
     public static final Boolean BETA = true;
+    public static final Boolean LOGGING_ENABLED = true;
 
     // Server and API level
     public static final String API_LEVEL = "1";

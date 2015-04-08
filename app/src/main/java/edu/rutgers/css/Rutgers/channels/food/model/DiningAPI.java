@@ -24,6 +24,8 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Helper for getting data from dining API
  */
@@ -69,7 +71,7 @@ public final class DiningAPI {
                         sNBDiningMenus.add(diningMenu);
                     }
                 } catch (JSONException | JsonSyntaxException e) {
-                    Log.e(TAG, "setup(): " + e.getMessage());
+                    LOGE(TAG, "setup(): " + e.getMessage());
                     confd.reject(e);
                 }
 
@@ -80,7 +82,7 @@ public final class DiningAPI {
 
             @Override
             public void onFail(AjaxStatus e) {
-                Log.e(TAG, AppUtils.formatAjaxStatus(e));
+                LOGE(TAG, AppUtils.formatAjaxStatus(e));
                 confd.reject(new Exception(AppUtils.formatAjaxStatus(e)));
             }
 
@@ -139,7 +141,7 @@ public final class DiningAPI {
                 }
 
                 // No matching dining hall found
-                Log.w(TAG, "Dining hall \"" + location + "\" not found in API.");
+                LOGW(TAG, "Dining hall \"" + location + "\" not found in API.");
                 d.reject(new IllegalArgumentException("Dining hall not found"));
             }
 

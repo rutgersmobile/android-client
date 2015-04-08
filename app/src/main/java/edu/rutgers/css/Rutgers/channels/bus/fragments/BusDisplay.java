@@ -34,6 +34,8 @@ import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 public class BusDisplay extends BaseChannelFragment implements DoneCallback<List<Prediction>>,
         FailCallback<Exception>, AlwaysCallback<List<Prediction>, Exception> {
 
@@ -117,7 +119,7 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
         String requiredArgs[] = {ARG_AGENCY_TAG, ARG_MODE_TAG, ARG_TAG_TAG};
         for (String argTag: requiredArgs) {
             if (StringUtils.isBlank(args.getString(argTag))) {
-                Log.e(TAG, "Argument \""+argTag+"\" not set");
+                LOGE(TAG, "Argument \""+argTag+"\" not set");
                 missingArg = true;
             }
         }
@@ -130,7 +132,7 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
         } else if (BusDisplay.STOP_MODE.equalsIgnoreCase(mode)) {
             mMode = BusDisplay.STOP_MODE;
         } else {
-            Log.e(TAG, "Invalid mode \""+args.getString(ARG_MODE_TAG)+"\"");
+            LOGE(TAG, "Invalid mode \""+args.getString(ARG_MODE_TAG)+"\"");
             // End here and make sure mAgency and mTag are null to prevent update attempts
             return;
         }
@@ -149,7 +151,7 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
         if (args.getString(ARG_TITLE_TAG) != null) {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         } else {
-            Log.e(TAG, "Argument \""+ARG_TITLE_TAG+"\" not set");
+            LOGE(TAG, "Argument \""+ARG_TITLE_TAG+"\" not set");
             getActivity().setTitle(getString(R.string.bus_title));
         }
 
@@ -260,7 +262,7 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
                 Prediction oldPrediction = mAdapter.getItem(i);
 
                 if (!newPrediction.equals(oldPrediction)) {
-                    Log.d(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());
+                    LOGD(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());
                     oldPrediction.setTitle(newPrediction.getTitle());
                     oldPrediction.setTag(newPrediction.getTag());
                 }

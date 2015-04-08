@@ -18,6 +18,8 @@ import java.util.Set;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Maintains the list of loaded RU Mobile channels.
  */
@@ -73,7 +75,7 @@ public final class ChannelManager {
                 JSONObject cur = array.getJSONObject(i);
                 addChannel(cur);
             } catch (JSONException e) {
-                Log.w(TAG, "loadChannelsFromJSONArray(): " + e.getMessage());
+                LOGW(TAG, "loadChannelsFromJSONArray(): " + e.getMessage());
             }
         }
     }
@@ -90,7 +92,7 @@ public final class ChannelManager {
                 cur.putOpt("category", category);
                 addChannel(cur);
             } catch (JSONException e) {
-                Log.w(TAG, "loadChannelsFromJSONArray(): " + e.getMessage());
+                LOGW(TAG, "loadChannelsFromJSONArray(): " + e.getMessage());
             }
         }
     }
@@ -119,17 +121,17 @@ public final class ChannelManager {
             if (channelsMap.get(handle) != null) {
                 // If the new channel has override permission, insert it over the old one
                 if (channel.canOverride()) {
-                    Log.i(TAG, "Overriding channel " + handle);
+                    LOGI(TAG, "Overriding channel " + handle);
                     channelsMap.put(handle, channel);
                 } else {
-                    Log.i(TAG, "Discarding duplicate channel: " + handle);
+                    LOGI(TAG, "Discarding duplicate channel: " + handle);
                 }
             } else {
                 // This channel is not already mapped - add it in
                 channelsMap.put(handle, channel);
             }
         } catch (JSONException e) {
-            Log.e(TAG, "Could not add channel: " + e.getMessage());
+            LOGE(TAG, "Could not add channel: " + e.getMessage());
         }
     }
 

@@ -31,6 +31,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Display description and section information for a course.
  */
@@ -73,7 +75,7 @@ public class SOCSections extends BaseChannelFragment {
         mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, data);
 
         if (args.getString(ARG_DATA_TAG) == null) {
-            Log.e(TAG, "Course data not set");
+            LOGE(TAG, "Course data not set");
             AppUtils.showFailedLoadToast(getActivity());
             return;
         }
@@ -82,7 +84,7 @@ public class SOCSections extends BaseChannelFragment {
         try {
             mCourse = gson.fromJson(args.getString(ARG_DATA_TAG), Course.class);
         } catch (JsonSyntaxException e) {
-            Log.e(TAG, e.getMessage());
+            LOGE(TAG, e.getMessage());
             return;
         }
 
@@ -135,7 +137,7 @@ public class SOCSections extends BaseChannelFragment {
                         switchFragments(WebDisplay.createArgs("WebReg", ScheduleAPI.getRegistrationLink(semester, index)));
                     } else {
                         Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
-                        Log.w(TAG, "Section had no index field. Failed to launch webreg.");
+                        LOGW(TAG, "Section had no index field. Failed to launch webreg.");
                     }
                 }
             }

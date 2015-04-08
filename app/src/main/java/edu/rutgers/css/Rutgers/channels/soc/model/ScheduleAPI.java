@@ -21,6 +21,8 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Schedule of Classes API
  */
@@ -56,7 +58,7 @@ public final class ScheduleAPI {
                 try {
                     deferred.resolve(gson.fromJson(result.toString(), Semesters.class));
                 } catch (JsonSyntaxException e) {
-                    Log.e(TAG, "getSemesters(): " + e.getMessage());
+                    LOGE(TAG, "getSemesters(): " + e.getMessage());
                     deferred.reject(e);
                 }
             }
@@ -100,7 +102,7 @@ public final class ScheduleAPI {
                     }
                     deferred.resolve(subjects);
                 } catch (JSONException | JsonSyntaxException e) {
-                    Log.e(TAG, "getSubjects(): " + e.getMessage());
+                    LOGE(TAG, "getSubjects(): " + e.getMessage());
                     deferred.reject(e);
                 }
             }
@@ -145,7 +147,7 @@ public final class ScheduleAPI {
                     }
                     deferred.resolve(courses);
                 } catch (JSONException | JsonSyntaxException e) {
-                    Log.e(TAG, "getCourses(): " + e.getMessage());
+                    LOGE(TAG, "getCourses(): " + e.getMessage());
                     deferred.reject(e);
                 }
             }
@@ -184,7 +186,7 @@ public final class ScheduleAPI {
                 try {
                     deferred.resolve(gson.fromJson(result.toString(), Course.class));
                 } catch (JsonSyntaxException e) {
-                    Log.e(TAG, "getCourse(): " + e.getMessage());
+                    LOGE(TAG, "getCourse(): " + e.getMessage());
                     deferred.reject(e);
                 }
             }
@@ -215,7 +217,7 @@ public final class ScheduleAPI {
                     SOCIndex socIndex = new SOCIndex(campusCode, levelCode, semesterCode, result);
                     deferred.resolve(socIndex);
                 } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "getIndex(): " + e.getMessage());
+                    LOGE(TAG, "getIndex(): " + e.getMessage());
                     deferred.reject(e);
                 }
             }
@@ -276,7 +278,7 @@ public final class ScheduleAPI {
      * @return Unchanged invalid string
      */
     private static String invalidSemester(String semesterCode) {
-        Log.e(TAG, "Invalid semester code \"" + semesterCode + "\"");
+        LOGE(TAG, "Invalid semester code \"" + semesterCode + "\"");
         return semesterCode;
     }
 

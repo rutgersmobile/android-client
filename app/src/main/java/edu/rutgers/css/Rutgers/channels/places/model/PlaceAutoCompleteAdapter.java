@@ -14,6 +14,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Adapter for place auto-completion results. The filter executes queries on the Places API and
  * the results are placed into the adapter so that they can be shown in some form of list.
@@ -76,7 +78,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
             }).fail(new FailCallback<Exception>() {
                 @Override
                 public void onFail(Exception result) {
-                    Log.w(TAG, result.getMessage());
+                    LOGW(TAG, result.getMessage());
                 }
             });
 
@@ -84,7 +86,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
             try {
                 p.waitSafely();
             } catch (InterruptedException e) {
-                Log.e(TAG, e.getMessage());
+                LOGE(TAG, e.getMessage());
             }
 
             return results;

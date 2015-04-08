@@ -37,6 +37,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Dynamic Table
  * <p>Use {@link #dTag()} instead of TAG when logging</p>
@@ -123,7 +125,7 @@ public class DTable extends BaseChannelFragment {
             mHandle = savedInstanceState.getString(SAVED_HANDLE_TAG);
             mDRoot = (DTableRoot) savedInstanceState.getSerializable(SAVED_ROOT_TAG);
             mAdapter.addAll(mDRoot.getChildren());
-            Log.d(dTag(), "Restoring mData");
+            LOGD(dTag(), "Restoring mData");
             return;
         }
 
@@ -140,7 +142,7 @@ public class DTable extends BaseChannelFragment {
                 mAdapter.addAll(mDRoot.getChildren());
                 return;
             } catch (ClassCastException e) {
-                Log.e(dTag(), "onCreateView(): " + e.getMessage());
+                LOGE(dTag(), "onCreateView(): " + e.getMessage());
             }
         }
 
@@ -148,7 +150,7 @@ public class DTable extends BaseChannelFragment {
         else if (args.getString(ARG_URL_TAG) != null) mURL = args.getString(ARG_URL_TAG);
         else if (args.getString(ARG_API_TAG) != null) mAPI = args.getString(ARG_API_TAG);
         else {
-            Log.e(dTag(), "DTable must have URL, API, or data in its arguments bundle");
+            LOGE(dTag(), "DTable must have URL, API, or data in its arguments bundle");
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -166,10 +168,10 @@ public class DTable extends BaseChannelFragment {
             public void onDone(JSONObject result) {
                 try {
                     mDRoot = new DTableRoot(result);
-                    Log.v(dTag(), "Loaded DTable root: " + mDRoot.getTitle());
+                    LOGV(dTag(), "Loaded DTable root: " + mDRoot.getTitle());
                     mAdapter.addAll(mDRoot.getChildren());
                 } catch (JSONException e) {
-                    Log.e(dTag(), "onCreate(): " + e.getMessage());
+                    LOGE(dTag(), "onCreate(): " + e.getMessage());
                     AppUtils.showFailedLoadToast(getActivity());
                 }
             }
@@ -178,7 +180,7 @@ public class DTable extends BaseChannelFragment {
 
             @Override
             public void onFail(AjaxStatus status) {
-                Log.w(dTag(), AppUtils.formatAjaxStatus(status));
+                LOGW(dTag(), AppUtils.formatAjaxStatus(status));
                 AppUtils.showFailedLoadToast(getActivity());
             }
 

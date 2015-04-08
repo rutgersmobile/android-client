@@ -11,6 +11,8 @@ import android.util.Log;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Image utilities
  */
@@ -47,7 +49,7 @@ public final class ImageUtils {
             drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
             return drawable;
         } catch(Resources.NotFoundException e) {
-            Log.w(TAG, "getIcon(): " + e.getMessage());
+            LOGW(TAG, "getIcon(): " + e.getMessage());
             return null;
         }
     }
@@ -65,14 +67,14 @@ public final class ImageUtils {
         try {
             iconRes = resources.getIdentifier("ic_"+handle, "drawable", Config.PACKAGE_NAME);
         } catch(Resources.NotFoundException e) {
-            Log.w(TAG, "getIcon(): " + e.getMessage());
+            LOGW(TAG, "getIcon(): " + e.getMessage());
         }
 
         // Look up the color resource
         try {
             colorRes = resources.getIdentifier(handle+"_icon_color", "color", Config.PACKAGE_NAME);
         } catch(Resources.NotFoundException e) {
-            Log.w(TAG, "getIcon(): " + e.getMessage());
+            LOGW(TAG, "getIcon(): " + e.getMessage());
         }
 
         return getIcon(resources, iconRes, colorRes);

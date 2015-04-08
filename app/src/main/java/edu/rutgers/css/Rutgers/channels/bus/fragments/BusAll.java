@@ -40,6 +40,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 public class BusAll extends BaseChannelFragment {
 
@@ -123,7 +124,7 @@ public class BusAll extends BaseChannelFragment {
             public void onFail(OneReject result) {
                 AppUtils.showFailedLoadToast(getActivity());
                 Exception e = (Exception) result.getReject();
-                Log.w(TAG, e.getMessage());
+                LOGW(TAG, e.getMessage());
             }
 
         }).always(new AlwaysCallback<MultipleResults, OneReject>() {

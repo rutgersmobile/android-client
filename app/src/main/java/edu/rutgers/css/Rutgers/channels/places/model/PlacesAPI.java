@@ -35,6 +35,8 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Provides access to the Places database.
  * @author James Chambers
@@ -90,14 +92,14 @@ public final class PlacesAPI {
                                 sTokens.put(tokens.getString(i), place);
                             }
                         } else {
-                            Log.e(TAG, "No document found for key from lunr.documentStore: \""+docKey+"\"");
+                            LOGE(TAG, "No document found for key from lunr.documentStore: \""+docKey+"\"");
                         }
                     }
 
 
                     confd.resolve(null);
                 } catch (JSONException | JsonSyntaxException e) {
-                    Log.e(TAG, "setup(): " + e.getMessage());
+                    LOGE(TAG, "setup(): " + e.getMessage());
                     confd.reject(e);
                     sPlaces = null;
                 }

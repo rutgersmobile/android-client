@@ -22,6 +22,8 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * An array adapter for course sections. Displays each section with instructor and meeting times.
  * Also displays course description and prerequisites if available.
@@ -286,7 +288,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
             Integer endInt = Integer.parseInt(endHour);
             if (endInt == 12 || endInt < beginInt) endPmCode = "P";
         } catch (NumberFormatException e) {
-            Log.w(TAG, "Couldn't parse ints");
+            LOGW(TAG, "Couldn't parse ints");
         }
 
         return beginHour + ":" + beginTime.substring(2,4) + " " + pmCode + "M" +

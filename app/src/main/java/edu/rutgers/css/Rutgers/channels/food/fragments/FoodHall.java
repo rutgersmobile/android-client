@@ -31,6 +31,8 @@ import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Displays available meals for a dining hall.
  * @author James Chambers
@@ -75,7 +77,7 @@ public class FoodHall extends Fragment {
 
         mLocation = args.getString(ARG_LOCATION_TAG);
         if (mLocation == null) {
-            Log.e(TAG, "location argument not set");
+            LOGE(TAG, "location argument not set");
             return;
         }
 
@@ -113,7 +115,7 @@ public class FoodHall extends Fragment {
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         } else {
             Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Location not set");
+            LOGE(TAG, "Location not set");
             return v;
         }
 

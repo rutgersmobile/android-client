@@ -43,6 +43,8 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 public class BusStops extends BaseChannelFragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
 
     /* Log tag and component handle */
@@ -69,14 +71,14 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        Log.d(TAG, "Attaching to activity");
+        LOGD(TAG, "Attaching to activity");
         mLocationClientProvider = (LocationClientProvider) activity;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d(TAG, "Detaching from activity");
+        LOGD(TAG, "Detaching from activity");
         mLocationClientProvider = null;
     }
 
@@ -223,7 +225,7 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        Log.i(TAG, "Connected to services");
+        LOGI(TAG, "Connected to services");
 
         // Location services reconnected - retry loading nearby stops
         // Make sure this isn't called before onCreate() has ran.
@@ -232,7 +234,7 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
 
     @Override
     public void onDisconnected() {
-        Log.i(TAG, "Disconnected from services");
+        LOGI(TAG, "Disconnected from services");
     }
 
     /**
@@ -271,14 +273,14 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
             // Get last location
             Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
             if (lastLoc == null) {
-                Log.w(TAG, "Could not get location");
+                LOGW(TAG, "Could not get location");
                 clearNearbyRows();
                 //addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
                 return;
             }
 
-            if (BuildConfig.DEBUG) Log.d(TAG, "Current location: " + lastLoc.toString());
-            Log.i(TAG, "Updating nearby active stops");
+            if (BuildConfig.DEBUG) LOGD(TAG, "Current location: " + lastLoc.toString());
+            LOGI(TAG, "Updating nearby active stops");
 
             Promise<List<StopGroup>, Exception, Void> nbNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NB, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
             Promise<List<StopGroup>, Exception, Void> nwkNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NWK, (float) lastLoc.getLatitude(), (float) lastLoc.getLongitude());
@@ -314,7 +316,7 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
                 }
             });
         } else {
-            Log.w(TAG, "Couldn't get location provider, can't find nearby stops");
+            LOGW(TAG, "Couldn't get location provider, can't find nearby stops");
             //addNearbyRow(1, new RMenuItemRow(getString(R.string.failed_location)));
         }
 

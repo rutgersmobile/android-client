@@ -22,6 +22,8 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
 import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Displays facility calendar of hours.
  */
@@ -72,7 +74,7 @@ public class  RecreationHoursDisplay extends Fragment {
         // Load location hours
         mSchedules = (List<FacilityDaySchedule>) args.getSerializable(ARG_DATA_TAG);
         if (mSchedules == null) {
-            Log.e(TAG, "Hours data not set");
+            LOGE(TAG, "Hours data not set");
             mSchedules = new ArrayList<>();
         }
 

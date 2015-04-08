@@ -40,6 +40,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+
 /**
  * Facility information: hours, address, phone numbers, etc.
  */
@@ -91,7 +93,7 @@ public class RecreationDisplay extends BaseChannelFragment {
 
         // Make sure necessary arguments were given
         if (args.getString(ARG_CAMPUS_TAG) == null || args.getString(ARG_FACILITY_TAG) == null) {
-            Log.e(TAG, "Missing campus/location arguments");
+            LOGE(TAG, "Missing campus/location arguments");
             return;
         }
 
@@ -208,7 +210,7 @@ public class RecreationDisplay extends BaseChannelFragment {
                 mAdapter.add(new RMenuHeaderRow(getString(R.string.rec_hours_header)));
                 mAdapter.add(new RMenuItemRow(rowArgs));
             } catch (JsonSyntaxException e) {
-                Log.e(TAG, "addInfo(): " + e.getMessage());
+                LOGE(TAG, "addInfo(): " + e.getMessage());
             }
         }
 
