@@ -119,6 +119,7 @@ public class WebDisplay extends Fragment {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (mWebView == null) return false;
                 mCurrentURL = url;
                 mWebView.loadUrl(mCurrentURL);
                 setShareIntent(mCurrentURL);
@@ -133,9 +134,11 @@ public class WebDisplay extends Fragment {
                 if (errorCode == WebViewClient.ERROR_UNSUPPORTED_SCHEME) {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(failingUrl));
                     try {
+                        if (mWebView != null) {
+                            String handleIt = String.format(getString(R.string.www_handle_uri), failingUrl);
+                            mWebView.loadData(handleIt, "text/plain", null);
+                        }
                         startActivity(intent);
-                        String handleIt = String.format(getString(R.string.www_handle_uri), failingUrl);
-                        mWebView.loadData(handleIt, "text/plain", null);
                     } catch(ActivityNotFoundException e) {
                         Log.e(TAG, e.getMessage());
                     }
