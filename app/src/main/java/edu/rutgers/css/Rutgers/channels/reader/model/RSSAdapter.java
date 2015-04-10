@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import com.androidquery.AQuery;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
@@ -78,7 +80,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
         // Populate RSS row layout elements
         holder.titleTextView.setText(curItem.getTitle());
 
-        if (curItem.getDate() != null && !curItem.getDate().isEmpty()) {
+        if (StringUtils.isNotBlank(curItem.getDate())) {
             holder.dateTextView.setText(curItem.getDate());
             holder.dateTextView.setVisibility(View.VISIBLE);
         } else {
