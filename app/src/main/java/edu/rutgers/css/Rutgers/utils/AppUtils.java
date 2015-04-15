@@ -27,15 +27,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import edu.rutgers.css.Rutgers.R;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * General helper methods & global variables for the app
@@ -198,7 +196,7 @@ public final class AppUtils {
 
         FragmentManager fm = activity.getSupportFragmentManager();
         if (fm.getBackStackEntryCount() > 0) {
-            return handle.equalsIgnoreCase(fm.getBackStackEntryAt(fm.getBackStackEntryCount()-1).getName());
+            return handle.equalsIgnoreCase(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
         } else {
             return false;
         }
@@ -277,22 +275,6 @@ public final class AppUtils {
             LOGE(TAG, "loadRawJSONObject(): " + e.getMessage());
             return null;
         }
-    }
-
-    /**
-     * Check if two different timestamps have the same date.
-     * @param d1 Date 1
-     * @param d2 Date 2
-     * @return True if days of year match, false if not
-     */
-    public static boolean isSameDay(@NonNull Date d1, @NonNull Date d2) {
-        Calendar cal1 = Calendar.getInstance(Locale.US);
-        Calendar cal2 = Calendar.getInstance(Locale.US);
-        cal1.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-        cal2.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-        cal1.setTime(d1);
-        cal2.setTime(d2);
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
     /**

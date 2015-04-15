@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.reader.model;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.androidquery.util.XmlDom;
 
@@ -9,23 +8,24 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateParser;
 import org.apache.commons.lang3.time.DatePrinter;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
-/**
- * Class for holding RSS item data
- *
- */
+/** Represents an item in a news or events feed */
 public class RSSItem implements Serializable {
 
     private static final String TAG = "RSSItem";
@@ -106,29 +106,29 @@ public class RSSItem implements Serializable {
                 // Not all feeds supply endDateTime ¯\_(ツ)_/¯
                 if (item.text("event:endDateTime") != null) {
                     Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
-
-                    if (AppUtils.isSameDay(eventBegin, eventEnd)) {
-                        this.date = eventOutDf.format(eventBegin) + " - " + eventOutTimeOnlyDf.format(eventEnd);
-                    } else {
-                        this.date = eventOutDf.format(eventBegin) + " - " + eventOutDf.format(eventEnd);
-                    }
+                    this.date = formatEventDateRange(eventBegin, eventEnd);
                 } else {
-                    this.date = eventOutDf.format(eventBegin);
+                    this.date = formatEventDate(eventBegin);
                 }
             } catch (ParseException e) {
-                LOGW(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"");
+                LOGW(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"", e);
                 this.date = item.text("event:beginDateTime");
             }
         }
         
         // Image may be in url field (enclosure url attribute in the Rutgers feed)
         try {
-            if (item.child("enclosure") != null) this.imgUrl = new URL(item.child("enclosure").attr("url"));
-            else if (item.child("media:thumbnail") != null) this.imgUrl = new URL(item.child("media:thumbnail").attr("url"));
-            else if (item.child("url") != null) this.imgUrl = new URL(item.text("url"));
-            else this.imgUrl = null;
+            if (item.child("enclosure") != null) {
+                this.imgUrl = new URL(item.child("enclosure").attr("url"));
+            } else if (item.child("media:thumbnail") != null) {
+                this.imgUrl = new URL(item.child("media:thumbnail").attr("url"));
+            } else if (item.child("url") != null) {
+                this.imgUrl = new URL(item.text("url"));
+            } else {
+                this.imgUrl = null;
+            }
         } catch (MalformedURLException e) {
-            LOGE(TAG, e.getMessage());
+            LOGE(TAG, "Bad image URL: " + e.getMessage());
             this.imgUrl = null;
         }
     }
@@ -141,6 +141,52 @@ public class RSSItem implements Serializable {
     /** Trim whitespace and newlines, remove HTML tags, and decode HTML symbols */
     private String sanitizeStringWithTags(String string) {
         return StringUtils.trim(StringUtils.chomp(AppUtils.stripTags(StringEscapeUtils.unescapeHtml4(string))));
+    }
+
+    /*
+     * The timestamps 00:00:00 and 23:59:50 are interpreted to mean that there
+     * is no specific start/end time for the event - they last all day.
+     */
+
+    /** Get the string representation of an event date. */
+    private String formatEventDate(Date date) {
+        if (isMidnight(date) || isEndOfDay(date)) {
+            return eventOutDayOnlyDf.format(date);
+        } else {
+            return eventOutDf.format(date);
+        }
+    }
+
+    /** Get the string representation of an event date range. */
+    private String formatEventDateRange(Date beginDate, Date endDate) {
+        if (DateUtils.isSameDay(beginDate, endDate)) {
+            if (isEndOfDay(endDate)) {
+                // Ending at 23:59:50 means it lasts all day, just show the date
+                return formatEventDate(beginDate);
+            } else if (isMidnight(beginDate)) {
+                // The event starts at midnight but has an end time before the end of day (weird case)
+                return formatEventDate(beginDate) + " until " + eventOutDayOnlyDf.format(endDate);
+            } else {
+                // The event has normal begin and end times (hopefully)
+                return formatEventDate(beginDate) + " - " + eventOutTimeOnlyDf.format(endDate);
+            }
+        } else {
+            return formatEventDate(beginDate) + " - " + formatEventDate(endDate);
+        }
+    }
+
+    /** Check if the time is set to 00:00:00 */
+    private boolean isMidnight(Date date) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
+        cal.setTime(date);
+        return (cal.get(Calendar.HOUR_OF_DAY) == 0) && (cal.get(Calendar.MINUTE) == 0) && (cal.get(Calendar.SECOND) == 0);
+    }
+
+    /** Check if the time is set to 23:59:50 */
+    private boolean isEndOfDay(Date date) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
+        cal.setTime(date);
+        return (cal.get(Calendar.HOUR_OF_DAY) == 23) && (cal.get(Calendar.MINUTE) == 59) && (cal.get(Calendar.SECOND) == 50);
     }
 
     /** Get decoded RSS item title */
