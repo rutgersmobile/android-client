@@ -5,7 +5,7 @@ import android.util.Log;
 import edu.rutgers.css.Rutgers.BuildConfig;
 import edu.rutgers.css.Rutgers.Config;
 
-public class LogUtils {
+public final class LogUtils {
 
     private LogUtils() {}
 
