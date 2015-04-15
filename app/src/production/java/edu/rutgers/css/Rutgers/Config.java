@@ -14,7 +14,7 @@ public final class Config {
     public static final String OSNAME = "android";
     public static final String BETAMODE = "production";
     public static final Boolean BETA = false;
-    public static final Boolean LOGGING_ENABLED = false;
+    public static final Boolean FORCE_DEBUG_LOGGING = false;
 
     // Server and API level
     public static final String API_LEVEL = "1";
