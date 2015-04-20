@@ -32,6 +32,9 @@ public final class PrefUtils {
     /** Key for boolean "first drawer open" flag. */
     public static final String KEY_PREF_FIRST_DRAWER    = "pref_first_drawer";
 
+    /** Key for tutorial stage. */
+    public static final String KEY_PREF_TUTORIAL_STAGE = "pref_tut_stage";
+
     public static boolean isFirstLaunch(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(KEY_PREF_FIRST_LAUNCH, true);
@@ -53,6 +56,21 @@ public final class PrefUtils {
     public static void markDrawerUsed(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putBoolean(KEY_PREF_FIRST_DRAWER, true).apply();
+    }
+
+    public static int getTutorialStage(@NonNull Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getInt(KEY_PREF_TUTORIAL_STAGE, 0);
+    }
+
+    public static void advanceTutorialStage(@NonNull Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putInt(KEY_PREF_TUTORIAL_STAGE, prefs.getInt(KEY_PREF_TUTORIAL_STAGE, 0)+1).apply();
+    }
+
+    public static void setTutorialStage(@NonNull Context context, int stage) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putInt(KEY_PREF_TUTORIAL_STAGE, stage).apply();
     }
 
 }

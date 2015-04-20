@@ -48,8 +48,7 @@
 
         <activity
             android:name="edu.rutgers.css.Rutgers.ui.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:theme="@android:style/Theme.Holo.Light.Dialog">
+            android:label="@string/title_activity_settings">
         </activity>
 
     </application>
