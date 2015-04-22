@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -80,10 +81,10 @@ public class MainActivity extends LocationProviderActivity implements
     /** Flags whether drawer shortcuts have been loaded. */
     private boolean mLoadedShortcuts;
 
-    /** Flags whether the user has ever opened the drawer. */
-    private boolean mShowDrawerTutorial;
+    /** Flags whether the drawer tutorial _should_ be displayed. */
+    private boolean mShowDrawerShowcase;
 
-    /** Flags whether the tutorial is currently being displayed. */
+    /** Flags whether the drawer tutorial _is_ being displayed. */
     private boolean mDisplayingTutorial;
 
     /* View references */
@@ -135,9 +136,9 @@ public class MainActivity extends LocationProviderActivity implements
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 if (!mLoadedShortcuts) loadWebShortcuts();
-                if (mShowDrawerTutorial) {
-                    PrefUtils.markDrawerUsed(getApplicationContext());
-                    mShowDrawerTutorial = false;
+                if (mShowDrawerShowcase) {
+                    PrefUtils.markDrawerUsed(MainActivity.this);
+                    mShowDrawerShowcase = false;
                     LOGI(TAG, "Drawer opened for first time.");
                 }
             }
@@ -195,7 +196,7 @@ public class MainActivity extends LocationProviderActivity implements
     protected void onResume() {
         super.onResume();
 
-        showDrawerTutorial();
+        showDrawerShowcase();
     }
 
     @Override
@@ -306,78 +307,74 @@ public class MainActivity extends LocationProviderActivity implements
         LOGI(TAG, "Current tutorial stage: " + PrefUtils.getTutorialStage(this));
         switch (PrefUtils.getTutorialStage(this)) {
             case 0: {
-                AlertDialog.Builder campusDialogBuilder = new AlertDialog.Builder(this)
-                        .setTitle(R.string.pref_campus_title)
-                        .setSingleChoiceItems(R.array.pref_campus_strings, -1, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                            }
-                        })
-                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                            }
-                        });
-                AlertDialog campusDialog = campusDialogBuilder.create();
-                campusDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        PrefUtils.advanceTutorialStage(getApplicationContext());
-                        runTutorial();
-                    }
-                });
-                campusDialog.show();
+                showListPrefDialog(PrefUtils.KEY_PREF_HOME_CAMPUS,
+                        R.string.pref_campus_title,
+                        R.array.pref_campus_strings,
+                        R.array.pref_campus_values);
                 break;
             }
 
             case 1: {
-                AlertDialog.Builder associationDialogBuilder = new AlertDialog.Builder(this)
-                        .setTitle(R.string.pref_user_type_title)
-                        .setSingleChoiceItems(R.array.pref_user_type_strings, -1, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                            }
-                        })
-                        .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                            }
-                        });
-                AlertDialog associationDialog = associationDialogBuilder.create();
-                associationDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        PrefUtils.advanceTutorialStage(getApplicationContext());
-                        runTutorial();
-                    }
-                });
-                associationDialog.show();
+                showListPrefDialog(PrefUtils.KEY_PREF_USER_TYPE,
+                        R.string.pref_user_type_title,
+                        R.array.pref_user_type_strings,
+                        R.array.pref_user_type_values);
                 break;
             }
 
             case 2: {
                 // Determine whether to run nav drawer tutorial
-                if (PrefUtils.hasDrawerBeenUsed(getApplicationContext())) {
-                    mShowDrawerTutorial = false;
-                    PrefUtils.advanceTutorialStage(getApplicationContext());
+                if (PrefUtils.hasDrawerBeenUsed(MainActivity.this)) {
+                    mShowDrawerShowcase = false;
+                    PrefUtils.advanceTutorialStage(MainActivity.this);
                 } else {
-                    mShowDrawerTutorial = true;
+                    mShowDrawerShowcase = true;
                     LOGI(TAG, "Drawer never opened before, show tutorial!");
-                    showDrawerTutorial();
+                    showDrawerShowcase();
                 }
                 break;
             }
         }
     }
 
-    private void showDrawerTutorial() {
+    /** Display a single-choice selection dialog for a list-based preference. */
+    private void showListPrefDialog(@NonNull final String prefKey, int titleResId, int choicesResId, int valuesResId) {
+        if (isFinishing() || getResources() == null) return;
+
+        final String[] choicesArray = getResources().getStringArray(choicesResId);
+        final String[] valsArray = getResources().getStringArray(valuesResId);
+
+        AlertDialog.Builder prefDialogBuilder = new AlertDialog.Builder(this)
+                .setTitle(titleResId)
+                .setSingleChoiceItems(choicesArray, -1, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                        sharedPreferences.edit().putString(prefKey, valsArray[i]).apply();
+                    }
+                })
+                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+        AlertDialog prefDialog = prefDialogBuilder.create();
+        prefDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                PrefUtils.advanceTutorialStage(MainActivity.this);
+                runTutorial();
+            }
+        });
+        prefDialog.show();
+    }
+
+    /** Display the drawer showcase. */
+    private void showDrawerShowcase() {
         if (isFinishing()) return;
 
-        if (mShowDrawerTutorial && !mDisplayingTutorial) {
+        if (mShowDrawerShowcase && !mDisplayingTutorial) {
             new ShowcaseView.Builder(this)
                     .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
                     .setContentTitle(R.string.tutorial_welcome_title)
