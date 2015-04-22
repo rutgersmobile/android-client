@@ -219,8 +219,6 @@ public class MainActivity extends LocationProviderActivity implements
     
     @Override
     public void onBackPressed() {
-        LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
-
         // If drawer is open, intercept back press to close drawer
         if (mDrawerLayout.isDrawerOpen(mDrawerListView)) {
             mDrawerLayout.closeDrawer(mDrawerListView);
@@ -238,6 +236,7 @@ public class MainActivity extends LocationProviderActivity implements
             }
         }
 
+        LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
         super.onBackPressed();
     }
 
@@ -304,7 +303,7 @@ public class MainActivity extends LocationProviderActivity implements
     }
 
     private void runTutorial() {
-        LOGI(TAG, "Current tutorial stage: " + PrefUtils.getTutorialStage(this));
+        LOGV(TAG, "Current tutorial stage: " + PrefUtils.getTutorialStage(this));
         switch (PrefUtils.getTutorialStage(this)) {
             case 0: {
                 showListPrefDialog(PrefUtils.KEY_PREF_HOME_CAMPUS,
