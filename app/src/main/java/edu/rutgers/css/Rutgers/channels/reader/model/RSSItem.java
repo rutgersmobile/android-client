@@ -46,7 +46,7 @@ public class RSSItem implements Serializable {
     private final static DateParser eventDf = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss EEE", Locale.US);
 
     /** Date format: "Apr 12, 2014 9:30 AM" */
-    private final static DatePrinter eventOutDf = FastDateFormat.getInstance("MMM dd, yyyy h:mm a", Locale.US);
+    private final static DatePrinter eventOutDf = FastDateFormat.getInstance("MMM dd, yyyy, h:mm a", Locale.US);
 
     /** Date format: "Apr 12, 2014" */
     private final static DatePrinter eventOutDayOnlyDf = FastDateFormat.getInstance("MMM dd, yyyy", Locale.US);
