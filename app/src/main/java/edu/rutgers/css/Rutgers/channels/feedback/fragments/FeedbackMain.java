@@ -80,7 +80,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         
-        mAQ = new AQuery(getActivity().getApplicationContext());
+        mAQ = new AQuery(getActivity());
     }
     
     @Override
@@ -163,7 +163,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         Map<String, Object> params = new HashMap<>();
         params.put("subject", mSubjectSpinner.getSelectedItem());
         params.put("email", mEmailEditText.getText().toString().trim());
-        params.put("uuid", AppUtils.getUUID(getActivity().getApplicationContext()));
+        params.put("uuid", AppUtils.getUUID(getActivity()));
         params.put("message", mMessageEditText.getText().toString().trim());
         params.put("wants_response", StringUtils.isNotBlank(mEmailEditText.getText().toString()));
         // Post the selected channel if this is channel feedback
