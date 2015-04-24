@@ -54,6 +54,8 @@ public class RSSItem implements Serializable {
     /** Date format: "9:30 AM" */
     private final static DatePrinter eventOutTimeOnlyDf = FastDateFormat.getInstance("h:mm a", Locale.US);
 
+    private final static Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
+
     private String title;
     private String description;
     private String link;
@@ -92,9 +94,12 @@ public class RSSItem implements Serializable {
                 }
             }
 
-            // Couldn't parse the date, just display it as is
             if (parsed == null) {
+                // Couldn't parse the date, just display it as is
                 this.date = sanitizeString(item.text("pubDate"));
+            } else if (parsed.getTime() == 0) {
+                // A shameful timestamp.
+                this.date = null;
             }
         } else if (item.text("event:beginDateTime") != null) {
             // Event time - parse start & end timestamps and produce an output string that gives
@@ -103,15 +108,20 @@ public class RSSItem implements Serializable {
             try {
                 Date eventBegin = eventDf.parse(item.text("event:beginDateTime"));
 
-                // Not all feeds supply endDateTime ¯\_(ツ)_/¯
-                if (item.text("event:endDateTime") != null) {
-                    Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
-                    this.date = formatEventDateRange(eventBegin, eventEnd);
+                if (eventBegin.getTime() == 0) {
+                    // Swag. Fun. Nice.
+                    this.date = null;
                 } else {
-                    this.date = formatEventDate(eventBegin);
+                    // Not all feeds supply endDateTime ¯\_(ツ)_/¯
+                    if (item.text("event:endDateTime") != null) {
+                        Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
+                        this.date = formatEventDateRange(eventBegin, eventEnd);
+                    } else {
+                        this.date = formatEventDate(eventBegin);
+                    }
                 }
             } catch (ParseException e) {
-                LOGW(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime")+"\"", e);
+                LOGW(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime") + "\"", e);
                 this.date = item.text("event:beginDateTime");
             }
         }
@@ -177,14 +187,12 @@ public class RSSItem implements Serializable {
 
     /** Check if the time is set to 00:00:00 */
     private boolean isMidnight(Date date) {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
         cal.setTime(date);
         return (cal.get(Calendar.HOUR_OF_DAY) == 0) && (cal.get(Calendar.MINUTE) == 0) && (cal.get(Calendar.SECOND) == 0);
     }
 
     /** Check if the time is set to 23:59:50 */
     private boolean isEndOfDay(Date date) {
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
         cal.setTime(date);
         return (cal.get(Calendar.HOUR_OF_DAY) == 23) && (cal.get(Calendar.MINUTE) == 59) && (cal.get(Calendar.SECOND) == 50);
     }
