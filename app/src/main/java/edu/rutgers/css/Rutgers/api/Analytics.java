@@ -37,7 +37,10 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Analytics service. Queues analytics events and flushes them to the server when the app is paused.
@@ -235,6 +238,7 @@ public final class Analytics extends IntentService {
 
             }
 
+            cursor.close();
         } catch (SQLiteException sqle) {
             LOGE(TAG, "Failed to post events: " + sqle.getMessage());
         } finally {
