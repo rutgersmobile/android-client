@@ -67,7 +67,6 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewHolder holder;
 
-        // Make new data holder or get existing one
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.row_bus_prediction_title, null);
             holder = new ViewHolder();
@@ -128,7 +127,6 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         PopViewHolder holder;
 
-        // Make new data holder or get existing one
         if (convertView == null) {
             convertView = layoutInflater.inflate(R.layout.popdown, null);
             holder = new PopViewHolder();
@@ -146,7 +144,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
             holder.popdownTextView.setText(formatMinutesDetails(prediction.getMinutes()));
             holder.popdownTextView.setGravity(Gravity.RIGHT);
         } else {
-            // No predictions loaded - gray out all text
+            // No predictions loaded
             holder.popdownTextView.setText("");
         }
 
