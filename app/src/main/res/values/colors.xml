@@ -39,14 +39,14 @@
     <color name="news_icon_color">#F5F7F7</color>
     <color name="food_icon_color">#F5F7F7</color>
     <color name="places_icon_color">#F5F7F7</color>
-    <color name="rec_icon_color">#F5F7F7</color>
+    <color name="recreation_icon_color">#F5F7F7</color>
     <color name="events_icon_color">#F5F7F7</color>
     <color name="soc_icon_color">#F5F7F7</color>
     <color name="ruinfo_icon_color">#F5F7F7</color>
-    <color name="careers_icon_color">#F5F7F7</color>
+    <color name="career_services_icon_color">#F5F7F7</color>
     <color name="campus_status_icon_color">#F5F7F7</color>
     <color name="feedback_icon_color">#F5F7F7</color>
-    <color name="athletics_icon_color">#F5F7F7</color>
+    <color name="knights_icon_color">#F5F7F7</color>
 
     <!-- Web shortcuts -->
     <color name="housing_icon_color">#F5F7F7</color>
