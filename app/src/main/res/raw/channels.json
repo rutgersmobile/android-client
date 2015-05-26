@@ -1,92 +1,158 @@
 [
-    {
-        "category": "main",
-        "title": "Bus",
-        "handle": "bus",
-        "view": "bus"
+  {
+    "handle": "bus",
+    "title": "Bus",
+    "view": "bus",
+    "icon": "bus"
+  },
+  {
+    "handle": "news",
+    "title": "News",
+    "api": "news.txt",
+    "grouped": true,
+    "view": "dtable",
+    "icon": "news"
+  },
+  {
+    "handle": "food",
+    "title": "Food",
+    "view": "food",
+    "icon": "food"
+  },
+  {
+    "handle": "places",
+    "title": "Places",
+    "view": "places",
+    "icon": "places"
+  },
+  {
+    "handle": "recreation",
+    "title": {
+      "homeCampus": "New Brunswick",
+      "homeTitle": "Recreation",
+      "foreignTitle": "NB Recreation"
     },
-
-    {
-        "category": "main",
-        "title": "News",
-        "handle": "news",
-        "view": "dtable",
-        "api": "news.txt"
+    "api": "rec.txt",
+    "grouped": true,
+    "view": "dtable",
+    "icon": "recreation"
+  },
+  {
+    "handle": "events",
+    "title": "Events",
+    "api": "events.txt",
+    "grouped": true,
+    "view": "dtable",
+    "icon": "events"
+  },
+  {
+    "handle": "soc",
+    "title": "Schedule of Classes",
+    "view": "soc",
+    "icon": "soc"
+  },
+  {
+    "handle": "ruinfo",
+    "title": "RU-Info",
+    "view": "ruinfo",
+    "icon": "ruinfo"
+  },
+  {
+    "handle": "career_services",
+    "title": {
+      "homeCampus": "New Brunswick",
+      "homeTitle": "Career Services",
+      "foreignTitle": "NB Career Services"
     },
-
-    {
-        "category": "main",
-        "title": "Food",
-        "handle": "food",
-        "view": "food"
+    "api": "csfaq.txt",
+    "grouped": true,
+    "view": "dtable",
+    "icon": "careers"
+  },
+  {
+    "handle": "campus_status",
+    "title": "Emergency Services",
+    "api": "emergency.txt",
+    "grouped": true,
+    "view": "dtable",
+    "icon": "emergency"
+  },
+  {
+    "handle": "feedback",
+    "title": "Feedback",
+    "view": "feedback",
+    "icon": "feedback"
+  },
+  {
+    "handle": "knights",
+    "title": "Scarlet Knights",
+    "icon": "knights",
+    "grouped": true,
+    "view": "dtable",
+    "api": "athleticsfaq.txt"
+  },
+  {
+    "handle": "housing",
+    "title": {
+      "homeCampus": "New Brunswick",
+      "homeTitle": "Housing & ResLife",
+      "foreignTitle": "NB Housing & ResLife"
     },
-
-    {
-        "category": "main",
-        "title": "Places",
-        "handle": "places",
-        "view": "places"
+    "url": "http://ruoncampus.rutgers.edu/mobile",
+    "view": "www",
+    "icon": "housing3"
+  },
+  {
+    "handle": "kiosk",
+    "title": "NB Kiosk",
+    "url": "http://nbkiosk.rutgers.edu/",
+    "view": "www",
+    "icon": "kiosk4"
+  },
+  {
+    "handle": "libraries",
+    "title": "Libraries",
+    "url": "http://m.libraries.rutgers.edu/",
+    "view": "www",
+    "icon": "library15"
+  },
+  {
+    "handle": "myrutgers",
+    "title": "myRutgers",
+    "url": "https://my.rutgers.edu/",
+    "icon": "myrutgers4",
+    "view": "www"
+  },
+  {
+    "handle": "ecollege",
+    "title": "Pearson eCollege",
+    "url": "https://ecollege.rutgers.edu/",
+    "view": "www",
+    "icon": "ecollege10"
+  },
+  {
+    "handle": "ralumni",
+    "title": "R Alumni",
+    "url": "http://ralumni.com",
+    "view": "www",
+    "icon": "rualumni6"
+  },
+  {
+    "handle": "sakai",
+    "title": "Sakai",
+    "url": "https://sakai.rutgers.edu/mobile",
+    "view": "www",
+    "icon": "sakai4"
+  },
+  {
+    "handle": "stud_life",
+    "title": {
+      "homeCampus": "New Brunswick",
+      "homeTitle": "Student Life",
+      "foreignTitle": "NB Student Life"
     },
-
-    {
-        "category": "main",
-        "title": "Recreation",
-        "handle": "rec",
-        "view": "dtable",
-        "api": "rec.txt"
-    },
-
-    {
-        "category": "main",
-        "title": "Events",
-        "handle": "events",
-        "view": "dtable",
-        "api": "events.txt"
-    },
-
-    {
-        "category": "main",
-        "title": "Schedule of Classes",
-        "handle": "soc",
-        "view": "soc"
-    },
-
-    {
-        "category": "main",
-        "title": "RU-info",
-        "handle": "ruinfo",
-        "view": "ruinfo"
-    },
-
-    {
-        "category": "main",
-        "title": "Career Services",
-        "handle": "careers",
-        "view": "dtable",
-        "api": "csfaq.txt"
-    },
-
-    {
-        "category": "main",
-        "title": "Emergency Services",
-        "handle": "campus_status",
-        "view": "dtable",
-        "api": "emergency.txt"
-    },
-
-    {
-        "category": "main",
-        "title": "Feedback",
-        "handle": "feedback",
-        "view": "feedback"
-    },
-
-    {
-        "category": "main",
-        "title": "Scarlet Knights",
-        "handle": "athletics",
-        "view": "dtable",
-        "api": "athleticsfaq.txt"
-    }
-
+    "url": "http://getinvolved.rutgers.edu/m/",
+    "view": "www",
+    "icon": "studlife8"
+  }
 ]
