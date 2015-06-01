@@ -74,6 +74,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             holder.titleTextView.setText(course.getDisplayTitle());
 
             if (course.isStub()) {
+                holder.titleTextView.setVisibility(View.GONE);
                 // Replace the stub data
                 final ScheduleAdapter scheduleAdapter = this;
                 AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -97,6 +98,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                 // Get the number of open/total visible sections for this course
                 holder.creditsTextView.setText("credits: " + course.getCredits());
                 holder.sectionsTextView.setText("sections: " + course.countOpenSections(false) + "/" + course.countTotalSections(false));
+                holder.titleTextView.setVisibility(View.VISIBLE);
                 holder.creditsTextView.setVisibility(View.VISIBLE);
                 holder.sectionsTextView.setVisibility(View.VISIBLE);
                 holder.progressBar.setVisibility(View.GONE);
