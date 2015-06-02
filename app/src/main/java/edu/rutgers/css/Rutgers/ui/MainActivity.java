@@ -176,13 +176,14 @@ public class MainActivity extends LocationProviderActivity implements
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+                mDrawerAdapter.clear();
+                loadChannels();
                 loadWebShortcuts();
                 mDrawerAdapter.notifyDataSetChanged();
             }
         };
 
         preferences.registerOnSharedPreferenceChangeListener(listener);
-
 
         // Load nav drawer items
         mLoadedShortcuts = false;
