@@ -1,6 +1,8 @@
 package edu.rutgers.css.Rutgers.model.rmenu;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -96,9 +98,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
     @Override
     public boolean isEnabled(int position) {
         RMenuRow curItem = this.getItem(position);
-        if (curItem == null) return false;
-        else if (!curItem.getIsClickable()) return false;
-        else return true;
+        return curItem != null && curItem.getIsClickable();
     }
 
     @Override

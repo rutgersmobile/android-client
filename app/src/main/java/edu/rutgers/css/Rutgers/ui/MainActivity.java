@@ -91,6 +91,9 @@ public class MainActivity extends LocationProviderActivity implements
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
 
+    /* Callback for changed preferences */
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+
     @Override
     public ChannelManager getChannelManager() {
         return mChannelManager;
@@ -168,6 +171,18 @@ public class MainActivity extends LocationProviderActivity implements
             }
 
         });
+
+        // Reload web channels when we change preferences to update campus-based names
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+                loadWebShortcuts();
+                mDrawerAdapter.notifyDataSetChanged();
+            }
+        };
+
+        preferences.registerOnSharedPreferenceChangeListener(listener);
+
 
         // Load nav drawer items
         mLoadedShortcuts = false;
