@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.ui;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,12 +17,17 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
@@ -29,7 +35,6 @@ import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
@@ -47,7 +52,6 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
@@ -76,7 +80,7 @@ public class MainActivity extends LocationProviderActivity implements
     private ChannelManager mChannelManager;
     private ComponentFactory mComponentFactory;
     private ActionBarDrawerToggle mDrawerToggle;
-    private RMenuAdapter mDrawerAdapter;
+    private DrawerAdapter mDrawerAdapter;
 
     /** Flags whether drawer shortcuts have been loaded. */
     private boolean mLoadedShortcuts;
@@ -99,6 +103,31 @@ public class MainActivity extends LocationProviderActivity implements
         return mChannelManager;
     }
 
+    private class DrawerAdapter extends ArrayAdapter<Channel> {
+        public DrawerAdapter(List<Channel> objects) {
+            super(MainActivity.this, R.layout.row_drawer_item, objects);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Channel channel = getItem(position);
+            LayoutInflater layoutInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
+
+            if (convertView == null) {
+                convertView = layoutInflater.inflate(R.layout.row_drawer_item, null);
+            }
+
+            TextView textView = (TextView) convertView.findViewById(R.id.title);
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.imageView);
+
+            textView.setText(channel.getTitle(homeCampus));
+            imageView.setImageDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
+
+            return convertView;
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,7 +147,7 @@ public class MainActivity extends LocationProviderActivity implements
         }
 
         // Set up navigation drawer
-        mDrawerAdapter = new RMenuAdapter(this, R.layout.row_drawer_item, R.layout.row_drawer_header, new ArrayList<RMenuRow>());
+        mDrawerAdapter = this.new DrawerAdapter(new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -176,9 +205,6 @@ public class MainActivity extends LocationProviderActivity implements
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
-                mDrawerAdapter.clear();
-                loadChannels();
-                loadWebShortcuts();
                 mDrawerAdapter.notifyDataSetChanged();
             }
         };
@@ -462,31 +488,8 @@ public class MainActivity extends LocationProviderActivity implements
     private void addMenuSection(String category, List<Channel> channels) {
         //mDrawerAdapter.add(new RMenuHeaderRow(category))
 
-        final String homeCampus = RutgersUtils.getHomeCampus(this);
-
         for (Channel channel: channels) {
-            Bundle itemArgs = new Bundle();
-            itemArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
-            itemArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
-
-            if (StringUtils.isNotBlank(channel.getApi())) {
-                itemArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
-            }
-
-            if (StringUtils.isNotBlank(channel.getUrl())) {
-                itemArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
-            }
-
-            if (channel.getData() != null) {
-                itemArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData().toString());
-            }
-
-            RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
-            // Try to find icon for this item and set it
-            newSMI.setDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
-
-            // Add the item to the drawer
-            mDrawerAdapter.add(newSMI);
+            mDrawerAdapter.add(channel);
         }
     }
 
