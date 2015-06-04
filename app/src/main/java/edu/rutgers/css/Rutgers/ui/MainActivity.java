@@ -35,6 +35,7 @@ import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
@@ -52,8 +53,6 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
@@ -184,15 +183,29 @@ public class MainActivity extends LocationProviderActivity implements
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
-                if (!(clickedRow instanceof RMenuItemRow)) return;
+                Channel channel = (Channel) parent.getAdapter().getItem(position);
+                Bundle channelArgs = new Bundle();
+                String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
 
-                Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
-                // This is a top level menu press
-                clickedArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
+                channelArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
+
+                if (StringUtils.isNotBlank(channel.getApi())) {
+                    channelArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
+                }
+
+                if (StringUtils.isNotBlank(channel.getUrl())) {
+                    channelArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+                }
+
+                if (channel.getData() != null) {
+                    channelArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData().toString());
+                }
+
+                channelArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                 
                 // Launch component
-                switchFragments(clickedArgs);
+                switchFragments(channelArgs);
                 
                 //mDrawerAdapter.setSelectedPos(position);
                 mDrawerListView.invalidateViews();
