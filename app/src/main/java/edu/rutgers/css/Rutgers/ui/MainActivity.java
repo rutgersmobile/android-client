@@ -103,6 +103,11 @@ public class MainActivity extends LocationProviderActivity implements
     }
 
     private class DrawerAdapter extends ArrayAdapter<Channel> {
+        private class ViewHolder {
+            TextView textView;
+            ImageView imageView;
+        }
+
         public DrawerAdapter(List<Channel> objects) {
             super(MainActivity.this, R.layout.row_drawer_item, objects);
         }
@@ -112,16 +117,21 @@ public class MainActivity extends LocationProviderActivity implements
             Channel channel = getItem(position);
             LayoutInflater layoutInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
+            ViewHolder holder;
 
             if (convertView == null) {
                 convertView = layoutInflater.inflate(R.layout.row_drawer_item, null);
+
+                holder = new ViewHolder();
+                holder.textView = (TextView) convertView.findViewById(R.id.title);
+                holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
             }
 
-            TextView textView = (TextView) convertView.findViewById(R.id.title);
-            ImageView imageView = (ImageView) convertView.findViewById(R.id.imageView);
-
-            textView.setText(channel.getTitle(homeCampus));
-            imageView.setImageDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
+            holder.textView.setText(channel.getTitle(homeCampus));
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
 
             return convertView;
         }
@@ -499,10 +509,7 @@ public class MainActivity extends LocationProviderActivity implements
      */
     private void addMenuSection(String category, List<Channel> channels) {
         //mDrawerAdapter.add(new RMenuHeaderRow(category))
-
-        for (Channel channel: channels) {
-            mDrawerAdapter.add(channel);
-        }
+        mDrawerAdapter.addAll(channels);
     }
 
     /*
