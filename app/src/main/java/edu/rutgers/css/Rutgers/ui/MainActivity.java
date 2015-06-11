@@ -157,6 +157,8 @@ public class MainActivity extends LocationProviderActivity implements
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
+        mDrawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
         mDrawerToggle = new ActionBarDrawerToggle(        
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
@@ -208,10 +210,14 @@ public class MainActivity extends LocationProviderActivity implements
                 }
 
                 channelArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                
+
+                mDrawerListView.setItemChecked(position, true);
+
+                LOGI(TAG, "Currently checked item position: " + mDrawerListView.getCheckedItemPosition());
+
                 // Launch component
-                switchFragments(channelArgs);
-                
+                switchDrawerFragments(channelArgs);
+
                 //mDrawerAdapter.setSelectedPos(position);
                 mDrawerListView.invalidateViews();
                 mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
@@ -323,7 +329,7 @@ public class MainActivity extends LocationProviderActivity implements
             case R.id.action_about:
                 Bundle aboutArgs = AboutDisplay.createArgs();
                 aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                switchFragments(aboutArgs);
+                switchDrawerFragments(aboutArgs);
                 mDrawerLayout.closeDrawer(mDrawerListView);
                 return true;
             
@@ -487,7 +493,6 @@ public class MainActivity extends LocationProviderActivity implements
             }
 
         });
-
     }
 
     /**
@@ -500,6 +505,16 @@ public class MainActivity extends LocationProviderActivity implements
     /*
      * Fragment display methods
      */
+
+    private boolean switchDrawerFragments(@NonNull Bundle args) {
+        final String componentTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
+
+        if (AppUtils.isOnTop(this, componentTag) && !componentTag.equals(WebDisplay.HANDLE)) {
+            return false;
+        }
+
+        return switchFragments(args);
+    }
 
     /**
      * Add current fragment to the backstack and switch to the new one defined by given arguments.

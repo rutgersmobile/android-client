@@ -46,4 +46,6 @@
     <string name="stud_life_title">Student Life</string>
     <string name="text_title">Text Display</string>
 
+    <string name="fragment_speed">500</string>
+
 </resources>
