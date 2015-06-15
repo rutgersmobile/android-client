@@ -29,17 +29,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,7 +45,6 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
@@ -363,7 +357,9 @@ public class MainActivity extends LocationProviderActivity implements
             Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
         }
 
-        runTutorial();
+        // Currently this causes a crash
+        // See T7 for more info
+        //runTutorial();
     }
 
     private void runTutorial() {
@@ -550,8 +546,8 @@ public class MainActivity extends LocationProviderActivity implements
 
         // Switch the main content fragment
         fm.beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left,
-                        R.animator.slide_in_left, R.animator.slide_out_right)
+                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                        R.anim.slide_in_left, R.anim.slide_out_right)
                 .replace(R.id.main_content_frame, fragment, componentTag)
                 .addToBackStack(componentTag)
                 .commit();

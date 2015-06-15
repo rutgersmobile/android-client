@@ -35,9 +35,9 @@ public class Channel {
             this.view = channelJson.getString("view");
         }
 
-        if (!channelJson.isNull("api")) this.api = channelJson.getString("api");
-        if (!channelJson.isNull("url")) this.url = channelJson.getString("url");
-        if (!channelJson.isNull("data")) this.data = channelJson.getJSONArray("data");
+        this.api = channelJson.optString("api");
+        this.url = channelJson.optString("url");
+        this.data = channelJson.optJSONArray("data");
 
         this.canOverride = channelJson.optBoolean("canOverride");
     }

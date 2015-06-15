@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.api;
 
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,7 +17,9 @@ import java.util.Set;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Maintains the list of loaded RU Mobile channels.
@@ -104,7 +105,9 @@ public final class ChannelManager {
      */
     public void loadChannelsFromResource(Resources resources, int resourceId) {
         JSONArray jsonArray = AppUtils.loadRawJSONArray(resources, resourceId);
-        loadChannelsFromJSONArray(jsonArray);
+        if (jsonArray != null) {
+            loadChannelsFromJSONArray(jsonArray);
+        }
     }
 
     /**
