@@ -9,12 +9,12 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,12 +29,17 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jdeferred.DoneCallback;
+import org.jdeferred.FailCallback;
+import org.jdeferred.android.AndroidDeferredManager;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,6 +50,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
@@ -466,11 +472,28 @@ public class MainActivity extends LocationProviderActivity implements
      */
     
     /**
-     * Add native channel items to the menu.
+     * Try to grab web hosted channels, add the native packaged channels on failure.
      */
     private void loadChannels() {
-        mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
-        addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels("main"));
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(Request.jsonArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
+
+            @Override
+            public void onDone(JSONArray channelsArray) {
+                mChannelManager.loadChannelsFromJSONArray(channelsArray, "ordered_content");
+                addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels("main"));
+            }
+
+        }).fail(new FailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
+                addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels("main"));
+            }
+
+        });
+
     }
     
     /**
