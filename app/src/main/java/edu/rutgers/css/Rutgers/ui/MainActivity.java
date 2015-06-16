@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.ui;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,20 +9,25 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
@@ -47,9 +53,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
@@ -76,7 +80,7 @@ public class MainActivity extends LocationProviderActivity implements
     private ChannelManager mChannelManager;
     private ComponentFactory mComponentFactory;
     private ActionBarDrawerToggle mDrawerToggle;
-    private RMenuAdapter mDrawerAdapter;
+    private DrawerAdapter mDrawerAdapter;
 
     /** Flags whether the drawer tutorial _should_ be displayed. */
     private boolean mShowDrawerShowcase;
@@ -88,9 +92,47 @@ public class MainActivity extends LocationProviderActivity implements
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
 
+    /* Callback for changed preferences */
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+
     @Override
     public ChannelManager getChannelManager() {
         return mChannelManager;
+    }
+
+    private class DrawerAdapter extends ArrayAdapter<Channel> {
+        private class ViewHolder {
+            TextView textView;
+            ImageView imageView;
+        }
+
+        public DrawerAdapter(List<Channel> objects) {
+            super(MainActivity.this, R.layout.row_drawer_item, objects);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Channel channel = getItem(position);
+            LayoutInflater layoutInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
+            ViewHolder holder;
+
+            if (convertView == null) {
+                convertView = layoutInflater.inflate(R.layout.row_drawer_item, null);
+
+                holder = new ViewHolder();
+                holder.textView = (TextView) convertView.findViewById(R.id.title);
+                holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            holder.textView.setText(channel.getTitle(homeCampus));
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
+
+            return convertView;
+        }
     }
 
     @Override
@@ -112,14 +154,13 @@ public class MainActivity extends LocationProviderActivity implements
         }
 
         // Set up navigation drawer
-        mDrawerAdapter = new RMenuAdapter(this, R.layout.row_drawer_item, R.layout.row_drawer_header, new ArrayList<RMenuRow>());
+        mDrawerAdapter = this.new DrawerAdapter(new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         mDrawerToggle = new ActionBarDrawerToggle(        
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
                 R.string.drawer_open,  /* "open drawer" description */
                 R.string.drawer_close  /* "close drawer" description */
                 ) {
@@ -148,15 +189,29 @@ public class MainActivity extends LocationProviderActivity implements
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuRow clickedRow = (RMenuRow) parent.getAdapter().getItem(position);
-                if (!(clickedRow instanceof RMenuItemRow)) return;
+                Channel channel = (Channel) parent.getAdapter().getItem(position);
+                Bundle channelArgs = new Bundle();
+                String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
 
-                Bundle clickedArgs = ((RMenuItemRow) clickedRow).getArgs();
-                // This is a top level menu press
-                clickedArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
+                channelArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
+
+                if (StringUtils.isNotBlank(channel.getApi())) {
+                    channelArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
+                }
+
+                if (StringUtils.isNotBlank(channel.getUrl())) {
+                    channelArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+                }
+
+                if (channel.getData() != null) {
+                    channelArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData().toString());
+                }
+
+                channelArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                 
                 // Launch component
-                switchFragments(clickedArgs);
+                switchFragments(channelArgs);
                 
                 //mDrawerAdapter.setSelectedPos(position);
                 mDrawerListView.invalidateViews();
@@ -164,6 +219,16 @@ public class MainActivity extends LocationProviderActivity implements
             }
 
         });
+
+        // Reload web channels when we change preferences to update campus-based names
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+                mDrawerAdapter.notifyDataSetChanged();
+            }
+        };
+
+        preferences.registerOnSharedPreferenceChangeListener(listener);
 
         // Load nav drawer items
         loadChannels();
@@ -293,7 +358,9 @@ public class MainActivity extends LocationProviderActivity implements
             Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
         }
 
-        runTutorial();
+        // Currently this causes a crash
+        // See T7 for more info
+        //runTutorial();
     }
 
     private void runTutorial() {
@@ -400,46 +467,59 @@ public class MainActivity extends LocationProviderActivity implements
      */
     
     /**
-     * Add native channel items to the menu.
+     * Try to grab web hosted channels, add the native packaged channels on failure.
      */
     private void loadChannels() {
-        mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
-        addChannels(mChannelManager.getChannels());
-    }
 
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(Request.jsonArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
+
+            @Override
+            public void onDone(JSONArray channelsArray) {
+                mChannelManager.loadChannelsFromJSONArray(channelsArray);
+                addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels());
+            }
+
+        }).fail(new FailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
+                addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels());
+            }
+
+        });
+
+    }
+    
     /**
-     * Add channels to navigation drawer.
-     * @param channels Channels to add to nav drawer
+     * Grab web channel links and add them to the menu.
      */
-    private void addChannels(List<Channel> channels) {
-        final String homeCampus = RutgersUtils.getHomeCampus(this);
+    private void loadWebShortcuts() {
+        AndroidDeferredManager dm = new AndroidDeferredManager();
+        dm.when(Request.apiArray("shortcuts.txt", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
 
-        for (Channel channel: channels) {
-            Bundle itemArgs = new Bundle();
-            itemArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
-            itemArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
-
-            if (StringUtils.isNotBlank(channel.getApi())) {
-                itemArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
+            @Override
+            public void onDone(JSONArray shortcutsArray) {
+                mChannelManager.loadChannelsFromJSONArray(shortcutsArray);
+                addMenuSection(getString(R.string.drawer_shortcuts), mChannelManager.getChannels());
             }
 
-            if (StringUtils.isNotBlank(channel.getUrl())) {
-                itemArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+        }).fail(new FailCallback<AjaxStatus>() {
+
+            @Override
+            public void onFail(AjaxStatus status) {
+                LOGE(TAG, "loadWebShortcuts(): " + AppUtils.formatAjaxStatus(status));
             }
 
-            if (channel.getData() != null) {
-                itemArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData().toString());
-            }
+        });
 
-            RMenuItemRow newSMI = new RMenuItemRow(itemArgs);
-            // Try to find icon for this item and set it
-            newSMI.setDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
-
-            // Add the item to the drawer
-            mDrawerAdapter.add(newSMI);
-        }
     }
-
+    
+    private void addMenuSection(String category, List<Channel> channels) {
+        //mDrawerAdapter.add(new RMenuHeaderRow(category))
+        mDrawerAdapter.addAll(channels);
+    }
     /*
      * Fragment display methods
      */
@@ -478,8 +558,8 @@ public class MainActivity extends LocationProviderActivity implements
 
         // Switch the main content fragment
         fm.beginTransaction()
-                .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left,
-                        R.animator.slide_in_left, R.animator.slide_out_right)
+                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                        R.anim.slide_in_left, R.anim.slide_out_right)
                 .replace(R.id.main_content_frame, fragment, componentTag)
                 .addToBackStack(componentTag)
                 .commit();

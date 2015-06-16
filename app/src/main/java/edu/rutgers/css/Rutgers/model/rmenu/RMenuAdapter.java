@@ -96,9 +96,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
     @Override
     public boolean isEnabled(int position) {
         RMenuRow curItem = this.getItem(position);
-        if (curItem == null) return false;
-        else if (!curItem.getIsClickable()) return false;
-        else return true;
+        return curItem != null && curItem.getIsClickable();
     }
 
     @Override
