@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.soc.model;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +15,14 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import edu.rutgers.css.Rutgers.R;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Adapter for subjects and courses.
@@ -159,8 +161,6 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                 }
             }
 
-            ArrayList<ScheduleAdapterItem> tempList; //will be a copy of original list
-
             // Save list of original values if it doesn't exist
             synchronized(mLock) {
                 if (mOriginalList == null) {
@@ -172,45 +172,105 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                         mOriginalList = new ArrayList<>(mList);
                     }
                 }
-
-                tempList = new ArrayList<>(mOriginalList);
             }
 
-            ArrayList<ScheduleAdapterItem> passed = new ArrayList<>();
-            String query = constraint.toString().trim();
+            Set<ScheduleAdapterItem> passed = new HashSet<>();
+            List<String> words = new ArrayList<>(Arrays.asList(constraint.toString().trim().split(" ")));
 
-            // Consult the INDEX!!!
-            if (socIndex != null) {
-                // Check if it's a full course code 000:000
-                if (query.length() == 7 && query.charAt(3) == ':') {
-                    String subjCode = query.substring(0,3);
-                    String courseCode = query.substring(4,7);
-                    if (allDigits(subjCode) && allDigits(courseCode)) {
-                        Course course = socIndex.getCourseByCode(subjCode, courseCode);
-                        if (course != null) passed.add(course);
+            List<Subject> subjectsByAbbrev = socIndex.getSubjectsByAbbreviation(words.get(0));
+            if (subjectsByAbbrev.size() != 0) {
+                words.remove(0);
+                passed.addAll(subjectsByAbbrev);
+            }
+
+            for (String word : words) {
+                if (isNumericalCode(word)) {
+                    Subject subject = socIndex.getSubjectByCode(word);
+                    if (subject != null) {
+                        passed.add(subject);
+                        words.remove(word);
+                    }
+                }
+            }
+
+            String courseId = null;
+            for (String word : words) {
+                if (isNumericalCode(word)) {
+                    courseId = word;
+                    words.remove(word);
+                    break;
+                }
+            }
+
+            for (Subject subject : socIndex.getSubjects()) {
+                List<String> subjectWords = Arrays.asList(subject.getDescription().split(" "));
+
+                checkSubject:
+                for (String word : words) {
+                    for (String subjectWord : subjectWords) {
+                        if (StringUtils.startsWithIgnoreCase(subjectWord, word)) {
+                            passed.add(subject);
+                            break checkSubject;
+                        }
+                    }
+                }
+            }
+
+            List<ScheduleAdapterItem> passedCopy = new ArrayList<>(passed);
+            Set<ScheduleAdapterItem> courses = new HashSet<>();
+            if (passed.size() > 0) {
+                if (courseId != null) {
+                    for (ScheduleAdapterItem subject : passedCopy) {
+                        Course course = socIndex.getCourseByCode(subject.getTitle(), courseId);
+                        if (course != null) {
+                            courses.add(course);
+                        }
+                    }
+                } else if (words.size() > 0) {
+                    for (ScheduleAdapterItem subject : passedCopy) {
+                        for (String word : words) {
+                            courses.addAll(socIndex.getCoursesByNameAndSubject(subject.getCode(), word, 10));
+                        }
+                    }
+                } else if (passed.size() == 1) {
+                    courses.addAll(socIndex.getCoursesBySubject(passed.iterator().next().getCode()));
+                }
+            } else {
+                if (courseId != null) {
+                    if (words.size() > 0) {
+                        for (String word : words) {
+                            courses.addAll(socIndex.getCoursesByCode(courseId, word));
+                        }
+                    } else {
+                        courses.addAll(socIndex.getCoursesByCode(courseId));
                     }
                 } else {
-                    // Check abbreviations
-                    passed.addAll(socIndex.getSubjectsByAbbreviation(query.toUpperCase()));
+                    if (words.size() > 0) {
+                        for (String word : words) {
+                            courses.addAll(socIndex.getCoursesByQuery(word));
+                        }
+                    }
                 }
-
             }
 
-            // Straight string comparison on original list
-            for (ScheduleAdapterItem item: tempList) {
-                String cmp = item.getDisplayTitle();
-                if (StringUtils.containsIgnoreCase(cmp, query)) passed.add(item);
-            }
+            List<ScheduleAdapterItem> values = new ArrayList<>(passed);
+            values.addAll(courses);
 
-            // If we didn't find anything.. CONSULT THE INDEX!! to search full course names
-            if (passed.isEmpty() && socIndex != null) {
-                List<Course> fuzzies = socIndex.getCoursesByName(query, 10);
-                passed.addAll(fuzzies);
-            }
-
-            filterResults.values = passed;
+            filterResults.values = values;
             filterResults.count = passed.size();
             return filterResults;
+        }
+
+        private boolean isNumericalCode(String word) {
+            if (word.length() > 3 || word.length() == 0) {
+                return false;
+            }
+            try {
+                Integer.parseInt(word);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
         }
 
         @Override

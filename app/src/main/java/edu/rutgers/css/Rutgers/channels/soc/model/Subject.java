@@ -21,10 +21,16 @@ public class Subject extends ScheduleAdapterItem {
         return getDescription() + " (" + getCode() + ")";
     }
 
+    @Override
+    public String getTitle() {
+        return getDescription();
+    }
+
     public String getDescription() {
         return description;
     }
 
+    @Override
     public String getCode() {
         return code;
     }

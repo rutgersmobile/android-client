@@ -41,8 +41,14 @@ public class Course extends ScheduleAdapterItem {
         this.stub = false;
     }
 
+    @Override
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String getCode() {
+        return courseNumber;
     }
 
     /**

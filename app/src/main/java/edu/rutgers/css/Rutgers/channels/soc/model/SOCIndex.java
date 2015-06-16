@@ -112,6 +112,14 @@ public class SOCIndex {
         }
     }
 
+    public List<Subject> getSubjects() {
+        List<Subject> results = new ArrayList<>();
+        for (IndexSubject subject : mSubjectsByCode.values()) {
+            results.add(new Subject(subject.name.toUpperCase(), subject.id));
+        }
+        return results;
+    }
+
     /**
      * Get subjects by abbreviation
      * @param abbrev Abbreviation
@@ -119,8 +127,8 @@ public class SOCIndex {
      */
     public List<Subject> getSubjectsByAbbreviation(String abbrev) {
         List<Subject> results = new ArrayList<>();
-        if (mAbbreviations.containsKey(abbrev)) {
-            String[] subjCodes = mAbbreviations.get(abbrev);
+        if (mAbbreviations.containsKey(abbrev.toUpperCase())) {
+            String[] subjCodes = mAbbreviations.get(abbrev.toUpperCase());
             for (String subjCode: subjCodes) {
                 IndexSubject curSubject = mSubjectsByCode.get(subjCode);
                 if (curSubject != null) {
@@ -144,6 +152,45 @@ public class SOCIndex {
         } else {
             return null;
         }
+    }
+
+    public List<Course> getCoursesBySubject(String subjectCode) {
+        List<Course> results = new ArrayList<>();
+        IndexSubject subject = mSubjectsByCode.get(subjectCode);
+        if (subject != null) {
+            Set<Map.Entry<String, String>> courseEntries = subject.courses.entrySet();
+            for (Map.Entry<String, String> courseEntry : courseEntries) {
+                String courseCode = courseEntry.getKey();
+                String courseTitle = courseEntry.getValue();
+                results.add(new Course(courseTitle, subjectCode, courseCode));
+            }
+        }
+        return results;
+    }
+
+    public List<Course> getCoursesByCode(String queryCourseCode, String query) {
+        List<Course> results = new ArrayList<>();
+        Set<Map.Entry<String, IndexCourse>> courseEntries = mCoursesByName.entrySet();
+        for (Map.Entry<String, IndexCourse> courseEntry : courseEntries) {
+            String courseName = courseEntry.getKey();
+            String courseCode = courseEntry.getValue().course;
+            String subjectCode = courseEntry.getValue().subj;
+
+            if (query == null || StringUtils.containsIgnoreCase(courseCode, query)) {
+                if (queryCourseCode == null || courseCode.equals(queryCourseCode)) {
+                    results.add(new Course(courseName, subjectCode, queryCourseCode));
+                }
+            }
+        }
+        return results;
+    }
+
+    public List<Course> getCoursesByCode(String courseCode) {
+        return getCoursesByCode(courseCode, null);
+    }
+
+    public List<Course> getCoursesByQuery(String query) {
+        return getCoursesByCode(null, query);
     }
 
     /**
@@ -171,6 +218,17 @@ public class SOCIndex {
      * @return List of course-stub JSON objects (empty if no results found)
      */
     public List<Course> getCoursesByName(String query, int cap) {
+        return getCoursesByNameAndSubject(null, query, cap);
+    }
+
+    /**
+     * Get courses by partial title matches on query in a subject
+     * @param querySubject subject to look for courses in
+     * @param query Query string
+     * @param cap Maximum number of results (cutoff point)
+     * @return List of course-stub JSON objects (empty if no results found)
+     */
+    public List<Course> getCoursesByNameAndSubject(String querySubject, String query, int cap) {
         List<Course> results = new ArrayList<>();
 
         Set<Map.Entry<String, IndexCourse>> courseEntries = mCoursesByName.entrySet();
@@ -181,14 +239,15 @@ public class SOCIndex {
                 String subjectCode = curCourse.subj;
                 String courseCode = curCourse.course;
 
-                results.add(new Course(curEntry.getKey().toUpperCase(), subjectCode, courseCode));
+                if (querySubject == null || querySubject.equals(subjectCode)) {
+                    results.add(new Course(curEntry.getKey().toUpperCase(), subjectCode, courseCode));
+                }
                 if (results.size() >= cap) return results;
             }
         }
 
         return results;
     }
-
 
     public void setSemesterCode(String semesterCode) {
         this.semesterCode = semesterCode;
