@@ -470,14 +470,13 @@ public class MainActivity extends LocationProviderActivity implements
      * Try to grab web hosted channels, add the native packaged channels on failure.
      */
     private void loadChannels() {
-
         AndroidDeferredManager dm = new AndroidDeferredManager();
         dm.when(Request.jsonArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray channelsArray) {
                 mChannelManager.loadChannelsFromJSONArray(channelsArray);
-                addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels());
+                addChannels(mChannelManager.getChannels());
             }
 
         }).fail(new FailCallback<AjaxStatus>() {
@@ -485,39 +484,24 @@ public class MainActivity extends LocationProviderActivity implements
             @Override
             public void onFail(AjaxStatus status) {
                 mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
-                addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels());
+                addChannels(mChannelManager.getChannels());
             }
 
         });
 
     }
-    
-    /**
-     * Grab web channel links and add them to the menu.
-     */
-    private void loadWebShortcuts() {
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Request.apiArray("shortcuts.txt", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
 
-            @Override
-            public void onDone(JSONArray shortcutsArray) {
-                mChannelManager.loadChannelsFromJSONArray(shortcutsArray);
-                addMenuSection(getString(R.string.drawer_shortcuts), mChannelManager.getChannels());
-            }
-
-        }).fail(new FailCallback<AjaxStatus>() {
-
-            @Override
-            public void onFail(AjaxStatus status) {
-                LOGE(TAG, "loadWebShortcuts(): " + AppUtils.formatAjaxStatus(status));
-            }
-
-        });
-
-    }
-    
     private void addMenuSection(String category, List<Channel> channels) {
         //mDrawerAdapter.add(new RMenuHeaderRow(category))
+        mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
+        addChannels(mChannelManager.getChannels());
+    }
+
+    /**
+     * Add channels to navigation drawer.
+     * @param channels Channels to add to nav drawer
+     */
+    private void addChannels(List<Channel> channels) {
         mDrawerAdapter.addAll(channels);
     }
     /*
