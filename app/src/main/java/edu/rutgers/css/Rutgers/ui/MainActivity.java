@@ -53,7 +53,6 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
@@ -81,6 +80,9 @@ public class MainActivity extends LocationProviderActivity implements
     private ComponentFactory mComponentFactory;
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerAdapter mDrawerAdapter;
+
+    /** Flags whether drawer shortcuts have been loaded. */
+    private boolean mLoadedShortcuts;
 
     /** Flags whether the drawer tutorial _should_ be displayed. */
     private boolean mShowDrawerShowcase;
@@ -173,6 +175,7 @@ public class MainActivity extends LocationProviderActivity implements
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+                if (!mLoadedShortcuts) loadWebShortcuts();
                 if (mShowDrawerShowcase) {
                     PrefUtils.markDrawerUsed(MainActivity.this);
                     mShowDrawerShowcase = false;
@@ -231,7 +234,9 @@ public class MainActivity extends LocationProviderActivity implements
         preferences.registerOnSharedPreferenceChangeListener(listener);
 
         // Load nav drawer items
+        mLoadedShortcuts = false;
         loadChannels();
+        loadWebShortcuts();
         
         // Display initial fragment
         FragmentManager fm = getSupportFragmentManager();
@@ -467,43 +472,48 @@ public class MainActivity extends LocationProviderActivity implements
      */
     
     /**
-     * Try to grab web hosted channels, add the native packaged channels on failure.
+     * Add native channel items to the menu.
      */
     private void loadChannels() {
+        mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
+        addMenuSection(getString(R.string.drawer_channels), mChannelManager.getChannels("main"));
+    }
+    
+    /**
+     * Grab web channel links and add them to the menu.
+     */
+    private void loadWebShortcuts() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Request.jsonArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
+        dm.when(Request.apiArray("shortcuts.txt", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
 
             @Override
-            public void onDone(JSONArray channelsArray) {
-                mChannelManager.loadChannelsFromJSONArray(channelsArray);
-                addChannels(mChannelManager.getChannels());
+            public void onDone(JSONArray shortcutsArray) {
+                mLoadedShortcuts = true;
+                mChannelManager.loadChannelsFromJSONArray(shortcutsArray, "shortcuts");
+                addMenuSection(getString(R.string.drawer_shortcuts), mChannelManager.getChannels("shortcuts"));
             }
 
         }).fail(new FailCallback<AjaxStatus>() {
 
             @Override
             public void onFail(AjaxStatus status) {
-                mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
-                addChannels(mChannelManager.getChannels());
+                LOGE(TAG, "loadWebShortcuts(): " + AppUtils.formatAjaxStatus(status));
             }
 
         });
-
-    }
-
-    private void addMenuSection(String category, List<Channel> channels) {
-        //mDrawerAdapter.add(new RMenuHeaderRow(category))
-        mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
-        addChannels(mChannelManager.getChannels());
+        
     }
 
     /**
      * Add channels to navigation drawer.
+     * @param category Section title
      * @param channels Channels to add to nav drawer
      */
-    private void addChannels(List<Channel> channels) {
+    private void addMenuSection(String category, List<Channel> channels) {
+        //mDrawerAdapter.add(new RMenuHeaderRow(category))
         mDrawerAdapter.addAll(channels);
     }
+
     /*
      * Fragment display methods
      */

@@ -50,6 +50,23 @@ public final class ChannelManager {
     }
 
     /**
+     * Get channels from a specific channel category (channels, shortcuts)
+     * @param category Category name
+     * @return JSON array of all channel objects in category
+     */
+    public List<Channel> getChannels(@NonNull String category) {
+        ArrayList<Channel> result = new ArrayList<>();
+
+        Set<Map.Entry<String, Channel>> set = channelsMap.entrySet();
+        for (Map.Entry<String, Channel> entry: set) {
+            Channel curChannel = entry.getValue();
+            if (category.equalsIgnoreCase(curChannel.getCategory())) result.add(curChannel);
+        }
+
+        return result;
+    }
+
+    /**
      * Load channel data from JSON Array
      * @param array Channel data JSON Array
      */
@@ -57,6 +74,23 @@ public final class ChannelManager {
         for (int i = 0; i < array.length(); i++) {
             try {
                 JSONObject cur = array.getJSONObject(i);
+                addChannel(cur);
+            } catch (JSONException e) {
+                LOGW(TAG, "loadChannelsFromJSONArray(): " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Load channel data from JSON Array, setting category for all items
+     * @param array Channel data JSON Array
+     * @param category Category name
+     */
+    public void loadChannelsFromJSONArray(@NonNull JSONArray array, @NonNull String category) {
+        for (int i = 0; i < array.length(); i++) {
+            try {
+                JSONObject cur = array.getJSONObject(i);
+                cur.putOpt("category", category);
                 addChannel(cur);
             } catch (JSONException e) {
                 LOGW(TAG, "loadChannelsFromJSONArray(): " + e.getMessage());
