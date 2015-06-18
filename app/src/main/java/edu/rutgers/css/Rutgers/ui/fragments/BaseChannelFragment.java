@@ -6,10 +6,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.ProgressBar;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
+import edu.rutgers.css.Rutgers.utils.FragmentUtils;
 
 /**
  * Base channel fragment. Handles progress circle display and communication with parent activity.
@@ -33,6 +35,18 @@ public abstract class BaseChannelFragment extends Fragment {
         // Get rid of view references
         mProgressCircle = null;
     }
+
+    //hack to prevent animations from occurring when popping from backstack
+    @Override
+    public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
+        if (FragmentUtils.fDisableAnimations) {
+            Animation a = new Animation() {};
+            a.setDuration(0);
+            return a;
+        }
+        return super.onCreateAnimation(transit, enter, nextAnim);
+    }
+
 
     final protected void showProgressCircle() {
         if (mProgressCircle != null) mProgressCircle.setVisibility(View.VISIBLE);
