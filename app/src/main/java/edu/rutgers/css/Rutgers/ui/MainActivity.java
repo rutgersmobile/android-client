@@ -9,12 +9,12 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -57,6 +57,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.FragmentUtils;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -562,9 +563,13 @@ public class MainActivity extends LocationProviderActivity implements
         // If this is a top level (nav drawer) press, find the last time this channel was launched
         // and pop backstack to it
         if (isTopLevel && fm.findFragmentByTag(componentTag) != null) {
+            //fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            //hacky way to disable animations
+            FragmentUtils.fDisableAnimations = true;
             fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            FragmentUtils.fDisableAnimations = false;
         }
-
+        
         // Switch the main content fragment
         fm.beginTransaction()
                 .setCustomAnimations(R.animator.slide_in_right, R.animator.slide_out_left,
