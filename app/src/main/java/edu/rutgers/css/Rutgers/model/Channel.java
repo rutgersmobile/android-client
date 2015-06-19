@@ -14,7 +14,6 @@ import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
  */
 public class Channel {
 
-    private String category;
     private VarTitle title;
     private String handle;
     private String view;
@@ -25,7 +24,6 @@ public class Channel {
 
     /** Construct channel from JSON. */
     public Channel(JSONObject channelJson) throws JSONException {
-        this.category = channelJson.getString("category");
         this.title = new VarTitle(channelJson.get("title"));
         this.handle = channelJson.getString("handle");
 
@@ -40,10 +38,6 @@ public class Channel {
         this.data = channelJson.optJSONArray("data");
 
         this.canOverride = channelJson.optBoolean("canOverride");
-    }
-
-    public String getCategory() {
-        return category;
     }
 
     public String getTitle() {
