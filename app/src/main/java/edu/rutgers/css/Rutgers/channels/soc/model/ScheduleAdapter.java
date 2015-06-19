@@ -176,11 +176,14 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             }
 
             Set<ScheduleAdapterItem> passed = new HashSet<>();
-            List<String> words = new ArrayList<>(Arrays.asList(constraint.toString().trim().split(" ")));
+            List<String> words = new ArrayList<>(Arrays.asList(constraint.toString().trim().split("[ :]")));
 
             passed.addAll(queryAbbreviations(words));
 
-            passed.addAll(querySubjectCode(words));
+            Subject subjectCode = querySubjectCode(words);
+            if (subjectCode != null) {
+                passed.add(subjectCode);
+            }
 
             String courseId = queryCourseCode(words);
 
@@ -188,36 +191,20 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
 
             final List<ScheduleAdapterItem> passedCopy = new ArrayList<>(passed);
             Set<ScheduleAdapterItem> courses = new HashSet<>();
-            if (passed.size() > 0) {
+            if (!passed.isEmpty()) {
                 if (courseId != null) {
                     for (ScheduleAdapterItem subject : passedCopy) {
                         courses.addAll(socIndex.getCoursesByCodeInSubject(subject.getCode(), courseId));
                     }
-                } else if (words.size() > 0) {
+                } else if (!words.isEmpty()) {
                     for (ScheduleAdapterItem subject : passedCopy) {
-                        for (String word : words) {
-                            courses.addAll(socIndex.getCoursesByNameInSubject(subject.getCode(), word, 10));
-                        }
+                        courses.addAll(socIndex.getCoursesByNameInSubject(subject.getCode(), words, 10));
                     }
                 } else if (passed.size() == 1) {
                     courses.addAll(socIndex.getCoursesInSubject(passed.iterator().next().getCode()));
                 }
             } else {
-                if (courseId != null) {
-                    if (words.size() > 0) {
-                        for (String word : words) {
-                            courses.addAll(socIndex.getCoursesByCode(courseId, word));
-                        }
-                    } else {
-                        courses.addAll(socIndex.getCoursesByCode(courseId));
-                    }
-                } else {
-                    if (words.size() > 0) {
-                        for (String word : words) {
-                            courses.addAll(socIndex.getCoursesByQuery(word));
-                        }
-                    }
-                }
+                courses.addAll(socIndex.getCoursesByCode(courseId, words));
             }
 
             List<ScheduleAdapterItem> values = new ArrayList<>(passed);
@@ -239,24 +226,23 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             return null;
         }
 
-        private List<Subject> querySubjectCode(List<String> words) {
-            List<Subject> results = new ArrayList<>();
+        private Subject querySubjectCode(List<String> words) {
             for (Iterator<String> i = words.iterator(); i.hasNext();) {
                 String word = i.next();
                 if (isNumericalCode(word)) {
                     Subject subject = socIndex.getSubjectByCode(word);
                     if (subject != null) {
                         i.remove();
-                        results.add(subject);
+                        return subject;
                     }
                 }
             }
-            return results;
+            return null;
         }
 
         private List<Subject> queryAbbreviations(List<String> words) {
             List<Subject> subjectsByAbbrev = socIndex.getSubjectsByAbbreviation(words.get(0));
-            if (subjectsByAbbrev.size() != 0) {
+            if (!subjectsByAbbrev.isEmpty()) {
                 words.remove(0);
             }
             return subjectsByAbbrev;
@@ -274,6 +260,9 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
 
         private boolean validSubject(List<String> words, Subject subject) {
             List<String> subjectWords = Arrays.asList(subject.getDescription().split(" "));
+            if (words.isEmpty()) {
+                return false;
+            }
             for (String word : words) {
                 if (!anyStarts(word, subjectWords)) {
                     return false;
@@ -311,9 +300,13 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
 
             // Replace current list with results
             synchronized (mLock) {
-                mList.clear();
-                if (filterResults.values != null) mList.addAll((ArrayList<ScheduleAdapterItem>) filterResults.values);
-                notifyDataSetChanged();
+                // TODO make this equals actually work
+                if (!mList.equals(filterResults.values)) {
+                    mList.clear();
+                    if (filterResults.values != null)
+                        mList.addAll((ArrayList<ScheduleAdapterItem>) filterResults.values);
+                    notifyDataSetChanged();
+                }
             }
         }
     }

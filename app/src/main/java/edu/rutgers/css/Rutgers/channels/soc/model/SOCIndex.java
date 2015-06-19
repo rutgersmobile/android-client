@@ -168,7 +168,7 @@ public class SOCIndex {
         return results;
     }
 
-    public List<Course> getCoursesByCode(String queryCourseCode, String query) {
+    public List<Course> getCoursesByCode(String queryCourseCode, List<String> query) {
         List<Course> results = new ArrayList<>();
         Set<Map.Entry<String, IndexCourse>> courseEntries = mCoursesByName.entrySet();
         for (Map.Entry<String, IndexCourse> courseEntry : courseEntries) {
@@ -176,39 +176,13 @@ public class SOCIndex {
             String courseCode = courseEntry.getValue().course;
             String subjectCode = courseEntry.getValue().subj;
 
-            if (query == null || StringUtils.containsIgnoreCase(courseName, query)) {
+            if (query.isEmpty() || allContained(query, courseName)) {
                 if (queryCourseCode == null || courseCode.contains(queryCourseCode)) {
                     results.add(new Course(courseName, subjectCode, courseCode));
                 }
             }
         }
         return results;
-    }
-
-    public List<Course> getCoursesByCode(String courseCode) {
-        return getCoursesByCode(courseCode, null);
-    }
-
-    public List<Course> getCoursesByQuery(String query) {
-        return getCoursesByCode(null, query);
-    }
-
-    /**
-     * Get course by subject & course code combination
-     * @param subjectCode Subject code
-     * @param courseCode Course code
-     * @return Course-stub JSON object
-     */
-    public Course getCourseByCodeInSubject(String subjectCode, String courseCode) {
-        IndexSubject subject = mSubjectsByCode.get(subjectCode);
-        if (subject == null) return null;
-
-        String title = subject.courses.get(courseCode);
-        if (title != null) {
-            return new Course(title.toUpperCase(), subjectCode, courseCode);
-        } else {
-            return null;
-        }
     }
 
     public List<Course> getCoursesByCodeInSubject(String subjectCode, String courseCodeQuery) {
@@ -221,7 +195,7 @@ public class SOCIndex {
             String courseCode = courseEntry.getKey();
             String courseTitle = courseEntry.getValue();
 
-            if (courseCode.contains(courseCodeQuery)) {
+            if (courseCode.startsWith(courseCodeQuery)) {
                 results.add(new Course(courseTitle, subjectCode, courseCode));
             }
         }
@@ -236,7 +210,7 @@ public class SOCIndex {
      * @param cap Maximum number of results (cutoff point)
      * @return List of course-stub JSON objects (empty if no results found)
      */
-    public List<Course> getCoursesByNameInSubject(String subjectCode, String query, int cap) {
+    public List<Course> getCoursesByNameInSubject(String subjectCode, List<String> query, int cap) {
         IndexSubject subject = mSubjectsByCode.get(subjectCode);
         if (subject == null) return new ArrayList<>();
 
@@ -246,13 +220,22 @@ public class SOCIndex {
             String courseCode = courseEntry.getKey();
             String courseTitle = courseEntry.getValue();
 
-            if (StringUtils.containsIgnoreCase(courseTitle, query)) {
+            if (allContained(query, courseTitle)) {
                 results.add(new Course(courseTitle, subjectCode, courseCode));
             }
             if (results.size() >= cap) return results;
         }
 
         return results;
+    }
+
+    private boolean allContained(List<String> words, String s) {
+        for (String word : words) {
+            if (!StringUtils.containsIgnoreCase(s, word)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void setSemesterCode(String semesterCode) {
