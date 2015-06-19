@@ -17,6 +17,7 @@ import org.jdeferred.android.AndroidDeferredManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -177,63 +178,29 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             Set<ScheduleAdapterItem> passed = new HashSet<>();
             List<String> words = new ArrayList<>(Arrays.asList(constraint.toString().trim().split(" ")));
 
-            List<Subject> subjectsByAbbrev = socIndex.getSubjectsByAbbreviation(words.get(0));
-            if (subjectsByAbbrev.size() != 0) {
-                words.remove(0);
-                passed.addAll(subjectsByAbbrev);
-            }
+            passed.addAll(queryAbbreviations(words));
 
-            for (String word : words) {
-                if (isNumericalCode(word)) {
-                    Subject subject = socIndex.getSubjectByCode(word);
-                    if (subject != null) {
-                        passed.add(subject);
-                        words.remove(word);
-                    }
-                }
-            }
+            passed.addAll(querySubjectCode(words));
 
-            String courseId = null;
-            for (String word : words) {
-                if (isNumericalCode(word)) {
-                    courseId = word;
-                    words.remove(word);
-                    break;
-                }
-            }
+            String courseId = queryCourseCode(words);
 
-            for (Subject subject : socIndex.getSubjects()) {
-                List<String> subjectWords = Arrays.asList(subject.getDescription().split(" "));
+            passed.addAll(queryValidSubjects(words, socIndex.getSubjects()));
 
-                checkSubject:
-                for (String word : words) {
-                    for (String subjectWord : subjectWords) {
-                        if (StringUtils.startsWithIgnoreCase(subjectWord, word)) {
-                            passed.add(subject);
-                            break checkSubject;
-                        }
-                    }
-                }
-            }
-
-            List<ScheduleAdapterItem> passedCopy = new ArrayList<>(passed);
+            final List<ScheduleAdapterItem> passedCopy = new ArrayList<>(passed);
             Set<ScheduleAdapterItem> courses = new HashSet<>();
             if (passed.size() > 0) {
                 if (courseId != null) {
                     for (ScheduleAdapterItem subject : passedCopy) {
-                        Course course = socIndex.getCourseByCode(subject.getTitle(), courseId);
-                        if (course != null) {
-                            courses.add(course);
-                        }
+                        courses.addAll(socIndex.getCoursesByCodeInSubject(subject.getCode(), courseId));
                     }
                 } else if (words.size() > 0) {
                     for (ScheduleAdapterItem subject : passedCopy) {
                         for (String word : words) {
-                            courses.addAll(socIndex.getCoursesByNameAndSubject(subject.getCode(), word, 10));
+                            courses.addAll(socIndex.getCoursesByNameInSubject(subject.getCode(), word, 10));
                         }
                     }
                 } else if (passed.size() == 1) {
-                    courses.addAll(socIndex.getCoursesBySubject(passed.iterator().next().getCode()));
+                    courses.addAll(socIndex.getCoursesInSubject(passed.iterator().next().getCode()));
                 }
             } else {
                 if (courseId != null) {
@@ -261,6 +228,69 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             return filterResults;
         }
 
+        private String queryCourseCode(List<String> words) {
+            for (Iterator<String> i = words.iterator(); i.hasNext();) {
+                String word = i.next();
+                if (isNumericalCode(word)) {
+                    i.remove();
+                    return word;
+                }
+            }
+            return null;
+        }
+
+        private List<Subject> querySubjectCode(List<String> words) {
+            List<Subject> results = new ArrayList<>();
+            for (Iterator<String> i = words.iterator(); i.hasNext();) {
+                String word = i.next();
+                if (isNumericalCode(word)) {
+                    Subject subject = socIndex.getSubjectByCode(word);
+                    if (subject != null) {
+                        i.remove();
+                        results.add(subject);
+                    }
+                }
+            }
+            return results;
+        }
+
+        private List<Subject> queryAbbreviations(List<String> words) {
+            List<Subject> subjectsByAbbrev = socIndex.getSubjectsByAbbreviation(words.get(0));
+            if (subjectsByAbbrev.size() != 0) {
+                words.remove(0);
+            }
+            return subjectsByAbbrev;
+        }
+
+        private List<Subject> queryValidSubjects(List<String> words, List<Subject> subjects) {
+            List<Subject> results = new ArrayList<>();
+            for (Subject subject : subjects) {
+                if (validSubject(words, subject)) {
+                    results.add(subject);
+                }
+            }
+            return results;
+        }
+
+        private boolean validSubject(List<String> words, Subject subject) {
+            List<String> subjectWords = Arrays.asList(subject.getDescription().split(" "));
+            for (String word : words) {
+                if (!anyStarts(word, subjectWords)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean anyStarts(String word, List<String> subjectWords) {
+            for (String subjectWord : subjectWords) {
+                if (StringUtils.startsWithIgnoreCase(subjectWord, word)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private boolean isNumericalCode(String word) {
             if (word.length() > 3 || word.length() == 0) {
                 return false;
@@ -273,6 +303,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             // If filterResults is null, leave the current list alone.

@@ -154,7 +154,7 @@ public class SOCIndex {
         }
     }
 
-    public List<Course> getCoursesBySubject(String subjectCode) {
+    public List<Course> getCoursesInSubject(String subjectCode) {
         List<Course> results = new ArrayList<>();
         IndexSubject subject = mSubjectsByCode.get(subjectCode);
         if (subject != null) {
@@ -176,9 +176,9 @@ public class SOCIndex {
             String courseCode = courseEntry.getValue().course;
             String subjectCode = courseEntry.getValue().subj;
 
-            if (query == null || StringUtils.containsIgnoreCase(courseCode, query)) {
-                if (queryCourseCode == null || courseCode.equals(queryCourseCode)) {
-                    results.add(new Course(courseName, subjectCode, queryCourseCode));
+            if (query == null || StringUtils.containsIgnoreCase(courseName, query)) {
+                if (queryCourseCode == null || courseCode.contains(queryCourseCode)) {
+                    results.add(new Course(courseName, subjectCode, courseCode));
                 }
             }
         }
@@ -199,7 +199,7 @@ public class SOCIndex {
      * @param courseCode Course code
      * @return Course-stub JSON object
      */
-    public Course getCourseByCode(String subjectCode, String courseCode) {
+    public Course getCourseByCodeInSubject(String subjectCode, String courseCode) {
         IndexSubject subject = mSubjectsByCode.get(subjectCode);
         if (subject == null) return null;
 
@@ -211,39 +211,45 @@ public class SOCIndex {
         }
     }
 
-    /**
-     * Get courses by partial title matches on query.
-     * @param query Query string
-     * @param cap Maximum number of results (cutoff point)
-     * @return List of course-stub JSON objects (empty if no results found)
-     */
-    public List<Course> getCoursesByName(String query, int cap) {
-        return getCoursesByNameAndSubject(null, query, cap);
+    public List<Course> getCoursesByCodeInSubject(String subjectCode, String courseCodeQuery) {
+        IndexSubject subject = mSubjectsByCode.get(subjectCode);
+        if (subject == null) return new ArrayList<>();
+
+        List<Course> results = new ArrayList<>();
+
+        for (Map.Entry<String, String> courseEntry : subject.courses.entrySet()) {
+            String courseCode = courseEntry.getKey();
+            String courseTitle = courseEntry.getValue();
+
+            if (courseCode.contains(courseCodeQuery)) {
+                results.add(new Course(courseTitle, subjectCode, courseCode));
+            }
+        }
+
+        return results;
     }
 
     /**
      * Get courses by partial title matches on query in a subject
-     * @param querySubject subject to look for courses in
+     * @param subjectCode subject to look for courses in
      * @param query Query string
      * @param cap Maximum number of results (cutoff point)
      * @return List of course-stub JSON objects (empty if no results found)
      */
-    public List<Course> getCoursesByNameAndSubject(String querySubject, String query, int cap) {
+    public List<Course> getCoursesByNameInSubject(String subjectCode, String query, int cap) {
+        IndexSubject subject = mSubjectsByCode.get(subjectCode);
+        if (subject == null) return new ArrayList<>();
+
         List<Course> results = new ArrayList<>();
 
-        Set<Map.Entry<String, IndexCourse>> courseEntries = mCoursesByName.entrySet();
-        for (Map.Entry<String, IndexCourse> curEntry: courseEntries) {
-            // If there's a partial match on the full course name...
-            if (StringUtils.containsIgnoreCase(curEntry.getKey(), query)) {
-                IndexCourse curCourse = curEntry.getValue();
-                String subjectCode = curCourse.subj;
-                String courseCode = curCourse.course;
+        for (Map.Entry<String, String> courseEntry : subject.courses.entrySet()) {
+            String courseCode = courseEntry.getKey();
+            String courseTitle = courseEntry.getValue();
 
-                if (querySubject == null || querySubject.equals(subjectCode)) {
-                    results.add(new Course(curEntry.getKey().toUpperCase(), subjectCode, courseCode));
-                }
-                if (results.size() >= cap) return results;
+            if (StringUtils.containsIgnoreCase(courseTitle, query)) {
+                results.add(new Course(courseTitle, subjectCode, courseCode));
             }
+            if (results.size() >= cap) return results;
         }
 
         return results;
