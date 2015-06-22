@@ -17,8 +17,8 @@ import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -177,7 +177,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             }
 
             // All the subjects that will be returned in filterResults
-            Set<Subject> subjects = new HashSet<>();
+            Set<Subject> subjects = new LinkedHashSet<>();
 
             // Words in the query tokenized by spaces and colons (for format like "198:111")
             List<String> words = new ArrayList<>(Arrays.asList(constraint.toString().trim().split("[ :]")));
@@ -198,7 +198,7 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             subjects.addAll(queryValidSubjects(words, socIndex.getSubjects()));
 
             // All courses to be returned in filterResults
-            Set<Course> courses = new HashSet<>();
+            Set<Course> courses = new LinkedHashSet<>();
             if (!subjects.isEmpty()) {
                 if (courseId != null) {
                     // If a subject and a course id are entered,
