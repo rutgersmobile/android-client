@@ -11,9 +11,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,8 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import edu.rutgers.css.Rutgers.R;
-
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Adapter for subjects and courses.
@@ -72,48 +67,10 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
 
         final ScheduleAdapterItem scheduleItem = getItem(position);
 
-        // If it's a course
-        if (scheduleItem instanceof Course) {
-            final Course course = (Course) scheduleItem;
-            holder.titleTextView.setText(course.getDisplayTitle());
-
-            if (course.isStub()) {
-                holder.titleTextView.setVisibility(View.GONE);
-                // Replace the stub data
-                final ScheduleAdapter scheduleAdapter = this;
-                AndroidDeferredManager dm = new AndroidDeferredManager();
-                dm.when(ScheduleAPI.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), course.getSubject(), course.getCourseNumber())).done(new DoneCallback<Course>() {
-                    @Override
-                    public void onDone(Course result) {
-                        course.updateFields(result);
-                        scheduleAdapter.notifyDataSetChanged();
-                    }
-                }).fail(new FailCallback<Exception>() {
-                    @Override
-                    public void onFail(Exception result) {
-                        LOGW(TAG, result.getMessage());
-                    }
-                });
-
-                holder.creditsTextView.setVisibility(View.GONE);
-                holder.sectionsTextView.setVisibility(View.GONE);
-                holder.progressBar.setVisibility(View.VISIBLE);
-            } else {
-                // Get the number of open/total visible sections for this course
-                holder.creditsTextView.setText("credits: " + course.getCredits());
-                holder.sectionsTextView.setText("sections: " + course.countOpenSections(false) + "/" + course.countTotalSections(false));
-                holder.titleTextView.setVisibility(View.VISIBLE);
-                holder.creditsTextView.setVisibility(View.VISIBLE);
-                holder.sectionsTextView.setVisibility(View.VISIBLE);
-                holder.progressBar.setVisibility(View.GONE);
-            }
-        } else {
-            // Just put in the display title (probably a subject)
-            holder.titleTextView.setText(scheduleItem.getDisplayTitle());
-            holder.creditsTextView.setVisibility(View.GONE);
-            holder.sectionsTextView.setVisibility(View.GONE);
-            holder.progressBar.setVisibility(View.GONE);
-        }
+        holder.titleTextView.setText(scheduleItem.getDisplayTitle());
+        holder.creditsTextView.setVisibility(View.GONE);
+        holder.sectionsTextView.setVisibility(View.GONE);
+        holder.progressBar.setVisibility(View.GONE);
 
         return convertView;
     }

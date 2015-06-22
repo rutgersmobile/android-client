@@ -6,7 +6,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,7 +43,9 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
@@ -178,9 +179,20 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
                     switchFragments(coursesArgs);
                 } else if (clickedItem instanceof Course) {
                     // This is for when courses are loaded into the list by user-supplied filter
-                    if (((Course) clickedItem).isStub()) return; // Stub course hasn't loaded data yet
-                    Bundle courseArgs = SOCSections.createArgs(clickedItem.getDisplayTitle(), mSemester, (Course) clickedItem);
-                    switchFragments(courseArgs);
+                    final Course course = (Course) clickedItem;
+                    AndroidDeferredManager dm = new AndroidDeferredManager();
+                    dm.when(ScheduleAPI.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), course.getSubject(), course.getCourseNumber())).done(new DoneCallback<Course>() {
+                        @Override
+                        public void onDone(Course result) {
+                            Bundle courseArgs = SOCSections.createArgs(result.getDisplayTitle(), mSemester, result);
+                            switchFragments(courseArgs);
+                        }
+                    }).fail(new FailCallback<Exception>() {
+                        @Override
+                        public void onFail(Exception result) {
+                            LOGW(TAG, result.getMessage());
+                        }
+                    });
                 }
             }
 
