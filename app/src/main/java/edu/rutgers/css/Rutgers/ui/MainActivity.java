@@ -53,7 +53,6 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
-import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
@@ -489,12 +488,6 @@ public class MainActivity extends LocationProviderActivity implements
 
         });
 
-    }
-
-    private void addMenuSection(String category, List<Channel> channels) {
-        //mDrawerAdapter.add(new RMenuHeaderRow(category))
-        mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
-        addChannels(mChannelManager.getChannels());
     }
 
     /**

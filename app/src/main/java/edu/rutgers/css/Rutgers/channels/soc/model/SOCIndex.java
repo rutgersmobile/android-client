@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -185,18 +186,21 @@ public class SOCIndex {
         return results;
     }
 
-    public List<Course> getCoursesByCodeInSubject(String subjectCode, String courseCodeQuery) {
-        IndexSubject subject = mSubjectsByCode.get(subjectCode);
-        if (subject == null) return new ArrayList<>();
-
+    public List<Course> getCoursesByCodeInSubjects(Collection<Subject> subjects, String courseCodeQuery) {
         List<Course> results = new ArrayList<>();
 
-        for (Map.Entry<String, String> courseEntry : subject.courses.entrySet()) {
-            String courseCode = courseEntry.getKey();
-            String courseTitle = courseEntry.getValue();
+        for (Subject subject : subjects) {
+            String subjectCode = subject.getCode();
+            IndexSubject indexSubject = mSubjectsByCode.get(subjectCode);
+            if (indexSubject == null) continue;
 
-            if (courseCode.startsWith(courseCodeQuery)) {
-                results.add(new Course(courseTitle, subjectCode, courseCode));
+            for (Map.Entry<String, String> courseEntry : indexSubject.courses.entrySet()) {
+                String courseCode = courseEntry.getKey();
+                String courseTitle = courseEntry.getValue();
+
+                if (courseCode.startsWith(courseCodeQuery)) {
+                    results.add(new Course(courseTitle, subjectCode, courseCode));
+                }
             }
         }
 
@@ -205,25 +209,29 @@ public class SOCIndex {
 
     /**
      * Get courses by partial title matches on query in a subject
-     * @param subjectCode subject to look for courses in
+     * @param subjects subjects to look for courses in
      * @param query Query string
      * @param cap Maximum number of results (cutoff point)
      * @return List of course-stub JSON objects (empty if no results found)
      */
-    public List<Course> getCoursesByNameInSubject(String subjectCode, List<String> query, int cap) {
-        IndexSubject subject = mSubjectsByCode.get(subjectCode);
-        if (subject == null) return new ArrayList<>();
-
+    public List<Course> getCoursesByNameInSubjects(Collection<Subject> subjects, List<String> query, int cap) {
         List<Course> results = new ArrayList<>();
 
-        for (Map.Entry<String, String> courseEntry : subject.courses.entrySet()) {
-            String courseCode = courseEntry.getKey();
-            String courseTitle = courseEntry.getValue();
+        for (Subject subject : subjects) {
+            String subjectCode = subject.getCode();
+            IndexSubject indexSubject = mSubjectsByCode.get(subjectCode);
+            if (indexSubject == null) continue;
 
-            if (allContained(query, courseTitle)) {
-                results.add(new Course(courseTitle, subjectCode, courseCode));
+
+            for (Map.Entry<String, String> courseEntry : indexSubject.courses.entrySet()) {
+                String courseCode = courseEntry.getKey();
+                String courseTitle = courseEntry.getValue();
+
+                if (allContained(query, courseTitle)) {
+                    results.add(new Course(courseTitle, subjectCode, courseCode));
+                }
+                if (results.size() >= cap) return results;
             }
-            if (results.size() >= cap) return results;
         }
 
         return results;

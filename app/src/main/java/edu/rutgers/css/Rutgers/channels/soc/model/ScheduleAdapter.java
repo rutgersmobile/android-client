@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.soc.model;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -175,57 +176,80 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                 }
             }
 
-            Set<ScheduleAdapterItem> passed = new HashSet<>();
+            // All the subjects that will be returned in filterResults
+            Set<Subject> subjects = new HashSet<>();
+
+            // Words in the query tokenized by spaces and colons (for format like "198:111")
             List<String> words = new ArrayList<>(Arrays.asList(constraint.toString().trim().split("[ :]")));
 
-            passed.addAll(queryAbbreviations(words));
+            // Add subjects by abbreviations
+            subjects.addAll(queryAbbreviations(words));
 
+            // Check if we have a valid subject code in the query
             Subject subjectCode = querySubjectCode(words);
             if (subjectCode != null) {
-                passed.add(subjectCode);
+                subjects.add(subjectCode);
             }
 
+            // Record a valid course code if we find one in the query
             String courseId = queryCourseCode(words);
 
-            passed.addAll(queryValidSubjects(words, socIndex.getSubjects()));
+            // Add subjects that are made up of all the words in the query
+            subjects.addAll(queryValidSubjects(words, socIndex.getSubjects()));
 
-            final List<ScheduleAdapterItem> passedCopy = new ArrayList<>(passed);
-            Set<ScheduleAdapterItem> courses = new HashSet<>();
-            if (!passed.isEmpty()) {
+            // All courses to be returned in filterResults
+            Set<Course> courses = new HashSet<>();
+            if (!subjects.isEmpty()) {
                 if (courseId != null) {
-                    for (ScheduleAdapterItem subject : passedCopy) {
-                        courses.addAll(socIndex.getCoursesByCodeInSubject(subject.getCode(), courseId));
-                    }
+                    // If a subject and a course id are entered,
+                    // add the matching courses from those subjects
+                    courses.addAll(socIndex.getCoursesByCodeInSubjects(subjects, courseId));
                 } else if (!words.isEmpty()) {
-                    for (ScheduleAdapterItem subject : passedCopy) {
-                        courses.addAll(socIndex.getCoursesByNameInSubject(subject.getCode(), words, 10));
-                    }
-                } else if (passed.size() == 1) {
-                    courses.addAll(socIndex.getCoursesInSubject(passed.iterator().next().getCode()));
+                    // Otherwise find matching course names in those subjects
+                    courses.addAll(socIndex.getCoursesByNameInSubjects(subjects, words, 10));
+                } else if (subjects.size() == 1) {
+                    // If the only thing entered was a single subject,
+                    // then get all the courses for that subject
+                    courses.addAll(socIndex.getCoursesInSubject(subjects.iterator().next().getCode()));
                 }
             } else {
+                // If no subjects were input, get all courses matching
+                // the ones put in regardless of subject
                 courses.addAll(socIndex.getCoursesByCode(courseId, words));
             }
 
-            List<ScheduleAdapterItem> values = new ArrayList<>(passed);
+            // Smash the subjects and courses together
+            // TODO Keep the lists separate
+            List<ScheduleAdapterItem> values = new ArrayList<>();
+            values.addAll(subjects);
             values.addAll(courses);
-
             filterResults.values = values;
-            filterResults.count = passed.size();
+
+            filterResults.count = subjects.size();
             return filterResults;
         }
 
-        private String queryCourseCode(List<String> words) {
-            for (Iterator<String> i = words.iterator(); i.hasNext();) {
-                String word = i.next();
-                if (isNumericalCode(word)) {
-                    i.remove();
-                    return word;
-                }
+        /**
+         * Get subjects by abbreviations from the first word in the query.
+         * Remove that word if there is a match.
+         * @param words List of words in the query.
+         * @return All subjects matching the given abbreviation.
+         */
+        private List<Subject> queryAbbreviations(List<String> words) {
+            List<Subject> subjectsByAbbrev = socIndex.getSubjectsByAbbreviation(words.get(0));
+            if (!subjectsByAbbrev.isEmpty()) {
+                words.remove(0);
             }
-            return null;
+            return subjectsByAbbrev;
         }
 
+        /**
+         * Find the first complete subject code and return the corresponding subject.
+         * Remove the word that was matched.
+         * @param words List of words in the query
+         * @return A subject object if one is found, null otherwise
+         */
+        @Nullable
         private Subject querySubjectCode(List<String> words) {
             for (Iterator<String> i = words.iterator(); i.hasNext();) {
                 String word = i.next();
@@ -240,12 +264,21 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             return null;
         }
 
-        private List<Subject> queryAbbreviations(List<String> words) {
-            List<Subject> subjectsByAbbrev = socIndex.getSubjectsByAbbreviation(words.get(0));
-            if (!subjectsByAbbrev.isEmpty()) {
-                words.remove(0);
+        /**
+         * Find the first valid course code and return it. Remove the matched word.
+         * @param words List of words in the query
+         * @return String of the course code
+         */
+        @Nullable
+        private String queryCourseCode(List<String> words) {
+            for (Iterator<String> i = words.iterator(); i.hasNext();) {
+                String word = i.next();
+                if (isNumericalCode(word)) {
+                    i.remove();
+                    return word;
+                }
             }
-            return subjectsByAbbrev;
+            return null;
         }
 
         private List<Subject> queryValidSubjects(List<String> words, List<Subject> subjects) {
