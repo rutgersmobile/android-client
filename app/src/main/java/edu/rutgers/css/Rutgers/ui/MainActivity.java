@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -43,6 +44,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +59,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.DrawerUtils;
 import edu.rutgers.css.Rutgers.utils.FragmentUtils;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
@@ -70,6 +73,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 /**
  * Main activity. Handles navigation drawer, displayed fragments, and connection to location services.
  */
+
 public class MainActivity extends LocationProviderActivity implements
         ChannelManagerProvider {
 
@@ -100,6 +104,7 @@ public class MainActivity extends LocationProviderActivity implements
         return mChannelManager;
     }
 
+
     private class DrawerAdapter extends ArrayAdapter<Channel> {
         private class ViewHolder {
             TextView textView;
@@ -109,6 +114,7 @@ public class MainActivity extends LocationProviderActivity implements
         public DrawerAdapter(List<Channel> objects) {
             super(MainActivity.this, R.layout.row_drawer_item, objects);
         }
+
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -141,7 +147,6 @@ public class MainActivity extends LocationProviderActivity implements
         setContentView(R.layout.activity_main);
 
         LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
-
         mComponentFactory = new ComponentFactory();
         mChannelManager = new ChannelManager();
 
@@ -158,8 +163,6 @@ public class MainActivity extends LocationProviderActivity implements
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        mDrawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
         mDrawerToggle = new ActionBarDrawerToggle(        
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
@@ -168,9 +171,7 @@ public class MainActivity extends LocationProviderActivity implements
                 ) {
 
             /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-            }
+            public void onDrawerClosed(View view) {super.onDrawerClosed(view);}
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
@@ -182,15 +183,18 @@ public class MainActivity extends LocationProviderActivity implements
                 }
             }
         };
-        
+
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
         
         mDrawerListView.setAdapter(mDrawerAdapter);
+        mDrawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mDrawerListView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                LOGE(TAG, "I JUST PRESSED THE BUTTON");
+
                 Channel channel = (Channel) parent.getAdapter().getItem(position);
                 Bundle channelArgs = new Bundle();
                 String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
@@ -212,15 +216,16 @@ public class MainActivity extends LocationProviderActivity implements
 
                 channelArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
 
-                mDrawerListView.setItemChecked(position, true);
 
+                mDrawerListView.setItemChecked(position, true);
+                mDrawerListView.setSelection(position);
                 LOGI(TAG, "Currently checked item position: " + mDrawerListView.getCheckedItemPosition());
 
+                mDrawerListView.invalidateViews();
                 // Launch component
                 switchDrawerFragments(channelArgs);
-
                 //mDrawerAdapter.setSelectedPos(position);
-                mDrawerListView.invalidateViews();
+
                 mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
             }
 
