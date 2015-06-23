@@ -7,7 +7,8 @@ import java.util.List;
 /**
  * Course from Schedule of Classes. Construct with GSON.
  */
-public class Course extends ScheduleAdapterItem {
+public class Course extends ScheduleAdapterItem
+        implements Comparable<Course> {
 
     private String title;
     private String subject;
@@ -57,7 +58,7 @@ public class Course extends ScheduleAdapterItem {
      */
     @Override
     public String getDisplayTitle() {
-        return getCourseNumber() + ": " + getTitle();
+        return getTitle() + " (" + getSubject() + ":" + getCourseNumber() + ")";
     }
 
     /**
@@ -128,4 +129,8 @@ public class Course extends ScheduleAdapterItem {
         return sections;
     }
 
+    @Override
+    public int compareTo(Course course) {
+        return this.getCode().compareTo(course.getCode());
+    }
 }

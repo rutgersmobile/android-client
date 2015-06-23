@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -166,6 +167,7 @@ public class SOCIndex {
                 results.add(new Course(courseTitle, subjectCode, courseCode));
             }
         }
+        Collections.sort(results);
         return results;
     }
 
@@ -183,6 +185,7 @@ public class SOCIndex {
                 }
             }
         }
+        Collections.sort(results);
         return results;
     }
 
@@ -194,14 +197,17 @@ public class SOCIndex {
             IndexSubject indexSubject = mSubjectsByCode.get(subjectCode);
             if (indexSubject == null) continue;
 
+            List<Course> sortList = new ArrayList<>();
             for (Map.Entry<String, String> courseEntry : indexSubject.courses.entrySet()) {
                 String courseCode = courseEntry.getKey();
                 String courseTitle = courseEntry.getValue();
 
                 if (courseCode.startsWith(courseCodeQuery)) {
-                    results.add(new Course(courseTitle, subjectCode, courseCode));
+                    sortList.add(new Course(courseTitle, subjectCode, courseCode));
                 }
             }
+            Collections.sort(sortList);
+            results.addAll(sortList);
         }
 
         return results;
@@ -216,22 +222,27 @@ public class SOCIndex {
      */
     public List<Course> getCoursesByNameInSubjects(Collection<Subject> subjects, List<String> query, int cap) {
         List<Course> results = new ArrayList<>();
+        boolean hitCap = false;
 
         for (Subject subject : subjects) {
             String subjectCode = subject.getCode();
             IndexSubject indexSubject = mSubjectsByCode.get(subjectCode);
             if (indexSubject == null) continue;
 
-
+            List<Course> sortList = new ArrayList<>();
             for (Map.Entry<String, String> courseEntry : indexSubject.courses.entrySet()) {
                 String courseCode = courseEntry.getKey();
                 String courseTitle = courseEntry.getValue();
 
                 if (allContained(query, courseTitle)) {
-                    results.add(new Course(courseTitle, subjectCode, courseCode));
+                    sortList.add(new Course(courseTitle, subjectCode, courseCode));
                 }
-                if (results.size() >= cap) return results;
+                hitCap = results.size() + sortList.size() >= cap;
+                if (hitCap) break;
             }
+            Collections.sort(sortList);
+            results.addAll(sortList);
+            if (hitCap) return results;
         }
 
         return results;

@@ -12,10 +12,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -178,7 +181,7 @@ public class ScheduleAdapter extends BaseAdapter
             displayTitle = course.getDisplayTitle();
         }
 
-        holder.titleTextView.setText(displayTitle);
+        holder.titleTextView.setText(WordUtils.capitalizeFully(displayTitle));
         holder.creditsTextView.setVisibility(View.GONE);
         holder.sectionsTextView.setVisibility(View.GONE);
         holder.progressBar.setVisibility(View.GONE);
@@ -245,7 +248,7 @@ public class ScheduleAdapter extends BaseAdapter
             }
 
             // All the subjects that will be returned in filterResults
-            Set<Subject> subjects = new LinkedHashSet<>();
+            Set<Subject> subjects = new HashSet<>();
 
             // Words in the query tokenized by spaces and colons (for format like "198:111")
             List<String> words = new ArrayList<>(Arrays.asList(constraint.toString().trim().split("[ :]")));
@@ -264,6 +267,10 @@ public class ScheduleAdapter extends BaseAdapter
 
             // Add subjects that are made up of all the words in the query
             subjects.addAll(queryValidSubjects(words, socIndex.getSubjects()));
+
+            List<Subject> subjectList = new ArrayList<>(subjects);
+            Collections.sort(subjectList);
+            subjects = new LinkedHashSet<>(subjectList);
 
             // All courses to be returned in filterResults
             Set<Course> courses = new LinkedHashSet<>();

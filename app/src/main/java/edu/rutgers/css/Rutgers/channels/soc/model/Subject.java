@@ -3,7 +3,8 @@ package edu.rutgers.css.Rutgers.channels.soc.model;
 /**
  * Subject/department name and code. Construct with GSON.
  */
-public class Subject extends ScheduleAdapterItem {
+public class Subject extends ScheduleAdapterItem
+        implements Comparable<Subject> {
     private String description;
     private String code;
 
@@ -33,5 +34,10 @@ public class Subject extends ScheduleAdapterItem {
     @Override
     public String getCode() {
         return code;
+    }
+
+    @Override
+    public int compareTo(Subject subject) {
+        return this.getTitle().compareTo(subject.getTitle());
     }
 }
