@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.jdeferred.AlwaysCallback;
@@ -19,7 +18,6 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
@@ -27,9 +25,9 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
  * Lists courses under a subject/department.
@@ -78,8 +76,7 @@ public class SOCCourses extends BaseChannelFragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
 
-        List<ScheduleAdapterItem> data = new ArrayList<>();
-        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, data);
+        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, R.layout.row_section_header);
 
         // Restore filter
         if (savedInstanceState != null && savedInstanceState.getString(SAVED_FILTER_TAG) != null) {
@@ -97,7 +94,7 @@ public class SOCCourses extends BaseChannelFragment {
 
             @Override
             public void onDone(List<Course> result) {
-                mAdapter.addAll(result);
+                mAdapter.addAllCourses(result);
 
                 // Re-apply filter
                 if (mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
@@ -121,7 +118,7 @@ public class SOCCourses extends BaseChannelFragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_list_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
 
         if (mLoading) showProgressCircle();
 
@@ -132,7 +129,7 @@ public class SOCCourses extends BaseChannelFragment {
 
         mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
-        final ListView listView = (ListView) v.findViewById(R.id.list);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

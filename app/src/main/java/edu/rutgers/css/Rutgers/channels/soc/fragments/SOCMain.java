@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.AlwaysCallback;
@@ -42,6 +41,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
@@ -87,8 +87,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        List<ScheduleAdapterItem> data = new ArrayList<>();
-        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, data);
+        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, R.layout.row_section_header);
 
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -158,14 +157,14 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_list_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
         setScheduleTitle();
 
         if (mLoadingSemesters || mLoadingSubjects) showProgressCircle();
 
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
-        final ListView listView = (ListView) v.findViewById(R.id.list);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -175,7 +174,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
                 if (clickedItem instanceof Subject) {
                     Bundle coursesArgs = SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
-                            mSemester, mLevel, ((Subject) clickedItem).getCode());
+                            mSemester, mLevel, clickedItem.getCode());
                     switchFragments(coursesArgs);
                 } else if (clickedItem instanceof Course) {
                     // This is for when courses are loaded into the list by user-supplied filter
@@ -343,7 +342,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
                 // Load subjects
                 mAdapter.clear();
-                mAdapter.addAll(subjects);
+                mAdapter.addAllSubjects(subjects);
 
                 // Re-apply filter
                 if (!StringUtils.isEmpty(mFilterString)) {

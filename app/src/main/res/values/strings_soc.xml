@@ -10,5 +10,7 @@
     <string name="soc_select_level">Select level</string>
     <string name="soc_undergrad">Undergraduate</string>
     <string name="soc_grad">Graduate</string>
+    <string name="soc_sub_header">Subjects</string>
+    <string name="soc_course_header">Courses</string>
 
 </resources>

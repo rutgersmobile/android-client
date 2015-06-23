@@ -5,8 +5,9 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -14,47 +15,149 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import edu.rutgers.css.Rutgers.R;
+import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 /**
  * Adapter for subjects and courses.
  */
-public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
+public class ScheduleAdapter extends BaseAdapter
+        implements StickyListHeadersAdapter, Filterable {
 
     private static final String TAG = "ScheduleAdapter";
 
     private int mRowLayoutResId;
-    private List<ScheduleAdapterItem> mList;
-    private List<ScheduleAdapterItem> mOriginalList;
+    private int mHeaderLayoutResId;
+    private SectionHolder mOriginalLists;
+    private List<Subject> mSubjectSection;
+    private List<Course> mCourseSection;
     private ScheduleFilter mFilter;
     private SOCIndex mSOCIndex;
+    private Context mContext;
+    private LayoutInflater mLayoutInflater;
     private final Object mLock = new Object();
 
-    static class ViewHolder {
+    @Override
+    public View getHeaderView(int i, View view, ViewGroup viewGroup) {
+        HeaderViewHolder holder;
+        if (view == null) {
+            holder = new HeaderViewHolder();
+            view = mLayoutInflater.inflate(mHeaderLayoutResId, null);
+            holder.headerTextView = (TextView) view.findViewById(R.id.title);
+            view.setTag(holder);
+        } else {
+            holder = (HeaderViewHolder) view.getTag();
+        }
+        if (i == 0 && mSubjectSection.size() != 0) {
+            holder.headerTextView.setText(R.string.soc_sub_header);
+        } else {
+            holder.headerTextView.setText(R.string.soc_course_header);
+        }
+        return view;
+    }
+
+    @Override
+    public long getHeaderId(int i) {
+        if (i < mSubjectSection.size()) {
+            return mSubjectSection.hashCode();
+        } else {
+            return mCourseSection.hashCode();
+        }
+    }
+
+    private static class HeaderViewHolder {
+        TextView headerTextView;
+    }
+
+    private static class ViewHolder {
         TextView titleTextView;
         TextView creditsTextView;
         TextView sectionsTextView;
         ProgressBar progressBar;
     }
 
-    public ScheduleAdapter(Context context, int resource, List<ScheduleAdapterItem> objects) {
-        super(context, resource, objects);
-        this.mRowLayoutResId = resource;
-        this.mList = objects;
+    private static class SectionHolder {
+        public SectionHolder(Collection<Subject> subjects, Collection<Course> courses) {
+            this.subjects = subjects;
+            this.courses = courses;
+        }
+        Collection<Subject> subjects;
+        Collection<Course> courses;
+    }
+
+    public ScheduleAdapter(Context context, int itemResource, int headerResource) {
+        this.mContext = context;
+        this.mLayoutInflater = LayoutInflater.from(context);
+        this.mRowLayoutResId = itemResource;
+        this.mHeaderLayoutResId = headerResource;
+        this.mSubjectSection = new ArrayList<>();
+        this.mCourseSection = new ArrayList<>();
+    }
+
+    @Override
+    public int getCount() {
+        return mSubjectSection.size() + mCourseSection.size();
+    }
+
+    @Override
+    public Object getItem(int i) {
+        if (i < mSubjectSection.size()) {
+            return mSubjectSection.get(i);
+        }
+        i -= mSubjectSection.size();
+        return mCourseSection.get(i);
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
+    }
+
+    public void clear() {
+        synchronized (mLock) {
+            mSubjectSection.clear();
+            mCourseSection.clear();
+        }
+        notifyDataSetChanged();
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    public void addSubject(Subject subject) {
+        synchronized (mLock) {
+            mSubjectSection.add(subject);
+        }
+        notifyDataSetChanged();
+    }
+
+    public void addAllSubjects(Collection<Subject> subjects) {
+        synchronized (mLock) {
+            mSubjectSection.addAll(subjects);
+        }
+        notifyDataSetChanged();
+    }
+
+    public void addAllCourses(Collection<Course> courses) {
+        synchronized (mLock) {
+            mCourseSection.addAll(courses);
+        }
+        notifyDataSetChanged();
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewHolder holder;
 
         if (convertView == null) {
-            convertView = layoutInflater.inflate(mRowLayoutResId, null);
+            convertView = mLayoutInflater.inflate(mRowLayoutResId, null);
             holder = new ViewHolder();
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             holder.creditsTextView = (TextView) convertView.findViewById(R.id.credits);
@@ -65,9 +168,17 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        final ScheduleAdapterItem scheduleItem = getItem(position);
+        String displayTitle;
 
-        holder.titleTextView.setText(scheduleItem.getDisplayTitle());
+        if (position < mSubjectSection.size()) {
+            final Subject subject = (Subject) getItem(position);
+            displayTitle = subject.getDisplayTitle();
+        } else {
+            final Course course = (Course) getItem(position);
+            displayTitle = course.getDisplayTitle();
+        }
+
+        holder.titleTextView.setText(displayTitle);
         holder.creditsTextView.setVisibility(View.GONE);
         holder.sectionsTextView.setVisibility(View.GONE);
         holder.progressBar.setVisibility(View.GONE);
@@ -108,9 +219,9 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
             if (constraint == null || constraint.toString().trim().isEmpty()) {
                 synchronized (mLock) {
                     // A filter has been applied before and there is a backup list, restore it
-                    if (mOriginalList != null) {
-                        filterResults.values = mOriginalList;
-                        filterResults.count = mOriginalList.size();
+                    if (mOriginalLists != null) {
+                        filterResults.values = mOriginalLists;
+                        filterResults.count = mOriginalLists.subjects.size() + mOriginalLists.courses.size();
                         return filterResults;
                     }
                     // No non-empty filter has been applied so far, leave the current list untouched
@@ -122,13 +233,13 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
 
             // Save list of original values if it doesn't exist
             synchronized(mLock) {
-                if (mOriginalList == null) {
-                    if (mList.size() == 0) {
+                if (mOriginalLists == null) {
+                    if (mSubjectSection.size() == 0 && mCourseSection.size() == 0) {
                         filterResults.values = null;
                         filterResults.count = 0;
                         return filterResults;
                     } else {
-                        mOriginalList = new ArrayList<>(mList);
+                        mOriginalLists = new SectionHolder(new ArrayList<>(mSubjectSection), new ArrayList<>(mCourseSection));
                     }
                 }
             }
@@ -175,14 +286,9 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
                 courses.addAll(socIndex.getCoursesByCode(courseId, words));
             }
 
-            // Smash the subjects and courses together
-            // TODO Keep the lists separate
-            List<ScheduleAdapterItem> values = new ArrayList<>();
-            values.addAll(subjects);
-            values.addAll(courses);
-            filterResults.values = values;
-
+            filterResults.values = new SectionHolder(subjects, courses);
             filterResults.count = subjects.size();
+
             return filterResults;
         }
 
@@ -290,13 +396,14 @@ public class ScheduleAdapter extends ArrayAdapter<ScheduleAdapterItem> {
 
             // Replace current list with results
             synchronized (mLock) {
-                // TODO make this equals actually work
-                if (!mList.equals(filterResults.values)) {
-                    mList.clear();
-                    if (filterResults.values != null)
-                        mList.addAll((ArrayList<ScheduleAdapterItem>) filterResults.values);
-                    notifyDataSetChanged();
+                mSubjectSection.clear();
+                mCourseSection.clear();
+                if (filterResults.values != null) {
+                    SectionHolder sectionHolder = (SectionHolder) filterResults.values;
+                    mSubjectSection.addAll(sectionHolder.subjects);
+                    mCourseSection.addAll(sectionHolder.courses);
                 }
+                notifyDataSetChanged();
             }
         }
     }
