@@ -198,7 +198,6 @@ public class MainActivity extends LocationProviderActivity implements
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                LOGE(TAG, "I JUST PRESSED THE BUTTON");
 
                 Channel channel = (Channel) parent.getAdapter().getItem(position);
                 Bundle channelArgs = new Bundle();
@@ -223,7 +222,6 @@ public class MainActivity extends LocationProviderActivity implements
 
 
                 mDrawerListView.setItemChecked(position, true);
-                mDrawerListView.setSelection(position);
                 LOGI(TAG, "Currently checked item position: " + mDrawerListView.getCheckedItemPosition());
 
                 mDrawerListView.invalidateViews();
