@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -44,7 +43,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +57,6 @@ import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.DrawerUtils;
 import edu.rutgers.css.Rutgers.utils.FragmentUtils;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
@@ -200,6 +197,7 @@ public class MainActivity extends LocationProviderActivity implements
 
                 channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
                 channelArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
+                channelArgs.putString(ComponentFactory.ARG_HANDLE_TAG, channel.getHandle());
 
                 if (StringUtils.isNotBlank(channel.getApi())) {
                     channelArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
@@ -511,9 +509,9 @@ public class MainActivity extends LocationProviderActivity implements
      */
 
     private boolean switchDrawerFragments(@NonNull Bundle args) {
-        final String componentTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
+        final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
 
-        if (AppUtils.isOnTop(this, componentTag) && !componentTag.equals(WebDisplay.HANDLE)) {
+        if (AppUtils.isOnTop(this, handleTag) && !handleTag.equals(WebDisplay.HANDLE)) {
             return false;
         }
 
@@ -529,7 +527,7 @@ public class MainActivity extends LocationProviderActivity implements
      * @return True if the new fragment was successfully created, false if not.
      */
     public boolean switchFragments(@NonNull Bundle args) {
-        final String componentTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
+        final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
         final boolean isTopLevel = args.getBoolean(ComponentFactory.ARG_TOP_LEVEL);
 
         // Attempt to create the fragment
@@ -548,11 +546,11 @@ public class MainActivity extends LocationProviderActivity implements
 
         // If this is a top level (nav drawer) press, find the last time this channel was launched
         // and pop backstack to it
-        if (isTopLevel && fm.findFragmentByTag(componentTag) != null) {
+        if (isTopLevel && fm.findFragmentByTag(handleTag) != null) {
             //fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             //hacky way to disable animations
             FragmentUtils.fDisableAnimations = true;
-            fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            fm.popBackStackImmediate(handleTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             FragmentUtils.fDisableAnimations = false;
         }
         
@@ -560,8 +558,8 @@ public class MainActivity extends LocationProviderActivity implements
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
                         R.anim.slide_in_left, R.anim.slide_out_right)
-                .replace(R.id.main_content_frame, fragment, componentTag)
-                .addToBackStack(componentTag)
+                .replace(R.id.main_content_frame, fragment, handleTag)
+                .addToBackStack(handleTag)
                 .commit();
 
         return true;

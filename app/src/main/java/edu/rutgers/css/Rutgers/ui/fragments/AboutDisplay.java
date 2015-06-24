@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -16,7 +15,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 /**
  * About RUMobile display fragment.
  */
-public final class AboutDisplay extends Fragment {
+public final class AboutDisplay extends BaseDisplay {
 
     /* Log tag and component handle */
     private static final String TAG = "AboutDisplay";

@@ -2,10 +2,8 @@ package edu.rutgers.css.Rutgers.ui.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +12,9 @@ import android.widget.TextView;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
-public class TextDisplay extends Fragment {
+public class TextDisplay extends BaseDisplay {
 
     /* Log tag and component handle */
     private static final String TAG = "TextDisplay";
