@@ -37,42 +37,17 @@ public class ScheduleAdapter extends BaseAdapter
 
     private int mRowLayoutResId;
     private int mHeaderLayoutResId;
+
     private SectionHolder mOriginalLists;
     private List<Subject> mSubjectSection;
     private List<Course> mCourseSection;
+
     private ScheduleFilter mFilter;
     private SOCIndex mSOCIndex;
-    private Context mContext;
-    private LayoutInflater mLayoutInflater;
     private final Object mLock = new Object();
 
-    @Override
-    public View getHeaderView(int i, View view, ViewGroup viewGroup) {
-        HeaderViewHolder holder;
-        if (view == null) {
-            holder = new HeaderViewHolder();
-            view = mLayoutInflater.inflate(mHeaderLayoutResId, null);
-            holder.headerTextView = (TextView) view.findViewById(R.id.title);
-            view.setTag(holder);
-        } else {
-            holder = (HeaderViewHolder) view.getTag();
-        }
-        if (i == 0 && mSubjectSection.size() != 0) {
-            holder.headerTextView.setText(R.string.soc_sub_header);
-        } else {
-            holder.headerTextView.setText(R.string.soc_course_header);
-        }
-        return view;
-    }
-
-    @Override
-    public long getHeaderId(int i) {
-        if (i < mSubjectSection.size()) {
-            return mSubjectSection.hashCode();
-        } else {
-            return mCourseSection.hashCode();
-        }
-    }
+    private Context mContext;
+    private LayoutInflater mLayoutInflater;
 
     private static class HeaderViewHolder {
         TextView headerTextView;
@@ -103,11 +78,20 @@ public class ScheduleAdapter extends BaseAdapter
         this.mCourseSection = new ArrayList<>();
     }
 
+    /**
+     * Total amount of subjects and courses being displayed.
+     * @return The sum of the two lists' sizes.
+     */
     @Override
     public int getCount() {
         return mSubjectSection.size() + mCourseSection.size();
     }
 
+    /**
+     * Return a Subject or Course at the given position. Acts as if both lists are combined.
+     * @param i Position of the item to get
+     * @return The item requested. Could be a Subject or Course.
+     */
     @Override
     public Object getItem(int i) {
         if (i < mSubjectSection.size()) {
@@ -122,6 +106,9 @@ public class ScheduleAdapter extends BaseAdapter
         return i;
     }
 
+    /**
+     * Remove all elements in both lists.
+     */
     public void clear() {
         synchronized (mLock) {
             mSubjectSection.clear();
@@ -130,17 +117,10 @@ public class ScheduleAdapter extends BaseAdapter
         notifyDataSetChanged();
     }
 
-    protected Context getContext() {
-        return mContext;
-    }
-
-    public void addSubject(Subject subject) {
-        synchronized (mLock) {
-            mSubjectSection.add(subject);
-        }
-        notifyDataSetChanged();
-    }
-
+    /**
+     * Add a collection of subjects to the subjects list.
+     * @param subjects Subjects to add
+     */
     public void addAllSubjects(Collection<Subject> subjects) {
         synchronized (mLock) {
             mSubjectSection.addAll(subjects);
@@ -148,11 +128,43 @@ public class ScheduleAdapter extends BaseAdapter
         notifyDataSetChanged();
     }
 
+    /**
+     * Add a collection of courses to the courses list.
+     * @param courses Courses to add
+     */
     public void addAllCourses(Collection<Course> courses) {
         synchronized (mLock) {
             mCourseSection.addAll(courses);
         }
         notifyDataSetChanged();
+    }
+
+    @Override
+    public View getHeaderView(int i, View view, ViewGroup viewGroup) {
+        HeaderViewHolder holder;
+        if (view == null) {
+            holder = new HeaderViewHolder();
+            view = mLayoutInflater.inflate(mHeaderLayoutResId, null);
+            holder.headerTextView = (TextView) view.findViewById(R.id.title);
+            view.setTag(holder);
+        } else {
+            holder = (HeaderViewHolder) view.getTag();
+        }
+        if (i == 0 && mSubjectSection.size() != 0) {
+            holder.headerTextView.setText(R.string.soc_sub_header);
+        } else {
+            holder.headerTextView.setText(R.string.soc_course_header);
+        }
+        return view;
+    }
+
+    @Override
+    public long getHeaderId(int i) {
+        if (i < mSubjectSection.size()) {
+            return mSubjectSection.hashCode();
+        } else {
+            return mCourseSection.hashCode();
+        }
     }
 
     @Override
@@ -171,15 +183,7 @@ public class ScheduleAdapter extends BaseAdapter
             holder = (ViewHolder) convertView.getTag();
         }
 
-        String displayTitle;
-
-        if (position < mSubjectSection.size()) {
-            final Subject subject = (Subject) getItem(position);
-            displayTitle = subject.getDisplayTitle();
-        } else {
-            final Course course = (Course) getItem(position);
-            displayTitle = course.getDisplayTitle();
-        }
+        String displayTitle = ((ScheduleAdapterItem) getItem(position)).getDisplayTitle();
 
         holder.titleTextView.setText(WordUtils.capitalizeFully(displayTitle));
         holder.creditsTextView.setVisibility(View.GONE);
@@ -188,6 +192,11 @@ public class ScheduleAdapter extends BaseAdapter
 
         return convertView;
     }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
 
     public void setFilterIndex(SOCIndex socIndex) {
         mSOCIndex = socIndex;

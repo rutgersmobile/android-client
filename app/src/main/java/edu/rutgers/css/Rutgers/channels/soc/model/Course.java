@@ -130,7 +130,7 @@ public class Course extends ScheduleAdapterItem
     }
 
     @Override
-    public int compareTo(Course course) {
+    public int compareTo(@NonNull Course course) {
         return this.getCode().compareTo(course.getCode());
     }
 }
