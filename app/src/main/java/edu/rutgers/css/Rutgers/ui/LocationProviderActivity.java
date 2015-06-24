@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -19,13 +19,16 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Base for an activity that can connect to Google location services and provide location
  * information to child fragments.
  */
-public abstract class LocationProviderActivity extends FragmentActivity implements
+public abstract class LocationProviderActivity extends AppCompatActivity implements
         LocationClientProvider,
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {

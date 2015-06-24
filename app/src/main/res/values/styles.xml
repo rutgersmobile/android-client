@@ -1,86 +1,27 @@
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <!--
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    -->
-    <style name="RutgersBaseTheme" parent="android:Theme.Holo.Light">
-        <!--
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="RutgersTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/actbar_new</item>
+        <item name="colorPrimaryDark">@color/actbar_dark</item>
     </style>
 
-    <!-- Application theme. -->
-    <style name="RutgersTheme" parent="_RutgersTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-        <item name="android:actionBarStyle">@style/RutgersActionBar</item>
-        <item name="android:actionMenuTextColor">@color/actbar_text</item>
-        <item name="android:listViewStyle">@style/RutgersListViewStyle</item>
+    <style name="TabRutgersTheme">
+    ​    <item name="android:gravity">center_horizontal</item>
+    ​    <item name="android:paddingLeft">16dip</item>
+    ​    <item name="android:paddingRight">16dip</item>
+    ​    <item name="android:background">@drawable/rutgerstheme_tab_indicator_holo</item>
+    ​    <item name="android:layout_width">0dip</item>
+    ​    <item name="android:layout_weight">1</item>
+    ​    <item name="android:minWidth">80dip</item>
     </style>
-
-    <style name="RutgersListViewStyle" parent="@android:style/Widget.Holo.Light.ListView">
-        <!-- <item name="android:background">@color/lighter_gray</item> -->
-    </style>
-
-    <!-- ActionBar styles -->
-    <style name="RutgersActionBar"
-        parent="@android:style/Widget.Holo.ActionBar">
-
-        <item name="android:background">@color/actbar_bg</item>
-        <item name="android:titleTextStyle">@style/RutgersActionBarTitleText</item>
-
-    </style>
-
-    <style name="RutgersActionBarTitleText"
-        parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
-
-        <item name="android:textColor">@color/actbar_text</item>
-
-    </style>
-
-    <!-- Spinner style -->
-    <style name="RutgersSpinnerItem" parent="@android:style/Widget.TextView.SpinnerItem">
-        <item name="android:textAppearance">@style/RutgersSpinnerText</item>
-    </style>
-
-    <style name="RutgersSpinnerDropdown" parent="@android:style/Widget.Holo.Light.DropDownItem.Spinner">
-        <item name="android:textAppearance">@style/RutgersSpinnerText</item>
-    </style>
-
-    <style name="RutgersSpinnerText" parent="@android:style/TextAppearance.Holo.Widget.DropDownItem">
-        <item name="android:textColor">@color/white</item>
-    </style>
-
-    <!-- Styles for table content displays -->
-    <style name="RowHeader">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
-        <item name="android:layout_marginRight">@dimen/activity_horizontal_margin</item>
-        <item name="android:layout_marginTop">@dimen/activity_vertical_margin</item>
-    </style>
-    
-    <style name="RowContent">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">@dimen/activity_horizontal_margin</item>
-        <item name="android:layout_marginRight">@dimen/activity_horizontal_margin</item>
-    </style>
-    
-    <style name="RowContentText">
-    	<item name="android:layout_gravity">left|top|fill_horizontal</item>
-    	<item name="android:layout_width">0dp</item>
-    	<item name="android:layout_weight">1</item>
-    	<item name="android:layout_height">wrap_content</item>
-    	<item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-    </style>
-    
-    <style name="BasicDivider">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">2dp</item>
-        <item name="android:background">@android:color/darker_gray</item>
-    </style>
-    
+    ​
+    ​<style name="TabTextRutgersTheme">
+      ​  <item name="android:textColor">#000000</item>
+      ​  <item name="android:textSize">12sp</item>
+      ​  <item name="android:textStyle">bold</item>
+      ​  <!-- v14 <item name="android:textAllCaps">true</item> -->
+      ​  <item name="android:ellipsize">marquee</item>
+      ​  <item name="android:maxLines">2</item>
+      ​  <item name="android:maxWidth">180dip</item>
+    ​</style>
 </resources>

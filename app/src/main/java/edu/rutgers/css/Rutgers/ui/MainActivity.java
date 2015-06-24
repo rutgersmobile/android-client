@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,9 +32,6 @@ import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
-import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
@@ -82,6 +80,8 @@ public class MainActivity extends LocationProviderActivity implements
     private ComponentFactory mComponentFactory;
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerAdapter mDrawerAdapter;
+
+    private Toolbar mToolbar;
 
     /** Flags whether the drawer tutorial _should_ be displayed. */
     private boolean mShowDrawerShowcase;
@@ -143,6 +143,9 @@ public class MainActivity extends LocationProviderActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+
         LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
         mComponentFactory = new ComponentFactory();
         mChannelManager = new ChannelManager();
@@ -150,15 +153,16 @@ public class MainActivity extends LocationProviderActivity implements
         firstLaunchChecks();
 
         // Enable drawer icon
-        if (getActionBar() != null) {
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
 
         // Set up navigation drawer
         mDrawerAdapter = this.new DrawerAdapter(new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout.setStatusBarBackgroundColor(R.color.actbar_new);
 
         mDrawerToggle = new ActionBarDrawerToggle(        
                 this,                  /* host Activity */
@@ -439,34 +443,34 @@ public class MainActivity extends LocationProviderActivity implements
 
     /** Display the drawer showcase. */
     private void showDrawerShowcase() {
-        if (isFinishing()) return;
-
-        if (mShowDrawerShowcase && !mDisplayingTutorial) {
-            new ShowcaseView.Builder(this)
-                    .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
-                    .setContentTitle(R.string.tutorial_welcome_title)
-                    .setContentText(R.string.tutorial_welcome_text)
-                    .setStyle(R.style.RutgersShowcaseTheme)
-                    .setShowcaseEventListener(new OnShowcaseEventListener() {
-                        @Override
-                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
-                            // ShowcaseView was told to hide.
-                        }
-
-                        @Override
-                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                            // ShowcaseView has been fully hidden.
-                            mDisplayingTutorial = false;
-                        }
-
-                        @Override
-                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
-                            mDisplayingTutorial = true;
-                        }
-                    })
-                    .hideOnTouchOutside()
-                    .build();
-        }
+//        if (isFinishing()) return;
+//
+//        if (mShowDrawerShowcase && !mDisplayingTutorial) {
+//            new ShowcaseView.Builder(this)
+//                    .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
+//                    .setContentTitle(R.string.tutorial_welcome_title)
+//                    .setContentText(R.string.tutorial_welcome_text)
+//                    .setStyle(R.style.RutgersShowcaseTheme)
+//                    .setShowcaseEventListener(new OnShowcaseEventListener() {
+//                        @Override
+//                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
+//                            // ShowcaseView was told to hide.
+//                        }
+//
+//                        @Override
+//                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+//                            // ShowcaseView has been fully hidden.
+//                            mDisplayingTutorial = false;
+//                        }
+//
+//                        @Override
+//                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
+//                            mDisplayingTutorial = true;
+//                        }
+//                    })
+//                    .hideOnTouchOutside()
+//                    .build();
+//        }
     }
 
     /*
