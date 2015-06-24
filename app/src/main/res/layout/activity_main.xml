@@ -19,7 +19,7 @@
         android:choiceMode="singleChoice"
         android:listSelector="@drawable/main_drawer_selector"
         android:divider="@drawable/drawer_divider"
-        android:dividerHeight="2dp"
+        android:dividerHeight="0dp"
         android:background="@color/drawer_item_bg" />
         <!--android:background="?android:attr/activatedBackgroundIndicator"-->
 
