@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.WebChromeClient;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.utils.FragmentUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
@@ -54,6 +56,17 @@ public class WebDisplay extends Fragment {
 
     public WebDisplay() {
         // Required empty public constructor
+    }
+
+    //hack to prevent animations from occurring when popping from backstack
+    @Override
+    public Animation onCreateAnimation(int transit, boolean enter, int nextAnim) {
+        if (FragmentUtils.fDisableAnimations) {
+            Animation a = new Animation() {};
+            a.setDuration(0);
+            return a;
+        }
+        return super.onCreateAnimation(transit, enter, nextAnim);
     }
 
     /** Create argument bundle for in-app browser. */
