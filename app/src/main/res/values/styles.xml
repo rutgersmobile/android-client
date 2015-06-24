@@ -3,6 +3,10 @@
     <style name="RutgersTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/actbar_new</item>
         <item name="colorPrimaryDark">@color/actbar_dark</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorPrimaryInverse">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:colorControlNormal">@color/white</item>
     </style>
 
     <style name="TabRutgersTheme">
@@ -24,4 +28,6 @@
       ​  <item name="android:maxLines">2</item>
       ​  <item name="android:maxWidth">180dip</item>
     ​</style>
+
+
 </resources>
