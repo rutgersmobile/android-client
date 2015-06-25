@@ -162,7 +162,7 @@ public class MainActivity extends LocationProviderActivity implements
         mDrawerAdapter = this.new DrawerAdapter(new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerLayout.setStatusBarBackgroundColor(R.color.actbar_new);
+        mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.actbar_new));
 
         mDrawerToggle = new ActionBarDrawerToggle(        
                 this,                  /* host Activity */
@@ -182,6 +182,11 @@ public class MainActivity extends LocationProviderActivity implements
                     mShowDrawerShowcase = false;
                     LOGI(TAG, "Drawer opened for first time.");
                 }
+            }
+
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                super.onDrawerSlide(drawerView, 0);
             }
         };
 

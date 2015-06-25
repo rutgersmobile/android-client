@@ -3,10 +3,13 @@
     <style name="RutgersTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/actbar_new</item>
         <item name="colorPrimaryDark">@color/actbar_dark</item>
+    </style>
+
+    <style name="ToolbarTheme" parent="RutgersTheme">
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorPrimaryInverse">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
-        <item name="android:colorControlNormal">@color/white</item>
+        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="TabRutgersTheme">
@@ -23,11 +26,9 @@
       ​  <item name="android:textColor">#000000</item>
       ​  <item name="android:textSize">12sp</item>
       ​  <item name="android:textStyle">bold</item>
-      ​  <!-- v14 <item name="android:textAllCaps">true</item> -->
       ​  <item name="android:ellipsize">marquee</item>
       ​  <item name="android:maxLines">2</item>
       ​  <item name="android:maxWidth">180dip</item>
     ​</style>
-
 
 </resources>
