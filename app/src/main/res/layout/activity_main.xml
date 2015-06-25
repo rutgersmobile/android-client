@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:theme="@style/RutgersTheme"/>
+            android:theme="@style/ToolbarTheme" />
 
         <FrameLayout
             android:id="@+id/main_content_frame"
