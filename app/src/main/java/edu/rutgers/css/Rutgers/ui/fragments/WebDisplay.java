@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ActionProvider;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,6 +47,7 @@ public class WebDisplay extends BaseDisplay {
 
     /* Member data */
     private ShareActionProvider mShareActionProvider;
+    private ActionProvider mActionProvider;
     private String mCurrentURL;
     private int mSetupCount = 0;
 
@@ -178,10 +181,9 @@ public class WebDisplay extends BaseDisplay {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.web_menu, menu);
-
         MenuItem shareItem = menu.findItem(R.id.action_share);
         if (shareItem != null) {
-            mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
+            mActionProvider = MenuItemCompat.getActionProvider(shareItem);
             initialIntent();
         } else {
             LOGW(TAG, "Could not find Share menu item");
