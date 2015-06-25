@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ActionProvider;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,7 +21,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.Config;
@@ -47,7 +46,6 @@ public class WebDisplay extends BaseDisplay {
 
     /* Member data */
     private ShareActionProvider mShareActionProvider;
-    private ActionProvider mActionProvider;
     private String mCurrentURL;
     private int mSetupCount = 0;
 
@@ -183,7 +181,8 @@ public class WebDisplay extends BaseDisplay {
         inflater.inflate(R.menu.web_menu, menu);
         MenuItem shareItem = menu.findItem(R.id.action_share);
         if (shareItem != null) {
-            mActionProvider = MenuItemCompat.getActionProvider(shareItem);
+            mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+
             initialIntent();
         } else {
             LOGW(TAG, "Could not find Share menu item");
