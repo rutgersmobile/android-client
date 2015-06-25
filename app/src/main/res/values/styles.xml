@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="RutgersTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="RutgersTheme" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">@color/actbar_new</item>
         <item name="colorPrimaryDark">@color/actbar_dark</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="ToolbarTheme" parent="RutgersTheme">

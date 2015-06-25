@@ -156,6 +156,7 @@ public class MainActivity extends LocationProviderActivity implements
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setElevation(10);
         }
 
         // Set up navigation drawer
