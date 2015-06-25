@@ -25,13 +25,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
+import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdeferred.DoneCallback;
@@ -42,6 +45,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
@@ -80,8 +84,6 @@ public class MainActivity extends LocationProviderActivity implements
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerAdapter mDrawerAdapter;
 
-    private Toolbar mToolbar;
-
     /** Flags whether the drawer tutorial _should_ be displayed. */
     private boolean mShowDrawerShowcase;
 
@@ -105,20 +107,59 @@ public class MainActivity extends LocationProviderActivity implements
     }
 
 
-    private class DrawerAdapter extends ArrayAdapter<Channel> {
+    private class DrawerAdapter extends BaseAdapter {
+        List<Channel> channels;
+
         private class ViewHolder {
             TextView textView;
             ImageView imageView;
         }
 
-        public DrawerAdapter(List<Channel> objects) {
-            super(MainActivity.this, R.layout.row_drawer_item, objects);
+        public DrawerAdapter(List<Channel> channels) {
+            this.channels = channels;
         }
 
+        @Override
+        public int getCount() {
+            if (channels.size() != 0) {
+                return channels.size() + 1;
+            }
+            return 0;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            if (positionIsChannel(i)) {
+                return channels.get(i);
+            } else if (positionIsSettings(i)) {
+                return SettingsActivity.class;
+            }
+            return null;
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        public int getPosition(Channel item) {
+            return channels.indexOf(item);
+        }
+
+        public void addAll(Collection<Channel> channels) {
+            this.channels.addAll(channels);
+        }
+
+        public boolean positionIsChannel(int position) {
+            return position < channels.size() && channels.size() != 0;
+        }
+
+        public boolean positionIsSettings(int position) {
+            return position == channels.size() && channels.size() != 0;
+        }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            Channel channel = getItem(position);
             LayoutInflater layoutInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
             ViewHolder holder;
@@ -134,8 +175,14 @@ public class MainActivity extends LocationProviderActivity implements
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            holder.textView.setText(channel.getTitle(homeCampus));
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
+            if (positionIsChannel(position)) {
+                Channel channel = channels.get(position);
+                holder.textView.setText(channel.getTitle(homeCampus));
+                holder.imageView.setImageDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
+            } else if (positionIsSettings(position)) {
+                holder.textView.setText("Settings");
+                holder.imageView.setImageDrawable(ImageUtils.getIcon(getResources(), "action_settings"));
+            }
 
             return convertView;
         }
@@ -146,8 +193,8 @@ public class MainActivity extends LocationProviderActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
         mComponentFactory = new ComponentFactory();
@@ -159,7 +206,6 @@ public class MainActivity extends LocationProviderActivity implements
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setElevation(10);
         }
 
         // Set up navigation drawer
@@ -205,6 +251,11 @@ public class MainActivity extends LocationProviderActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                if (((DrawerAdapter) parent.getAdapter()).positionIsSettings(position)) {
+                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                    return;
+                }
+
                 Channel channel = (Channel) parent.getAdapter().getItem(position);
                 Bundle channelArgs = new Bundle();
                 String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
@@ -226,7 +277,6 @@ public class MainActivity extends LocationProviderActivity implements
                 }
 
                 channelArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-
 
                 mDrawerListView.setItemChecked(position, true);
                 LOGI(TAG, "Currently checked item position: " + mDrawerListView.getCheckedItemPosition());
@@ -276,7 +326,7 @@ public class MainActivity extends LocationProviderActivity implements
     protected void onResume() {
         super.onResume();
 
-        showDrawerShowcase();
+//        showDrawerShowcase();
     }
 
     @Override
@@ -358,11 +408,6 @@ public class MainActivity extends LocationProviderActivity implements
         // Handle event here or pass it on
         switch(item.getItemId()) {
 
-            // Start the Settings activity
-            case R.id.action_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-
             case R.id.action_about:
                 Bundle aboutArgs = AboutDisplay.createArgs();
                 aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
@@ -432,7 +477,7 @@ public class MainActivity extends LocationProviderActivity implements
                 } else {
                     mShowDrawerShowcase = true;
                     LOGI(TAG, "Drawer never opened before, show tutorial!");
-                    showDrawerShowcase();
+//                    showDrawerShowcase();
                 }
                 break;
             }
@@ -472,36 +517,37 @@ public class MainActivity extends LocationProviderActivity implements
         prefDialog.show();
     }
 
+    // TODO Get this to work
     /** Display the drawer showcase. */
     private void showDrawerShowcase() {
-//        if (isFinishing()) return;
-//
-//        if (mShowDrawerShowcase && !mDisplayingTutorial) {
-//            new ShowcaseView.Builder(this)
-//                    .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
-//                    .setContentTitle(R.string.tutorial_welcome_title)
-//                    .setContentText(R.string.tutorial_welcome_text)
+        if (isFinishing()) return;
+
+        if (mShowDrawerShowcase && !mDisplayingTutorial) {
+            new ShowcaseView.Builder(this)
+                    .setTarget(new ActionViewTarget(this, ActionViewTarget.Type.HOME))
+                    .setContentTitle(R.string.tutorial_welcome_title)
+                    .setContentText(R.string.tutorial_welcome_text)
 //                    .setStyle(R.style.RutgersShowcaseTheme)
-//                    .setShowcaseEventListener(new OnShowcaseEventListener() {
-//                        @Override
-//                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
-//                            // ShowcaseView was told to hide.
-//                        }
-//
-//                        @Override
-//                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-//                            // ShowcaseView has been fully hidden.
-//                            mDisplayingTutorial = false;
-//                        }
-//
-//                        @Override
-//                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
-//                            mDisplayingTutorial = true;
-//                        }
-//                    })
-//                    .hideOnTouchOutside()
-//                    .build();
-//        }
+                    .setShowcaseEventListener(new OnShowcaseEventListener() {
+                        @Override
+                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                            // ShowcaseView was told to hide.
+                        }
+
+                        @Override
+                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+                            // ShowcaseView has been fully hidden.
+                            mDisplayingTutorial = false;
+                        }
+
+                        @Override
+                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
+                            mDisplayingTutorial = true;
+                        }
+                    })
+                    .hideOnTouchOutside()
+                    .build();
+        }
     }
 
     /*
