@@ -8,6 +8,15 @@
         <item name="android:windowSharedElementExitTransition">@android:transition/move</item>
     </style>
 
+    <style name="RutgersTheme.Pref" parent="android:Theme.Material.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/RutgersTheme.ActionBarTheme</item>
+        <item name="android:colorPrimaryDark">@color/actbar_dark</item>
+    </style>
+
+    <style name="RutgersTheme.ActionBarTheme" parent="android:Widget.Material.ActionBar">
+        <item name="android:background">@color/actbar_new</item>
+    </style>
+
     <style name="ToolbarTheme" parent="ToolbarTheme.Base">
         <item name="android:elevation">5dp</item>
     </style>

@@ -48,7 +48,11 @@
 
         <activity
             android:name="edu.rutgers.css.Rutgers.ui.SettingsActivity"
+            android:theme="@style/RutgersTheme.Pref"
             android:label="@string/title_activity_settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.rutgers.css.Rutgers.ui.MainActivity" />
         </activity>
 
     </application>
