@@ -55,7 +55,6 @@ import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.FragmentUtils;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -182,7 +181,7 @@ public class MainActivity extends LocationProviderActivity implements
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                LOGE(TAG, "Current checked item on drawer opened at: " +mDrawerListView.getCheckedItemPosition());
+                LOGE(TAG, "Current checked item on drawer opened at: " + mDrawerListView.getCheckedItemPosition());
                 if (mShowDrawerShowcase) {
                     PrefUtils.markDrawerUsed(MainActivity.this);
                     mShowDrawerShowcase = false;
@@ -327,8 +326,8 @@ public class MainActivity extends LocationProviderActivity implements
                             FragmentManager.BackStackEntry backStackEntry;
                             backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
                             String fragmentTag = backStackEntry.getName();
-                            for(int k=0; k < mChannelManager.getChannels().size(); k++){
-                                if(mChannelManager.getChannels().get(k).getHandle().equalsIgnoreCase(fragmentTag)){
+                            for(Channel channel: mChannelManager.getChannels()){
+                                if(channel.getHandle().equalsIgnoreCase((fragmentTag))){
                                     int position = mDrawerAdapter.getPosition(mChannelManager.getChannels().get(k));
                                     mDrawerListView.setItemChecked(position, true);
                                 }
@@ -584,13 +583,13 @@ public class MainActivity extends LocationProviderActivity implements
 
         // If this is a top level (nav drawer) press, find the last time this channel was launched
         // and pop backstack to it
-        if (isTopLevel && fm.findFragmentByTag(handleTag) != null) {
-            //fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            //hacky way to disable animations
-            FragmentUtils.fDisableAnimations = true;
-            fm.popBackStackImmediate(handleTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            FragmentUtils.fDisableAnimations = false;
-        }
+//        if (isTopLevel && fm.findFragmentByTag(handleTag) != null) {
+//            //fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//            //hacky way to disable animations
+//            FragmentUtils.fDisableAnimations = true;
+//            fm.popBackStackImmediate(handleTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//            FragmentUtils.fDisableAnimations = false;
+//        }
         
         // Switch the main content fragment
         fm.beginTransaction()
