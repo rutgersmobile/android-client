@@ -96,6 +96,10 @@ public class MainActivity extends LocationProviderActivity implements
     /* Callback for changed preferences */
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
+    private FragmentManager fm = getSupportFragmentManager();
+
+
+
     @Override
     public ChannelManager getChannelManager() {
         return mChannelManager;
@@ -178,6 +182,7 @@ public class MainActivity extends LocationProviderActivity implements
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+                LOGE(TAG, "Current checked item on drawer opened at: " +mDrawerListView.getCheckedItemPosition());
                 if (mShowDrawerShowcase) {
                     PrefUtils.markDrawerUsed(MainActivity.this);
                     mShowDrawerShowcase = false;
@@ -251,14 +256,14 @@ public class MainActivity extends LocationProviderActivity implements
         loadChannels();
         
         // Display initial fragment
-        FragmentManager fm = getSupportFragmentManager();
         if (fm.getBackStackEntryCount() == 0) {
             fm.beginTransaction()
                 .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                 .commit();
         }
-
     }
+
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -292,7 +297,7 @@ public class MainActivity extends LocationProviderActivity implements
             AQUtility.cleanCacheAsync(this);
         }
     }
-    
+
     @Override
     public void onBackPressed() {
         // If drawer is open, intercept back press to close drawer
@@ -303,7 +308,7 @@ public class MainActivity extends LocationProviderActivity implements
 
         // If web display is active, send back button presses to it for navigating browser history
         if (AppUtils.isOnTop(this, WebDisplay.HANDLE)) {
-            Fragment webView = getSupportFragmentManager().findFragmentByTag(WebDisplay.HANDLE);
+            Fragment webView = fm.findFragmentByTag(WebDisplay.HANDLE);
             if (webView != null && webView.isVisible()) {
                 if (((WebDisplay) webView).backPress()) {
                     LOGD(TAG, "Triggered WebView back button");
@@ -311,6 +316,27 @@ public class MainActivity extends LocationProviderActivity implements
                 }
             }
         }
+        //To change which menu item is highlighted to the correct currently displayed fragment, listen
+        //for when the backstack changes after the back button is pressed and set the view that matches
+        //the fragment at the end of the backstack as checked
+        fm.addOnBackStackChangedListener(
+                new FragmentManager.OnBackStackChangedListener() {
+                    public void onBackStackChanged(){
+                        mDrawerListView.setItemChecked(mDrawerListView.getCheckedItemPosition(), false);
+                        if(fm.getBackStackEntryCount() > 0) {
+                            FragmentManager.BackStackEntry backStackEntry;
+                            backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
+                            String fragmentTag = backStackEntry.getName();
+                            for(int k=0; k < mChannelManager.getChannels().size(); k++){
+                                if(mChannelManager.getChannels().get(k).getHandle().equalsIgnoreCase(fragmentTag)){
+                                    int position = mDrawerAdapter.getPosition(mChannelManager.getChannels().get(k));
+                                    mDrawerListView.setItemChecked(position, true);
+                                }
+                            }
+                        }
+                    }
+                }
+        );
 
         LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
         super.onBackPressed();
@@ -319,7 +345,7 @@ public class MainActivity extends LocationProviderActivity implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        
+
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
@@ -518,6 +544,8 @@ public class MainActivity extends LocationProviderActivity implements
      * Fragment display methods
      */
 
+
+
     private boolean switchDrawerFragments(@NonNull Bundle args) {
         final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
 
@@ -527,6 +555,7 @@ public class MainActivity extends LocationProviderActivity implements
 
         return switchFragments(args);
     }
+
 
     /**
      * Add current fragment to the backstack and switch to the new one defined by given arguments.
@@ -552,7 +581,6 @@ public class MainActivity extends LocationProviderActivity implements
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(this);
 
-        final FragmentManager fm = getSupportFragmentManager();
 
         // If this is a top level (nav drawer) press, find the last time this channel was launched
         // and pop backstack to it
