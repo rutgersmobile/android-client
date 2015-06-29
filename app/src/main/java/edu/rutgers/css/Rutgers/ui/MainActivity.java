@@ -253,6 +253,7 @@ public class MainActivity extends LocationProviderActivity implements
 
                 if (((DrawerAdapter) parent.getAdapter()).positionIsSettings(position)) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                    mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
                 }
 
