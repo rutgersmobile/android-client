@@ -328,7 +328,7 @@ public class MainActivity extends LocationProviderActivity implements
                             String fragmentTag = backStackEntry.getName();
                             for(Channel channel: mChannelManager.getChannels()){
                                 if(channel.getHandle().equalsIgnoreCase((fragmentTag))){
-                                    int position = mDrawerAdapter.getPosition(mChannelManager.getChannels().get(k));
+                                    int position = mDrawerAdapter.getPosition(channel);
                                     mDrawerListView.setItemChecked(position, true);
                                 }
                             }
