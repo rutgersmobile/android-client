@@ -324,6 +324,7 @@ public class MainActivity extends LocationProviderActivity implements
 
     @Override
     protected void onResume() {
+        highlightCorrectDrawerItem();
         super.onResume();
 
 //        showDrawerShowcase();
@@ -371,24 +372,33 @@ public class MainActivity extends LocationProviderActivity implements
         fm.addOnBackStackChangedListener(
                 new FragmentManager.OnBackStackChangedListener() {
                     public void onBackStackChanged(){
-                        mDrawerListView.setItemChecked(mDrawerListView.getCheckedItemPosition(), false);
-                        if(fm.getBackStackEntryCount() > 0) {
-                            FragmentManager.BackStackEntry backStackEntry;
-                            backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
-                            String fragmentTag = backStackEntry.getName();
-                            for(Channel channel: mChannelManager.getChannels()){
-                                if(channel.getHandle().equalsIgnoreCase((fragmentTag))){
-                                    int position = mDrawerAdapter.getPosition(channel);
-                                    mDrawerListView.setItemChecked(position, true);
-                                }
-                            }
-                        }
+                        highlightCorrectDrawerItem();
                     }
                 }
         );
 
         LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
         super.onBackPressed();
+    }
+
+    /**
+     * Change which menu item is highlighted to the correct currently displayed fragment. used for
+     * changing the backstack when the back button is pressed and when changing activities from
+     * settings to main
+     * */
+    private void highlightCorrectDrawerItem() {
+        mDrawerListView.setItemChecked(mDrawerListView.getCheckedItemPosition(), false);
+        if(fm.getBackStackEntryCount() > 0) {
+            FragmentManager.BackStackEntry backStackEntry;
+            backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
+            String fragmentTag = backStackEntry.getName();
+            for (Channel channel : mChannelManager.getChannels()) {
+                if (channel.getHandle().equalsIgnoreCase((fragmentTag))) {
+                    int position = mDrawerAdapter.getPosition(channel);
+                    mDrawerListView.setItemChecked(position, true);
+                }
+            }
+        }
     }
 
     @Override
