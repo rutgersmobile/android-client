@@ -27,6 +27,7 @@ public final class AboutDisplay extends BaseDisplay {
 
     public static Bundle createArgs() {
         Bundle args = new Bundle();
+        args.putString(ComponentFactory.ARG_HANDLE_TAG, AboutDisplay.HANDLE);
         args.putString(ComponentFactory.ARG_COMPONENT_TAG, AboutDisplay.HANDLE);
         return args;
     }

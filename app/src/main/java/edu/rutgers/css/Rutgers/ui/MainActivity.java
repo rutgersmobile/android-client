@@ -19,8 +19,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -122,7 +120,7 @@ public class MainActivity extends LocationProviderActivity implements
         @Override
         public int getCount() {
             if (channels.size() != 0) {
-                return channels.size() + 1;
+                return channels.size() + 2;
             }
             return 0;
         }
@@ -133,6 +131,8 @@ public class MainActivity extends LocationProviderActivity implements
                 return channels.get(i);
             } else if (positionIsSettings(i)) {
                 return SettingsActivity.class;
+            } else if (positionIsAbout(i)) {
+                return AboutDisplay.class;
             }
             return null;
         }
@@ -154,8 +154,20 @@ public class MainActivity extends LocationProviderActivity implements
             return position < channels.size() && channels.size() != 0;
         }
 
+        public boolean positionIsAbout(int position) {
+            return position == getAboutPosition() && channels.size() != 0;
+        }
+
+        public int getAboutPosition() {
+            return channels.size();
+        }
+
         public boolean positionIsSettings(int position) {
-            return position == channels.size() && channels.size() != 0;
+            return position == getSettingsPosition() && channels.size() != 0;
+        }
+
+        public int getSettingsPosition() {
+            return channels.size() + 1;
         }
 
         @Override
@@ -182,6 +194,8 @@ public class MainActivity extends LocationProviderActivity implements
             } else if (positionIsSettings(position)) {
                 holder.textView.setText("Settings");
                 holder.imageView.setImageDrawable(ImageUtils.getIcon(getResources(), "action_settings"));
+            } else if (positionIsAbout(position)) {
+                holder.textView.setText("About");
             }
 
             return convertView;
@@ -251,8 +265,15 @@ public class MainActivity extends LocationProviderActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if (((DrawerAdapter) parent.getAdapter()).positionIsSettings(position)) {
+                DrawerAdapter adapter = (DrawerAdapter)parent.getAdapter();
+                if (adapter.positionIsSettings(position)) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                    mDrawerLayout.closeDrawer(mDrawerListView);
+                    return;
+                } else if (adapter.positionIsAbout(position)) {
+                    Bundle aboutArgs = AboutDisplay.createArgs();
+                    aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                    switchDrawerFragments(aboutArgs);
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
                 }
@@ -370,13 +391,11 @@ public class MainActivity extends LocationProviderActivity implements
         //To change which menu item is highlighted to the correct currently displayed fragment, listen
         //for when the backstack changes after the back button is pressed and set the view that matches
         //the fragment at the end of the backstack as checked
-        fm.addOnBackStackChangedListener(
-                new FragmentManager.OnBackStackChangedListener() {
-                    public void onBackStackChanged(){
-                        highlightCorrectDrawerItem();
-                    }
-                }
-        );
+        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            public void onBackStackChanged() {
+                highlightCorrectDrawerItem();
+            }
+        });
 
         LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
         super.onBackPressed();
@@ -393,10 +412,15 @@ public class MainActivity extends LocationProviderActivity implements
             FragmentManager.BackStackEntry backStackEntry;
             backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
             String fragmentTag = backStackEntry.getName();
+            if (fragmentTag.equals(AboutDisplay.HANDLE)) {
+                mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
+                return;
+            }
             for (Channel channel : mChannelManager.getChannels()) {
                 if (channel.getHandle().equalsIgnoreCase((fragmentTag))) {
                     int position = mDrawerAdapter.getPosition(channel);
                     mDrawerListView.setItemChecked(position, true);
+                    return;
                 }
             }
         }
@@ -407,37 +431,6 @@ public class MainActivity extends LocationProviderActivity implements
         super.onConfigurationChanged(newConfig);
 
         mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // See if ActionBarDrawerToggle will handle event
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
-        // Handle event here or pass it on
-        switch(item.getItemId()) {
-
-            case R.id.action_about:
-                Bundle aboutArgs = AboutDisplay.createArgs();
-                aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                switchDrawerFragments(aboutArgs);
-                mDrawerLayout.closeDrawer(mDrawerListView);
-                return true;
-            
-            default:
-                return super.onOptionsItemSelected(item);
-                
-        }
-        
-    }
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
     }
 
     /** Initialize settings, display tutorial, etc. */
