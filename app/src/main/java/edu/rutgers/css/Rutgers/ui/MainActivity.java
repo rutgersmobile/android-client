@@ -228,7 +228,6 @@ public class MainActivity extends LocationProviderActivity implements
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                LOGE(TAG, "Current checked item on drawer opened at: " + mDrawerListView.getCheckedItemPosition());
                 if (mShowDrawerShowcase) {
                     PrefUtils.markDrawerUsed(MainActivity.this);
                     mShowDrawerShowcase = false;
@@ -292,7 +291,6 @@ public class MainActivity extends LocationProviderActivity implements
         loadChannels();
 
         if(fm.getBackStackEntryCount() == 0){
-            LOGE(TAG, "last tag is null");
             fm.beginTransaction()
                     .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                     .commit();
@@ -584,10 +582,9 @@ public class MainActivity extends LocationProviderActivity implements
                 SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
                 String lastFragmentTag = pref.getString("handleTag", null);
                 if (lastFragmentTag != null && !lastFragmentTag.equals("main")) {
-                    LOGE(TAG, "YOU FINALLY GOT IT, THE TAG IS " + lastFragmentTag);
                     Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
                     if (channel == null){
-                        LOGE(TAG, "YO THIS AINT NO CHANNEL SON");
+                        LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
                     }
                     Bundle initialFragmentBundle = channel.getBundle();
                     switchDrawerFragments(initialFragmentBundle);
@@ -656,7 +653,6 @@ public class MainActivity extends LocationProviderActivity implements
                             String fragmentTag = backStackEntry.getName();
                             SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
                             sharedPreferences.edit().putString("handleTag", fragmentTag).commit();
-                            LOGE(TAG, "setting the preferences to " + sharedPreferences.getString("handleTag", "nope"));
                         }
                     }
                 }
