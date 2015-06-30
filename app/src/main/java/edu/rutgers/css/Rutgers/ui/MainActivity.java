@@ -19,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -431,6 +432,17 @@ public class MainActivity extends LocationProviderActivity implements
         super.onConfigurationChanged(newConfig);
 
         mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+    // See if ActionBarDrawerToggle will handle event
+        if (mDrawerToggle.onOptionsItemSelected(item)){
+            return true;
+        }
+        else{
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     /** Initialize settings, display tutorial, etc. */
