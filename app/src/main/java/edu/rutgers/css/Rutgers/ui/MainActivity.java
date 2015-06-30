@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.ui;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -107,10 +106,22 @@ public class MainActivity extends LocationProviderActivity implements
     }
 
 
+    // TODO refactor this class to something more extensible
     private class DrawerAdapter extends BaseAdapter {
         List<Channel> channels;
 
+        private static final int EXTRA = 3;
+
+        private static final int DIVIDER_OFFSET = 0;
+        private static final int ABOUT_OFFSET = 1;
+        private static final int SETTINGS_OFFSET = 2;
+
+        private static final int VIEW_TYPES = 2;
+        private static final int PRESSABLE_TYPE = 0;
+        private static final int DIVIDER_TYPE = 1;
+
         private class ViewHolder {
+            int type;
             TextView textView;
             ImageView imageView;
         }
@@ -121,10 +132,22 @@ public class MainActivity extends LocationProviderActivity implements
 
         @Override
         public int getCount() {
-            if (channels.size() != 0) {
-                return channels.size() + 2;
+            // The total count is the number of channels plus one for each of:
+            // settings, about
+            return channels.size() + EXTRA;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return VIEW_TYPES;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (positionIsDivider(position)) {
+                return DIVIDER_TYPE;
             }
-            return 0;
+            return PRESSABLE_TYPE;
         }
 
         @Override
@@ -150,36 +173,51 @@ public class MainActivity extends LocationProviderActivity implements
 
         public void addAll(Collection<Channel> channels) {
             this.channels.addAll(channels);
+            notifyDataSetInvalidated();
         }
 
         public boolean positionIsChannel(int position) {
-            return position < channels.size() && channels.size() != 0;
+            return position < channels.size();
+        }
+
+        public boolean positionIsDivider(int position) {
+            return position == getDividerPosition();
+        }
+
+        public int getDividerPosition() {
+            return channels.size() + DIVIDER_OFFSET;
         }
 
         public boolean positionIsAbout(int position) {
-            return position == getAboutPosition() && channels.size() != 0;
+            return position == getAboutPosition();
         }
 
         public int getAboutPosition() {
-            return channels.size();
+            return channels.size() + ABOUT_OFFSET;
         }
 
         public boolean positionIsSettings(int position) {
-            return position == getSettingsPosition() && channels.size() != 0;
+            return position == getSettingsPosition();
         }
 
         public int getSettingsPosition() {
-            return channels.size() + 1;
+            return channels.size() + SETTINGS_OFFSET;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater layoutInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
             String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
             ViewHolder holder;
+            final int type = getItemViewType(position);
 
             if (convertView == null) {
-                convertView = layoutInflater.inflate(R.layout.row_drawer_item, null);
+                convertView = layoutInflater.inflate(
+                        type == PRESSABLE_TYPE ? R.layout.row_drawer_item : R.layout.row_divider, null);
+
+                if (type == DIVIDER_TYPE) {
+                    convertView.setOnClickListener(null);
+                }
 
                 holder = new ViewHolder();
                 holder.textView = (TextView) convertView.findViewById(R.id.title);
@@ -187,6 +225,10 @@ public class MainActivity extends LocationProviderActivity implements
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
+            }
+
+            if (type == DIVIDER_TYPE) {
+                return convertView;
             }
 
             if (positionIsChannel(position)) {

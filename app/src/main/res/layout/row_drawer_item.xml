@@ -6,6 +6,7 @@
 
     android:background="@drawable/main_drawer_selector"
     android:choiceMode="singleChoice">
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="30dp"
@@ -15,6 +16,7 @@
         android:layout_marginLeft="10dp"
         android:src="@drawable/ic_ruinfo"
         />
+
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
