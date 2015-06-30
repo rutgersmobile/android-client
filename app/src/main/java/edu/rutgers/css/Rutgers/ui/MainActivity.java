@@ -35,9 +35,10 @@ import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 
-import org.apache.commons.lang3.StringUtils;
+import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
 import org.jdeferred.FailCallback;
+import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -242,7 +243,6 @@ public class MainActivity extends LocationProviderActivity implements
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                LOGE(TAG, "Current checked item on drawer opened at: " + mDrawerListView.getCheckedItemPosition());
                 if (mShowDrawerShowcase) {
                     PrefUtils.markDrawerUsed(MainActivity.this);
                     mShowDrawerShowcase = false;
@@ -280,25 +280,10 @@ public class MainActivity extends LocationProviderActivity implements
                 }
 
                 Channel channel = (Channel) parent.getAdapter().getItem(position);
-                Bundle channelArgs = new Bundle();
+                Bundle channelArgs = channel.getBundle();
                 String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
 
                 channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
-                channelArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
-                channelArgs.putString(ComponentFactory.ARG_HANDLE_TAG, channel.getHandle());
-
-                if (StringUtils.isNotBlank(channel.getApi())) {
-                    channelArgs.putString(ComponentFactory.ARG_API_TAG, channel.getApi());
-                }
-
-                if (StringUtils.isNotBlank(channel.getUrl())) {
-                    channelArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
-                }
-
-                if (channel.getData() != null) {
-                    channelArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData().toString());
-                }
-
                 channelArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
 
                 mDrawerListView.setItemChecked(position, true);
@@ -326,15 +311,17 @@ public class MainActivity extends LocationProviderActivity implements
 
         // Load nav drawer items
         loadChannels();
-        
-        // Display initial fragment
-        if (fm.getBackStackEntryCount() == 0) {
-            fm.beginTransaction()
-                .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
-                .commit();
-        }
-    }
 
+        if(fm.getBackStackEntryCount() == 0){
+            fm.beginTransaction()
+                    .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
+                    .commit();
+        }
+
+        //display last fragment or main screen
+
+
+    }
 
 
     @Override
@@ -373,6 +360,10 @@ public class MainActivity extends LocationProviderActivity implements
 
     @Override
     public void onBackPressed() {
+        //don't go back to the main screen, just quit.
+        if(fm.getBackStackEntryCount() <= 1){
+            super.onBackPressed();
+        }
         // If drawer is open, intercept back press to close drawer
         if (mDrawerLayout.isDrawerOpen(mDrawerListView)) {
             mDrawerLayout.closeDrawer(mDrawerListView);
@@ -413,17 +404,15 @@ public class MainActivity extends LocationProviderActivity implements
             FragmentManager.BackStackEntry backStackEntry;
             backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
             String fragmentTag = backStackEntry.getName();
+
             if (fragmentTag.equals(AboutDisplay.HANDLE)) {
                 mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
                 return;
             }
-            for (Channel channel : mChannelManager.getChannels()) {
-                if (channel.getHandle().equalsIgnoreCase((fragmentTag))) {
-                    int position = mDrawerAdapter.getPosition(channel);
-                    mDrawerListView.setItemChecked(position, true);
-                    return;
-                }
-            }
+
+            Channel channel = mChannelManager.getChannelByTag(fragmentTag);
+            int position = mDrawerAdapter.getPosition(channel);
+            mDrawerListView.setItemChecked(position, true);
         }
     }
 
@@ -569,9 +558,9 @@ public class MainActivity extends LocationProviderActivity implements
     /*
      * Nav drawer helpers
      */
-    
+
     /**
-     * Try to grab web hosted channels, add the native packaged channels on failure.
+     * Try to grab web hosted channels, add the native packaged channels on failure. Load the last channel onAlways.
      */
     private void loadChannels() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
@@ -591,6 +580,29 @@ public class MainActivity extends LocationProviderActivity implements
                 addChannels(mChannelManager.getChannels());
             }
 
+        }).always(new AlwaysCallback<JSONArray, AjaxStatus>() {
+            @Override
+            public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
+                SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+                String lastFragmentTag = pref.getString("handleTag", null);
+                if (lastFragmentTag != null && !lastFragmentTag.equals("main")) {
+                    Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
+                    if (channel == null){
+                        LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
+                        //hack to go back to 'about' page
+                        if (lastFragmentTag.equals("about")){
+                            Bundle aboutArgs = AboutDisplay.createArgs();
+                            aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                            switchDrawerFragments(aboutArgs);
+                        }
+                        return;
+                    }
+                    Bundle initialFragmentBundle = channel.getBundle();
+                    switchDrawerFragments(initialFragmentBundle);
+                    highlightCorrectDrawerItem();
+
+                }
+            }
         });
     }
 
@@ -643,16 +655,21 @@ public class MainActivity extends LocationProviderActivity implements
         AppUtils.closeKeyboard(this);
 
 
-        // If this is a top level (nav drawer) press, find the last time this channel was launched
-        // and pop backstack to it
-//        if (isTopLevel && fm.findFragmentByTag(handleTag) != null) {
-//            //fm.popBackStackImmediate(componentTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-//            //hacky way to disable animations
-//            FragmentUtils.fDisableAnimations = true;
-//            fm.popBackStackImmediate(handleTag, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-//            FragmentUtils.fDisableAnimations = false;
-//        }
-        
+        fm.addOnBackStackChangedListener(
+                new FragmentManager.OnBackStackChangedListener() {
+                    public void onBackStackChanged() {
+                        if(fm.getBackStackEntryCount() > 0) {
+                            FragmentManager.BackStackEntry backStackEntry;
+                            backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
+                            String fragmentTag = backStackEntry.getName();
+                            SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+                            sharedPreferences.edit().putString("handleTag", fragmentTag).commit();
+                        }
+                    }
+                }
+        );
+
+
         // Switch the main content fragment
         fm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,

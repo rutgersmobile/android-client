@@ -50,6 +50,19 @@ public final class ChannelManager {
     }
 
     /**
+     *
+     * @param key String that represents the Channel's tag
+     * @return Channel that matches the key
+     */
+    public Channel getChannelByTag(@NonNull String key){
+        if(!channelsMap.containsKey(key)){
+            return null;
+        }
+        return channelsMap.get(key);
+    }
+
+
+    /**
      * Load channel data from JSON Array
      * @param array Channel data JSON Array
      */

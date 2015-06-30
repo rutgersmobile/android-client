@@ -1,11 +1,14 @@
 package edu.rutgers.css.Rutgers.model;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 
@@ -73,6 +76,23 @@ public class Channel {
 
     public JSONArray getData() {
         return data;
+    }
+
+    public Bundle getBundle(){
+
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, getView());
+        bundle.putString(ComponentFactory.ARG_HANDLE_TAG, getHandle());
+        if (StringUtils.isNotBlank(getApi())) {
+            bundle.putString(ComponentFactory.ARG_API_TAG, getApi());
+        }
+        if (StringUtils.isNotBlank(getUrl())) {
+            bundle.putString(ComponentFactory.ARG_URL_TAG, getUrl());
+        }
+        if (getData() != null) {
+            bundle.putString(ComponentFactory.ARG_DATA_TAG, getData().toString());
+        }
+        return bundle;
     }
 
 }
