@@ -124,7 +124,6 @@ public class MainActivity extends LocationProviderActivity implements
         private static final int DIVIDER_TYPE = 1;
 
         private class ViewHolder {
-            int type;
             TextView textView;
             ImageView imageView;
         }
@@ -374,7 +373,7 @@ public class MainActivity extends LocationProviderActivity implements
 
         if(fm.getBackStackEntryCount() == 0){
             fm.beginTransaction()
-                    .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
+                    .add(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                     .commit();
         }
     }
@@ -471,14 +470,9 @@ public class MainActivity extends LocationProviderActivity implements
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-    // See if ActionBarDrawerToggle will handle event
-        if (mDrawerToggle.onOptionsItemSelected(item)){
-            return true;
-        }
-        else{
-            return super.onOptionsItemSelected(item);
-        }
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // See if ActionBarDrawerToggle will handle event
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     /** Initialize settings, display tutorial, etc. */
@@ -640,15 +634,18 @@ public class MainActivity extends LocationProviderActivity implements
                         if (lastFragmentTag.equals(AboutDisplay.HANDLE)) {
                             initialFragmentBundle = AboutDisplay.createArgs();
                             initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                            mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
                         } else {
                             LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
                             return;
                         }
                     } else {
                         initialFragmentBundle = channel.getBundle();
+                        int position = mDrawerAdapter.getPosition(channel);
+                        mDrawerListView.setItemChecked(position, true);
                     }
+                    initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
                     switchDrawerFragments(initialFragmentBundle);
-                    highlightCorrectDrawerItem();
                 }
             }
         });
@@ -670,11 +667,8 @@ public class MainActivity extends LocationProviderActivity implements
     private boolean switchDrawerFragments(@NonNull Bundle args) {
         final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
 
-        if (AppUtils.isOnTop(this, handleTag) && !handleTag.equals(WebDisplay.HANDLE)) {
-            return false;
-        }
+        return !(AppUtils.isOnTop(this, handleTag) && !handleTag.equals(WebDisplay.HANDLE)) && switchFragments(args);
 
-        return switchFragments(args);
     }
 
 
@@ -688,7 +682,7 @@ public class MainActivity extends LocationProviderActivity implements
      */
     public boolean switchFragments(@NonNull Bundle args) {
         final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
-        final boolean isTopLevel = args.getBoolean(ComponentFactory.ARG_TOP_LEVEL);
+        final boolean restoring = args.getBoolean(ComponentFactory.ARG_RESTORE);
 
         // Attempt to create the fragment
         final Fragment fragment = mComponentFactory.createFragment(args);
@@ -703,12 +697,14 @@ public class MainActivity extends LocationProviderActivity implements
         AppUtils.closeKeyboard(this);
 
         // Switch the main content fragment
-        fm.beginTransaction()
+        FragmentTransaction ft = fm.beginTransaction()
                 .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
                         R.anim.slide_in_left, R.anim.slide_out_right)
-                .replace(R.id.main_content_frame, fragment, handleTag)
-                .addToBackStack(handleTag)
-                .commit();
+                .replace(R.id.main_content_frame, fragment, handleTag);
+        if (!restoring) {
+            ft.addToBackStack(handleTag);
+        }
+        ft.commit();
 
         return true;
     }
