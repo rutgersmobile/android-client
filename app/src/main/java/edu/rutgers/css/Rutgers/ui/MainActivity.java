@@ -442,17 +442,20 @@ public class MainActivity extends LocationProviderActivity implements
      * settings to main
      * */
     private void highlightCorrectDrawerItem() {
-        mDrawerListView.setItemChecked(mDrawerListView.getCheckedItemPosition(), false);
+
         if(fm.getBackStackEntryCount() > 0) {
+
             FragmentManager.BackStackEntry backStackEntry;
             backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
             String fragmentTag = backStackEntry.getName();
-
+            if (fragmentTag == null){
+                return;
+            }
+            mDrawerListView.setItemChecked(mDrawerListView.getCheckedItemPosition(), false);
             if (fragmentTag.equals(AboutDisplay.HANDLE)) {
                 mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
                 return;
             }
-
             Channel channel = mChannelManager.getChannelByTag(fragmentTag);
             int position = mDrawerAdapter.getPosition(channel);
             mDrawerListView.setItemChecked(position, true);
