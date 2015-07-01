@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.ui;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -629,10 +630,10 @@ public class MainActivity extends LocationProviderActivity implements
                 String lastFragmentTag = pref.getString("handleTag", null);
                 if (lastFragmentTag != null && !lastFragmentTag.equals("main")) {
                     Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
-                    if (channel == null){
+                    if (channel == null) {
                         LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
                         //hack to go back to 'about' page
-                        if (lastFragmentTag.equals("about")){
+                        if (lastFragmentTag.equals("about")) {
                             Bundle aboutArgs = AboutDisplay.createArgs();
                             aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                             switchDrawerFragments(aboutArgs);
@@ -696,20 +697,17 @@ public class MainActivity extends LocationProviderActivity implements
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(this);
 
-
-        fm.addOnBackStackChangedListener(
-                new FragmentManager.OnBackStackChangedListener() {
-                    public void onBackStackChanged() {
-                        if(fm.getBackStackEntryCount() > 0) {
-                            FragmentManager.BackStackEntry backStackEntry;
-                            backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
-                            String fragmentTag = backStackEntry.getName();
-                            SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-                            sharedPreferences.edit().putString("handleTag", fragmentTag).commit();
-                        }
-                    }
+        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            public void onBackStackChanged() {
+                if(fm.getBackStackEntryCount() > 0) {
+                    FragmentManager.BackStackEntry backStackEntry;
+                    backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
+                    String fragmentTag = backStackEntry.getName();
+                    SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+                    sharedPreferences.edit().putString("handleTag", fragmentTag).apply();
                 }
-        );
+            }
+        });
 
 
         // Switch the main content fragment
