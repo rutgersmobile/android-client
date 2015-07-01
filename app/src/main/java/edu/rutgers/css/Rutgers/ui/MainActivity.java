@@ -78,6 +78,8 @@ public class MainActivity extends LocationProviderActivity implements
     /** Log tag */
     private static final String TAG = "MainActivity";
 
+    public static final String PREF_HANDLE_TAG = "handleTag";
+
     /* Member data */
     private ChannelManager mChannelManager;
     private ComponentFactory mComponentFactory;
@@ -273,7 +275,7 @@ public class MainActivity extends LocationProviderActivity implements
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.actbar_new));
 
-        mDrawerToggle = new ActionBarDrawerToggle(        
+        mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
                 R.string.drawer_open,  /* "open drawer" description */
@@ -301,7 +303,7 @@ public class MainActivity extends LocationProviderActivity implements
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
-        
+
         mDrawerListView.setAdapter(mDrawerAdapter);
         mDrawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mDrawerListView.setOnItemClickListener(new OnItemClickListener() {
@@ -355,15 +357,26 @@ public class MainActivity extends LocationProviderActivity implements
         // Load nav drawer items
         loadChannels();
 
+        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            public void onBackStackChanged() {
+                if(fm.getBackStackEntryCount() > 0) {
+                    FragmentManager.BackStackEntry backStackEntry;
+                    backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
+                    String fragmentTag = backStackEntry.getName();
+                    if (fragmentTag != null) {
+                        SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+                        sharedPreferences.edit().putString(PREF_HANDLE_TAG, fragmentTag).apply();
+                    }
+                }
+                highlightCorrectDrawerItem();
+            }
+        });
+
         if(fm.getBackStackEntryCount() == 0){
             fm.beginTransaction()
                     .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                     .commit();
         }
-
-        //display last fragment or main screen
-
-
     }
 
 
@@ -403,10 +416,6 @@ public class MainActivity extends LocationProviderActivity implements
 
     @Override
     public void onBackPressed() {
-        //don't go back to the main screen, just quit.
-        if(fm.getBackStackEntryCount() <= 1){
-            super.onBackPressed();
-        }
         // If drawer is open, intercept back press to close drawer
         if (mDrawerLayout.isDrawerOpen(mDrawerListView)) {
             mDrawerLayout.closeDrawer(mDrawerListView);
@@ -423,14 +432,6 @@ public class MainActivity extends LocationProviderActivity implements
                 }
             }
         }
-        //To change which menu item is highlighted to the correct currently displayed fragment, listen
-        //for when the backstack changes after the back button is pressed and set the view that matches
-        //the fragment at the end of the backstack as checked
-        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            public void onBackStackChanged() {
-                highlightCorrectDrawerItem();
-            }
-        });
 
         LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
         super.onBackPressed();
@@ -630,23 +631,24 @@ public class MainActivity extends LocationProviderActivity implements
             @Override
             public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
                 SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-                String lastFragmentTag = pref.getString("handleTag", null);
-                if (lastFragmentTag != null && !lastFragmentTag.equals("main")) {
+                String lastFragmentTag = pref.getString(PREF_HANDLE_TAG, null);
+                if (lastFragmentTag != null && !lastFragmentTag.equals(MainScreen.HANDLE)) {
                     Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
+                    Bundle initialFragmentBundle;
                     if (channel == null) {
-                        LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
                         //hack to go back to 'about' page
-                        if (lastFragmentTag.equals("about")) {
-                            Bundle aboutArgs = AboutDisplay.createArgs();
-                            aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                            switchDrawerFragments(aboutArgs);
+                        if (lastFragmentTag.equals(AboutDisplay.HANDLE)) {
+                            initialFragmentBundle = AboutDisplay.createArgs();
+                            initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                        } else {
+                            LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
+                            return;
                         }
-                        return;
+                    } else {
+                        initialFragmentBundle = channel.getBundle();
                     }
-                    Bundle initialFragmentBundle = channel.getBundle();
                     switchDrawerFragments(initialFragmentBundle);
                     highlightCorrectDrawerItem();
-
                 }
             }
         });
@@ -699,19 +701,6 @@ public class MainActivity extends LocationProviderActivity implements
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(this);
-
-        fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            public void onBackStackChanged() {
-                if(fm.getBackStackEntryCount() > 0) {
-                    FragmentManager.BackStackEntry backStackEntry;
-                    backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
-                    String fragmentTag = backStackEntry.getName();
-                    SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-                    sharedPreferences.edit().putString("handleTag", fragmentTag).apply();
-                }
-            }
-        });
-
 
         // Switch the main content fragment
         fm.beginTransaction()

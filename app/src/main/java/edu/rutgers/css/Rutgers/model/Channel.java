@@ -83,6 +83,7 @@ public class Channel {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, getView());
         bundle.putString(ComponentFactory.ARG_HANDLE_TAG, getHandle());
+        bundle.putString(ComponentFactory.ARG_TITLE_TAG, getTitle());
         if (StringUtils.isNotBlank(getApi())) {
             bundle.putString(ComponentFactory.ARG_API_TAG, getApi());
         }
