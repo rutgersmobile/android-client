@@ -47,5 +47,6 @@
     <string name="text_title">Text Display</string>
 
     <string name="fragment_speed">500</string>
+    <string name="splash_speed">800</string>
 
 </resources>

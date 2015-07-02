@@ -95,6 +95,7 @@ public class MainActivity extends LocationProviderActivity implements
     /* View references */
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
+    private Toolbar mToolbar;
 
     /* Callback for changed preferences */
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -253,8 +254,9 @@ public class MainActivity extends LocationProviderActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar.setVisibility(View.GONE);
+        setSupportActionBar(mToolbar);
 
         LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
         mComponentFactory = new ComponentFactory();
@@ -354,7 +356,34 @@ public class MainActivity extends LocationProviderActivity implements
         preferences.registerOnSharedPreferenceChangeListener(listener);
 
         // Load nav drawer items
-        loadChannels();
+        loadChannels().always(new AlwaysCallback<JSONArray, AjaxStatus>() {
+            @Override
+            public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
+                SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+                String lastFragmentTag = pref.getString(PREF_HANDLE_TAG, null);
+                if (lastFragmentTag != null && !lastFragmentTag.equals(MainScreen.HANDLE)) {
+                    Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
+                    Bundle initialFragmentBundle;
+                    if (channel == null) {
+                        //hack to go back to 'about' page
+                        if (lastFragmentTag.equals(AboutDisplay.HANDLE)) {
+                            initialFragmentBundle = AboutDisplay.createArgs();
+                            initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                            mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
+                        } else {
+                            LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
+                            return;
+                        }
+                    } else {
+                        initialFragmentBundle = channel.getBundle();
+                        int position = mDrawerAdapter.getPosition(channel);
+                        mDrawerListView.setItemChecked(position, true);
+                    }
+                    initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
+                    switchDrawerFragments(initialFragmentBundle);
+                }
+            }
+        });
 
         fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             public void onBackStackChanged() {
@@ -603,9 +632,9 @@ public class MainActivity extends LocationProviderActivity implements
     /**
      * Try to grab web hosted channels, add the native packaged channels on failure. Load the last channel onAlways.
      */
-    private void loadChannels() {
+    private Promise<JSONArray, AjaxStatus, Double> loadChannels() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Request.jsonArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
+        return dm.when(Request.jsonArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
 
             @Override
             public void onDone(JSONArray channelsArray) {
@@ -619,34 +648,6 @@ public class MainActivity extends LocationProviderActivity implements
             public void onFail(AjaxStatus status) {
                 mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
                 addChannels(mChannelManager.getChannels());
-            }
-
-        }).always(new AlwaysCallback<JSONArray, AjaxStatus>() {
-            @Override
-            public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
-                SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-                String lastFragmentTag = pref.getString(PREF_HANDLE_TAG, null);
-                if (lastFragmentTag != null && !lastFragmentTag.equals(MainScreen.HANDLE)) {
-                    Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
-                    Bundle initialFragmentBundle;
-                    if (channel == null) {
-                        //hack to go back to 'about' page
-                        if (lastFragmentTag.equals(AboutDisplay.HANDLE)) {
-                            initialFragmentBundle = AboutDisplay.createArgs();
-                            initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                            mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
-                        } else {
-                            LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
-                            return;
-                        }
-                    } else {
-                        initialFragmentBundle = channel.getBundle();
-                        int position = mDrawerAdapter.getPosition(channel);
-                        mDrawerListView.setItemChecked(position, true);
-                    }
-                    initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
-                    switchDrawerFragments(initialFragmentBundle);
-                }
             }
         });
     }
@@ -697,14 +698,22 @@ public class MainActivity extends LocationProviderActivity implements
         AppUtils.closeKeyboard(this);
 
         // Switch the main content fragment
-        FragmentTransaction ft = fm.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
-                        R.anim.slide_in_left, R.anim.slide_out_right)
-                .replace(R.id.main_content_frame, fragment, handleTag);
+        FragmentTransaction ft = fm.beginTransaction();
+        if (!restoring) {
+            ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right);
+        } else {
+            ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_bottom);
+        }
+        ft.replace(R.id.main_content_frame, fragment, handleTag);
         if (!restoring) {
             ft.addToBackStack(handleTag);
         }
         ft.commit();
+
+        if (mToolbar.getVisibility() == View.GONE) {
+            mToolbar.setVisibility(View.VISIBLE);
+        }
 
         return true;
     }
