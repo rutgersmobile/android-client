@@ -44,6 +44,7 @@ android {
         }
         production {
             versionName "4.0"
+            applicationId "edu.rutgers.css.Rutgers.production"
         }
     }
 
