@@ -16,18 +16,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
@@ -41,12 +35,8 @@ import org.jdeferred.FailCallback;
 import org.jdeferred.Promise;
 import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
@@ -55,6 +45,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.model.Channel;
+import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
 import edu.rutgers.css.Rutgers.model.MotdAPI;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
@@ -63,7 +54,6 @@ import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
@@ -104,153 +94,11 @@ public class MainActivity extends LocationProviderActivity implements
     /* Callback for changed preferences */
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
-    private FragmentManager fm = getSupportFragmentManager();
-
-
+    private final FragmentManager fm = getSupportFragmentManager();
 
     @Override
     public ChannelManager getChannelManager() {
         return mChannelManager;
-    }
-
-
-    // TODO refactor this class to something more extensible
-    private class DrawerAdapter extends BaseAdapter {
-        List<Channel> channels;
-
-        private static final int EXTRA = 3;
-
-        private static final int DIVIDER_OFFSET = 0;
-        private static final int ABOUT_OFFSET = 1;
-        private static final int SETTINGS_OFFSET = 2;
-
-        private static final int VIEW_TYPES = 2;
-        private static final int PRESSABLE_TYPE = 0;
-        private static final int DIVIDER_TYPE = 1;
-
-        private class ViewHolder {
-            TextView textView;
-            ImageView imageView;
-        }
-
-        public DrawerAdapter(List<Channel> channels) {
-            this.channels = channels;
-        }
-
-        @Override
-        public int getCount() {
-            // The total count is the number of channels plus one for each of:
-            // settings, about
-            return channels.size() + EXTRA;
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return VIEW_TYPES;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            if (positionIsDivider(position)) {
-                return DIVIDER_TYPE;
-            }
-            return PRESSABLE_TYPE;
-        }
-
-        @Override
-        public Object getItem(int i) {
-            if (positionIsChannel(i)) {
-                return channels.get(i);
-            } else if (positionIsSettings(i)) {
-                return SettingsActivity.class;
-            } else if (positionIsAbout(i)) {
-                return AboutDisplay.class;
-            }
-            return null;
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        public int getPosition(Channel item) {
-            return channels.indexOf(item);
-        }
-
-        public void addAll(Collection<Channel> channels) {
-            this.channels.addAll(channels);
-            notifyDataSetInvalidated();
-        }
-
-        public boolean positionIsChannel(int position) {
-            return position < channels.size();
-        }
-
-        public boolean positionIsDivider(int position) {
-            return position == getDividerPosition();
-        }
-
-        public int getDividerPosition() {
-            return channels.size() + DIVIDER_OFFSET;
-        }
-
-        public boolean positionIsAbout(int position) {
-            return position == getAboutPosition();
-        }
-
-        public int getAboutPosition() {
-            return channels.size() + ABOUT_OFFSET;
-        }
-
-        public boolean positionIsSettings(int position) {
-            return position == getSettingsPosition();
-        }
-
-        public int getSettingsPosition() {
-            return channels.size() + SETTINGS_OFFSET;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
-            String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
-            ViewHolder holder;
-            final int type = getItemViewType(position);
-
-            if (convertView == null) {
-                convertView = layoutInflater.inflate(
-                        type == PRESSABLE_TYPE ? R.layout.row_drawer_item : R.layout.row_divider, null);
-
-                if (type == DIVIDER_TYPE) {
-                    convertView.setOnClickListener(null);
-                }
-
-                holder = new ViewHolder();
-                holder.textView = (TextView) convertView.findViewById(R.id.title);
-                holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            if (type == DIVIDER_TYPE) {
-                return convertView;
-            }
-
-            if (positionIsChannel(position)) {
-                Channel channel = channels.get(position);
-                holder.textView.setText(channel.getTitle(homeCampus));
-                holder.imageView.setImageDrawable(ImageUtils.getIcon(getResources(), channel.getHandle()));
-            } else if (positionIsSettings(position)) {
-                holder.textView.setText("Settings");
-                holder.imageView.setImageDrawable(ImageUtils.getIcon(getResources(), "action_settings"));
-            } else if (positionIsAbout(position)) {
-                holder.textView.setText("About");
-            }
-
-            return convertView;
-        }
     }
 
     @Override
@@ -275,22 +123,18 @@ public class MainActivity extends LocationProviderActivity implements
         }
 
         // Set up navigation drawer
-        mDrawerAdapter = this.new DrawerAdapter(new ArrayList<Channel>());
+        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.actbar_new));
 
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                R.string.drawer_open,  /* "open drawer" description */
-                R.string.drawer_close  /* "close drawer" description */
-                ) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+            @Override
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+            }
 
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {super.onDrawerClosed(view);}
-
-            /** Called when a drawer has settled in a completely open state. */
+            @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 if (mShowDrawerShowcase) {
@@ -312,11 +156,9 @@ public class MainActivity extends LocationProviderActivity implements
         mDrawerListView.setAdapter(mDrawerAdapter);
         mDrawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mDrawerListView.setOnItemClickListener(new OnItemClickListener() {
-
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                DrawerAdapter adapter = (DrawerAdapter)parent.getAdapter();
+                DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
                 if (adapter.positionIsSettings(position)) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     mDrawerLayout.closeDrawer(mDrawerListView);
@@ -342,7 +184,6 @@ public class MainActivity extends LocationProviderActivity implements
                 mDrawerListView.invalidateViews();
                 // Launch component
                 switchDrawerFragments(channelArgs);
-                //mDrawerAdapter.setSelectedPos(position);
 
                 mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
             }
@@ -499,13 +340,10 @@ public class MainActivity extends LocationProviderActivity implements
      * settings to main
      * */
     private void highlightCorrectDrawerItem() {
-
         if(fm.getBackStackEntryCount() > 0) {
-
-            FragmentManager.BackStackEntry backStackEntry;
-            backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
+            FragmentManager.BackStackEntry backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
             String fragmentTag = backStackEntry.getName();
-            if (fragmentTag == null){
+            if (fragmentTag == null) {
                 return;
             }
             mDrawerListView.setItemChecked(mDrawerListView.getCheckedItemPosition(), false);
@@ -514,8 +352,7 @@ public class MainActivity extends LocationProviderActivity implements
                 return;
             }
             Channel channel = mChannelManager.getChannelByTag(fragmentTag);
-            int position = mDrawerAdapter.getPosition(channel);
-            mDrawerListView.setItemChecked(position, true);
+            mDrawerListView.setItemChecked(mDrawerAdapter.getPosition(channel), true);
         }
     }
 
@@ -663,43 +500,29 @@ public class MainActivity extends LocationProviderActivity implements
     private Promise<JSONArray, AjaxStatus, Double> loadChannels() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
         return dm.when(Request.jsonArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
-
             @Override
             public void onDone(JSONArray channelsArray) {
                 mChannelManager.loadChannelsFromJSONArray(channelsArray);
-                addChannels(mChannelManager.getChannels());
+                mDrawerAdapter.addAll(mChannelManager.getChannels());
             }
-
         }).fail(new FailCallback<AjaxStatus>() {
-
             @Override
             public void onFail(AjaxStatus status) {
                 mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
-                addChannels(mChannelManager.getChannels());
+                mDrawerAdapter.addAll(mChannelManager.getChannels());
             }
         });
     }
 
-    /**
-     * Add channels to navigation drawer.
-     * @param channels Channels to add to nav drawer
-     */
-    private void addChannels(List<Channel> channels) {
-        mDrawerAdapter.addAll(channels);
-    }
     /*
      * Fragment display methods
      */
-
-
 
     private boolean switchDrawerFragments(@NonNull Bundle args) {
         final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
 
         return !(AppUtils.isOnTop(this, handleTag) && !handleTag.equals(WebDisplay.HANDLE)) && switchFragments(args);
-
     }
-
 
     /**
      * Add current fragment to the backstack and switch to the new one defined by given arguments.
@@ -716,10 +539,10 @@ public class MainActivity extends LocationProviderActivity implements
         // Attempt to create the fragment
         final Fragment fragment = mComponentFactory.createFragment(args);
         if (fragment == null) {
-            sendChannelErrorEvent(args); // Channel launch failure analytics event
+            Analytics.sendChannelErrorEvent(this, args); // Channel launch failure analytics event
             return false;
         } else {
-            sendChannelEvent(args); // Channel launch analytics event
+            Analytics.sendChannelEvent(this, args); // Channel launch analytics event
         }
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
@@ -760,32 +583,4 @@ public class MainActivity extends LocationProviderActivity implements
         ft.addToBackStack(tag);
         dialogFragment.show(ft, tag);
     }
-
-    private void sendChannelEvent(@NonNull Bundle args) {
-        JSONObject extras = new JSONObject();
-        try {
-            extras.put("handle", args.getString(ComponentFactory.ARG_COMPONENT_TAG));
-            extras.put("url", args.getString(ComponentFactory.ARG_URL_TAG));
-            extras.put("api", args.getString(ComponentFactory.ARG_API_TAG));
-            extras.put("title", args.getString(ComponentFactory.ARG_TITLE_TAG));
-        } catch (JSONException e) {
-            LOGE(TAG, Log.getStackTraceString(e));
-        }
-        Analytics.queueEvent(this, Analytics.CHANNEL_OPENED, extras);
-    }
-
-    private void sendChannelErrorEvent(@NonNull Bundle args) {
-        JSONObject extras = new JSONObject();
-        try {
-            extras.put("description","failed to open channel");
-            extras.put("handle", args.getString(ComponentFactory.ARG_COMPONENT_TAG));
-            extras.put("url", args.getString(ComponentFactory.ARG_URL_TAG));
-            extras.put("api", args.getString(ComponentFactory.ARG_API_TAG));
-            extras.put("title", args.getString(ComponentFactory.ARG_TITLE_TAG));
-        } catch (JSONException e) {
-            LOGE(TAG, Log.getStackTraceString(e));
-        }
-        Analytics.queueEvent(this, Analytics.ERROR, extras);
-    }
-
 }

@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Build;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -67,6 +68,33 @@ public final class Analytics extends IntentService {
 
     public Analytics() {
         super("Analytics");
+    }
+
+    public static void sendChannelEvent(Context context, @NonNull Bundle args) {
+        JSONObject extras = new JSONObject();
+        try {
+            extras.put("handle", args.getString(ComponentFactory.ARG_COMPONENT_TAG));
+            extras.put("url", args.getString(ComponentFactory.ARG_URL_TAG));
+            extras.put("api", args.getString(ComponentFactory.ARG_API_TAG));
+            extras.put("title", args.getString(ComponentFactory.ARG_TITLE_TAG));
+        } catch (JSONException e) {
+            LOGE(TAG, Log.getStackTraceString(e));
+        }
+        queueEvent(context, Analytics.CHANNEL_OPENED, extras);
+    }
+
+    public static void sendChannelErrorEvent(Context context, @NonNull Bundle args) {
+        JSONObject extras = new JSONObject();
+        try {
+            extras.put("description","failed to open channel");
+            extras.put("handle", args.getString(ComponentFactory.ARG_COMPONENT_TAG));
+            extras.put("url", args.getString(ComponentFactory.ARG_URL_TAG));
+            extras.put("api", args.getString(ComponentFactory.ARG_API_TAG));
+            extras.put("title", args.getString(ComponentFactory.ARG_TITLE_TAG));
+        } catch (JSONException e) {
+            LOGE(TAG, Log.getStackTraceString(e));
+        }
+        queueEvent(context, Analytics.ERROR, extras);
     }
 
     /**
