@@ -30,6 +30,8 @@ import java.io.RandomAccessFile;
 import java.util.UUID;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.ChannelManager;
+import edu.rutgers.css.Rutgers.model.Channel;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
@@ -200,6 +202,26 @@ public final class AppUtils {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Check if the fragment on top of the stack is the given component
+     * @param activity The activity that the fragment is in
+     * @param channelManager Location to get Channel info for determining the component of a fragment
+     * @param handle The component to look for
+     * @return True if on top, false if not
+     */
+    public static boolean isComponentOnTop(FragmentActivity activity, ChannelManager channelManager, @NonNull String handle) {
+        if (activity == null) return false;
+
+        FragmentManager fm = activity.getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            Channel channel = channelManager.getChannelByTag(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
+            if (channel != null) {
+                return handle.equalsIgnoreCase(channel.getView());
+            }
+        }
+        return false;
     }
 
     public static String topHandle(FragmentActivity activity) {

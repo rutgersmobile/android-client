@@ -25,7 +25,7 @@
     <color name="actbar_text">@color/almost_black</color>
 
     <!-- Nav drawer colors -->
-    <color name="drawer_selected">#EB4B4B</color>
+    <color name="drawer_selected">#ca072d</color>
     <color name="drawer_section_header_bg">#2A2A2A</color>
     <color name="drawer_section_header_text">#F5F7F7</color>
     <color name="drawer_item_bg">#2A2A2A</color>
@@ -58,7 +58,7 @@
     <color name="sakai_icon_color">#F5F7F7</color>
     <color name="stud_life_icon_color">#F5F7F7</color>
 
-    <color name="actbar_new">#E53935</color>
-    <color name="actbar_dark">#B71C1C</color>
+    <color name="actbar_new">#990000</color>
+    <color name="actbar_dark">#800000</color>
 </resources>
 

@@ -187,7 +187,6 @@ public class MainActivity extends LocationProviderActivity implements
 
                 mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
             }
-
         });
 
         // Reload web channels when we change preferences to update campus-based names
@@ -320,8 +319,9 @@ public class MainActivity extends LocationProviderActivity implements
         }
 
         // If web display is active, send back button presses to it for navigating browser history
-        if (AppUtils.isOnTop(this, WebDisplay.HANDLE)) {
-            Fragment webView = fm.findFragmentByTag(WebDisplay.HANDLE);
+        if (AppUtils.isComponentOnTop(this, mChannelManager, WebDisplay.HANDLE)) {
+            // Get the fragment on top of the back stack
+            Fragment webView = fm.findFragmentByTag(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
             if (webView != null && webView.isVisible()) {
                 if (((WebDisplay) webView).backPress()) {
                     LOGD(TAG, "Triggered WebView back button");
@@ -521,7 +521,7 @@ public class MainActivity extends LocationProviderActivity implements
     private boolean switchDrawerFragments(@NonNull Bundle args) {
         final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
 
-        return !(AppUtils.isOnTop(this, handleTag) && !handleTag.equals(WebDisplay.HANDLE)) && switchFragments(args);
+        return !AppUtils.isOnTop(this, handleTag) && switchFragments(args);
     }
 
     /**
