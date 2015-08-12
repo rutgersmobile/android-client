@@ -191,6 +191,7 @@ public class MainActivity extends LocationProviderActivity implements
 
         // Reload web channels when we change preferences to update campus-based names
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
                 mDrawerAdapter.notifyDataSetChanged();
@@ -208,6 +209,7 @@ public class MainActivity extends LocationProviderActivity implements
                     if (fragmentTag != null) {
                         SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
                         sharedPreferences.edit().putString(PREF_HANDLE_TAG, fragmentTag).apply();
+                        LOGI(TAG, "Stored channel tag: " + fragmentTag);
                     }
                 }
                 highlightCorrectDrawerItem();
@@ -244,15 +246,13 @@ public class MainActivity extends LocationProviderActivity implements
                             Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
                             Bundle initialFragmentBundle;
                             if (channel == null) {
-                                //hack to go back to 'about' page
-                                if (lastFragmentTag.equals(AboutDisplay.HANDLE)) {
-                                    initialFragmentBundle = AboutDisplay.createArgs();
-                                    initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                                    mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
-                                } else {
-                                    LOGE(TAG, "Invalid Channel saved in preferences.handleTag");
-                                    return;
-                                }
+                                //hack to go back to 'about' page if the last viewed fragment was about or had an invalid tag.
+                                LOGE(TAG, "Invalid Channel saved in preferences.handleTag: " + lastFragmentTag);
+                                pref.edit().remove(PREF_HANDLE_TAG);
+                                pref.edit().commit();
+                                initialFragmentBundle = AboutDisplay.createArgs();
+                                initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                                mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
                             } else {
                                 initialFragmentBundle = channel.getBundle();
                                 int position = mDrawerAdapter.getPosition(channel);
