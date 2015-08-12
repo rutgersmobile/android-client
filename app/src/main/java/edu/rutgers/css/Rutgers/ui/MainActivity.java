@@ -227,19 +227,18 @@ public class MainActivity extends LocationProviderActivity implements
                 if (motd != null && !motd.isWindow()) {
                     MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
                     f.show(fm, MotdDialogFragment.TAG);
+                } else if (motd != null) {
+                    switchFragments(TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
+                    if (!motd.hasCloseButton()) {
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    }
+                    return;
                 }
                 // Load nav drawer items
                 loadChannels().always(new AlwaysCallback<JSONArray, AjaxStatus>() {
                     @Override
                     public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
-                        if (motd != null && motd.isWindow()) {
-                            switchFragments(TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
-                            if (!motd.hasCloseButton()) {
-                                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                            }
-                            return;
-                        }
                         SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
                         String lastFragmentTag = pref.getString(PREF_HANDLE_TAG, null);
                         if (lastFragmentTag != null && !lastFragmentTag.equals(MainScreen.HANDLE)) {
@@ -249,7 +248,7 @@ public class MainActivity extends LocationProviderActivity implements
                                 //hack to go back to 'about' page if the last viewed fragment was about or had an invalid tag.
                                 LOGE(TAG, "Invalid Channel saved in preferences.handleTag: " + lastFragmentTag);
                                 pref.edit().remove(PREF_HANDLE_TAG);
-                                pref.edit().commit();
+                                pref.edit().apply();
                                 initialFragmentBundle = AboutDisplay.createArgs();
                                 initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                                 mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
@@ -270,7 +269,7 @@ public class MainActivity extends LocationProviderActivity implements
 
         if (fm.getBackStackEntryCount() == 0) {
             fm.beginTransaction()
-                    .add(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
+                    .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                     .commit();
         }
     }
@@ -548,6 +547,10 @@ public class MainActivity extends LocationProviderActivity implements
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(this);
 
+        if (mToolbar.getVisibility() == View.GONE) {
+            mToolbar.setVisibility(View.VISIBLE);
+        }
+
         // Switch the main content fragment
         FragmentTransaction ft = fm.beginTransaction();
         if (!restoring) {
@@ -561,10 +564,6 @@ public class MainActivity extends LocationProviderActivity implements
             ft.addToBackStack(handleTag);
         }
         ft.commit();
-
-        if (mToolbar.getVisibility() == View.GONE) {
-            mToolbar.setVisibility(View.VISIBLE);
-        }
 
         return true;
     }
