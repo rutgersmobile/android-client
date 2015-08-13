@@ -39,6 +39,7 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -74,6 +75,8 @@ public class MainActivity extends LocationProviderActivity implements
 
     public static final String PREF_HANDLE_TAG = "handleTag";
 
+    private static final String STATE_ROTATED = "rotated";
+
     /* Member data */
     private ChannelManager mChannelManager;
     private ComponentFactory mComponentFactory;
@@ -96,18 +99,23 @@ public class MainActivity extends LocationProviderActivity implements
 
     private final FragmentManager fm = getSupportFragmentManager();
 
+    private int prevOrientation = 0;
+    private boolean rotated = false;
+
     @Override
     public ChannelManager getChannelManager() {
         return mChannelManager;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setVisibility(View.GONE);
+        if (savedInstanceState == null || (savedInstanceState != null && !savedInstanceState.getBoolean(STATE_ROTATED))) {
+            mToolbar.setVisibility(View.GONE);
+        }
         setSupportActionBar(mToolbar);
 
         LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
@@ -224,17 +232,22 @@ public class MainActivity extends LocationProviderActivity implements
         }).always(new AlwaysCallback<Motd, AjaxStatus>() {
             @Override
             public void onAlways(Promise.State state, final Motd motd, AjaxStatus rejected) {
-                if (motd != null && !motd.isWindow()) {
-                    MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
-                    f.show(fm, MotdDialogFragment.TAG);
-                } else if (motd != null) {
-                    switchFragments(TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
-                    if (!motd.hasCloseButton()) {
-                        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                RutgersApplication application = (RutgersApplication) getApplication();
+                if(!application.getShowedMotd()) {
+                    application.setShowedMotd(true);
+                    if (motd != null && !motd.isWindow()) {
+                        MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
+                        f.show(fm, MotdDialogFragment.TAG);
+                    } else if (motd != null) {
+                        switchFragments(TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
+                        if (!motd.hasCloseButton()) {
+                            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                        }
+                        return;
                     }
-                    return;
                 }
+
                 // Load nav drawer items
                 loadChannels().always(new AlwaysCallback<JSONArray, AjaxStatus>() {
                     @Override
@@ -257,7 +270,9 @@ public class MainActivity extends LocationProviderActivity implements
                                 int position = mDrawerAdapter.getPosition(channel);
                                 mDrawerListView.setItemChecked(position, true);
                             }
-                            initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
+                            if (savedInstanceState == null || (savedInstanceState != null && !savedInstanceState.getBoolean(STATE_ROTATED))) {
+                                initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
+                            }
                             switchDrawerFragments(initialFragmentBundle);
                         } else {
                             mToolbar.setVisibility(View.VISIBLE);
@@ -360,6 +375,16 @@ public class MainActivity extends LocationProviderActivity implements
         super.onConfigurationChanged(newConfig);
 
         mDrawerToggle.onConfigurationChanged(newConfig);
+
+        if (newConfig.orientation != prevOrientation) {
+            rotated = true;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean(STATE_ROTATED, rotated);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override

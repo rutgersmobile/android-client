@@ -15,6 +15,8 @@ public class RutgersApplication extends Application {
 
     private static Context context;
 
+    private boolean showedMotd = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -36,4 +38,11 @@ public class RutgersApplication extends Application {
         return RutgersApplication.context;
     }
 
+    public boolean getShowedMotd() {
+        return showedMotd;
+    }
+
+    public void setShowedMotd(boolean showedMotd) {
+        this.showedMotd = showedMotd;
+    }
 }
