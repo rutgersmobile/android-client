@@ -5,7 +5,10 @@ import android.content.Context;
 
 import com.androidquery.callback.BitmapAjaxCallback;
 
+import java.util.Map;
+
 import edu.rutgers.css.Rutgers.api.Analytics;
+import edu.rutgers.css.Rutgers.model.Channel;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -15,7 +18,7 @@ public class RutgersApplication extends Application {
 
     private static Context context;
 
-    private boolean showedMotd = false;
+    private static Map<String, Channel> channelsMap;
 
     @Override
     public void onCreate() {
@@ -30,6 +33,7 @@ public class RutgersApplication extends Application {
 
     @Override
     public void onLowMemory() {
+        super.onLowMemory();
         // Remove images from memory cache
         BitmapAjaxCallback.clearCache();
     }
@@ -38,11 +42,12 @@ public class RutgersApplication extends Application {
         return RutgersApplication.context;
     }
 
-    public boolean getShowedMotd() {
-        return showedMotd;
+    public static void setChannelsMap(Map<String, Channel> channelsMap) {
+        RutgersApplication.channelsMap = channelsMap;
     }
 
-    public void setShowedMotd(boolean showedMotd) {
-        this.showedMotd = showedMotd;
+    public static Map<String, Channel> getChannelsMap() {
+        return channelsMap;
     }
+
 }
