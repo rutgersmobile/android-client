@@ -49,6 +49,14 @@ public final class ChannelManager {
         return result;
     }
 
+    public void setChannelsMap(Map<String, Channel> channelsMap) {
+        this.channelsMap = channelsMap;
+    }
+
+    public Map<String, Channel> getChannelsMap() {
+        return channelsMap;
+    }
+
     /**
      *
      * @param key String that represents the Channel's tag

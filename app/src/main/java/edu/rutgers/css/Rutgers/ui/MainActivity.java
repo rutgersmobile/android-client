@@ -37,8 +37,10 @@ import org.jdeferred.android.AndroidDeferredManager;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -74,6 +76,10 @@ public class MainActivity extends LocationProviderActivity implements
 
     public static final String PREF_HANDLE_TAG = "handleTag";
 
+    public static final String SHOWED_MOTD = "showedMotd";
+
+    private boolean showedMotd = false;
+
     /* Member data */
     private ChannelManager mChannelManager;
     private ComponentFactory mComponentFactory;
@@ -106,8 +112,14 @@ public class MainActivity extends LocationProviderActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (savedInstanceState != null) {
+            showedMotd = savedInstanceState.getBoolean(SHOWED_MOTD);
+        }
+
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setVisibility(View.GONE);
+        if (!showedMotd) {
+            mToolbar.setVisibility(View.GONE);
+        }
         setSupportActionBar(mToolbar);
 
         LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
@@ -216,62 +228,83 @@ public class MainActivity extends LocationProviderActivity implements
             }
         });
 
-        MotdAPI.getMotd().fail(new FailCallback<AjaxStatus>() {
-            @Override
-            public void onFail(AjaxStatus result) {
-                LOGE(TAG, "Couldn't get MOTD");
-            }
-        }).always(new AlwaysCallback<Motd, AjaxStatus>() {
-            @Override
-            public void onAlways(Promise.State state, final Motd motd, AjaxStatus rejected) {
-                if (motd != null && !motd.isWindow()) {
-                    MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
-                    f.show(fm, MotdDialogFragment.TAG);
-                } else if (motd != null) {
-                    switchFragments(TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
-                    if (!motd.hasCloseButton()) {
-                        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                    }
-                    return;
+        Map<String, Channel> channelsMap = RutgersApplication.getChannelsMap();
+
+        if (channelsMap == null) {
+            MotdAPI.getMotd().fail(new FailCallback<AjaxStatus>() {
+                @Override
+                public void onFail(AjaxStatus result) {
+                    LOGE(TAG, "Couldn't get MOTD");
                 }
-                // Load nav drawer items
-                loadChannels().always(new AlwaysCallback<JSONArray, AjaxStatus>() {
-                    @Override
-                    public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
-                        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-                        String lastFragmentTag = pref.getString(PREF_HANDLE_TAG, null);
-                        if (lastFragmentTag != null && !lastFragmentTag.equals(MainScreen.HANDLE)) {
-                            Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
-                            Bundle initialFragmentBundle;
-                            if (channel == null) {
-                                //hack to go back to 'about' page if the last viewed fragment was about or had an invalid tag.
-                                LOGE(TAG, "Invalid Channel saved in preferences.handleTag: " + lastFragmentTag);
-                                pref.edit().remove(PREF_HANDLE_TAG);
-                                pref.edit().apply();
-                                initialFragmentBundle = AboutDisplay.createArgs();
-                                initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                                mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
-                            } else {
-                                initialFragmentBundle = channel.getBundle();
-                                int position = mDrawerAdapter.getPosition(channel);
-                                mDrawerListView.setItemChecked(position, true);
+            }).always(new AlwaysCallback<Motd, AjaxStatus>() {
+                @Override
+                public void onAlways(Promise.State state, final Motd motd, AjaxStatus rejected) {
+                    if (!showedMotd) {
+                        showedMotd = true;
+                        if (motd != null && !motd.isWindow()) {
+                            MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
+                            f.show(fm, MotdDialogFragment.TAG);
+                        } else if (motd != null) {
+                            switchFragments(TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
+                            if (!motd.hasCloseButton()) {
+                                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                             }
-                            initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
-                            switchDrawerFragments(initialFragmentBundle);
-                        } else {
-                            mToolbar.setVisibility(View.VISIBLE);
+                            return;
                         }
                     }
-                });
-            }
-        });
+                    mToolbar.setVisibility(View.VISIBLE);
+                    // Load nav drawer items
+                    loadChannels().always(new AlwaysCallback<JSONArray, AjaxStatus>() {
+                        @Override
+                        public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
+                            restore();
+                        }
+                    });
+                }
+            });
+        } else {
+            mChannelManager.setChannelsMap(channelsMap);
+            mDrawerAdapter.addAll(mChannelManager.getChannels());
+            restore();
+            return;
+        }
 
         if (fm.getBackStackEntryCount() == 0) {
             fm.beginTransaction()
                     .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                     .commit();
         }
+    }
+
+    private void restore() {
+        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+        String lastFragmentTag = pref.getString(PREF_HANDLE_TAG, null);
+        if (lastFragmentTag != null && !lastFragmentTag.equals(MainScreen.HANDLE)) {
+            Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
+            Bundle initialFragmentBundle;
+            if (channel == null) {
+                //hack to go back to 'about' page if the last viewed fragment was about or had an invalid tag.
+                LOGE(TAG, "Invalid Channel saved in preferences.handleTag: " + lastFragmentTag);
+                pref.edit().remove(PREF_HANDLE_TAG);
+                pref.edit().apply();
+                initialFragmentBundle = AboutDisplay.createArgs();
+                initialFragmentBundle.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
+                mDrawerListView.setItemChecked(mDrawerAdapter.getAboutPosition(), true);
+            } else {
+                initialFragmentBundle = channel.getBundle();
+                int position = mDrawerAdapter.getPosition(channel);
+                mDrawerListView.setItemChecked(position, true);
+            }
+            initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
+            switchDrawerFragments(initialFragmentBundle);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SHOWED_MOTD, showedMotd);
     }
 
 
@@ -502,12 +535,14 @@ public class MainActivity extends LocationProviderActivity implements
             @Override
             public void onDone(JSONArray channelsArray) {
                 mChannelManager.loadChannelsFromJSONArray(channelsArray);
+                RutgersApplication.setChannelsMap(mChannelManager.getChannelsMap());
                 mDrawerAdapter.addAll(mChannelManager.getChannels());
             }
         }).fail(new FailCallback<AjaxStatus>() {
             @Override
             public void onFail(AjaxStatus status) {
                 mChannelManager.loadChannelsFromResource(getResources(), R.raw.channels);
+                RutgersApplication.setChannelsMap(mChannelManager.getChannelsMap());
                 mDrawerAdapter.addAll(mChannelManager.getChannels());
             }
         });
@@ -553,12 +588,8 @@ public class MainActivity extends LocationProviderActivity implements
 
         // Switch the main content fragment
         FragmentTransaction ft = fm.beginTransaction();
-        if (!restoring) {
-            ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
-                    R.anim.slide_in_left, R.anim.slide_out_right);
-        } else {
-            ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_bottom);
-        }
+        ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                R.anim.slide_in_left, R.anim.slide_out_right);
         ft.replace(R.id.main_content_frame, fragment, handleTag);
         if (!restoring) {
             ft.addToBackStack(handleTag);
