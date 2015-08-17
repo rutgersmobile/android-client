@@ -113,7 +113,7 @@ public class MainActivity extends LocationProviderActivity implements
         setContentView(R.layout.activity_main);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (savedInstanceState == null || !savedInstanceState.getBoolean(STATE_ROTATED)) {
+        if (savedInstanceState == null || (savedInstanceState != null && !savedInstanceState.getBoolean(STATE_ROTATED))) {
             mToolbar.setVisibility(View.GONE);
         }
         setSupportActionBar(mToolbar);
@@ -270,7 +270,7 @@ public class MainActivity extends LocationProviderActivity implements
                                 int position = mDrawerAdapter.getPosition(channel);
                                 mDrawerListView.setItemChecked(position, true);
                             }
-                            if (savedInstanceState == null || !savedInstanceState.getBoolean(STATE_ROTATED)) {
+                            if (savedInstanceState == null || (savedInstanceState != null && !savedInstanceState.getBoolean(STATE_ROTATED))) {
                                 initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
                             }
                             switchDrawerFragments(initialFragmentBundle);
@@ -377,7 +377,6 @@ public class MainActivity extends LocationProviderActivity implements
         mDrawerToggle.onConfigurationChanged(newConfig);
 
         if (newConfig.orientation != prevOrientation) {
-            prevOrientation = newConfig.orientation;
             rotated = true;
         }
     }
