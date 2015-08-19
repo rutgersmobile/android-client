@@ -227,6 +227,9 @@ public class MainActivity extends LocationProviderActivity implements
                     FragmentManager.BackStackEntry backStackEntry;
                     backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
                     fragmentTag = backStackEntry.getName();
+                    if (lastFragmentTag == null && fm.getBackStackEntryCount() == 1) {
+                        lastFragmentTag = fragmentTag;
+                    }
                 }
                 if (fragmentTag == null) {
                     fragmentTag = lastFragmentTag;
@@ -236,7 +239,7 @@ public class MainActivity extends LocationProviderActivity implements
                 LOGI(TAG, "Stored channel tag: " + fragmentTag);
                 highlightCorrectDrawerItem();
             }
-    });
+        });
 
         loadCorrectFragment(savedInstanceState);
     }
