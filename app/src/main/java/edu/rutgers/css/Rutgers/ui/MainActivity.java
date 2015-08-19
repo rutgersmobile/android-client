@@ -75,8 +75,9 @@ public class MainActivity extends LocationProviderActivity implements
     private static final String TAG = "MainActivity";
 
     public static final String PREF_HANDLE_TAG = "handleTag";
-
     public static final String SHOWED_MOTD = "showedMotd";
+    public static final String FRAGMENT_ARGS = "fragmentArgs";
+    public static final String LAST_FRAGMENT_TAG = "lastFragmentTag";
 
     private boolean showedMotd = false;
 
@@ -102,8 +103,9 @@ public class MainActivity extends LocationProviderActivity implements
 
     private final FragmentManager fm = getSupportFragmentManager();
 
-    private int prevOrientation = 0;
-    private boolean rotated = false;
+    private Bundle fragmentArgs;
+
+    private String lastFragmentTag;
 
     @Override
     public ChannelManager getChannelManager() {
@@ -117,6 +119,9 @@ public class MainActivity extends LocationProviderActivity implements
 
         if (savedInstanceState != null) {
             showedMotd = savedInstanceState.getBoolean(SHOWED_MOTD);
+            lastFragmentTag = savedInstanceState.getString(LAST_FRAGMENT_TAG);
+        } else {
+            lastFragmentTag = getPreferences(Context.MODE_PRIVATE).getString(PREF_HANDLE_TAG, null);
         }
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -217,20 +222,26 @@ public class MainActivity extends LocationProviderActivity implements
 
         fm.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             public void onBackStackChanged() {
+                String fragmentTag = null;
                 if (fm.getBackStackEntryCount() > 0) {
                     FragmentManager.BackStackEntry backStackEntry;
                     backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
-                    String fragmentTag = backStackEntry.getName();
-                    if (fragmentTag != null) {
-                        SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-                        sharedPreferences.edit().putString(PREF_HANDLE_TAG, fragmentTag).apply();
-                        LOGI(TAG, "Stored channel tag: " + fragmentTag);
-                    }
+                    fragmentTag = backStackEntry.getName();
                 }
+                if (fragmentTag == null) {
+                    fragmentTag = lastFragmentTag;
+                }
+                SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+                sharedPreferences.edit().putString(PREF_HANDLE_TAG, fragmentTag).apply();
+                LOGI(TAG, "Stored channel tag: " + fragmentTag);
                 highlightCorrectDrawerItem();
             }
-        });
+    });
 
+        loadCorrectFragment(savedInstanceState);
+    }
+
+    private void loadCorrectFragment(Bundle savedInstanceState) {
         Map<String, Channel> channelsMap = RutgersApplication.getChannelsMap();
 
         if (channelsMap == null) {
@@ -250,7 +261,9 @@ public class MainActivity extends LocationProviderActivity implements
                         } else if (motd != null) {
                             switchFragments(TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
                             if (!motd.hasCloseButton()) {
-                                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                                if (getSupportActionBar() != null) {
+                                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                                }
                                 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                             }
                             return;
@@ -261,34 +274,35 @@ public class MainActivity extends LocationProviderActivity implements
                     loadChannels().always(new AlwaysCallback<JSONArray, AjaxStatus>() {
                         @Override
                         public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
-                            restore();
+                            restore(true);
                         }
                     });
                 }
             });
+
+            if (fm.getBackStackEntryCount() == 0) {
+                fm.beginTransaction()
+                        .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
+                        .commit();
+            }
         } else {
             mChannelManager.setChannelsMap(channelsMap);
             mDrawerAdapter.addAll(mChannelManager.getChannels());
-            restore();
-            return;
-        }
-
-        if (fm.getBackStackEntryCount() == 0) {
-            fm.beginTransaction()
-                    .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
-                    .commit();
+            mToolbar.setVisibility(View.VISIBLE);
+            if (savedInstanceState == null) {
+                restore(false);
+            }
         }
     }
 
-    private void restore() {
-        SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
-        String lastFragmentTag = pref.getString(PREF_HANDLE_TAG, null);
+    private boolean restore(boolean anim) {
         if (lastFragmentTag != null && !lastFragmentTag.equals(MainScreen.HANDLE)) {
             Channel channel = mChannelManager.getChannelByTag(lastFragmentTag);
             Bundle initialFragmentBundle;
             if (channel == null) {
                 //hack to go back to 'about' page if the last viewed fragment was about or had an invalid tag.
                 LOGE(TAG, "Invalid Channel saved in preferences.handleTag: " + lastFragmentTag);
+                SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
                 pref.edit().remove(PREF_HANDLE_TAG);
                 pref.edit().apply();
                 initialFragmentBundle = AboutDisplay.createArgs();
@@ -299,15 +313,20 @@ public class MainActivity extends LocationProviderActivity implements
                 int position = mDrawerAdapter.getPosition(channel);
                 mDrawerListView.setItemChecked(position, true);
             }
-            initialFragmentBundle.putBoolean(ComponentFactory.ARG_RESTORE, true);
-            switchDrawerFragments(initialFragmentBundle);
+            initialFragmentBundle.putBoolean(ComponentFactory.ARG_ANIM_BOTTOM, true);
+            initialFragmentBundle.putBoolean(ComponentFactory.ARG_ANIM, anim);
+            initialFragmentBundle.putBoolean(ComponentFactory.ARG_BACKSTACK, false);
+            return switchDrawerFragments(initialFragmentBundle);
         }
+        return false;
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(SHOWED_MOTD, showedMotd);
+        outState.putBundle(FRAGMENT_ARGS, fragmentArgs);
+        outState.putString(LAST_FRAGMENT_TAG, lastFragmentTag);
     }
 
 
@@ -396,10 +415,6 @@ public class MainActivity extends LocationProviderActivity implements
         super.onConfigurationChanged(newConfig);
 
         mDrawerToggle.onConfigurationChanged(newConfig);
-
-        if (newConfig.orientation != prevOrientation) {
-            rotated = true;
-        }
     }
 
     @Override
@@ -575,7 +590,9 @@ public class MainActivity extends LocationProviderActivity implements
      */
     public boolean switchFragments(@NonNull Bundle args) {
         final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
-        final boolean restoring = args.getBoolean(ComponentFactory.ARG_RESTORE);
+        final boolean animBottom = args.getBoolean(ComponentFactory.ARG_ANIM_BOTTOM);
+        final boolean backstack = args.getBoolean(ComponentFactory.ARG_BACKSTACK, true);
+        final boolean anim = args.getBoolean(ComponentFactory.ARG_ANIM, true);
 
         // Attempt to create the fragment
         final Fragment fragment = mComponentFactory.createFragment(args);
@@ -586,19 +603,21 @@ public class MainActivity extends LocationProviderActivity implements
             Analytics.sendChannelEvent(this, args); // Channel launch analytics event
         }
 
+        fragmentArgs = args;
+
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(this);
 
-        if (mToolbar.getVisibility() == View.GONE) {
-            mToolbar.setVisibility(View.VISIBLE);
-        }
-
         // Switch the main content fragment
         FragmentTransaction ft = fm.beginTransaction();
-        ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
-                R.anim.slide_in_left, R.anim.slide_out_right);
+        if (anim && animBottom) {
+            ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_bottom);
+        } else if (anim) {
+            ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right);
+        }
         ft.replace(R.id.main_content_frame, fragment, handleTag);
-        if (!restoring) {
+        if (backstack) {
             ft.addToBackStack(handleTag);
         }
         ft.commit();
