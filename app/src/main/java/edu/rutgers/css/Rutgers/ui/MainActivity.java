@@ -103,8 +103,6 @@ public class MainActivity extends LocationProviderActivity implements
 
     private final FragmentManager fm = getSupportFragmentManager();
 
-    private Bundle fragmentArgs;
-
     private String lastFragmentTag;
 
     @Override
@@ -227,16 +225,15 @@ public class MainActivity extends LocationProviderActivity implements
                     FragmentManager.BackStackEntry backStackEntry;
                     backStackEntry = fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1);
                     fragmentTag = backStackEntry.getName();
+                }
+                if (fragmentTag != null && mChannelManager.getChannelByTag(fragmentTag) != null) {
+                    SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+                    sharedPreferences.edit().putString(PREF_HANDLE_TAG, fragmentTag).apply();
                     if (lastFragmentTag == null && fm.getBackStackEntryCount() == 1) {
                         lastFragmentTag = fragmentTag;
                     }
+                    LOGI(TAG, "Stored channel tag: " + fragmentTag);
                 }
-                if (fragmentTag == null) {
-                    fragmentTag = lastFragmentTag;
-                }
-                SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-                sharedPreferences.edit().putString(PREF_HANDLE_TAG, fragmentTag).apply();
-                LOGI(TAG, "Stored channel tag: " + fragmentTag);
                 highlightCorrectDrawerItem();
             }
         });
@@ -328,7 +325,6 @@ public class MainActivity extends LocationProviderActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(SHOWED_MOTD, showedMotd);
-        outState.putBundle(FRAGMENT_ARGS, fragmentArgs);
         outState.putString(LAST_FRAGMENT_TAG, lastFragmentTag);
     }
 
@@ -360,7 +356,12 @@ public class MainActivity extends LocationProviderActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        
+
+        if (lastFragmentTag != null) {
+            SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+            sharedPreferences.edit().putString(PREF_HANDLE_TAG, lastFragmentTag).apply();
+        }
+
         // Clear AQuery cache on exit
         if (isTaskRoot()) {
             AQUtility.cleanCacheAsync(this);
@@ -606,8 +607,6 @@ public class MainActivity extends LocationProviderActivity implements
             Analytics.sendChannelEvent(this, args); // Channel launch analytics event
         }
 
-        fragmentArgs = args;
-
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(this);
 
@@ -621,7 +620,11 @@ public class MainActivity extends LocationProviderActivity implements
         }
         ft.replace(R.id.main_content_frame, fragment, handleTag);
         if (backstack) {
-            ft.addToBackStack(handleTag);
+            if (mChannelManager.getChannelByTag(handleTag) != null) {
+                ft.addToBackStack(handleTag);
+            } else {
+                ft.addToBackStack(null);
+            }
         }
         ft.commit();
 
