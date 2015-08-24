@@ -85,5 +85,5 @@ public final class Prediction implements Serializable {
                         (this.getDirection() != null && this.getDirection().equals(otherPrediction.getDirection()))
                 );
     }
-    
+
 }

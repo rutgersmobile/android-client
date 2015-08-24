@@ -71,7 +71,7 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
         listView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(@NonNull AdapterView<?> parent, @NonNull View view, int position, long id) {
                 RouteStub routeStub = (RouteStub) parent.getAdapter().getItem(position);
                 Bundle displayArgs = BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
                         routeStub.getAgencyTag(), routeStub.getTag());

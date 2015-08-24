@@ -24,6 +24,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -137,7 +139,7 @@ public final class NextbusAPI {
                 StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=" + (AGENCY_NB.equals(agency)? "rutgers" : "rutgers-newark"));
 
                 // Find route in agency config, and get its stop tags
-                Route route = conf.getRoutes().get(routeKey);
+                final Route route = conf.getRoutes().get(routeKey);
                 if (route == null) {
                     d.reject(new IllegalArgumentException("Invalid route tag \""+routeKey+"\""));
                     return;
@@ -168,6 +170,13 @@ public final class NextbusAPI {
 
                             results.add(newPrediction);
                         }
+
+                        Collections.sort(results, new Comparator<Prediction>() {
+                            @Override
+                            public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
+                                return route.getStopTags().indexOf(p1.getTag()) - route.getStopTags().indexOf(p2.getTag());
+                            }
+                        });
 
                         d.resolve(results);
                     }
@@ -255,6 +264,17 @@ public final class NextbusAPI {
                             }
                             results.add(oneresult);
                         }
+
+                        Collections.sort(results, new Comparator<Prediction>() {
+                            @Override
+                            public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
+                                int res = p1.getTitle().compareTo(p2.getTitle());
+                                if (res == 0) {
+                                    return p1.getDirection().compareTo(p2.getDirection());
+                                }
+                                return res;
+                            }
+                        });
 
                         d.resolve(results);
                     }
