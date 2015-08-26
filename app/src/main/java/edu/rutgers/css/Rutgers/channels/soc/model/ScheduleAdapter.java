@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.rutgers.css.Rutgers.R;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
@@ -34,6 +36,7 @@ public class ScheduleAdapter extends BaseAdapter
         implements StickyListHeadersAdapter, Filterable {
 
     private static final String TAG = "ScheduleAdapter";
+    private static final Pattern romanNumeral = Pattern.compile("^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$");
 
     private int mRowLayoutResId;
     private int mHeaderLayoutResId;
@@ -184,8 +187,20 @@ public class ScheduleAdapter extends BaseAdapter
         }
 
         String displayTitle = ((ScheduleAdapterItem) getItem(position)).getDisplayTitle();
+        StringBuilder stringBuilder = new StringBuilder();
 
-        holder.titleTextView.setText(WordUtils.capitalizeFully(displayTitle));
+        for (String s : displayTitle.split(" ")) {
+            Matcher matcher = romanNumeral.matcher(s);
+            if (!matcher.find()) {
+                s = WordUtils.capitalizeFully(s);
+            } else {
+                s = WordUtils.capitalize(s);
+            }
+            stringBuilder.append(s);
+            stringBuilder.append(" ");
+        }
+
+        holder.titleTextView.setText(stringBuilder.toString().trim());
         holder.creditsTextView.setVisibility(View.GONE);
         holder.sectionsTextView.setVisibility(View.GONE);
         holder.progressBar.setVisibility(View.GONE);
