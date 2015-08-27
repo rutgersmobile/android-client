@@ -207,7 +207,7 @@ public class FragmentMediator {
      */
     private Promise<JSONArray, AjaxStatus, Double> loadChannels() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        return dm.when(Request.jsonArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
+        return dm.when(Request.apiArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
             @Override
             public void onDone(JSONArray channelsArray) {
                 channelManager.loadChannelsFromJSONArray(channelsArray);

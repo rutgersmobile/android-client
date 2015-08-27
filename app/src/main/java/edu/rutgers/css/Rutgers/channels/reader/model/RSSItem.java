@@ -10,6 +10,7 @@ import org.apache.commons.lang3.time.DateParser;
 import org.apache.commons.lang3.time.DatePrinter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.xml.sax.SAXException;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -125,11 +126,16 @@ public class RSSItem implements Serializable {
                 this.date = item.text("event:beginDateTime");
             }
         }
-        
+
         // Image may be in url field (enclosure url attribute in the Rutgers feed)
         try {
             if (item.child("enclosure") != null) {
-                this.imgUrl = new URL(item.child("enclosure").attr("url"));
+                if (!item.child("enclosure").attr("url").isEmpty()) {
+                    this.imgUrl = new URL(item.child("enclosure").attr("url"));
+                } else {
+                    XmlDom imageXml = new XmlDom(item.child("enclosure").text());
+                    this.imgUrl = new URL(imageXml.attr("src"));
+                }
             } else if (item.child("media:thumbnail") != null) {
                 this.imgUrl = new URL(item.child("media:thumbnail").attr("url"));
             } else if (item.child("url") != null) {
@@ -139,6 +145,9 @@ public class RSSItem implements Serializable {
             }
         } catch (MalformedURLException e) {
             LOGE(TAG, "Bad image URL: " + e.getMessage());
+            this.imgUrl = null;
+        } catch (SAXException e) {
+            LOGE(TAG, "Parse exception: " + e.getMessage());
             this.imgUrl = null;
         }
     }
