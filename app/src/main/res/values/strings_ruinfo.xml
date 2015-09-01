@@ -17,5 +17,6 @@
     <string name="ruinfo_email_address">colhenry@rci.rutgers.edu</string>
     <string name="ruinfo_website_desc">For hours and additional info, visit us online:</string>
     <string name="ruinfo_website_button">Visit Mobile Website</string>
+    <string name="ruinfo_disclaimer">Standard text messaging rates or other carrier charges may apply.</string>
 
 </resources>
