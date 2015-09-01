@@ -83,9 +83,10 @@ public class DrawerAdapter extends BaseAdapter {
             holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), channel.getHandle()));
         } else if (positionIsSettings(position)) {
             holder.textView.setText("Settings");
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), "action_settings"));
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), "settings_black_24dp"));
         } else if (positionIsAbout(position)) {
             holder.textView.setText("About");
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), "info"));
         }
 
         return convertView;
