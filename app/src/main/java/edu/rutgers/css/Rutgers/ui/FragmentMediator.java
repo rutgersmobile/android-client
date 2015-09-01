@@ -127,12 +127,12 @@ public class FragmentMediator {
             }).always(new AlwaysCallback<Motd, AjaxStatus>() {
                 @Override
                 public void onAlways(Promise.State state, final Motd motd, AjaxStatus rejected) {
-                    if (!showedMotd) {
+                    if (!showedMotd && motd != null && motd.getData() != null) {
                         showedMotd = true;
-                        if (motd != null && !motd.isWindow()) {
+                        if (!motd.isWindow()) {
                             MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
                             f.show(fm, MotdDialogFragment.TAG);
-                        } else if (motd != null) {
+                        } else {
                             switchFragments(
                                     TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
                             if (!motd.hasCloseButton()) {
@@ -143,6 +143,8 @@ public class FragmentMediator {
                             }
                             return;
                         }
+                    } else if (motd != null) {
+                        LOGI(TAG, motd.getMotd());
                     }
                     toolbar.setVisibility(View.VISIBLE);
                     // Load nav drawer items
