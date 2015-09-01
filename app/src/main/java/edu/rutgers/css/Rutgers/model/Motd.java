@@ -6,12 +6,12 @@ package edu.rutgers.css.Rutgers.model;
 public final class Motd {
     private final String motd;
     private final String title;
-    private final boolean data;
+    private final String data;
     private final boolean isWindow;
     private final boolean hasCloseButton;
     private final String betaCheck;
 
-    public Motd(String motd, String title, boolean data, boolean isWindow, boolean hasCloseButton, String betaCheck) {
+    public Motd(String motd, String title, String data, boolean isWindow, boolean hasCloseButton, String betaCheck) {
         this.motd = motd;
         this.title = title;
         this.data = data;
@@ -28,7 +28,7 @@ public final class Motd {
         return title;
     }
 
-    public boolean isData() {
+    public String getData() {
         return data;
     }
 

@@ -144,6 +144,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
             @Override
             public void onFail(Exception result) {
                 AppUtils.showFailedLoadToast(getActivity());
+                LOGE(TAG, result.getMessage());
             }
         }).always(new AlwaysCallback<Semesters, Exception>() {
             @Override
@@ -356,6 +357,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
             public void onFail(OneReject result) {
                 mAdapter.clear();
                 AppUtils.showFailedLoadToast(getActivity());
+                LOGE(TAG, result.toString());
             }
 
         }).always(new AlwaysCallback<MultipleResults, OneReject>() {
