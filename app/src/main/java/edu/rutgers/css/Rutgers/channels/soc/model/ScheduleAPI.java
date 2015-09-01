@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers.channels.soc.model;
 
-import android.util.Log;
-
 import com.androidquery.callback.AjaxStatus;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -21,7 +19,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * Schedule of Classes API
@@ -29,7 +27,8 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 public final class ScheduleAPI {
 
     private static final String TAG = "ScheduleAPI";
-    private static final String SOC_BASE_URL = "https://sis.rutgers.edu/soc/";
+    // TODO should be https but it doesn't have a SHA-2 cert
+    private static final String SOC_BASE_URL = "http://sis.rutgers.edu/soc/";
     private static final String WEBREG_BASE_URL = "https://sims.rutgers.edu/webreg/";
 
     // Campus codes (full list should be read from res/raw/soc_campuses.json)
