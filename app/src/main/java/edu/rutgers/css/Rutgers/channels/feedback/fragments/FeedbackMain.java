@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.feedback.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,7 +38,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /** Feedback form. */
 public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedListener {
@@ -48,8 +47,8 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     private static final String TAG = "FeedbackMain";
     public static final String HANDLE = "feedback";
 
-    //private static final String API = AppUtils.API_BASE + "feedback.php";
-    private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php"; // TODO Replace
+    private static final String API = Config.API_BASE + "feedback.php";
+    //private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php"; // TODO Replace
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;

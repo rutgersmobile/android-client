@@ -53,8 +53,8 @@ public final class Analytics extends IntentService {
 
     public static final String TAG                  = "Analytics";
 
-    private static final String POST_URL = "http://sauron.rutgers.edu/~jamchamb/analytics.php"; // TODO Replace
-//    private static final String POST_URL = Config.API_BASE + "analytics.php";
+//    private static final String POST_URL = "http://sauron.rutgers.edu/~jamchamb/analytics.php"; // TODO Replace
+    private static final String POST_URL = Config.API_BASE + "analytics.php";
 
     // Event types
     public static final String NEW_INSTALL          = "fresh_launch";

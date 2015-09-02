@@ -17,20 +17,36 @@
         <requestFocus />
     </EditText>
 
-    <Spinner
-        android:id="@+id/subjectSpinner"
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="fill_horizontal"
-        android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/subject_spinner_title"/>
+        <Spinner
+            android:id="@+id/subjectSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 
-    <Spinner
-        android:id="@+id/channelSpinner"
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="fill_horizontal"
-        android:spinnerStyle="@android:style/Widget.Spinner.DropDown"
-        android:visibility="gone" />
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/channel_spinner_title"/>
+        <Spinner
+            android:id="@+id/channelSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <EditText
         android:id="@+id/messageEditText"
