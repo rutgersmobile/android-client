@@ -49,7 +49,7 @@
     <string name="fragment_speed">500</string>
     <string name="splash_speed">800</string>
 
-    <string name="subject_spinner_title">ayy lmao</string>
-    <string name="channel_spinner_title">ayy lmao</string>
+    <string name="subject_spinner_title">Subject</string>
+    <string name="channel_spinner_title">Channel</string>
 
 </resources>

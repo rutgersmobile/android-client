@@ -22,7 +22,7 @@ android {
         applicationId "edu.rutgers.css.Rutgers"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 20
+        versionCode 21
         versionName "4.0"
     }
 

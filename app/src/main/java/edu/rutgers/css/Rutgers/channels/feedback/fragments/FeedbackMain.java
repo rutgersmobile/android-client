@@ -14,6 +14,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidquery.AQuery;
@@ -60,6 +61,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     /* View references */
     private Spinner mSubjectSpinner;
     private Spinner mChannelSpinner;
+    private TextView mChannelSpinnerText;
     private EditText mMessageEditText;
     private EditText mEmailEditText;
 
@@ -96,9 +98,11 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         mMessageEditText = (EditText) v.findViewById(R.id.messageEditText);
         mEmailEditText = (EditText) v.findViewById(R.id.emailEditText);
 
+        mChannelSpinnerText = (TextView) v.findViewById(R.id.channel_spinner_text);
+
         mSubjectSpinner = (Spinner) v.findViewById(R.id.subjectSpinner);
         ArrayAdapter<CharSequence> subjectAdapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.feedback_subjects, android.R.layout.simple_spinner_item);
+                R.array.feedback_subjects, R.layout.spinner);
         subjectAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         mSubjectSpinner.setAdapter(subjectAdapter);
         mSubjectSpinner.setOnItemSelectedListener(this);
@@ -234,8 +238,10 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
             // Channel feedback allows user to select a specific channel
             if (selection.equals(getString(R.string.feedback_channel_feedback))) {
                 if (mChannelSpinner != null) mChannelSpinner.setVisibility(View.VISIBLE);
+                if (mChannelSpinnerText != null) mChannelSpinnerText.setVisibility(View.VISIBLE);
             } else {
                 if (mChannelSpinner != null) mChannelSpinner.setVisibility(View.GONE);
+                if (mChannelSpinnerText != null) mChannelSpinnerText.setVisibility(View.GONE);
             }
             
             // "General questions" boots you to RU-info. BURNNNN!!!

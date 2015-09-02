@@ -50,4 +50,7 @@
       ​  <item name="android:maxWidth">180dip</item>
     ​</style>
 
+    <style name="RutgersSpinnerTheme" parent="Widget.AppCompat.TextView.SpinnerItem">
+    </style>
+
 </resources>

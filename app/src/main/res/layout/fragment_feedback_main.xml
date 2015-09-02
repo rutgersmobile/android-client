@@ -28,6 +28,7 @@
             android:text="@string/subject_spinner_title"/>
         <Spinner
             android:id="@+id/subjectSpinner"
+            style="@style/RutgersSpinnerTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </LinearLayout>
@@ -38,11 +39,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
+            android:id="@+id/channel_spinner_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/channel_spinner_title"/>
+            android:text="@string/channel_spinner_title"
+            android:visibility="gone" />
         <Spinner
             android:id="@+id/channelSpinner"
+            style="@style/RutgersSpinnerTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone" />
