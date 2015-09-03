@@ -2,6 +2,8 @@ package edu.rutgers.css.Rutgers.channels.feedback.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -64,6 +67,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     private TextView mChannelSpinnerText;
     private EditText mMessageEditText;
     private EditText mEmailEditText;
+    private CheckBox mRequestReplyCheckbox;
 
     public FeedbackMain() {
         // Required empty public constructor
@@ -95,8 +99,31 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         
         mLockSend = false;
 
+        mRequestReplyCheckbox = (CheckBox) v.findViewById(R.id.request_reply);
+        mRequestReplyCheckbox.setEnabled(false);
+
         mMessageEditText = (EditText) v.findViewById(R.id.messageEditText);
         mEmailEditText = (EditText) v.findViewById(R.id.emailEditText);
+        mEmailEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (StringUtils.isBlank(charSequence)) {
+                    mRequestReplyCheckbox.setEnabled(false);
+                } else {
+                    mRequestReplyCheckbox.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
 
         mChannelSpinnerText = (TextView) v.findViewById(R.id.channel_spinner_text);
 
@@ -161,6 +188,8 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         }
 
         // TODO Validate email address format
+
+        Integer wantsResonse = mRequestReplyCheckbox.isChecked() && mRequestReplyCheckbox.isEnabled() ? 1 : 0;
         
         // Build POST request
         Map<String, Object> params = new HashMap<>();
@@ -168,7 +197,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         params.put("email", mEmailEditText.getText().toString().trim());
         params.put("uuid", AppUtils.getUUID(getActivity()));
         params.put("message", mMessageEditText.getText().toString().trim());
-        params.put("wants_response", StringUtils.isNotBlank(mEmailEditText.getText().toString()));
+        params.put("wants_response", wantsResonse);
         // Post the selected channel if this is channel feedback
         if (mSubjectSpinner.getSelectedItem().equals(getString(R.string.feedback_channel_feedback))) {
             params.put("channel", mChannelSpinner.getSelectedItem());    

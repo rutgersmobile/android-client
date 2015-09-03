@@ -51,5 +51,6 @@
 
     <string name="subject_spinner_title">Subject</string>
     <string name="channel_spinner_title">Channel</string>
+    <string name="request_reply">Request Reply</string>
 
 </resources>
