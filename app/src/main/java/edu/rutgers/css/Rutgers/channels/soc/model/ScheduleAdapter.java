@@ -143,22 +143,25 @@ public class ScheduleAdapter extends BaseAdapter
     }
 
     @Override
-    public View getHeaderView(int i, View view, ViewGroup viewGroup) {
+    public View getHeaderView(int position, View convertView, ViewGroup viewGroup) {
         HeaderViewHolder holder;
-        if (view == null) {
+        if (convertView == null) {
             holder = new HeaderViewHolder();
-            view = mLayoutInflater.inflate(mHeaderLayoutResId, null);
-            holder.headerTextView = (TextView) view.findViewById(R.id.title);
-            view.setTag(holder);
+            convertView = mLayoutInflater.inflate(mHeaderLayoutResId, null);
+            holder.headerTextView = (TextView) convertView.findViewById(R.id.title);
+            convertView.setTag(holder);
         } else {
-            holder = (HeaderViewHolder) view.getTag();
+            holder = (HeaderViewHolder) convertView.getTag();
         }
-        if (i == 0 && mSubjectSection.size() != 0) {
+
+        // Check if this item falls within the subject or course list to determine header
+        if (position < mSubjectSection.size()) {
             holder.headerTextView.setText(R.string.soc_sub_header);
         } else {
             holder.headerTextView.setText(R.string.soc_course_header);
         }
-        return view;
+
+        return convertView;
     }
 
     @Override
