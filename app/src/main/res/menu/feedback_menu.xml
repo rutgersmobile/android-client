@@ -6,6 +6,6 @@
         android:id="@+id/action_send"
         app:showAsAction="always"
         android:title="@string/send"
-        android:icon="@drawable/ic_action_send_now" />
+        android:icon="@drawable/ic_send_white_24dp" />
 
 </menu>
