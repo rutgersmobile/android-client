@@ -160,6 +160,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
+        setScheduleTitle();
 
         if (mLoadingSemesters || mLoadingSubjects) showProgressCircle();
 
