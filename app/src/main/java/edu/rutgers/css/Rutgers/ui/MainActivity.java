@@ -263,6 +263,10 @@ public class MainActivity extends LocationProviderActivity implements
         return fragmentMediator.switchFragments(args);
     }
 
+    public boolean isFirstAndVisibleFragment(@NonNull String handle) {
+        return fragmentMediator.isFirstAndVisibleFragment(handle);
+    }
+
     public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {
         tutorialMediator.showDialogFragment(dialogFragment, tag);
     }

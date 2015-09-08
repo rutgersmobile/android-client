@@ -235,7 +235,10 @@ public class FragmentMediator {
      * @return True if the new fragment was successfully created, false if not.
      */
     public boolean switchFragments(@NonNull Bundle args) {
-        final String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
+        String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
+        if (handleTag == null) {
+            handleTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
+        }
         final boolean animBottom = args.getBoolean(ComponentFactory.ARG_ANIM_BOTTOM);
         final boolean backstack = args.getBoolean(ComponentFactory.ARG_BACKSTACK, true);
         final boolean anim = args.getBoolean(ComponentFactory.ARG_ANIM, true);
@@ -262,11 +265,7 @@ public class FragmentMediator {
         }
         ft.replace(R.id.main_content_frame, fragment, handleTag);
         if (backstack) {
-            if (channelManager.getChannelByTag(handleTag) != null) {
-                ft.addToBackStack(handleTag);
-            } else {
-                ft.addToBackStack(null);
-            }
+            ft.addToBackStack(handleTag);
         }
         ft.commit();
 
@@ -305,6 +304,10 @@ public class FragmentMediator {
             SharedPreferences sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
             sharedPreferences.edit().putString(PREF_HANDLE_TAG, lastFragmentTag).apply();
         }
+    }
+
+    public boolean isFirstAndVisibleFragment(@NonNull String handle) {
+        return fm.getBackStackEntryCount() == 0 && handle.equalsIgnoreCase(lastFragmentTag);
     }
 
     public void backPressWebView() {
