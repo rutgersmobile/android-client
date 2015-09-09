@@ -92,21 +92,21 @@ public class ScheduleAdapter extends BaseAdapter
 
     /**
      * Return a Subject or Course at the given position. Acts as if both lists are combined.
-     * @param i Position of the item to get
+     * @param position Position of the item to get
      * @return The item requested. Could be a Subject or Course.
      */
     @Override
-    public Object getItem(int i) {
-        if (i < mSubjectSection.size()) {
-            return mSubjectSection.get(i);
+    public Object getItem(int position) {
+        if (position < mSubjectSection.size()) {
+            return mSubjectSection.get(position);
         }
-        i -= mSubjectSection.size();
-        return mCourseSection.get(i);
+        position -= mSubjectSection.size();
+        return mCourseSection.get(position);
     }
 
     @Override
-    public long getItemId(int i) {
-        return i;
+    public long getItemId(int position) {
+        return position;
     }
 
     /**
@@ -165,8 +165,8 @@ public class ScheduleAdapter extends BaseAdapter
     }
 
     @Override
-    public long getHeaderId(int i) {
-        if (i < mSubjectSection.size()) {
+    public long getHeaderId(int position) {
+        if (position < mSubjectSection.size()) {
             return mSubjectSection.hashCode();
         } else {
             return mCourseSection.hashCode();
