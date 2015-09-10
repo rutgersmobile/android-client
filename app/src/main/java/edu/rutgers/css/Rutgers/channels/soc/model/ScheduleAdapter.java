@@ -92,21 +92,21 @@ public class ScheduleAdapter extends BaseAdapter
 
     /**
      * Return a Subject or Course at the given position. Acts as if both lists are combined.
-     * @param i Position of the item to get
+     * @param position Position of the item to get
      * @return The item requested. Could be a Subject or Course.
      */
     @Override
-    public Object getItem(int i) {
-        if (i < mSubjectSection.size()) {
-            return mSubjectSection.get(i);
+    public Object getItem(int position) {
+        if (position < mSubjectSection.size()) {
+            return mSubjectSection.get(position);
         }
-        i -= mSubjectSection.size();
-        return mCourseSection.get(i);
+        position -= mSubjectSection.size();
+        return mCourseSection.get(position);
     }
 
     @Override
-    public long getItemId(int i) {
-        return i;
+    public long getItemId(int position) {
+        return position;
     }
 
     /**
@@ -143,27 +143,30 @@ public class ScheduleAdapter extends BaseAdapter
     }
 
     @Override
-    public View getHeaderView(int i, View view, ViewGroup viewGroup) {
+    public View getHeaderView(int position, View convertView, ViewGroup viewGroup) {
         HeaderViewHolder holder;
-        if (view == null) {
+        if (convertView == null) {
             holder = new HeaderViewHolder();
-            view = mLayoutInflater.inflate(mHeaderLayoutResId, null);
-            holder.headerTextView = (TextView) view.findViewById(R.id.title);
-            view.setTag(holder);
+            convertView = mLayoutInflater.inflate(mHeaderLayoutResId, null);
+            holder.headerTextView = (TextView) convertView.findViewById(R.id.title);
+            convertView.setTag(holder);
         } else {
-            holder = (HeaderViewHolder) view.getTag();
+            holder = (HeaderViewHolder) convertView.getTag();
         }
-        if (i == 0 && mSubjectSection.size() != 0) {
+
+        // Check if this item falls within the subject or course list to determine header
+        if (position < mSubjectSection.size()) {
             holder.headerTextView.setText(R.string.soc_sub_header);
         } else {
             holder.headerTextView.setText(R.string.soc_course_header);
         }
-        return view;
+
+        return convertView;
     }
 
     @Override
-    public long getHeaderId(int i) {
-        if (i < mSubjectSection.size()) {
+    public long getHeaderId(int position) {
+        if (position < mSubjectSection.size()) {
             return mSubjectSection.hashCode();
         } else {
             return mCourseSection.hashCode();

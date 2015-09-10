@@ -38,6 +38,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
@@ -298,7 +299,9 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private void setScheduleTitle() {
         // Only change title if SOC Main fragment on screen (possibly covered by selection dialog)
         if (!isAdded() || getResources() == null) return;
-        if (!(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE) || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
+        if (!(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE)
+                || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE)
+                || ((MainActivity) getActivity()).isFirstAndVisibleFragment(SOCMain.HANDLE))) return;
         if (mSemester == null) getActivity().setTitle(R.string.soc_title);
         else getActivity().setTitle(ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
