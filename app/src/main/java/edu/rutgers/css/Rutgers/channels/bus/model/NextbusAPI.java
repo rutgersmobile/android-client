@@ -136,7 +136,7 @@ public final class NextbusAPI {
 
                 // Start building Nextbus query with predictionsForMultiStops command
                 // Returns predictions for a set of route/stop combinations. Direction is optional and can be null.
-                StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=" + (AGENCY_NB.equals(agency)? "rutgers" : "rutgers-newark"));
+                StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=rutgers");
 
                 // Find route in agency config, and get its stop tags
                 final Route route = conf.getRoutes().get(routeKey);
@@ -219,7 +219,7 @@ public final class NextbusAPI {
                 // Get agency configuration
                 AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
 
-                StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=" + (AGENCY_NB.equals(agency)? "rutgers" : "rutgers-newark"));
+                StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=rutgers");
 
                 // Get group of stop IDs by stop title
                 StopGroup stopsByTitle = conf.getStopsByTitle().get(stopTitleKey);
