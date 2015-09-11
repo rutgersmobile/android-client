@@ -11,10 +11,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
-import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
-
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
@@ -63,51 +59,18 @@ public class TutorialMediator {
 
             case 2: {
                 // Determine whether to run nav drawer tutorial
+                /*
                 if (PrefUtils.hasDrawerBeenUsed(activity)) {
                     showDrawerShowcase = false;
                     PrefUtils.advanceTutorialStage(activity);
                 } else {
                     showDrawerShowcase = true;
                     LOGI(TAG, "Drawer never opened before, show tutorial!");
-                    // Currently this causes a crash
-                    // See T7 for more info
-//                    showDrawerShowcase();
+                    // Show drawer tutorial here
                 }
+                */
                 break;
             }
-        }
-    }
-
-    // TODO Get this to work
-    /** Display the drawer showcase. */
-    private void showDrawerShowcase() {
-        if (activity.isFinishing()) return;
-
-        if (showDrawerShowcase && !displayingTutorial) {
-            new ShowcaseView.Builder(activity)
-                    .setTarget(new ActionViewTarget(activity, ActionViewTarget.Type.HOME))
-                    .setContentTitle(R.string.tutorial_welcome_title)
-                    .setContentText(R.string.tutorial_welcome_text)
-//                    .setStyle(R.style.RutgersShowcaseTheme)
-                    .setShowcaseEventListener(new OnShowcaseEventListener() {
-                        @Override
-                        public void onShowcaseViewHide(ShowcaseView showcaseView) {
-                            // ShowcaseView was told to hide.
-                        }
-
-                        @Override
-                        public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-                            // ShowcaseView has been fully hidden.
-                            displayingTutorial = false;
-                        }
-
-                        @Override
-                        public void onShowcaseViewShow(ShowcaseView showcaseView) {
-                            displayingTutorial = true;
-                        }
-                    })
-                    .hideOnTouchOutside()
-                    .build();
         }
     }
 
@@ -127,7 +90,7 @@ public class TutorialMediator {
                         sharedPreferences.edit().putString(prefKey, valsArray[i]).apply();
                     }
                 })
-                .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(@NonNull DialogInterface dialogInterface, int i) {
 

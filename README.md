@@ -14,7 +14,6 @@ This is an Android Studio project using Gradle for dependency management. Make s
 * [JDeferred](http://jdeferred.org/)
 * [ListViewAnimations](http://nhaarman.github.io/ListViewAnimations/)
 * [PagerSlidingTabStrip](https://github.com/astuetz/PagerSlidingTabStrip)
-* [ShowcaseView](https://github.com/amlcurran/ShowcaseView)
 * [StickyListHeaders](https://github.com/emilsjolander/StickyListHeaders)
 
 # License
