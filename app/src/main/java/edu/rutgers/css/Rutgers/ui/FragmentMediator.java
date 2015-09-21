@@ -284,12 +284,15 @@ public class FragmentMediator {
             if (fragmentTag == null) {
                 return;
             }
+            Channel channel = channelManager.getChannelByTag(fragmentTag);
+            if (channel == null) {
+                return;
+            }
             drawerListView.setItemChecked(drawerListView.getCheckedItemPosition(), false);
             if (fragmentTag.equals(AboutDisplay.HANDLE)) {
                 drawerListView.setItemChecked(drawerAdapter.getAboutPosition(), true);
                 return;
             }
-            Channel channel = channelManager.getChannelByTag(fragmentTag);
             drawerListView.setItemChecked(drawerAdapter.getPosition(channel), true);
         }
     }
