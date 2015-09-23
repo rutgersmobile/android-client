@@ -22,7 +22,7 @@ android {
         applicationId "edu.rutgers.css.Rutgers"
         minSdkVersion 14
         targetSdkVersion 22
-        versionCode 24
+        versionCode 25
         versionName "4.0"
     }
 
@@ -44,7 +44,7 @@ android {
         }
         production {
             versionName "4.0"
-            applicationId "edu.rutgers.css.Rutgers.production"
+            applicationId "edu.rutgers.css.Rutgers.beta"
         }
     }
 

@@ -18,7 +18,8 @@ public final class Config {
 
     // Server and API level
     public static final String API_LEVEL = "1";
-    public static final String API_BASE = "https://doxa.rutgers.edu/mobile/"+API_LEVEL+"/";
+    public static final String API_MACHINE = "doxa";
+    public static final String API_BASE = "https://"+API_MACHINE+".rutgers.edu/mobile/"+API_LEVEL+"/";
 
     // Location-based services config
     public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"

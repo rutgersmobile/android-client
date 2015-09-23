@@ -40,10 +40,12 @@ public final class AboutDisplay extends BaseDisplay {
 
         final TextView titleText = (TextView) v.findViewById(R.id.titleText);
         final TextView versionText = (TextView) v.findViewById(R.id.versionText);
+        final TextView apiText = (TextView) v.findViewById(R.id.apiText);
         final TextView bodyText = (TextView) v.findViewById(R.id.bodyText);
 
         titleText.setText(Html.fromHtml(getString(R.string.about_header)));
         versionText.setText(Html.fromHtml(getString(R.string.about_version, Config.VERSION)));
+        apiText.setText(Config.API_MACHINE + " " + Config.API_LEVEL);
         bodyText.setText(Html.fromHtml(getString(R.string.about_text)));
         bodyText.setMovementMethod(LinkMovementMethod.getInstance());
 
