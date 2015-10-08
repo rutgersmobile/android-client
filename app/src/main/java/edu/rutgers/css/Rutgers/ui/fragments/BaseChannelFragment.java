@@ -43,7 +43,7 @@ public abstract class BaseChannelFragment extends BaseDisplay {
 
     final protected void switchFragments(Bundle args) {
         if (getActivity() != null) {
-            ((MainActivity)getActivity()).switchFragments(args);
+            ((MainActivity)getActivity()).getFragmentMediator().switchFragments(args);
         }
     }
 

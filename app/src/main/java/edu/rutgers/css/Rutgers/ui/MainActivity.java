@@ -26,6 +26,7 @@ import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
+import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
@@ -105,6 +106,7 @@ public class MainActivity extends LocationProviderActivity implements
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
                 tutorialMediator.markDrawerUsed();
+                AppUtils.closeKeyboard(MainActivity.this);
             }
 
             @Override
@@ -163,7 +165,7 @@ public class MainActivity extends LocationProviderActivity implements
 
         preferences.registerOnSharedPreferenceChangeListener(listener);
 
-        fragmentMediator = new FragmentMediator(this,
+        fragmentMediator = new MainFragmentMediator(this,
                 mToolbar, mDrawerLayout, mDrawerAdapter,
                 mChannelManager, mDrawerListView, savedInstanceState);
 
@@ -259,12 +261,8 @@ public class MainActivity extends LocationProviderActivity implements
         tutorialMediator.runTutorial();
     }
 
-    public boolean switchFragments(@NonNull Bundle args) {
-        return fragmentMediator.switchFragments(args);
-    }
-
-    public boolean isFirstAndVisibleFragment(@NonNull String handle) {
-        return fragmentMediator.isFirstAndVisibleFragment(handle);
+    public FragmentMediator getFragmentMediator() {
+        return fragmentMediator;
     }
 
     public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {

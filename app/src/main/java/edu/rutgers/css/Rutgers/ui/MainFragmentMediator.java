@@ -30,6 +30,7 @@ import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
@@ -48,9 +49,9 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 /**
  * Control where we're putting fragments
  */
-public class FragmentMediator {
+public class MainFragmentMediator implements FragmentMediator {
 
-    private static final String TAG = "FragmentMediator";
+    private static final String TAG = "MainFragmentMediator";
 
     private boolean showedMotd = false;
     private String lastFragmentTag;
@@ -70,9 +71,9 @@ public class FragmentMediator {
     private final ComponentFactory componentFactory;
     private final Bundle savedInstanceState;
 
-    public FragmentMediator(final AppCompatActivity activity, final Toolbar toolbar, final DrawerLayout drawerLayout,
-                            final DrawerAdapter drawerAdapter, final ChannelManager channelManager,
-                            final ListView drawerListView, final Bundle savedInstanceState) {
+    public MainFragmentMediator(final AppCompatActivity activity, final Toolbar toolbar, final DrawerLayout drawerLayout,
+                                final DrawerAdapter drawerAdapter, final ChannelManager channelManager,
+                                final ListView drawerListView, final Bundle savedInstanceState) {
         this.fm = activity.getSupportFragmentManager();
         this.toolbar = toolbar;
         this.activity = activity;
@@ -235,6 +236,8 @@ public class FragmentMediator {
      * @return True if the new fragment was successfully created, false if not.
      */
     public boolean switchFragments(@NonNull Bundle args) {
+        if (activity.isFinishing() || !RutgersApplication.isApplicationVisible()) return false;
+
         String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
         if (handleTag == null) {
             handleTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
@@ -254,7 +257,6 @@ public class FragmentMediator {
 
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(activity);
-
         // Switch the main content fragment
         FragmentTransaction ft = fm.beginTransaction();
         if (anim && animBottom) {
@@ -309,7 +311,7 @@ public class FragmentMediator {
         }
     }
 
-    public boolean isFirstAndVisibleFragment(@NonNull String handle) {
+    public boolean isFirstVisibleFragment(@NonNull String handle) {
         return fm.getBackStackEntryCount() == 0 && handle.equalsIgnoreCase(lastFragmentTag);
     }
 

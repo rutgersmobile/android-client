@@ -24,6 +24,7 @@ android {
         targetSdkVersion 22
         versionCode 25
         versionName "4.0"
+        resConfigs "en"
     }
 
     buildTypes {
@@ -44,7 +45,7 @@ android {
         }
         production {
             versionName "4.0"
-            applicationId "edu.rutgers.css.Rutgers.beta"
+            applicationId "edu.rutgers.css.Rutgers"
         }
     }
 

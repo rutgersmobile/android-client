@@ -9,8 +9,9 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.model.Channel;
+import edu.rutgers.css.Rutgers.utils.MainActivityLifecycleHandler;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
 public class RutgersApplication extends Application {
 
@@ -20,10 +21,13 @@ public class RutgersApplication extends Application {
 
     private static Map<String, Channel> channelsMap;
 
+    private static MainActivityLifecycleHandler lh = new MainActivityLifecycleHandler();
+
     @Override
     public void onCreate() {
         super.onCreate();
         RutgersApplication.context = getApplicationContext();
+        registerActivityLifecycleCallbacks(lh);
 
         LOGV(TAG, "Application started");
 
@@ -50,4 +54,11 @@ public class RutgersApplication extends Application {
         return channelsMap;
     }
 
+    public static boolean isApplicationVisible() {
+        return lh.isApplicationVisible();
+    }
+
+    public static boolean isApplicationInForeground() {
+        return lh.isApplicationInForeground();
+    }
 }

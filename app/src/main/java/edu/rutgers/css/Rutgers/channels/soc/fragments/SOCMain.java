@@ -301,7 +301,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         if (!isAdded() || getResources() == null) return;
         if (!(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE)
                 || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE)
-                || ((MainActivity) getActivity()).isFirstAndVisibleFragment(SOCMain.HANDLE))) return;
+                || ((MainActivity) getActivity()).getFragmentMediator().isFirstVisibleFragment(SOCMain.HANDLE))) return;
         if (mSemester == null) getActivity().setTitle(R.string.soc_title);
         else getActivity().setTitle(ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
