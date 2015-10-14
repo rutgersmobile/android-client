@@ -194,6 +194,7 @@ public class MainFragmentMediator implements FragmentMediator {
             initialFragmentBundle.putBoolean(ComponentFactory.ARG_ANIM_BOTTOM, true);
             initialFragmentBundle.putBoolean(ComponentFactory.ARG_ANIM, anim);
             initialFragmentBundle.putBoolean(ComponentFactory.ARG_BACKSTACK, false);
+            initialFragmentBundle.putBoolean(ComponentFactory.ARG_CREATE, true);
             return switchDrawerFragments(initialFragmentBundle);
         }
         return false;
@@ -236,7 +237,7 @@ public class MainFragmentMediator implements FragmentMediator {
      * @return True if the new fragment was successfully created, false if not.
      */
     public boolean switchFragments(@NonNull Bundle args) {
-        if (activity.isFinishing() || !RutgersApplication.isApplicationVisible()) return false;
+        if (activity.isFinishing() || !RutgersApplication.isApplicationVisible() && !args.getBoolean(ComponentFactory.ARG_CREATE)) return false;
 
         String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
         if (handleTag == null) {
