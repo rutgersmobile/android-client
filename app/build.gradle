@@ -44,7 +44,7 @@ android {
             applicationId "edu.rutgers.css.Rutgers.beta"
         }
         production {
-            versionName "4.0.2"
+            versionName getVersionName()
             applicationId "edu.rutgers.css.Rutgers"
         }
     }
