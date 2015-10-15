@@ -223,10 +223,10 @@ public class MainActivity extends LocationProviderActivity implements
             return;
         }
 
-        fragmentMediator.backPressWebView();
-
-        LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
-        super.onBackPressed();
+        if (!fragmentMediator.backPressWebView()) {
+            LOGV(TAG, "Back button pressed. Leaving top component: " + AppUtils.topHandle(this));
+            super.onBackPressed();
+        }
     }
 
     @Override

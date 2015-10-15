@@ -13,7 +13,7 @@ public interface FragmentMediator {
     void saveFragment();
 
     boolean isFirstVisibleFragment(@NonNull String handle);
-    void backPressWebView();
+    boolean backPressWebView();
 
     boolean switchDrawerFragments(@NonNull Bundle args);
     void highlightCorrectDrawerItem();

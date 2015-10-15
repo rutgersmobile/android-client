@@ -211,15 +211,18 @@ public final class AppUtils {
      * @param handle The component to look for
      * @return True if on top, false if not
      */
-    public static boolean isComponentOnTop(FragmentActivity activity, ChannelManager channelManager, @NonNull String handle) {
+    public static boolean isComponentOnTop(FragmentActivity activity, ChannelManager channelManager, @NonNull String handle, String lastFragmentTag) {
         if (activity == null) return false;
 
         FragmentManager fm = activity.getSupportFragmentManager();
+        Channel channel = null;
         if (fm.getBackStackEntryCount() > 0) {
-            Channel channel = channelManager.getChannelByTag(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
-            if (channel != null) {
-                return handle.equalsIgnoreCase(channel.getView());
-            }
+            channel = channelManager.getChannelByTag(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
+        } else if (lastFragmentTag != null){
+            channel = channelManager.getChannelByTag(lastFragmentTag);
+        }
+        if (channel != null) {
+            return handle.equalsIgnoreCase(channel.getView());
         }
         return false;
     }

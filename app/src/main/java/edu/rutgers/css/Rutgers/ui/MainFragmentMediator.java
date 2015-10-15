@@ -56,6 +56,10 @@ public class MainFragmentMediator implements FragmentMediator {
     private boolean showedMotd = false;
     private String lastFragmentTag;
 
+    public String getLastFragmentTag() {
+        return lastFragmentTag;
+    }
+
     public static final String PREF_HANDLE_TAG = "handleTag";
     public static final String SHOWED_MOTD = "showedMotd";
     public static final String LAST_FRAGMENT_TAG = "lastFragmentTag";
@@ -316,16 +320,23 @@ public class MainFragmentMediator implements FragmentMediator {
         return fm.getBackStackEntryCount() == 0 && handle.equalsIgnoreCase(lastFragmentTag);
     }
 
-    public void backPressWebView() {
+    public boolean backPressWebView() {
         // If web display is active, send back button presses to it for navigating browser history
-        if (AppUtils.isComponentOnTop(activity, channelManager, WebDisplay.HANDLE)) {
+        if (AppUtils.isComponentOnTop(activity, channelManager, WebDisplay.HANDLE, lastFragmentTag)) {
             // Get the fragment on top of the back stack
-            Fragment webView = fm.findFragmentByTag(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
+            Fragment webView;
+            if (fm.getBackStackEntryCount() > 0) {
+                webView = fm.findFragmentByTag(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
+            } else {
+                webView = fm.findFragmentByTag(lastFragmentTag);
+            }
             if (webView != null && webView.isVisible()) {
                 if (((WebDisplay) webView).backPress()) {
                     LOGD(TAG, "Triggered WebView back button");
+                    return true;
                 }
             }
         }
+        return false;
     }
 }
