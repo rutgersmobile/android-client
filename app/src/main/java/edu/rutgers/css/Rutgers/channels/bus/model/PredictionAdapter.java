@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.channels.bus.model;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.Html;
@@ -34,6 +35,8 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
     private static final Calendar cal = Calendar.getInstance(Locale.US);
 
     private Context mContext;
+
+    private final Handler handler = new Handler();
     
     static class ViewHolder {
         TextView titleTextView;
@@ -149,6 +152,16 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
         }
 
         return convertView;
+    }
+
+    public void setPredictions(final List<Prediction> predictions) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                clear();
+                addAll(predictions);
+            }
+        });
     }
 
     /**

@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +33,8 @@ import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 public class BusDisplay extends BaseChannelFragment implements DoneCallback<List<Prediction>>,
         FailCallback<Exception>, AlwaysCallback<List<Prediction>, Exception> {
@@ -252,8 +252,7 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
             /* Add items if the list is being newly populated, or
              * the updated JSON doesn't seem to match and the list should be
              * cleared and repopulated. */
-            mAdapter.clear();
-            mAdapter.addAll(newPredictions);
+            mAdapter.setPredictions(newPredictions);
         } else {
             /* Update items individually if the list is already populated
              * and the new results correspond to currently displayed stops. */

@@ -241,7 +241,7 @@ public class MainFragmentMediator implements FragmentMediator {
      * @return True if the new fragment was successfully created, false if not.
      */
     public boolean switchFragments(@NonNull Bundle args) {
-        if (activity.isFinishing() || !RutgersApplication.isApplicationVisible() && !args.getBoolean(ComponentFactory.ARG_CREATE)) return false;
+        if (activity.isFinishing() || (!RutgersApplication.isApplicationVisible() && !args.getBoolean(ComponentFactory.ARG_CREATE))) return false;
 
         String handleTag = args.getString(ComponentFactory.ARG_HANDLE_TAG);
         if (handleTag == null) {
