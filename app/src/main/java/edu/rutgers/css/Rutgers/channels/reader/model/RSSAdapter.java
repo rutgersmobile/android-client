@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.androidquery.AQuery;
+import com.squareup.picasso.Picasso;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,8 +25,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
     private static final String TAG = "RSSAdapter";
     private int mLayoutResource;
     private int mTargetWidth;
-    private AQuery aq;
-    
+
     // Class to hold data for RSS list rows
     static class ViewHolder {
             ImageView iconImageView;
@@ -39,8 +38,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
     public RSSAdapter(Context context, int resource, List<RSSItem> objects) {
         super(context, resource, objects);
         this.mLayoutResource = resource;
-        this.aq = new AQuery(context);
-        
+
         this.mTargetWidth = (int) getContext().getResources().getDimension(R.dimen.rss_image_width);
     }
 
@@ -99,8 +97,11 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
         } else {
             holder.iconImageView.setVisibility(View.VISIBLE);
             // Download the image
-            AQuery cvAq = aq.recycle(convertView);
-            cvAq.id(holder.iconImageView).image(curItem.getImgUrl().toString(), true, true, mTargetWidth, 0, null, AQuery.FADE_IN_NETWORK, 1.0f);
+            Picasso.with(getContext())
+                    .load(curItem.getImgUrl().toString())
+                    .resize(mTargetWidth, mTargetWidth)
+                    .centerCrop()
+                    .into(holder.iconImageView);
         }
         
         return convertView;

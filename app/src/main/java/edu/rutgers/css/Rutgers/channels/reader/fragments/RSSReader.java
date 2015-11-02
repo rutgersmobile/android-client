@@ -2,7 +2,8 @@ package edu.rutgers.css.Rutgers.channels.reader.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,24 +12,16 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.androidquery.callback.AjaxStatus;
-import com.androidquery.util.XmlDom;
-
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSAdapter;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
+import edu.rutgers.css.Rutgers.channels.reader.model.loader.RSSItemLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -38,14 +31,15 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 /**
  * RSS feed reader
  */
-public class RSSReader extends BaseChannelFragment {
+public class RSSReader extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<RSSItem>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "RSSReader";
     public static final String HANDLE               = "reader";
+    private static final int LOADER_ID              = 1;
 
     /* Constants */
-    private static final long EXPIRE                = Request.CACHE_ONE_MINUTE;
+    public static final long EXPIRE                = ApiRequest.CACHE_ONE_MINUTE;
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -91,37 +85,8 @@ public class RSSReader extends BaseChannelFragment {
             Toast.makeText(getActivity(), R.string.failed_no_url, Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        // Get RSS feed XML and add items through the array adapter
-        mLoading = true;
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Request.xml(args.getString(ARG_URL_TAG), RSSReader.EXPIRE)).done(new DoneCallback<XmlDom>() {
-            
-            @Override
-            public void onDone(XmlDom xml) {
-                List<XmlDom> items = xml.tags("item");
-                
-                for (XmlDom item: items) {
-                    RSSItem newItem = new RSSItem(item);
-                    mAdapter.add(newItem);
-                }
-            }
 
-        }).fail(new FailCallback<AjaxStatus>() {
-
-            @Override
-            public void onFail(AjaxStatus e) {
-                LOGE(TAG, AppUtils.formatAjaxStatus(e));
-                AppUtils.showFailedLoadToast(getActivity());
-            }
-
-        }).always(new AlwaysCallback<XmlDom, AjaxStatus>() {
-            @Override
-            public void onAlways(Promise.State state, XmlDom resolved, AjaxStatus rejected) {
-                mLoading = false;
-                hideProgressCircle();
-            }
-        });
+        getLoaderManager().initLoader(LOADER_ID, args, this);
     }
 
     @Override
@@ -159,4 +124,27 @@ public class RSSReader extends BaseChannelFragment {
         if (!mData.isEmpty()) outState.putSerializable(SAVED_DATA_TAG, mData);
     }
 
+    @Override
+    public Loader<List<RSSItem>> onCreateLoader(int id, Bundle args) {
+        return new RSSItemLoader(getContext(), args.getString(ARG_URL_TAG));
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<RSSItem>> loader, List<RSSItem> data) {
+        if (data.isEmpty()) {
+            AppUtils.showFailedLoadToast(getContext());
+        }
+        mAdapter.clear();
+        mData = new ArrayList<>(data);
+        mAdapter.addAll(mData);
+        mLoading = false;
+        hideProgressCircle();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<RSSItem>> loader) {
+        mAdapter.clear();
+        mLoading = false;
+        hideProgressCircle();
+    }
 }

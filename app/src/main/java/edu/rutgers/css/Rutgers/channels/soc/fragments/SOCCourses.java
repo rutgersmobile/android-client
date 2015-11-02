@@ -2,6 +2,8 @@ package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -12,19 +14,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import org.apache.commons.lang3.text.WordUtils;
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
+import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
@@ -32,11 +29,13 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 /**
  * Lists courses under a subject/department.
  */
-public class SOCCourses extends BaseChannelFragment {
+public class SOCCourses extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<Course>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "SOCCourses";
     public static final String HANDLE               = "soccourses";
+
+    private static final int LOADER_ID              = 1;
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -83,37 +82,8 @@ public class SOCCourses extends BaseChannelFragment {
             mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
-        final String campus = args.getString(ARG_CAMPUS_TAG);
-        final String level = args.getString(ARG_LEVEL_TAG);
-        final String semester = args.getString(ARG_SEMESTER_TAG);
-        final String subjectCode = args.getString(ARG_SUBCODE_TAG);
-
         mLoading = true;
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(ScheduleAPI.getCourses(campus, level, semester, subjectCode)).done(new DoneCallback<List<Course>>() {
-
-            @Override
-            public void onDone(List<Course> result) {
-                mAdapter.addAllCourses(result);
-
-                // Re-apply filter
-                if (mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
-            }
-
-        }).fail(new FailCallback<Exception>() {
-
-            @Override
-            public void onFail(Exception result) {
-                AppUtils.showFailedLoadToast(getActivity());
-            }
-
-        }).always(new AlwaysCallback<List<Course>, Exception>() {
-            @Override
-            public void onAlways(Promise.State state, List<Course> resolved, Exception rejected) {
-                mLoading = false;
-                hideProgressCircle();
-            }
-        });
+        getLoaderManager().initLoader(LOADER_ID, args, this);
     }
 
     @Override
@@ -179,4 +149,34 @@ public class SOCCourses extends BaseChannelFragment {
         if (mFilterEditText != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
     }
 
+    @Override
+    public Loader<List<Course>> onCreateLoader(int id, Bundle args) {
+        final String campus = args.getString(ARG_CAMPUS_TAG);
+        final String level = args.getString(ARG_LEVEL_TAG);
+        final String semester = args.getString(ARG_SEMESTER_TAG);
+        final String subjectCode = args.getString(ARG_SUBCODE_TAG);
+
+        return new CoursesLoader(getContext(), campus, level, semester, subjectCode);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<Course>> loader, List<Course> data) {
+        if (data.isEmpty()) {
+            AppUtils.showFailedLoadToast(getContext());
+        }
+        mLoading = false;
+        hideProgressCircle();
+        mAdapter.clear();
+        mAdapter.addAllCourses(data);
+
+        // Re-apply filter
+        if (mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Course>> loader) {
+        mLoading = false;
+        hideProgressCircle();
+        mAdapter.clear();
+    }
 }

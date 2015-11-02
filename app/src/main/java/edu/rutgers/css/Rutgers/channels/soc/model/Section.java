@@ -2,12 +2,13 @@ package edu.rutgers.css.Rutgers.channels.soc.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by jamchamb on 10/30/14.
  */
-public class Section extends SectionAdapterItem {
+public class Section extends SectionAdapterItem implements Serializable {
 
     private String subtopic;
     private String subtitle;
@@ -81,7 +82,7 @@ public class Section extends SectionAdapterItem {
         return campusCode;
     }
 
-    public static class Instructor {
+    public static class Instructor implements Serializable {
         private String name;
 
         public String getName() {
@@ -89,7 +90,7 @@ public class Section extends SectionAdapterItem {
         }
     }
 
-    public static class MeetingTime {
+    public static class MeetingTime implements Serializable {
         private String meetingDay;
         private String meetingModeDesc;
         private String startTime;

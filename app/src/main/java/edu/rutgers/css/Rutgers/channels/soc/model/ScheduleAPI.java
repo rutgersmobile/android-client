@@ -1,25 +1,15 @@
 package edu.rutgers.css.Rutgers.channels.soc.model;
 
-import com.androidquery.callback.AjaxStatus;
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
-import org.jdeferred.Deferred;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.impl.DeferredObject;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.api.Request;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * Schedule of Classes API
@@ -47,28 +37,8 @@ public final class ScheduleAPI {
      * Get current semester configuration from API.
      * @return SOC Conf API with semesters array and default semester setting
      */
-    public static Promise<Semesters, Exception, Void> getSemesters() {
-        final DeferredObject<Semesters, Exception, Void> deferred = new DeferredObject<>();
-
-        Request.api("soc_conf.txt", Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
-            @Override
-            public void onDone(JSONObject result) {
-                Gson gson = new Gson();
-                try {
-                    deferred.resolve(gson.fromJson(result.toString(), Semesters.class));
-                } catch (JsonSyntaxException e) {
-                    LOGE(TAG, "getSemesters(): " + e.getMessage());
-                    deferred.reject(e);
-                }
-            }
-        }).fail(new FailCallback<AjaxStatus>() {
-            @Override
-            public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
-            }
-        });
-
-        return deferred.promise();
+    public static Semesters getSemesters() throws JsonSyntaxException, IOException {
+        return ApiRequest.api("soc_conf.txt", ApiRequest.CACHE_ONE_DAY, Semesters.class);
     }
 
     /**
@@ -78,9 +48,7 @@ public final class ScheduleAPI {
      * @param semesterCode Semester code (e.g. 72014 for Summer 2014)
      * @return Promise for array of course subjects
      */
-    public static Promise<List<Subject>, Exception, Void> getSubjects(String campusCode, String levelCode, String semesterCode) {
-        final DeferredObject<List<Subject>, Exception, Void> deferred = new DeferredObject<>();
-
+    public static List<Subject> getSubjects(String campusCode, String levelCode, String semesterCode) throws JsonSyntaxException, IOException {
         String reqUrl;
         if (CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineSubjects.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode;
@@ -88,31 +56,8 @@ public final class ScheduleAPI {
             reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode;
         }
 
-        Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONArray>() {
-            @Override
-            public void onDone(JSONArray result) {
-                Gson gson = new Gson();
-                ArrayList<Subject> subjects = new ArrayList<>(result.length());
-
-                try {
-                    for (int i = 0; i < result.length(); i++) {
-                        Subject newSub = gson.fromJson(result.getJSONObject(i).toString(), Subject.class);
-                        subjects.add(newSub);
-                    }
-                    deferred.resolve(subjects);
-                } catch (JSONException | JsonSyntaxException e) {
-                    LOGE(TAG, "getSubjects(): " + e.getMessage());
-                    deferred.reject(e);
-                }
-            }
-        }).fail(new FailCallback<AjaxStatus>() {
-            @Override
-            public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
-            }
-        });
-
-        return deferred.promise();
+        Type type = new TypeToken<List<Subject>>(){}.getType();
+        return ApiRequest.json(reqUrl, ApiRequest.CACHE_ONE_DAY, type);
     }
 
     /**
@@ -123,9 +68,7 @@ public final class ScheduleAPI {
      * @param subjectCode Subject code (e.g. 010, 084)
      * @return Array of courses for a subject
      */
-    public static Promise<List<Course>, Exception, Void> getCourses(String campusCode, String levelCode, String semesterCode, String subjectCode) {
-        final DeferredObject<List<Course>, Exception, Void> deferred = new DeferredObject<>();
-
+    public static List<Course> getCourses(String campusCode, String levelCode, String semesterCode, String subjectCode) throws JsonSyntaxException, IOException {
         String reqUrl;
         if (CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineCourses.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&level=" + levelCode + "&subject=" + subjectCode;
@@ -133,31 +76,8 @@ public final class ScheduleAPI {
             reqUrl = SOC_BASE_URL + "courses.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode + "&subject=" + subjectCode;
         }
 
-        Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONArray>() {
-            @Override
-            public void onDone(JSONArray result) {
-                Gson gson = new Gson();
-                ArrayList<Course> courses = new ArrayList<>(result.length());
-
-                try {
-                    for (int i = 0; i < result.length(); i++) {
-                        Course newCourse = gson.fromJson(result.getJSONObject(i).toString(), Course.class);
-                        courses.add(newCourse);
-                    }
-                    deferred.resolve(courses);
-                } catch (JSONException | JsonSyntaxException e) {
-                    LOGE(TAG, "getCourses(): " + e.getMessage());
-                    deferred.reject(e);
-                }
-            }
-        }).fail(new FailCallback<AjaxStatus>() {
-            @Override
-            public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
-            }
-        });
-
-        return deferred.promise();
+        Type type = new TypeToken<List<Course>>(){}.getType();
+        return ApiRequest.json(reqUrl, ApiRequest.CACHE_ONE_DAY, type);
     }
 
     /**
@@ -168,9 +88,7 @@ public final class ScheduleAPI {
      * @param courseCode Course code (e.g. 101, 252, 344)
      * @return JSON Object for one course
      */
-    public static Promise<Course, Exception, Void> getCourse(String campusCode, String semesterCode, String subjectCode, String courseCode) {
-        final DeferredObject<Course, Exception, Void> deferred = new DeferredObject<>();
-
+    public static Course getCourse(String campusCode, String semesterCode, String subjectCode, String courseCode) throws JsonSyntaxException, IOException {
         String reqUrl;
         if (CODE_CAMPUS_ONLINE.equals(campusCode)) {
             reqUrl = SOC_BASE_URL + "onlineCourse.json?term=" + semesterCode.charAt(0) + "&year=" + semesterCode.substring(1) + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
@@ -178,25 +96,7 @@ public final class ScheduleAPI {
             reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         }
 
-        Request.json(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
-            @Override
-            public void onDone(JSONObject result) {
-                Gson gson = new Gson();
-                try {
-                    deferred.resolve(gson.fromJson(result.toString(), Course.class));
-                } catch (JsonSyntaxException e) {
-                    LOGE(TAG, "getCourse(): " + e.getMessage());
-                    deferred.reject(e);
-                }
-            }
-        }).fail(new FailCallback<AjaxStatus>() {
-            @Override
-            public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
-            }
-        });
-
-        return deferred.promise();
+        return ApiRequest.json(reqUrl, ApiRequest.CACHE_ONE_DAY, Course.class);
     }
 
     /**
@@ -206,28 +106,9 @@ public final class ScheduleAPI {
      * @param levelCode Level code (e.g. U for undergrad, G for graduate)
      * @return Promise for an SOCIndex
      */
-    public static Promise<SOCIndex, Exception, Double> getIndex(final String semesterCode, final String campusCode, final String levelCode) {
-        final Deferred<SOCIndex, Exception, Double> deferred = new DeferredObject<>();
-
-        Request.api("indexes/"+semesterCode+"_"+campusCode+"_"+levelCode+".json", Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
-            @Override
-            public void onDone(JSONObject result) {
-                try {
-                    SOCIndex socIndex = new SOCIndex(campusCode, levelCode, semesterCode, result);
-                    deferred.resolve(socIndex);
-                } catch (IllegalArgumentException e) {
-                    LOGE(TAG, "getIndex(): " + e.getMessage());
-                    deferred.reject(e);
-                }
-            }
-        }).fail(new FailCallback<AjaxStatus>() {
-            @Override
-            public void onFail(AjaxStatus status) {
-                deferred.reject(new Exception(AppUtils.formatAjaxStatus(status)));
-            }
-        });
-
-        return deferred.promise();
+    public static SOCIndex getIndex(final String semesterCode, final String campusCode, final String levelCode) throws JsonSyntaxException, IOException {
+        String resource = "indexes/" + semesterCode + "_" + campusCode + "_" + levelCode + ".json";
+        return ApiRequest.api(resource, ApiRequest.CACHE_ONE_DAY, SOCIndex.class, new SOCIndexDeserializer(campusCode, levelCode, semesterCode));
     }
 
     /**

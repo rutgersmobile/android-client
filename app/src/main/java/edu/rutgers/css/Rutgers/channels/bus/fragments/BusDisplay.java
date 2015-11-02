@@ -3,6 +3,8 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +15,6 @@ import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter
 import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,17 +24,14 @@ import java.util.TimerTask;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
+import edu.rutgers.css.Rutgers.channels.bus.model.loader.PredictionLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
-public class BusDisplay extends BaseChannelFragment implements DoneCallback<List<Prediction>>,
-        FailCallback<Exception>, AlwaysCallback<List<Prediction>, Exception> {
+public class BusDisplay extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<Prediction>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusDisplay";
@@ -70,8 +64,9 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
     private Handler mUpdateHandler;
     private Timer mUpdateTimer;
     private String mAgency;
-    private AndroidDeferredManager mDM;
-    
+
+    private static final int LOADER_ID              = 101;
+
     public BusDisplay() {
         // Required empty public constructor
     }
@@ -91,8 +86,6 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mDM = new AndroidDeferredManager();
 
         mData = new ArrayList<>();
         mAdapter = new PredictionAdapter(getActivity(), mData);
@@ -140,6 +133,8 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
         // Get agency and route/stop tag
         mAgency = args.getString(ARG_AGENCY_TAG);
         mTag = args.getString(ARG_TAG_TAG);
+
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
     @Override
@@ -169,12 +164,13 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
             }
 
             @Override
-            public void onItemCollapsed(int position) {}
+            public void onItemCollapsed(int position) {
+            }
         });
 
         return v;
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
@@ -190,7 +186,7 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
                 mUpdateHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        loadPredictions();
+                        getLoaderManager().getLoader(LOADER_ID).forceLoad();
                     }
                 });
             }
@@ -217,70 +213,29 @@ public class BusDisplay extends BaseChannelFragment implements DoneCallback<List
         outState.putSerializable(SAVED_DATA_TAG, mData);
     }
 
-    /**
-     * Load prediction data
-     */
-    private void loadPredictions() {
-        // Don't run if required args aren't loaded
-        if (mAgency == null || mTag == null) return;
-
-        showProgressCircle();
-        if (BusDisplay.ROUTE_MODE.equals(mMode)) {
-            mDM.when(NextbusAPI.routePredict(mAgency, mTag)).then(this).fail(this).always(this);
-        } else if (BusDisplay.STOP_MODE.equals(mMode)) {
-            mDM.when(NextbusAPI.stopPredict(mAgency, mTag)).then(this).fail(this).always(this);
-        }
+    @Override
+    public Loader<List<Prediction>> onCreateLoader(int id, Bundle args) {
+        return new PredictionLoader(getActivity(), mAgency, mTag, mMode);
     }
 
-    /**
-     * Callback function for when nextbus data is loaded
-     */
     @Override
-    public void onDone(List<Prediction> newPredictions) {
-        hideProgressCircle();
-
+    public void onLoadFinished(Loader<List<Prediction>> loader, List<Prediction> data) {
         // If there are no active routes or stops, show a message
-        if (newPredictions.isEmpty()) {
+        if (data.isEmpty()) {
             if (BusDisplay.STOP_MODE.equals(mMode)) {
-                if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
+                if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_stops, Toast.LENGTH_SHORT).show();
             } else {
                 if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
             }
         }
-
-        if (mAdapter.getCount() != newPredictions.size()) {
-            /* Add items if the list is being newly populated, or
-             * the updated JSON doesn't seem to match and the list should be
-             * cleared and repopulated. */
-            mAdapter.setPredictions(newPredictions);
-        } else {
-            /* Update items individually if the list is already populated
-             * and the new results correspond to currently displayed stops. */
-            for (int i = 0; i < mAdapter.getCount(); i++) {
-                Prediction newPrediction = newPredictions.get(i);
-                Prediction oldPrediction = mAdapter.getItem(i);
-
-                if (!newPrediction.equals(oldPrediction)) {
-                    LOGD(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());
-                    oldPrediction.setTitle(newPrediction.getTitle());
-                    oldPrediction.setTag(newPrediction.getTag());
-                }
-                
-                oldPrediction.setMinutes(newPrediction.getMinutes());
-                mAdapter.notifyDataSetChanged();
-            }
-        }
-    }
-
-    @Override
-    public void onFail(Exception result) {
-        AppUtils.showFailedLoadToast(getActivity());
         mAdapter.clear();
-    }
-
-    @Override
-    public void onAlways(Promise.State state, List<Prediction> resolved, Exception rejected) {
+        mAdapter.addAll(data);
         hideProgressCircle();
     }
 
+    @Override
+    public void onLoaderReset(Loader<List<Prediction>> loader) {
+        mAdapter.clear();
+        hideProgressCircle();
+    }
 }

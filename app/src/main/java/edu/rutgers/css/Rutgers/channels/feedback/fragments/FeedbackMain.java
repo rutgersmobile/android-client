@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.feedback.fragments;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.Editable;
@@ -20,16 +21,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
-import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
@@ -42,7 +46,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /** Feedback form. */
 public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedListener {
@@ -50,7 +54,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     /* Log tag and component handle */
     private static final String TAG = "FeedbackMain";
     public static final String HANDLE = "feedback";
-
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final String API = Config.API_BASE + "feedback.php";
     //private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php"; // TODO Replace
 
@@ -58,7 +62,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
 
     /* Member data */
-    private AQuery mAQ;
+    private OkHttpClient client;
     private boolean mLockSend;
 
     /* View references */
@@ -68,6 +72,54 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     private EditText mMessageEditText;
     private EditText mEmailEditText;
     private CheckBox mRequestReplyCheckbox;
+
+    enum Status {
+        SUCCESS, FAIL, IOFAIL
+    };
+
+    class ResultHolder {
+        String successStatus;
+        String failStatus;
+        String iofailStatus;
+        Status status;
+
+        public String getFailStatus() {
+            return failStatus;
+        }
+
+        public ResultHolder setFailStatus(String failStatus) {
+            this.failStatus = failStatus;
+            return this;
+        }
+
+        public String getSuccessStatus() {
+            return successStatus;
+        }
+
+        public ResultHolder setSuccessStatus(String successStatus) {
+            this.successStatus = successStatus;
+            return this;
+        }
+
+        public Status getStatus() {
+            return status;
+        }
+
+        public ResultHolder setStatus(Status status) {
+            this.status = status;
+            return this;
+        }
+
+        public String getIofailStatus() {
+            return iofailStatus;
+        }
+
+        public ResultHolder setIofailStatus(String iofailStatus) {
+            this.iofailStatus = iofailStatus;
+            return this;
+        }
+    }
+
 
     public FeedbackMain() {
         // Required empty public constructor
@@ -84,8 +136,8 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        
-        mAQ = new AQuery(getActivity());
+
+        client = new OkHttpClient();
     }
     
     @Override
@@ -192,20 +244,20 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         Integer wantsResonse = mRequestReplyCheckbox.isChecked() && mRequestReplyCheckbox.isEnabled() ? 1 : 0;
         
         // Build POST request
-        Map<String, Object> params = new HashMap<>();
-        params.put("subject", mSubjectSpinner.getSelectedItem());
-        params.put("email", mEmailEditText.getText().toString().trim());
-        params.put("uuid", AppUtils.getUUID(getActivity()));
-        params.put("message", mMessageEditText.getText().toString().trim());
-        params.put("wants_response", wantsResonse);
+        final FormEncodingBuilder builder = new FormEncodingBuilder()
+            .add("subject", (String)(mSubjectSpinner.getSelectedItem()))
+            .add("email", mEmailEditText.getText().toString().trim())
+            .add("uuid", AppUtils.getUUID(getActivity()))
+            .add("message", mMessageEditText.getText().toString().trim())
+            .add("wants_response", wantsResonse.toString());
         // Post the selected channel if this is channel feedback
         if (mSubjectSpinner.getSelectedItem().equals(getString(R.string.feedback_channel_feedback))) {
-            params.put("channel", mChannelSpinner.getSelectedItem());    
+            builder.add("channel", (String) (mChannelSpinner.getSelectedItem()));
         }
         //params.put("debuglog", "");
-        params.put("version", Config.VERSION);
-        params.put("osname", Config.OSNAME);
-        params.put("betamode", Config.BETAMODE);
+        builder.add("version", Config.VERSION);
+        builder.add("osname", Config.OSNAME);
+        builder.add("betamode", Config.BETAMODE);
         
         // Lock send button until POST request goes through
         mLockSend = true;
@@ -213,37 +265,61 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         final String feedbackErrorString = getString(R.string.feedback_error);
         final String feedbackSuccessString = getString(R.string.feedback_success);
 
-        mAQ.ajax(API, params, JSONObject.class, new AjaxCallback<JSONObject>() {
+        final Gson gson = new Gson();
 
+        new AsyncTask<Void, Void, ResultHolder>() {
             @Override
-            public void callback(String url, JSONObject json, AjaxStatus status) {
-                // Unlock send button
-                mLockSend = false;
-
-                // Check the response JSON
-                if (json != null) {
-                    if (json.optJSONArray("errors") != null) {
-                        JSONArray response = json.optJSONArray("errors");
-                        Toast.makeText(getActivity(), response.optString(0, feedbackErrorString), Toast.LENGTH_SHORT).show();
-                    } else if (!json.isNull("success")) {
-                        String response = json.optString("success", feedbackSuccessString);
-                        Toast.makeText(getActivity(), response, Toast.LENGTH_SHORT).show();
-
-                        // Only reset forms after message has gone through
-                        resetForm();
+            protected ResultHolder doInBackground(Void... params) {
+                Request request = new Request.Builder()
+                        .url(API)
+                        .post(builder.build())
+                        .build();
+                String status;
+                try {
+                    Response response = client.newCall(request).execute();
+                    JsonObject jsonObject = gson.fromJson(response.body().string(), JsonObject.class);
+                    mLockSend = false;
+                    if (jsonObject.getAsJsonArray("errors") != null) {
+                        JsonArray errors = jsonObject.getAsJsonArray("errors");
+                        try {
+                            JsonElement error = errors.get(0);
+                            status = error.getAsString();
+                        } catch (IndexOutOfBoundsException | ClassCastException e) {
+                            status = feedbackErrorString;
+                        }
+                        return new ResultHolder().setStatus(FeedbackMain.Status.SUCCESS).setSuccessStatus(status);
+                    } else if (jsonObject.has("success") && !jsonObject.isJsonNull()) {
+                        try {
+                            status = jsonObject.getAsJsonPrimitive("success").getAsString();
+                        } catch (ClassCastException e) {
+                            status = feedbackSuccessString;
+                        }
+                        return new ResultHolder().setStatus(FeedbackMain.Status.FAIL).setFailStatus(status);
                     }
-                } else {
-                    // No response
-                    LOGW(TAG, AppUtils.formatAjaxStatus(status));
-                    Toast toast = Toast.makeText(getActivity(), R.string.failed_load_short, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 125);
-                    toast.show();
+                } catch (IOException e) {
+                    LOGW(TAG, e.getMessage());
                 }
-
+                return new ResultHolder().setIofailStatus(getString(R.string.failed_load_short)).setStatus(FeedbackMain.Status.IOFAIL);
             }
 
-        });
-
+            @Override
+            protected void onPostExecute(ResultHolder result) {
+                switch (result.getStatus()) {
+                    case SUCCESS:
+                        Toast.makeText(getActivity(), result.getSuccessStatus(), Toast.LENGTH_SHORT).show();
+                        resetForm();
+                        break;
+                    case FAIL:
+                        Toast.makeText(getActivity(), result.getFailStatus(), Toast.LENGTH_SHORT).show();
+                        break;
+                    case IOFAIL:
+                        Toast toast = Toast.makeText(getActivity(), result.getIofailStatus(), Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 125);
+                        toast.show();
+                        break;
+                }
+            }
+        }.execute();
     }
     
     /**

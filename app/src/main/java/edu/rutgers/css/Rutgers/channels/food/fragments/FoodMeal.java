@@ -3,22 +3,19 @@ package edu.rutgers.css.Rutgers.channels.food.fragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
+import edu.rutgers.css.Rutgers.channels.food.model.loader.MealGenreLoader;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -28,15 +25,18 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
  * Displays all food items available for a specific meal at a specific dining location.
  * @author James Chambers
  */
-public class FoodMeal extends Fragment {
+public class FoodMeal extends Fragment
+    implements LoaderManager.LoaderCallbacks<List<DiningMenu.Genre>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "FoodMeal";
     public static final String HANDLE               = "foodmeal";
 
     /* Argument bundle tags */
-    private static final String ARG_LOCATION_TAG    = "location";
-    private static final String ARG_MEAL_TAG        = "meal";
+    public static final String ARG_LOCATION_TAG    = "location";
+    public static final String ARG_MEAL_TAG        = "meal";
+
+    private static final int LOADER_ID              = TAG.hashCode();
 
     /* Member data */
     private DiningMenuAdapter mAdapter;
@@ -79,32 +79,7 @@ public class FoodMeal extends Fragment {
             return;
         }
 
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(DiningAPI.getDiningLocation(args.getString(ARG_LOCATION_TAG))).done(new DoneCallback<DiningMenu>() {
-
-            @Override
-            public void onDone(DiningMenu diningMenu) {
-                DiningMenu.Meal meal = diningMenu.getMeal(args.getString(ARG_MEAL_TAG));
-                if (meal == null) {
-                    LOGE(TAG, "Meal \"" + args.getString(ARG_MEAL_TAG) + "\" not found");
-                    return;
-                }
-
-                // Populate the menu with categories and food items
-                List<DiningMenu.Genre> mealGenres = meal.getGenres();
-                mAdapter.addAll(mealGenres);
-            }
-
-        }).fail(new FailCallback<Exception>() {
-
-            @Override
-            public void onFail(Exception e) {
-                LOGE(TAG, e.getMessage());
-                AppUtils.showFailedLoadToast(getActivity());
-            }
-
-        });
-        
+        getLoaderManager().initLoader(LOADER_ID, args, this);
     }
 
     @Override
@@ -115,5 +90,24 @@ public class FoodMeal extends Fragment {
         listView.setAdapter(mAdapter);
 
         return v;
+    }
+
+    @Override
+    public Loader<List<DiningMenu.Genre>> onCreateLoader(int id, Bundle args) {
+        return new MealGenreLoader(getActivity(), args);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<DiningMenu.Genre>> loader, List<DiningMenu.Genre> data) {
+        if (data.isEmpty()) {
+            AppUtils.showFailedLoadToast(getContext());
+        }
+        mAdapter.clear();
+        mAdapter.addAll(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<DiningMenu.Genre>> loader) {
+        mAdapter.clear();
     }
 }

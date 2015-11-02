@@ -1,12 +1,15 @@
 package edu.rutgers.css.Rutgers.channels.places.fragments;
 
-import android.app.Activity;
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,22 +23,17 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.places.model.KeyValPairLoader;
-import edu.rutgers.css.Rutgers.channels.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
-import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
+import edu.rutgers.css.Rutgers.channels.places.model.loader.KeyValPairLoader;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
@@ -53,19 +51,25 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
  * @author James Chambers
  */
 public class PlacesMain extends BaseChannelFragment
-        implements GoogleApiClient.ConnectionCallbacks, LoaderManager.LoaderCallbacks<SimpleSection<KeyValPair>> {
+        implements GoogleApiClient.ConnectionCallbacks, LoaderManager.LoaderCallbacks<List<KeyValPair>>,
+        LocationListener {
 
     /* Log tag and component handle */
     private static final String TAG                 = "PlacesMain";
     public static final String HANDLE               = "places";
+    private static final int LOADER_ID              = 1;
+    private static final int LOCATION_REQUEST       = 101;
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    private static final String ARG_LAT_TAG         = "lat";
+    private static final String ARG_LON_TAG         = "lon";
 
     /* Member data */
     private PlaceAutoCompleteAdapter mSearchAdapter;
     private SimpleSectionedAdapter<KeyValPair> mAdapter;
     private GoogleApiClientProvider mGoogleApiClientProvider;
+    private LocationRequest mLocationRequest;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -80,10 +84,10 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         LOGD(TAG, "Attaching to activity");
-        mGoogleApiClientProvider = (GoogleApiClientProvider) activity;
+        mGoogleApiClientProvider = (GoogleApiClientProvider) context;
     }
 
     @Override
@@ -99,6 +103,10 @@ public class PlacesMain extends BaseChannelFragment
 
         mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
         mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setInterval(10 * 1000)
+                .setFastestInterval(1000);
     }
     
     @Override
@@ -133,8 +141,7 @@ public class PlacesMain extends BaseChannelFragment
 
             @Override
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) return true;
-                else return false;
+                return actionId == EditorInfo.IME_ACTION_SEARCH;
             }
             
         });
@@ -173,14 +180,17 @@ public class PlacesMain extends BaseChannelFragment
         if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.registerListener(this);
 
         // Reload nearby places
-        loadNearbyPlaces();
+        showProgressCircle();
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.unregisterListener(this);
+        if (mGoogleApiClientProvider != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), this);
+            mGoogleApiClientProvider.unregisterListener(this);
+        }
     }
 
     @Override
@@ -191,8 +201,48 @@ public class PlacesMain extends BaseChannelFragment
         // Make sure this isn't called before the activity has been attached
         // or before onCreate() has ran.
         if (mAdapter != null && isAdded()) {
-            loadNearbyPlaces();
+            final String connectingString = getString(R.string.location_connecting);
+            final String failedLocationString = getString(R.string.failed_location);
+            final String nearbyPlacesString = getString(R.string.places_nearby);
+
+            List<KeyValPair> nearbyPlaces = new ArrayList<>();
+            SimpleSection<KeyValPair> nearbyPlacesSection = new SimpleSection<>(nearbyPlacesString, nearbyPlaces);
+
+            // Check for location services
+            if (mGoogleApiClientProvider == null || !mGoogleApiClientProvider.getGoogleApiClient().isConnected()) {
+                LOGW(TAG, "Location services not connected");
+                nearbyPlaces.add(new KeyValPair(null, connectingString));
+                mAdapter.clear();
+                mAdapter.add(nearbyPlacesSection);
+                hideProgressCircle();
+                return;
+            }
+
+            // Get last location
+            final Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
+            if (lastLoc == null) {
+                LOGW(TAG, "Couldn't get location");
+                nearbyPlaces.add(new KeyValPair(null, failedLocationString));
+                mAdapter.clear();
+                mAdapter.add(nearbyPlacesSection);
+                hideProgressCircle();
+                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+                }
+                return;
+            }
+
+            loadNearby(lastLoc);
         }
+    }
+
+    private void loadNearby(Location location) {
+        showProgressCircle();
+
+        Bundle args = new Bundle();
+        args.putDouble(ARG_LAT_TAG, location.getLatitude());
+        args.putDouble(ARG_LON_TAG, location.getLongitude());
+        getLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
     @Override
@@ -200,92 +250,39 @@ public class PlacesMain extends BaseChannelFragment
         LOGI(TAG, "Suspended from services for cause: " + cause);
     }
 
-    private void loadNearbyPlaces() {
-        if (!isAdded()) return;
+    @Override
+    public Loader<List<KeyValPair>> onCreateLoader(int id, Bundle args) {
+        double lat = args.getDouble(ARG_LAT_TAG);
+        double lon = args.getDouble(ARG_LON_TAG);
+        return new KeyValPairLoader(getActivity(), lat, lon);
+    }
 
-        LOGI(TAG, "Updating nearby places");
-
+    @Override
+    public void onLoadFinished(Loader<List<KeyValPair>> loader, List<KeyValPair> data) {
         final String nearbyPlacesString = getString(R.string.places_nearby);
-        final String noneNearbyString = getString(R.string.places_none_nearby);
-        final String failedLoadString = getString(R.string.failed_load_short);
-        final String failedLocationString = getString(R.string.failed_location);
-        final String connectingString = getString(R.string.location_connecting);
-
-        final ArrayList<KeyValPair> nearbyPlaces = new ArrayList<>();
-        final SimpleSection<KeyValPair> nearbyPlacesSection = new SimpleSection<>(nearbyPlacesString, nearbyPlaces);
-
         mAdapter.clear();
-        mAdapter.add(nearbyPlacesSection);
+        mAdapter.add(new SimpleSection<>(nearbyPlacesString, data));
+        hideProgressCircle();
+    }
 
-        // Check for location services
-        if (mGoogleApiClientProvider == null || !mGoogleApiClientProvider.getGoogleApiClient().isConnected()) {
-            LOGW(TAG, "Location services not connected");
-            nearbyPlaces.add(new KeyValPair(null, connectingString));
-            mAdapter.notifyDataSetChanged();
-            return;
-        }
+    @Override
+    public void onLoaderReset(Loader<List<KeyValPair>> loader) {
+        mAdapter.clear();
+    }
 
-        // Get last location
-        final Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
-        if (lastLoc == null) {
-            LOGW(TAG, "Couldn't get location");
-            nearbyPlaces.add(new KeyValPair(null, failedLocationString));
-            mAdapter.notifyDataSetChanged();
-            return;
-        }
-
-        showProgressCircle();
-
-        PlacesAPI.getPlacesNear(lastLoc.getLatitude(), lastLoc.getLongitude()).done(new DoneCallback<List<Place>>() {
-
-            @Override
-            public void onDone(List<Place> result) {
-                mAdapter.clear();
-
-                if (result.isEmpty()) {
-                    nearbyPlaces.add(new KeyValPair(null, noneNearbyString));
-                } else {
-                    for (Place place: result) {
-                        nearbyPlaces.add(new KeyValPair(place.getId(), place.getTitle()));
-                    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_REQUEST: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
                 }
-
-                mAdapter.add(nearbyPlacesSection);
             }
-
-        }).fail(new FailCallback<Exception>() {
-
-            @Override
-            public void onFail(Exception e) {
-                LOGE(TAG, e.getMessage());
-                mAdapter.clear();
-                nearbyPlaces.add(new KeyValPair(null, failedLoadString));
-                mAdapter.add(nearbyPlacesSection);
-            }
-
-        }).always(new AlwaysCallback<List<Place>, Exception>() {
-
-            @Override
-            public void onAlways(Promise.State state, List<Place> resolved, Exception rejected) {
-                hideProgressCircle();
-            }
-
-        });
-
+        }
     }
 
     @Override
-    public Loader<SimpleSection<KeyValPair>> onCreateLoader(int id, Bundle args) {
-        return new KeyValPairLoader(getActivity());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<SimpleSection<KeyValPair>> loader, SimpleSection<KeyValPair> data) {
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<SimpleSection<KeyValPair>> loader) {
-
+    public void onLocationChanged(Location location) {
+        loadNearby(location);
     }
 }

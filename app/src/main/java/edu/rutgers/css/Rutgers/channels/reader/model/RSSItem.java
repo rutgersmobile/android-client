@@ -1,16 +1,11 @@
 package edu.rutgers.css.Rutgers.channels.reader.model;
 
-import android.support.annotation.NonNull;
-
-import com.androidquery.util.XmlDom;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateParser;
 import org.apache.commons.lang3.time.DatePrinter;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
-import org.xml.sax.SAXException;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -23,8 +18,7 @@ import java.util.TimeZone;
 
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /** Represents an item in a news or events feed */
 public class RSSItem implements Serializable {
@@ -64,30 +58,24 @@ public class RSSItem implements Serializable {
     private String date;
     private URL imgUrl;
 
-    /**
-     * Default constructor takes RSS item as XML object
-     * @param item RSS item in XML form
-     */
-    public RSSItem(@NonNull XmlDom item) {
-        // RSS 2.0 required fields
-        this.title = sanitizeString(item.text("title"));
-        this.description = sanitizeStringWithTags(item.text("description"));
-        this.link = item.text("link");
-        
-        // Author is currently unused as its presence in feeds is too sporadic
-        this.author = sanitizeString(item.text("author"));
-        
+    public RSSItem(String title, String description, String link, String author, String pubDate, String beginDateTime, String endDateTime, String url) {
+        this.title = sanitizeString(title);
+        this.description = sanitizeStringWithTags(description);
+        this.link = link;
+        this.author = sanitizeString(author);
+
         // Get date - check pubDate for news or event:xxxDateTime for events
-        if (item.text("pubDate") != null) {
+        if (pubDate != null) {
             /* Try to parse the pubDate using the standard pubDate format, as well as some
              * variations seen in the feeds we read */
             DateParser[] parsers = {rssDf, rssDf2, rssDf3};
             Date parsed = null;
 
-            for (DateParser parser: parsers) {
+            for (DateParser parser : parsers) {
                 try {
-                    parsed = parser.parse(item.text("pubDate"));
-                } catch (ParseException e) {}
+                    parsed = parser.parse(pubDate);
+                } catch (ParseException ignored) {
+                }
 
                 if (parsed != null) {
                     this.date = rssOutFormat.format(parsed);
@@ -97,57 +85,40 @@ public class RSSItem implements Serializable {
 
             if (parsed == null) {
                 // Couldn't parse the date, just display it as is
-                this.date = sanitizeString(item.text("pubDate"));
+                this.date = sanitizeString(pubDate);
             } else if (parsed.getTime() == 0) {
                 // A shameful timestamp.
                 this.date = null;
             }
-        } else if (item.text("event:beginDateTime") != null) {
+        } else if (beginDateTime != null) {
             // Event time - parse start & end timestamps and produce an output string that gives
             // the date and beginning and end times, e.g. "Fri, Apr 18, 10:00 AM - 11:00 AM"
             // Events feed dates are in Eastern time.
             try {
-                Date eventBegin = eventDf.parse(item.text("event:beginDateTime"));
+                Date eventBegin = eventDf.parse(beginDateTime);
 
                 if (eventBegin.getTime() == 0) {
                     // Swag. Fun. Nice.
                     this.date = null;
                 } else {
                     // Not all feeds supply endDateTime ¯\_(ツ)_/¯
-                    if (item.text("event:endDateTime") != null) {
-                        Date eventEnd = eventDf.parse(item.text("event:endDateTime"));
+                    if (endDateTime != null) {
+                        Date eventEnd = eventDf.parse(endDateTime);
                         this.date = formatEventDateRange(eventBegin, eventEnd);
                     } else {
                         this.date = formatEventDate(eventBegin);
                     }
                 }
             } catch (ParseException e) {
-                LOGW(TAG, "Failed to parse event date \"" + item.text("event:beginDateTime") + "\"", e);
-                this.date = item.text("event:beginDateTime");
+                LOGW(TAG, "Failed to parse event date \"" + beginDateTime + "\"", e);
+                this.date = beginDateTime;
             }
         }
 
-        // Image may be in url field (enclosure url attribute in the Rutgers feed)
         try {
-            if (item.child("enclosure") != null) {
-                if (!item.child("enclosure").attr("url").isEmpty()) {
-                    this.imgUrl = new URL(item.child("enclosure").attr("url"));
-                } else {
-                    XmlDom imageXml = new XmlDom(item.child("enclosure").text());
-                    this.imgUrl = new URL(imageXml.attr("src"));
-                }
-            } else if (item.child("media:thumbnail") != null) {
-                this.imgUrl = new URL(item.child("media:thumbnail").attr("url"));
-            } else if (item.child("url") != null) {
-                this.imgUrl = new URL(item.text("url"));
-            } else {
-                this.imgUrl = null;
-            }
+            this.imgUrl = new URL(url);
         } catch (MalformedURLException e) {
             LOGE(TAG, "Bad image URL: " + e.getMessage());
-            this.imgUrl = null;
-        } catch (SAXException e) {
-            LOGE(TAG, "Parse exception: " + e.getMessage());
             this.imgUrl = null;
         }
     }

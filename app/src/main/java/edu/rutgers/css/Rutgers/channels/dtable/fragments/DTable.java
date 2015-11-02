@@ -2,24 +2,16 @@ package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.androidquery.callback.AjaxStatus;
 import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
-
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,11 +20,11 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Request;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
+import edu.rutgers.css.Rutgers.channels.dtable.model.loader.DTableLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -43,11 +35,12 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
  * Dynamic Table
  * <p>Use {@link #dTag()} instead of TAG when logging</p>
  */
-public class DTable extends BaseChannelFragment {
+public class DTable extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<DTableRoot> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "DTable";
     public static final String HANDLE               = "dtable";
+    private static final int LOADER_ID              = 1;
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -155,42 +148,8 @@ public class DTable extends BaseChannelFragment {
             return;
         }
 
-        Promise<JSONObject, AjaxStatus, Double> promise =
-                (mURL != null) ? Request.json(mURL, Request.CACHE_ONE_HOUR) :
-                                 Request.api(mAPI, Request.CACHE_ONE_HOUR);
-
         mLoading = true;
-
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(promise).done(new DoneCallback<JSONObject>() {
-
-            @Override
-            public void onDone(JSONObject result) {
-                try {
-                    mDRoot = new DTableRoot(result);
-                    LOGV(dTag(), "Loaded DTable root: " + mDRoot.getTitle());
-                    mAdapter.addAll(mDRoot.getChildren());
-                } catch (JSONException e) {
-                    LOGE(dTag(), "onCreate(): " + e.getMessage());
-                    AppUtils.showFailedLoadToast(getActivity());
-                }
-            }
-
-        }).fail(new FailCallback<AjaxStatus>() {
-
-            @Override
-            public void onFail(AjaxStatus status) {
-                LOGW(dTag(), AppUtils.formatAjaxStatus(status));
-                AppUtils.showFailedLoadToast(getActivity());
-            }
-
-        }).always(new AlwaysCallback<JSONObject, AjaxStatus>() {
-            @Override
-            public void onAlways(Promise.State state, JSONObject resolved, AjaxStatus rejected) {
-                mLoading = false;
-                hideProgressCircle();
-            }
-        });
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
     @Override
@@ -267,4 +226,25 @@ public class DTable extends BaseChannelFragment {
         }
     }
 
+    @Override
+    public Loader<DTableRoot> onCreateLoader(int id, Bundle args) {
+        return new DTableLoader(getContext(), mURL, mAPI, dTag());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<DTableRoot> loader, DTableRoot data) {
+        if (data != null) {
+            mAdapter.clear();
+            mAdapter.addAll(data.getChildren());
+        } else {
+            AppUtils.showFailedLoadToast(getActivity());
+        }
+        mLoading = false;
+        hideProgressCircle();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<DTableRoot> loader) {
+        mAdapter.clear();
+    }
 }

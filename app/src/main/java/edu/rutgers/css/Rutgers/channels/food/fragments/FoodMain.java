@@ -1,42 +1,40 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
+import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuSectionLoader;
 import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
  * Displays dining halls that have menus available in the Dining API.
  * @author James Chambers
  */
-public class FoodMain extends BaseChannelFragment {
+public class FoodMain extends BaseChannelFragment
+    implements LoaderManager.LoaderCallbacks<List<SimpleSection<DiningMenu>>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "FoodMain";
     public static final String HANDLE               = "food";
+
+    private static final int LOADER_ID              = 101;
+
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -64,63 +62,7 @@ public class FoodMain extends BaseChannelFragment {
         mAdapter = new SchoolFacilitiesAdapter(getActivity(),
                 R.layout.row_title, R.layout.row_section_header, R.id.title);
 
-        // Get user's home campus
-        final String userHome = RutgersUtils.getHomeCampus(getActivity());
-
-        // getString() in callback can cause crashes - load Resource strings here
-        final String nbCampusFullString = getString(R.string.campus_nb_full);
-        final String nwkCampusFullString = getString(R.string.campus_nwk_full);
-        final String camCampusFullString = getString(R.string.campus_cam_full);
-
-        // Static dining hall entries
-        List<DiningMenu.Meal> dummyMeal = new ArrayList<>(1);
-        dummyMeal.add(new DiningMenu.Meal("fake", true, null)); // Prevents static entries from being grayed out
-
-        List<DiningMenu> stonsby = new ArrayList<>(1);
-        stonsby.add(new DiningMenu(getString(R.string.dining_stonsby_title), 0, dummyMeal));
-        final SimpleSection<DiningMenu> newarkHalls = new SimpleSection<>(nwkCampusFullString, stonsby);
-
-        List<DiningMenu> gateway = new ArrayList<>(1);
-        gateway.add(new DiningMenu(getString(R.string.dining_gateway_title), 0, dummyMeal));
-        final SimpleSection<DiningMenu> camdenHalls = new SimpleSection<>(camCampusFullString, gateway);
-
-        // Get dining hall data and populate the top-level menu with names of the dining halls
-        mLoading = true;
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(DiningAPI.getDiningHalls()).done(new DoneCallback<List<DiningMenu>>() {
-
-            @Override
-            public void onDone(List<DiningMenu> diningMenus) {
-                SimpleSection<DiningMenu> nbHalls = new SimpleSection<>(nbCampusFullString, diningMenus);
-
-                // Determine campus ordering
-                if (userHome.equals(nwkCampusFullString)) {
-                    mAdapter.add(newarkHalls);
-                    mAdapter.add(camdenHalls);
-                    mAdapter.add(nbHalls);
-                } else if (userHome.equals(camCampusFullString)) {
-                    mAdapter.add(camdenHalls);
-                    mAdapter.add(newarkHalls);
-                    mAdapter.add(nbHalls);
-                } else {
-                    mAdapter.add(nbHalls);
-                    mAdapter.add(camdenHalls);
-                    mAdapter.add(newarkHalls);
-                }
-            }
-
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception result) {
-                AppUtils.showFailedLoadToast(getActivity());
-            }
-        }).always(new AlwaysCallback<List<DiningMenu>, Exception>() {
-            @Override
-            public void onAlways(Promise.State state, List<DiningMenu> resolved, Exception rejected) {
-                mLoading = false;
-                hideProgressCircle();
-            }
-        });
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
     @Override
@@ -161,4 +103,26 @@ public class FoodMain extends BaseChannelFragment {
         return v;
     }
 
+    @Override
+    public Loader<List<SimpleSection<DiningMenu>>> onCreateLoader(int id, Bundle args) {
+        mLoading = true;
+        showProgressCircle();
+        return new DiningMenuSectionLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<SimpleSection<DiningMenu>>> loader, List<SimpleSection<DiningMenu>> data) {
+        if (data.isEmpty()) {
+            AppUtils.showFailedLoadToast(getContext());
+        }
+        mAdapter.clear();
+        mAdapter.addAll(data);
+        mLoading = false;
+        hideProgressCircle();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<SimpleSection<DiningMenu>>> loader) {
+        mAdapter.clear();
+    }
 }

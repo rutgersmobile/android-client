@@ -3,9 +3,9 @@ package edu.rutgers.css.Rutgers.api;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,9 +17,7 @@ import java.util.Set;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * Maintains the list of loaded RU Mobile channels.
@@ -74,12 +72,12 @@ public final class ChannelManager {
      * Load channel data from JSON Array
      * @param array Channel data JSON Array
      */
-    public void loadChannelsFromJSONArray(@NonNull JSONArray array) {
-        for (int i = 0; i < array.length(); i++) {
+    public void loadChannelsFromJSONArray(@NonNull JsonArray array) {
+        for (JsonElement element : array) {
             try {
-                JSONObject cur = array.getJSONObject(i);
+                JsonObject cur = element.getAsJsonObject();
                 addChannel(cur);
-            } catch (JSONException e) {
+            } catch (IllegalStateException e) {
                 LOGW(TAG, "loadChannelsFromJSONArray(): " + e.getMessage());
             }
         }
@@ -91,7 +89,7 @@ public final class ChannelManager {
      * @param resourceId Raw resource file ID
      */
     public void loadChannelsFromResource(Resources resources, int resourceId) {
-        JSONArray jsonArray = AppUtils.loadRawJSONArray(resources, resourceId);
+        JsonArray jsonArray = AppUtils.loadRawJSONArray(resources, resourceId);
         if (jsonArray != null) {
             loadChannelsFromJSONArray(jsonArray);
         }
@@ -102,7 +100,7 @@ public final class ChannelManager {
      * new channel must have canOverride set to true in order to replace it.
      * @param channelJson Channel JSON
      */
-    private void addChannel(@NonNull JSONObject channelJson) {
+    private void addChannel(@NonNull JsonObject channelJson) {
         try {
             Channel channel = new Channel(channelJson);
 
@@ -120,7 +118,7 @@ public final class ChannelManager {
                 // This channel is not already mapped - add it in
                 channelsMap.put(handle, channel);
             }
-        } catch (JSONException e) {
+        } catch (IllegalStateException e) {
             LOGE(TAG, "Could not add channel: " + e.getMessage());
         }
     }

@@ -4,6 +4,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -16,19 +18,9 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.multiple.MultipleResults;
-import org.jdeferred.multiple.OneReject;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.BuildConfig;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
@@ -38,24 +30,25 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
+import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
  */
-public class SOCMain extends BaseChannelFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class SOCMain extends BaseChannelFragment implements SharedPreferences.OnSharedPreferenceChangeListener, LoaderManager.LoaderCallbacks<SubjectLoader.SubjectHolder> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "SOCMain";
     public static final String HANDLE               = "soc";
+
+    private static final int LOADER_ID              = 1;
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = "filter";
@@ -69,8 +62,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private String mCampus;
     private String mLevel;
     private String mFilterString;
-    private boolean mLoadingSemesters;
-    private boolean mLoadingSubjects;
+    private boolean mLoading;
 
     public SOCMain() {
         // Required empty public constructor
@@ -105,56 +97,9 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
             mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
-        // Get the available & current semesters
-        mLoadingSemesters = true;
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(ScheduleAPI.getSemesters()).done(new DoneCallback<Semesters>() {
-            @Override
-            public void onDone(Semesters result) {
-                int defaultIndex = result.getDefaultSemester();
-                List<String> semesters = result.getSemesters();
-
-                if (semesters.isEmpty()) {
-                    LOGE(TAG, "Semesters list is empty");
-                    return;
-                } else if (defaultIndex < 0 || defaultIndex >= semesters.size()) {
-                    LOGW(TAG, "Invalid default index " + defaultIndex);
-                    defaultIndex = 0;
-                }
-
-                mDefaultSemester = semesters.get(defaultIndex);
-                mSemesters = semesters;
-
-                // If there is a saved semester setting, make sure it's valid
-                if (mSemester == null || !mSemesters.contains(mSemester)) {
-                    mSemester = mDefaultSemester;
-                }
-
-                if (BuildConfig.DEBUG) {
-                    for (String semester: mSemesters) {
-                        LOGV(TAG, "Got semester: " + ScheduleAPI.translateSemester(semester));
-                    }
-                    LOGV(TAG, "Default semester: " + ScheduleAPI.translateSemester(mDefaultSemester));
-                }
-
-                // Campus, level, and semester have been set.
-                loadSubjects();
-
-            }
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception result) {
-                AppUtils.showFailedLoadToast(getActivity());
-                LOGE(TAG, result.getMessage());
-            }
-        }).always(new AlwaysCallback<Semesters, Exception>() {
-            @Override
-            public void onAlways(Promise.State state, Semesters resolved, Exception rejected) {
-                mLoadingSemesters = false;
-                if (!mLoadingSubjects) hideProgressCircle();
-            }
-        });
-
+        mLoading = true;
+        showProgressCircle();
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override
@@ -162,7 +107,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
         setScheduleTitle();
 
-        if (mLoadingSemesters || mLoadingSubjects) showProgressCircle();
+        if (mLoading) showProgressCircle();
 
         final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
@@ -181,19 +126,12 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
                 } else if (clickedItem instanceof Course) {
                     // This is for when courses are loaded into the list by user-supplied filter
                     final Course course = (Course) clickedItem;
-                    AndroidDeferredManager dm = new AndroidDeferredManager();
-                    dm.when(ScheduleAPI.getCourse(mSOCIndex.getCampusCode(), mSOCIndex.getSemesterCode(), course.getSubject(), course.getCourseNumber())).done(new DoneCallback<Course>() {
-                        @Override
-                        public void onDone(Course result) {
-                            Bundle courseArgs = SOCSections.createArgs(result.getDisplayTitle(), mSemester, result);
-                            switchFragments(courseArgs);
-                        }
-                    }).fail(new FailCallback<Exception>() {
-                        @Override
-                        public void onFail(Exception result) {
-                            LOGW(TAG, result.getMessage());
-                        }
-                    });
+                    Bundle courseArgs = SOCSections.createArgs(
+                            course.getDisplayTitle(), mSemester, mSOCIndex.getCampusCode(),
+                            mSOCIndex.getSemesterCode(), course.getSubject(),
+                            course.getCourseNumber()
+                    );
+                    switchFragments(courseArgs);
                 }
             }
 
@@ -289,7 +227,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         if (somethingChanged) {
             LOGV(TAG, "Loading new subjects");
-            loadSubjects();
+            getLoaderManager().restartLoader(LOADER_ID, null, this);
         }
     }
 
@@ -319,58 +257,6 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         DialogFragment newDialogFragment = SOCDialogFragment.newInstance(semestersList);
         showDialogFragment(newDialogFragment, SOCDialogFragment.HANDLE);
-    }
-
-    /**
-     * Load list of subjects based on current configuration for campus, level, and semester.
-     */
-    private void loadSubjects() {
-        LOGV(TAG, "Loading subjects - Campus: " + mCampus + "; Level: " + mLevel + "; Semester: " + mSemester);
-        setScheduleTitle();
-        mAdapter.clear();
-        mAdapter.notifyDataSetChanged();
-
-        // Get index & list of subjects
-        mLoadingSubjects = true;
-        showProgressCircle();
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(ScheduleAPI.getIndex(mSemester, mCampus, mLevel),  ScheduleAPI.getSubjects(mCampus, mLevel, mSemester)).done(new DoneCallback<MultipleResults>() {
-
-            @Override
-            public void onDone(MultipleResults results) {
-                SOCIndex index = (SOCIndex) results.get(0).getResult();
-                List<Subject> subjects = (List<Subject>) results.get(1).getResult();
-
-                mSOCIndex = index;
-                mAdapter.setFilterIndex(mSOCIndex);
-
-                // Load subjects
-                mAdapter.clear();
-                mAdapter.addAllSubjects(subjects);
-
-                // Re-apply filter
-                if (!StringUtils.isEmpty(mFilterString)) {
-                    mAdapter.getFilter().filter(mFilterString);
-                }
-            }
-
-        }).fail(new FailCallback<OneReject>() {
-
-            @Override
-            public void onFail(OneReject result) {
-                mAdapter.clear();
-                AppUtils.showFailedLoadToast(getActivity());
-                LOGE(TAG, result.toString());
-            }
-
-        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
-            @Override
-            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
-                mLoadingSubjects = false;
-                if (!mLoadingSemesters) hideProgressCircle();
-            }
-        });
-
     }
 
     /**
@@ -404,4 +290,45 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         editor.commit();
     }
 
+    @Override
+    public Loader<SubjectLoader.SubjectHolder> onCreateLoader(int id, Bundle args) {
+        return new SubjectLoader(getContext(), mSemester, mLevel, mCampus);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<SubjectLoader.SubjectHolder> loader, SubjectLoader.SubjectHolder data) {
+        mAdapter.clear();
+        mLoading = false;
+        hideProgressCircle();
+
+        SOCIndex socIndex = data.getIndex();
+        List<Subject> subjects = data.getSubjects();
+        Semesters semesters = data.getSemesters();
+        String semester = data.getSemester();
+        String defaultSemester = data.getDefaultSemester();
+
+        if (socIndex == null || subjects == null || semesters == null) {
+            AppUtils.showFailedLoadToast(getContext());
+            return;
+        }
+
+        mSemester = semester;
+        mDefaultSemester = defaultSemester;
+
+        mSemesters = semesters.getSemesters();
+
+        mSOCIndex = socIndex;
+        mAdapter.setFilterIndex(mSOCIndex);
+
+        mAdapter.addAllSubjects(subjects);
+
+        setScheduleTitle();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<SubjectLoader.SubjectHolder> loader) {
+        mAdapter.clear();
+        mLoading = false;
+        hideProgressCircle();
+    }
 }

@@ -2,17 +2,13 @@ package edu.rutgers.css.Rutgers.channels.recreation.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
 
 import java.util.List;
 
@@ -21,7 +17,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Campus;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityAdapter;
-import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
+import edu.rutgers.css.Rutgers.channels.recreation.model.loader.CampusLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
@@ -29,11 +25,12 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 /**
  * Display gyms and facilities for each campus
  */
-public class RecreationMain extends BaseChannelFragment {
+public class RecreationMain extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<Campus>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "RecreationMain";
     public static final String HANDLE               = "recreation";
+    private static final int LOADER_ID              = 1;
 
     /* Argument bundle tags */
     public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;
@@ -53,7 +50,7 @@ public class RecreationMain extends BaseChannelFragment {
         bundle.putString(ARG_TITLE_TAG, title);
         return bundle;
     }
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,27 +58,9 @@ public class RecreationMain extends BaseChannelFragment {
         mAdapter = new FacilityAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         mLoading = true;
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(GymsAPI.getCampuses()).done(new DoneCallback<List<Campus>>() {
-            @Override
-            public void onDone(List<Campus> result) {
-                mAdapter.addAll(result);
-            }
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception result) {
-                AppUtils.showFailedLoadToast(getActivity());
-            }
-        }).always(new AlwaysCallback<List<Campus>, Exception>() {
-            @Override
-            public void onAlways(Promise.State state, List<Campus> resolved, Exception rejected) {
-                mLoading = false;
-                hideProgressCircle();
-            }
-        });
-
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress);
@@ -113,4 +92,26 @@ public class RecreationMain extends BaseChannelFragment {
         return v;
     }
 
+    @Override
+    public Loader<List<Campus>> onCreateLoader(int id, Bundle args) {
+        return new CampusLoader(getContext());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<Campus>> loader, List<Campus> data) {
+        if (data.isEmpty()) {
+            AppUtils.showFailedLoadToast(getContext());
+        }
+        mAdapter.clear();
+        mAdapter.addAll(data);
+        mLoading = false;
+        hideProgressCircle();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Campus>> loader) {
+        mAdapter.clear();
+        mLoading = false;
+        hideProgressCircle();
+    }
 }

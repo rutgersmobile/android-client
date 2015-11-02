@@ -14,9 +14,10 @@ import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonSyntaxException;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,9 +34,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.model.Channel;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * General helper methods & global variables for the app
@@ -156,30 +155,6 @@ public final class AppUtils {
     }
 
     /**
-     * Create custom string from Ajax Status object.
-     * @param status AjaxStatus object
-     * @return Custom string describing status
-     */
-    public static String formatAjaxStatus(@NonNull AjaxStatus status) {
-        String translateStatusCode;
-        switch(status.getCode()) {
-            case AjaxStatus.NETWORK_ERROR:
-                translateStatusCode = "NETWORK_ERROR";
-                break;
-            case AjaxStatus.AUTH_ERROR:
-                translateStatusCode = "AUTH_ERROR";
-                break;
-            case AjaxStatus.TRANSFORM_ERROR:
-                translateStatusCode = "TRANSFORM_ERROR";
-                break;
-            default:
-                translateStatusCode = "other";
-        }
-
-        return "AJAX Response: " + status.getMessage() + " (" + status.getCode() + ": " + translateStatusCode + ")";
-    }
-
-    /**
      * Show a pop-up message saying that the attempt to get data has failed.
      * @param context App's context (activity)
      */
@@ -272,13 +247,13 @@ public final class AppUtils {
      * @param resourceId Raw resource file ID
      * @return JSON array or null if there was a problem loading the raw resource file
      */
-    public static JSONArray loadRawJSONArray(@NonNull Resources resources, int resourceId) {
+    public static JsonArray loadRawJSONArray(@NonNull Resources resources, int resourceId) {
         String jsonString = loadRawResource(resources, resourceId);
         if (jsonString == null) return null;
 
         try {
-            return new JSONArray(jsonString);
-        } catch (JSONException e) {
+            return new Gson().fromJson(jsonString, JsonArray.class);
+        } catch (JsonSyntaxException e) {
             LOGE(TAG, "loadRawJSONArray(): " + e.getMessage());
             return null;
         }

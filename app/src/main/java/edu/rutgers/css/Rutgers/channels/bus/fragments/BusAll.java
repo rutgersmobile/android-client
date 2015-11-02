@@ -1,10 +1,10 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,38 +15,29 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.multiple.MultipleResults;
-import org.jdeferred.multiple.OneReject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusItem;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
-import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
+import edu.rutgers.css.Rutgers.channels.bus.model.loader.NextBusItemLoader;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
-
-public class BusAll extends BaseChannelFragment {
+public class BusAll extends BaseChannelFragment
+    implements LoaderManager.LoaderCallbacks<List<SimpleSection<NextbusItem>>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusAll";
     public static final String HANDLE               = "busall";
+
+    private static final int LOADER_ID              = 101;
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".filter";
@@ -74,65 +65,8 @@ public class BusAll extends BaseChannelFragment {
             mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
-        // Get home campus for result ordering
-        String userHome = RutgersUtils.getHomeCampus(getActivity());
-        final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
-
-        // Get promises for all route & stop information
-        final Promise<List<RouteStub>, Exception, Void> nbRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NB);
-        final Promise<List<StopStub>, Exception, Void> nbStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NB);
-        final Promise<List<RouteStub>, Exception, Void> nwkRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NWK);
-        final Promise<List<StopStub>, Exception, Void> nwkStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NWK);
-
         mLoading = true;
-
-        // Synchronized load of all route & stop information
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(nbRoutes, nbStops, nwkRoutes, nwkStops).done(new DoneCallback<MultipleResults>() {
-
-            @Override
-            public void onDone(MultipleResults results) {
-                mLoading = false;
-
-                List<RouteStub> nbRoutesResult = (List<RouteStub>) results.get(0).getResult();
-                List<StopStub> nbStopsResult = (List<StopStub>) results.get(1).getResult();
-                List<RouteStub> nwkRoutesResult = (List<RouteStub>) results.get(2).getResult();
-                List<StopStub> nwkStopsResult = (List<StopStub>) results.get(3).getResult();
-
-                if (nbHome) {
-                    loadRoutes(NextbusAPI.AGENCY_NB, nbRoutesResult);
-                    loadStops(NextbusAPI.AGENCY_NB, nbStopsResult);
-                    loadRoutes(NextbusAPI.AGENCY_NWK, nwkRoutesResult);
-                    loadStops(NextbusAPI.AGENCY_NWK, nwkStopsResult);
-                } else {
-                    loadRoutes(NextbusAPI.AGENCY_NWK, nwkRoutesResult);
-                    loadStops(NextbusAPI.AGENCY_NWK, nwkStopsResult);
-                    loadRoutes(NextbusAPI.AGENCY_NB, nbRoutesResult);
-                    loadStops(NextbusAPI.AGENCY_NB, nbStopsResult);
-                }
-
-                // Set filter after info is re-loaded
-                if (mFilterString != null) {
-                    mAdapter.getFilter().filter(mFilterString);
-                }
-
-            }
-
-        }).fail(new FailCallback<OneReject>() {
-
-            @Override
-            public void onFail(OneReject result) {
-                AppUtils.showFailedLoadToast(getActivity());
-                Exception e = (Exception) result.getReject();
-                LOGW(TAG, e.getMessage());
-            }
-
-        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
-            @Override
-            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
-                hideProgressCircle();
-            }
-        });
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
     @Override
@@ -216,34 +150,30 @@ public class BusAll extends BaseChannelFragment {
         mFilterEditText = null;
     }
 
-    private void loadStops(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
-        if (!isAdded() || getResources() == null) return;
-
-        // Get header for stops section
-        String header;
-        if (NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_stops_header);
-        else if (NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_stops_header);
-        else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
-
-        List<NextbusItem> nextbusItems = new ArrayList<>(stopStubs.size());
-        nextbusItems.addAll(stopStubs);
-
-        mAdapter.add(new SimpleSection<>(header, nextbusItems));
+    @Override
+    public Loader<List<SimpleSection<NextbusItem>>> onCreateLoader(int id, Bundle args) {
+        return new NextBusItemLoader(getContext());
     }
 
-    private void loadRoutes(@NonNull String agency, @NonNull List<RouteStub> routeStubs) {
-        if (!isAdded() || getResources() == null) return;
-
-        // Get header for routes section
-        String header;
-        if (NextbusAPI.AGENCY_NB.equals(agency)) header = getString(R.string.bus_nb_all_routes_header);
-        else if (NextbusAPI.AGENCY_NWK.equals(agency)) header = getString(R.string.bus_nwk_all_routes_header);
-        else throw new IllegalArgumentException("Invalid Nextbus agency \""+agency+"\"");
-
-        List<NextbusItem> nextbusItems = new ArrayList<>(routeStubs.size());
-        nextbusItems.addAll(routeStubs);
-
-        mAdapter.add(new SimpleSection<>(header, nextbusItems));
+    @Override
+    public void onLoadFinished(Loader<List<SimpleSection<NextbusItem>>> loader, List<SimpleSection<NextbusItem>> data) {
+        mAdapter.clear();
+        mAdapter.addAll(data);
+        mLoading = false;
+        hideProgressCircle();
+        if (data.isEmpty()) {
+            AppUtils.showFailedLoadToast(getContext());
+        }
+        // Set filter after info is re-loaded
+        if (mFilterString != null) {
+            mAdapter.getFilter().filter(mFilterString);
+        }
     }
 
+    @Override
+    public void onLoaderReset(Loader<List<SimpleSection<NextbusItem>>> loader) {
+        mAdapter.clear();;
+        mLoading = false;
+        hideProgressCircle();
+    }
 }

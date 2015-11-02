@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.model.rmenu;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.androidquery.AQuery;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -31,7 +30,6 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
     private int mItemResource;
     private int mCategoryResource;
     private List<RMenuRow> mData;
-    private AQuery aq;
 
     protected static enum ViewTypes {
         HEADER, CLICKABLE, UNCLICKABLE, IMAGE
@@ -56,7 +54,6 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
         this.mItemResource = itemResource;
         this.mCategoryResource = categoryResource;
         this.mData = objects;
-        this.aq = new AQuery(context);
     }
 
     /**
@@ -150,8 +147,11 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
             } else if (curItem instanceof RMenuImageRow) {
                 // Get image from network
                 RMenuImageRow imageRowItem = (RMenuImageRow) curItem;
-                AQuery cvAq = aq.recycle(convertView);
-                cvAq.id(holder.imageView).image(imageRowItem.getDrawableURL(), false, true, imageRowItem.getWidth(), 0, null, AQuery.FADE_IN_NETWORK);
+                Picasso.with(getContext())
+                        .load(imageRowItem.getDrawableURL())
+                        .resize(imageRowItem.getHeight(), imageRowItem.getWidth())
+                        .centerInside()
+                        .into(holder.imageView);
             } else {
                 holder.imageView.setImageBitmap(null);
                 holder.imageView.setVisibility(View.GONE);

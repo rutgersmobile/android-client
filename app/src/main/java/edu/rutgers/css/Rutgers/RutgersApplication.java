@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers;
 import android.app.Application;
 import android.content.Context;
 
-import com.androidquery.callback.BitmapAjaxCallback;
 
 import java.util.Map;
 
@@ -33,13 +32,6 @@ public class RutgersApplication extends Application {
 
         // Queue "app launched" event
         Analytics.queueEvent(this, Analytics.LAUNCH, null);
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        // Remove images from memory cache
-        BitmapAjaxCallback.clearCache();
     }
 
     public static Context getAppContext() {

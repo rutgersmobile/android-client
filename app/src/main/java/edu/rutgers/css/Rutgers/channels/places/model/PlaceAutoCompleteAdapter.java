@@ -1,14 +1,12 @@
 package edu.rutgers.css.Rutgers.channels.places.model;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
+import com.google.gson.JsonSyntaxException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,30 +60,17 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
             // Empty or null constraint returns nothing
             if (charSequence == null || charSequence.toString().isEmpty()) return results;
 
-            // Do request for search results
-            Promise<List<Place>, Exception, Void> p = PlacesAPI.searchPlaces(charSequence.toString());
-            p.done(new DoneCallback<List<Place>>() {
-                @Override
-                public void onDone(List<Place> result) {
-                    List<KeyValPair> keyValPairs = new ArrayList<>(result.size());
-                    for (Place place: result) {
-                        keyValPairs.add(new KeyValPair(place.getId(), place.getTitle()));
-                    }
-
-                    results.values = keyValPairs;
-                    results.count = keyValPairs.size();
-                }
-            }).fail(new FailCallback<Exception>() {
-                @Override
-                public void onFail(Exception result) {
-                    LOGW(TAG, result.getMessage());
-                }
-            });
-
-            // Wait for the request to finish before returning results
             try {
-                p.waitSafely();
-            } catch (InterruptedException e) {
+                // Do request for search results
+                List<Place> places = PlacesAPI.searchPlaces(charSequence.toString());
+                List<KeyValPair> keyValPairs = new ArrayList<>(places.size());
+                for (Place place: places) {
+                    keyValPairs.add(new KeyValPair(place.getId(), place.getTitle()));
+                }
+
+                results.values = keyValPairs;
+                results.count = keyValPairs.size();
+            } catch (JsonSyntaxException | IOException e) {
                 LOGE(TAG, e.getMessage());
             }
 
@@ -93,6 +78,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
             mData.clear();
             if (filterResults.values != null) mData.addAll((List<KeyValPair>) filterResults.values);

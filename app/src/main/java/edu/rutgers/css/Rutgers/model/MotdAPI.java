@@ -1,17 +1,10 @@
 package edu.rutgers.css.Rutgers.model;
 
-import com.androidquery.callback.AjaxStatus;
-import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
-import org.jdeferred.Deferred;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.impl.DeferredObject;
-import org.json.JSONObject;
+import java.io.IOException;
 
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 
 /**
  * Class for getting the message of the day from the Rutgers API
@@ -20,23 +13,20 @@ public final class MotdAPI {
     private MotdAPI() {}
 
     private static final String RESOURCE = "motd.txt";
+    public static final String TAG = "MotdAPI";
 
-    public static Promise<Motd, AjaxStatus, Double> getMotd() {
-        final AndroidDeferredManager dm = new AndroidDeferredManager();
-        final Deferred<Motd, AjaxStatus, Double> df = new DeferredObject<>();
-        dm.when(Request.api(RESOURCE, Request.CACHE_NEVER)).done(new DoneCallback<JSONObject>() {
-            @Override
-            public void onDone(JSONObject result) {
-                Gson gson = new Gson();
-                Motd motd = gson.fromJson(result.toString(), Motd.class);
-                df.resolve(motd);
-            }
-        }).fail(new FailCallback<AjaxStatus>() {
-            @Override
-            public void onFail(AjaxStatus result) {
-                df.reject(result);
-            }
-        });
-        return df.promise();
+    private static Motd motd;
+    private static boolean sSettingUp = false;
+
+    private static void setup() throws JsonSyntaxException, IOException {
+        if (sSettingUp) return;
+        sSettingUp = true;
+        motd = ApiRequest.api(RESOURCE, ApiRequest.CACHE_NEVER, Motd.class);
+        sSettingUp = false;
+    }
+
+    public static Motd getMotd() throws JsonSyntaxException, IOException {
+        setup();
+        return motd;
     }
 }

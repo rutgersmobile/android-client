@@ -1,20 +1,14 @@
 package edu.rutgers.css.Rutgers.channels.soc.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import edu.rutgers.css.Rutgers.utils.JsonUtils;
 
 /**
  * SOC Index.
@@ -23,12 +17,12 @@ public class SOCIndex {
 
     private static final String TAG = "SOCIndex";
 
-    private static class IndexCourse {
+    public static class IndexCourse {
         String course;
         String subj;
     }
 
-    private static class IndexSubject {
+    public static class IndexSubject {
         String id;
         String name;
         HashMap<String, String> courses;
@@ -43,75 +37,18 @@ public class SOCIndex {
     private HashMap<String, IndexSubject> mSubjectsByCode;
     private HashMap<String, String> mSubjectsByName;
 
-    public SOCIndex(String campusCode, String levelCode, String semesterCode, JSONObject index) throws IllegalArgumentException {
-        if (index.isNull("abbrevs") || index.isNull("courses") || index.isNull("ids") || index.isNull("names")) {
-            throw new IllegalArgumentException("Invalid index, missing critical fields");
-        }
+    public SOCIndex(String campusCode, String levelCode, String semesterCode,
+                    HashMap<String, String[]> abbreviations, HashMap<String, IndexCourse> coursesByName,
+                    HashMap<String, IndexSubject> subjectsByCode, HashMap<String, String> subjectsByName) {
 
         setSemesterCode(semesterCode);
         setCampusCode(campusCode);
         setLevelCode(levelCode);
 
-        // Convert the JSON into native hashtables
-        try {
-            JSONObject abbrevs = index.getJSONObject("abbrevs"); // List of subject abbrevs->sub IDs
-            JSONObject ids = index.getJSONObject("ids"); // List of subject IDs->contained courses
-            JSONObject names = index.getJSONObject("names"); // List of subject names->sub IDs
-            JSONObject courses = index.getJSONObject("courses"); // List of course names->sub/course IDs
-
-            // Set up abbreviations hashtable
-            mAbbreviations = new HashMap<>();
-            for (Iterator<String> abbrevsIterator = abbrevs.keys(); abbrevsIterator.hasNext();) {
-                String curAbbrev = abbrevsIterator.next();
-                JSONArray curContents = abbrevs.getJSONArray(curAbbrev);
-                String[] subIDStrings = JsonUtils.jsonToStringArray(curContents);
-                mAbbreviations.put(curAbbrev, subIDStrings);
-            }
-
-            // Set up subject IDs hashtable
-            mSubjectsByCode = new HashMap<>();
-            for (Iterator<String> idsIterator = ids.keys(); idsIterator.hasNext();) {
-                String curID = idsIterator.next();
-                JSONObject curContents = ids.getJSONObject(curID);
-
-                // Set up the list of CourseID:CourseName mappings for this Subject ID entry
-                JSONObject curCourses = curContents.getJSONObject("courses");
-                HashMap<String, String> courseMap = new HashMap<>();
-                for (Iterator<String> courseIDIterator = curCourses.keys(); courseIDIterator.hasNext();) {
-                    String curCourseID = courseIDIterator.next();
-                    String curCourseName = curCourses.getString(curCourseID);
-                    courseMap.put(curCourseID, curCourseName);
-                }
-
-                IndexSubject newSubject = new IndexSubject();
-                newSubject.id = curID;
-                newSubject.name = curContents.getString("name");
-                newSubject.courses = courseMap;
-
-                mSubjectsByCode.put(curID, newSubject);
-            }
-
-            // Set up subject names hashtable
-            mSubjectsByName = new HashMap<>();
-            for (Iterator<String> namesIterator = names.keys(); namesIterator.hasNext();) {
-                String curName = namesIterator.next();
-                String curContents = names.getString(curName);
-                mSubjectsByName.put(curName, curContents);
-            }
-
-            // Set up course names
-            mCoursesByName = new HashMap<>();
-            for (Iterator<String> coursesIterator = courses.keys(); coursesIterator.hasNext();) {
-                String curCourseName = coursesIterator.next();
-                JSONObject curContents = courses.getJSONObject(curCourseName);
-                IndexCourse newCourse = new IndexCourse();
-                newCourse.course = curContents.getString("course");
-                newCourse.subj = curContents.getString("subj");
-                mCoursesByName.put(curCourseName, newCourse);
-            }
-        } catch (JSONException e) {
-            throw new IllegalArgumentException("Invalid index JSON: " + e.getMessage());
-        }
+        mAbbreviations = abbreviations;
+        mCoursesByName = coursesByName;
+        mSubjectsByCode = subjectsByCode;
+        mSubjectsByName = subjectsByName;
     }
 
     public List<Subject> getSubjects() {

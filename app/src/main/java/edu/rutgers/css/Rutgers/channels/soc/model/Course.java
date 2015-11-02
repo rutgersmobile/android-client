@@ -2,13 +2,14 @@ package edu.rutgers.css.Rutgers.channels.soc.model;
 
 import android.support.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Course from Schedule of Classes. Construct with GSON.
  */
 public class Course extends ScheduleAdapterItem
-        implements Comparable<Course> {
+        implements Comparable<Course>, Serializable {
 
     private String title;
     private String subject;

@@ -67,6 +67,12 @@ public class DTableAdapter extends ExpandableListItemAdapter<DTableElement> {
     }
 
     @Override
+    public void clear() {
+        mItems.clear();
+        super.clear();
+    }
+
+    @Override
     public DTableElement getItem (int pos) {
        return mItems.get(pos);
     }

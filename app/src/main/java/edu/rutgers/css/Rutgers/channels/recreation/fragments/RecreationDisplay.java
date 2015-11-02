@@ -5,7 +5,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +18,6 @@ import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -31,7 +27,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
-import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
+import edu.rutgers.css.Rutgers.channels.recreation.model.loader.FacilityLoader;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
@@ -45,7 +41,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 /**
  * Facility information: hours, address, phone numbers, etc.
  */
-public class RecreationDisplay extends BaseChannelFragment {
+public class RecreationDisplay extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<Facility> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "RecreationDisplay";
@@ -63,6 +59,7 @@ public class RecreationDisplay extends BaseChannelFragment {
     private static final int BUSINESS_ROW = 2;
     private static final int DESCRIPTION_ROW = 3;
     private static final int HOURS_ROW = 4;
+    private static final int LOADER_ID = 1;
 
     /* Member data */
     private Facility mFacility;
@@ -102,25 +99,7 @@ public class RecreationDisplay extends BaseChannelFragment {
         final String facilityTitle = args.getString(ARG_FACILITY_TAG);
 
         mLoading = true;
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(GymsAPI.getFacility(campusTitle, facilityTitle)).done(new DoneCallback<Facility>() {
-            @Override
-            public void onDone(@NonNull Facility result) {
-                mFacility = result;
-                addInfo();
-            }
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception result) {
-                AppUtils.showFailedLoadToast(getActivity());
-            }
-        }).always(new AlwaysCallback<Facility, Exception>() {
-            @Override
-            public void onAlways(Promise.State state, Facility resolved, Exception rejected) {
-                mLoading = false;
-                hideProgressCircle();
-            }
-        });
+        getLoaderManager().initLoader(LOADER_ID, args, this);
     }
     
     @Override
@@ -261,4 +240,27 @@ public class RecreationDisplay extends BaseChannelFragment {
 
     }
 
+    @Override
+    public Loader<Facility> onCreateLoader(int id, Bundle args) {
+        final String campusTitle = args.getString(ARG_CAMPUS_TAG);
+        final String facilityTitle = args.getString(ARG_FACILITY_TAG);
+        return new FacilityLoader(getContext(), campusTitle, facilityTitle);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Facility> loader, Facility data) {
+        if (data == null) {
+            AppUtils.showFailedLoadToast(getActivity());
+        }
+        mFacility = data;
+        addInfo();
+        mLoading = false;
+        hideProgressCircle();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Facility> loader) {
+        mLoading = false;
+        hideProgressCircle();
+    }
 }
