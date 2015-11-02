@@ -24,14 +24,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.ui.LocationProviderActivity;
+import edu.rutgers.css.Rutgers.ui.GoogleApiProviderActivity;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -63,7 +62,7 @@ public final class LocationUtils {
 
         @Override
         public void onDismiss(DialogInterface dialog) {
-            ((LocationProviderActivity)getActivity()).onDialogDismissed();
+            ((GoogleApiProviderActivity)getActivity()).onDialogDismissed();
         }
     }
 

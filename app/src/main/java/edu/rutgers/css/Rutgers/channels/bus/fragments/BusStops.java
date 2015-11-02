@@ -5,7 +5,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 
-import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
@@ -35,7 +35,7 @@ import edu.rutgers.css.Rutgers.channels.bus.model.StopGroup;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
-import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
+import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -43,9 +43,11 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
-public class BusStops extends BaseChannelFragment implements FilterFocusBroadcaster, GooglePlayServicesClient.ConnectionCallbacks {
+public class BusStops extends BaseChannelFragment implements FilterFocusBroadcaster, GoogleApiClient.ConnectionCallbacks {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusStops";
@@ -57,7 +59,7 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     /* Member data */
     private SimpleSectionedAdapter<StopStub> mAdapter;
     private List<StopStub> mNearbyStops;
-    private LocationClientProvider mLocationClientProvider;
+    private GoogleApiClientProvider mGoogleApiClientProvider;
     private FilterFocusListener mFilterFocusListener;
     private AndroidDeferredManager mDM;
 
@@ -72,14 +74,14 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         LOGD(TAG, "Attaching to activity");
-        mLocationClientProvider = (LocationClientProvider) activity;
+        mGoogleApiClientProvider = (GoogleApiClientProvider) activity;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         LOGD(TAG, "Detaching from activity");
-        mLocationClientProvider = null;
+        mGoogleApiClientProvider = null;
     }
 
     @Override
@@ -136,7 +138,7 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     public void onResume() {
         super.onResume();
 
-        if (mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
+        if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.registerListener(this);
 
         // Clear out everything & add in empty nearby stops section as a placeholder
         mAdapter.clear();
@@ -212,7 +214,7 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
             mUpdateTimer = null;
         }
 
-        if (mLocationClientProvider != null) mLocationClientProvider.unregisterListener(this);
+        if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.unregisterListener(this);
     }
 
     @Override
@@ -233,8 +235,8 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     }
 
     @Override
-    public void onDisconnected() {
-        LOGI(TAG, "Disconnected from services");
+    public void onConnectionSuspended(int cause) {
+        LOGI(TAG, "Suspended from services for cause: " + cause);
     }
 
     /**
@@ -269,9 +271,9 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
         clearNearbyRows();
 
         // Check for location services
-        if (mLocationClientProvider != null && mLocationClientProvider.servicesConnected() && mLocationClientProvider.getLocationClient().isConnected()) {
+        if (mGoogleApiClientProvider != null && mGoogleApiClientProvider.servicesConnected() && mGoogleApiClientProvider.getGoogleApiClient().isConnected()) {
             // Get last location
-            Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
+            final Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
             if (lastLoc == null) {
                 LOGW(TAG, "Could not get location");
                 clearNearbyRows();

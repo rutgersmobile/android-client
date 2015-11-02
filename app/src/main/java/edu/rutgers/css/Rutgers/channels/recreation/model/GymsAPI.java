@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.recreation.model;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
 import com.google.gson.Gson;

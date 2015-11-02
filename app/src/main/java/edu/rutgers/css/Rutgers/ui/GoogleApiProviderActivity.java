@@ -8,15 +8,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
-import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
+import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
 import edu.rutgers.css.Rutgers.utils.LocationUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
@@ -28,14 +28,14 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
  * Base for an activity that can connect to Google location services and provide location
  * information to child fragments.
  */
-public abstract class LocationProviderActivity extends AppCompatActivity implements
-        LocationClientProvider,
-        GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener {
+public abstract class GoogleApiProviderActivity extends AppCompatActivity implements
+        GoogleApiClientProvider,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     /* Member data */
-    private LocationClient mLocationClient;
-    private List<WeakReference<GooglePlayServicesClient.ConnectionCallbacks>> mLocationListeners = new ArrayList<>(5);
+    private GoogleApiClient googleApiClient;
+    private List<WeakReference<GoogleApiClient.ConnectionCallbacks>> mLocationListeners = new ArrayList<>(5);
 
     /** True when resolving Google Services error. */
     private boolean mResolvingError = false;
@@ -44,8 +44,8 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
      * For providing the location client to fragments
      */
     @Override
-    public LocationClient getLocationClient() {
-        return mLocationClient;
+    public GoogleApiClient getGoogleApiClient() {
+        return googleApiClient;
     }
 
     @Override
@@ -53,7 +53,11 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
         super.onCreate(savedInstanceState);
 
         // Connect to Google Play location services
-        mLocationClient = new LocationClient(this, this, this);
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
     @Override
@@ -61,11 +65,11 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
         super.onStart();
 
         // Connect to location services when activity becomes visible
-        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
-            if (listener.get() != null) mLocationClient.registerConnectionCallbacks(listener.get());
+        for (WeakReference<GoogleApiClient.ConnectionCallbacks> listener: mLocationListeners) {
+            if (listener.get() != null) googleApiClient.registerConnectionCallbacks(listener.get());
         }
 
-        mLocationClient.connect();
+        googleApiClient.connect();
     }
 
     @Override
@@ -73,11 +77,11 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
         super.onStop();
 
         // Disconnect from location services when activity is no longer visible
-        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> listener: mLocationListeners) {
-            if (listener.get() != null) mLocationClient.unregisterConnectionCallbacks(listener.get());
+        for (WeakReference<GoogleApiClient.ConnectionCallbacks> listener: mLocationListeners) {
+            if (listener.get() != null) googleApiClient.unregisterConnectionCallbacks(listener.get());
         }
 
-        mLocationClient.disconnect();
+        googleApiClient.disconnect();
     }
 
     /**
@@ -85,9 +89,9 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
      * @param listener Fragment that uses the location client.
      */
     @Override
-    public void registerListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        if (mLocationClient != null) {
-            mLocationClient.registerConnectionCallbacks(listener);
+    public void registerListener(GoogleApiClient.ConnectionCallbacks listener) {
+        if (googleApiClient != null) {
+            googleApiClient.registerConnectionCallbacks(listener);
             mLocationListeners.add(new WeakReference<>(listener));
             LOGD(Config.APPTAG, "Registered location listener: " + listener.toString());
         } else {
@@ -100,16 +104,16 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
      * @param listener Play services Connection Callbacks listener
      */
     @Override
-    public void unregisterListener(GooglePlayServicesClient.ConnectionCallbacks listener) {
-        for (WeakReference<GooglePlayServicesClient.ConnectionCallbacks> curRef: mLocationListeners) {
+    public void unregisterListener(GoogleApiClient.ConnectionCallbacks listener) {
+        for (WeakReference<GoogleApiClient.ConnectionCallbacks> curRef: mLocationListeners) {
             if (curRef.get() == listener) {
                 mLocationListeners.remove(curRef);
                 break;
             }
         }
 
-        if (mLocationClient != null) {
-            mLocationClient.unregisterConnectionCallbacks(listener);
+        if (googleApiClient != null) {
+            googleApiClient.unregisterConnectionCallbacks(listener);
             LOGD(Config.APPTAG, "Unregistered location listener: " + listener.toString());
         }
     }
@@ -127,8 +131,8 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
      * {@inheritDoc}
      */
     @Override
-    public void onDisconnected() {
-        LOGI(Config.APPTAG, "Disconnected from Google Play services");
+    public void onConnectionSuspended(int cause) {
+        LOGI(Config.APPTAG, "Suspended Google Play Services Connection for cause: " + cause);
     }
 
     /**
@@ -146,7 +150,7 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
                 result.startResolutionForResult(this, LocationUtils.REQUEST_RESOLVE_ERROR);
             } catch (IntentSender.SendIntentException e) {
                 LOGE(Config.APPTAG, Log.getStackTraceString(e));
-                mLocationClient.connect(); // Try again
+                googleApiClient.connect(); // Try again
             }
         } else {
             LocationUtils.showErrorDialog(this, result.getErrorCode());
@@ -169,9 +173,9 @@ public abstract class LocationProviderActivity extends AppCompatActivity impleme
                 switch (resultCode) {
                     case Activity.RESULT_OK:
                         LOGW(Config.APPTAG, "Connection failure resolved by Google Play");
-                        if (!mLocationClient.isConnecting() && !mLocationClient.isConnected()) {
+                        if (!googleApiClient.isConnecting() && !googleApiClient.isConnected()) {
                             LOGW(Config.APPTAG, "Attempting to reconnect to Play Services...");
-                            mLocationClient.connect();
+                            googleApiClient.connect();
                         }
                         break;
 

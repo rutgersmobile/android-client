@@ -17,7 +17,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import org.jdeferred.AlwaysCallback;
 import org.jdeferred.DoneCallback;
@@ -29,10 +30,11 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.places.model.KeyValPairLoader;
 import edu.rutgers.css.Rutgers.channels.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
 import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
-import edu.rutgers.css.Rutgers.interfaces.LocationClientProvider;
+import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
@@ -48,7 +50,8 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
  * <p>Places selected from this fragment are displayed with {@link PlacesDisplay}.</p>
  * @author James Chambers
  */
-public class PlacesMain extends BaseChannelFragment implements GooglePlayServicesClient.ConnectionCallbacks {
+public class PlacesMain extends BaseChannelFragment
+        implements GoogleApiClient.ConnectionCallbacks, LoaderManager.LoaderCallbacks<SimpleSection<KeyValPair>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "PlacesMain";
@@ -60,7 +63,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
     /* Member data */
     private PlaceAutoCompleteAdapter mSearchAdapter;
     private SimpleSectionedAdapter<KeyValPair> mAdapter;
-    private LocationClientProvider mLocationClientProvider;
+    private GoogleApiClientProvider mGoogleApiClientProvider;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -78,14 +81,14 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         LOGD(TAG, "Attaching to activity");
-        mLocationClientProvider = (LocationClientProvider) activity;
+        mGoogleApiClientProvider = (GoogleApiClientProvider) activity;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         LOGD(TAG, "Detaching from activity");
-        mLocationClientProvider = null;
+        mGoogleApiClientProvider = null;
     }
 
     @Override
@@ -165,7 +168,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
     public void onResume() {
         super.onResume();
 
-        if (mLocationClientProvider != null) mLocationClientProvider.registerListener(this);
+        if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.registerListener(this);
 
         // Reload nearby places
         loadNearbyPlaces();
@@ -175,7 +178,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
     public void onPause() {
         super.onPause();
 
-        if (mLocationClientProvider != null) mLocationClientProvider.unregisterListener(this);
+        if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.unregisterListener(this);
     }
 
     @Override
@@ -191,8 +194,8 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
     }
 
     @Override
-    public void onDisconnected() {
-        LOGI(TAG, "Disconnected from services");
+    public void onConnectionSuspended(int cause) {
+        LOGI(TAG, "Suspended from services for cause: " + cause);
     }
 
     private void loadNearbyPlaces() {
@@ -213,7 +216,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
         mAdapter.add(nearbyPlacesSection);
 
         // Check for location services
-        if (mLocationClientProvider == null || !mLocationClientProvider.getLocationClient().isConnected()) {
+        if (mGoogleApiClientProvider == null || !mGoogleApiClientProvider.getGoogleApiClient().isConnected()) {
             LOGW(TAG, "Location services not connected");
             nearbyPlaces.add(new KeyValPair(null, connectingString));
             mAdapter.notifyDataSetChanged();
@@ -221,7 +224,7 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
         }
 
         // Get last location
-        final Location lastLoc = mLocationClientProvider.getLocationClient().getLastLocation();
+        final Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
         if (lastLoc == null) {
             LOGW(TAG, "Couldn't get location");
             nearbyPlaces.add(new KeyValPair(null, failedLocationString));
@@ -269,4 +272,18 @@ public class PlacesMain extends BaseChannelFragment implements GooglePlayService
 
     }
 
+    @Override
+    public Loader<SimpleSection<KeyValPair>> onCreateLoader(int id, Bundle args) {
+        return new KeyValPairLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<SimpleSection<KeyValPair>> loader, SimpleSection<KeyValPair> data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<SimpleSection<KeyValPair>> loader) {
+
+    }
 }

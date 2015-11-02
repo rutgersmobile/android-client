@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.places.model;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.androidquery.callback.AjaxStatus;
 import com.google.gson.Gson;
@@ -21,6 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +54,19 @@ public final class PlacesAPI {
     private static Map<String, Place> sTokens;
 
     private PlacesAPI() {}
+
+    private class KVHolder {
+        public HashMap<String, Place> all;
+        public Lunr lunr;
+    }
+
+    private class Lunr {
+        public DocStore documentStore;
+    }
+
+    private class DocStore {
+        public HashMap<String, List<String>> store;
+    }
 
     /**
      * Grab the places flat-file from the API and convert it into a map.
