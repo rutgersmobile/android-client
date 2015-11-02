@@ -8,6 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
@@ -15,7 +17,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 /**
  * RU Mobile channel.
  */
-public class Channel {
+public class Channel implements Serializable {
 
     private VarTitle title;
     private String handle;

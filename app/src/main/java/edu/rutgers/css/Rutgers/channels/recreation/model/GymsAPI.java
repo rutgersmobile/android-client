@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
@@ -33,7 +33,7 @@ public final class GymsAPI {
     
     public static final DateFormat GYM_DATE_FORMAT = new SimpleDateFormat("M/d/yyyy", Locale.US);
     
-    private static final long expire = Request.CACHE_ONE_DAY; // Cache gym info for a day
+    private static final long expire = ApiRequest.CACHE_ONE_DAY; // Cache gym info for a day
 
     private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
 
@@ -46,7 +46,7 @@ public final class GymsAPI {
     public static Promise<List<Campus>, Exception, Void> getCampuses() {
         final DeferredObject<List<Campus>, Exception, Void> deferred = new DeferredObject<>();
 
-        Promise<JSONArray, AjaxStatus, Double> p = Request.apiArray("gyms_array.txt", expire);
+        Promise<JSONArray, AjaxStatus, Double> p = ApiRequest.apiArray("gyms_array.txt", expire);
 
         sDM.when(p, AndroidExecutionScope.BACKGROUND).done(new DoneCallback<JSONArray>() {
             @Override

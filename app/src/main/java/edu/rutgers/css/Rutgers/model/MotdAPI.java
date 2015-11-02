@@ -11,7 +11,7 @@ import org.jdeferred.android.AndroidDeferredManager;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONObject;
 
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 
 /**
  * Class for getting the message of the day from the Rutgers API
@@ -24,7 +24,7 @@ public final class MotdAPI {
     public static Promise<Motd, AjaxStatus, Double> getMotd() {
         final AndroidDeferredManager dm = new AndroidDeferredManager();
         final Deferred<Motd, AjaxStatus, Double> df = new DeferredObject<>();
-        dm.when(Request.api(RESOURCE, Request.CACHE_NEVER)).done(new DoneCallback<JSONObject>() {
+        dm.when(ApiRequest.api(RESOURCE, ApiRequest.CACHE_NEVER)).done(new DoneCallback<JSONObject>() {
             @Override
             public void onDone(JSONObject result) {
                 Gson gson = new Gson();

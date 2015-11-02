@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
@@ -51,8 +51,8 @@ public final class NextbusAPI {
     private static ActiveStops sNWKActive;
     
     private static final String BASE_URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=";
-    private static final long activeExpireTime = Request.CACHE_ONE_MINUTE * 10; // active bus data cached ten minutes
-    private static final long configExpireTime = Request.CACHE_ONE_HOUR; // config data cached one hour
+    private static final long activeExpireTime = ApiRequest.CACHE_ONE_MINUTE * 10; // active bus data cached ten minutes
+    private static final long configExpireTime = ApiRequest.CACHE_ONE_HOUR; // config data cached one hour
 
     public static final String AGENCY_NB = "nb";
     public static final String AGENCY_NWK = "nwk";
@@ -73,10 +73,10 @@ public final class NextbusAPI {
         final Deferred<Void, Exception, Void> confd = new DeferredObject<>();
         configured = confd.promise();
 
-        final Promise promiseNBActive = Request.api("nbactivestops.txt", activeExpireTime);
-        final Promise promiseNWKActive = Request.api("nwkactivestops.txt", activeExpireTime);
-        final Promise promiseNBConf = Request.api("rutgersrouteconfig.txt", configExpireTime);
-        final Promise promiseNWKConf = Request.api("rutgers-newarkrouteconfig.txt", configExpireTime);
+        final Promise promiseNBActive = ApiRequest.api("nbactivestops.txt", activeExpireTime);
+        final Promise promiseNWKActive = ApiRequest.api("nwkactivestops.txt", activeExpireTime);
+        final Promise promiseNBConf = ApiRequest.api("rutgersrouteconfig.txt", configExpireTime);
+        final Promise promiseNWKConf = ApiRequest.api("rutgers-newarkrouteconfig.txt", configExpireTime);
 
         sDM.when(AndroidExecutionScope.BACKGROUND, promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new DoneCallback<MultipleResults>() {
             @Override
@@ -150,7 +150,7 @@ public final class NextbusAPI {
                     queryBuilder.append("&stops=").append(routeKey).append("|null|").append(stopTag);
                 }
 
-                Request.xml(queryBuilder.toString(), Request.CACHE_NEVER).done(new DoneCallback<XmlDom>() {
+                ApiRequest.xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER).done(new DoneCallback<XmlDom>() {
 
                     @Override
                     public void onDone(XmlDom xml) {
@@ -243,7 +243,7 @@ public final class NextbusAPI {
                     }
                 }
 
-                Request.xml(queryBuilder.toString(), Request.CACHE_NEVER).done(new DoneCallback<XmlDom>() {
+                ApiRequest.xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER).done(new DoneCallback<XmlDom>() {
 
                     @Override
                     public void onDone(XmlDom xml) {

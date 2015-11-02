@@ -32,7 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import edu.rutgers.css.Rutgers.Config;
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
@@ -75,9 +75,24 @@ public final class PlacesAPI {
         if (sSettingUp || sPlaces != null) return;
         else sSettingUp = true;
 
-        final Deferred<Void, Exception, Void> confd = new DeferredObject<>();
+        try {
+            KVHolder holder = ApiRequest.new_api("places.txt", ApiRequest.CACHE_ONE_DAY, KVHolder.class);
+            sPlaces = holder.all;
+            for (String key : holder.lunr.documentStore.store.keySet()) {
+                Place place = sPlaces.get(key);
+                if (place != null) {
+                    List<String> tokens = holder.lunr.documentStore.store.get(key);
+                    for (String token : tokens) {
+                        sTokens.put(token, place);
+                    }
+                }
+            }
+        } catch (JsonSyntaxException | IOException e) {
+            LOGE(TAG, e.getMessage());
+        }
 
-        sDM.when(Request.api("places.txt", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONObject>() {
+        final Deferred<Void, Exception, Void> confd = new DeferredObject<>();
+        sDM.when(ApiRequest.api("places.txt", ApiRequest.CACHE_ONE_DAY)).done(new DoneCallback<JSONObject>() {
             @Override
             public void onDone(JSONObject result) {
                 // There are 1,286 places in the database as of Jan '15

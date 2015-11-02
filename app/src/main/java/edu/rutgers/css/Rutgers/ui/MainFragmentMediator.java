@@ -29,7 +29,7 @@ import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
@@ -215,7 +215,7 @@ public class MainFragmentMediator implements FragmentMediator {
      */
     private Promise<JSONArray, AjaxStatus, Double> loadChannels() {
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        return dm.when(Request.apiArray("ordered_content.json", Request.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
+        return dm.when(ApiRequest.apiArray("ordered_content.json", ApiRequest.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
             @Override
             public void onDone(JSONArray channelsArray) {
                 channelManager.loadChannelsFromJSONArray(channelsArray);

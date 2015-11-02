@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
@@ -156,8 +155,8 @@ public class DTable extends BaseChannelFragment {
         }
 
         Promise<JSONObject, AjaxStatus, Double> promise =
-                (mURL != null) ? Request.json(mURL, Request.CACHE_ONE_HOUR) :
-                                 Request.api(mAPI, Request.CACHE_ONE_HOUR);
+                (mURL != null) ? ApiRequest.json(mURL, ApiRequest.CACHE_ONE_HOUR) :
+                                 ApiRequest.api(mAPI, ApiRequest.CACHE_ONE_HOUR);
 
         mLoading = true;
 

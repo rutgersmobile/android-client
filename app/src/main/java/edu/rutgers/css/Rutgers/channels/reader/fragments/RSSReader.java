@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.reader.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +25,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSAdapter;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -45,7 +44,7 @@ public class RSSReader extends BaseChannelFragment {
     public static final String HANDLE               = "reader";
 
     /* Constants */
-    private static final long EXPIRE                = Request.CACHE_ONE_MINUTE;
+    private static final long EXPIRE                = ApiRequest.CACHE_ONE_MINUTE;
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -95,7 +94,7 @@ public class RSSReader extends BaseChannelFragment {
         // Get RSS feed XML and add items through the array adapter
         mLoading = true;
         AndroidDeferredManager dm = new AndroidDeferredManager();
-        dm.when(Request.xml(args.getString(ARG_URL_TAG), RSSReader.EXPIRE)).done(new DoneCallback<XmlDom>() {
+        dm.when(ApiRequest.xml(args.getString(ARG_URL_TAG), RSSReader.EXPIRE)).done(new DoneCallback<XmlDom>() {
             
             @Override
             public void onDone(XmlDom xml) {

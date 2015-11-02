@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -42,7 +43,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
  * Main activity. Handles navigation drawer, displayed fragments, and connection to location services.
  */
 
-public class MainActivity extends LocationProviderActivity implements
+public class MainActivity extends GoogleApiProviderActivity implements
         ChannelManagerProvider {
 
     /** Log tag */
@@ -94,7 +95,7 @@ public class MainActivity extends LocationProviderActivity implements
         mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.actbar_new));
+        mDrawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.actbar_new));
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
             @Override

@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.api.Request;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -50,7 +50,7 @@ public final class ScheduleAPI {
     public static Promise<Semesters, Exception, Void> getSemesters() {
         final DeferredObject<Semesters, Exception, Void> deferred = new DeferredObject<>();
 
-        Request.api("soc_conf.txt", Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
+        ApiRequest.api("soc_conf.txt", ApiRequest.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
             @Override
             public void onDone(JSONObject result) {
                 Gson gson = new Gson();
@@ -88,7 +88,7 @@ public final class ScheduleAPI {
             reqUrl = SOC_BASE_URL + "subjects.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode;
         }
 
-        Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONArray>() {
+        ApiRequest.jsonArray(reqUrl, ApiRequest.CACHE_ONE_DAY).done(new DoneCallback<JSONArray>() {
             @Override
             public void onDone(JSONArray result) {
                 Gson gson = new Gson();
@@ -133,7 +133,7 @@ public final class ScheduleAPI {
             reqUrl = SOC_BASE_URL + "courses.json?semester=" + semesterCode + "&campus=" + campusCode + "&level=" + levelCode + "&subject=" + subjectCode;
         }
 
-        Request.jsonArray(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONArray>() {
+        ApiRequest.jsonArray(reqUrl, ApiRequest.CACHE_ONE_DAY).done(new DoneCallback<JSONArray>() {
             @Override
             public void onDone(JSONArray result) {
                 Gson gson = new Gson();
@@ -178,7 +178,7 @@ public final class ScheduleAPI {
             reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         }
 
-        Request.json(reqUrl, Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
+        ApiRequest.json(reqUrl, ApiRequest.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
             @Override
             public void onDone(JSONObject result) {
                 Gson gson = new Gson();
@@ -209,7 +209,7 @@ public final class ScheduleAPI {
     public static Promise<SOCIndex, Exception, Double> getIndex(final String semesterCode, final String campusCode, final String levelCode) {
         final Deferred<SOCIndex, Exception, Double> deferred = new DeferredObject<>();
 
-        Request.api("indexes/"+semesterCode+"_"+campusCode+"_"+levelCode+".json", Request.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
+        ApiRequest.api("indexes/" + semesterCode + "_" + campusCode + "_" + levelCode + ".json", ApiRequest.CACHE_ONE_DAY).done(new DoneCallback<JSONObject>() {
             @Override
             public void onDone(JSONObject result) {
                 try {
