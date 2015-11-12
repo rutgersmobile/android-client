@@ -72,7 +72,7 @@ dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
     compile project(':PagerSlidingTabStrip')
     compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.google.android.gms:play-services:8.1.0'
+    compile 'com.google.android.gms:play-services-location:8.3.0'
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'org.slf4j:slf4j-android:1.7.7'
     compile 'org.jdeferred:jdeferred-android-aar:1.2.3'

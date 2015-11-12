@@ -42,7 +42,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
  * Main activity. Handles navigation drawer, displayed fragments, and connection to location services.
  */
 
-public class MainActivity extends LocationProviderActivity implements
+public class MainActivity extends GoogleApiProviderActivity implements
         ChannelManagerProvider {
 
     /** Log tag */
