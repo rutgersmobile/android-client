@@ -23,8 +23,6 @@ import java.util.Map;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
-
 /**
  * Provides access to the Places database.
  * @author James Chambers
@@ -46,40 +44,42 @@ public final class PlacesAPI {
     private class KVHolder {
         public HashMap<String, Place> all;
         public Lunr lunr;
-    }
 
-    private class Lunr {
-        public DocStore documentStore;
-    }
+        private KVHolder() { }
 
-    private class DocStore {
-        public HashMap<String, List<String>> store;
+        private class Lunr {
+            public DocStore documentStore;
+
+            private Lunr() { }
+
+            private class DocStore {
+                public HashMap<String, List<String>> store;
+
+                private DocStore() { }
+            }
+        }
     }
 
     /**
      * Grab the places flat-file from the API and convert it into a map.
      */
-    private synchronized static void setup() {
+    private synchronized static void setup() throws JsonSyntaxException, IOException {
         if (sSettingUp || sPlaces != null) return;
         else sSettingUp = true;
 
-        try {
-            sPlaces = new HashMap<>(1300);
-            sTokens = new HashMap<>(1300);
+        sPlaces = new HashMap<>(1300);
+        sTokens = new HashMap<>(1300);
 
-            KVHolder holder = ApiRequest.new_api("places.txt", ApiRequest.CACHE_ONE_DAY, KVHolder.class);
-            sPlaces = holder.all;
-            for (String key : holder.lunr.documentStore.store.keySet()) {
-                Place place = sPlaces.get(key);
-                if (place != null) {
-                    List<String> tokens = holder.lunr.documentStore.store.get(key);
-                    for (String token : tokens) {
-                        sTokens.put(token, place);
-                    }
+        KVHolder holder = ApiRequest.new_api("places.txt", ApiRequest.CACHE_ONE_DAY, KVHolder.class);
+        sPlaces = holder.all;
+        for (String key : holder.lunr.documentStore.store.keySet()) {
+            Place place = sPlaces.get(key);
+            if (place != null) {
+                List<String> tokens = holder.lunr.documentStore.store.get(key);
+                for (String token : tokens) {
+                    sTokens.put(token, place);
                 }
             }
-        } catch (JsonSyntaxException | IOException e) {
-            LOGE(TAG, e.getMessage());
         }
 
         sSettingUp = false;
@@ -90,7 +90,7 @@ public final class PlacesAPI {
      * @param placeKey Key for place entry, returned from search results
      * @return Promise for a Place object representing the entry in the database
      */
-    public static Place getPlace(@NonNull final String placeKey) {
+    public static Place getPlace(@NonNull final String placeKey) throws JsonSyntaxException, IOException {
         setup();
         return sPlaces.get(placeKey);
     }
@@ -101,7 +101,7 @@ public final class PlacesAPI {
      * @param sourceLon Longitude
      * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
-    public static List<Place> getPlacesNear(final double sourceLat, final double sourceLon) {
+    public static List<Place> getPlacesNear(final double sourceLat, final double sourceLon) throws JsonSyntaxException, IOException {
         setup();
 
         List<Place> results = new ArrayList<>();
@@ -136,7 +136,7 @@ public final class PlacesAPI {
      * @param query Query string
      * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
-    public static List<Place> searchPlaces(final String query) {
+    public static List<Place> searchPlaces(final String query) throws JsonSyntaxException, IOException {
         setup();
 
         List<Place> results = new ArrayList<>();
@@ -149,12 +149,17 @@ public final class PlacesAPI {
         // Split each place title up into individual words and see if the query is a prefix of any of them
         for (Place place : sPlaces.values()) {
             String parts[] = StringUtils.split(place.getTitle(), ' ');
+            boolean found = false;
             for (String part : parts) {
                 if (StringUtils.startsWithIgnoreCase(part, query)) {
                     // The check makes sure we don't duplicate the special token match 'p'
+                    found = true;
                     if (place != p) results.add(place);
                     break;
                 }
+            }
+            if (!found && StringUtils.containsIgnoreCase(place.getTitle(), query) && place != p) {
+                results.add(place);
             }
         }
 

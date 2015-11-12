@@ -2,27 +2,13 @@ package edu.rutgers.css.Rutgers.channels.bus.model;
 
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.androidquery.callback.AjaxStatus;
-import com.androidquery.util.XmlDom;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.Deferred;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.android.AndroidExecutionScope;
-import org.jdeferred.impl.DeferredObject;
-import org.jdeferred.multiple.MultipleResults;
-import org.jdeferred.multiple.OneReject;
-import org.jdeferred.multiple.OneResult;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,7 +17,6 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -43,8 +28,6 @@ public final class NextbusAPI {
 
     private static final String TAG = "NextbusAPI";
 
-    private static final AndroidDeferredManager sDM = new AndroidDeferredManager();
-    private static Promise<Void, Exception, Void> configured;
     private static AgencyConfig sNBConf;
     private static AgencyConfig sNWKConf;
     private static ActiveStops sNBActive;
@@ -65,55 +48,23 @@ public final class NextbusAPI {
     /**
      * Load agency configurations and lists of active routes/stops for each campus.
      */
-    private static void setup () {
+    private static void setup () throws JsonSyntaxException, IOException {
         if (sSettingUp) return;
         else sSettingUp = true;
 
-        // This promise is used to notify calling methods when the nextbus configuration has been loaded.
-        final Deferred<Void, Exception, Void> confd = new DeferredObject<>();
-        configured = confd.promise();
+        ActiveStops.AgentlessActiveStops nbActive =
+                ApiRequest.new_api("nbactivestops.txt", activeExpireTime, ActiveStops.AgentlessActiveStops.class);
+        ActiveStops.AgentlessActiveStops nwkActive =
+                ApiRequest.new_api("nwkactivestops.txt", activeExpireTime, ActiveStops.AgentlessActiveStops.class);
+        sNBActive = new ActiveStops(AGENCY_NB, nbActive);
+        sNWKActive = new ActiveStops(AGENCY_NWK, nwkActive);
 
-        final Promise promiseNBActive = ApiRequest.api("nbactivestops.txt", activeExpireTime);
-        final Promise promiseNWKActive = ApiRequest.api("nwkactivestops.txt", activeExpireTime);
-        final Promise promiseNBConf = ApiRequest.api("rutgersrouteconfig.txt", configExpireTime);
-        final Promise promiseNWKConf = ApiRequest.api("rutgers-newarkrouteconfig.txt", configExpireTime);
+        sNBConf = ApiRequest.new_api("rutgersrouteconfig.txt", configExpireTime, AgencyConfig.class,
+                new AgencyConfigDeserializer(AGENCY_NB));
+        sNWKConf = ApiRequest.new_api("rutgers-newarkrouteconfig.txt", configExpireTime, AgencyConfig.class,
+                new AgencyConfigDeserializer(AGENCY_NWK));
 
-        sDM.when(AndroidExecutionScope.BACKGROUND, promiseNBActive, promiseNBConf, promiseNWKActive, promiseNWKConf).done(new DoneCallback<MultipleResults>() {
-            @Override
-            public void onDone(MultipleResults results) {
-                try {
-                    for (OneResult result: results) {
-                        if (result.getPromise() == promiseNBActive) {
-                            sNBActive = new ActiveStops(AGENCY_NB, (JSONObject) result.getResult());
-                        } else if (result.getPromise() == promiseNWKActive) {
-                            sNWKActive = new ActiveStops(AGENCY_NWK, (JSONObject) result.getResult());
-                        } else if (result.getPromise() == promiseNBConf) {
-                            sNBConf = new AgencyConfig(AGENCY_NB, (JSONObject) result.getResult());
-                        } else if (result.getPromise() == promiseNWKConf) {
-                            sNWKConf = new AgencyConfig(AGENCY_NWK, (JSONObject) result.getResult());
-                        }
-                    }
-                } catch (JsonSyntaxException | JSONException e) {
-                    LOGE(TAG, Log.getStackTraceString(e));
-                    confd.reject(e);
-                    return;
-                }
-
-                confd.resolve(null);
-            }
-        }).fail(new FailCallback<OneReject>() {
-            @Override
-            public void onFail(OneReject reject) {
-                AjaxStatus status = (AjaxStatus) reject.getReject();
-                LOGE(TAG, AppUtils.formatAjaxStatus(status));
-                confd.reject(new Exception(AppUtils.formatAjaxStatus(status)));
-            }
-        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
-            @Override
-            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
-                sSettingUp = false;
-            }
-        });
+        sSettingUp = false;
     }
     
     /**
@@ -122,83 +73,38 @@ public final class NextbusAPI {
      * @param routeKey Route to get predictions for.
      * @return Promise for list of arrival time predictions.
      */
-    public static Promise<List<Prediction>, Exception, Void> routePredict(@NonNull final String agency, @NonNull final String routeKey) {
-        final Deferred<List<Prediction>, Exception, Void> d = new DeferredObject<>();
+    public static List<Prediction> routePredict(@NonNull final String agency, @NonNull final String routeKey) throws JsonSyntaxException, XmlPullParserException, IOException {
         setup();
         
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
-            
-            public void onDone(Void v) {
-                LOGV(TAG, "routePredict: " + agency + ", " + routeKey);
+        LOGV(TAG, "routePredict: " + agency + ", " + routeKey);
 
-                // Get agency configuration
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
+        // Get agency configuration
+        AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
 
-                // Start building Nextbus query with predictionsForMultiStops command
-                // Returns predictions for a set of route/stop combinations. Direction is optional and can be null.
-                StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=rutgers");
+        // Start building Nextbus query with predictionsForMultiStops command
+        // Returns predictions for a set of route/stop combinations. Direction is optional and can be null.
+        StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=rutgers");
 
-                // Find route in agency config, and get its stop tags
-                final Route route = conf.getRoutes().get(routeKey);
-                if (route == null) {
-                    d.reject(new IllegalArgumentException("Invalid route tag \""+routeKey+"\""));
-                    return;
-                }
+        // Find route in agency config, and get its stop tags
+        final Route route = conf.getRoutes().get(routeKey);
+        if (route == null) {
+            throw new IllegalArgumentException("Invalid route tag \""+routeKey+"\"");
+        }
 
-                for (String stopTag: route.getStopTags()) {
-                    // multiple 'stops' parameters, these are: routeTag|dirTag|stopId
-                    queryBuilder.append("&stops=").append(routeKey).append("|null|").append(stopTag);
-                }
+        for (String stopTag: route.getStopTags()) {
+            // multiple 'stops' parameters, these are: routeTag|dirTag|stopId
+            queryBuilder.append("&stops=").append(routeKey).append("%7Cnull%7C").append(stopTag);
+        }
 
-                ApiRequest.xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER).done(new DoneCallback<XmlDom>() {
-
-                    @Override
-                    public void onDone(XmlDom xml) {
-                        ArrayList<Prediction> results = new ArrayList<>();
-
-                        // Read each group of predictions for a single stop.
-                        for (XmlDom stop: xml.tags("predictions")) {
-                            Prediction newPrediction = new Prediction(stop.attr("stopTitle"), stop.attr("stopTag"));
-
-                            // Predictions are children of the 'direction' element
-                            if (stop.tag("direction") == null) continue;
-
-                            // Read each prediction element. Contains estimated times for each vehicle to reach stop.
-                            for (XmlDom time: stop.tags("prediction")) {
-                                newPrediction.addMinutes(Integer.parseInt(time.attr("minutes")));
-                            }
-
-                            results.add(newPrediction);
-                        }
-
-                        Collections.sort(results, new Comparator<Prediction>() {
-                            @Override
-                            public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
-                                return route.getStopTags().indexOf(p1.getTag()) - route.getStopTags().indexOf(p2.getTag());
-                            }
-                        });
-
-                        d.resolve(results);
-                    }
-
-                }).fail(new FailCallback<AjaxStatus>() {
-
-                    @Override
-                    public void onFail(AjaxStatus status) {
-                        d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
-                    }
-
-                });
-            }
-
-        }).fail(new FailCallback<Exception>() {
+        List<Prediction> predictions = ApiRequest.new_xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER, new PredictionXmlParser(PredictionXmlParser.PredictionType.ROUTE));
+        Collections.sort(predictions, new Comparator<Prediction>() {
             @Override
-            public void onFail(Exception e) {
-                d.reject(e);
+            public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
+                return route.getStopTags().indexOf(p1.getTag()) - route.getStopTags().indexOf(p2.getTag());
             }
         });
-        
-        return d.promise();
+
+        return predictions;
     }
     
     /**
@@ -207,96 +113,47 @@ public final class NextbusAPI {
      * @param stopTitleKey Full title of the stop to get predictions for.
      * @return Promise for list of arrival time predictions.
      */
-    public static Promise<List<Prediction>, Exception, Void> stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) {
-        final Deferred<List<Prediction>, Exception, Void> d = new DeferredObject<>();
+    public static List<Prediction> stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) throws JsonSyntaxException, XmlPullParserException, IOException {
         setup();
-        
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
-            
-            public void onDone(Void v) {
-                LOGV(TAG, "stopPredict: " + agency + ", " + stopTitleKey);
+        LOGV(TAG, "stopPredict: " + agency + ", " + stopTitleKey);
 
-                // Get agency configuration
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
+        // Get agency configuration
+        AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
 
-                StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=rutgers");
+        StringBuilder queryBuilder = new StringBuilder(BASE_URL + "predictionsForMultiStops&a=rutgers");
 
-                // Get group of stop IDs by stop title
-                StopGroup stopsByTitle = conf.getStopsByTitle().get(stopTitleKey);
-                if (stopsByTitle == null) {
-                    d.reject(new IllegalArgumentException("Invalid stop tag \""+stopTitleKey+"\""));
-                    return;
-                }
+        // Get group of stop IDs by stop title
+        StopGroup stopsByTitle = conf.getStopsByTitle().get(stopTitleKey);
+        if (stopsByTitle == null) {
+            throw new IllegalArgumentException("Invalid stop tag \""+stopTitleKey+"\"");
+        }
 
-                // For every stop tag with the given stop title, get all its routes
-                for (String stopTag: stopsByTitle.getStopTags()) {
-                    Stop stop = conf.getStops().get(stopTag);
-                    if (stop == null) {
-                        d.reject(new Exception("Stop tag \""+stopTag+"\" in stopsByTitle but not stops"));
-                        return;
-                    }
-
-                    // Then use the route tags to build the query
-                    for (String routeTag: stop.getRouteTags()) {
-                        // multiple 'stops' parameters, these are: routeTag|dirTag|stopId
-                        queryBuilder.append("&stops=").append(routeTag).append("|null|").append(stopTag);
-                    }
-                }
-
-                ApiRequest.xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER).done(new DoneCallback<XmlDom>() {
-
-                    @Override
-                    public void onDone(XmlDom xml) {
-                        ArrayList<Prediction> results = new ArrayList<>();
-
-                        // Read each group of predictions for a single stop.
-                        for (XmlDom stop: xml.tags("predictions")) {
-                            Prediction oneresult = new Prediction(stop.attr("routeTitle"), stop.attr("routeTag"));
-
-                            // Predictions are children of the 'direction' element
-                            XmlDom dirtag = stop.tag("direction");
-                            if (dirtag != null) oneresult.setDirection(dirtag.attr("title"));
-                            else continue;
-
-                            // Read each prediction element. Contains estimated times for each vehicle to reach stop.
-                            for (XmlDom time: stop.tags("prediction")) {
-                                oneresult.addMinutes(Integer.parseInt(time.attr("minutes")));
-                            }
-                            results.add(oneresult);
-                        }
-
-                        Collections.sort(results, new Comparator<Prediction>() {
-                            @Override
-                            public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
-                                int res = p1.getTitle().compareTo(p2.getTitle());
-                                if (res == 0) {
-                                    return p1.getDirection().compareTo(p2.getDirection());
-                                }
-                                return res;
-                            }
-                        });
-
-                        d.resolve(results);
-                    }
-
-                }).fail(new FailCallback<AjaxStatus>() {
-
-                    @Override
-                    public void onFail(AjaxStatus status) {
-                        d.reject(new Exception(AppUtils.formatAjaxStatus(status)));
-                    }
-
-                });
+        // For every stop tag with the given stop title, get all its routes
+        for (String stopTag: stopsByTitle.getStopTags()) {
+            Stop stop = conf.getStops().get(stopTag);
+            if (stop == null) {
+                throw new IllegalArgumentException("Stop tag \""+stopTag+"\" in stopsByTitle but not stops");
             }
 
-        }).fail(new FailCallback<Exception>() {
+            // Then use the route tags to build the query
+            for (String routeTag: stop.getRouteTags()) {
+                // multiple 'stops' parameters, these are: routeTag|dirTag|stopId
+                queryBuilder.append("&stops=").append(routeTag).append("%7Cnull%7C").append(stopTag);
+            }
+        }
+
+        List<Prediction> predictions = ApiRequest.new_xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER, new PredictionXmlParser(PredictionXmlParser.PredictionType.STOP));
+        Collections.sort(predictions, new Comparator<Prediction>() {
             @Override
-            public void onFail(Exception e) {
-                d.reject(e);
+            public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
+                int res = p1.getTitle().compareTo(p2.getTitle());
+                if (res == 0) {
+                    return p1.getDirection().compareTo(p2.getDirection());
+                }
+                return res;
             }
         });
-        
-        return d.promise();
+        return predictions;
     }
     
     /**
@@ -304,24 +161,10 @@ public final class NextbusAPI {
      * @param agency Agency (campus) to get active routes for.
      * @return Promise for list of route stubs (tags and titles).
      */
-    public static Promise<List<RouteStub>, Exception, Void> getActiveRoutes(@NonNull final String agency) {
-        final Deferred<List<RouteStub>, Exception, Void> d = new DeferredObject<>();
+    public static List<RouteStub> getActiveRoutes(@NonNull final String agency) throws JsonSyntaxException, IOException {
         setup();
-        
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
-            @Override
-            public void onDone(Void v) {
-                ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
-                d.resolve(active.getRoutes());
-            }
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception e) {
-                d.reject(e);
-            }
-        });
-        
-        return d.promise();
+        ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
+        return active.getRoutes();
     }
     
     /**
@@ -329,24 +172,10 @@ public final class NextbusAPI {
      * @param agency Agency (campus) to get all routes for.
      * @return Promise for list of route stubs (tags and titles).
      */
-    public static Promise<List<RouteStub>, Exception, Void> getAllRoutes(@NonNull final String agency) {
-        final Deferred<List<RouteStub>, Exception, Void> d = new DeferredObject<>();
+    public static List<RouteStub> getAllRoutes(@NonNull final String agency) throws JsonSyntaxException, IOException {
         setup();
-        
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
-            @Override
-            public void onDone(Void v) {
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
-                d.resolve(conf.getSortedRoutes());
-            }
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception e) {
-                d.reject(e);
-            }
-        });
-        
-        return d.promise();
+        AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
+        return conf.getSortedRoutes();
     }
 
     /**
@@ -354,24 +183,10 @@ public final class NextbusAPI {
      * @param agency Agency (campus) to active stops for.
      * @return Promise for list of stop stubs (titles and geohashes).
      */
-    public static Promise<List<StopStub>, Exception, Void> getActiveStops(@NonNull final String agency) {
-        final Deferred<List<StopStub>, Exception, Void> d = new DeferredObject<>();
+    public static List<StopStub> getActiveStops(@NonNull final String agency) throws JsonSyntaxException, IOException {
         setup();
-        
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
-            @Override
-            public void onDone(Void v) {
-                ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
-                d.resolve(active.getStops());
-            }
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception e) {
-                d.reject(e);
-            }
-        });
-        
-        return d.promise();
+        ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
+        return active.getStops();
     }
     
     /**
@@ -379,26 +194,10 @@ public final class NextbusAPI {
      * @param agency Agency (campus) to get all stops for.
      * @return Promise for list of stop stubs (titles and geohashes).
      */
-    public static Promise<List<StopStub>, Exception, Void> getAllStops(@NonNull final String agency) {
-        final Deferred<List<StopStub>, Exception, Void> d = new DeferredObject<>();
+    public static List<StopStub> getAllStops(@NonNull final String agency) throws JsonSyntaxException, IOException {
         setup();
-        
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
-            
-            @Override
-            public void onDone(Void v) {
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
-                d.resolve(conf.getSortedStops());
-            }
-
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception e) {
-                d.reject(e);
-            }
-        });
-        
-        return d.promise();
+        AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
+        return conf.getSortedStops();
     }
     
     /**
@@ -408,55 +207,39 @@ public final class NextbusAPI {
      * @param sourceLon Longitude
      * @return Promise for list of stop groups (unique stops grouped by title).
      */
-    public static Promise<List<StopGroup>, Exception, Void> getStopsByTitleNear(@NonNull final String agency, final double sourceLat, final double sourceLon) {
-        final Deferred<List<StopGroup>, Exception, Void> d = new DeferredObject<>();
+    public static List<StopGroup> getStopsByTitleNear(@NonNull final String agency, final double sourceLat, final double sourceLon) throws JsonSyntaxException, IOException {
         setup();
+        AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
+        HashMap<String, StopGroup> stopsByTitle = conf.getStopsByTitle();
 
-        sDM.when(configured, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<Void>() {
-            
-            @Override
-            public void onDone(Void v) {
-                AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
-                HashMap<String, StopGroup> stopsByTitle = conf.getStopsByTitle();
+        List<StopGroup> nearStops = new ArrayList<>();
 
-                List<StopGroup> nearStops = new ArrayList<>();
+        // Loop through stop groups
+        for (StopGroup stopGroup: stopsByTitle.values()) {
+            // TODO Decode the geohash into long/lat and just compare with that
 
-                // Loop through stop groups
-                for (StopGroup stopGroup: stopsByTitle.values()) {
-                    // TODO Decode the geohash into long/lat and just compare with that
-
-                    // Get stop data for each stop tag and check the distance.
-                    for (String stopTag: stopGroup.getStopTags()) {
-                        Stop stop = conf.getStops().get(stopTag);
-                        if (stop == null) {
-                            LOGW(TAG, "Stop tag \""+stopTag+"\" found in stopsByTitle not in stops");
-                            continue; // Check next tag
-                        }
-
-                        // Calculate distance to stop
-                        double stopLat = Double.parseDouble(stop.getLatitude());
-                        double stopLon = Double.parseDouble(stop.getLongitude());
-                        float[] results = new float[1];
-                        Location.distanceBetween(sourceLat, sourceLon, stopLat, stopLon, results);
-
-                        if (results[0] < Config.NEARBY_RANGE) {
-                            nearStops.add(stopGroup);
-                            break; // Skip to next group
-                        }
-                    }
+            // Get stop data for each stop tag and check the distance.
+            for (String stopTag: stopGroup.getStopTags()) {
+                Stop stop = conf.getStops().get(stopTag);
+                if (stop == null) {
+                    LOGW(TAG, "Stop tag \""+stopTag+"\" found in stopsByTitle not in stops");
+                    continue; // Check next tag
                 }
 
-                d.resolve(nearStops);
-            }
+                // Calculate distance to stop
+                double stopLat = Double.parseDouble(stop.getLatitude());
+                double stopLon = Double.parseDouble(stop.getLongitude());
+                float[] results = new float[1];
+                Location.distanceBetween(sourceLat, sourceLon, stopLat, stopLon, results);
 
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception e) {
-                d.reject(e);
+                if (results[0] < Config.NEARBY_RANGE) {
+                    nearStops.add(stopGroup);
+                    break; // Skip to next group
+                }
             }
-        });
-        
-        return d.promise();
+        }
+
+        return nearStops;
     }
 
     /**
@@ -466,38 +249,25 @@ public final class NextbusAPI {
      * @param sourceLon Longitude
      * @return Promise for list of stop groups (unique stops grouped by title).
      */
-    public static Promise<List<StopGroup>, Exception, Void> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
-        final Deferred<List<StopGroup>, Exception, Void> d = new DeferredObject<>();
+    public static List<StopGroup> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) throws JsonSyntaxException, IOException {
         setup();
 
-        final Promise<List<StopGroup>, Exception, Void> allNearStops = getStopsByTitleNear(agency, sourceLat, sourceLon);
-        sDM.when(allNearStops, AndroidExecutionScope.BACKGROUND).then(new DoneCallback<List<StopGroup>>() {
-            @Override
-            public void onDone(List<StopGroup> nearbyStops) {
-                final ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
-                List<StopGroup> results = new ArrayList<>();
+        final List<StopGroup> nearbyStops = getStopsByTitleNear(agency, sourceLat, sourceLon);
+        final ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
+        List<StopGroup> results = new ArrayList<>();
 
-                for (StopGroup stopGroup : nearbyStops) {
-                    String stopTitle = stopGroup.getTitle();
+        for (StopGroup stopGroup : nearbyStops) {
+            String stopTitle = stopGroup.getTitle();
 
-                    // Try to find this stop in list of active stops
-                    for (StopStub activeStopStub : active.getStops()) {
-                        if (StringUtils.equals(stopTitle, activeStopStub.getTitle())) {
-                            results.add(stopGroup); // Found: it's active
-                        }
-                    }
+            // Try to find this stop in list of active stops
+            for (StopStub activeStopStub : active.getStops()) {
+                if (StringUtils.equals(stopTitle, activeStopStub.getTitle())) {
+                    results.add(stopGroup); // Found: it's active
                 }
+            }
+        }
 
-                d.resolve(results);
-            }
-        }).fail(new FailCallback<Exception>() {
-            @Override
-            public void onFail(Exception e) {
-                d.reject(e);
-            }
-        });
-        
-        return d.promise();
+        return results;
     }
 
 }

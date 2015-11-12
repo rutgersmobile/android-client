@@ -22,38 +22,37 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
  */
 public class DiningMenuSectionLoader extends AsyncTaskLoader<List<SimpleSection<DiningMenu>>> {
 
-    Context context;
-
     public static final String TAG = "DiningMenuSectionLoader";
 
     private List<SimpleSection<DiningMenu>> mData;
 
+    String nbCampusFullString;
+    String nwkCampusFullString;
+    String camCampusFullString;
+
     public DiningMenuSectionLoader(Context context) {
         super(context);
-        this.context = context;
+        nbCampusFullString = context.getString(R.string.campus_nb_full);
+        nwkCampusFullString = context.getString(R.string.campus_nwk_full);
+        camCampusFullString = context.getString(R.string.campus_cam_full);
     }
 
     @Override
     public List<SimpleSection<DiningMenu>> loadInBackground() {
         final List<SimpleSection<DiningMenu>> simpleSections = new ArrayList<>();
         // Get user's home campus
-        final String userHome = RutgersUtils.getHomeCampus(context);
-
-        // getString() in callback can cause crashes - load Resource strings here
-        final String nbCampusFullString = context.getString(R.string.campus_nb_full);
-        final String nwkCampusFullString = context.getString(R.string.campus_nwk_full);
-        final String camCampusFullString = context.getString(R.string.campus_cam_full);
+        final String userHome = RutgersUtils.getHomeCampus(getContext());
 
         // Static dining hall entries
         List<DiningMenu.Meal> dummyMeal = new ArrayList<>(1);
         dummyMeal.add(new DiningMenu.Meal("fake", true, null)); // Prevents static entries from being grayed out
 
         List<DiningMenu> stonsby = new ArrayList<>(1);
-        stonsby.add(new DiningMenu(context.getString(R.string.dining_stonsby_title), 0, dummyMeal));
+        stonsby.add(new DiningMenu(getContext().getString(R.string.dining_stonsby_title), 0, dummyMeal));
         final SimpleSection<DiningMenu> newarkHalls = new SimpleSection<>(nwkCampusFullString, stonsby);
 
         List<DiningMenu> gateway = new ArrayList<>(1);
-        gateway.add(new DiningMenu(context.getString(R.string.dining_gateway_title), 0, dummyMeal));
+        gateway.add(new DiningMenu(getContext().getString(R.string.dining_gateway_title), 0, dummyMeal));
         final SimpleSection<DiningMenu> camdenHalls = new SimpleSection<>(camCampusFullString, gateway);
 
         try {
@@ -76,7 +75,7 @@ public class DiningMenuSectionLoader extends AsyncTaskLoader<List<SimpleSection<
             }
         } catch (JsonSyntaxException | IOException e) {
             Log.e(TAG, e.getMessage());
-            AppUtils.showFailedLoadToast(context);
+            AppUtils.showFailedLoadToast(getContext());
         }
 
         return simpleSections;

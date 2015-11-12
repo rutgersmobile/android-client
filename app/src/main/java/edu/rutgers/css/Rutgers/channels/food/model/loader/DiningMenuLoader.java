@@ -22,12 +22,10 @@ public class DiningMenuLoader extends AsyncTaskLoader<DiningMenu> {
 
     DiningMenu data;
     String location;
-    Context context;
     DiningMenu newData;
 
     public DiningMenuLoader(Context context, DiningMenu data, String location) {
         super(context);
-        this.context = context;
         this.data = data;
         this.location = location;
     }
@@ -39,7 +37,7 @@ public class DiningMenuLoader extends AsyncTaskLoader<DiningMenu> {
             newData = DiningAPI.getDiningLocation(location);
         } catch (JsonSyntaxException | IOException e) {
             LOGE(TAG, e.getMessage());
-            AppUtils.showFailedLoadToast(context);
+            AppUtils.showFailedLoadToast(getContext());
         }
         return newData;
     }

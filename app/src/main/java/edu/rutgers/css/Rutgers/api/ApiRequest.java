@@ -4,7 +4,8 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.XmlDom;
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -14,12 +15,14 @@ import org.jdeferred.Promise;
 import org.jdeferred.impl.DeferredObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.RutgersApplication;
+import edu.rutgers.css.Rutgers.interfaces.XmlParser;
 
 /** Convenience class for making requests */
 public final class ApiRequest {
@@ -54,7 +57,15 @@ public final class ApiRequest {
      * @return Promise for a JSON object
      */
     public static <T> T new_api(String resource, long expire, Type type) throws JsonSyntaxException, IOException{
-        return new_json(Config.API_BASE + resource, expire, type);
+        return new_json(Config.API_BASE + resource, expire, type, null);
+    }
+
+    public static <T> T new_api(String resource, long expire, Class<T> clazz) throws JsonSyntaxException, IOException{
+        return new_json(Config.API_BASE + resource, expire, (Type) clazz, null);
+    }
+
+    public static <T> T new_api(String resource, long expire, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
+        return new_json(Config.API_BASE + resource, expire, type, deserializer);
     }
 
     /**
@@ -63,15 +74,28 @@ public final class ApiRequest {
      * @param expire Cache time in milliseconds
      * @return Promise for a JSON object
      */
-    public static <T> T new_json(String resource, long expire, Type type) throws JsonSyntaxException, IOException {
+    public static <T> T new_json(String resource, long expire, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
         setup();
+        Response response = getResponse(resource);
+        GsonBuilder gson = new GsonBuilder();
+        if (deserializer != null) {
+            gson = gson.registerTypeAdapter(type, deserializer);
+        }
 
+        return gson.create().fromJson(response.body().string(), type);
+    }
+
+    private static Response getResponse(String resource) throws IOException {
         Request request = new Request.Builder()
                 .url(resource)
                 .build();
-        Response response = client.newCall(request).execute();
+        return client.newCall(request).execute();
+    }
 
-        return new Gson().fromJson(response.body().string(), type);
+    public static <T> T new_xml(String resource, long expire, XmlParser<T> parser) throws XmlPullParserException, IOException {
+        setup();
+        Response response = getResponse(resource);
+        return parser.parse(response.body().byteStream());
     }
 
     /**

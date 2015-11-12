@@ -24,14 +24,12 @@ public class MealGenreLoader extends AsyncTaskLoader<List<DiningMenu.Genre>> {
 
     public static final String TAG = "MealGenreLoader";
 
-    private Context context;
     private String mealStr;
     private String locationStr;
     private List<DiningMenu.Genre> mData;
 
     public MealGenreLoader(Context context, Bundle args) {
         super(context);
-        this.context = context;
         this.mealStr = args.getString(FoodMeal.ARG_MEAL_TAG);
         this.locationStr = args.getString(FoodMeal.ARG_LOCATION_TAG);
     }
@@ -52,7 +50,7 @@ public class MealGenreLoader extends AsyncTaskLoader<List<DiningMenu.Genre>> {
             }
         } catch (JsonSyntaxException | IOException e) {
             LOGE(TAG, e.getMessage());
-            AppUtils.showFailedLoadToast(context);
+            AppUtils.showFailedLoadToast(getContext());
         }
 
         return genres;

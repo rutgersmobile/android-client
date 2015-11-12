@@ -2,6 +2,8 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,39 +11,30 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.jdeferred.multiple.MultipleResults;
-import org.jdeferred.multiple.OneReject;
-
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
+import edu.rutgers.css.Rutgers.channels.bus.model.loader.RouteLoader;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadcaster {
+public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadcaster, LoaderManager.LoaderCallbacks<List<SimpleSection<RouteStub>>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusRoutes";
     public static final String HANDLE               = "busroutes";
 
+    private static final int LOADER_ID              = 101;
+
     /* Member data */
     private SimpleSectionedAdapter<RouteStub> mAdapter;
     private FilterFocusListener mFilterFocusListener;
-    private AndroidDeferredManager mDM;
-    
+
     public BusRoutes() {
         // Required empty public constructor
     }
@@ -49,7 +42,6 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDM = new AndroidDeferredManager();
         mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
     }
     
@@ -93,50 +85,8 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
 
         // Clear out everything
         mAdapter.clear();
-
-        // Get home campus for result ordering
-        String userHome = RutgersUtils.getHomeCampus(getActivity());
-        final boolean nbHome = userHome.equals(getString(R.string.campus_nb_full));
-
-        // Get promises for active routes
-        final Promise<List<RouteStub>, Exception, Void> nbActiveRoutes = NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NB);
-        final Promise<List<RouteStub>, Exception, Void> nwkActiveRoutes = NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NWK);
-
-        // Synchronized load of active routes
         showProgressCircle();
-        mDM.when(nbActiveRoutes, nwkActiveRoutes).done(new DoneCallback<MultipleResults>() {
-
-            @Override
-            public void onDone(MultipleResults results) {
-                // Abort if resources can't be accessed
-                if (!isAdded() || getResources() == null) return;
-
-                List<RouteStub> nbResult = (List<RouteStub>) results.get(0).getResult();
-                List<RouteStub> nwkResult = (List<RouteStub>) results.get(1).getResult();
-
-                if (nbHome) {
-                    loadAgency(NextbusAPI.AGENCY_NB, nbResult);
-                    loadAgency(NextbusAPI.AGENCY_NWK, nwkResult);
-                } else {
-                    loadAgency(NextbusAPI.AGENCY_NWK, nwkResult);
-                    loadAgency(NextbusAPI.AGENCY_NB, nbResult);
-                }
-            }
-
-        }).fail(new FailCallback<OneReject>() {
-
-            @Override
-            public void onFail(OneReject result) {
-                AppUtils.showFailedLoadToast(getActivity());
-            }
-
-        }).always(new AlwaysCallback<MultipleResults, OneReject>() {
-            @Override
-            public void onAlways(Promise.State state, MultipleResults resolved, OneReject rejected) {
-                hideProgressCircle();
-            }
-        });
-
+        getLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override
@@ -147,33 +97,25 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
         setFocusListener(null);
     }
 
-    /**
-     * Populate list with bus routes for agency, with a section header for that agency
-     * @param agencyTag Agency tag for API request
-     * @param routeStubs List of routes (stubs)
-     */
-    private void loadAgency(@NonNull String agencyTag, @NonNull List<RouteStub> routeStubs) {
-        // Abort if resources can't be accessed
-        if (!isAdded() || getResources() == null) return;
-
-        // Get header for routes section
-        String header;
-        if (NextbusAPI.AGENCY_NB.equals(agencyTag)) header = getString(R.string.bus_nb_active_routes_header);
-        else if (NextbusAPI.AGENCY_NWK.equals(agencyTag)) header = getString(R.string.bus_nwk_active_routes_header);
-        else throw new IllegalArgumentException("Invalid Nextbus agency \""+agencyTag+"\"");
-
-        mAdapter.add(new SimpleSection<>(header, routeStubs));
-
-        /*
-        if (routeStubs.isEmpty()) {
-            mAdapter.add(new RMenuItemRow(getString(R.string.bus_no_active_routes)));
-        }
-        */
-    }
-
     @Override
     public void setFocusListener(FilterFocusListener listener) {
         mFilterFocusListener = listener;
     }
 
+    @Override
+    public Loader<List<SimpleSection<RouteStub>>> onCreateLoader(int id, Bundle args) {
+        return new RouteLoader(getActivity());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<SimpleSection<RouteStub>>> loader, List<SimpleSection<RouteStub>> data) {
+        mAdapter.clear();
+        mAdapter.addAll(data);
+        hideProgressCircle();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<SimpleSection<RouteStub>>> loader) {
+        mAdapter.clear();
+    }
 }
