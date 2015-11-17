@@ -65,11 +65,11 @@ public class PredictionXmlParser implements XmlParser<List<Prediction>> {
         String title;
         String tag;
         if (type == PredictionType.ROUTE) {
-            title = parser.getAttributeValue(null, "stopTitle");
-            tag = parser.getAttributeValue(null, "stopTag");
+            title = parser.getAttributeValue(ns, "stopTitle");
+            tag = parser.getAttributeValue(ns, "stopTag");
         } else {
-            title = parser.getAttributeValue(null, "routeTitle");
-            tag = parser.getAttributeValue(null, "routeTag");
+            title = parser.getAttributeValue(ns, "routeTitle");
+            tag = parser.getAttributeValue(ns, "routeTag");
         }
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -88,7 +88,7 @@ public class PredictionXmlParser implements XmlParser<List<Prediction>> {
     private Prediction readDirection(XmlPullParser parser, String stopTitle, String stopTag) throws XmlPullParserException, IOException {
         Prediction prediction = new Prediction(stopTitle, stopTag);
         parser.require(XmlPullParser.START_TAG, ns, "direction");
-        String direction = parser.getAttributeValue(null, "title");
+        String direction = parser.getAttributeValue(ns, "title");
         prediction.setDirection(direction);
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -106,7 +106,7 @@ public class PredictionXmlParser implements XmlParser<List<Prediction>> {
 
     private int readPrediction(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "prediction");
-        int minutes = Integer.parseInt(parser.getAttributeValue(null, "minutes"));
+        int minutes = Integer.parseInt(parser.getAttributeValue(ns, "minutes"));
         while (parser.next() != XmlPullParser.END_TAG) {}
         parser.require(XmlPullParser.END_TAG, ns, "prediction");
         return minutes;

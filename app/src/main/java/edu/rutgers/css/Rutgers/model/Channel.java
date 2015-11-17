@@ -3,16 +3,19 @@ package edu.rutgers.css.Rutgers.model;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.Serializable;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
+import edu.rutgers.css.Rutgers.utils.JsonUtils;
 
 /**
  * RU Mobile channel.
@@ -24,25 +27,27 @@ public class Channel implements Serializable {
     private String view;
     private String api;
     private String url;
-    private JSONArray data;
+    private JsonArray data;
     private boolean canOverride;
 
     /** Construct channel from JSON. */
-    public Channel(JSONObject channelJson) throws JSONException {
+    public Channel(JsonObject channelJson) throws JsonSyntaxException {
         this.title = new VarTitle(channelJson.get("title"));
-        this.handle = channelJson.getString("handle");
+        this.handle = channelJson.getAsJsonPrimitive("handle").getAsString();
 
-        if (channelJson.isNull("view") && !channelJson.isNull("url")) {
+        if (channelJson.get("view").isJsonNull() && !channelJson.get("url").isJsonNull()) {
             this.view = WebDisplay.HANDLE;
         } else {
-            this.view = channelJson.getString("view");
+            this.view = channelJson.getAsJsonPrimitive("view").getAsString();
         }
 
-        if (!channelJson.isNull("api")) this.api = channelJson.getString("api");
-        if (!channelJson.isNull("url")) this.url = channelJson.getString("url");
-        if (!channelJson.isNull("data")) this.data = channelJson.getJSONArray("data");
+        if (JsonUtils.exists(channelJson, "api")) this.api = channelJson.getAsJsonPrimitive("api").getAsString();
+        if (JsonUtils.exists(channelJson, "url")) this.url = channelJson.getAsJsonPrimitive("url").getAsString();
+        if (JsonUtils.exists(channelJson, "data")) this.data = channelJson.getAsJsonArray("data");
 
-        this.canOverride = channelJson.optBoolean("canOverride");
+        JsonElement elem = channelJson.get("canOverride");
+
+        this.canOverride = elem != null && !elem.isJsonNull() && elem.getAsBoolean();
     }
 
     public String getTitle() {
@@ -76,7 +81,7 @@ public class Channel implements Serializable {
         return canOverride;
     }
 
-    public JSONArray getData() {
+    public JsonArray getData() {
         return data;
     }
 

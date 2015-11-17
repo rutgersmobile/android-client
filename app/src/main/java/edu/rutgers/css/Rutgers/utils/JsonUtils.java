@@ -2,6 +2,8 @@ package edu.rutgers.css.Rutgers.utils;
 
 import android.support.annotation.NonNull;
 
+import com.google.gson.JsonObject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +18,10 @@ public final class JsonUtils {
     private static final String TAG = "JsonUtils";
 
     private JsonUtils() {}
+
+    public static boolean exists(@NonNull JsonObject jsonObject, @NonNull String field) {
+        return jsonObject.has(field) && !jsonObject.get(field).isJsonNull();
+    }
 
     /**
      * Check if a JSON string is really empty - do not coerce null value into string "null".

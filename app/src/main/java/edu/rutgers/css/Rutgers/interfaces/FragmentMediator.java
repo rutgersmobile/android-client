@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
  * Mediator interface for managing fragments in an activity
  */
 public interface FragmentMediator {
-    void loadCorrectFragment();
     boolean switchFragments(@NonNull Bundle args);
     void saveState(Bundle outState);
     void saveFragment();

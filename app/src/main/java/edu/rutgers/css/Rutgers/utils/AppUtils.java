@@ -15,8 +15,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.androidquery.callback.AjaxStatus;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonSyntaxException;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,9 +35,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.model.Channel;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * General helper methods & global variables for the app
@@ -272,13 +272,13 @@ public final class AppUtils {
      * @param resourceId Raw resource file ID
      * @return JSON array or null if there was a problem loading the raw resource file
      */
-    public static JSONArray loadRawJSONArray(@NonNull Resources resources, int resourceId) {
+    public static JsonArray loadRawJSONArray(@NonNull Resources resources, int resourceId) {
         String jsonString = loadRawResource(resources, resourceId);
         if (jsonString == null) return null;
 
         try {
-            return new JSONArray(jsonString);
-        } catch (JSONException e) {
+            return new Gson().fromJson(jsonString, JsonArray.class);
+        } catch (JsonSyntaxException e) {
             LOGE(TAG, "loadRawJSONArray(): " + e.getMessage());
             return null;
         }

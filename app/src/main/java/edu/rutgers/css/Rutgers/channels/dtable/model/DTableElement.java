@@ -2,8 +2,8 @@ package edu.rutgers.css.Rutgers.channels.dtable.model;
 
 import android.support.annotation.NonNull;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.Serializable;
 
@@ -14,7 +14,7 @@ public class DTableElement implements Serializable {
 
     private VarTitle varTitle;
 
-    public DTableElement(JSONObject jsonObject) throws JSONException {
+    public DTableElement(JsonObject jsonObject) throws JsonSyntaxException {
         // Set the element title. JSON may have a string or object containing campus-local strings
         varTitle = new VarTitle(jsonObject.get("title"));
     }

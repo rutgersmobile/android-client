@@ -8,16 +8,15 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,17 +143,17 @@ public class SOCDialogFragment extends DialogFragment {
      */
     private ArrayList<KeyValPair> loadCampuses() {
         ArrayList<KeyValPair> results = new ArrayList<KeyValPair>();
-        JSONArray campusJSONArray = AppUtils.loadRawJSONArray(getResources(), R.raw.soc_campuses);
+        JsonArray campusJSONArray = AppUtils.loadRawJSONArray(getResources(), R.raw.soc_campuses);
         if (campusJSONArray == null) {
             LOGE(TAG, "Couldn't get list of campuses for SOC");
             return results;
         }
 
-        for (int i = 0; i < campusJSONArray.length(); i++) {
+        for (JsonElement element : campusJSONArray) {
             try {
-                JSONObject campusJSON = campusJSONArray.getJSONObject(i);
-                results.add(new KeyValPair(campusJSON.getString("tag"), campusJSON.getString("title")));
-            } catch(JSONException e) {
+                JsonObject campusJSON = element.getAsJsonObject();
+                results.add(new KeyValPair(campusJSON.getAsJsonPrimitive("tag").getAsString(), campusJSON.getAsJsonPrimitive("title").getAsString()));
+            } catch(IllegalStateException e) {
                 LOGW(TAG, "loadCampuses(): " + e.getMessage());
             }
         }

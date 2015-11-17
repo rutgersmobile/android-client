@@ -2,8 +2,9 @@ package edu.rutgers.css.Rutgers.channels.dtable.model;
 
 import android.support.annotation.NonNull;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.Serializable;
 
@@ -16,15 +17,19 @@ public class VarTitle implements Serializable {
     public String homeTitle;
     public String foreignTitle;
 
-    public VarTitle(Object titleObject) throws JSONException {
-        if (titleObject.getClass() == String.class) {
-            homeTitle = (String) titleObject;
-        } else if (titleObject.getClass() == JSONObject.class) {
-            homeCampus = ((JSONObject)titleObject).getString("homeCampus");
-            homeTitle = ((JSONObject)titleObject).getString("homeTitle");
-            foreignTitle = ((JSONObject)titleObject).getString("foreignTitle");
-        } else {
-            throw new IllegalArgumentException("Title must be a String or JSONObject");
+    public VarTitle(JsonElement element) throws JsonSyntaxException {
+        try {
+            homeTitle = element.getAsString();
+        } catch (ClassCastException | UnsupportedOperationException e) {
+            try {
+                JsonObject json = element.getAsJsonObject();
+
+                homeCampus = json.getAsJsonPrimitive("homeCampus").getAsString();
+                homeTitle = json.getAsJsonPrimitive("homeTitle").getAsString();
+                foreignTitle = json.getAsJsonPrimitive("foreignTitle").getAsString();
+            } catch (ClassCastException e2) {
+                throw new IllegalArgumentException("Title must be a String or JSONObject");
+            }
         }
     }
 

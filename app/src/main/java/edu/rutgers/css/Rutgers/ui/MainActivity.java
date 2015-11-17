@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -19,25 +20,30 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.androidquery.util.AQUtility;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonSyntaxException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
+import edu.rutgers.css.Rutgers.model.Motd;
+import edu.rutgers.css.Rutgers.model.MotdAPI;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
+import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * Main activity. Handles navigation drawer, displayed fragments, and connection to location services.
@@ -54,6 +60,8 @@ public class MainActivity extends GoogleApiProviderActivity implements
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerAdapter mDrawerAdapter;
 
+    private static final int LOADER_ID = 1;
+
 
     /* View references */
     private DrawerLayout mDrawerLayout;
@@ -62,8 +70,26 @@ public class MainActivity extends GoogleApiProviderActivity implements
     /* Callback for changed preferences */
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
-    private FragmentMediator fragmentMediator;
+    private MainFragmentMediator fragmentMediator;
     private TutorialMediator tutorialMediator;
+
+    private class InitLoadHolder {
+        private JsonArray array;
+        private Motd motd;
+
+        public InitLoadHolder(JsonArray array, Motd motd) {
+            this.array = array;
+            this.motd = motd;
+        }
+
+        public JsonArray getArray() {
+            return array;
+        }
+
+        public Motd getMotd() {
+            return motd;
+        }
+    }
 
     @Override
     public ChannelManager getChannelManager() {
@@ -170,7 +196,46 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 mToolbar, mDrawerLayout, mDrawerAdapter,
                 mChannelManager, mDrawerListView, savedInstanceState);
 
-        fragmentMediator.loadCorrectFragment();
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
+                    .commit();
+        }
+
+        new AsyncTask<Void, Void, InitLoadHolder>() {
+            private Exception e;
+
+            @Override
+            protected InitLoadHolder doInBackground(Void... params) {
+                JsonArray array;
+                Motd motd = null;
+
+                try {
+                    array = ApiRequest.new_api("ordered_content.json", ApiRequest.CACHE_ONE_DAY, JsonArray.class);
+                } catch (JsonSyntaxException | IOException e) {
+                    array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
+                    this.e = e;
+                }
+
+                try {
+                    motd = MotdAPI.getMotd();
+                } catch (JsonSyntaxException | IOException e) {
+                    this.e = e;
+                }
+
+                return new InitLoadHolder(array, motd);
+            }
+
+            @Override
+            protected void onPostExecute(InitLoadHolder results) {
+                if (results.getArray() == null || results.getMotd() == null) {
+                    LOGE(TAG, "Couldn't load Motd or ordered_content: " + e.getMessage());
+                    AppUtils.showFailedLoadToast(MainActivity.this);
+                    return;
+                }
+                fragmentMediator.loadCorrectFragment(results.getMotd(), results.getArray());
+            }
+        }.execute();
     }
 
     @Override

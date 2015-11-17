@@ -1,7 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.dtable.model;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * Specifies a channel to open and arguments to pass to it.
@@ -14,15 +14,19 @@ public class DTableChannel extends DTableElement {
     private VarTitle channelTitle;
     private int count;
 
-    public DTableChannel(JSONObject jsonObject) throws JSONException {
+    public DTableChannel(JsonObject jsonObject) throws JsonSyntaxException {
         super(jsonObject);
 
-        JSONObject channel = jsonObject.getJSONObject("channel");
-        view = channel.getString("view");
-        if (!channel.isNull("title")) channelTitle = new VarTitle(channel.get("title"));
-        if (!channel.isNull("url")) url = channel.getString("url");
-        if (!channel.isNull("data")) data = channel.getString("data");
-        count = channel.optInt("count");
+        JsonObject channel = jsonObject.getAsJsonObject("channel");
+        view = channel.getAsJsonPrimitive("view").getAsString();
+        if (channel.has("title") && !channel.get("title").isJsonNull()) channelTitle = new VarTitle(channel.get("title"));
+        if (channel.has("url") && !channel.get("url").isJsonNull()) url = channel.getAsJsonPrimitive("url").getAsString();
+        if (channel.has("data") && !channel.get("data").isJsonNull()) data = channel.getAsJsonPrimitive("data").getAsString();
+        if (channel.has("count")) {
+            count = channel.getAsJsonPrimitive("count").getAsInt();
+        } else {
+            count = 0;
+        }
     }
 
     /**

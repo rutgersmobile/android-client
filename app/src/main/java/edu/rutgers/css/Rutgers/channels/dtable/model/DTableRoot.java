@@ -1,8 +1,10 @@
 package edu.rutgers.css.Rutgers.channels.dtable.model;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,20 +19,28 @@ public class DTableRoot extends DTableElement {
     private boolean window;
     private List<DTableElement> children;
 
-    public DTableRoot(JSONObject jsonObject) throws JSONException {
+    public DTableRoot(JsonObject jsonObject) throws JsonSyntaxException {
         super(jsonObject);
 
-        schema = jsonObject.optString("schema");
-        grouped = jsonObject.optBoolean("grouped");
-        window = jsonObject.optBoolean("window");
+        JsonPrimitive p = jsonObject.getAsJsonPrimitive("schema");
+        if (p != null) {
+            schema = p.getAsString();
+        }
 
-        JSONArray childrenJson = jsonObject.getJSONArray("children");
-        children = new ArrayList<>(childrenJson.length());
+        p = jsonObject.getAsJsonPrimitive("grouped");
+        grouped = p != null && p.getAsBoolean();
 
-        for (int i = 0; i < childrenJson.length(); i++) {
-            JSONObject child = childrenJson.getJSONObject(i);
+        p = jsonObject.getAsJsonPrimitive("window");
+        window = p != null && p.getAsBoolean();
+
+        JsonArray childrenJson = jsonObject.getAsJsonArray("children");
+        children = new ArrayList<>(childrenJson.size());
+
+        for (JsonElement childElement : childrenJson) {
+            JsonObject child = childElement.getAsJsonObject();
             if (child.has("answer")) children.add(new DTableFAQ(child));
-            else if (child.has("children") && child.opt("children") instanceof JSONArray) children.add(new DTableRoot(child));
+            else if (child.has("children") && child.get("children").isJsonArray())
+                children.add(new DTableRoot(child));
             else if (child.has("channel")) children.add(new DTableChannel(child));
             else if (child.has("title")) children.add(new DTableElement(child));
         }

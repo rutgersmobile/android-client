@@ -13,14 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ListView;
 
-import com.androidquery.callback.AjaxStatus;
-
-import org.jdeferred.AlwaysCallback;
-import org.jdeferred.DoneCallback;
-import org.jdeferred.FailCallback;
-import org.jdeferred.Promise;
-import org.jdeferred.android.AndroidDeferredManager;
-import org.json.JSONArray;
+import com.google.gson.JsonArray;
 
 import java.util.Map;
 
@@ -29,12 +22,10 @@ import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
-import edu.rutgers.css.Rutgers.model.MotdAPI;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
@@ -42,9 +33,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * Control where we're putting fragments
@@ -63,7 +52,6 @@ public class MainFragmentMediator implements FragmentMediator {
     public static final String PREF_HANDLE_TAG = "handleTag";
     public static final String SHOWED_MOTD = "showedMotd";
     public static final String LAST_FRAGMENT_TAG = "lastFragmentTag";
-
 
     private final FragmentManager fm;
     private final Toolbar toolbar;
@@ -120,53 +108,34 @@ public class MainFragmentMediator implements FragmentMediator {
         });
     }
 
-    public void loadCorrectFragment() {
+    public void loadCorrectFragment(Motd motd, JsonArray channelsArray) {
         Map<String, Channel> channelsMap = RutgersApplication.getChannelsMap();
 
         if (channelsMap == null) {
-            MotdAPI.getMotd().fail(new FailCallback<AjaxStatus>() {
-                @Override
-                public void onFail(AjaxStatus result) {
-                    LOGE(TAG, "Couldn't get MOTD");
-                }
-            }).always(new AlwaysCallback<Motd, AjaxStatus>() {
-                @Override
-                public void onAlways(Promise.State state, final Motd motd, AjaxStatus rejected) {
-                    if (!showedMotd && motd != null && motd.getData() != null) {
-                        showedMotd = true;
-                        if (!motd.isWindow()) {
-                            MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
-                            f.show(fm, MotdDialogFragment.TAG);
-                        } else {
-                            switchFragments(
-                                    TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
-                            if (!motd.hasCloseButton()) {
-                                if (activity.getSupportActionBar() != null) {
-                                    activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                                }
-                                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                            }
-                            return;
+            if (!showedMotd && motd != null && motd.getData() != null) {
+                showedMotd = true;
+                if (!motd.isWindow()) {
+                    MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
+                    f.show(fm, MotdDialogFragment.TAG);
+                } else {
+                    switchFragments(
+                            TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
+                    if (!motd.hasCloseButton()) {
+                        if (activity.getSupportActionBar() != null) {
+                            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                         }
-                    } else if (motd != null) {
-                        LOGI(TAG, motd.getMotd());
+                        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                     }
-                    toolbar.setVisibility(View.VISIBLE);
-                    // Load nav drawer items
-                    loadChannels().always(new AlwaysCallback<JSONArray, AjaxStatus>() {
-                        @Override
-                        public void onAlways(Promise.State state, JSONArray resolved, AjaxStatus rejected) {
-                            restore(true);
-                        }
-                    });
+                    return;
                 }
-            });
-
-            if (fm.getBackStackEntryCount() == 0) {
-                fm.beginTransaction()
-                        .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
-                        .commit();
+            } else if (motd != null) {
+                LOGI(TAG, motd.getMotd());
             }
+            toolbar.setVisibility(View.VISIBLE);
+
+            // Load nav drawer items
+            loadChannels(channelsArray);
+            restore(true);
         } else {
             channelManager.setChannelsMap(channelsMap);
             drawerAdapter.addAll(channelManager.getChannels());
@@ -213,23 +182,10 @@ public class MainFragmentMediator implements FragmentMediator {
     /**
      * Try to grab web hosted channels, add the native packaged channels on failure. Load the last channel onAlways.
      */
-    private Promise<JSONArray, AjaxStatus, Double> loadChannels() {
-        AndroidDeferredManager dm = new AndroidDeferredManager();
-        return dm.when(ApiRequest.apiArray("ordered_content.json", ApiRequest.CACHE_ONE_DAY)).done(new DoneCallback<JSONArray>() {
-            @Override
-            public void onDone(JSONArray channelsArray) {
-                channelManager.loadChannelsFromJSONArray(channelsArray);
-                RutgersApplication.setChannelsMap(channelManager.getChannelsMap());
-                drawerAdapter.addAll(channelManager.getChannels());
-            }
-        }).fail(new FailCallback<AjaxStatus>() {
-            @Override
-            public void onFail(AjaxStatus status) {
-                channelManager.loadChannelsFromResource(activity.getResources(), R.raw.channels);
-                RutgersApplication.setChannelsMap(channelManager.getChannelsMap());
-                drawerAdapter.addAll(channelManager.getChannels());
-            }
-        });
+    private void loadChannels(JsonArray array) {
+        channelManager.loadChannelsFromJSONArray(array);
+        RutgersApplication.setChannelsMap(channelManager.getChannelsMap());
+        drawerAdapter.addAll(channelManager.getChannels());
     }
 
     /**

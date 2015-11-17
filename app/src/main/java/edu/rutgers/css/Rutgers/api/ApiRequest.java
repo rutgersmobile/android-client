@@ -68,6 +68,10 @@ public final class ApiRequest {
         return new_json(Config.API_BASE + resource, expire, type, deserializer);
     }
 
+    public static <T> T new_json(String resource, long expire, Type type) throws JsonSyntaxException, IOException {
+        return new_json(resource, expire, type, null);
+    }
+
     /**
      * Get arbitrary JSON.
      * @param resource JSON file URL
@@ -85,7 +89,7 @@ public final class ApiRequest {
         return gson.create().fromJson(response.body().string(), type);
     }
 
-    private static Response getResponse(String resource) throws IOException {
+    public static Response getResponse(String resource) throws IOException {
         Request request = new Request.Builder()
                 .url(resource)
                 .build();
