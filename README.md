@@ -3,17 +3,18 @@ Rutgers Mobile - Android
 
 The new RU Mobile client for Android.
 
-This is an Android Studio project using Gradle for dependency management. Make sure to initialize submodules with `git submodule update --init` before building.
+This is an Android Studio project using Gradle for dependency management.
+Make sure to initialize submodules with `git submodule update --init` before building.
 
 ![App demo](http://rutgersmobile.github.io/android-client/images/food_demo.gif)
 
 ## Libraries Used
-* [Android Query](https://code.google.com/p/android-query/)
 * [Apache Commons Lang](http://commons.apache.org/proper/commons-lang/)
 * [GSON](https://code.google.com/p/google-gson/)
-* [JDeferred](http://jdeferred.org/)
 * [ListViewAnimations](http://nhaarman.github.io/ListViewAnimations/)
+* [OkHTTP](http://square.github.io/okhttp/)
 * [PagerSlidingTabStrip](https://github.com/astuetz/PagerSlidingTabStrip)
+* [Picasso](http://square.github.io/picasso/)
 * [StickyListHeaders](https://github.com/emilsjolander/StickyListHeaders)
 
 # License
