@@ -188,6 +188,8 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     public void onLoadFinished(Loader<List<SimpleSection<StopStub>>> loader, List<SimpleSection<StopStub>> data) {
         mAdapter.clear();
         mAdapter.addAll(data);
+
+        // Assume an empty response is an error
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }

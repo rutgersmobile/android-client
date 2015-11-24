@@ -2,12 +2,15 @@ package edu.rutgers.css.Rutgers.channels.bus.model;
 
 import android.support.annotation.NonNull;
 
+import lombok.Data;
+
 /**
  * Nextbus stop stub.
  */
+@Data
 public final class StopStub implements NextbusItem {
-    private String title;
-    private String geoHash;
+    private final String title;
+    private final String geoHash;
     private String agencyTag; // Not part of Nextbus results
 
     /** Create a stop stub from a stop group. */
@@ -18,26 +21,8 @@ public final class StopStub implements NextbusItem {
     }
 
     @Override
-    public String getTitle() {
-        return title;
-    }
-
-    @Override
     public String getTag() {
         return getTitle();
-    }
-
-    public String getGeoHash() {
-        return geoHash;
-    }
-
-    @Override
-    public String getAgencyTag() {
-        return agencyTag;
-    }
-
-    void setAgencyTag(@NonNull String agencyTag) {
-        this.agencyTag = agencyTag;
     }
 
     @Override

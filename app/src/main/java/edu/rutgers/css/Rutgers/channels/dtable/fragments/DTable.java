@@ -148,6 +148,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
             return;
         }
 
+        // Start loading DTableRoot object in another thread
         mLoading = true;
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
@@ -233,6 +234,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<DTableRoot> loader, DTableRoot data) {
+        // Data will always be returned as non-null unless there was an error
         if (data != null) {
             mAdapter.clear();
             mAdapter.addAll(data.getChildren());

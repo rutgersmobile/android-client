@@ -18,6 +18,7 @@ import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -35,8 +36,10 @@ public class StopLoader extends SimpleAsyncLoader<List<SimpleSection<StopStub>>>
 
     @Override
     public List<SimpleSection<StopStub>> loadInBackground() {
-        final List<SimpleSection<StopStub>> stops = new ArrayList<>();
-        final List<StopStub> nearbyStops = new ArrayList<>();
+        // Stops is the return value it will hold headers as well as stops
+        val stops = new ArrayList<SimpleSection<StopStub>>();
+        // Nearby stops are one of the sections in stops
+        val nearbyStops = new ArrayList<StopStub>();
         stops.add(new SimpleSection<>(getContext().getString(R.string.nearby_bus_header), nearbyStops));
 
         // Check for location services
@@ -45,8 +48,9 @@ public class StopLoader extends SimpleAsyncLoader<List<SimpleSection<StopStub>>>
             LOGI(TAG, "Updating nearby active stops");
 
             try {
-                List<StopGroup> nbNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NB, (float) location.getLatitude(), (float) location.getLongitude());
-                List<StopGroup> nwkNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NWK, (float) location.getLatitude(), (float) location.getLongitude());
+                // Get nearby stops from the api
+                val nbNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NB, (float) location.getLatitude(), (float) location.getLongitude());
+                val nwkNearbyStops = NextbusAPI.getActiveStopsByTitleNear(NextbusAPI.AGENCY_NWK, (float) location.getLatitude(), (float) location.getLongitude());
                 if (nbNearbyStops.isEmpty() && nwkNearbyStops.isEmpty()) {
                     // If there aren't any results, put a "no stops nearby" message
                     //addNearbyRow(1, new RMenuItemRow(noneNearbyString));
@@ -66,13 +70,13 @@ public class StopLoader extends SimpleAsyncLoader<List<SimpleSection<StopStub>>>
         }
 
         // Get home campus for result ordering
-        String userHome = RutgersUtils.getHomeCampus(getContext());
-        final boolean nbHome = userHome.equals(getContext().getString(R.string.campus_nb_full));
+        val userHome = RutgersUtils.getHomeCampus(getContext());
+        val nbHome = userHome.equals(getContext().getString(R.string.campus_nb_full));
 
         try {
-            // Get promises for active stops
-            final List<StopStub> nbActiveStops = NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NB);
-            final List<StopStub> nwkActiveStops = NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NWK);
+            // Get active stops
+            val nbActiveStops = NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NB);
+            val nwkActiveStops = NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NWK);
 
             if (nbHome) {
                 stops.add(loadAgency(NextbusAPI.AGENCY_NB, nbActiveStops));

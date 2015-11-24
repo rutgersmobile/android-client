@@ -14,6 +14,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import lombok.Data;
+import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -50,14 +51,16 @@ public class SubjectLoader extends SimpleAsyncLoader<SubjectLoader.SubjectHolder
         Semesters result = null;
         String defaultSemester = null;
         try {
+            // Get semesters to make sure the semester we're looking at makes sense
             result = ScheduleAPI.getSemesters();
             int defaultIndex = result.getDefaultSemester();
-            List<String> semesters = result.getSemesters();
+            val semesters = result.getSemesters();
 
             if (semesters.isEmpty()) {
                 LOGE(TAG, "Semesters list is empty");
                 return null;
             } else if (defaultIndex < 0 || defaultIndex >= semesters.size()) {
+                // index should be within the size of the array it is indexing into
                 LOGW(TAG, "Invalid default index " + defaultIndex);
                 defaultIndex = 0;
             }
@@ -70,12 +73,14 @@ public class SubjectLoader extends SimpleAsyncLoader<SubjectLoader.SubjectHolder
             }
 
             if (BuildConfig.DEBUG) {
-                for (String semester : semesters) {
+                for (val semester : semesters) {
                     LOGV(TAG, "Got semester: " + ScheduleAPI.translateSemester(semester));
                 }
                 LOGV(TAG, "Default semester: " + ScheduleAPI.translateSemester(defaultSemester));
             }
 
+            // Now that we have the correct semester we can get
+            // the index for searching and subjects to show on the main page
             socIndex = ScheduleAPI.getIndex(semester, campus, level);
             subjects = ScheduleAPI.getSubjects(campus, level, semester);
         } catch (JsonSyntaxException | IOException e) {

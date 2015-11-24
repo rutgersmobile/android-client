@@ -58,7 +58,7 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
                 if (mFilterFocusListener != null) mFilterFocusListener.focusEvent();
             }
         });
-        
+
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
@@ -105,7 +105,7 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
 
     @Override
     public Loader<List<SimpleSection<RouteStub>>> onCreateLoader(int id, Bundle args) {
-        return new RouteLoader(getActivity());
+        return new RouteLoader(getContext());
     }
 
     @Override
@@ -113,6 +113,9 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
         mAdapter.clear();
         mAdapter.addAll(data);
         hideProgressCircle();
+
+        // Assume an empty response is an error
+        // TODO: Is that actually reasonable?
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }

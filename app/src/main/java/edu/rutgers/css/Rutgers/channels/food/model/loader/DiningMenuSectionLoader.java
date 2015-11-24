@@ -15,6 +15,7 @@ import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import lombok.val;
 
 /**
  * Loads dining menus in a new thread
@@ -36,25 +37,25 @@ public class DiningMenuSectionLoader extends SimpleAsyncLoader<List<SimpleSectio
 
     @Override
     public List<SimpleSection<DiningMenu>> loadInBackground() {
-        final List<SimpleSection<DiningMenu>> simpleSections = new ArrayList<>();
+        val simpleSections = new ArrayList<SimpleSection<DiningMenu>>();
         // Get user's home campus
-        final String userHome = RutgersUtils.getHomeCampus(getContext());
+        val userHome = RutgersUtils.getHomeCampus(getContext());
 
         // Static dining hall entries
-        List<DiningMenu.Meal> dummyMeal = new ArrayList<>(1);
+        val dummyMeal = new ArrayList<DiningMenu.Meal>(1);
         dummyMeal.add(new DiningMenu.Meal("fake", true, null)); // Prevents static entries from being grayed out
 
-        List<DiningMenu> stonsby = new ArrayList<>(1);
+        val stonsby = new ArrayList<DiningMenu>(1);
         stonsby.add(new DiningMenu(getContext().getString(R.string.dining_stonsby_title), 0, dummyMeal));
-        final SimpleSection<DiningMenu> newarkHalls = new SimpleSection<>(nwkCampusFullString, stonsby);
+        val newarkHalls = new SimpleSection<DiningMenu>(nwkCampusFullString, stonsby);
 
-        List<DiningMenu> gateway = new ArrayList<>(1);
+        val gateway = new ArrayList<DiningMenu>(1);
         gateway.add(new DiningMenu(getContext().getString(R.string.dining_gateway_title), 0, dummyMeal));
-        final SimpleSection<DiningMenu> camdenHalls = new SimpleSection<>(camCampusFullString, gateway);
+        val camdenHalls = new SimpleSection<DiningMenu>(camCampusFullString, gateway);
 
         try {
-            List<DiningMenu> diningMenus = DiningAPI.getDiningHalls();
-            SimpleSection<DiningMenu> nbHalls = new SimpleSection<>(nbCampusFullString, diningMenus);
+            val diningMenus = DiningAPI.getDiningHalls();
+            val nbHalls = new SimpleSection<DiningMenu>(nbCampusFullString, diningMenus);
 
             // Determine campus ordering
             if (userHome.equals(nwkCampusFullString)) {

@@ -39,6 +39,7 @@ import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import lombok.val;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
@@ -77,7 +78,7 @@ public class PlacesMain extends BaseChannelFragment
 
     /** Create argument bundle for main places screen. */
     public static Bundle createArgs(@NonNull String title) {
-        Bundle bundle = new Bundle();
+        val bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, PlacesMain.HANDLE);
         bundle.putString(ARG_TITLE_TAG, title);
         return bundle;
@@ -111,17 +112,17 @@ public class PlacesMain extends BaseChannelFragment
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places);
+        val v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places);
 
         // Set title from JSON
-        final Bundle args = getArguments();
+        val args = getArguments();
         if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.places_title);
 
-        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
+        val listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
 
-        final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
+        val autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
         autoComp.setAdapter(mSearchAdapter);
 
         // Item selected from auto-complete list
@@ -147,7 +148,7 @@ public class PlacesMain extends BaseChannelFragment
         });
 
         // Clear search bar
-        final ImageButton clearSearchButton = (ImageButton) v.findViewById(R.id.filterClearButton);
+        val clearSearchButton = (ImageButton) v.findViewById(R.id.filterClearButton);
         clearSearchButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -201,12 +202,12 @@ public class PlacesMain extends BaseChannelFragment
         // Make sure this isn't called before the activity has been attached
         // or before onCreate() has ran.
         if (mAdapter != null && isAdded()) {
-            final String connectingString = getString(R.string.location_connecting);
-            final String failedLocationString = getString(R.string.failed_location);
-            final String nearbyPlacesString = getString(R.string.places_nearby);
+            val connectingString = getString(R.string.location_connecting);
+            val failedLocationString = getString(R.string.failed_location);
+            val nearbyPlacesString = getString(R.string.places_nearby);
 
-            List<KeyValPair> nearbyPlaces = new ArrayList<>();
-            SimpleSection<KeyValPair> nearbyPlacesSection = new SimpleSection<>(nearbyPlacesString, nearbyPlaces);
+            val nearbyPlaces = new ArrayList<KeyValPair>();
+            val nearbyPlacesSection = new SimpleSection<KeyValPair>(nearbyPlacesString, nearbyPlaces);
 
             // Check for location services
             if (mGoogleApiClientProvider == null || !mGoogleApiClientProvider.getGoogleApiClient().isConnected()) {
@@ -219,7 +220,7 @@ public class PlacesMain extends BaseChannelFragment
             }
 
             // Get last location
-            final Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
+            val lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
             if (lastLoc == null) {
                 LOGW(TAG, "Couldn't get location");
                 nearbyPlaces.add(new KeyValPair(null, failedLocationString));
@@ -252,14 +253,14 @@ public class PlacesMain extends BaseChannelFragment
 
     @Override
     public Loader<List<KeyValPair>> onCreateLoader(int id, Bundle args) {
-        double lat = args.getDouble(ARG_LAT_TAG);
-        double lon = args.getDouble(ARG_LON_TAG);
+        val lat = args.getDouble(ARG_LAT_TAG);
+        val lon = args.getDouble(ARG_LON_TAG);
         return new KeyValPairLoader(getActivity(), lat, lon);
     }
 
     @Override
     public void onLoadFinished(Loader<List<KeyValPair>> loader, List<KeyValPair> data) {
-        final String nearbyPlacesString = getString(R.string.places_nearby);
+        val nearbyPlacesString = getString(R.string.places_nearby);
         mAdapter.clear();
         mAdapter.add(new SimpleSection<>(nearbyPlacesString, data));
         hideProgressCircle();
@@ -272,12 +273,10 @@ public class PlacesMain extends BaseChannelFragment
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case LOCATION_REQUEST: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
-                }
-            }
+        if (requestCode == LOCATION_REQUEST
+                && grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
         }
     }
 

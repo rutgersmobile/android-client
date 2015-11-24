@@ -6,31 +6,27 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+import lombok.Data;
+
 /**
  * Nextbus active stop list.
  */
+@Data
 public final class ActiveStops {
-    private List<RouteStub> routes;
-    private List<StopStub> stops;
-    @SerializedName("time") private long timestamp;
+    private final List<RouteStub> routes;
+    private final List<StopStub> stops;
+    @SerializedName("time") private final long timestamp;
     private String agencyTag; // Not part of Nextbus results
 
+    /**
+     * Agency is not returned by the api, however it is required by the ActiveStops class.
+     * Gson parses the api info into this object before it is used to initialize ActiveStops.
+     */
+    @Data
     public class AgentlessActiveStops {
-        private List<RouteStub> routes;
-        private List<StopStub> stops;
-        @SerializedName("time") private long timestamp;
-
-        public List<RouteStub> getRoutes() {
-            return routes;
-        }
-
-        public List<StopStub> getStops() {
-            return stops;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
-        }
+        private final List<RouteStub> routes;
+        private final List<StopStub> stops;
+        @SerializedName("time") private final long timestamp;
     }
 
     public ActiveStops(@NonNull String agencyTag, @NonNull AgentlessActiveStops activeStops) {
@@ -40,27 +36,8 @@ public final class ActiveStops {
         this.stops = activeStops.getStops();
         this.timestamp = activeStops.getTimestamp();
 
+        // Set the agency on each route and stop
         for (RouteStub routeStub: routes) routeStub.setAgencyTag(getAgencyTag());
         for (StopStub stopStub: stops) stopStub.setAgencyTag(getAgencyTag());
-    }
-
-    public List<RouteStub> getRoutes() {
-        return routes;
-    }
-
-    public List<StopStub> getStops() {
-        return stops;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public String getAgencyTag() {
-        return agencyTag;
-    }
-
-    private void setAgencyTag(@NonNull String agencyTag) {
-        this.agencyTag = agencyTag;
     }
 }

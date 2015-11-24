@@ -37,7 +37,8 @@ public class BusAll extends BaseChannelFragment
     private static final String TAG                 = "BusAll";
     public static final String HANDLE               = "busall";
 
-    private static final int LOADER_ID              = 101;
+    /* ID for loader */
+    private static final int LOADER_ID              = 1;
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".filter";
@@ -65,6 +66,7 @@ public class BusAll extends BaseChannelFragment
             mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
+        // Start loading all stops and routes in the background
         mLoading = true;
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
@@ -161,9 +163,12 @@ public class BusAll extends BaseChannelFragment
         mAdapter.addAll(data);
         mLoading = false;
         hideProgressCircle();
+
+        // If we get nothing back assume it's an error
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }
+
         // Set filter after info is re-loaded
         if (mFilterString != null) {
             mAdapter.getFilter().filter(mFilterString);

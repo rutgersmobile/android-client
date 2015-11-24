@@ -29,6 +29,7 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import lombok.val;
 
 /**
  * Display information about a Rutgers location from the Places database.
@@ -63,7 +64,7 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
 
     /** Create argument bundle for Rutgers place/building display. */
     public static Bundle createArgs(@NonNull String title, @NonNull String placeKey) {
-        Bundle bundle = new Bundle();
+        val bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, PlacesDisplay.HANDLE);
         bundle.putString(ARG_TITLE_TAG, title);
         bundle.putString(ARG_PLACEKEY_TAG, placeKey);
@@ -75,41 +76,41 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         super.onCreate(savedInstanceState);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, new ArrayList<RMenuRow>());
 
-        final Bundle args = getArguments();
+        val args = getArguments();
 
-        // Get place key
-        getLoaderManager().initLoader(LOADER_ID, args, this);
+        // start loading place
         mLoading = true;
+        getLoaderManager().initLoader(LOADER_ID, args, this);
     }
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_list_progress);
+        val v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_list_progress);
 
         if (mLoading) showProgressCircle();
 
         // Set title
-        final Bundle args = getArguments();
+        val args = getArguments();
         if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.places_title);
 
-        final ListView listView = (ListView) v.findViewById(R.id.list);
+        val listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RMenuItemRow clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
+                val clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
 
                 switch(clicked.getArgs().getInt(ID_KEY)) {
                     case ADDRESS_ROW:
                         launchMap();
                         break;
                     case DESC_ROW:
-                        Bundle textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
+                        val textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
                         switchFragments(textArgs);
                         break;
                     case BUS_ROW:
-                        Bundle busArgs = new Bundle(clicked.getArgs());
+                        val busArgs = new Bundle(clicked.getArgs());
                         busArgs.remove(ID_KEY);
                         switchFragments(busArgs);
                         break;
@@ -120,21 +121,14 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         return v;
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        int i = 0;
-        i += 1;
-    }
-
     /**
      * Start a map activity intent for this address/location
      */
     private void launchMap() {
         if (mPlace == null || mPlace.getLocation() == null) return;
-        Place.Location location = mPlace.getLocation();
+        val location = mPlace.getLocation();
 
-        Intent intent = new Intent(Intent.ACTION_VIEW);
+        val intent = new Intent(Intent.ACTION_VIEW);
 
         // Create the maps query. Prefer addresses for user readability.
         if (!StringUtils.isEmpty(location.getStreet()) && !StringUtils.isEmpty(location.getCity()) && !StringUtils.isEmpty(location.getStateAbbr())) {
@@ -153,12 +147,13 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
 
     @Override
     public Loader<PlaceLoader.PlaceHolder> onCreateLoader(int id, Bundle args) {
-        String key = args.getString(ARG_PLACEKEY_TAG);
+        val key = args.getString(ARG_PLACEKEY_TAG);
         return new PlaceLoader(getActivity(), key, ID_KEY, ADDRESS_ROW, DESC_ROW, BUS_ROW);
     }
 
     @Override
     public void onLoadFinished(Loader<PlaceLoader.PlaceHolder> loader, PlaceLoader.PlaceHolder data) {
+        // These fields will be non-null and non-empty on success
         if (data.getPlace() == null || data.getRows().isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }

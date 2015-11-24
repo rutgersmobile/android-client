@@ -28,13 +28,13 @@ import edu.rutgers.css.Rutgers.channels.soc.model.SOCIndex;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
-import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
+import lombok.val;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
@@ -287,7 +287,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, campus);
         editor.putString(PrefUtils.KEY_PREF_SOC_LEVEL, level);
-        editor.commit();
+        editor.apply();
     }
 
     @Override
@@ -301,22 +301,27 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         mLoading = false;
         hideProgressCircle();
 
-        SOCIndex socIndex = data.getIndex();
-        List<Subject> subjects = data.getSubjects();
-        Semesters semesters = data.getSemesters();
-        String semester = data.getSemester();
-        String defaultSemester = data.getDefaultSemester();
+        val socIndex = data.getIndex();
+        val subjects = data.getSubjects();
+        val semesters = data.getSemesters();
+        val semester = data.getSemester();
+        val defaultSemester = data.getDefaultSemester();
 
+        // all of these values will be filled out if there is not an error
         if (socIndex == null || subjects == null || semesters == null) {
             AppUtils.showFailedLoadToast(getContext());
             return;
         }
+
+        // Set all the values we got back
 
         mSemester = semester;
         mDefaultSemester = defaultSemester;
 
         mSemesters = semesters.getSemesters();
 
+        // the index has important information for searching so we
+        // get it during this load
         mSOCIndex = socIndex;
         mAdapter.setFilterIndex(mSOCIndex);
 

@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.dtable.model.loader;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -10,19 +9,25 @@ import java.io.IOException;
 
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
+import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * Generic DTable loader
  */
-public class DTableLoader extends AsyncTaskLoader<DTableRoot> {
+public class DTableLoader extends SimpleAsyncLoader<DTableRoot> {
     private String url;
     private String api;
     private String tag;
 
-    private DTableRoot data;
-
+    /**
+     * Only one of either url or api is required. Url is used if both are supplied
+     * @param context Application context
+     * @param url Location of resource that contains data to build DTableRoot
+     * @param api Resource name on mobile server
+     * @param tag Logging tag from calling class
+     */
     public DTableLoader(Context context, String url, String api, String tag) {
         super(context);
         this.url = url;
@@ -48,38 +53,5 @@ public class DTableLoader extends AsyncTaskLoader<DTableRoot> {
         }
 
         return root;
-    }
-
-    @Override
-    public void deliverResult(DTableRoot holder) {
-        if (isReset()) {
-            return;
-        }
-
-        DTableRoot oldItems = data;
-        data = holder;
-        if (isStarted()) {
-            super.deliverResult(data);
-        }
-    }
-
-    @Override
-    protected void onStartLoading() {
-        if (data != null) {
-            deliverResult(data);
-        } else {
-            forceLoad();
-        }
-    }
-
-    @Override
-    protected void onStopLoading() {
-        cancelLoad();
-    }
-
-    @Override
-    protected void onReset() {
-        onStopLoading();
-        data = null;
     }
 }

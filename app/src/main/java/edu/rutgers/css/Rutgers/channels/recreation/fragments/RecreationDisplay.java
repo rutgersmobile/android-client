@@ -249,6 +249,7 @@ public class RecreationDisplay extends BaseChannelFragment implements LoaderMana
 
     @Override
     public void onLoadFinished(Loader<Facility> loader, Facility data) {
+        // The response will only be null when there is an error
         if (data == null) {
             AppUtils.showFailedLoadToast(getActivity());
         }

@@ -26,7 +26,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -45,6 +44,8 @@ import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import lombok.Data;
+import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -54,7 +55,6 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     /* Log tag and component handle */
     private static final String TAG = "FeedbackMain";
     public static final String HANDLE = "feedback";
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final String API = Config.API_BASE + "feedback.php";
     //private static final String API = "http://sauron.rutgers.edu/~jamchamb/feedback.php"; // TODO Replace
 
@@ -77,47 +77,13 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         SUCCESS, FAIL, IOFAIL
     };
 
+    /**
+     * Class for holding result status.
+     */
+    @Data
     class ResultHolder {
-        String successStatus;
-        String failStatus;
-        String iofailStatus;
-        Status status;
-
-        public String getFailStatus() {
-            return failStatus;
-        }
-
-        public ResultHolder setFailStatus(String failStatus) {
-            this.failStatus = failStatus;
-            return this;
-        }
-
-        public String getSuccessStatus() {
-            return successStatus;
-        }
-
-        public ResultHolder setSuccessStatus(String successStatus) {
-            this.successStatus = successStatus;
-            return this;
-        }
-
-        public Status getStatus() {
-            return status;
-        }
-
-        public ResultHolder setStatus(Status status) {
-            this.status = status;
-            return this;
-        }
-
-        public String getIofailStatus() {
-            return iofailStatus;
-        }
-
-        public ResultHolder setIofailStatus(String iofailStatus) {
-            this.iofailStatus = iofailStatus;
-            return this;
-        }
+        final String statusMessage;
+        final Status status;
     }
 
 
@@ -244,7 +210,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         Integer wantsResonse = mRequestReplyCheckbox.isChecked() && mRequestReplyCheckbox.isEnabled() ? 1 : 0;
         
         // Build POST request
-        final FormEncodingBuilder builder = new FormEncodingBuilder()
+        val builder = new FormEncodingBuilder()
             .add("subject", (String)(mSubjectSpinner.getSelectedItem()))
             .add("email", mEmailEditText.getText().toString().trim())
             .add("uuid", AppUtils.getUUID(getActivity()))
@@ -262,24 +228,27 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         // Lock send button until POST request goes through
         mLockSend = true;
 
-        final String feedbackErrorString = getString(R.string.feedback_error);
-        final String feedbackSuccessString = getString(R.string.feedback_success);
+        val feedbackErrorString = getString(R.string.feedback_error);
+        val feedbackSuccessString = getString(R.string.feedback_success);
 
-        final Gson gson = new Gson();
+        val gson = new Gson();
 
+        // We need to make our request in the background.
+        // Android doesn't allow network on the ui thread
         new AsyncTask<Void, Void, ResultHolder>() {
             @Override
             protected ResultHolder doInBackground(Void... params) {
-                Request request = new Request.Builder()
+                val request = new Request.Builder()
                         .url(API)
                         .post(builder.build())
                         .build();
-                String status;
+                String status = "";
                 try {
                     Response response = client.newCall(request).execute();
                     JsonObject jsonObject = gson.fromJson(response.body().string(), JsonObject.class);
                     mLockSend = false;
                     if (jsonObject.getAsJsonArray("errors") != null) {
+                        // If errors exist, get the first and set the status from it
                         JsonArray errors = jsonObject.getAsJsonArray("errors");
                         try {
                             JsonElement error = errors.get(0);
@@ -287,33 +256,40 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
                         } catch (IndexOutOfBoundsException | ClassCastException e) {
                             status = feedbackErrorString;
                         }
-                        return new ResultHolder().setStatus(FeedbackMain.Status.SUCCESS).setSuccessStatus(status);
+                        return new ResultHolder(status, FeedbackMain.Status.SUCCESS);
                     } else if (jsonObject.has("success") && !jsonObject.isJsonNull()) {
+                        // Set the status message in the response, or if it doesn't exist, use
+                        // our own
                         try {
                             status = jsonObject.getAsJsonPrimitive("success").getAsString();
                         } catch (ClassCastException e) {
                             status = feedbackSuccessString;
                         }
-                        return new ResultHolder().setStatus(FeedbackMain.Status.FAIL).setFailStatus(status);
+                        return new ResultHolder(status, FeedbackMain.Status.FAIL);
                     }
                 } catch (IOException e) {
                     LOGW(TAG, e.getMessage());
                 }
-                return new ResultHolder().setIofailStatus(getString(R.string.failed_load_short)).setStatus(FeedbackMain.Status.IOFAIL);
+                // Failure is so catastrophic we found out before we even got to the server
+                return new ResultHolder(status, FeedbackMain.Status.IOFAIL);
             }
 
             @Override
             protected void onPostExecute(ResultHolder result) {
+                // Display message in slightly different ways depending on
+                // if there was a success or failure
                 switch (result.getStatus()) {
                     case SUCCESS:
-                        Toast.makeText(getActivity(), result.getSuccessStatus(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), result.getStatusMessage(), Toast.LENGTH_SHORT).show();
+                        // Only reset the form on success in case the user wants to try
+                        // to send it again
                         resetForm();
                         break;
                     case FAIL:
-                        Toast.makeText(getActivity(), result.getFailStatus(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), result.getStatusMessage(), Toast.LENGTH_SHORT).show();
                         break;
                     case IOFAIL:
-                        Toast toast = Toast.makeText(getActivity(), result.getIofailStatus(), Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getActivity(), result.getStatusMessage(), Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.TOP, 0, 125);
                         toast.show();
                         break;

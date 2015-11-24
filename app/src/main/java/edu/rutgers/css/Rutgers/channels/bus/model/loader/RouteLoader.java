@@ -38,7 +38,7 @@ public class RouteLoader extends SimpleAsyncLoader<List<SimpleSection<RouteStub>
         final boolean nbHome = userHome.equals(getContext().getString(R.string.campus_nb_full));
 
         try {
-            // Get promises for active routes
+            // Get active routes
             final List<RouteStub> nbActiveRoutes = NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NB);
             final List<RouteStub> nwkActiveRoutes = NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NWK);
 

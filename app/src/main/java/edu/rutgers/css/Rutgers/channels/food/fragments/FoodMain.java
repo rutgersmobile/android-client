@@ -62,6 +62,7 @@ public class FoodMain extends BaseChannelFragment
         mAdapter = new SchoolFacilitiesAdapter(getActivity(),
                 R.layout.row_title, R.layout.row_section_header, R.id.title);
 
+        // start loading dining menus
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
@@ -112,6 +113,7 @@ public class FoodMain extends BaseChannelFragment
 
     @Override
     public void onLoadFinished(Loader<List<SimpleSection<DiningMenu>>> loader, List<SimpleSection<DiningMenu>> data) {
+        // Assume an empty response is an error
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }

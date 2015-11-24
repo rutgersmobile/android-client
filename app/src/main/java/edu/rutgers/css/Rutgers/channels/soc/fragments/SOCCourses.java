@@ -24,6 +24,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import lombok.val;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
@@ -82,6 +83,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
             mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
         }
 
+        // Start loading courses
         mLoading = true;
         getLoaderManager().initLoader(LOADER_ID, args, this);
     }
@@ -151,16 +153,17 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
     @Override
     public Loader<List<Course>> onCreateLoader(int id, Bundle args) {
-        final String campus = args.getString(ARG_CAMPUS_TAG);
-        final String level = args.getString(ARG_LEVEL_TAG);
-        final String semester = args.getString(ARG_SEMESTER_TAG);
-        final String subjectCode = args.getString(ARG_SUBCODE_TAG);
+        val campus = args.getString(ARG_CAMPUS_TAG);
+        val level = args.getString(ARG_LEVEL_TAG);
+        val semester = args.getString(ARG_SEMESTER_TAG);
+        val subjectCode = args.getString(ARG_SUBCODE_TAG);
 
         return new CoursesLoader(getContext(), campus, level, semester, subjectCode);
     }
 
     @Override
     public void onLoadFinished(Loader<List<Course>> loader, List<Course> data) {
+        // If response is empty assume that there was an error
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }

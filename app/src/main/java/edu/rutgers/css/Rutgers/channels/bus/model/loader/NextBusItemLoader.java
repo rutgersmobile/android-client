@@ -17,6 +17,7 @@ import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -33,17 +34,17 @@ public class NextBusItemLoader extends SimpleAsyncLoader<List<SimpleSection<Next
 
     @Override
     public List<SimpleSection<NextbusItem>> loadInBackground() {
-        List<SimpleSection<NextbusItem>> nextbusItems = new ArrayList<>();
+        val nextbusItems = new ArrayList<SimpleSection<NextbusItem>>();
         // Get home campus for result ordering
-        String userHome = RutgersUtils.getHomeCampus(getContext());
-        final boolean nbHome = userHome.equals(getContext().getString(R.string.campus_nb_full));
+        val userHome = RutgersUtils.getHomeCampus(getContext());
+        val nbHome = userHome.equals(getContext().getString(R.string.campus_nb_full));
 
         try {
-            // Get promises for all route & stop information
-            final List<RouteStub> nbRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NB);
-            final List<StopStub> nbStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NB);
-            final List<RouteStub> nwkRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NWK);
-            final List<StopStub> nwkStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NWK);
+            // Get all route & stop information
+            val nbRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NB);
+            val nbStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NB);
+            val nwkRoutes = NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NWK);
+            val nwkStops = NextbusAPI.getAllStops(NextbusAPI.AGENCY_NWK);
 
             if (nbHome) {
                 nextbusItems.add(loadRoutes(NextbusAPI.AGENCY_NB, nbRoutes));
@@ -77,7 +78,7 @@ public class NextBusItemLoader extends SimpleAsyncLoader<List<SimpleSection<Next
                 throw new IllegalArgumentException("Invalid Nextbus agency \"" + agency + "\"");
         }
 
-        List<NextbusItem> nextbusItems = new ArrayList<>(stopStubs.size());
+        val nextbusItems = new ArrayList<NextbusItem>(stopStubs.size());
         nextbusItems.addAll(stopStubs);
 
         return new SimpleSection<>(header, nextbusItems);
@@ -97,7 +98,7 @@ public class NextBusItemLoader extends SimpleAsyncLoader<List<SimpleSection<Next
                 throw new IllegalArgumentException("Invalid Nextbus agency \"" + agency + "\"");
         }
 
-        List<NextbusItem> nextbusItems = new ArrayList<>(routeStubs.size());
+        val nextbusItems = new ArrayList<NextbusItem>(routeStubs.size());
         nextbusItems.addAll(routeStubs);
 
         return new SimpleSection<>(header, nextbusItems);

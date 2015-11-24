@@ -96,6 +96,7 @@ public final class NextbusAPI {
             queryBuilder.append("&stops=").append(routeKey).append("%7Cnull%7C").append(stopTag);
         }
 
+        // Run the query we built and sort the prediction results
         List<Prediction> predictions = ApiRequest.xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER, new PredictionXmlParser(PredictionXmlParser.PredictionType.ROUTE));
         Collections.sort(predictions, new Comparator<Prediction>() {
             @Override
@@ -142,6 +143,7 @@ public final class NextbusAPI {
             }
         }
 
+        // Run the query we built and sort the prediction results
         List<Prediction> predictions = ApiRequest.xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER, new PredictionXmlParser(PredictionXmlParser.PredictionType.STOP));
         Collections.sort(predictions, new Comparator<Prediction>() {
             @Override

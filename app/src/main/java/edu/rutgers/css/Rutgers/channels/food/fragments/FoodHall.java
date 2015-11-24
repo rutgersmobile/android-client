@@ -140,6 +140,8 @@ public class FoodHall extends Fragment
 
     @Override
     public void onLoadFinished(Loader<DiningMenu> loader, DiningMenu data) {
+        mPagerAdapter.clear();
+        // Data will only be null if there is an error
         if (data == null) {
             AppUtils.showFailedLoadToast(getContext());
             return;

@@ -99,6 +99,7 @@ public class RecreationMain extends BaseChannelFragment implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<List<Campus>> loader, List<Campus> data) {
+        // assume that an empty response is an error
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }
