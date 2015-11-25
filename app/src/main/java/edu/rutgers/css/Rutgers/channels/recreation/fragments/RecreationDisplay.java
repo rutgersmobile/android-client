@@ -94,10 +94,6 @@ public class RecreationDisplay extends BaseChannelFragment implements LoaderMana
             return;
         }
 
-        // Get the facility info
-        final String campusTitle = args.getString(ARG_CAMPUS_TAG);
-        final String facilityTitle = args.getString(ARG_FACILITY_TAG);
-
         mLoading = true;
         getLoaderManager().initLoader(LOADER_ID, args, this);
     }

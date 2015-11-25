@@ -69,14 +69,6 @@ public final class ComponentFactory {
     /** Boolean flag used to indicate whether component was launched from a menu. */
     public static final String ARG_TOP_LEVEL        = "topLevel";
 
-    public static final String ARG_ANIM_BOTTOM      = "animBottom";
-
-    public static final String ARG_BACKSTACK        = "backstack";
-
-    public static final String ARG_ANIM             = "anim";
-
-    public static final String ARG_CREATE           = "create";
-
     /** Table of fragments that can be launched. Handles must be lowercase. */
     private static Map<String, Class<? extends Fragment>> sFragmentTable =
             Collections.unmodifiableMap(new HashMap<String, Class<? extends Fragment>>() {{

@@ -3,12 +3,13 @@ package edu.rutgers.css.Rutgers.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
@@ -20,14 +21,11 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonSyntaxException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
-import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
@@ -35,9 +33,10 @@ import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
-import edu.rutgers.css.Rutgers.model.MotdAPI;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
+import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
+import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -49,7 +48,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
  */
 
 public class MainActivity extends GoogleApiProviderActivity implements
-        ChannelManagerProvider {
+        ChannelManagerProvider, LoaderManager.LoaderCallbacks<MainActivityLoader.InitLoadHolder> {
 
     /** Log tag */
     private static final String TAG = "MainActivity";
@@ -58,9 +57,12 @@ public class MainActivity extends GoogleApiProviderActivity implements
     private ChannelManager mChannelManager;
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerAdapter mDrawerAdapter;
+    private boolean mShowedMotd;
+    private Toolbar mToolbar;
 
+    /* Constants */
     private static final int LOADER_ID = 1;
-
+    public static final String SHOWED_MOTD = "showedMotd";
 
     /* View references */
     private DrawerLayout mDrawerLayout;
@@ -69,26 +71,9 @@ public class MainActivity extends GoogleApiProviderActivity implements
     /* Callback for changed preferences */
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
-    private MainFragmentMediator fragmentMediator;
+    /* Mediators */
+    private FragmentMediator fragmentMediator;
     private TutorialMediator tutorialMediator;
-
-    private class InitLoadHolder {
-        private JsonArray array;
-        private Motd motd;
-
-        public InitLoadHolder(JsonArray array, Motd motd) {
-            this.array = array;
-            this.motd = motd;
-        }
-
-        public JsonArray getArray() {
-            return array;
-        }
-
-        public Motd getMotd() {
-            return motd;
-        }
-    }
 
     @Override
     public ChannelManager getChannelManager() {
@@ -100,10 +85,21 @@ public class MainActivity extends GoogleApiProviderActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // See if we've showed the Motd before
+        if (savedInstanceState != null) {
+            mShowedMotd = savedInstanceState.getBoolean(SHOWED_MOTD);
+        }
+
         tutorialMediator = new TutorialMediator(this);
 
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+
+        // The Motd may tell us to lock out the app, so we should't show
+        // the toolbar until we know we're allowed to
+        if (!mShowedMotd) {
+            mToolbar.setVisibility(View.GONE);
+        }
 
         LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
         mChannelManager = new ChannelManager();
@@ -157,7 +153,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 } else if (adapter.positionIsAbout(position)) {
                     Bundle aboutArgs = AboutDisplay.createArgs();
                     aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
-                    fragmentMediator.switchDrawerFragments(aboutArgs);
+                    fragmentMediator.switchFragments(aboutArgs);
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
                 }
@@ -174,7 +170,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
                 mDrawerListView.invalidateViews();
                 // Launch component
-                fragmentMediator.switchDrawerFragments(channelArgs);
+                fragmentMediator.switchFragments(channelArgs);
 
                 mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
             }
@@ -191,9 +187,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         preferences.registerOnSharedPreferenceChangeListener(listener);
 
-        fragmentMediator = new MainFragmentMediator(this,
-                mToolbar, mDrawerLayout, mDrawerAdapter,
-                mChannelManager, mDrawerListView, savedInstanceState);
+        fragmentMediator = new MainFragmentMediator(this);
 
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
             getSupportFragmentManager().beginTransaction()
@@ -201,46 +195,13 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     .commit();
         }
 
-        new AsyncTask<Void, Void, InitLoadHolder>() {
-            private Exception e;
-
-            @Override
-            protected InitLoadHolder doInBackground(Void... params) {
-                JsonArray array;
-                Motd motd = null;
-
-                try {
-                    array = ApiRequest.api("ordered_content.json", ApiRequest.CACHE_ONE_DAY, JsonArray.class);
-                } catch (JsonSyntaxException | IOException e) {
-                    array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
-                    this.e = e;
-                }
-
-                try {
-                    motd = MotdAPI.getMotd();
-                } catch (JsonSyntaxException | IOException e) {
-                    this.e = e;
-                }
-
-                return new InitLoadHolder(array, motd);
-            }
-
-            @Override
-            protected void onPostExecute(InitLoadHolder results) {
-                if (results.getArray() == null || results.getMotd() == null) {
-                    LOGE(TAG, "Couldn't load Motd or ordered_content: " + e.getMessage());
-                    AppUtils.showFailedLoadToast(MainActivity.this);
-                    return;
-                }
-                fragmentMediator.loadCorrectFragment(results.getMotd(), results.getArray());
-            }
-        }.execute();
+        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        fragmentMediator.saveState(outState);
+        outState.putBoolean(SHOWED_MOTD, mShowedMotd);
     }
 
 
@@ -253,26 +214,11 @@ public class MainActivity extends GoogleApiProviderActivity implements
     }
 
     @Override
-    protected void onResume() {
-        fragmentMediator.highlightCorrectDrawerItem();
-        super.onResume();
-
-//        showDrawerShowcase();
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
 
         // Attempt to flush analytics events to server
         Analytics.postEvents(this);
-    }
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        fragmentMediator.saveFragment();
     }
 
     @Override
@@ -327,5 +273,56 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
     public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {
         tutorialMediator.showDialogFragment(dialogFragment, tag);
+    }
+
+    @Override
+    public Loader<MainActivityLoader.InitLoadHolder> onCreateLoader(int id, Bundle args) {
+        return new MainActivityLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<MainActivityLoader.InitLoadHolder> loader, MainActivityLoader.InitLoadHolder data) {
+        // These will be non-null on success
+        if (data.getArray() == null || data.getMotd() == null) {
+            AppUtils.showFailedLoadToast(MainActivity.this);
+            return;
+        }
+
+        final Motd motd = data.getMotd();
+        final JsonArray array = data.getArray();
+        if (!mShowedMotd && motd.getData() != null) {
+            mShowedMotd = true;
+            if (!motd.isWindow()) {
+                // show a popup with the Motd
+                MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
+                f.show(getSupportFragmentManager(), MotdDialogFragment.TAG);
+            } else {
+                // switch to a fullscreen Motd
+                fragmentMediator.switchFragments(
+                        TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
+                if (!motd.hasCloseButton()) {
+                    // Lock the user to the Motd (bricks the app on purpose)
+                    if (getSupportActionBar() != null) {
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                    }
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                }
+                return;
+            }
+        } else {
+            LOGI(TAG, motd.getMotd());
+        }
+
+        mToolbar.setVisibility(View.VISIBLE);
+
+        // Load nav drawer items
+        mChannelManager.loadChannelsFromJSONArray(array);
+        mDrawerAdapter.addAll(mChannelManager.getChannels());
+        mDrawerLayout.openDrawer(mDrawerListView);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {
+
     }
 }

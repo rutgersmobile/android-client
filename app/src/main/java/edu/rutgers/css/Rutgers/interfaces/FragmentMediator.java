@@ -8,12 +8,5 @@ import android.support.annotation.NonNull;
  */
 public interface FragmentMediator {
     boolean switchFragments(@NonNull Bundle args);
-    void saveState(Bundle outState);
-    void saveFragment();
-
-    boolean isFirstVisibleFragment(@NonNull String handle);
     boolean backPressWebView();
-
-    boolean switchDrawerFragments(@NonNull Bundle args);
-    void highlightCorrectDrawerItem();
 }

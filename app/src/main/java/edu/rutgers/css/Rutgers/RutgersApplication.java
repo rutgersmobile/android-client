@@ -3,14 +3,10 @@ package edu.rutgers.css.Rutgers;
 import android.app.Application;
 import android.content.Context;
 
-
-import java.util.Map;
-
 import edu.rutgers.css.Rutgers.api.Analytics;
-import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.utils.MainActivityLifecycleHandler;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 public class RutgersApplication extends Application {
 
@@ -18,7 +14,6 @@ public class RutgersApplication extends Application {
 
     private static Context context;
 
-    private static Map<String, Channel> channelsMap;
 
     private static MainActivityLifecycleHandler lh = new MainActivityLifecycleHandler();
 
@@ -36,14 +31,6 @@ public class RutgersApplication extends Application {
 
     public static Context getAppContext() {
         return RutgersApplication.context;
-    }
-
-    public static void setChannelsMap(Map<String, Channel> channelsMap) {
-        RutgersApplication.channelsMap = channelsMap;
-    }
-
-    public static Map<String, Channel> getChannelsMap() {
-        return channelsMap;
     }
 
     public static boolean isApplicationVisible() {

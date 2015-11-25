@@ -45,7 +45,6 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import lombok.Data;
-import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -210,7 +209,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         Integer wantsResonse = mRequestReplyCheckbox.isChecked() && mRequestReplyCheckbox.isEnabled() ? 1 : 0;
         
         // Build POST request
-        val builder = new FormEncodingBuilder()
+        final FormEncodingBuilder builder = new FormEncodingBuilder()
             .add("subject", (String)(mSubjectSpinner.getSelectedItem()))
             .add("email", mEmailEditText.getText().toString().trim())
             .add("uuid", AppUtils.getUUID(getActivity()))
@@ -228,24 +227,24 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         // Lock send button until POST request goes through
         mLockSend = true;
 
-        val feedbackErrorString = getString(R.string.feedback_error);
-        val feedbackSuccessString = getString(R.string.feedback_success);
+        final String feedbackErrorString = getString(R.string.feedback_error);
+        final String feedbackSuccessString = getString(R.string.feedback_success);
 
-        val gson = new Gson();
+        final Gson gson = new Gson();
 
         // We need to make our request in the background.
         // Android doesn't allow network on the ui thread
         new AsyncTask<Void, Void, ResultHolder>() {
             @Override
             protected ResultHolder doInBackground(Void... params) {
-                val request = new Request.Builder()
+                final Request request = new Request.Builder()
                         .url(API)
                         .post(builder.build())
                         .build();
                 String status = "";
                 try {
-                    Response response = client.newCall(request).execute();
-                    JsonObject jsonObject = gson.fromJson(response.body().string(), JsonObject.class);
+                    final Response response = client.newCall(request).execute();
+                    final JsonObject jsonObject = gson.fromJson(response.body().string(), JsonObject.class);
                     mLockSend = false;
                     if (jsonObject.getAsJsonArray("errors") != null) {
                         // If errors exist, get the first and set the status from it

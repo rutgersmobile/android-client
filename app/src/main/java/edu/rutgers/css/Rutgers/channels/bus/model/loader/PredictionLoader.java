@@ -14,7 +14,6 @@ import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
-import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -47,7 +46,7 @@ public class PredictionLoader extends SimpleAsyncLoader<List<Prediction>> {
 
     @Override
     public List<Prediction> loadInBackground() {
-        val predictions = new ArrayList<Prediction>();
+        List<Prediction> predictions = new ArrayList<>();
         try {
             if (BusDisplay.ROUTE_MODE.equals(mode)) {
                 predictions.addAll(NextbusAPI.routePredict(agency, tag));
@@ -65,8 +64,8 @@ public class PredictionLoader extends SimpleAsyncLoader<List<Prediction>> {
             /* Update items individually if the list is already populated
              * and the new results correspond to currently displayed stops. */
                 for (int i = 0; i < oldData.size(); i++) {
-                    val newPrediction = predictions.get(i);
-                    val oldPrediction = oldData.get(i);
+                    Prediction newPrediction = predictions.get(i);
+                    Prediction oldPrediction = oldData.get(i);
 
                     if (!newPrediction.equals(oldPrediction)) {
                         LOGD(TAG, "Mismatched prediction: " + oldPrediction.getTitle() + " & " + newPrediction.getTitle());

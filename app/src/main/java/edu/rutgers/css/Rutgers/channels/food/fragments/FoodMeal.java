@@ -17,7 +17,6 @@ import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.MealGenreLoader;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import lombok.val;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
@@ -48,8 +47,8 @@ public class FoodMeal extends Fragment
 
     /** Create a new instance of the meal display fragment. */
     public static FoodMeal newInstance(@NonNull String location, @NonNull String meal) {
-        val foodMeal = new FoodMeal();
-        val args = createArgs(location, meal);
+        final FoodMeal foodMeal = new FoodMeal();
+        final Bundle args = createArgs(location, meal);
         args.remove(ComponentFactory.ARG_COMPONENT_TAG);
         foodMeal.setArguments(args);
         return foodMeal;
@@ -57,7 +56,7 @@ public class FoodMeal extends Fragment
 
     /** Create argument bundle for a dining hall meal display. */
     public static Bundle createArgs(@NonNull String location, @NonNull String meal) {
-        val bundle = new Bundle();
+        final Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, FoodMeal.HANDLE);
         bundle.putString(ARG_LOCATION_TAG, location);
         bundle.putString(ARG_MEAL_TAG, meal);
@@ -67,7 +66,7 @@ public class FoodMeal extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        val args = getArguments();
+        final Bundle args = getArguments();
         
         mAdapter = new DiningMenuAdapter(getActivity(),
                 R.layout.row_title, R.layout.row_section_header, R.id.title);
@@ -86,9 +85,9 @@ public class FoodMeal extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        val v = inflater.inflate(R.layout.fragment_stickylist_progress, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_stickylist_progress, parent, false);
 
-        val listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
+        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
 
         return v;
@@ -96,8 +95,8 @@ public class FoodMeal extends Fragment
 
     @Override
     public Loader<List<DiningMenu.Genre>> onCreateLoader(int id, Bundle args) {
-        val meal = args.getString(FoodMeal.ARG_MEAL_TAG);
-        val location = args.getString(FoodMeal.ARG_LOCATION_TAG);
+        final String meal = args.getString(FoodMeal.ARG_MEAL_TAG);
+        final String location = args.getString(FoodMeal.ARG_LOCATION_TAG);
         return new MealGenreLoader(getContext(), meal, location);
     }
 

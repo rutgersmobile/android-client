@@ -14,7 +14,6 @@ import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import lombok.Data;
-import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -54,7 +53,7 @@ public class SubjectLoader extends SimpleAsyncLoader<SubjectLoader.SubjectHolder
             // Get semesters to make sure the semester we're looking at makes sense
             result = ScheduleAPI.getSemesters();
             int defaultIndex = result.getDefaultSemester();
-            val semesters = result.getSemesters();
+            List<String> semesters = result.getSemesters();
 
             if (semesters.isEmpty()) {
                 LOGE(TAG, "Semesters list is empty");
@@ -73,7 +72,7 @@ public class SubjectLoader extends SimpleAsyncLoader<SubjectLoader.SubjectHolder
             }
 
             if (BuildConfig.DEBUG) {
-                for (val semester : semesters) {
+                for (String semester : semesters) {
                     LOGV(TAG, "Got semester: " + ScheduleAPI.translateSemester(semester));
                 }
                 LOGV(TAG, "Default semester: " + ScheduleAPI.translateSemester(defaultSemester));

@@ -28,13 +28,12 @@ import edu.rutgers.css.Rutgers.channels.soc.model.SOCIndex;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
+import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
-import lombok.val;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
@@ -238,8 +237,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         // Only change title if SOC Main fragment on screen (possibly covered by selection dialog)
         if (!isAdded() || getResources() == null) return;
         if (!(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE)
-                || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE)
-                || ((MainActivity) getActivity()).getFragmentMediator().isFirstVisibleFragment(SOCMain.HANDLE))) return;
+                || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
         if (mSemester == null) getActivity().setTitle(R.string.soc_title);
         else getActivity().setTitle(ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
     }
@@ -301,11 +299,11 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         mLoading = false;
         hideProgressCircle();
 
-        val socIndex = data.getIndex();
-        val subjects = data.getSubjects();
-        val semesters = data.getSemesters();
-        val semester = data.getSemester();
-        val defaultSemester = data.getDefaultSemester();
+        final SOCIndex socIndex = data.getIndex();
+        final List<Subject> subjects = data.getSubjects();
+        final Semesters semesters = data.getSemesters();
+        final String semester = data.getSemester();
+        final String defaultSemester = data.getDefaultSemester();
 
         // all of these values will be filled out if there is not an error
         if (socIndex == null || subjects == null || semesters == null) {

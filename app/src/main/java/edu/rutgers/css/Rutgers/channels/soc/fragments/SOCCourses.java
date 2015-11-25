@@ -24,7 +24,6 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import lombok.val;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
@@ -153,10 +152,10 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
     @Override
     public Loader<List<Course>> onCreateLoader(int id, Bundle args) {
-        val campus = args.getString(ARG_CAMPUS_TAG);
-        val level = args.getString(ARG_LEVEL_TAG);
-        val semester = args.getString(ARG_SEMESTER_TAG);
-        val subjectCode = args.getString(ARG_SUBCODE_TAG);
+        final String campus = args.getString(ARG_CAMPUS_TAG);
+        final String level = args.getString(ARG_LEVEL_TAG);
+        final String semester = args.getString(ARG_SEMESTER_TAG);
+        final String subjectCode = args.getString(ARG_SUBCODE_TAG);
 
         return new CoursesLoader(getContext(), campus, level, semester, subjectCode);
     }

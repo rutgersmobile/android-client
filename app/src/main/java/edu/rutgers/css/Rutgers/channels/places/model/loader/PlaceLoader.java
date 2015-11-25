@@ -17,6 +17,7 @@ import java.util.Map;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
+import edu.rutgers.css.Rutgers.channels.bus.model.StopGroup;
 import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.channels.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
@@ -26,7 +27,6 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import lombok.Data;
-import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -91,7 +91,7 @@ public class PlaceLoader extends SimpleAsyncLoader<PlaceLoader.PlaceHolder> {
             return null;
         }
 
-        val rows = new ArrayList<RMenuRow>();
+        final List<RMenuRow> rows = new ArrayList<>();
         Place place = null;
 
         try {
@@ -125,7 +125,7 @@ public class PlaceLoader extends SimpleAsyncLoader<PlaceLoader.PlaceHolder> {
                 }
                 */
 
-                val addressArgs = new Bundle();
+                final Bundle addressArgs = new Bundle();
                 addressArgs.putInt(idKey, addressRow);
                 addressArgs.putString("title", formatAddress(place.getLocation()));
                 rows.add(new RMenuHeaderRow(addressHeader));
@@ -134,7 +134,7 @@ public class PlaceLoader extends SimpleAsyncLoader<PlaceLoader.PlaceHolder> {
 
             // Add description row
             if (!StringUtils.isEmpty(place.getDescription())) {
-                val descArgs = new Bundle();
+                final Bundle descArgs = new Bundle();
                 descArgs.putInt(idKey, descRow);
                 descArgs.putString("title", StringUtils.abbreviate(place.getDescription(), 80));
                 descArgs.putString("data", place.getDescription());
@@ -144,24 +144,24 @@ public class PlaceLoader extends SimpleAsyncLoader<PlaceLoader.PlaceHolder> {
 
             // Add nearby bus stops
             if (place.getLocation() != null) {
-                val startPos = rows.size();
+                final int startPos = rows.size();
 
-                val location = place.getLocation();
-                val buildLat = location.getLatitude();
-                val buildLon = location.getLongitude();
+                final Place.Location location = place.getLocation();
+                final double buildLat = location.getLatitude();
+                final double buildLon = location.getLongitude();
 
                 // Determine Nextbus agency by campus
-                val agency = sAgencyMap.get(place.getCampusName());
+                final String agency = sAgencyMap.get(place.getCampusName());
 
                 if (agency != null) {
-                    val stops = NextbusAPI.getStopsByTitleNear(agency, buildLat, buildLon);
+                    final List<StopGroup> stops = NextbusAPI.getStopsByTitleNear(agency, buildLat, buildLon);
                     if (!stops.isEmpty()) {
                         // There are nearby stops. Add header and all stops.
                         int insertPos = startPos;
                         rows.add(insertPos++, new RMenuHeaderRow(nearbyHeader));
 
-                        for (val stopGroup : stops) {
-                            val stopArgs = BusDisplay.createArgs(stopGroup.getTitle(), BusDisplay.STOP_MODE, agency, stopGroup.getTitle());
+                        for (final StopGroup stopGroup : stops) {
+                            final Bundle stopArgs = BusDisplay.createArgs(stopGroup.getTitle(), BusDisplay.STOP_MODE, agency, stopGroup.getTitle());
                             stopArgs.putInt(idKey, busRow);
                             rows.add(insertPos++, new RMenuItemRow(stopArgs));
                         }
@@ -172,7 +172,7 @@ public class PlaceLoader extends SimpleAsyncLoader<PlaceLoader.PlaceHolder> {
             // Add offices housed in this building
             if (place.getOffices() != null) {
                 rows.add(new RMenuHeaderRow(officesHeader));
-                for (val office : place.getOffices()) {
+                for (final String office : place.getOffices()) {
                     rows.add(new RMenuItemRow(office));
                 }
             }

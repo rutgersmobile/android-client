@@ -1,9 +1,13 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +46,8 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     private static final String TAG                 = "BusStops";
     public static final String HANDLE               = "busstops";
 
-    private static final int LOADER_ID              = 101;
+    private static final int LOADER_ID              = 1;
+    private static final int LOCATION_REQUEST       = 1;
 
     /* Constants */
     private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
@@ -154,7 +159,11 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
         if (mAdapter != null && isAdded()) {
             Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
             if (location == null) {
-                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
+                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+                } else {
+                    requestLocationUpdates();
+                }
                 return;
             }
             if (BuildConfig.DEBUG) LOGD(TAG, "Current location: " + location.toString());
@@ -204,4 +213,18 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     public void onLocationChanged(Location location) {
         loadNearby(location);
     }
+
+    private void requestLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == LOCATION_REQUEST
+                && grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            requestLocationUpdates();
+        }
+    }
+
 }

@@ -11,7 +11,6 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
-import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -33,16 +32,16 @@ public class MealGenreLoader extends SimpleAsyncLoader<List<DiningMenu.Genre>> {
 
     @Override
     public List<DiningMenu.Genre> loadInBackground() {
-        val genres = new ArrayList<DiningMenu.Genre>();
+        final List<DiningMenu.Genre> genres = new ArrayList<>();
 
         try {
-            val diningMenu = DiningAPI.getDiningLocation(locationStr);
-            val meal = diningMenu.getMeal(mealStr);
+            final DiningMenu diningMenu = DiningAPI.getDiningLocation(locationStr);
+            final DiningMenu.Meal meal = diningMenu.getMeal(mealStr);
             if (meal == null) {
                 LOGE(TAG, "Meal \"" + mealStr + "\" not found");
             } else {
                 // Populate the menu with categories and food items
-                val mealGenres = meal.getGenres();
+                final List<DiningMenu.Genre> mealGenres = meal.getGenres();
                 genres.addAll(mealGenres);
             }
         } catch (JsonSyntaxException | IOException e) {

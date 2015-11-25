@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.channels.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
-import lombok.val;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -38,13 +38,13 @@ public class KeyValPairLoader extends SimpleAsyncLoader<List<KeyValPair>> {
 
     @Override
     public List<KeyValPair> loadInBackground() {
-        val nearbyPlaces = new ArrayList<KeyValPair>();
+        final List<KeyValPair> nearbyPlaces = new ArrayList<>();
         try {
-            val places = PlacesAPI.getPlacesNear(lat, lon);
+            final List<Place> places = PlacesAPI.getPlacesNear(lat, lon);
             if (places.isEmpty()) {
                 nearbyPlaces.add(new KeyValPair(null, noneNearbyString));
             } else {
-                for (val place : places) {
+                for (final Place place : places) {
                     nearbyPlaces.add(new KeyValPair(place.getId(), place.getTitle()));
                 }
             }

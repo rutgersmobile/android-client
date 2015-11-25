@@ -168,15 +168,11 @@ public final class AppUtils {
      * @param handle Fragment handle
      * @return True if on top, false if not
      */
-    public static boolean isOnTop(FragmentActivity activity, @NonNull String handle) {
+    public static boolean isOnTop(FragmentActivity activity, @NonNull String component) {
         if (activity == null) return false;
 
         FragmentManager fm = activity.getSupportFragmentManager();
-        if (fm.getBackStackEntryCount() > 0) {
-            return handle.equalsIgnoreCase(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
-        } else {
-            return false;
-        }
+        return fm.getBackStackEntryCount() > 0 && component.equalsIgnoreCase(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
     }
 
     /**
