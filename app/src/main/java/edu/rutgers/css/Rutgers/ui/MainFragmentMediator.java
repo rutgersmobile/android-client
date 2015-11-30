@@ -59,8 +59,10 @@ public class MainFragmentMediator implements FragmentMediator {
         AppUtils.closeKeyboard(activity);
         // Switch the main content fragment
         fm.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
-                    R.anim.slide_in_left, R.anim.slide_out_right)
+                // There's a bug in the support library that will
+                // cause crashes with custom animations
+                // .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
+                //     R.anim.slide_in_left, R.anim.slide_out_right)
                 .replace(R.id.main_content_frame, fragment, componentTag)
                 .addToBackStack(componentTag)
                 .commit();

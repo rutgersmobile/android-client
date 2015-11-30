@@ -175,29 +175,6 @@ public final class AppUtils {
         return fm.getBackStackEntryCount() > 0 && component.equalsIgnoreCase(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
     }
 
-    /**
-     * Check if the fragment on top of the stack is the given component
-     * @param activity The activity that the fragment is in
-     * @param channelManager Location to get Channel info for determining the component of a fragment
-     * @param handle The component to look for
-     * @return True if on top, false if not
-     */
-    public static boolean isComponentOnTop(FragmentActivity activity, ChannelManager channelManager, @NonNull String handle, String lastFragmentTag) {
-        if (activity == null) return false;
-
-        FragmentManager fm = activity.getSupportFragmentManager();
-        Channel channel = null;
-        if (fm.getBackStackEntryCount() > 0) {
-            channel = channelManager.getChannelByTag(fm.getBackStackEntryAt(fm.getBackStackEntryCount() - 1).getName());
-        } else if (lastFragmentTag != null){
-            channel = channelManager.getChannelByTag(lastFragmentTag);
-        }
-        if (channel != null) {
-            return handle.equalsIgnoreCase(channel.getView());
-        }
-        return false;
-    }
-
     public static String topHandle(FragmentActivity activity) {
         if (activity == null) return null;
 

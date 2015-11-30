@@ -135,6 +135,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         mTag = args.getString(ARG_TAG_TAG);
 
         // Start loading predictions
+        showProgressCircle();
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
