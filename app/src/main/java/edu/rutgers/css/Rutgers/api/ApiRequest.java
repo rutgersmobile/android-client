@@ -40,6 +40,12 @@ public final class ApiRequest {
         return false;
     }
 
+    /**
+     * This should be in setup, but since it requires a
+     * context to get the directory, it needs to to be called
+     * by itself in onCreate in MainActivity
+     * @param context Context to get cache directory from
+     */
     public static void enableCache(Context context) {
         if (setup()) {
             int cacheSize = 10 * 1024 * 1024;
@@ -52,7 +58,7 @@ public final class ApiRequest {
      * Parse JSON from the mobile server into an object of the given type
      * Works for JSON objects and arrays.
      * @param resource JSON file to read from API directory
-     * @param expire Cache time in milliseconds. If omitted, defaults to 1
+     * @param expire Cache time in milliseconds. If omitted, defaults to 1, must be provided with unit
      * @param unit TimeUnit to say how long to cache. If omitted, then no caching
      * @param type Type that the JSON should be parsed into
      * @param deserializer If not null register this deserializer with Gson before parsing. This can
@@ -137,16 +143,20 @@ public final class ApiRequest {
     public static Response getResponse(String resource, int expire, TimeUnit unit) throws IOException {
         Request.Builder builder = new Request.Builder()
                 .url(resource);
+
+        CacheControl control;
         if (expire != CACHE_NEVER) {
-            builder.cacheControl(new CacheControl.Builder()
+            control = new CacheControl.Builder()
                     .maxStale(expire, unit)
-                    .build());
+                    .build();
         } else {
-            builder.cacheControl(new CacheControl.Builder()
+            control = new CacheControl.Builder()
                     .noStore()
-                    .build());
+                    .build();
         }
-        return client.newCall(builder.build()).execute();
+
+        Request request = builder.cacheControl(control).build();
+        return client.newCall(request).execute();
     }
 
     /**
