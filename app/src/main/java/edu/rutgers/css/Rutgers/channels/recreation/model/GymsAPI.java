@@ -12,6 +12,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 
@@ -21,7 +22,8 @@ public final class GymsAPI {
     
     public static final DateFormat GYM_DATE_FORMAT = new SimpleDateFormat("M/d/yyyy", Locale.US);
     
-    private static final long expire = ApiRequest.CACHE_ONE_DAY; // Cache gym info for a day
+    private static final int EXPIRE = 1; // Cache gym info for a day
+    private static final TimeUnit EXPIRE_UNIT = TimeUnit.DAYS;
 
     private GymsAPI() {}
 
@@ -31,7 +33,7 @@ public final class GymsAPI {
      */
     public static List<Campus> getCampuses() throws JsonSyntaxException, IOException {
         Type type = new TypeToken<List<Campus>>(){}.getType();
-        return ApiRequest.api("gyms_array.txt", expire, type);
+        return ApiRequest.api("gyms_array.txt", EXPIRE, EXPIRE_UNIT, type);
     }
 
     /**

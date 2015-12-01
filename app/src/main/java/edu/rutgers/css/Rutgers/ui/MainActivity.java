@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
@@ -89,6 +90,8 @@ public class MainActivity extends GoogleApiProviderActivity implements
         if (savedInstanceState != null) {
             mShowedMotd = savedInstanceState.getBoolean(SHOWED_MOTD);
         }
+
+        ApiRequest.enableCache(this);
 
         tutorialMediator = new TutorialMediator(this);
 

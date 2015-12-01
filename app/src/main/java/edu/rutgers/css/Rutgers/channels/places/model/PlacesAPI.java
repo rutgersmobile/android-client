@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
@@ -65,7 +66,7 @@ public final class PlacesAPI {
         sPlaces = new HashMap<>(1300);
         sTokens = new HashMap<>(1300);
 
-        KVHolder holder = ApiRequest.api("places.txt", ApiRequest.CACHE_ONE_DAY, KVHolder.class);
+        KVHolder holder = ApiRequest.api("places.txt", 1, TimeUnit.DAYS, KVHolder.class);
         sPlaces = holder.all;
         for (String key : holder.lunr.documentStore.store.keySet()) {
             Place place = sPlaces.get(key);

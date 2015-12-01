@@ -33,7 +33,7 @@ public class RSSItemLoader extends SimpleAsyncLoader<List<RSSItem>> {
     public List<RSSItem> loadInBackground() {
         List<RSSItem> rssItems = new ArrayList<>();
         try {
-            rssItems.addAll(ApiRequest.xml(url, RSSReader.EXPIRE, new RSSXmlParser()));
+            rssItems.addAll(ApiRequest.xml(url, RSSReader.EXPIRE, RSSReader.EXPIRE_UNIT, new RSSXmlParser()));
         } catch (XmlPullParserException | IOException e) {
             LOGE(TAG, e.getMessage());
         }

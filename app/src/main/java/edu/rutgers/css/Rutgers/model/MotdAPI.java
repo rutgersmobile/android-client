@@ -21,7 +21,7 @@ public final class MotdAPI {
     private static void setup() throws JsonSyntaxException, IOException {
         if (sSettingUp) return;
         sSettingUp = true;
-        motd = ApiRequest.api(RESOURCE, ApiRequest.CACHE_NEVER, Motd.class);
+        motd = ApiRequest.api(RESOURCE, Motd.class);
         sSettingUp = false;
     }
 

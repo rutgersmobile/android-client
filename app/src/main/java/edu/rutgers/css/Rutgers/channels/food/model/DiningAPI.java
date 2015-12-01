@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 
@@ -21,7 +22,8 @@ public final class DiningAPI {
     private static final String TAG = "DiningAPI";
 
     private static final String API_PATH = "rutgers-dining.txt";
-    private static long expire = ApiRequest.CACHE_ONE_HOUR; // Cache dining data for an hour
+    private static final int EXPIRE = 1; // Cache dining data for an hour
+    private static final TimeUnit EXPIRE_UNIT = TimeUnit.HOURS;
 
     private static List<DiningMenu> sNBDiningMenus;
 
@@ -40,7 +42,7 @@ public final class DiningAPI {
         Type type = new TypeToken<List<DiningMenu>>(){}.getType();
 
         try {
-            sNBDiningMenus = ApiRequest.api(API_PATH, expire, type);
+            sNBDiningMenus = ApiRequest.api(API_PATH, EXPIRE, EXPIRE_UNIT, type);
         } catch (JsonSyntaxException | IOException e) {
             LOGE(TAG, "setup(): " + e.getMessage());
             throw e;

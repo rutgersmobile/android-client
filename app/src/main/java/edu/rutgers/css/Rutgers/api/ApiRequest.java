@@ -1,8 +1,12 @@
 package edu.rutgers.css.Rutgers.api;
 
+import android.content.Context;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
+import com.squareup.okhttp.Cache;
+import com.squareup.okhttp.CacheControl;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -11,6 +15,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.interfaces.XmlParser;
@@ -22,25 +27,33 @@ public final class ApiRequest {
 
     private static OkHttpClient client;
 
-    public static long CACHE_NEVER = -1; // -1 means always refresh -- never use cache
-    public static long CACHE_ONE_MINUTE = 1000 * 60;
-    public static long CACHE_ONE_HOUR = CACHE_ONE_MINUTE * 60;
-    public static long CACHE_ONE_DAY = CACHE_ONE_HOUR * 24;
+    private static final int CACHE_NEVER = -1; // -1 means always refresh -- never use cache
 
     private ApiRequest() {}
 
     /** Initialize the singleton OkHttp object */
-    private static void setup () {
+    private static boolean setup () {
         if (client == null) {
             client = new OkHttpClient();
+            return true;
+        }
+        return false;
+    }
+
+    public static void enableCache(Context context) {
+        if (setup()) {
+            int cacheSize = 10 * 1024 * 1024;
+            Cache cache = new Cache(context.getCacheDir(), cacheSize);
+            client.setCache(cache);
         }
     }
 
     /**
      * Parse JSON from the mobile server into an object of the given type
-     * Works for JSON objects and arrays
+     * Works for JSON objects and arrays.
      * @param resource JSON file to read from API directory
-     * @param expire Cache time in milliseconds
+     * @param expire Cache time in milliseconds. If omitted, defaults to 1
+     * @param unit TimeUnit to say how long to cache. If omitted, then no caching
      * @param type Type that the JSON should be parsed into
      * @param deserializer If not null register this deserializer with Gson before parsing. This can
      *                     be used for custom parsing of a JSON object when Gson alone won't do the
@@ -48,20 +61,40 @@ public final class ApiRequest {
      * @param <T> Return type should be the same as type
      * @return An object of the given type
      */
-    public static <T> T api(String resource, long expire, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
-        return json(Config.API_BASE + resource, expire, type, deserializer);
+    public static <T> T api(String resource, int expire, TimeUnit unit, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
+        return json(Config.API_BASE + resource, expire, unit, type, deserializer);
     }
 
-    public static <T> T api(String resource, long expire, Type type) throws JsonSyntaxException, IOException{
-        return json(Config.API_BASE + resource, expire, type, null);
+    public static <T> T api(String resource, TimeUnit unit, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
+        return json(Config.API_BASE + resource, 1, unit, type, deserializer);
     }
 
-    public static <T> T api(String resource, long expire, Class<T> clazz) throws JsonSyntaxException, IOException{
-        return json(Config.API_BASE + resource, expire, (Type) clazz, null);
+    public static <T> T api(String resource, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
+        return json(Config.API_BASE + resource, CACHE_NEVER, TimeUnit.DAYS, type, deserializer);
     }
 
-    public static <T> T json(String resource, long expire, Type type) throws JsonSyntaxException, IOException {
-        return json(resource, expire, type, null);
+    public static <T> T api(String resource, int expire, TimeUnit unit, Type type) throws JsonSyntaxException, IOException{
+        return json(Config.API_BASE + resource, expire, unit, type, null);
+    }
+
+    public static <T> T api(String resource, TimeUnit unit, Type type) throws JsonSyntaxException, IOException{
+        return json(Config.API_BASE + resource, 1, unit, type, null);
+    }
+
+    public static <T> T api(String resource, Type type) throws JsonSyntaxException, IOException{
+        return json(Config.API_BASE + resource, CACHE_NEVER, TimeUnit.DAYS, type, null);
+    }
+
+    public static <T> T api(String resource, int expire, TimeUnit unit, Class<T> clazz) throws JsonSyntaxException, IOException{
+        return json(Config.API_BASE + resource, expire, unit, (Type) clazz, null);
+    }
+
+    public static <T> T api(String resource, TimeUnit unit, Class<T> clazz) throws JsonSyntaxException, IOException{
+        return json(Config.API_BASE + resource, 1, unit, (Type) clazz, null);
+    }
+
+    public static <T> T api(String resource, Class<T> clazz) throws JsonSyntaxException, IOException{
+        return json(Config.API_BASE + resource, CACHE_NEVER, TimeUnit.DAYS, (Type) clazz, null);
     }
 
     /**
@@ -72,15 +105,27 @@ public final class ApiRequest {
      * @param deserializer Optional custom deserializer.
      * @return Promise for a JSON object
      */
-    public static <T> T json(String resource, long expire, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
+    public static <T> T json(String resource, int expire, TimeUnit unit, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
         setup();
-        Response response = getResponse(resource);
+        Response response = getResponse(resource, expire, unit);
         GsonBuilder gson = new GsonBuilder();
         if (deserializer != null) {
             gson = gson.registerTypeAdapter(type, deserializer);
         }
 
-        return gson.create().fromJson(response.body().string(), type);
+        return gson.create().fromJson(response.body().charStream(), type);
+    }
+
+    public static <T> T json(String resource, int expire, TimeUnit unit, Type type) throws JsonSyntaxException, IOException {
+        return json(resource, expire, unit, type, null);
+    }
+
+    public static <T> T json(String resource, TimeUnit unit, Type type) throws JsonSyntaxException, IOException {
+        return json(resource, 1, unit, type, null);
+    }
+
+    public static <T> T json(String resource, Type type) throws JsonSyntaxException, IOException {
+        return json(resource, CACHE_NEVER, TimeUnit.DAYS, type, null);
     }
 
     /**
@@ -89,11 +134,19 @@ public final class ApiRequest {
      * @return A response object from executing a new call on the client
      * @throws IOException
      */
-    public static Response getResponse(String resource) throws IOException {
-        Request request = new Request.Builder()
-                .url(resource)
-                .build();
-        return client.newCall(request).execute();
+    public static Response getResponse(String resource, int expire, TimeUnit unit) throws IOException {
+        Request.Builder builder = new Request.Builder()
+                .url(resource);
+        if (expire != CACHE_NEVER) {
+            builder.cacheControl(new CacheControl.Builder()
+                    .maxStale(expire, unit)
+                    .build());
+        } else {
+            builder.cacheControl(new CacheControl.Builder()
+                    .noStore()
+                    .build());
+        }
+        return client.newCall(builder.build()).execute();
     }
 
     /**
@@ -107,9 +160,17 @@ public final class ApiRequest {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    public static <T> T xml(String resource, long expire, XmlParser<T> parser) throws XmlPullParserException, IOException {
+    public static <T> T xml(String resource, int expire, TimeUnit unit, XmlParser<T> parser) throws XmlPullParserException, IOException {
         setup();
-        Response response = getResponse(resource);
+        Response response = getResponse(resource, expire, unit);
         return parser.parse(response.body().byteStream());
+    }
+
+    public static <T> T xml(String resource, TimeUnit unit, XmlParser<T> parser) throws XmlPullParserException, IOException {
+        return xml(resource, 1, unit, parser);
+    }
+
+    public static <T> T xml(String resource, XmlParser<T> parser) throws XmlPullParserException, IOException {
+        return xml(resource, CACHE_NEVER, TimeUnit.DAYS, parser);
     }
 }

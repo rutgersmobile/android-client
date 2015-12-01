@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
@@ -41,9 +42,9 @@ public class DTableLoader extends SimpleAsyncLoader<DTableRoot> {
         try {
             JsonObject json;
             if (url != null) {
-                json = ApiRequest.json(url, ApiRequest.CACHE_ONE_HOUR, JsonObject.class);
+                json = ApiRequest.json(url, TimeUnit.HOURS, JsonObject.class);
             } else {
-                json = ApiRequest.api(api, ApiRequest.CACHE_ONE_HOUR, JsonObject.class);
+                json = ApiRequest.api(api, TimeUnit.HOURS, JsonObject.class);
             }
 
             root = new DTableRoot(json);

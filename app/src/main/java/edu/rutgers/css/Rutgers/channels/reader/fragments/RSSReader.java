@@ -14,10 +14,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSAdapter;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
@@ -39,7 +39,8 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
     private static final int LOADER_ID              = 1;
 
     /* Constants */
-    public static final long EXPIRE                = ApiRequest.CACHE_ONE_MINUTE;
+    public static final int EXPIRE                = 1;
+    public static final TimeUnit EXPIRE_UNIT       = TimeUnit.MINUTES;
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;

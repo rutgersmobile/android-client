@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
@@ -39,7 +40,7 @@ public class MainActivityLoader extends SimpleAsyncLoader<MainActivityLoader.Ini
         Motd motd = null;
 
         try {
-            array = ApiRequest.api("ordered_content.json", ApiRequest.CACHE_ONE_DAY, JsonArray.class);
+            array = ApiRequest.api("ordered_content.json", TimeUnit.DAYS, JsonArray.class);
         } catch (JsonSyntaxException | IOException e) {
             array = AppUtils.loadRawJSONArray(getContext().getResources(), R.raw.channels);
         }

@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
@@ -34,8 +35,10 @@ public final class NextbusAPI {
     private static ActiveStops sNWKActive;
     
     private static final String BASE_URL = "http://webservices.nextbus.com/service/publicXMLFeed?command=";
-    private static final long activeExpireTime = ApiRequest.CACHE_ONE_MINUTE * 10; // active bus data cached ten minutes
-    private static final long configExpireTime = ApiRequest.CACHE_ONE_HOUR; // config data cached one hour
+    private static final int activeExpireTime = 10; // active bus data cached ten minutes
+    private static final TimeUnit activeTimeUnit = TimeUnit.MINUTES;
+    private static final int configExpireTime = 1; // config data cached one hour
+    private static final TimeUnit configTimeUnit = TimeUnit.HOURS;
 
     public static final String AGENCY_NB = "nb";
     public static final String AGENCY_NWK = "nwk";
@@ -53,15 +56,15 @@ public final class NextbusAPI {
         else sSettingUp = true;
 
         ActiveStops.AgentlessActiveStops nbActive =
-                ApiRequest.api("nbactivestops.txt", activeExpireTime, ActiveStops.AgentlessActiveStops.class);
+                ApiRequest.api("nbactivestops.txt", activeExpireTime, activeTimeUnit, ActiveStops.AgentlessActiveStops.class);
         ActiveStops.AgentlessActiveStops nwkActive =
-                ApiRequest.api("nwkactivestops.txt", activeExpireTime, ActiveStops.AgentlessActiveStops.class);
+                ApiRequest.api("nwkactivestops.txt", activeExpireTime, activeTimeUnit, ActiveStops.AgentlessActiveStops.class);
         sNBActive = new ActiveStops(AGENCY_NB, nbActive);
         sNWKActive = new ActiveStops(AGENCY_NWK, nwkActive);
 
-        sNBConf = ApiRequest.api("rutgersrouteconfig.txt", configExpireTime, AgencyConfig.class,
+        sNBConf = ApiRequest.api("rutgersrouteconfig.txt", configExpireTime, configTimeUnit, AgencyConfig.class,
                 new AgencyConfigDeserializer(AGENCY_NB));
-        sNWKConf = ApiRequest.api("rutgers-newarkrouteconfig.txt", configExpireTime, AgencyConfig.class,
+        sNWKConf = ApiRequest.api("rutgers-newarkrouteconfig.txt", configExpireTime, configTimeUnit, AgencyConfig.class,
                 new AgencyConfigDeserializer(AGENCY_NWK));
 
         sSettingUp = false;
@@ -97,7 +100,7 @@ public final class NextbusAPI {
         }
 
         // Run the query we built and sort the prediction results
-        List<Prediction> predictions = ApiRequest.xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER, new PredictionXmlParser(PredictionXmlParser.PredictionType.ROUTE));
+        List<Prediction> predictions = ApiRequest.xml(queryBuilder.toString(), new PredictionXmlParser(PredictionXmlParser.PredictionType.ROUTE));
         Collections.sort(predictions, new Comparator<Prediction>() {
             @Override
             public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
@@ -144,7 +147,7 @@ public final class NextbusAPI {
         }
 
         // Run the query we built and sort the prediction results
-        List<Prediction> predictions = ApiRequest.xml(queryBuilder.toString(), ApiRequest.CACHE_NEVER, new PredictionXmlParser(PredictionXmlParser.PredictionType.STOP));
+        List<Prediction> predictions = ApiRequest.xml(queryBuilder.toString(), new PredictionXmlParser(PredictionXmlParser.PredictionType.STOP));
         Collections.sort(predictions, new Comparator<Prediction>() {
             @Override
             public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {

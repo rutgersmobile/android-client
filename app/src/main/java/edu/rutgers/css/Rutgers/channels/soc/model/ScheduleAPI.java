@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 
@@ -38,7 +39,7 @@ public final class ScheduleAPI {
      * @return SOC Conf API with semesters array and default semester setting
      */
     public static Semesters getSemesters() throws JsonSyntaxException, IOException {
-        return ApiRequest.api("soc_conf.txt", ApiRequest.CACHE_ONE_DAY, Semesters.class);
+        return ApiRequest.api("soc_conf.txt", 1, TimeUnit.DAYS, Semesters.class);
     }
 
     /**
@@ -57,7 +58,7 @@ public final class ScheduleAPI {
         }
 
         Type type = new TypeToken<List<Subject>>(){}.getType();
-        return ApiRequest.json(reqUrl, ApiRequest.CACHE_ONE_DAY, type);
+        return ApiRequest.json(reqUrl, 1, TimeUnit.DAYS, type);
     }
 
     /**
@@ -77,7 +78,7 @@ public final class ScheduleAPI {
         }
 
         Type type = new TypeToken<List<Course>>(){}.getType();
-        return ApiRequest.json(reqUrl, ApiRequest.CACHE_ONE_DAY, type);
+        return ApiRequest.json(reqUrl, 1, TimeUnit.DAYS, type);
     }
 
     /**
@@ -96,7 +97,7 @@ public final class ScheduleAPI {
             reqUrl = SOC_BASE_URL + "course.json?semester=" + semesterCode + "&campus=" + campusCode + "&subject=" + subjectCode + "&courseNumber=" + courseCode;
         }
 
-        return ApiRequest.json(reqUrl, ApiRequest.CACHE_ONE_DAY, Course.class);
+        return ApiRequest.json(reqUrl, 1, TimeUnit.DAYS, Course.class);
     }
 
     /**
@@ -108,7 +109,7 @@ public final class ScheduleAPI {
      */
     public static SOCIndex getIndex(final String semesterCode, final String campusCode, final String levelCode) throws JsonSyntaxException, IOException {
         String resource = "indexes/" + semesterCode + "_" + campusCode + "_" + levelCode + ".json";
-        return ApiRequest.api(resource, ApiRequest.CACHE_ONE_DAY, SOCIndex.class, new SOCIndexDeserializer(campusCode, levelCode, semesterCode));
+        return ApiRequest.api(resource, 1, TimeUnit.DAYS, SOCIndex.class, new SOCIndexDeserializer(campusCode, levelCode, semesterCode));
     }
 
     /**
