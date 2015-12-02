@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
+import jp.wasabeef.picasso.transformations.CropTransformation;
 
 /**
  * Array adapter extended for RSS items
@@ -24,7 +25,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
     
     private static final String TAG = "RSSAdapter";
     private int mLayoutResource;
-    private int mTargetWidth;
+    private final int mTargetWidth;
 
     // Class to hold data for RSS list rows
     static class ViewHolder {
@@ -50,9 +51,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
     @Override
     public boolean isEnabled(int position) {
         RSSItem curItem = this.getItem(position);
-        if (curItem == null) return false;
-        else if (curItem.getLink() == null) return false;
-        else return true;
+        return curItem != null && curItem.getLink() != null;
     }
 
     @Override
@@ -99,8 +98,7 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
             // Download the image
             Picasso.with(getContext())
                     .load(curItem.getImgUrl().toString())
-                    .resize(mTargetWidth, mTargetWidth)
-                    .centerCrop()
+                    .transform(new CropTransformation(mTargetWidth, mTargetWidth, CropTransformation.CropType.TOP))
                     .into(holder.iconImageView);
         }
         

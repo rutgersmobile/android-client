@@ -13,6 +13,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
+import jp.wasabeef.picasso.transformations.CropTransformation;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -149,8 +150,7 @@ public class RMenuAdapter extends ArrayAdapter<RMenuRow> {
                 RMenuImageRow imageRowItem = (RMenuImageRow) curItem;
                 Picasso.with(getContext())
                         .load(imageRowItem.getDrawableURL())
-                        .resize(imageRowItem.getHeight(), imageRowItem.getWidth())
-                        .centerInside()
+                        .transform(new CropTransformation(imageRowItem.getWidth(), imageRowItem.getHeight(), CropTransformation.CropType.TOP))
                         .into(holder.imageView);
             } else {
                 holder.imageView.setImageBitmap(null);
