@@ -108,7 +108,7 @@ public class SOCIndex {
         return results;
     }
 
-    public List<Course> getCoursesByCode(String queryCourseCode, List<String> query) {
+    public List<Course> getCoursesByCodes(String queryCourseCode, List<String> query) {
         List<Course> results = new ArrayList<>();
         Set<Map.Entry<String, IndexCourse>> courseEntries = mCoursesByName.entrySet();
         for (Map.Entry<String, IndexCourse> courseEntry : courseEntries) {
@@ -124,6 +124,20 @@ public class SOCIndex {
         }
         Collections.sort(results);
         return results;
+    }
+
+    public Course getCourseByCode(final String sCode, final String cCode) {
+        for (Map.Entry<String, IndexCourse> e : mCoursesByName.entrySet()) {
+            final String courseName = e.getKey();
+            final String courseCode = e.getValue().course;
+            final String subjectCode = e.getValue().subj;
+
+            if (courseCode.equals(cCode) && subjectCode.equals(sCode)) {
+                return new Course(courseName, subjectCode, courseCode);
+            }
+        }
+
+        return null;
     }
 
     public List<Course> getCoursesByCodeInSubjects(Collection<Subject> subjects, String courseCodeQuery) {

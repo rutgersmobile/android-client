@@ -51,7 +51,7 @@ public final class NextbusAPI {
     /**
      * Load agency configurations and lists of active routes/stops for each campus.
      */
-    private static void setup () throws JsonSyntaxException, IOException {
+    private static synchronized void setup () throws JsonSyntaxException, IOException {
         if (sSettingUp) return;
         else sSettingUp = true;
 

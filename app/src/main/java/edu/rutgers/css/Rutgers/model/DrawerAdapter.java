@@ -135,7 +135,12 @@ public class DrawerAdapter extends BaseAdapter {
 
     public void addAll(Collection<Channel> channels) {
         this.channels.addAll(channels);
-        notifyDataSetInvalidated();
+        notifyDataSetChanged();
+    }
+
+    public void clear() {
+        channels.clear();
+        notifyDataSetChanged();
     }
 
     public boolean positionIsChannel(int position) {

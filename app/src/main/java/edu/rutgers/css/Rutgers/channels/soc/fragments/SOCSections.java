@@ -47,7 +47,6 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     private static final String ARG_DATA_TAG        = "soc.sections.data";
     private static final String ARG_SEMESTER_TAG    = "semester";
     private static final String ARG_CAMPUS_CODE_TAG = "campusCode";
-    private static final String ARG_SEM_CODE_TAG    = "semesterCode";
     private static final String ARG_SUBJECT_TAG     = "subject";
     private static final String ARG_COURSE_NUM_TAG  = "courseNumber";
 
@@ -63,14 +62,13 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
 
     /** Create argument bundle for course sections display. */
     public static Bundle createArgs(@NonNull final String title, @NonNull final String semester,
-                                    @NonNull final String campusCode, @NonNull final String semesterCode,
+                                    @NonNull final String campusCode,
                                     @NonNull final String subject, @NonNull final String courseNumber) {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, SOCSections.HANDLE);
         bundle.putString(ARG_TITLE_TAG, title);
         bundle.putString(ARG_SEMESTER_TAG, semester);
         bundle.putString(ARG_CAMPUS_CODE_TAG, campusCode);
-        bundle.putString(ARG_SEM_CODE_TAG, semesterCode);
         bundle.putString(ARG_SUBJECT_TAG, subject);
         bundle.putString(ARG_COURSE_NUM_TAG, courseNumber);
         return bundle;
@@ -170,7 +168,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     public Loader<Course> onCreateLoader(int id, Bundle args) {
         return new CourseLoader(getContext(),
                 args.getString(ARG_CAMPUS_CODE_TAG),
-                args.getString(ARG_SEM_CODE_TAG),
+                args.getString(ARG_SEMESTER_TAG),
                 args.getString(ARG_SUBJECT_TAG),
                 args.getString(ARG_COURSE_NUM_TAG)
         );

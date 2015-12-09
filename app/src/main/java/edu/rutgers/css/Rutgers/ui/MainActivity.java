@@ -3,10 +3,14 @@ package edu.rutgers.css.Rutgers.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
@@ -23,6 +27,7 @@ import android.widget.ListView;
 import com.google.gson.JsonArray;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
@@ -37,6 +42,7 @@ import edu.rutgers.css.Rutgers.model.Motd;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
+import edu.rutgers.css.Rutgers.link.fragments.LinkLoadFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
@@ -155,7 +161,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     return;
                 } else if (adapter.positionIsAbout(position)) {
                     Bundle aboutArgs = AboutDisplay.createArgs();
-                    aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                     fragmentMediator.switchFragments(aboutArgs);
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
@@ -166,7 +171,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
 
                 channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
-                channelArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
 
                 mDrawerListView.setItemChecked(position, true);
                 LOGI(TAG, "Currently checked item position: " + mDrawerListView.getCheckedItemPosition());
@@ -192,7 +196,15 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         fragmentMediator = new MainFragmentMediator(this);
 
-        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+        JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
+        if (array != null) {
+            mChannelManager.loadChannelsFromJSONArray(array);
+            mDrawerAdapter.addAll(mChannelManager.getChannels());
+        }
+
+        if (wantsLink()) {
+            deepLink();
+        } else if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
                     .commit();
@@ -284,15 +296,15 @@ public class MainActivity extends GoogleApiProviderActivity implements
     }
 
     @Override
-    public void onLoadFinished(Loader<MainActivityLoader.InitLoadHolder> loader, MainActivityLoader.InitLoadHolder data) {
+    public void onLoadFinished(Loader<MainActivityLoader.InitLoadHolder> loader, MainActivityLoader.InitLoadHolder holder) {
         // These will be non-null on success
-        if (data.getArray() == null || data.getMotd() == null) {
+        if (holder.getArray() == null || holder.getMotd() == null) {
             AppUtils.showFailedLoadToast(MainActivity.this);
             return;
         }
 
-        final Motd motd = data.getMotd();
-        final JsonArray array = data.getArray();
+        final Motd motd = holder.getMotd();
+        final JsonArray array = holder.getArray();
         if (!mShowedMotd && motd.getData() != null) {
             mShowedMotd = true;
             if (!motd.isWindow()) {
@@ -301,7 +313,9 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 f.show(getSupportFragmentManager(), MotdDialogFragment.TAG);
             } else {
                 // switch to a fullscreen Motd
-                fragmentMediator.switchFragments(
+                // we have to cheat to do this, but since the goal
+                // is to brick the app it doesn't matter too much
+                switchFragmentsOnLoadFinished(
                         TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
                 if (!motd.hasCloseButton()) {
                     // Lock the user to the Motd (bricks the app on purpose)
@@ -319,13 +333,80 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mToolbar.setVisibility(View.VISIBLE);
 
         // Load nav drawer items
+        mChannelManager.clear();
         mChannelManager.loadChannelsFromJSONArray(array);
+
+        mDrawerAdapter.clear();
         mDrawerAdapter.addAll(mChannelManager.getChannels());
-        mDrawerLayout.openDrawer(mDrawerListView);
+
+        if (!wantsLink()) {
+            mDrawerLayout.openDrawer(mDrawerListView);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {
+        mChannelManager.clear();
+        mDrawerAdapter.clear();
+    }
 
+    private boolean wantsLink() {
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        Uri data = intent.getData();
+        return action.equals(Intent.ACTION_VIEW) && data != null;
+    }
+
+    private void deepLink() {
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+        final Uri data = intent.getData();
+
+        if (action.equals(Intent.ACTION_VIEW) && data != null) {
+            LOGI(TAG, "Intent received: action: " + action + " data: " + data.toString());
+
+            final List<String> pathParts = new ArrayList<>();
+            final List<String> encodedPathParts;
+            final String handle;
+            if (data.getScheme().equals("rutgers")) {
+                encodedPathParts = data.getPathSegments();
+                handle = data.getHost();
+            } else {
+                encodedPathParts = data.getPathSegments().subList(2, data.getPathSegments().size());
+                handle = data.getPathSegments().get(1);
+            }
+
+            for (final String part : encodedPathParts) {
+                pathParts.add(Uri.decode(part));
+            }
+
+            final Channel channel = mChannelManager.getChannelByTag(handle);
+            if (channel != null) {
+                final Fragment taskFragment = new LinkLoadFragment();
+                final Bundle taskArgs = LinkLoadFragment.createBundle(channel, pathParts);
+                taskFragment.setArguments(taskArgs);
+                getSupportFragmentManager().beginTransaction().add(taskFragment, LinkLoadFragment.TAG).commit();
+            }
+        }
+    }
+
+    /**
+     * You're not supposed to switch fragments after a loader
+     * but we're going to do it anyway cause we roll like that.
+     *
+     * Don't use this unless it's for a good reason
+     * @param args Args for the fragment to switch to
+     */
+    private void switchFragmentsOnLoadFinished(final Bundle args) {
+        final int WAT = 1;
+        Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == WAT) {
+                    fragmentMediator.switchFragments(args);
+                }
+            }
+        };
+        handler.sendEmptyMessage(WAT);
     }
 }

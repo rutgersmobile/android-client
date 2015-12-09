@@ -317,7 +317,7 @@ public class ScheduleAdapter extends BaseAdapter
             } else {
                 // If no subjects were input, get all courses matching
                 // the ones put in regardless of subject
-                courses.addAll(socIndex.getCoursesByCode(courseId, words));
+                courses.addAll(socIndex.getCoursesByCodes(courseId, words));
             }
 
             filterResults.values = new SectionHolder(subjects, courses);

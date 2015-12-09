@@ -56,6 +56,7 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
     private Place mPlace;
     private RMenuAdapter mAdapter;
     private boolean mLoading;
+    private String mTitle;
 
     public PlacesDisplay() {
         // Required empty public constructor
@@ -70,12 +71,21 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         return bundle;
     }
 
+    /** Create argument bundle for Rutgers place/building display. */
+    public static Bundle createArgs(@NonNull String placeKey) {
+        final Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, PlacesDisplay.HANDLE);
+        bundle.putString(ARG_PLACEKEY_TAG, placeKey);
+        return bundle;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, new ArrayList<RMenuRow>());
 
         final Bundle args = getArguments();
+        mTitle = args.getString(ARG_TITLE_TAG);
 
         // start loading place
         mLoading = true;
@@ -89,8 +99,7 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         if (mLoading) showProgressCircle();
 
         // Set title
-        final Bundle args = getArguments();
-        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
+        if (mTitle != null) getActivity().setTitle(mTitle);
         else getActivity().setTitle(R.string.places_title);
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
@@ -158,6 +167,7 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         if (data.getPlace() == null || data.getRows().isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }
+        mTitle = data.getPlace().getTitle();
         mAdapter.clear();
         mAdapter.addAll(data.getRows());
         mPlace = data.getPlace();

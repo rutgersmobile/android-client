@@ -130,7 +130,9 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     public void onResume() {
         super.onResume();
 
-        if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.registerListener(this);
+        if (mGoogleApiClientProvider != null) {
+            mGoogleApiClientProvider.registerListener(this);
+        }
 
         getLoaderManager().initLoader(LOADER_ID, null, this);
     }
