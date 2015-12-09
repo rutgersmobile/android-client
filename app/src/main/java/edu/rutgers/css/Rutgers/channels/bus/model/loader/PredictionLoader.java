@@ -13,14 +13,17 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
+import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
+import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
+import lombok.Data;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
 /**
  * Async loader for Predictions
  */
-public class PredictionLoader extends SimpleAsyncLoader<List<Prediction>> {
+public class PredictionLoader extends SimpleAsyncLoader<PredictionLoader.PredictionHolder> {
 
     public static final String TAG = "PredictionLoader";
 
@@ -29,6 +32,12 @@ public class PredictionLoader extends SimpleAsyncLoader<List<Prediction>> {
     private String mode;
 
     private List<Prediction> oldData;
+
+    @Data
+    public class PredictionHolder {
+        public final List<Prediction> predictions;
+        public final String title;
+    }
 
     /**
      * @param context Context of the application
@@ -45,13 +54,24 @@ public class PredictionLoader extends SimpleAsyncLoader<List<Prediction>> {
     }
 
     @Override
-    public List<Prediction> loadInBackground() {
+    public PredictionHolder loadInBackground() {
         List<Prediction> predictions = new ArrayList<>();
+        String title = null;
         try {
             if (BusDisplay.ROUTE_MODE.equals(mode)) {
                 predictions.addAll(NextbusAPI.routePredict(agency, tag));
+                for (RouteStub route : NextbusAPI.getActiveRoutes(agency)) {
+                    if (route.getTag().equals(tag)) {
+                        title = route.getTitle();
+                    }
+                }
             } else if (BusDisplay.STOP_MODE.equals(mode)) {
                 predictions.addAll(NextbusAPI.stopPredict(agency, tag));
+                for (StopStub stop : NextbusAPI.getActiveStops(agency)) {
+                    if (stop.getTag().equals(tag)) {
+                        title = stop.getTitle();
+                    }
+                }
             }
 
             if (oldData.size() != predictions.size()) {
@@ -80,6 +100,6 @@ public class PredictionLoader extends SimpleAsyncLoader<List<Prediction>> {
             LOGE(TAG, e.getMessage());
         }
 
-        return oldData;
+        return new PredictionHolder(predictions, title);
     }
 }

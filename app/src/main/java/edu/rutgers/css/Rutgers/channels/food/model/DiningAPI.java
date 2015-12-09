@@ -35,7 +35,7 @@ public final class DiningAPI {
      * Grab the dining API data.
      * <p>(Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)</p>
      */
-    private static void setup() throws JsonSyntaxException, IOException {
+    private static synchronized void setup() throws JsonSyntaxException, IOException {
         if (sSettingUp) return;
         else sSettingUp = true;
 

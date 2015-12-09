@@ -3,7 +3,10 @@ package edu.rutgers.css.Rutgers.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -21,16 +24,21 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.google.gson.JsonArray;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
+import edu.rutgers.css.Rutgers.link.InitLoadArgs;
+import edu.rutgers.css.Rutgers.link.InitLoadAsyncTask;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
@@ -155,7 +163,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     return;
                 } else if (adapter.positionIsAbout(position)) {
                     Bundle aboutArgs = AboutDisplay.createArgs();
-                    aboutArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
                     fragmentMediator.switchFragments(aboutArgs);
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
@@ -166,7 +173,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
 
                 channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
-                channelArgs.putBoolean(ComponentFactory.ARG_TOP_LEVEL, true);
 
                 mDrawerListView.setItemChecked(position, true);
                 LOGI(TAG, "Currently checked item position: " + mDrawerListView.getCheckedItemPosition());
@@ -198,7 +204,19 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     .commit();
         }
 
+        JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
+        if (array != null) {
+            mChannelManager.loadChannelsFromJSONArray(array);
+            mDrawerAdapter.addAll(mChannelManager.getChannels());
+        }
+
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        deepLink();
     }
 
     @Override
@@ -284,15 +302,15 @@ public class MainActivity extends GoogleApiProviderActivity implements
     }
 
     @Override
-    public void onLoadFinished(Loader<MainActivityLoader.InitLoadHolder> loader, MainActivityLoader.InitLoadHolder data) {
+    public void onLoadFinished(Loader<MainActivityLoader.InitLoadHolder> loader, MainActivityLoader.InitLoadHolder holder) {
         // These will be non-null on success
-        if (data.getArray() == null || data.getMotd() == null) {
+        if (holder.getArray() == null || holder.getMotd() == null) {
             AppUtils.showFailedLoadToast(MainActivity.this);
             return;
         }
 
-        final Motd motd = data.getMotd();
-        final JsonArray array = data.getArray();
+        final Motd motd = holder.getMotd();
+        final JsonArray array = holder.getArray();
         if (!mShowedMotd && motd.getData() != null) {
             mShowedMotd = true;
             if (!motd.isWindow()) {
@@ -301,7 +319,9 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 f.show(getSupportFragmentManager(), MotdDialogFragment.TAG);
             } else {
                 // switch to a fullscreen Motd
-                fragmentMediator.switchFragments(
+                // we have to cheat to do this, but since the goal
+                // is to brick the app it doesn't matter too much
+                switchFragmentsOnLoadFinished(
                         TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
                 if (!motd.hasCloseButton()) {
                     // Lock the user to the Motd (bricks the app on purpose)
@@ -319,13 +339,92 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mToolbar.setVisibility(View.VISIBLE);
 
         // Load nav drawer items
+        mChannelManager.clear();
         mChannelManager.loadChannelsFromJSONArray(array);
+
+        mDrawerAdapter.clear();
         mDrawerAdapter.addAll(mChannelManager.getChannels());
-        mDrawerLayout.openDrawer(mDrawerListView);
+
+        if (!wantsLink()) {
+            mDrawerLayout.openDrawer(mDrawerListView);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {
+        mChannelManager.clear();
+        mDrawerAdapter.clear();
+    }
 
+    private boolean wantsLink() {
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        Uri data = intent.getData();
+        return action.equals(Intent.ACTION_VIEW) && data != null;
+    }
+
+    private void deepLink() {
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        Uri data = intent.getData();
+
+        if (action.equals(Intent.ACTION_VIEW) && data != null) {
+            LOGI(TAG, "Intent received: action: " + action + " data: " + data.toString());
+
+            List<String> pathParts = new ArrayList<>();
+            for (String part : data.getPathSegments().subList(2, data.getPathSegments().size())) {
+                pathParts.add(Uri.decode(part));
+            }
+
+            String handle = data.getPathSegments().get(1);
+            Channel channel = mChannelManager.getChannelByTag(handle);
+            if (channel != null) {
+                String channelTag = channel.getView();
+
+                if (pathParts.size() == 0) {
+                    LOGI(TAG, "Linking to channel: " + channelTag);
+                    Bundle args = channel.getBundle();
+                    String homeCampus = RutgersUtils.getHomeCampus(this);
+
+                    args.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
+                    fragmentMediator.switchFragments(args);
+                    return;
+                }
+
+                final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+                final String prefLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
+                final String prefCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
+                final String prefSemester = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null);
+
+                MainActivityBus.getInstance().register(this);
+                new InitLoadAsyncTask(RutgersUtils.getHomeCampus(this), prefCampus, prefLevel, prefSemester)
+                        .execute(new InitLoadArgs(channel, pathParts));
+            }
+        }
+    }
+
+    @Subscribe
+    public void onAsyncTaskResult(Bundle args) {
+        fragmentMediator.switchFragments(args);
+    }
+
+    /**
+     * You're not supposed to switch fragments after a loader
+     * but we're going to do it anyway cause we roll like that.
+     *
+     * Don't use this unless it's for a good reason
+     * @param args Args for the fragment to switch to
+     */
+    private void switchFragmentsOnLoadFinished(final Bundle args) {
+        final int WAT = 1;
+        Handler handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                if (msg.what == WAT) {
+                    fragmentMediator.switchFragments(args);
+                }
+            }
+        };
+        handler.sendEmptyMessage(WAT);
     }
 }

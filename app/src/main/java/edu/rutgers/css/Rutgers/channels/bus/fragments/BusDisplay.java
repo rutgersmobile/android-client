@@ -31,7 +31,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
-public class BusDisplay extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<Prediction>> {
+public class BusDisplay extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<PredictionLoader.PredictionHolder> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusDisplay";
@@ -77,6 +77,16 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, BusDisplay.HANDLE);
         bundle.putString(ARG_TITLE_TAG, title);
+        bundle.putString(ARG_AGENCY_TAG, agency);
+        bundle.putString(ARG_MODE_TAG, mode);
+        bundle.putString(ARG_TAG_TAG, tag);
+        return bundle;
+    }
+
+    public static Bundle createLinkArgs(@NonNull String mode, @NonNull String agency,
+                                        @NonNull String tag) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, BusDisplay.HANDLE);
         bundle.putString(ARG_AGENCY_TAG, agency);
         bundle.putString(ARG_MODE_TAG, mode);
         bundle.putString(ARG_TAG_TAG, tag);
@@ -134,6 +144,11 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         mAgency = args.getString(ARG_AGENCY_TAG);
         mTag = args.getString(ARG_TAG_TAG);
 
+        // Get title
+        String title = args.getString(ARG_TITLE_TAG, getString(R.string.bus_title));
+
+        getActivity().setTitle(title);
+
         // Start loading predictions
         showProgressCircle();
         getLoaderManager().initLoader(LOADER_ID, null, this);
@@ -142,15 +157,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
-
-        final Bundle args = getArguments();
-        // Get title
-        if (args.getString(ARG_TITLE_TAG) != null) {
-            getActivity().setTitle(args.getString(ARG_TITLE_TAG));
-        } else {
-            LOGE(TAG, "Argument \""+ARG_TITLE_TAG+"\" not set");
-            getActivity().setTitle(getString(R.string.bus_title));
-        }
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
 
@@ -216,14 +222,19 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     }
 
     @Override
-    public Loader<List<Prediction>> onCreateLoader(int id, Bundle args) {
+    public Loader<PredictionLoader.PredictionHolder> onCreateLoader(int id, Bundle args) {
         return new PredictionLoader(getActivity(), mAgency, mTag, mMode);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Prediction>> loader, List<Prediction> data) {
+    public void onLoadFinished(Loader<PredictionLoader.PredictionHolder> loader, PredictionLoader.PredictionHolder data) {
+        List<Prediction> predictions = data.getPredictions();
+        String title = data.getTitle();
+        if (title != null) {
+            getActivity().setTitle(title);
+        }
         // If there are no active routes or stops, show a message
-        if (data.isEmpty()) {
+        if (predictions.isEmpty()) {
             if (BusDisplay.STOP_MODE.equals(mMode)) {
                 if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_stops, Toast.LENGTH_SHORT).show();
             } else {
@@ -231,12 +242,12 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             }
         }
         mAdapter.clear();
-        mAdapter.addAll(data);
+        mAdapter.addAll(predictions);
         hideProgressCircle();
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Prediction>> loader) {
+    public void onLoaderReset(Loader<PredictionLoader.PredictionHolder> loader) {
         mAdapter.clear();
         hideProgressCircle();
     }

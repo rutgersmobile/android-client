@@ -26,6 +26,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    public static final String ARG_START_TAG        = "startTag";
 
     /* Member data */
     private ViewPager mViewPager;
@@ -76,6 +77,11 @@ public class BusMain extends Fragment implements FilterFocusListener {
                 }
             }
         });
+
+        int startPage = args.getInt(ARG_START_TAG, -1);
+        if (startPage != -1) {
+            mViewPager.setCurrentItem(startPage);
+        }
 
         return v;
     }

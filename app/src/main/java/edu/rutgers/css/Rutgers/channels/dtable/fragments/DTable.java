@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     private static final String ARG_API_TAG         = ComponentFactory.ARG_API_TAG;
     private static final String ARG_URL_TAG         = ComponentFactory.ARG_URL_TAG;
     private static final String ARG_DATA_TAG        = Config.PACKAGE_NAME + ".dtable.data";
+    private static final String ARG_PATH_TAG        = Config.PACKAGE_NAME + ".dtable.path";
 
     /* Saved instance state tags */
     private static final String SAVED_HANDLE_TAG    = Config.PACKAGE_NAME + ".dtable.saved.handle";
@@ -81,10 +83,22 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
         return bundle;
     }
 
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull URL url, @NonNull List<String> pathParts) {
+        Bundle bundle = createArgs(title, handle, url);
+        bundle.putSerializable(ARG_PATH_TAG, (Serializable) pathParts);
+        return bundle;
+    }
+
     /** Create argument bundle for a DTable that loads from the RUMobile API. */
     public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull String api) {
         Bundle bundle = baseArgs(title, handle);
         bundle.putString(ARG_API_TAG, api);
+        return bundle;
+    }
+
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull String api, @NonNull List<String> pathParts) {
+        Bundle bundle = createArgs(title, handle, api);
+        bundle.putSerializable(ARG_PATH_TAG, (Serializable) pathParts);
         return bundle;
     }
 
@@ -200,9 +214,12 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
                     newArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getChannelTitle(homeCampus));
 
                     // Add optional fields to the arg bundle
-                    if (channel.getUrl() != null) newArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
-                    if (channel.getData() != null) newArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
-                    if (channel.getCount() > 0) newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
+                    if (channel.getUrl() != null)
+                        newArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+                    if (channel.getData() != null)
+                        newArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
+                    if (channel.getCount() > 0)
+                        newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
                     switchFragments(newArgs);
                 }
             }
@@ -241,6 +258,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
         } else {
             AppUtils.showFailedLoadToast(getActivity());
         }
+
         mLoading = false;
         hideProgressCircle();
     }

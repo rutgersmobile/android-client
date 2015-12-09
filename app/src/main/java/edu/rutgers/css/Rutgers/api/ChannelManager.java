@@ -131,4 +131,8 @@ public final class ChannelManager {
         channelsMap.remove(handle);
     }
 
+    public void clear() {
+        channelsMap.clear();
+    }
+
 }

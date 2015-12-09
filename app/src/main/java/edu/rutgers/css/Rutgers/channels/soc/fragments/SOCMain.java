@@ -52,6 +52,10 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = "filter";
 
+    private static final String ARG_LEVEL_TAG       = "level";
+    private static final String ARG_CAMPUS_TAG      = "campus";
+    private static final String ARG_SEMESTER_TAG    = "semester";
+
     /* Member data */
     private SOCIndex mSOCIndex;
     private ScheduleAdapter mAdapter;
@@ -74,6 +78,24 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         return bundle;
     }
 
+    public static Bundle createArgs(final String level, final String campus, final String semester) {
+        Bundle bundle = createArgs();
+
+        if (level != null) {
+            bundle.putString(ARG_LEVEL_TAG, level);
+        }
+
+        if (campus != null) {
+            bundle.putString(ARG_CAMPUS_TAG, campus);
+        }
+
+        if (semester != null) {
+            bundle.putString(ARG_SEMESTER_TAG, semester);
+        }
+
+        return bundle;
+    }
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,9 +106,14 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         defaultSettings(sharedPref);
-        mLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
-        mCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
-        mSemester = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null);
+        final String prefLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
+        final String prefCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
+        final String prefSemester = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null);
+
+        final Bundle args = getArguments();
+        mLevel = args.getString(ARG_LEVEL_TAG, prefLevel);
+        mCampus = args.getString(ARG_CAMPUS_TAG, prefCampus);
+        mLevel = args.getString(ARG_SEMESTER_TAG, prefSemester);
 
         // Register settings listener
         sharedPref.registerOnSharedPreferenceChangeListener(this);
@@ -127,8 +154,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
                     final Course course = (Course) clickedItem;
                     Bundle courseArgs = SOCSections.createArgs(
                             course.getDisplayTitle(), mSemester, mSOCIndex.getCampusCode(),
-                            mSOCIndex.getSemesterCode(), course.getSubject(),
-                            course.getCourseNumber()
+                            course.getSubject(), course.getCourseNumber()
                     );
                     switchFragments(courseArgs);
                 }
