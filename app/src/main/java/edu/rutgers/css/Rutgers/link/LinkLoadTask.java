@@ -92,37 +92,58 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
         }
     }
 
+    /**
+     * @param pathParts /dining-hall-name
+     * @return bundle for creating this fragment
+     */
     private Bundle switchFood(List<String> pathParts) {
         String hall = LinkMaps.diningHalls.get(pathParts.get(0));
         return FoodHall.createArgs(hall);
     }
 
+    /**
+     * @param channel bus channel
+     * @param pathParts /route
+     *                  /stop
+     *                  /all
+     *                  /route/route-name
+     *                  /stop/stop-name
+     * @return bundle to start this fragment
+     */
     private Bundle switchBus(Channel channel, List<String> pathParts) {
+        // get the type of object to display: route, stop, or all
         String rsa = pathParts.remove(0);
-        if (pathParts.size() == 0 && channel != null) {
+        if (pathParts.size() == 0) {
+            // no route or stop name given
             Bundle args = BusMain.createArgs(channel.getTitle(homeCampus));
             args.putInt(BusMain.ARG_START_TAG, LinkMaps.busPositions.get(rsa));
             return args;
-        } else if (pathParts.size() > 0 && channel != null) {
-            String stopOrRoute = pathParts.remove(0);
-            String mode;
-            switch (LinkMaps.busPositions.get(rsa)) {
-                case 1:
-                    mode = BusDisplay.STOP_MODE;
-                    break;
-                default:
-                    mode = BusDisplay.ROUTE_MODE;
-                    break;
-            }
-            return BusDisplay.createLinkArgs(mode,
-                    NextbusAPI.AGENCY_NB, stopOrRoute);
         }
 
-        return null;
+        // link to the route or stop given
+        String stopOrRoute = pathParts.remove(0);
+        String mode;
+        switch (LinkMaps.busPositions.get(rsa)) {
+            case 1:
+                mode = BusDisplay.STOP_MODE;
+                break;
+            default:
+                mode = BusDisplay.ROUTE_MODE;
+                break;
+        }
+
+        return BusDisplay.createLinkArgs(mode,
+                NextbusAPI.AGENCY_NB, stopOrRoute);
     }
 
+    /**
+     * @param channel dtable
+     * @param pathParts names of dtable elements
+     * @return bundle to start this dtable
+     */
     private Bundle switchDtable(Channel channel, List<String> pathParts) {
         try {
+            // JSON representing the dtable
             JsonObject jsonObject;
             if (StringUtils.isNotBlank(channel.getApi())) {
                 jsonObject = ApiRequest.api(channel.getApi(), TimeUnit.HOURS, JsonObject.class);
@@ -133,11 +154,13 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
             DTableRoot root = new DTableRoot(jsonObject);
             for (String part : pathParts) {
                 for (DTableElement child : root.getChildren()) {
+                    // no spaces or capital letters in input
                     if (child.getTitle()
                             .replaceAll("\\s+", "")
                             .toLowerCase()
                             .equals(part)) {
                         if (child instanceof DTableRoot) {
+                            // look for the next element in this root's children
                             root = (DTableRoot) child;
                             break;
                         } else if (child instanceof DTableChannel) {
@@ -173,18 +196,35 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
         }
     }
 
+    /**
+     * This doesn't really have a place to link to yet. Channels with reader are really only
+     * launched from a dtable.
+     */
     private Bundle switchReader(Channel channel, List<String> pathParts) {
         return null;
     }
 
+    /**
+     * Almost every field is optional for SoC. Subject and course codes are
+     * indistinguishable and must always be in order. Semester should be before these two as well.
+     * @param pathParts /nb/u/92015/010/272
+     *                  /u/92015/nb/010/272
+     *                  /010/272
+     *                  /010
+     *                  /92015
+     *                  /92015/010/272
+     * @return bundle to start this fragment
+     */
     private Bundle switchSOC(List<String> pathParts) {
         List<String> stripped = new ArrayList<>();
+
         String campusCode = null;
         String levelCode = null;
         String semesterCode = null;
         String subjectCode = null;
         String courseCode = null;
 
+        // Default semester can be determined from the API
         if (defaultSemesterCode == null) {
             try {
                 Semesters semesters = ScheduleAPI.getSemesters();
@@ -195,11 +235,13 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
             }
         }
 
+        // all codes are capitalized
         final List<String> caps = new ArrayList<>();
         for (final String part : pathParts) {
             caps.add(part.toUpperCase());
         }
 
+        // take out everything that isn't a number
         for (String part : caps) {
             switch (part.toUpperCase()) {
                 case ScheduleAPI.CODE_CAMPUS_NB:
@@ -218,10 +260,13 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
         }
 
         if (stripped.size() > 0) {
+            // It's tough to tell when we're on the semester, so this
+            // is our best guess. Keeping the order helps a lot
             if (stripped.get(0).length() > 3) {
                 semesterCode = stripped.remove(0);
             }
 
+            // Subject and course codes are in order if there at all
             if (stripped.size() > 0) {
                 subjectCode = stripped.remove(0);
                 if (stripped.size() > 0) {
@@ -229,6 +274,8 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                 }
             }
         }
+
+        // Set defaults if we haven't gotten anything for semester/campus/level
 
         if (campusCode == null) {
             campusCode = defaultCampusCode;
@@ -243,6 +290,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
         }
 
         try {
+            // We need the index to get titles of the course / subject we're linking to
             SOCIndex index = ScheduleAPI.getIndex(semesterCode, campusCode, levelCode);
 
             if (courseCode != null && subjectCode != null) {

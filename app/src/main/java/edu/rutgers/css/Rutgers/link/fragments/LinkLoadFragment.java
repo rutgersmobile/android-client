@@ -29,6 +29,8 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 public final class LinkLoadFragment extends Fragment {
 
     public static final String TAG = "TaskFragment";
+
+    /* Bundle arguments */
     private static final String ARG_CHANNEL_TAG = "channel";
     private static final String ARG_PATH_TAG = "path";
 
@@ -55,6 +57,7 @@ public final class LinkLoadFragment extends Fragment {
         if (channel != null && homeCampus != null) {
             final String channelTag = channel.getView();
 
+            // Launch channel immediately if that's all we have
             if (pathParts.size() == 0) {
                 LOGI(TAG, "Linking to channel: " + channelTag);
                 Bundle channelArgs = channel.getBundle();
@@ -64,6 +67,8 @@ public final class LinkLoadFragment extends Fragment {
                 return;
             }
 
+            // We don't have a reference to the enclosing activity in the task
+            // so we have to get all this information here
             final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
             final String prefLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
             final String prefCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
@@ -75,6 +80,10 @@ public final class LinkLoadFragment extends Fragment {
         }
     }
 
+    /**
+     * Method called when the task comes back. Launches the desired fragment
+     * @param args Arguments for fragment creation
+     */
     @Subscribe
     public void switchFragments(Bundle args) {
         if (getActivity() != null) {

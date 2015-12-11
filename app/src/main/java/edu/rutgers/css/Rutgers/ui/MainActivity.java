@@ -196,6 +196,9 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         fragmentMediator = new MainFragmentMediator(this);
 
+        // Load the drawer content synchonously first. This will allow us to have something in the
+        // drawer while we're loading. When the loader comes back it will erase this and fill
+        // in new values
         JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
         if (array != null) {
             mChannelManager.loadChannelsFromJSONArray(array);
@@ -350,6 +353,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mDrawerAdapter.clear();
     }
 
+    /**
+     * Determine if the current intent will cause deep linking
+     * @return True if the intent has a uri
+     */
     private boolean wantsLink() {
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -357,6 +364,11 @@ public class MainActivity extends GoogleApiProviderActivity implements
         return action.equals(Intent.ACTION_VIEW) && data != null;
     }
 
+    /**
+     * Perform the deep linking. This breaks apart the input URI and
+     * creates a LinkLoadFragment for parsing the URI and launching the
+     * destination fragment.
+     */
     private void deepLink() {
         final Intent intent = getIntent();
         final String action = intent.getAction();
@@ -369,17 +381,21 @@ public class MainActivity extends GoogleApiProviderActivity implements
             final List<String> encodedPathParts;
             final String handle;
             if (data.getScheme().equals("rutgers")) {
+                // scheme "rutgers://<channel>/<args>"
                 encodedPathParts = data.getPathSegments();
                 handle = data.getHost();
             } else {
+                // scheme "http://rumobile.rutgers.edu/link/<channel>/<args>"
                 encodedPathParts = data.getPathSegments().subList(2, data.getPathSegments().size());
                 handle = data.getPathSegments().get(1);
             }
 
+            // Change arguments into normal strings
             for (final String part : encodedPathParts) {
                 pathParts.add(Uri.decode(part));
             }
 
+            // Launch the processing fragment
             final Channel channel = mChannelManager.getChannelByTag(handle);
             if (channel != null) {
                 final Fragment taskFragment = new LinkLoadFragment();
