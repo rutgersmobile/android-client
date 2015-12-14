@@ -96,8 +96,16 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
      * @param pathParts /dining-hall-name
      * @return bundle for creating this fragment
      */
-    private Bundle switchFood(List<String> pathParts) {
+    public Bundle switchFood(List<String> pathParts) {
+        if (pathParts.size() > 1) {
+            return null;
+        }
+
         String hall = LinkMaps.diningHalls.get(pathParts.get(0));
+        if (hall == null) {
+            return null;
+        }
+
         return FoodHall.createArgs(hall);
     }
 
@@ -110,7 +118,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
      *                  /stop/stop-name
      * @return bundle to start this fragment
      */
-    private Bundle switchBus(Channel channel, List<String> pathParts) {
+    public Bundle switchBus(Channel channel, List<String> pathParts) {
         // get the type of object to display: route, stop, or all
         String rsa = pathParts.remove(0);
         if (pathParts.size() == 0) {
@@ -141,7 +149,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
      * @param pathParts names of dtable elements
      * @return bundle to start this dtable
      */
-    private Bundle switchDtable(Channel channel, List<String> pathParts) {
+    public Bundle switchDtable(Channel channel, List<String> pathParts) {
         try {
             // JSON representing the dtable
             JsonObject jsonObject;
@@ -200,7 +208,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
      * This doesn't really have a place to link to yet. Channels with reader are really only
      * launched from a dtable.
      */
-    private Bundle switchReader(Channel channel, List<String> pathParts) {
+    public Bundle switchReader(Channel channel, List<String> pathParts) {
         return null;
     }
 
@@ -215,7 +223,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
      *                  /92015/010/272
      * @return bundle to start this fragment
      */
-    private Bundle switchSOC(List<String> pathParts) {
+    public Bundle switchSOC(List<String> pathParts) {
         List<String> stripped = new ArrayList<>();
 
         String campusCode = null;
@@ -310,7 +318,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
         }
     }
 
-    private Bundle switchPlaces(List<String> pathParts) {
+    public Bundle switchPlaces(List<String> pathParts) {
         return PlacesDisplay.createArgs(pathParts.get(0));
     }
 }

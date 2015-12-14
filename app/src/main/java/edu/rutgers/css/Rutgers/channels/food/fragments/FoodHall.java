@@ -43,8 +43,7 @@ public class FoodHall extends Fragment
     public static final String HANDLE               = "foodhall";
 
     /* Argument bundle tags */
-    private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
-    private static final String ARG_LOCATION_TAG    = "location";
+    public static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
 
     /* Saved instance state tags */
     private static final String SAVED_DATA_TAG    = Config.PACKAGE_NAME + ".dtable.saved.data";
@@ -67,7 +66,6 @@ public class FoodHall extends Fragment
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, FoodHall.HANDLE);
         bundle.putString(ARG_TITLE_TAG, location);
-        bundle.putString(ARG_LOCATION_TAG, location);
         return bundle;
     }
 
@@ -76,7 +74,7 @@ public class FoodHall extends Fragment
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
 
-        mLocation = args.getString(ARG_LOCATION_TAG);
+        mLocation = args.getString(ARG_TITLE_TAG);
         if (mLocation == null) {
             LOGE(TAG, "location argument not set");
             return;
