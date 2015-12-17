@@ -30,6 +30,18 @@ public class Channel implements Serializable {
     private JsonArray data;
     private boolean canOverride;
 
+    /* Simple constructor, currently only used for testing */
+    public Channel(VarTitle title, String handle, String view, String api,
+                   String url, JsonArray data, boolean canOverride) {
+        this.title = title;
+        this.handle = handle;
+        this.view = view;
+        this.api = api;
+        this.url = url;
+        this.data = data;
+        this.canOverride = canOverride;
+    }
+
     /** Construct channel from JSON. */
     public Channel(JsonObject channelJson) throws JsonSyntaxException {
         this.title = new VarTitle(channelJson.get("title"));

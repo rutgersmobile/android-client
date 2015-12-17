@@ -49,7 +49,6 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     private static final String ARG_API_TAG         = ComponentFactory.ARG_API_TAG;
     private static final String ARG_URL_TAG         = ComponentFactory.ARG_URL_TAG;
     private static final String ARG_DATA_TAG        = Config.PACKAGE_NAME + ".dtable.data";
-    private static final String ARG_PATH_TAG        = Config.PACKAGE_NAME + ".dtable.path";
 
     /* Saved instance state tags */
     private static final String SAVED_HANDLE_TAG    = Config.PACKAGE_NAME + ".dtable.saved.handle";
@@ -83,22 +82,10 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
         return bundle;
     }
 
-    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull URL url, @NonNull List<String> pathParts) {
-        Bundle bundle = createArgs(title, handle, url);
-        bundle.putSerializable(ARG_PATH_TAG, (Serializable) pathParts);
-        return bundle;
-    }
-
     /** Create argument bundle for a DTable that loads from the RUMobile API. */
     public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull String api) {
         Bundle bundle = baseArgs(title, handle);
         bundle.putString(ARG_API_TAG, api);
-        return bundle;
-    }
-
-    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull String api, @NonNull List<String> pathParts) {
-        Bundle bundle = createArgs(title, handle, api);
-        bundle.putSerializable(ARG_PATH_TAG, (Serializable) pathParts);
         return bundle;
     }
 

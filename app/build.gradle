@@ -16,7 +16,7 @@ def getVersionName = { ->
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.1'
+    buildToolsVersion '23.0.2'
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
@@ -76,7 +76,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:8.3.0'
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'org.slf4j:slf4j-android:1.7.7'
-    compile 'com.google.code.gson:gson:2.3'
+    compile 'com.google.code.gson:gson:2.4'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.nhaarman.listviewanimations:lib-core:3.1.0@aar'
     compile 'com.nhaarman.listviewanimations:lib-manipulation:3.1.0@aar'
@@ -94,7 +94,7 @@ dependencies {
     androidTestCompile 'com.android.support.test:rules:0.4'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
 //    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
-    androidTestCompile 'com.android.support:support-annotations:23.1.0'
+    androidTestCompile 'com.android.support:support-annotations:23.1.1'
 }
 
 idea {

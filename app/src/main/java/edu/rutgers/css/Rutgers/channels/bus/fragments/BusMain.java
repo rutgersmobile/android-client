@@ -26,7 +26,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
-    public static final String ARG_START_TAG        = "startTag";
+    private static final String ARG_START_TAG        = "startTag";
 
     /* Member data */
     private ViewPager mViewPager;
@@ -41,6 +41,12 @@ public class BusMain extends Fragment implements FilterFocusListener {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, BusMain.HANDLE);
         if (title != null) bundle.putString(ARG_TITLE_TAG, title);
+        return bundle;
+    }
+
+    public static Bundle createArgs(String title, int startTag) {
+        Bundle bundle = createArgs(title);
+        bundle.putInt(ARG_START_TAG, startTag);
         return bundle;
     }
 

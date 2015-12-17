@@ -27,9 +27,11 @@ import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCCourses;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
+import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.SOCIndex;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
+import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.model.Channel;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
@@ -119,23 +121,36 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
      * @return bundle to start this fragment
      */
     public Bundle switchBus(Channel channel, List<String> pathParts) {
+        if (pathParts.size() > 2) {
+            return null;
+        }
+
         // get the type of object to display: route, stop, or all
         String rsa = pathParts.remove(0);
+        Integer startTab = LinkMaps.busPositions.get(rsa);
+        if (startTab == null) {
+            return null;
+        }
+
         if (pathParts.size() == 0) {
             // no route or stop name given
-            Bundle args = BusMain.createArgs(channel.getTitle(homeCampus));
-            args.putInt(BusMain.ARG_START_TAG, LinkMaps.busPositions.get(rsa));
-            return args;
+            return BusMain.createArgs(channel.getTitle(homeCampus), startTab);
         }
 
         // link to the route or stop given
         String stopOrRoute = pathParts.remove(0);
         String mode;
-        switch (LinkMaps.busPositions.get(rsa)) {
+        switch (startTab) {
             case 1:
+                if (!NextbusAPI.validStop(NextbusAPI.AGENCY_NB, stopOrRoute)) {
+                    return null;
+                }
                 mode = BusDisplay.STOP_MODE;
                 break;
             default:
+                if (!NextbusAPI.validRoute(NextbusAPI.AGENCY_NB, stopOrRoute)) {
+                    return null;
+                }
                 mode = BusDisplay.ROUTE_MODE;
                 break;
         }
@@ -160,8 +175,11 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
             }
 
             DTableRoot root = new DTableRoot(jsonObject);
-            for (String part : pathParts) {
-                for (DTableElement child : root.getChildren()) {
+            int i;
+            for (i = 0; i < pathParts.size(); i++) {
+                final String part = pathParts.get(i);
+                boolean found = false;
+                for (final DTableElement child : root.getChildren()) {
                     // no spaces or capital letters in input
                     if (child.getTitle()
                             .replaceAll("\\s+", "")
@@ -170,8 +188,13 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                         if (child instanceof DTableRoot) {
                             // look for the next element in this root's children
                             root = (DTableRoot) child;
+                            found = true;
                             break;
                         } else if (child instanceof DTableChannel) {
+                            if (i != pathParts.size() - 1) {
+                                return null;
+                            }
+
                             DTableChannel dTableChannel = (DTableChannel) child;
                             Bundle newArgs = new Bundle();
                             // Must have view and title set to launch a channel
@@ -194,6 +217,9 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                             return newArgs;
                         }
                     }
+                }
+                if (!found) {
+                    return null;
                 }
             }
 
@@ -250,7 +276,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
         }
 
         // take out everything that isn't a number
-        for (String part : caps) {
+        for (final String part : caps) {
             switch (part.toUpperCase()) {
                 case ScheduleAPI.CODE_CAMPUS_NB:
                 case ScheduleAPI.CODE_CAMPUS_CAM:
@@ -263,6 +289,11 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                     levelCode = part;
                     break;
                 default:
+                    try {
+                        Integer.parseInt(part);
+                    } catch (NumberFormatException ignored) {
+                        return null;
+                    }
                     stripped.add(part);
             }
         }
@@ -283,6 +314,10 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
             }
         }
 
+        if (stripped.size() > 0) {
+            return null;
+        }
+
         // Set defaults if we haven't gotten anything for semester/campus/level
 
         if (campusCode == null) {
@@ -300,15 +335,24 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
         try {
             // We need the index to get titles of the course / subject we're linking to
             SOCIndex index = ScheduleAPI.getIndex(semesterCode, campusCode, levelCode);
+            if (index == null) {
+                return null;
+            }
 
             if (courseCode != null && subjectCode != null) {
-                String title = index.getCourseByCode(subjectCode, courseCode).getTitle();
-                return SOCSections.createArgs(title, semesterCode, campusCode, subjectCode, courseCode);
+                Course course = index.getCourseByCode(subjectCode, courseCode);
+                if (course == null) {
+                    return null;
+                }
+                return SOCSections.createArgs(course.getTitle(), semesterCode, campusCode, subjectCode, courseCode);
             }
 
             if (subjectCode != null) {
-                String title = index.getSubjectByCode(subjectCode).getTitle();
-                return SOCCourses.createArgs(title, campusCode, semesterCode, levelCode, subjectCode);
+                Subject subject = index.getSubjectByCode(subjectCode);
+                if (subject == null) {
+                    return null;
+                }
+                return SOCCourses.createArgs(subject.getTitle(), campusCode, semesterCode, levelCode, subjectCode);
             }
 
             return SOCMain.createArgs(levelCode, campusCode, semesterCode);

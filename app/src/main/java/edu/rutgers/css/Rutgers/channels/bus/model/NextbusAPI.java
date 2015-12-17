@@ -69,7 +69,33 @@ public final class NextbusAPI {
 
         sSettingUp = false;
     }
-    
+
+    public static boolean validRoute(@NonNull final String agency, @NonNull final String routeKey) {
+        try {
+            setup();
+
+            AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
+            final Route route = conf.getRoutes().get(routeKey);
+
+            return route != null;
+        } catch (JsonSyntaxException | IOException ignored) {
+            return false;
+        }
+    }
+
+    public static boolean validStop(@NonNull final String agency, @NonNull final String routeKey) {
+        try {
+            setup();
+
+            AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
+            final Stop stop = conf.getStops().get(routeKey);
+
+            return stop != null;
+        } catch (JsonSyntaxException | IOException ignored) {
+            return false;
+        }
+    }
+
     /**
      * Get arrival time predictions for every stop on a route.
      * @param agency Agency (campus) that the route belongs to.

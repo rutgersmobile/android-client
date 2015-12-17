@@ -42,7 +42,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     private static final String ARG_CAMPUS_TAG      = "campus";
     private static final String ARG_SEMESTER_TAG    = "semester";
     private static final String ARG_LEVEL_TAG       = "level";
-    private static final String ARG_SUBCODE_TAG     = "subjectCode";
+    private static final String ARG_SUBJECT_TAG     = "subject";
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = "filter";
@@ -66,7 +66,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         bundle.putString(ARG_CAMPUS_TAG, campus);
         bundle.putString(ARG_SEMESTER_TAG, semester);
         bundle.putString(ARG_LEVEL_TAG, level);
-        bundle.putString(ARG_SUBCODE_TAG, subjectCode);
+        bundle.putString(ARG_SUBJECT_TAG, subjectCode);
         return bundle;
     }
 
@@ -155,7 +155,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         final String campus = args.getString(ARG_CAMPUS_TAG);
         final String level = args.getString(ARG_LEVEL_TAG);
         final String semester = args.getString(ARG_SEMESTER_TAG);
-        final String subjectCode = args.getString(ARG_SUBCODE_TAG);
+        final String subjectCode = args.getString(ARG_SUBJECT_TAG);
 
         return new CoursesLoader(getContext(), campus, level, semester, subjectCode);
     }

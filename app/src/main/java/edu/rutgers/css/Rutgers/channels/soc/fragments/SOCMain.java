@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.channels.soc.fragments;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -78,21 +79,11 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         return bundle;
     }
 
-    public static Bundle createArgs(final String level, final String campus, final String semester) {
+    public static Bundle createArgs(@NonNull final String level, @NonNull final String campus, @NonNull final String semester) {
         Bundle bundle = createArgs();
-
-        if (level != null) {
-            bundle.putString(ARG_LEVEL_TAG, level);
-        }
-
-        if (campus != null) {
-            bundle.putString(ARG_CAMPUS_TAG, campus);
-        }
-
-        if (semester != null) {
-            bundle.putString(ARG_SEMESTER_TAG, semester);
-        }
-
+        bundle.putString(ARG_LEVEL_TAG, level);
+        bundle.putString(ARG_CAMPUS_TAG, campus);
+        bundle.putString(ARG_SEMESTER_TAG, semester);
         return bundle;
     }
 

@@ -58,7 +58,7 @@ public final class LinkLoadFragment extends Fragment {
             final String channelTag = channel.getView();
 
             // Launch channel immediately if that's all we have
-            if (pathParts.size() == 0) {
+            if (pathParts != null && pathParts.size() == 0) {
                 LOGI(TAG, "Linking to channel: " + channelTag);
                 Bundle channelArgs = channel.getBundle();
 
