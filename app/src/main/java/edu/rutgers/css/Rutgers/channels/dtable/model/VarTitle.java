@@ -17,6 +17,16 @@ public class VarTitle implements Serializable {
     public String homeTitle;
     public String foreignTitle;
 
+    public VarTitle(String homeTitle) {
+        this.homeTitle = homeTitle;
+    }
+
+    public VarTitle(String homeTitle, String homeCampus, String foreignTitle) {
+        this.homeTitle = homeTitle;
+        this.homeCampus = homeCampus;
+        this.foreignTitle = foreignTitle;
+    }
+
     public VarTitle(JsonElement element) throws JsonSyntaxException {
         try {
             homeTitle = element.getAsString();
