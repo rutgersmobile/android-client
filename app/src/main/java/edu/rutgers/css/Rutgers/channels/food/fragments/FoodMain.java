@@ -1,9 +1,15 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -42,6 +48,7 @@ public class FoodMain extends BaseChannelFragment
     /* Member data */
     private SchoolFacilitiesAdapter mAdapter;
     private boolean mLoading;
+    private ShareActionProvider shareActionProvider;
 
     public FoodMain() {
         // Required empty public constructor
@@ -58,6 +65,7 @@ public class FoodMain extends BaseChannelFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         mAdapter = new SchoolFacilitiesAdapter(getActivity(),
                 R.layout.row_title, R.layout.row_section_header, R.id.title);
@@ -102,6 +110,19 @@ public class FoodMain extends BaseChannelFragment
         });
         
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/food/");
+            shareActionProvider.setShareIntent(intent);
+        }
     }
 
     @Override

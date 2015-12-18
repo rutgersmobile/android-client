@@ -47,7 +47,7 @@ public class DTableLoader extends SimpleAsyncLoader<DTableRoot> {
                 json = ApiRequest.api(api, TimeUnit.HOURS, JsonObject.class);
             }
 
-            root = new DTableRoot(json);
+            root = new DTableRoot(json, null);
             LOGV(tag, "Loaded DTable root: " + root.getTitle());
         } catch (JsonSyntaxException | IOException e) {
             LOGW(tag, e.getMessage());

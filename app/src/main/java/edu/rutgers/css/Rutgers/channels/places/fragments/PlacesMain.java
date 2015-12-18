@@ -2,16 +2,23 @@ package edu.rutgers.css.Rutgers.channels.places.fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -70,6 +77,7 @@ public class PlacesMain extends BaseChannelFragment
     private SimpleSectionedAdapter<KeyValPair> mAdapter;
     private GoogleApiClientProvider mGoogleApiClientProvider;
     private LocationRequest mLocationRequest;
+    private ShareActionProvider shareActionProvider;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -100,6 +108,7 @@ public class PlacesMain extends BaseChannelFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
         mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
@@ -171,6 +180,19 @@ public class PlacesMain extends BaseChannelFragment
         });
 
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/places/");
+            shareActionProvider.setShareIntent(intent);
+        }
     }
 
     @Override

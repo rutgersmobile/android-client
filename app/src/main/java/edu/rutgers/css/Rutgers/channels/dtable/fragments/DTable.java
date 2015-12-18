@@ -1,10 +1,17 @@
 package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -16,6 +23,7 @@ import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.Expan
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
@@ -46,6 +54,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
     private static final String ARG_HANDLE_TAG      = ComponentFactory.ARG_HANDLE_TAG;
+    private static final String ARG_TOP_HANDLE_TAG  = "topHandle";
     private static final String ARG_API_TAG         = ComponentFactory.ARG_API_TAG;
     private static final String ARG_URL_TAG         = ComponentFactory.ARG_URL_TAG;
     private static final String ARG_DATA_TAG        = Config.PACKAGE_NAME + ".dtable.data";
@@ -60,38 +69,41 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     private String mURL;
     private String mAPI;
     private String mHandle;
+    private String mTopHandle;
     private boolean mLoading;
+    private ShareActionProvider shareActionProvider;
 
     public DTable() {
         // Required empty public constructor
     }
 
     /** Creates basic argument bundle - fields common to all bundles */
-    private static Bundle baseArgs(@NonNull String title, @NonNull String handle) {
+    private static Bundle baseArgs(@NonNull String title, @NonNull String handle, @NonNull String topHandle) {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, DTable.HANDLE);
         bundle.putString(ARG_TITLE_TAG, title);
         bundle.putString(ARG_HANDLE_TAG, handle);
+        bundle.putString(ARG_TOP_HANDLE_TAG, topHandle);
         return bundle;
     }
 
     /** Create argument bundle for a DTable that loads from a URL. */
-    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull URL url) {
-        Bundle bundle = baseArgs(title, handle);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull URL url) {
+        Bundle bundle = baseArgs(title, handle, topHandle);
         bundle.putString(ARG_URL_TAG, url.toString());
         return bundle;
     }
 
     /** Create argument bundle for a DTable that loads from the RUMobile API. */
-    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull String api) {
-        Bundle bundle = baseArgs(title, handle);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull String api) {
+        Bundle bundle = baseArgs(title, handle, topHandle);
         bundle.putString(ARG_API_TAG, api);
         return bundle;
     }
 
     /** Create argument bundle for a DTable that launches with pre-loaded table data. */
-    public static Bundle createArgs(@NonNull String title, @NonNull String handle, @NonNull DTableRoot tableRoot) {
-        Bundle bundle = baseArgs(title, handle);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull DTableRoot tableRoot) {
+        Bundle bundle = baseArgs(title, handle, topHandle);
         bundle.putSerializable(ARG_DATA_TAG, tableRoot);
         return bundle;
     }
@@ -108,6 +120,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         final Bundle args = getArguments();
 
@@ -128,6 +141,8 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
         else if (args.getString(ARG_API_TAG) != null) mHandle = args.getString(ARG_API_TAG).replace(".txt","");
         else if (args.getString(ARG_TITLE_TAG) != null) mHandle = args.getString(ARG_TITLE_TAG);
         else mHandle = "invalid";
+
+        mTopHandle = args.getString(ARG_TOP_HANDLE_TAG, mHandle);
 
         // If table data was provided in "data" field, load it
         if (args.getSerializable(ARG_DATA_TAG) != null) {
@@ -190,7 +205,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
                 if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.CAT_TYPE.ordinal()) {
                     // DTable root - launch a new DTable
                     String newHandle = mHandle + "_" + element.getTitle(homeCampus).replace(" ", "_").toLowerCase();
-                    Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), newHandle, (DTableRoot) element);
+                    Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), newHandle, mTopHandle, (DTableRoot) element);
                     switchFragments(newArgs);
                 } else {
                     // Channel row - launch channel
@@ -199,6 +214,8 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
                     // Must have view and title set to launch a channel
                     newArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
                     newArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getChannelTitle(homeCampus));
+                    newArgs.putString(ComponentFactory.ARG_HANDLE_TAG, mTopHandle);
+                    newArgs.putStringArrayList(ComponentFactory.ARG_HIST_TAG, getHistory());
 
                     // Add optional fields to the arg bundle
                     if (channel.getUrl() != null)
@@ -221,6 +238,44 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            if (mDRoot != null) {
+                setShareIntent();
+            }
+        }
+    }
+
+    private void setShareIntent() {
+        Uri.Builder linkBuilder = new Uri.Builder()
+                .scheme("http")
+                .authority("rumobile.rutgers.edu")
+                .appendPath("link")
+                .appendPath(mTopHandle);
+
+        for (final String title : getHistory()) {
+            linkBuilder.appendPath(title);
+        }
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, linkBuilder.build().toString());
+        shareActionProvider.setShareIntent(intent);
+    }
+
+    private ArrayList<String> getHistory() {
+        ArrayList<String> titles = new ArrayList<>();
+        for (DTableElement cur = mDRoot; cur.getParent() != null; cur = cur.getParent()) {
+            titles.add(cur.getTitle().replaceAll("\\s+", "").toLowerCase());
+        }
+        Collections.reverse(titles);
+        return titles;
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
@@ -240,6 +295,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     public void onLoadFinished(Loader<DTableRoot> loader, DTableRoot data) {
         // Data will always be returned as non-null unless there was an error
         if (data != null) {
+            mDRoot = data;
             mAdapter.clear();
             mAdapter.addAll(data.getChildren());
         } else {

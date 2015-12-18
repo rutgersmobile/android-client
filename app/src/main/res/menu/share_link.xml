@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_options"
-        app:showAsAction="always"
-        android:title="@string/soc_select"
-        android:icon="@drawable/ic_socsettings_white" />
-
-    <item
-        android:id="@+id/soc_share"
+        android:id="@+id/deep_link_share"
         android:icon="@drawable/abc_ic_menu_share_mtrl_alpha"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:title="@string/share"
         app:actionProviderClass="android.support.v7.widget.ShareActionProvider" />
 </menu>

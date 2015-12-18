@@ -3,9 +3,14 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -177,7 +182,7 @@ public class BusAll extends BaseChannelFragment
 
     @Override
     public void onLoaderReset(Loader<List<SimpleSection<NextbusItem>>> loader) {
-        mAdapter.clear();;
+        mAdapter.clear();
         mLoading = false;
         hideProgressCircle();
     }

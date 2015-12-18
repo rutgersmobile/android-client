@@ -7,7 +7,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -57,6 +62,7 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
     private RMenuAdapter mAdapter;
     private boolean mLoading;
     private String mTitle;
+    private ShareActionProvider shareActionProvider;
 
     public PlacesDisplay() {
         // Required empty public constructor
@@ -82,6 +88,7 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, new ArrayList<RMenuRow>());
 
         final Bundle args = getArguments();
@@ -109,7 +116,7 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final RMenuItemRow clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
 
-                switch(clicked.getArgs().getInt(ID_KEY)) {
+                switch (clicked.getArgs().getInt(ID_KEY)) {
                     case ADDRESS_ROW:
                         launchMap();
                         break;
@@ -127,6 +134,19 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         });
 
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/places/" + Uri.encode(getArguments().getString(ARG_PLACEKEY_TAG)));
+            shareActionProvider.setShareIntent(intent);
+        }
     }
 
     /**

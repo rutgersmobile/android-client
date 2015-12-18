@@ -1,10 +1,17 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -14,6 +21,7 @@ import android.widget.Toast;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -53,6 +61,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     /* Member data */
     private CourseSectionAdapter mAdapter;
     private Course mCourse;
+    private ShareActionProvider shareActionProvider;
 
     private boolean mLoading;
 
@@ -75,10 +84,11 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     }
 
     /** Create argument bundle for course sections display. */
-    public static Bundle createArgs(@NonNull final String title, @NonNull final String semester, @NonNull final Course course) {
+    public static Bundle createArgs(@NonNull final String title, @NonNull final String campus, @NonNull final String semester, @NonNull final Course course) {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, SOCSections.HANDLE);
         bundle.putString(ARG_TITLE_TAG, title);
+        bundle.putString(ARG_CAMPUS_TAG, campus);
         bundle.putString(ARG_SEMESTER_TAG, semester);
         bundle.putSerializable(ARG_DATA_TAG, course);
         return bundle;
@@ -87,6 +97,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         final Bundle args = getArguments();
 
         mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, new ArrayList<SectionAdapterItem>());
@@ -142,6 +153,48 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
         });
 
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            setShareIntent();
+        }
+    }
+
+    private void setShareIntent() {
+        Uri.Builder linkBuilder = new Uri.Builder()
+                .scheme("http")
+                .authority("rumobile.rutgers.edu")
+                .appendPath("link")
+                .appendPath("soc");
+
+        Bundle args = getArguments();
+        if (mCourse == null) {
+            List<String> argParts = new ArrayList<>();
+            argParts.add(args.getString(ARG_CAMPUS_TAG));
+            argParts.add(args.getString(ARG_SEMESTER_TAG));
+            argParts.add(args.getString(ARG_SUBJECT_TAG));
+            argParts.add(args.getString(ARG_COURSE_TAG));
+            for (final String part : argParts) {
+                if (part != null) {
+                    linkBuilder.appendPath(part);
+                }
+            }
+        } else {
+            linkBuilder.appendPath(args.getString(ARG_CAMPUS_TAG));
+            linkBuilder.appendPath(args.getString(ARG_SEMESTER_TAG));
+            linkBuilder.appendPath(mCourse.getSubject());
+            linkBuilder.appendPath(mCourse.getCourseNumber());
+        }
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, linkBuilder.build().toString());
+        shareActionProvider.setShareIntent(intent);
     }
 
     private void loadCourse(@NonNull Course course) {

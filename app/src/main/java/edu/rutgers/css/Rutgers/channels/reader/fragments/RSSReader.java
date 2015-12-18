@@ -1,10 +1,17 @@
 package edu.rutgers.css.Rutgers.channels.reader.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -53,6 +60,7 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
     private ArrayList<RSSItem> mData;
     private RSSAdapter mAdapter;
     private boolean mLoading;
+    private ShareActionProvider shareActionProvider;
 
     public RSSReader() {
         // Required empty public constructor
@@ -70,6 +78,7 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         final Bundle args = getArguments();
         
         mData = new ArrayList<>();
@@ -117,6 +126,38 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
         });
         
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+
+            String topHandle = getArguments().getString(ComponentFactory.ARG_HANDLE_TAG);
+            List<String> history = getArguments().getStringArrayList(ComponentFactory.ARG_HIST_TAG);
+            String pathPart = getArguments().getString(ARG_TITLE_TAG);
+
+            if (topHandle != null && history != null && pathPart != null) {
+                Uri.Builder linkBuilder = new Uri.Builder()
+                        .scheme("http")
+                        .authority("rumobile.rutgers.edu")
+                        .appendPath("link")
+                        .appendPath(topHandle);
+
+                for (final String title : history) {
+                    linkBuilder.appendPath(title);
+                }
+
+                linkBuilder.appendPath(pathPart.replaceAll("\\s+", "").toLowerCase());
+
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, linkBuilder.build().toString());
+                shareActionProvider.setShareIntent(intent);
+            }
+        }
     }
 
     @Override

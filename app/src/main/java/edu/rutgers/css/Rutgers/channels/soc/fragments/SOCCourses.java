@@ -1,12 +1,19 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -15,6 +22,7 @@ import android.widget.ImageButton;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
@@ -52,6 +60,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     private EditText mFilterEditText;
     private String mFilterString;
     private boolean mLoading;
+    private ShareActionProvider shareActionProvider;
 
     public SOCCourses() {
         // Required empty public constructor
@@ -73,6 +82,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         Bundle args = getArguments();
 
         mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, R.layout.row_section_header);
@@ -97,6 +107,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString(ARG_TITLE_TAG)));
 
         final String semester = args.getString(ARG_SEMESTER_TAG);
+        final String campus = args.getString(ARG_CAMPUS_TAG);
 
         mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
 
@@ -107,7 +118,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Course clickedCourse = (Course) parent.getItemAtPosition(position);
 
-                Bundle newArgs = SOCSections.createArgs(clickedCourse.getDisplayTitle(), semester, clickedCourse);
+                Bundle newArgs = SOCSections.createArgs(clickedCourse.getDisplayTitle(), campus,  semester, clickedCourse);
                 switchFragments(newArgs);
             }
         });
@@ -142,6 +153,42 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         });
 
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            setShareIntent();
+        }
+    }
+
+    private void setShareIntent() {
+        Bundle args = getArguments();
+        List<String> linkArgs = new ArrayList<>();
+        linkArgs.add(args.getString(ARG_CAMPUS_TAG));
+        linkArgs.add(args.getString(ARG_LEVEL_TAG));
+        linkArgs.add(args.getString(ARG_SEMESTER_TAG));
+        linkArgs.add(args.getString(ARG_SUBJECT_TAG));
+
+        Uri.Builder linkBuilder = new Uri.Builder()
+                .scheme("http")
+                .authority("rumobile.rutgers.edu")
+                .appendPath("link")
+                .appendPath("soc");
+        for (final String arg : linkArgs) {
+            if (arg != null) {
+                linkBuilder.appendPath(arg);
+            }
+        }
+        Uri link = linkBuilder.build();
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, link.toString());
+        shareActionProvider.setShareIntent(intent);
     }
 
     @Override

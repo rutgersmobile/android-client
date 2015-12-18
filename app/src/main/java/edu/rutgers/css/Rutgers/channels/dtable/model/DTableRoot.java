@@ -19,8 +19,8 @@ public class DTableRoot extends DTableElement {
     private boolean window;
     private List<DTableElement> children;
 
-    public DTableRoot(JsonObject jsonObject) throws JsonSyntaxException {
-        super(jsonObject);
+    public DTableRoot(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
+        super(jsonObject, parent);
 
         JsonPrimitive p = jsonObject.getAsJsonPrimitive("schema");
         if (p != null) {
@@ -38,11 +38,11 @@ public class DTableRoot extends DTableElement {
 
         for (JsonElement childElement : childrenJson) {
             JsonObject child = childElement.getAsJsonObject();
-            if (child.has("answer")) children.add(new DTableFAQ(child));
+            if (child.has("answer")) children.add(new DTableFAQ(child, this));
             else if (child.has("children") && child.get("children").isJsonArray())
-                children.add(new DTableRoot(child));
-            else if (child.has("channel")) children.add(new DTableChannel(child));
-            else if (child.has("title")) children.add(new DTableElement(child));
+                children.add(new DTableRoot(child, this));
+            else if (child.has("channel")) children.add(new DTableChannel(child, this));
+            else if (child.has("title")) children.add(new DTableElement(child, this));
         }
     }
 

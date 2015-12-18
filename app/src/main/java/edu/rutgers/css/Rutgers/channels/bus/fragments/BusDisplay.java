@@ -1,11 +1,18 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -64,6 +71,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private Handler mUpdateHandler;
     private Timer mUpdateTimer;
     private String mAgency;
+    private ShareActionProvider shareActionProvider;
 
     private static final int LOADER_ID              = 101;
 
@@ -96,6 +104,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         mData = new ArrayList<>();
         mAdapter = new PredictionAdapter(getActivity(), mData);
@@ -177,6 +186,19 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         });
 
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/bus/" + mMode + "/" + Uri.encode(mTag));
+            shareActionProvider.setShareIntent(intent);
+        }
     }
 
     @Override

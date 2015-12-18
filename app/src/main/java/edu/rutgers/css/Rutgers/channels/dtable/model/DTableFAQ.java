@@ -13,8 +13,8 @@ public class DTableFAQ extends DTableElement {
     private String answer;
     private boolean opened;
 
-    public DTableFAQ(JsonObject jsonObject) throws JsonSyntaxException {
-        super(jsonObject);
+    public DTableFAQ(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
+        super(jsonObject, parent);
 
         JsonPrimitive p = jsonObject.getAsJsonPrimitive("window");
         window = p != null && p.getAsBoolean();

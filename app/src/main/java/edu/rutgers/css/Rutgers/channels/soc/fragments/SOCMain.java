@@ -1,12 +1,16 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -67,6 +71,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private String mLevel;
     private String mFilterString;
     private boolean mLoading;
+    private ShareActionProvider shareActionProvider;
 
     public SOCMain() {
         // Required empty public constructor
@@ -188,6 +193,22 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.soc_menu, menu);
+        MenuItem shareItem = menu.findItem(R.id.soc_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            setShareIntent();
+        }
+    }
+
+    private void setShareIntent() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT,
+                "http://rumobile.rutgers.edu/link/soc/" +
+                        Uri.encode(mCampus).toLowerCase() + "/" +
+                        (mSemester != null ? Uri.encode(mSemester) + "/" : "") +
+                        Uri.encode(mLevel).toLowerCase());
+        shareActionProvider.setShareIntent(intent);
     }
 
     @Override
@@ -343,6 +364,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         mAdapter.addAllSubjects(subjects);
 
         setScheduleTitle();
+        setShareIntent();
     }
 
     @Override

@@ -96,7 +96,7 @@ public class PredictionLoader extends SimpleAsyncLoader<PredictionLoader.Predict
                     oldPrediction.setMinutes(newPrediction.getMinutes());
                 }
             }
-        } catch (JsonSyntaxException | XmlPullParserException | IOException e) {
+        } catch (JsonSyntaxException | XmlPullParserException | IOException | IllegalArgumentException e) {
             LOGE(TAG, e.getMessage());
         }
 

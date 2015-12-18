@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -7,8 +9,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -27,6 +34,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuLoader;
+import edu.rutgers.css.Rutgers.link.LinkMaps;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -55,6 +63,7 @@ public class FoodHall extends Fragment
     private String mLocation;
     private MealPagerAdapter mPagerAdapter;
     private DiningMenu mData;
+    private ShareActionProvider shareActionProvider;
 
     private final static DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
 
@@ -72,6 +81,7 @@ public class FoodHall extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         final Bundle args = getArguments();
 
         mLocation = args.getString(ARG_TITLE_TAG);
@@ -82,7 +92,10 @@ public class FoodHall extends Fragment
 
         mPagerAdapter = new MealPagerAdapter(getChildFragmentManager());
 
-        mData = (DiningMenu) args.getSerializable(SAVED_DATA_TAG);
+        if (savedInstanceState != null) {
+            mData = (DiningMenu) savedInstanceState.getSerializable(SAVED_DATA_TAG);
+        }
+
         if (mData == null) {
             getLoaderManager().initLoader(LOADER_ID, savedInstanceState, this);
         }
@@ -110,6 +123,19 @@ public class FoodHall extends Fragment
         tabs.setViewPager(viewPager);
 
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/food/" + LinkMaps.diningHallsInv.get(mLocation));
+            shareActionProvider.setShareIntent(intent);
+        }
     }
 
     @Override

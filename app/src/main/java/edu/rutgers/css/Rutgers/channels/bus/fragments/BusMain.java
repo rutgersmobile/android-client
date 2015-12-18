@@ -1,11 +1,17 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -31,6 +37,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
     /* Member data */
     private ViewPager mViewPager;
     private WeakReference<BusAll> mAllTab;
+    private ShareActionProvider shareActionProvider;
 
     public BusMain() {
         // Required empty public constructor
@@ -48,6 +55,12 @@ public class BusMain extends Fragment implements FilterFocusListener {
         Bundle bundle = createArgs(title);
         bundle.putInt(ARG_START_TAG, startTag);
         return bundle;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -72,6 +85,9 @@ public class BusMain extends Fragment implements FilterFocusListener {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                if (shareActionProvider != null) {
+                    BusMain.this.setShareIntent(position);
+                }
                 if (position == 2) {
                     // When "All" tab is selected, focus the search field and open keyboard
                     if (mAllTab != null && mAllTab.get() != null) {
@@ -90,6 +106,41 @@ public class BusMain extends Fragment implements FilterFocusListener {
         }
 
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.share_link, menu);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        if (shareItem != null) {
+            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            int startPage = getArguments().getInt(ARG_START_TAG, -1);
+            if (startPage != -1) {
+                setShareIntent(startPage);
+            } else {
+                setShareIntent(0);
+            }
+        }
+    }
+
+    private void setShareIntent(int position) {
+        String tab;
+        switch (position) {
+            case 0:
+                tab = "route";
+                break;
+            case 1:
+                tab = "stop";
+                break;
+            default:
+                tab = "all";
+                break;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/bus/" + tab);
+        shareActionProvider.setShareIntent(intent);
     }
 
     @Override

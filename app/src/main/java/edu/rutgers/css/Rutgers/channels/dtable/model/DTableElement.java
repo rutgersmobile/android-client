@@ -13,10 +13,16 @@ import java.io.Serializable;
 public class DTableElement implements Serializable {
 
     private VarTitle varTitle;
+    private DTableElement parent;
 
-    public DTableElement(JsonObject jsonObject) throws JsonSyntaxException {
+    public DTableElement(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
         // Set the element title. JSON may have a string or object containing campus-local strings
         varTitle = new VarTitle(jsonObject.get("title"));
+        this.parent = parent;
+    }
+
+    public DTableElement getParent() {
+        return parent;
     }
 
     /**

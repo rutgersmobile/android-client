@@ -15,6 +15,13 @@ public final class LinkMaps {
         put("neilson", "Neilson Dining Hall");
     }};
 
+    public static final Map<String, String> diningHallsInv = new HashMap<String, String>() {{
+        put("Brower Commons", "brower");
+        put("Busch Dining Hall", "busch");
+        put("Livingston Dining Commons", "livi");
+        put("Neilson Dining Hall", "neilson");
+    }};
+
     public static final Map<String, Integer> busPositions = new HashMap<String, Integer>() {{
         put("route", 0);
         put("routes", 0);

@@ -14,8 +14,8 @@ public class DTableChannel extends DTableElement {
     private VarTitle channelTitle;
     private int count;
 
-    public DTableChannel(JsonObject jsonObject) throws JsonSyntaxException {
-        super(jsonObject);
+    public DTableChannel(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
+        super(jsonObject, parent);
 
         JsonObject channel = jsonObject.getAsJsonObject("channel");
         view = channel.getAsJsonPrimitive("view").getAsString();

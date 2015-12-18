@@ -142,15 +142,9 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
         String mode;
         switch (startTab) {
             case 1:
-                if (!NextbusAPI.validStop(NextbusAPI.AGENCY_NB, stopOrRoute)) {
-                    return null;
-                }
                 mode = BusDisplay.STOP_MODE;
                 break;
             default:
-                if (!NextbusAPI.validRoute(NextbusAPI.AGENCY_NB, stopOrRoute)) {
-                    return null;
-                }
                 mode = BusDisplay.ROUTE_MODE;
                 break;
         }
@@ -174,7 +168,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                 jsonObject = ApiRequest.json(channel.getUrl(), TimeUnit.HOURS, JsonObject.class);
             }
 
-            DTableRoot root = new DTableRoot(jsonObject);
+            DTableRoot root = new DTableRoot(jsonObject, null);
             int i;
             for (i = 0; i < pathParts.size(); i++) {
                 final String part = pathParts.get(i);
@@ -223,7 +217,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                 }
             }
 
-            return DTable.createArgs(root.getTitle(), channel.getHandle(), root);
+            return DTable.createArgs(root.getTitle(), channel.getHandle(), null, root);
         } catch (JsonSyntaxException | IOException e) {
             LOGE(TAG, e.getMessage());
             return null;

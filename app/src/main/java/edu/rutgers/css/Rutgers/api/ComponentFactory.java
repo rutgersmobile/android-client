@@ -66,6 +66,8 @@ public final class ComponentFactory {
     /** Count argument. For example, the number of events to grab in Events. */
     public static final String ARG_COUNT_TAG        = "count";
 
+    public static final String ARG_HIST_TAG         = "history";
+
     /** Table of fragments that can be launched. Handles must be lowercase. */
     private static Map<String, Class<? extends Fragment>> sFragmentTable =
             Collections.unmodifiableMap(new HashMap<String, Class<? extends Fragment>>() {{
