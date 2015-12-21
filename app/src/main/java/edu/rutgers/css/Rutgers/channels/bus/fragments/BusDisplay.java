@@ -35,6 +35,7 @@ import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.PredictionLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -194,9 +195,10 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            Uri uri = LinkUtils.buildUri(Config.SCHEMA, "bus", mMode, mTag);
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/bus/" + mMode + "/" + Uri.encode(mTag));
+            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
             shareActionProvider.setShareIntent(intent);
         }
     }

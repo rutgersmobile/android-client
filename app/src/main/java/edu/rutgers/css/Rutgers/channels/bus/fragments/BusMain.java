@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,10 +20,12 @@ import com.astuetz.PagerSlidingTabStrip;
 
 import java.lang.ref.WeakReference;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
 public class BusMain extends Fragment implements FilterFocusListener {
 
@@ -137,9 +140,11 @@ public class BusMain extends Fragment implements FilterFocusListener {
                 break;
         }
 
+        Uri uri = LinkUtils.buildUri(Config.SCHEMA, "bus", tab);
+
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/bus/" + tab);
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
         shareActionProvider.setShareIntent(intent);
     }
 

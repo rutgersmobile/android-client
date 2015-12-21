@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
@@ -36,6 +37,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -166,34 +168,26 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     }
 
     private void setShareIntent() {
-        Uri.Builder linkBuilder = new Uri.Builder()
-                .scheme("http")
-                .authority("rumobile.rutgers.edu")
-                .appendPath("link")
-                .appendPath("soc");
-
         Bundle args = getArguments();
+        List<String> argParts = new ArrayList<>();
+        argParts.add("soc");
         if (mCourse == null) {
-            List<String> argParts = new ArrayList<>();
             argParts.add(args.getString(ARG_CAMPUS_TAG));
             argParts.add(args.getString(ARG_SEMESTER_TAG));
             argParts.add(args.getString(ARG_SUBJECT_TAG));
             argParts.add(args.getString(ARG_COURSE_TAG));
-            for (final String part : argParts) {
-                if (part != null) {
-                    linkBuilder.appendPath(part);
-                }
-            }
         } else {
-            linkBuilder.appendPath(args.getString(ARG_CAMPUS_TAG));
-            linkBuilder.appendPath(args.getString(ARG_SEMESTER_TAG));
-            linkBuilder.appendPath(mCourse.getSubject());
-            linkBuilder.appendPath(mCourse.getCourseNumber());
+            argParts.add(args.getString(ARG_CAMPUS_TAG));
+            argParts.add(args.getString(ARG_SEMESTER_TAG));
+            argParts.add(mCourse.getSubject());
+            argParts.add(mCourse.getCourseNumber());
         }
+
+        Uri uri = LinkUtils.buildUri(Config.SCHEMA, (String[]) argParts.toArray());
 
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, linkBuilder.build().toString());
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
         shareActionProvider.setShareIntent(intent);
     }
 

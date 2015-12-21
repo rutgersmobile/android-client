@@ -36,6 +36,7 @@ import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuLoader;
 import edu.rutgers.css.Rutgers.link.LinkMaps;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -131,9 +132,13 @@ public class FoodHall extends Fragment
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/food/" + LinkMaps.diningHallsInv.get(mLocation));
+
+            Uri uri = LinkUtils.buildUri(Config.SCHEMA, "food", LinkMaps.diningHallsInv.get(mLocation));
+            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+
             shareActionProvider.setShareIntent(intent);
         }
     }

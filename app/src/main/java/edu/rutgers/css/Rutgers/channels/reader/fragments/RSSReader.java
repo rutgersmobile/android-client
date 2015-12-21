@@ -32,6 +32,7 @@ import edu.rutgers.css.Rutgers.channels.reader.model.loader.RSSItemLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -140,21 +141,18 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
             String pathPart = getArguments().getString(ARG_TITLE_TAG);
 
             if (topHandle != null && history != null && pathPart != null) {
-                Uri.Builder linkBuilder = new Uri.Builder()
-                        .scheme("http")
-                        .authority("rumobile.rutgers.edu")
-                        .appendPath("link")
-                        .appendPath(topHandle);
-
+                List<String> linkArgs = new ArrayList<>();
+                linkArgs.add(topHandle);
                 for (final String title : history) {
-                    linkBuilder.appendPath(title);
+                    linkArgs.add(title);
                 }
+                linkArgs.add(pathPart.replaceAll("\\s+", "").toLowerCase());
 
-                linkBuilder.appendPath(pathPart.replaceAll("\\s+", "").toLowerCase());
+                Uri uri = LinkUtils.buildUri(Config.SCHEMA,  linkArgs.toArray(new String[linkArgs.size()]));
 
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, linkBuilder.build().toString());
+                intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
                 shareActionProvider.setShareIntent(intent);
             }
         }

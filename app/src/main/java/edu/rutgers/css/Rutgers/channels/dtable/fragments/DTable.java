@@ -20,7 +20,6 @@ import android.widget.Toast;
 import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
-import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,9 +35,11 @@ import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
 import edu.rutgers.css.Rutgers.channels.dtable.model.loader.DTableLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * Dynamic Table
@@ -250,19 +251,17 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     }
 
     private void setShareIntent() {
-        Uri.Builder linkBuilder = new Uri.Builder()
-                .scheme("http")
-                .authority("rumobile.rutgers.edu")
-                .appendPath("link")
-                .appendPath(mTopHandle);
-
+        final List<String> linkArgs = new ArrayList<>();
+        linkArgs.add(mTopHandle);
         for (final String title : getHistory()) {
-            linkBuilder.appendPath(title);
+            linkArgs.add(title);
         }
+
+        Uri uri = LinkUtils.buildUri(Config.SCHEMA, linkArgs.toArray(new String[linkArgs.size()]));
 
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, linkBuilder.build().toString());
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
         shareActionProvider.setShareIntent(intent);
     }
 

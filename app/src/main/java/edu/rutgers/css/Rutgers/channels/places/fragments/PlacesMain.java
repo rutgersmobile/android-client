@@ -37,6 +37,7 @@ import com.google.android.gms.location.LocationServices;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
@@ -46,9 +47,12 @@ import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * <p>The main Places fragment displays nearby Rutgers locations (buildings, parks, etc.), as well as
@@ -188,9 +192,10 @@ public class PlacesMain extends BaseChannelFragment
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            Uri uri = LinkUtils.buildUri(Config.SCHEMA, "places");
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/places/");
+            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
             shareActionProvider.setShareIntent(intent);
         }
     }

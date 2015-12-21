@@ -25,6 +25,7 @@ import org.apache.commons.lang3.text.WordUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
@@ -32,6 +33,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
@@ -168,26 +170,17 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     private void setShareIntent() {
         Bundle args = getArguments();
         List<String> linkArgs = new ArrayList<>();
+        linkArgs.add("soc");
         linkArgs.add(args.getString(ARG_CAMPUS_TAG));
         linkArgs.add(args.getString(ARG_LEVEL_TAG));
         linkArgs.add(args.getString(ARG_SEMESTER_TAG));
         linkArgs.add(args.getString(ARG_SUBJECT_TAG));
 
-        Uri.Builder linkBuilder = new Uri.Builder()
-                .scheme("http")
-                .authority("rumobile.rutgers.edu")
-                .appendPath("link")
-                .appendPath("soc");
-        for (final String arg : linkArgs) {
-            if (arg != null) {
-                linkBuilder.appendPath(arg);
-            }
-        }
-        Uri link = linkBuilder.build();
+        Uri uri = LinkUtils.buildUri(Config.SCHEMA, (String[]) linkArgs.toArray());
 
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, link.toString());
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
         shareActionProvider.setShareIntent(intent);
     }
 

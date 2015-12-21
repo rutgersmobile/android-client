@@ -26,6 +26,7 @@ import android.widget.ImageButton;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
@@ -38,6 +39,7 @@ import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -201,13 +203,10 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     }
 
     private void setShareIntent() {
+        Uri uri = LinkUtils.buildUri(Config.SCHEMA, "soc", mCampus.toLowerCase(), mSemester, mLevel.toLowerCase());
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT,
-                "http://rumobile.rutgers.edu/link/soc/" +
-                        Uri.encode(mCampus).toLowerCase() + "/" +
-                        (mSemester != null ? Uri.encode(mSemester) + "/" : "") +
-                        Uri.encode(mLevel).toLowerCase());
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
         shareActionProvider.setShareIntent(intent);
     }
 

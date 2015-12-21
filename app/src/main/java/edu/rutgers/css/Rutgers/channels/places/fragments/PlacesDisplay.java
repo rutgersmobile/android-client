@@ -34,6 +34,7 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
 /**
  * Display information about a Rutgers location from the Places database.
@@ -142,9 +143,10 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+            Uri uri = LinkUtils.buildUri(Config.SCHEMA, "places", getArguments().getString(ARG_PLACEKEY_TAG));
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, "http://rumobile.rutgers.edu/link/places/" + Uri.encode(getArguments().getString(ARG_PLACEKEY_TAG)));
+            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
             shareActionProvider.setShareIntent(intent);
         }
     }
