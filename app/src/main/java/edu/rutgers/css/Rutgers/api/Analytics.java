@@ -15,13 +15,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +28,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import edu.rutgers.css.Rutgers.BuildConfig;
 import edu.rutgers.css.Rutgers.Config;
@@ -65,6 +63,8 @@ public final class Analytics extends IntentService {
 
     private static final int QUEUE_MODE = 0;
     private static final int POST_MODE = 1;
+
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public Analytics() {
         super("Analytics");
@@ -242,28 +242,22 @@ public final class Analytics extends IntentService {
                 // Delete loaded rows from database
                 database.delete(AnalyticsOpenHelper.TABLE_NAME, null, null);
 
-                // Build POST request
-                HttpClient httpClient = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(POST_URL);
-
                 try {
-                    List<NameValuePair> nameValuePairs = new ArrayList<>();
-                    nameValuePairs.add(new BasicNameValuePair("payload", eventOutQueue.toString()));
-                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-                    HttpResponse httpResponse = httpClient.execute(httpPost);
-
-                    // Successful POST - commit transaction to remove rows
-                    LOGI(TAG, httpResponse.getStatusLine().toString());
-                    int responseCode = httpResponse.getStatusLine().getStatusCode();
-                    if (responseCode >= 200 && responseCode <= 299) {
+                    // Build POST request
+                    OkHttpClient client = new OkHttpClient();
+                    RequestBody body = RequestBody.create(JSON, eventOutQueue.toString());
+                    Request request = new Request.Builder()
+                            .url(POST_URL)
+                            .post(body)
+                            .build();
+                    Response response = client.newCall(request).execute();
+                    if(response.code() >= 200 && response.code() <= 299) {
                         database.setTransactionSuccessful();
                         LOGI(TAG, cursor.getCount() + " events posted.");
                     }
                 } catch (IOException e) {
                     LOGE(TAG, e.getMessage());
                 }
-
             }
 
             cursor.close();
