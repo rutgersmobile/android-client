@@ -176,7 +176,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         linkArgs.add(args.getString(ARG_SEMESTER_TAG));
         linkArgs.add(args.getString(ARG_SUBJECT_TAG));
 
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, (String[]) linkArgs.toArray());
+        Uri uri = LinkUtils.buildUri(Config.SCHEMA, linkArgs.toArray(new String[linkArgs.size()]));
 
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");

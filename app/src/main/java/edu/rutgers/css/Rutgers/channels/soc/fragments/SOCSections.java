@@ -183,7 +183,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
             argParts.add(mCourse.getCourseNumber());
         }
 
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, (String[]) argParts.toArray());
+        Uri uri = LinkUtils.buildUri(Config.SCHEMA, argParts.toArray(new String[argParts.size()]));
 
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
