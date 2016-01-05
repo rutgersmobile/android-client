@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -19,8 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
-import com.astuetz.PagerSlidingTabStrip;
 
 import org.apache.commons.lang3.time.DatePrinter;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -120,8 +119,10 @@ public class FoodHall extends Fragment
         final ViewPager viewPager = (ViewPager) v.findViewById(R.id.viewPager);
         viewPager.setAdapter(mPagerAdapter);
 
-        final PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
-        tabs.setViewPager(viewPager);
+        final TabLayout tabs = (TabLayout) v.findViewById(R.id.tabs);
+        tabs.setTabsFromPagerAdapter(mPagerAdapter);
+
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabs));
 
         return v;
     }

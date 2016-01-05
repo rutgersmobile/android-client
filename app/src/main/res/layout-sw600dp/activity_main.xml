@@ -6,24 +6,17 @@
     android:layout_height="match_parent">
 
     <!--  Main content view -->
-    <LinearLayout
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/ToolbarTheme" />
 
         <FrameLayout
             android:id="@+id/main_content_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </LinearLayout>
+    </android.support.design.widget.CoordinatorLayout>
+
     <ListView
         android:id="@+id/left_drawer"
         android:layout_width="370dp"

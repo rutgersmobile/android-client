@@ -7,19 +7,10 @@
     android:layout_height="match_parent">
 
     <!--  Main content view -->
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/main_content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical">
-
-        <include layout="@layout/toolbar" />
-
-        <FrameLayout
-            android:id="@+id/main_content_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+        android:layout_height="match_parent" />
 
     <ListView
         android:id="@+id/left_drawer"

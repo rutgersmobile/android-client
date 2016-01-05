@@ -3,20 +3,22 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.astuetz.PagerSlidingTabStrip;
 
 import java.lang.ref.WeakReference;
 
@@ -78,12 +80,26 @@ public class BusMain extends Fragment implements FilterFocusListener {
             getActivity().setTitle(R.string.bus_title);
         }
 
-        mViewPager = (ViewPager) v.findViewById(R.id.viewPager);
-        mViewPager.setAdapter(new BusFragmentPager(getChildFragmentManager()));
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
-        final PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
-        tabs.setViewPager(mViewPager);
-        tabs.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+        }
+
+        final BusFragmentPager pagerAdapter = new BusFragmentPager(getChildFragmentManager());
+
+        mViewPager = (ViewPager) v.findViewById(R.id.viewPager);
+        mViewPager.setAdapter(pagerAdapter);
+
+        final TabLayout tabs = (TabLayout) v.findViewById(R.id.tabs);
+        tabs.setupWithViewPager(mViewPager);
+        tabs.setTabsFromPagerAdapter(pagerAdapter);
+
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabs));
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
             @Override
             public void onPageSelected(int position) {
