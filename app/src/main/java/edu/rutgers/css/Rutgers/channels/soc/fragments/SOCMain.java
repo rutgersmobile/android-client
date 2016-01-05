@@ -1,8 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -10,7 +8,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -21,12 +22,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
@@ -37,13 +36,15 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
@@ -58,6 +59,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = "filter";
+    private static final String SEARCHING_TAG       = "searching";
 
     private static final String ARG_LEVEL_TAG       = "level";
     private static final String ARG_CAMPUS_TAG      = "campus";
@@ -74,6 +76,9 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private String mFilterString;
     private boolean mLoading;
     private ShareActionProvider shareActionProvider;
+    private EditText filterEditText;
+    private Toolbar toolbar;
+    private boolean searching = false;
 
     public SOCMain() {
         // Required empty public constructor
@@ -117,8 +122,10 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
         // Restore filter
-        if (savedInstanceState != null) {
-            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
+        if (savedInstanceState != null && filterEditText != null) {
+            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG, "");
+            searching = savedInstanceState.getBoolean(SEARCHING_TAG);
+            filterEditText.setText(mFilterString);
         }
 
         mLoading = true;
@@ -127,13 +134,30 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        updateSearchUI();
+    }
+
+    @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
+
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
         setScheduleTitle();
 
         if (mLoading) showProgressCircle();
 
-        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        filterEditText = (EditText) v.findViewById(R.id.search_box);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
@@ -180,34 +204,35 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         });
 
-        // Search clear button listener
-        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
-        filterClearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                filterEditText.setText(null);
-            }
-        });
-
         return v;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.soc_menu, menu);
-        MenuItem shareItem = menu.findItem(R.id.soc_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            setShareIntent();
+        MenuItem optionsItem = menu.findItem(R.id.action_options);
+        MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
+
+        if (searching) {
+            optionsItem.setVisible(false);
+            searchButton.setIcon(R.drawable.ic_clear_black_24dp);
+        } else {
+            optionsItem.setVisible(true);
+            searchButton.setIcon(R.drawable.ic_search_white_24dp);
         }
     }
 
-    private void setShareIntent() {
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, "soc", mCampus.toLowerCase(), mSemester, mLevel.toLowerCase());
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
+    }
+
+    public Link getLink() {
+        final List<String> pathParts = new ArrayList<>();
+        pathParts.add(mCampus.toLowerCase());
+        pathParts.add(mSemester);
+        pathParts.add(mLevel.toLowerCase());
+        return new Link("soc", pathParts, getLinkTitle());
     }
 
     @Override
@@ -217,15 +242,35 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         if (item.getItemId() == R.id.action_options) {
             showSelectDialog();
             return true;
+        } else if (item.getItemId() == R.id.search_button_toolbar) {
+            searching = !searching;
+            updateSearchUI();
+            return true;
         }
 
         return false;
+    }
+
+    public void updateSearchUI() {
+        if (searching) {
+            filterEditText.setVisibility(View.VISIBLE);
+            filterEditText.requestFocus();
+            toolbar.setBackgroundColor(getResources().getColor(R.color.white));
+            AppUtils.openKeyboard(getActivity());
+        } else {
+            filterEditText.setVisibility(View.GONE);
+            toolbar.setBackgroundColor(getResources().getColor(R.color.actbar_new));
+            filterEditText.setText("");
+            AppUtils.closeKeyboard(getActivity());
+        }
+        getActivity().invalidateOptionsMenu();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mFilterString != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
+        outState.putBoolean(SEARCHING_TAG, true);
     }
 
     @Override

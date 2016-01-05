@@ -1,13 +1,14 @@
 package edu.rutgers.css.Rutgers.channels.reader.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,12 +30,14 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSAdapter;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
 import edu.rutgers.css.Rutgers.channels.reader.model.loader.RSSItemLoader;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * RSS feed reader
@@ -104,6 +107,16 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
 
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -125,37 +138,32 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
                 }
             }
         });
-        
+
         return v;
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
+    }
 
-            String topHandle = getArguments().getString(ComponentFactory.ARG_HANDLE_TAG);
-            List<String> history = getArguments().getStringArrayList(ComponentFactory.ARG_HIST_TAG);
-            String pathPart = getArguments().getString(ARG_TITLE_TAG);
+    @Override
+    public Link getLink() {
+        final Bundle args = getArguments();
+        final String topHandle = args.getString(ComponentFactory.ARG_HANDLE_TAG);
+        final List<String> history = args.getStringArrayList(ComponentFactory.ARG_HIST_TAG);
+        final String pathPart = args.getString(ARG_TITLE_TAG);
 
-            if (topHandle != null && history != null && pathPart != null) {
-                List<String> linkArgs = new ArrayList<>();
-                linkArgs.add(topHandle);
-                for (final String title : history) {
-                    linkArgs.add(title);
-                }
-                linkArgs.add(pathPart.replaceAll("\\s+", "").toLowerCase());
-
-                Uri uri = LinkUtils.buildUri(Config.SCHEMA,  linkArgs.toArray(new String[linkArgs.size()]));
-
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-                shareActionProvider.setShareIntent(intent);
+        if (topHandle != null && history != null && pathPart != null) {
+            final List<String> linkArgs = new ArrayList<>();
+            for (final String title : history) {
+                linkArgs.add(title);
             }
+            linkArgs.add(pathPart.replaceAll("\\s+", "").toLowerCase());
+            return new Link(topHandle, linkArgs, getLinkTitle());
         }
+
+        return null;
     }
 
     @Override

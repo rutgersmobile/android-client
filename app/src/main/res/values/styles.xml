@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="RutgersTheme" parent="RutgersTheme.Base" />
-    <style name="ToolbarTheme" parent="ToolbarTheme.Base" />
 
     <style name="RutgersTheme.Base" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">@color/actbar_new</item>
         <item name="colorPrimaryDark">@color/actbar_dark</item>
+        <item name="colorAccent">@color/actbar_new</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="drawerArrowStyle">@style/WhiteHamburger</item>
     </style>
 
     <style name="RutgersTheme.Pref" parent="android:Theme.Holo.Light.DarkActionBar">
@@ -18,17 +19,26 @@
         <item name="android:background">@color/actbar_new</item>
         <item name="android:logo">@android:color/transparent</item>
         <item name="android:titleTextStyle">@style/RutgersTheme.TitleTextStyle</item>
+        <item name="drawerArrowStyle">@style/WhiteHamburger</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorPrimaryInverse">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="RutgersTheme.TitleTextStyle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
         <item name="android:textColor">@color/white</item>
     </style>
 
-    <style name="ToolbarTheme.Base" parent="RutgersTheme">
+    <style name="ToolbarTheme" parent="RutgersTheme">
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorPrimaryInverse">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
         <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="WhiteHamburger" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@color/white</item>
     </style>
 
     <style name="TabRutgersTheme">
@@ -53,4 +63,13 @@
     <style name="RutgersSpinnerTheme" parent="Widget.AppCompat.TextView.SpinnerItem">
     </style>
 
+    <style name="RutgersTheme.TabLayoutTheme" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">@color/white</item>
+        <item name="tabSelectedTextColor">@color/white</item>
+        <item name="tabTextAppearance">@style/RutgersTheme.TabLayoutTheme.TextAppearance</item>
+    </style>
+
+    <style name="RutgersTheme.TabLayoutTheme.TextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>

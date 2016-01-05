@@ -1,13 +1,14 @@
 package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,9 +34,10 @@ import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
 import edu.rutgers.css.Rutgers.channels.dtable.model.loader.DTableLoader;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
@@ -174,6 +176,16 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
 
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -239,30 +251,18 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            if (mDRoot != null) {
-                setShareIntent();
-            }
-        }
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
     }
 
-    private void setShareIntent() {
+    @Override
+    public Link getLink() {
         final List<String> linkArgs = new ArrayList<>();
-        linkArgs.add(mTopHandle);
         for (final String title : getHistory()) {
             linkArgs.add(title);
         }
 
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, linkArgs.toArray(new String[linkArgs.size()]));
-
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
+        return  new Link(mTopHandle, linkArgs, getLinkTitle());
     }
 
     private ArrayList<String> getHistory() {

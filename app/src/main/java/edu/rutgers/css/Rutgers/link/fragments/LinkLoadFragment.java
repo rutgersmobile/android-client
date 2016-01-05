@@ -33,12 +33,17 @@ public final class LinkLoadFragment extends Fragment {
     /* Bundle arguments */
     private static final String ARG_CHANNEL_TAG = "channel";
     private static final String ARG_PATH_TAG = "path";
+    private static final String ARG_BACKSTACK_TAG = "backStack";
+
+    private boolean backStack;
 
     public static Bundle createBundle(@NonNull final Channel channel,
-                                      @NonNull final List<String> pathParts) {
+                                      @NonNull final List<String> pathParts,
+                                      final boolean backStack) {
         Bundle bundle = new Bundle();
         bundle.putSerializable(ARG_CHANNEL_TAG, channel);
         bundle.putSerializable(ARG_PATH_TAG, (Serializable) pathParts);
+        bundle.putBoolean(ARG_BACKSTACK_TAG, backStack);
         return bundle;
     }
 
@@ -51,8 +56,9 @@ public final class LinkLoadFragment extends Fragment {
         final Bundle args = getArguments();
 
         final List<String> pathParts = (List<String>) args.getSerializable(ARG_PATH_TAG);
-        final Channel channel = (Channel) getArguments().getSerializable(ARG_CHANNEL_TAG);
+        final Channel channel = (Channel) args.getSerializable(ARG_CHANNEL_TAG);
         final String homeCampus = RutgersUtils.getHomeCampus(getContext());
+        backStack = args.getBoolean(ARG_BACKSTACK_TAG, true);
 
         if (channel != null && homeCampus != null) {
             final String channelTag = channel.getView();
@@ -87,6 +93,7 @@ public final class LinkLoadFragment extends Fragment {
     @Subscribe
     public void switchFragments(Bundle args) {
         if (getActivity() != null) {
+            args.putBoolean(ComponentFactory.ARG_BACKSTACK_TAG, backStack);
             ((MainActivity)getActivity()).getFragmentMediator().switchFragments(args);
         }
     }

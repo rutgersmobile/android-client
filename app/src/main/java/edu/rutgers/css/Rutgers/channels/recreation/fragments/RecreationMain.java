@@ -4,6 +4,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +22,8 @@ import edu.rutgers.css.Rutgers.channels.recreation.model.Campus;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityAdapter;
 import edu.rutgers.css.Rutgers.channels.recreation.model.loader.CampusLoader;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
@@ -64,6 +70,16 @@ public class RecreationMain extends BaseChannelFragment implements LoaderManager
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress);
+
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
 
         if (mLoading) showProgressCircle();
 
@@ -114,5 +130,15 @@ public class RecreationMain extends BaseChannelFragment implements LoaderManager
         mAdapter.clear();
         mLoading = false;
         hideProgressCircle();
+    }
+
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
     }
 }

@@ -1,13 +1,14 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -18,22 +19,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
@@ -103,6 +103,16 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
 
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -111,7 +121,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         final String semester = args.getString(ARG_SEMESTER_TAG);
         final String campus = args.getString(ARG_CAMPUS_TAG);
 
-        mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        mFilterEditText = (EditText) v.findViewById(R.id.search_box);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
@@ -145,43 +155,40 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
         });
 
-        // Search clear button listener
-        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
-        filterClearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mFilterEditText.setText(null);
-            }
-        });
-
         return v;
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            setShareIntent();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle options button
+        if (item.getItemId() == R.id.search_button_toolbar) {
+            if (mFilterEditText.getVisibility() == View.VISIBLE) {
+                mFilterEditText.setVisibility(View.GONE);
+                mFilterEditText.setText("");
+                AppUtils.closeKeyboard(getActivity());
+            } else {
+                mFilterEditText.setVisibility(View.VISIBLE);
+                mFilterEditText.requestFocus();
+                AppUtils.openKeyboard(getActivity());
+            }
+            return true;
         }
+        return false;
     }
 
-    private void setShareIntent() {
-        Bundle args = getArguments();
-        List<String> linkArgs = new ArrayList<>();
-        linkArgs.add("soc");
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
+    }
+
+    public Link getLink() {
+        final Bundle args = getArguments();
+        final List<String> linkArgs = new ArrayList<>();
         linkArgs.add(args.getString(ARG_CAMPUS_TAG));
         linkArgs.add(args.getString(ARG_LEVEL_TAG));
         linkArgs.add(args.getString(ARG_SEMESTER_TAG));
         linkArgs.add(args.getString(ARG_SUBJECT_TAG));
-
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, linkArgs.toArray(new String[linkArgs.size()]));
-
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
+        return new Link("soc", linkArgs, getLinkTitle());
     }
 
     @Override

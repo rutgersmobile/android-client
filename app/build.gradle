@@ -22,7 +22,7 @@ android {
         applicationId "edu.rutgers.css.Rutgers"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 30
+        versionCode 31
         versionName "4.1"
         resConfigs "en"
         testApplicationId "edu.rutgers.css.Rutgers.test"
@@ -72,7 +72,8 @@ dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
     compile project(':PagerSlidingTabStrip')
     compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.google.android.gms:play-services-location:8.3.0'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'org.slf4j:slf4j-android:1.7.7'
     compile 'com.google.code.gson:gson:2.4'

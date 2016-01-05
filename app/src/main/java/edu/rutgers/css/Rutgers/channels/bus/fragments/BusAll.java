@@ -3,21 +3,14 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
-import android.widget.ImageButton;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,7 +21,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusItem;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.NextBusItemLoader;
-import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -53,9 +46,6 @@ public class BusAll extends BaseChannelFragment
     private String mFilterString;
     private boolean mLoading;
 
-    /* View references */
-    private EditText mFilterEditText;
-    
     public BusAll() {
         // Required empty public constructor
     }
@@ -78,39 +68,9 @@ public class BusAll extends BaseChannelFragment
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress_simple);
 
         if (mLoading) showProgressCircle();
-
-        // Get the filter field and add a listener to it
-        mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
-        mFilterEditText.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Set filter for list adapter
-                mFilterString = s.toString().trim();
-                mAdapter.getFilter().filter(mFilterString);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-
-        });
-
-        // Get clear button and set listener
-        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
-        filterClearButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mFilterEditText.setText(null);
-            }
-        });
 
         // Set up list to accept clicks on route or stop rows
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
@@ -130,31 +90,33 @@ public class BusAll extends BaseChannelFragment
         });
 
         // Set main bus fragment as focus listener, for giving focus to search field
-        FilterFocusListener mainFragment = (BusMain) getParentFragment();
-        mainFragment.registerAllTab(this);
+        BusMain mainFragment = (BusMain) getParentFragment();
+        mainFragment.addSearchListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Set filter for list adapter
+                mFilterString = s.toString().trim();
+                mAdapter.getFilter().filter(mFilterString);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+
+        });
 
         return v;
-    }
-
-    public void focusFilter() {
-        if (mFilterEditText != null) {
-            mFilterEditText.requestFocus();
-            AppUtils.openKeyboard(getActivity());
-        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (StringUtils.isNotBlank(mFilterString)) outState.putString(SAVED_FILTER_TAG, mFilterString);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        mFilterEditText = null;
     }
 
     @Override
@@ -185,5 +147,15 @@ public class BusAll extends BaseChannelFragment
         mAdapter.clear();
         mLoading = false;
         hideProgressCircle();
+    }
+
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
     }
 }

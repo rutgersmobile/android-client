@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import edu.rutgers.css.Rutgers.R;
@@ -45,6 +46,7 @@ public class MainFragmentMediator implements FragmentMediator {
         if (activity.isFinishing() || !RutgersApplication.isApplicationVisible()) return false;
 
         final String componentTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
+        final boolean backStack = args.getBoolean(ComponentFactory.ARG_BACKSTACK_TAG, true);
 
         // Attempt to create the fragment
         final Fragment fragment = componentFactory.createFragment(args);
@@ -58,14 +60,16 @@ public class MainFragmentMediator implements FragmentMediator {
         // Close soft keyboard, it's usually annoying when it stays open after changing screens
         AppUtils.closeKeyboard(activity);
         // Switch the main content fragment
-        fm.beginTransaction()
+        FragmentTransaction ft = fm.beginTransaction()
                 // There's a bug in the support library that will
                 // cause crashes with custom animations
                 // .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left,
                 //     R.anim.slide_in_left, R.anim.slide_out_right)
-                .replace(R.id.main_content_frame, fragment, componentTag)
-                .addToBackStack(componentTag)
-                .commit();
+                .replace(R.id.main_content_frame, fragment, componentTag);
+        if (backStack) {
+            ft = ft.addToBackStack(componentTag);
+        }
+        ft.commit();
 
         return true;
     }

@@ -2,9 +2,9 @@ package edu.rutgers.css.Rutgers.channels.food.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,16 +16,18 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.MealGenreLoader;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * Displays all food items available for a specific meal at a specific dining location.
  * @author James Chambers
  */
-public class FoodMeal extends Fragment
+public class FoodMeal extends BaseChannelFragment
     implements LoaderManager.LoaderCallbacks<List<DiningMenu.Genre>> {
 
     /* Log tag and component handle */
@@ -85,7 +87,7 @@ public class FoodMeal extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_stickylist_progress, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_stickylist_progress_simple, parent, false);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
@@ -113,5 +115,15 @@ public class FoodMeal extends Fragment
     @Override
     public void onLoaderReset(Loader<List<DiningMenu.Genre>> loader) {
         mAdapter.clear();
+    }
+
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
     }
 }

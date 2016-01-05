@@ -1,6 +1,6 @@
 package edu.rutgers.css.Rutgers;
 
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
+import edu.rutgers.css.Rutgers.link.Link;
 
 /**
  * App configuration
@@ -29,5 +29,5 @@ public final class Config {
     public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
 
     // Deep link schema info
-    public static final LinkUtils.Schema SCHEMA = LinkUtils.Schema.HTTP;
+    public static final Link.Schema SCHEMA = Link.Schema.HTTP;
 }

@@ -13,7 +13,10 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,7 +28,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -43,14 +45,17 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
 import edu.rutgers.css.Rutgers.channels.places.model.loader.KeyValPairLoader;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
@@ -76,12 +81,19 @@ public class PlacesMain extends BaseChannelFragment
     private static final String ARG_LAT_TAG         = "lat";
     private static final String ARG_LON_TAG         = "lon";
 
+    /* State tags */
+    private static final String SEARCHING_TAG       = "searching";
+    private static final String SEARCH_TAG          = "search";
+
     /* Member data */
     private PlaceAutoCompleteAdapter mSearchAdapter;
     private SimpleSectionedAdapter<KeyValPair> mAdapter;
     private GoogleApiClientProvider mGoogleApiClientProvider;
     private LocationRequest mLocationRequest;
     private ShareActionProvider shareActionProvider;
+    private AutoCompleteTextView autoComp;
+    private Toolbar toolbar;
+    private boolean searching = false;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -110,6 +122,13 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outBundle) {
+        super.onSaveInstanceState(outBundle);
+        outBundle.putBoolean(SEARCHING_TAG, searching);
+        outBundle.putString(SEARCH_TAG, autoComp.getText().toString());
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -120,11 +139,27 @@ public class PlacesMain extends BaseChannelFragment
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setInterval(10 * 1000)
                 .setFastestInterval(1000);
+
+        if (savedInstanceState != null) {
+            searching = savedInstanceState.getBoolean(SEARCHING_TAG);
+            final String search = savedInstanceState.getString(SEARCH_TAG);
+            autoComp.setText(search);
+        }
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places);
+
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
 
         // Set title from JSON
         final Bundle args = getArguments();
@@ -134,7 +169,7 @@ public class PlacesMain extends BaseChannelFragment
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
 
-        final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
+        autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
         autoComp.setAdapter(mSearchAdapter);
 
         // Item selected from auto-complete list
@@ -159,17 +194,6 @@ public class PlacesMain extends BaseChannelFragment
             
         });
 
-        // Clear search bar
-        final ImageButton clearSearchButton = (ImageButton) v.findViewById(R.id.filterClearButton);
-        clearSearchButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                autoComp.setText("");
-            }
-
-        });
-
         // Click listener for nearby places list
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -188,16 +212,57 @@ public class PlacesMain extends BaseChannelFragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            Uri uri = LinkUtils.buildUri(Config.SCHEMA, "places");
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-            shareActionProvider.setShareIntent(intent);
+        inflater.inflate(R.menu.search_and_share, menu);
+        MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
+
+        if (searching) {
+            searchButton.setIcon(R.drawable.ic_clear_black_24dp);
+        } else {
+            searchButton.setIcon(R.drawable.ic_search_white_24dp);
         }
+    }
+
+    public void setShareIntent() {
+        Uri uri = getLink().getUri(Config.SCHEMA);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+        shareActionProvider.setShareIntent(intent);
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
+    }
+
+    public Link getLink() {
+        return new Link("places", new ArrayList<String>(), getLinkTitle());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle options button
+        if (item.getItemId() == R.id.search_button_toolbar) {
+            searching = !searching;
+            updateSearchUI();
+            return true;
+        }
+        return false;
+    }
+
+    private void updateSearchUI() {
+        if (searching) {
+            autoComp.setVisibility(View.VISIBLE);
+            autoComp.requestFocus();
+            toolbar.setBackgroundColor(getResources().getColor(R.color.white));
+            AppUtils.openKeyboard(getActivity());
+        } else {
+            autoComp.setVisibility(View.GONE);
+            autoComp.setText("");
+            toolbar.setBackgroundColor(getResources().getColor(R.color.actbar_new));
+            AppUtils.closeKeyboard(getActivity());
+        }
+        getActivity().invalidateOptionsMenu();
     }
 
     @Override
@@ -208,6 +273,7 @@ public class PlacesMain extends BaseChannelFragment
 
         // Reload nearby places
         showProgressCircle();
+        updateSearchUI();
     }
 
     @Override
@@ -295,7 +361,11 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     private void requestLocationUpdates() {
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
+        } catch (SecurityException e) {
+            LOGE(TAG, e.getMessage());
+        }
     }
 
     @Override
@@ -304,7 +374,7 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if (requestCode == LOCATION_REQUEST
                 && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

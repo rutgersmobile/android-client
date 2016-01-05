@@ -4,27 +4,26 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.RouteLoader;
-import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
-import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadcaster, LoaderManager.LoaderCallbacks<List<SimpleSection<RouteStub>>> {
+public class BusRoutes extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<SimpleSection<RouteStub>>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusRoutes";
@@ -34,7 +33,6 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
 
     /* Member data */
     private SimpleSectionedAdapter<RouteStub> mAdapter;
-    private FilterFocusListener mFilterFocusListener;
 
     public BusRoutes() {
         // Required empty public constructor
@@ -48,16 +46,7 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
-
-        // Get the filter field and add a listener to it
-        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
-        filterEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (mFilterFocusListener != null) mFilterFocusListener.focusEvent();
-            }
-        });
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress_simple);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
@@ -73,10 +62,6 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
 
         });
 
-        // Set main bus fragment as focus listener, for switching to All tab
-        FilterFocusListener mainFragment = (BusMain) getParentFragment();
-        setFocusListener(mainFragment);
-                
         return v;
     }
 
@@ -88,19 +73,6 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
         mAdapter.clear();
         showProgressCircle();
         getLoaderManager().initLoader(LOADER_ID, null, this);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        setFocusListener(null);
-    }
-
-    @Override
-    public void setFocusListener(FilterFocusListener listener) {
-        mFilterFocusListener = listener;
     }
 
     @Override
@@ -124,5 +96,15 @@ public class BusRoutes extends BaseChannelFragment implements FilterFocusBroadca
     @Override
     public void onLoaderReset(Loader<List<SimpleSection<RouteStub>>> loader) {
         mAdapter.clear();
+    }
+
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
     }
 }

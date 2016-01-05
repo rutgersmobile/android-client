@@ -1,13 +1,14 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
@@ -33,13 +33,14 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
 import edu.rutgers.css.Rutgers.channels.soc.model.Section;
 import edu.rutgers.css.Rutgers.channels.soc.model.SectionAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CourseLoader;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Display description and section information for a course.
@@ -117,6 +118,17 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
+
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
         final Bundle args = getArguments();
 
         if (mLoading) showProgressCircle();
@@ -158,19 +170,14 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            setShareIntent();
-        }
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
     }
 
-    private void setShareIntent() {
-        Bundle args = getArguments();
-        List<String> argParts = new ArrayList<>();
-        argParts.add("soc");
+    @Override
+    public Link getLink() {
+        final Bundle args = getArguments();
+        final List<String> argParts = new ArrayList<>();
         if (mCourse == null) {
             argParts.add(args.getString(ARG_CAMPUS_TAG));
             argParts.add(args.getString(ARG_SEMESTER_TAG));
@@ -183,12 +190,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
             argParts.add(mCourse.getCourseNumber());
         }
 
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, argParts.toArray(new String[argParts.size()]));
-
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
+        return new Link("soc", argParts, getLinkTitle());
     }
 
     private void loadCourse(@NonNull Course course) {

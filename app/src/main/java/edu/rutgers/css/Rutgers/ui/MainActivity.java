@@ -12,11 +12,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,19 +34,23 @@ import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.link.fragments.LinkLoadFragment;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
+import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
-import edu.rutgers.css.Rutgers.link.fragments.LinkLoadFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
 /**
  * Main activity. Handles navigation drawer, displayed fragments, and connection to location services.
@@ -65,7 +67,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerAdapter mDrawerAdapter;
     private boolean mShowedMotd;
-    private Toolbar mToolbar;
 
     /* Constants */
     private static final int LOADER_ID = 1;
@@ -101,31 +102,15 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         tutorialMediator = new TutorialMediator(this);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
-
-        // The Motd may tell us to lock out the app, so we should't show
-        // the toolbar until we know we're allowed to
-        if (!mShowedMotd) {
-            mToolbar.setVisibility(View.GONE);
-        }
-
         LOGD(TAG, "UUID: " + AppUtils.getUUID(this));
         mChannelManager = new ChannelManager();
 
         firstLaunchChecks();
 
-        // Enable drawer icon
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(true);
-        }
-
         // Set up navigation drawer
-        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Channel>());
+        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Link>(), new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.actbar_new));
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
             @Override
@@ -150,12 +135,20 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
 
         mDrawerListView.setAdapter(mDrawerAdapter);
-        mDrawerListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mDrawerListView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
-                if (adapter.positionIsSettings(position)) {
+                if (adapter.positionIsURI(position)) {
+                    final Link link = (Link) adapter.getItem(position);
+                    final Fragment taskFragment = new LinkLoadFragment();
+                    final Channel channel = mChannelManager.getChannelByTag(link.getHandle());
+                    final Bundle taskArgs = LinkLoadFragment.createBundle(channel, link.getPathParts(), true);
+                    taskFragment.setArguments(taskArgs);
+                    getSupportFragmentManager().beginTransaction().add(taskFragment, LinkLoadFragment.TAG).commit();
+                    mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
+                    return;
+                } else if (adapter.positionIsSettings(position)) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
@@ -164,16 +157,18 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     fragmentMediator.switchFragments(aboutArgs);
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
+                } else if (adapter.positionIsBookmarks(position)) {
+                    Bundle bookmarksArgs = BookmarksDisplay.createArgs();
+                    fragmentMediator.switchFragments(bookmarksArgs);
+                    mDrawerLayout.closeDrawer(mDrawerListView);
+                    return;
                 }
 
-                Channel channel = (Channel) parent.getAdapter().getItem(position);
+                Channel channel = (Channel) adapter.getItem(position);
                 Bundle channelArgs = channel.getBundle();
                 String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
 
                 channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
-
-                mDrawerListView.setItemChecked(position, true);
-                LOGI(TAG, "Currently checked item position: " + mDrawerListView.getCheckedItemPosition());
 
                 mDrawerListView.invalidateViews();
                 // Launch component
@@ -188,6 +183,8 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+                mDrawerAdapter.clearLinks();
+                mDrawerAdapter.addAllLinks(PrefUtils.getBookmarks(getApplicationContext()));
                 mDrawerAdapter.notifyDataSetChanged();
             }
         };
@@ -202,8 +199,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
         JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
         if (array != null) {
             mChannelManager.loadChannelsFromJSONArray(array);
-            mDrawerAdapter.addAll(mChannelManager.getChannels());
+            mDrawerAdapter.addAllChannels(mChannelManager.getChannels());
         }
+
+        mDrawerAdapter.addAllLinks(PrefUtils.getBookmarks(getApplicationContext()));
 
         if (wantsLink()) {
             deepLink();
@@ -289,6 +288,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
         return fragmentMediator;
     }
 
+    public void syncDrawer() {
+        mDrawerToggle.syncState();
+    }
+
     public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {
         tutorialMediator.showDialogFragment(dialogFragment, tag);
     }
@@ -333,14 +336,12 @@ public class MainActivity extends GoogleApiProviderActivity implements
             LOGI(TAG, motd.getMotd());
         }
 
-        mToolbar.setVisibility(View.VISIBLE);
-
         // Load nav drawer items
         mChannelManager.clear();
         mChannelManager.loadChannelsFromJSONArray(array);
 
-        mDrawerAdapter.clear();
-        mDrawerAdapter.addAll(mChannelManager.getChannels());
+        mDrawerAdapter.clearChannels();
+        mDrawerAdapter.addAllChannels(mChannelManager.getChannels());
 
         if (!wantsLink()) {
             mDrawerLayout.openDrawer(mDrawerListView);
@@ -350,7 +351,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
     @Override
     public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {
         mChannelManager.clear();
-        mDrawerAdapter.clear();
+        mDrawerAdapter.clearChannels();
     }
 
     /**
@@ -399,7 +400,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
             final Channel channel = mChannelManager.getChannelByTag(handle);
             if (channel != null) {
                 final Fragment taskFragment = new LinkLoadFragment();
-                final Bundle taskArgs = LinkLoadFragment.createBundle(channel, pathParts);
+                final Bundle taskArgs = LinkLoadFragment.createBundle(channel, pathParts, false);
                 taskFragment.setArguments(taskArgs);
                 getSupportFragmentManager().beginTransaction().add(taskFragment, LinkLoadFragment.TAG).commit();
             }

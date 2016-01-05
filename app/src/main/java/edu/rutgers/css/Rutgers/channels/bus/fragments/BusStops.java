@@ -9,12 +9,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -27,9 +27,8 @@ import edu.rutgers.css.Rutgers.BuildConfig;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.StopLoader;
-import edu.rutgers.css.Rutgers.interfaces.FilterFocusBroadcaster;
-import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -38,9 +37,8 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
-public class BusStops extends BaseChannelFragment implements FilterFocusBroadcaster,
-        GoogleApiClient.ConnectionCallbacks, LoaderManager.LoaderCallbacks<List<SimpleSection<StopStub>>>,
-        LocationListener {
+public class BusStops extends BaseChannelFragment implements GoogleApiClient.ConnectionCallbacks,
+        LoaderManager.LoaderCallbacks<List<SimpleSection<StopStub>>>, LocationListener {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusStops";
@@ -55,7 +53,6 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     /* Member data */
     private SimpleSectionedAdapter<StopStub> mAdapter;
     private GoogleApiClientProvider mGoogleApiClientProvider;
-    private FilterFocusListener mFilterFocusListener;
     private LocationRequest mLocationRequest;
     private Location lastLocation;
 
@@ -90,16 +87,7 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
-
-        // Get the filter field and add a listener to it
-        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
-        filterEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (mFilterFocusListener != null) mFilterFocusListener.focusEvent();
-            }
-        });
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress_simple);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
@@ -119,10 +107,6 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
 
         });
 
-        // Set main bus fragment as focus listener, for switching to All tab
-        FilterFocusListener mainFragment = (BusMain) getParentFragment();
-        setFocusListener(mainFragment);
-        
         return v;
     }
 
@@ -142,14 +126,6 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
         super.onPause();
 
         if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.unregisterListener(this);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        // Get rid of view references
-        setFocusListener(null);
     }
 
     @Override
@@ -183,11 +159,6 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
     @Override
     public void onConnectionSuspended(int cause) {
         LOGI(TAG, "Suspended from services for cause: " + cause);
-    }
-
-    @Override
-    public void setFocusListener(FilterFocusListener listener) {
-        mFilterFocusListener = listener;
     }
 
     @Override
@@ -229,4 +200,13 @@ public class BusStops extends BaseChannelFragment implements FilterFocusBroadcas
         }
     }
 
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
+    }
 }

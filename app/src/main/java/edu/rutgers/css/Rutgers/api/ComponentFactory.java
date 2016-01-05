@@ -30,6 +30,7 @@ import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCCourses;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
+import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 
@@ -68,6 +69,8 @@ public final class ComponentFactory {
 
     public static final String ARG_HIST_TAG         = "history";
 
+    public static final String ARG_BACKSTACK_TAG    = "backStack";
+
     /** Table of fragments that can be launched. Handles must be lowercase. */
     private static Map<String, Class<? extends Fragment>> sFragmentTable =
             Collections.unmodifiableMap(new HashMap<String, Class<? extends Fragment>>() {{
@@ -104,6 +107,7 @@ public final class ComponentFactory {
         put(RUInfoMain.HANDLE, RUInfoMain.class);
         put(FeedbackMain.HANDLE, FeedbackMain.class);
         put(AboutDisplay.HANDLE, AboutDisplay.class);
+        put(BookmarksDisplay.HANDLE, BookmarksDisplay.class);
     }});
 
     public ComponentFactory() {
