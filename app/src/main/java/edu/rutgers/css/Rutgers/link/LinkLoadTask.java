@@ -169,8 +169,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
             }
 
             DTableRoot root = new DTableRoot(jsonObject, null);
-            int i;
-            for (i = 0; i < pathParts.size(); i++) {
+            for (int i = 0; i < pathParts.size(); i++) {
                 final String part = pathParts.get(i);
                 boolean found = false;
                 for (final DTableElement child : root.getChildren()) {
