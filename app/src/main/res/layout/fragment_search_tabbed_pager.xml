@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <include layout="@layout/toolbar" />
+        <include layout="@layout/toolbar_search" />
 
         <android.support.design.widget.TabLayout
             android:id="@+id/tabs"

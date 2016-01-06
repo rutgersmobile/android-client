@@ -10,7 +10,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -37,13 +40,15 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
@@ -129,6 +134,17 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
+
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
         setScheduleTitle();
 
         if (mLoading) showProgressCircle();

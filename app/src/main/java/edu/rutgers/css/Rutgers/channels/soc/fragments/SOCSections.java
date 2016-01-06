@@ -7,7 +7,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,13 +36,14 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
 import edu.rutgers.css.Rutgers.channels.soc.model.Section;
 import edu.rutgers.css.Rutgers.channels.soc.model.SectionAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CourseLoader;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Display description and section information for a course.
@@ -117,6 +121,17 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_list_progress, parent, false);
+
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
         final Bundle args = getArguments();
 
         if (mLoading) showProgressCircle();

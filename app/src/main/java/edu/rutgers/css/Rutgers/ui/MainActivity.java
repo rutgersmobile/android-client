@@ -106,12 +106,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         firstLaunchChecks();
 
-        // Enable drawer icon
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(true);
-        }
-
         // Set up navigation drawer
         mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
@@ -274,6 +268,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
     public FragmentMediator getFragmentMediator() {
         return fragmentMediator;
+    }
+
+    public void syncDrawer() {
+        mDrawerToggle.syncState();
     }
 
     public void showDialogFragment(@NonNull DialogFragment dialogFragment, @NonNull String tag) {

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar_search"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?attr/actionBarSize"
+    android:background="?attr/colorPrimary"
+    android:theme="@style/ToolbarTheme">
+
+    <FrameLayout
+        android:id="@+id/search_frame"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:padding="5dp">
+
+        <EditText
+            android:id="@+id/search_box"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/search"
+            android:singleLine="true" />
+
+        <!--<Button-->
+            <!--android:id="@+id/clear_search"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginRight="10dp"-->
+            <!--android:layout_gravity="right|center_vertical"-->
+            <!--android:background="@android:drawable/ic_delete" />-->
+
+    </FrameLayout>
+</android.support.v7.widget.Toolbar>

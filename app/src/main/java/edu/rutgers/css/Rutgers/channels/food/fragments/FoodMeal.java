@@ -85,7 +85,7 @@ public class FoodMeal extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_stickylist_progress, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_stickylist_progress_simple, parent, false);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);

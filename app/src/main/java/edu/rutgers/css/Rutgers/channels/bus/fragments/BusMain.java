@@ -13,23 +13,24 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.lang.ref.WeakReference;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.interfaces.FilterFocusListener;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
-public class BusMain extends Fragment implements FilterFocusListener {
+public class BusMain extends Fragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusMain";
@@ -41,8 +42,9 @@ public class BusMain extends Fragment implements FilterFocusListener {
 
     /* Member data */
     private ViewPager mViewPager;
-    private WeakReference<BusAll> mAllTab;
     private ShareActionProvider shareActionProvider;
+    private FrameLayout searchFrame;
+    private EditText searchBox;
 
     public BusMain() {
         // Required empty public constructor
@@ -70,7 +72,7 @@ public class BusMain extends Fragment implements FilterFocusListener {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_tabbed_pager, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_search_tabbed_pager, parent, false);
         final Bundle args = getArguments();
 
         // Set title from JSON
@@ -80,13 +82,14 @@ public class BusMain extends Fragment implements FilterFocusListener {
             getActivity().setTitle(R.string.bus_title);
         }
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
         }
 
         final BusFragmentPager pagerAdapter = new BusFragmentPager(getChildFragmentManager());
@@ -107,15 +110,6 @@ public class BusMain extends Fragment implements FilterFocusListener {
                 if (shareActionProvider != null) {
                     BusMain.this.setShareIntent(position);
                 }
-                if (position == 2) {
-                    // When "All" tab is selected, focus the search field and open keyboard
-                    if (mAllTab != null && mAllTab.get() != null) {
-                        mAllTab.get().focusFilter();
-                    }
-                } else {
-                    // When another tab is scrolled to, close the keyboard
-                    AppUtils.closeKeyboard(getActivity());
-                }
             }
         });
 
@@ -124,12 +118,15 @@ public class BusMain extends Fragment implements FilterFocusListener {
             mViewPager.setCurrentItem(startPage);
         }
 
+        searchFrame = (FrameLayout) v.findViewById(R.id.search_frame);
+        searchBox = (EditText) v.findViewById(R.id.search_box);
+
         return v;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
+        inflater.inflate(R.menu.search_and_share, menu);
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
@@ -139,6 +136,17 @@ public class BusMain extends Fragment implements FilterFocusListener {
             } else {
                 setShareIntent(0);
             }
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.search_button_toolbar:
+                focusEvent();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -167,20 +175,20 @@ public class BusMain extends Fragment implements FilterFocusListener {
     @Override
     public void onDestroyView() {
         mViewPager = null;
-        mAllTab = null;
         super.onDestroyView();
     }
 
-    @Override
     public void focusEvent() {
-        if (mViewPager != null) {
+        if (mViewPager != null && searchFrame != null) {
             mViewPager.setCurrentItem(2, true);
+            searchFrame.setVisibility(View.VISIBLE);
+            searchBox.requestFocus();
+            AppUtils.openKeyboard(getActivity());
         }
     }
 
-    @Override
-    public void registerAllTab(BusAll allTab) {
-        mAllTab = new WeakReference<>(allTab);
+    public void addSearchListener(TextWatcher watcher) {
+        searchBox.addTextChangedListener(watcher);
     }
 
     private class BusFragmentPager extends FragmentPagerAdapter {

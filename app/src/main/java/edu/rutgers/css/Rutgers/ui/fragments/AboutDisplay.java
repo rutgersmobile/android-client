@@ -1,6 +1,9 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -11,6 +14,7 @@ import android.widget.TextView;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 
 /**
  * About RUMobile display fragment.
@@ -35,6 +39,16 @@ public final class AboutDisplay extends BaseDisplay {
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_about, parent, false);
+
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
 
         getActivity().setTitle(R.string.about_title);
 

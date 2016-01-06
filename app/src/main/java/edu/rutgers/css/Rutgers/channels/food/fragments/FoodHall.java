@@ -12,7 +12,10 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +37,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuLoader;
 import edu.rutgers.css.Rutgers.link.LinkMaps;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.LinkUtils;
 
@@ -64,6 +68,7 @@ public class FoodHall extends Fragment
     private MealPagerAdapter mPagerAdapter;
     private DiningMenu mData;
     private ShareActionProvider shareActionProvider;
+    private TabLayout tabLayout;
 
     private final static DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
 
@@ -106,6 +111,16 @@ public class FoodHall extends Fragment
         final View v = inflater.inflate(R.layout.fragment_tabbed_pager, parent, false);
         final Bundle args = getArguments();
 
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
         if (mTitle != null) {
             getActivity().setTitle(mTitle);
         } else if (args.getString(ARG_TITLE_TAG) != null) {
@@ -119,10 +134,11 @@ public class FoodHall extends Fragment
         final ViewPager viewPager = (ViewPager) v.findViewById(R.id.viewPager);
         viewPager.setAdapter(mPagerAdapter);
 
-        final TabLayout tabs = (TabLayout) v.findViewById(R.id.tabs);
-        tabs.setTabsFromPagerAdapter(mPagerAdapter);
+        tabLayout = (TabLayout) v.findViewById(R.id.tabs);
+        tabLayout.setTabsFromPagerAdapter(mPagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
 
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabs));
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
         return v;
     }
@@ -155,6 +171,8 @@ public class FoodHall extends Fragment
         for (DiningMenu.Meal meal: meals) {
             if (meal.isMealAvailable()) mPagerAdapter.add(meal);
         }
+
+        tabLayout.setTabsFromPagerAdapter(mPagerAdapter);
 
         // Set title to show timestamp for dining data
         mTitle = mLocation + " (" + dout.format(diningMenu.getDate()) + ")";
