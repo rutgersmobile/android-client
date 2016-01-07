@@ -28,7 +28,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -51,6 +50,7 @@ import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -86,6 +86,8 @@ public class PlacesMain extends BaseChannelFragment
     private GoogleApiClientProvider mGoogleApiClientProvider;
     private LocationRequest mLocationRequest;
     private ShareActionProvider shareActionProvider;
+    private AutoCompleteTextView autoComp;
+    private MenuItem shareItem;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -130,7 +132,7 @@ public class PlacesMain extends BaseChannelFragment
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -148,7 +150,7 @@ public class PlacesMain extends BaseChannelFragment
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
 
-        final AutoCompleteTextView autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
+        autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
         autoComp.setAdapter(mSearchAdapter);
 
         // Item selected from auto-complete list
@@ -173,17 +175,6 @@ public class PlacesMain extends BaseChannelFragment
             
         });
 
-        // Clear search bar
-        final ImageButton clearSearchButton = (ImageButton) v.findViewById(R.id.filterClearButton);
-        clearSearchButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                autoComp.setText("");
-            }
-
-        });
-
         // Click listener for nearby places list
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -202,8 +193,8 @@ public class PlacesMain extends BaseChannelFragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        inflater.inflate(R.menu.search_and_share, menu);
+        shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
             Uri uri = LinkUtils.buildUri(Config.SCHEMA, "places");
@@ -212,6 +203,26 @@ public class PlacesMain extends BaseChannelFragment
             intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
             shareActionProvider.setShareIntent(intent);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle options button
+        if (item.getItemId() == R.id.search_button_toolbar) {
+            if (autoComp.getVisibility() == View.VISIBLE) {
+                autoComp.setVisibility(View.GONE);
+                autoComp.setText("");
+                AppUtils.closeKeyboard(getActivity());
+                shareItem.setVisible(true);
+            } else {
+                autoComp.setVisibility(View.VISIBLE);
+                autoComp.requestFocus();
+                AppUtils.openKeyboard(getActivity());
+                shareItem.setVisible(false);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

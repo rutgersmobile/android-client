@@ -9,32 +9,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <include layout="@layout/toolbar" />
+        <include layout="@layout/toolbar_search" />
     </android.support.design.widget.AppBarLayout>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <include
+        <se.emilsjolander.stickylistheaders.StickyListHeadersListView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/search_field"/>
+            android:layout_height="match_parent"
+            android:id="@+id/stickyList" />
 
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <include layout="@layout/progress_circle" />
 
-            <se.emilsjolander.stickylistheaders.StickyListHeadersListView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/stickyList" />
-
-            <include layout="@layout/progress_circle" />
-
-        </FrameLayout>
-
-    </LinearLayout>
+    </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>

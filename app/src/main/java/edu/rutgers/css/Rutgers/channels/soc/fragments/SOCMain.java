@@ -24,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +78,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private String mFilterString;
     private boolean mLoading;
     private ShareActionProvider shareActionProvider;
+    private EditText filterEditText;
 
     public SOCMain() {
         // Required empty public constructor
@@ -135,7 +135,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -149,7 +149,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         if (mLoading) showProgressCircle();
 
-        final EditText filterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        filterEditText = (EditText) v.findViewById(R.id.search_box);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
@@ -196,15 +196,6 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         });
 
-        // Search clear button listener
-        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
-        filterClearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                filterEditText.setText(null);
-            }
-        });
-
         return v;
     }
 
@@ -232,6 +223,17 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         // Handle options button
         if (item.getItemId() == R.id.action_options) {
             showSelectDialog();
+            return true;
+        } else if (item.getItemId() == R.id.search_button_toolbar) {
+            if (filterEditText.getVisibility() == View.VISIBLE) {
+                filterEditText.setVisibility(View.GONE);
+                filterEditText.setText("");
+                AppUtils.closeKeyboard(getActivity());
+            } else {
+                filterEditText.setVisibility(View.VISIBLE);
+                filterEditText.requestFocus();
+                AppUtils.openKeyboard(getActivity());
+            }
             return true;
         }
 

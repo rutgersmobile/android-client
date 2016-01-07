@@ -70,7 +70,6 @@ public class BusAll extends BaseChannelFragment
 
         if (mLoading) showProgressCircle();
 
-
         // Set up list to accept clicks on route or stop rows
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);

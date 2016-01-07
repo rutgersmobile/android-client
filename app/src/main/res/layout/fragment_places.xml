@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <include layout="@layout/toolbar" />
+        <include layout="@layout/toolbar_search_auto" />
     </android.support.design.widget.AppBarLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -17,38 +17,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <AutoCompleteTextView
-                android:id="@+id/buildingSearchField"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:hint="@string/building_search"
-                android:fontFamily="sans-serif-light"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:imeOptions="actionSearch" >
-
-                <requestFocus />
-            </AutoCompleteTextView>
-
-            <ImageButton
-                android:layout_width="46dp"
-                android:layout_height="fill_parent"
-                android:id="@+id/filterClearButton"
-                android:layout_weight="0"
-                android:clickable="true"
-                android:src="@android:drawable/ic_input_delete"
-                android:layout_marginRight="8dp"
-                android:scaleType="centerCrop" />
-
-        </LinearLayout>
 
         <include layout="@layout/fragment_stickylist_progress_simple" />
 

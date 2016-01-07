@@ -8,13 +8,16 @@
     android:background="?attr/colorPrimary"
     android:theme="@style/ToolbarTheme">
 
-    <EditText
-        android:id="@+id/search_box"
-        android:visibility="gone"
-        android:background="@android:color/transparent"
-        android:layout_width="fill_parent"
+    <AutoCompleteTextView
+        android:id="@+id/buildingSearchField"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/search"
+        android:visibility="gone"
+        android:ems="10"
+        android:hint="@string/building_search"
+        android:maxLines="1"
         android:textColorHint="@color/unfocused_white"
-        android:singleLine="true" />
+        android:background="@android:color/transparent"
+        android:singleLine="true"
+        android:imeOptions="actionSearch"/>
 </android.support.v7.widget.Toolbar>

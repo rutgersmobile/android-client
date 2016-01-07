@@ -21,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
@@ -43,7 +42,6 @@ public class BusMain extends Fragment {
     /* Member data */
     private ViewPager mViewPager;
     private ShareActionProvider shareActionProvider;
-    private FrameLayout searchFrame;
     private EditText searchBox;
 
     public BusMain() {
@@ -118,7 +116,6 @@ public class BusMain extends Fragment {
             mViewPager.setCurrentItem(startPage);
         }
 
-        searchFrame = (FrameLayout) v.findViewById(R.id.search_frame);
         searchBox = (EditText) v.findViewById(R.id.search_box);
 
         return v;
@@ -179,11 +176,17 @@ public class BusMain extends Fragment {
     }
 
     public void focusEvent() {
-        if (mViewPager != null && searchFrame != null) {
-            mViewPager.setCurrentItem(2, true);
-            searchFrame.setVisibility(View.VISIBLE);
-            searchBox.requestFocus();
-            AppUtils.openKeyboard(getActivity());
+        if (mViewPager != null && searchBox != null) {
+            if (searchBox.getVisibility() == View.VISIBLE) {
+                searchBox.setVisibility(View.GONE);
+                searchBox.setText("");
+                AppUtils.closeKeyboard(getActivity());
+            } else {
+                searchBox.setVisibility(View.VISIBLE);
+                mViewPager.setCurrentItem(2, true);
+                searchBox.requestFocus();
+                AppUtils.openKeyboard(getActivity());
+            }
         }
     }
 

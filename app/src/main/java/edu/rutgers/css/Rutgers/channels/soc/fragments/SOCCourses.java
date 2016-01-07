@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -107,7 +106,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -125,7 +124,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         final String semester = args.getString(ARG_SEMESTER_TAG);
         final String campus = args.getString(ARG_CAMPUS_TAG);
 
-        mFilterEditText = (EditText) v.findViewById(R.id.filterEditText);
+        mFilterEditText = (EditText) v.findViewById(R.id.search_box);
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
@@ -159,26 +158,35 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
         });
 
-        // Search clear button listener
-        final ImageButton filterClearButton = (ImageButton) v.findViewById(R.id.filterClearButton);
-        filterClearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mFilterEditText.setText(null);
-            }
-        });
-
         return v;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
+        inflater.inflate(R.menu.search_and_share, menu);
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
             setShareIntent();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle options button
+        if (item.getItemId() == R.id.search_button_toolbar) {
+            if (mFilterEditText.getVisibility() == View.VISIBLE) {
+                mFilterEditText.setVisibility(View.GONE);
+                mFilterEditText.setText("");
+                AppUtils.closeKeyboard(getActivity());
+            } else {
+                mFilterEditText.setVisibility(View.VISIBLE);
+                mFilterEditText.requestFocus();
+                AppUtils.openKeyboard(getActivity());
+            }
+            return true;
+        }
+        return false;
     }
 
     private void setShareIntent() {
