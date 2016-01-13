@@ -21,4 +21,6 @@
         <include layout="@layout/fragment_stickylist_progress_simple" />
 
     </LinearLayout>
+
+    <include layout="@layout/floating_action_button" />
 </android.support.design.widget.CoordinatorLayout>

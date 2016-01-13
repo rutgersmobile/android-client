@@ -68,6 +68,8 @@ public final class ComponentFactory {
 
     public static final String ARG_HIST_TAG         = "history";
 
+    public static final String ARG_BACKSTACK_TAG    = "backStack";
+
     /** Table of fragments that can be launched. Handles must be lowercase. */
     private static Map<String, Class<? extends Fragment>> sFragmentTable =
             Collections.unmodifiableMap(new HashMap<String, Class<? extends Fragment>>() {{

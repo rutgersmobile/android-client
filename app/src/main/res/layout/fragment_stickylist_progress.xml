@@ -25,4 +25,6 @@
         <include layout="@layout/progress_circle" />
 
     </FrameLayout>
+
+    <include layout="@layout/floating_action_button"/>
 </android.support.design.widget.CoordinatorLayout>

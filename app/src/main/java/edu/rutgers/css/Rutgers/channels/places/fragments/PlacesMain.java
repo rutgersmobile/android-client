@@ -8,6 +8,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
@@ -45,13 +46,14 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
 import edu.rutgers.css.Rutgers.channels.places.model.loader.KeyValPairLoader;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
@@ -80,6 +82,10 @@ public class PlacesMain extends BaseChannelFragment
     private static final String ARG_LAT_TAG         = "lat";
     private static final String ARG_LON_TAG         = "lon";
 
+    /* State tags */
+    private static final String SEARCHING_TAG       = "searching";
+    private static final String SEARCH_TAG          = "search";
+
     /* Member data */
     private PlaceAutoCompleteAdapter mSearchAdapter;
     private SimpleSectionedAdapter<KeyValPair> mAdapter;
@@ -87,7 +93,8 @@ public class PlacesMain extends BaseChannelFragment
     private LocationRequest mLocationRequest;
     private ShareActionProvider shareActionProvider;
     private AutoCompleteTextView autoComp;
-    private MenuItem shareItem;
+    private Toolbar toolbar;
+    private boolean searching = false;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -116,6 +123,13 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outBundle) {
+        super.onSaveInstanceState(outBundle);
+        outBundle.putBoolean(SEARCHING_TAG, searching);
+        outBundle.putString(SEARCH_TAG, autoComp.getText().toString());
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -126,13 +140,19 @@ public class PlacesMain extends BaseChannelFragment
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setInterval(10 * 1000)
                 .setFastestInterval(1000);
+
+        if (savedInstanceState != null) {
+            searching = savedInstanceState.getBoolean(SEARCHING_TAG);
+            final String search = savedInstanceState.getString(SEARCH_TAG);
+            autoComp.setText(search);
+        }
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -188,41 +208,72 @@ public class PlacesMain extends BaseChannelFragment
             }
         });
 
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Link link = getLink();
+                PrefUtils.addBookmark(getContext(), link);
+            }
+        });
+
         return v;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.search_and_share, menu);
-        shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            Uri uri = LinkUtils.buildUri(Config.SCHEMA, "places");
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-            shareActionProvider.setShareIntent(intent);
+        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
+        MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
+        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+
+        setShareIntent();
+
+        if (searching) {
+            shareItem.setVisible(false);
+            searchButton.setIcon(R.drawable.ic_clear_black_24dp);
+        } else {
+            shareItem.setVisible(true);
+            searchButton.setIcon(R.drawable.ic_search_white_24dp);
         }
+    }
+
+    private void setShareIntent() {
+        Uri uri = getLink().getUri(Config.SCHEMA);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+        shareActionProvider.setShareIntent(intent);
+    }
+
+    private Link getLink() {
+        return new Link("places", new ArrayList<String>());
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle options button
         if (item.getItemId() == R.id.search_button_toolbar) {
-            if (autoComp.getVisibility() == View.VISIBLE) {
-                autoComp.setVisibility(View.GONE);
-                autoComp.setText("");
-                AppUtils.closeKeyboard(getActivity());
-                shareItem.setVisible(true);
-            } else {
-                autoComp.setVisibility(View.VISIBLE);
-                autoComp.requestFocus();
-                AppUtils.openKeyboard(getActivity());
-                shareItem.setVisible(false);
-            }
+            searching = !searching;
+            updateSearchUI();
             return true;
         }
         return false;
+    }
+
+    private void updateSearchUI() {
+        if (searching) {
+            autoComp.setVisibility(View.VISIBLE);
+            autoComp.requestFocus();
+            toolbar.setBackgroundColor(getResources().getColor(R.color.white));
+            AppUtils.openKeyboard(getActivity());
+        } else {
+            autoComp.setVisibility(View.GONE);
+            autoComp.setText("");
+            toolbar.setBackgroundColor(getResources().getColor(R.color.actbar_new));
+            AppUtils.closeKeyboard(getActivity());
+        }
+        getActivity().invalidateOptionsMenu();
     }
 
     @Override
@@ -233,6 +284,7 @@ public class PlacesMain extends BaseChannelFragment
 
         // Reload nearby places
         showProgressCircle();
+        updateSearchUI();
     }
 
     @Override

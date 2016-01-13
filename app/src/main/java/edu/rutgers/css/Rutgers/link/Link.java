@@ -1,34 +1,30 @@
-package edu.rutgers.css.Rutgers.utils;
+package edu.rutgers.css.Rutgers.link;
 
 import android.net.Uri;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
+import lombok.Data;
+
 /**
- * Utility methods for linking
+ * POJO for holding link info
  */
-public final class LinkUtils {
+@Data
+public class Link implements Serializable {
     public enum Schema {
         RUTGERS, HTTP
     }
 
-    public static Uri buildUri(final Schema schema, final String... args) {
-        final List<String> argsList = new ArrayList<>();
-        for (final String arg : args) {
-            if (arg != null) {
-                argsList.add(arg);
-            }
-        }
+    private final String handle;
+    private final List<String> pathParts;
 
+    public Uri getUri(Schema schema) {
         final Uri.Builder uriBuilder = new Uri.Builder();
 
         switch (schema) {
             case RUTGERS:
                 uriBuilder.scheme("rutgers");
-                if (argsList.size() > 0) {
-                    uriBuilder.authority(argsList.remove(0));
-                }
                 break;
             case HTTP:
                 uriBuilder.scheme("http");
@@ -37,7 +33,9 @@ public final class LinkUtils {
                 break;
         }
 
-        for (final String arg : argsList) {
+        uriBuilder.appendPath(handle);
+
+        for (final String arg : pathParts) {
             uriBuilder.appendPath(arg);
         }
 

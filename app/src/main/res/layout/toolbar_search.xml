@@ -15,6 +15,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:hint="@string/search"
-        android:textColorHint="@color/unfocused_white"
+        android:textColorHint="@color/unfocused_black"
+        android:textColor="@color/black"
         android:singleLine="true" />
 </android.support.v7.widget.Toolbar>

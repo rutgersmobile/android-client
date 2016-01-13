@@ -16,7 +16,8 @@
         android:ems="10"
         android:hint="@string/building_search"
         android:maxLines="1"
-        android:textColorHint="@color/unfocused_white"
+        android:textColorHint="@color/unfocused_black"
+        android:textColor="@color/black"
         android:background="@android:color/transparent"
         android:singleLine="true"
         android:imeOptions="actionSearch"/>

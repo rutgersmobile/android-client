@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.ui;
 
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -16,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +37,7 @@ import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.fragments.LinkLoadFragment;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
@@ -107,7 +110,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
         firstLaunchChecks();
 
         // Set up navigation drawer
-        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Channel>());
+        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Link>(), new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.setStatusBarBackgroundColor(ContextCompat.getColor(this, R.color.actbar_new));
@@ -139,7 +142,16 @@ public class MainActivity extends GoogleApiProviderActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
-                if (adapter.positionIsSettings(position)) {
+                if (adapter.positionIsURI(position)) {
+                    final Link link = (Link) adapter.getItem(position);
+                    final Fragment taskFragment = new LinkLoadFragment();
+                    final Channel channel = mChannelManager.getChannelByTag(link.getHandle());
+                    final Bundle taskArgs = LinkLoadFragment.createBundle(channel, link.getPathParts(), true);
+                    taskFragment.setArguments(taskArgs);
+                    getSupportFragmentManager().beginTransaction().add(taskFragment, LinkLoadFragment.TAG).commit();
+                    mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
+                    return;
+                } else if (adapter.positionIsSettings(position)) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
@@ -150,7 +162,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     return;
                 }
 
-                Channel channel = (Channel) parent.getAdapter().getItem(position);
+                Channel channel = (Channel) adapter.getItem(position);
                 Bundle channelArgs = channel.getBundle();
                 String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
 
@@ -164,11 +176,41 @@ public class MainActivity extends GoogleApiProviderActivity implements
             }
         });
 
+        // attempt to get a good drag out of it
+        mDrawerListView.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                return false;
+            }
+        });
+
+        mDrawerListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Link link = (Link) parent.getAdapter().getItem(position);
+                ClipData.Item item = new ClipData.Item(link.getHandle(), null, link.getUri());
+                return false;
+            }
+        });
+
+//        mDrawerListView.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_UP) {
+//                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
+
         // Reload web channels when we change preferences to update campus-based names
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
+                mDrawerAdapter.clearLinks();
+                mDrawerAdapter.addAllLinks(PrefUtils.getBookmarks(getApplicationContext()));
                 mDrawerAdapter.notifyDataSetChanged();
             }
         };
@@ -183,8 +225,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
         JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
         if (array != null) {
             mChannelManager.loadChannelsFromJSONArray(array);
-            mDrawerAdapter.addAll(mChannelManager.getChannels());
+            mDrawerAdapter.addAllChannels(mChannelManager.getChannels());
         }
+
+        mDrawerAdapter.addAllLinks(PrefUtils.getBookmarks(getApplicationContext()));
 
         if (wantsLink()) {
             deepLink();
@@ -322,8 +366,8 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mChannelManager.clear();
         mChannelManager.loadChannelsFromJSONArray(array);
 
-        mDrawerAdapter.clear();
-        mDrawerAdapter.addAll(mChannelManager.getChannels());
+        mDrawerAdapter.clearChannels();
+        mDrawerAdapter.addAllChannels(mChannelManager.getChannels());
 
         if (!wantsLink()) {
             mDrawerLayout.openDrawer(mDrawerListView);
@@ -333,7 +377,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
     @Override
     public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {
         mChannelManager.clear();
-        mDrawerAdapter.clear();
+        mDrawerAdapter.clearChannels();
     }
 
     /**
@@ -382,7 +426,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
             final Channel channel = mChannelManager.getChannelByTag(handle);
             if (channel != null) {
                 final Fragment taskFragment = new LinkLoadFragment();
-                final Bundle taskArgs = LinkLoadFragment.createBundle(channel, pathParts);
+                final Bundle taskArgs = LinkLoadFragment.createBundle(channel, pathParts, false);
                 taskFragment.setArguments(taskArgs);
                 getSupportFragmentManager().beginTransaction().add(taskFragment, LinkLoadFragment.TAG).commit();
             }

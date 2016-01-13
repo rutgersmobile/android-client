@@ -61,5 +61,6 @@
     <color name="actbar_new">#ca072d</color>
     <color name="actbar_dark">#990000</color>
     <color name="unfocused_white">#B0FFFFFF</color>
+    <color name="unfocused_black">#B0000000</color>
 </resources>
 

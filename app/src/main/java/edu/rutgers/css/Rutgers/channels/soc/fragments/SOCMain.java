@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -39,10 +40,10 @@ import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
 import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -62,6 +63,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = "filter";
+    private static final String SEARCHING_TAG       = "searching";
 
     private static final String ARG_LEVEL_TAG       = "level";
     private static final String ARG_CAMPUS_TAG      = "campus";
@@ -79,6 +81,8 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private boolean mLoading;
     private ShareActionProvider shareActionProvider;
     private EditText filterEditText;
+    private Toolbar toolbar;
+    private boolean searching = false;
 
     public SOCMain() {
         // Required empty public constructor
@@ -122,8 +126,10 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
         // Restore filter
-        if (savedInstanceState != null) {
-            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
+        if (savedInstanceState != null && filterEditText != null) {
+            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG, "");
+            searching = savedInstanceState.getBoolean(SEARCHING_TAG);
+            filterEditText.setText(mFilterString);
         }
 
         mLoading = true;
@@ -132,10 +138,16 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        updateSearchUI();
+    }
+
+    @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -196,6 +208,15 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         });
 
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Link link = getLink();
+                PrefUtils.addBookmark(getContext(), link);
+            }
+        });
+
         return v;
     }
 
@@ -203,18 +224,38 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.soc_menu, menu);
         MenuItem shareItem = menu.findItem(R.id.soc_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            setShareIntent();
+        MenuItem optionsItem = menu.findItem(R.id.action_options);
+        MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
+        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+        setShareIntent();
+
+        if (searching) {
+            shareItem.setVisible(false);
+            optionsItem.setVisible(false);
+            searchButton.setIcon(R.drawable.ic_clear_black_24dp);
+        } else {
+            shareItem.setVisible(true);
+            optionsItem.setVisible(true);
+            searchButton.setIcon(R.drawable.ic_search_white_24dp);
         }
     }
 
     private void setShareIntent() {
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, "soc", mCampus.toLowerCase(), mSemester, mLevel.toLowerCase());
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
+        if (shareActionProvider != null) {
+            Uri uri = getLink().getUri(Config.SCHEMA);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+            shareActionProvider.setShareIntent(intent);
+        }
+    }
+
+    private Link getLink() {
+        final List<String> pathParts = new ArrayList<>();
+        pathParts.add(mCampus.toLowerCase());
+        pathParts.add(mSemester);
+        pathParts.add(mLevel.toLowerCase());
+        return new Link("soc", pathParts);
     }
 
     @Override
@@ -225,25 +266,34 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
             showSelectDialog();
             return true;
         } else if (item.getItemId() == R.id.search_button_toolbar) {
-            if (filterEditText.getVisibility() == View.VISIBLE) {
-                filterEditText.setVisibility(View.GONE);
-                filterEditText.setText("");
-                AppUtils.closeKeyboard(getActivity());
-            } else {
-                filterEditText.setVisibility(View.VISIBLE);
-                filterEditText.requestFocus();
-                AppUtils.openKeyboard(getActivity());
-            }
+            searching = !searching;
+            updateSearchUI();
             return true;
         }
 
         return false;
     }
 
+    public void updateSearchUI() {
+        if (searching) {
+            filterEditText.setVisibility(View.VISIBLE);
+            filterEditText.requestFocus();
+            toolbar.setBackgroundColor(getResources().getColor(R.color.white));
+            AppUtils.openKeyboard(getActivity());
+        } else {
+            filterEditText.setVisibility(View.GONE);
+            toolbar.setBackgroundColor(getResources().getColor(R.color.actbar_new));
+            filterEditText.setText("");
+            AppUtils.closeKeyboard(getActivity());
+        }
+        getActivity().invalidateOptionsMenu();
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mFilterString != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
+        outState.putBoolean(SEARCHING_TAG, true);
     }
 
     @Override

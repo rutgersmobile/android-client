@@ -8,27 +8,35 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nhaarman.listviewanimations.util.Swappable;
+
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.SettingsActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
  * Adapter for holding channels
  * TODO refactor this class to something more extensible
  */
-public class DrawerAdapter extends BaseAdapter {
+public class DrawerAdapter extends BaseAdapter implements Swappable {
     private final Context context;
     private final List<Channel> channels;
+    private final List<Link> uris;
 
     private final int itemLayout;
     private final int dividerLayout;
 
-    private static final int EXTRA = 3;
+    private static final int EXTRA = 4; // 2 dividers, 1 about, 1 settings
+
+    private static final int DIVIDER_SIZE = 1;
 
     private static final int DIVIDER_OFFSET = 0;
     private static final int ABOUT_OFFSET = 1;
@@ -38,16 +46,26 @@ public class DrawerAdapter extends BaseAdapter {
     private static final int PRESSABLE_TYPE = 0;
     private static final int DIVIDER_TYPE = 1;
 
+    @Override
+    public void swapItems(int positionOne, int positionTwo) {
+        if (positionIsURI(positionOne) && positionIsURI(positionTwo)) {
+            Collections.swap(uris, positionOne, positionTwo);
+            PrefUtils.setBookmarks(context, uris);
+            notifyDataSetChanged();
+        }
+    }
+
     private class ViewHolder {
         TextView textView;
         ImageView imageView;
     }
 
-    public DrawerAdapter(Context context, int itemLayout, int dividerLayout, List<Channel> channels) {
+    public DrawerAdapter(Context context, int itemLayout, int dividerLayout, List<Link> uris, List<Channel> channels) {
         this.context = context;
         this.itemLayout = itemLayout;
         this.dividerLayout = dividerLayout;
         this.channels = channels;
+        this.uris = uris;
     }
 
     @Override
@@ -77,8 +95,12 @@ public class DrawerAdapter extends BaseAdapter {
             return convertView;
         }
 
-        if (positionIsChannel(position)) {
-            Channel channel = channels.get(position);
+        if (positionIsURI(position)) {
+            Link link = (Link) getItem(position);
+            holder.textView.setText(link.getUri(Link.Schema.RUTGERS).toString());
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), link.getHandle()));
+        } else if (positionIsChannel(position)) {
+            Channel channel = (Channel) getItem(position);
             holder.textView.setText(channel.getTitle(homeCampus));
             holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), channel.getHandle()));
         } else if (positionIsSettings(position)) {
@@ -96,7 +118,7 @@ public class DrawerAdapter extends BaseAdapter {
     public int getCount() {
         // The total count is the number of channels plus one for each of:
         // settings, about, divider
-        return channels.size() + EXTRA;
+        return uris.size() + channels.size() + EXTRA;
     }
 
     @Override
@@ -114,8 +136,10 @@ public class DrawerAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        if (positionIsChannel(i)) {
-            return channels.get(i);
+        if (positionIsURI(i)) {
+            return uris.get(i);
+        } else if (positionIsChannel(i)) {
+            return channels.get(i - (uris.size() + DIVIDER_SIZE));
         } else if (positionIsSettings(i)) {
             return SettingsActivity.class;
         } else if (positionIsAbout(i)) {
@@ -125,34 +149,53 @@ public class DrawerAdapter extends BaseAdapter {
     }
 
     @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
     public long getItemId(int i) {
         return i;
     }
 
-    public int getPosition(Channel item) {
-        return channels.indexOf(item);
-    }
-
-    public void addAll(Collection<Channel> channels) {
+    public void addAllChannels(Collection<Channel> channels) {
         this.channels.addAll(channels);
         notifyDataSetChanged();
     }
 
-    public void clear() {
+    public void addAllLinks(Collection<Link> links) {
+        this.uris.addAll(links);
+        notifyDataSetChanged();
+    }
+
+    public void clearLinks() {
+        this.uris.clear();
+        notifyDataSetChanged();
+    }
+
+    public void clearChannels() {
         channels.clear();
         notifyDataSetChanged();
     }
 
+    public boolean positionIsURI(int position) {
+        return position < uris.size();
+    }
+
     public boolean positionIsChannel(int position) {
-        return position < channels.size();
+        return position > uris.size() && position <= uris.size() + channels.size();
     }
 
     public boolean positionIsDivider(int position) {
-        return position == getDividerPosition();
+        return position == getLowDividerPosition() || position == getHighDividerPosition();
     }
 
-    public int getDividerPosition() {
-        return channels.size() + DIVIDER_OFFSET;
+    public int getHighDividerPosition() {
+        return uris.size() + DIVIDER_OFFSET;
+    }
+
+    public int getLowDividerPosition() {
+        return uris.size() + channels.size() + DIVIDER_SIZE + DIVIDER_OFFSET;
     }
 
     public boolean positionIsAbout(int position) {
@@ -160,7 +203,7 @@ public class DrawerAdapter extends BaseAdapter {
     }
 
     public int getAboutPosition() {
-        return channels.size() + ABOUT_OFFSET;
+        return uris.size() + DIVIDER_SIZE + channels.size() + ABOUT_OFFSET;
     }
 
     public boolean positionIsSettings(int position) {
@@ -168,6 +211,6 @@ public class DrawerAdapter extends BaseAdapter {
     }
 
     public int getSettingsPosition() {
-        return channels.size() + SETTINGS_OFFSET;
+        return uris.size() + DIVIDER_SIZE + channels.size() + SETTINGS_OFFSET;
     }
 }

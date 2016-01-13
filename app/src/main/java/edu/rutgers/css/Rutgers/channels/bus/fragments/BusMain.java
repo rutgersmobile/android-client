@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -22,12 +23,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 public class BusMain extends Fragment {
 
@@ -43,6 +48,10 @@ public class BusMain extends Fragment {
     private ViewPager mViewPager;
     private ShareActionProvider shareActionProvider;
     private EditText searchBox;
+    private TabLayout tabs;
+    private Toolbar toolbar;
+    private boolean searching = false;
+    private int position = 0;
 
     public BusMain() {
         // Required empty public constructor
@@ -65,7 +74,22 @@ public class BusMain extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null && searchBox != null) {
+            searching = savedInstanceState.getBoolean("searching");
+            String search = savedInstanceState.getString("search", "");
+            searchBox.setText(search);
+        }
+
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (searchBox != null) {
+            outState.putBoolean("searching", true);
+            outState.putString("search", searchBox.getText().toString());
+        }
     }
 
     @Override
@@ -80,7 +104,7 @@ public class BusMain extends Fragment {
             getActivity().setTitle(R.string.bus_title);
         }
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -95,7 +119,7 @@ public class BusMain extends Fragment {
         mViewPager = (ViewPager) v.findViewById(R.id.viewPager);
         mViewPager.setAdapter(pagerAdapter);
 
-        final TabLayout tabs = (TabLayout) v.findViewById(R.id.tabs);
+        tabs = (TabLayout) v.findViewById(R.id.tabs);
         tabs.setupWithViewPager(mViewPager);
         tabs.setTabsFromPagerAdapter(pagerAdapter);
 
@@ -105,9 +129,8 @@ public class BusMain extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                if (shareActionProvider != null) {
-                    BusMain.this.setShareIntent(position);
-                }
+                BusMain.this.position = position;
+                BusMain.this.setShareIntent(position);
             }
         });
 
@@ -118,6 +141,15 @@ public class BusMain extends Fragment {
 
         searchBox = (EditText) v.findViewById(R.id.search_box);
 
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Link link = createLink(BusMain.this.position);
+                PrefUtils.addBookmark(getContext(), link);
+            }
+        });
+
         return v;
     }
 
@@ -125,14 +157,22 @@ public class BusMain extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.search_and_share, menu);
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            int startPage = getArguments().getInt(ARG_START_TAG, -1);
-            if (startPage != -1) {
-                setShareIntent(startPage);
-            } else {
-                setShareIntent(0);
-            }
+        MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
+
+        if (searching) {
+            searchButton.setIcon(R.drawable.ic_clear_black_24dp);
+            shareItem.setVisible(false);
+        } else {
+            searchButton.setIcon(R.drawable.ic_search_white_24dp);
+            shareItem.setVisible(true);
+        }
+
+        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
+        int startPage = getArguments().getInt(ARG_START_TAG, -1);
+        if (startPage != -1) {
+            setShareIntent(startPage);
+        } else {
+            setShareIntent(0);
         }
     }
 
@@ -140,7 +180,8 @@ public class BusMain extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.search_button_toolbar:
-                focusEvent();
+                searching = !searching;
+                updateSearchUI();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -148,6 +189,17 @@ public class BusMain extends Fragment {
     }
 
     private void setShareIntent(int position) {
+        if (shareActionProvider != null) {
+            Uri uri = createLink(position).getUri(Config.SCHEMA);
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+            shareActionProvider.setShareIntent(intent);
+        }
+    }
+
+    private Link createLink(int position) {
         String tab;
         switch (position) {
             case 0:
@@ -161,12 +213,9 @@ public class BusMain extends Fragment {
                 break;
         }
 
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, "bus", tab);
-
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
+        final List<String> pathParts = new ArrayList<>();
+        pathParts.add(tab);
+        return new Link("bus", pathParts);
     }
 
     @Override
@@ -175,18 +224,31 @@ public class BusMain extends Fragment {
         super.onDestroyView();
     }
 
-    public void focusEvent() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateSearchUI();
+    }
+
+    public void updateSearchUI() {
         if (mViewPager != null && searchBox != null) {
-            if (searchBox.getVisibility() == View.VISIBLE) {
-                searchBox.setVisibility(View.GONE);
-                searchBox.setText("");
-                AppUtils.closeKeyboard(getActivity());
-            } else {
+            if (searching) {
+                searching = true;
                 searchBox.setVisibility(View.VISIBLE);
+                tabs.setVisibility(View.GONE);
                 mViewPager.setCurrentItem(2, true);
                 searchBox.requestFocus();
+                toolbar.setBackgroundColor(getResources().getColor(R.color.white));
                 AppUtils.openKeyboard(getActivity());
+            } else {
+                searching = false;
+                searchBox.setVisibility(View.GONE);
+                tabs.setVisibility(View.VISIBLE);
+                searchBox.setText("");
+                toolbar.setBackgroundColor(getResources().getColor(R.color.actbar_new));
+                AppUtils.closeKeyboard(getActivity());
             }
+            getActivity().invalidateOptionsMenu();
         }
     }
 

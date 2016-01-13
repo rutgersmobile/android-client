@@ -5,4 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:background="?attr/colorPrimary"
-    android:theme="@style/ToolbarTheme" />
+    android:theme="@style/ToolbarTheme">
+
+    <AutoCompleteTextView
+        android:id="@+id/buildingSearchField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:ems="10"
+        android:hint="@string/building_search"
+        android:maxLines="1"
+        android:textColorHint="@color/unfocused_black"
+        android:textColor="@color/black"
+        android:background="@android:color/transparent"
+        android:singleLine="true"
+        android:imeOptions="actionSearch"/>
+</android.support.v7.widget.Toolbar>

@@ -5,6 +5,15 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.rutgers.css.Rutgers.link.Link;
+
 /**
  * Preference keys and helpers.
  */
@@ -34,6 +43,8 @@ public final class PrefUtils {
 
     /** Key for tutorial stage. */
     public static final String KEY_PREF_TUTORIAL_STAGE = "pref_tut_stage";
+
+    public static final String KEY_PREF_BOOKMARK        = "pref_bookmark";
 
     public static boolean isFirstLaunch(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -71,6 +82,27 @@ public final class PrefUtils {
     public static void setTutorialStage(@NonNull Context context, int stage) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putInt(KEY_PREF_TUTORIAL_STAGE, stage).apply();
+    }
+
+    public static List<Link> getBookmarks(@NonNull Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Link>>(){}.getType();
+        String emptyList = gson.toJson(new ArrayList<Link>(), type);
+        return gson.fromJson(prefs.getString(KEY_PREF_BOOKMARK, emptyList), type);
+    }
+
+    public static void setBookmarks(@NonNull Context context, List<Link> links) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Link>>(){}.getType();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putString(KEY_PREF_BOOKMARK, gson.toJson(links, type)).apply();
+    }
+
+    public static void addBookmark(@NonNull Context context, @NonNull Link link) {
+        List<Link> links = getBookmarks(context);
+        links.add(link);
+        setBookmarks(context, links);
     }
 
 }

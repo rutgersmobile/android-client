@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -33,10 +34,11 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
@@ -158,6 +160,15 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
         });
 
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Link link = getLink();
+                PrefUtils.addBookmark(getContext(), link);
+            }
+        });
+
         return v;
     }
 
@@ -190,20 +201,22 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     }
 
     private void setShareIntent() {
-        Bundle args = getArguments();
-        List<String> linkArgs = new ArrayList<>();
-        linkArgs.add("soc");
-        linkArgs.add(args.getString(ARG_CAMPUS_TAG));
-        linkArgs.add(args.getString(ARG_LEVEL_TAG));
-        linkArgs.add(args.getString(ARG_SEMESTER_TAG));
-        linkArgs.add(args.getString(ARG_SUBJECT_TAG));
-
-        Uri uri = LinkUtils.buildUri(Config.SCHEMA, linkArgs.toArray(new String[linkArgs.size()]));
+        Uri uri = getLink().getUri(Config.SCHEMA);
 
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
         shareActionProvider.setShareIntent(intent);
+    }
+
+    private Link getLink() {
+        final Bundle args = getArguments();
+        final List<String> linkArgs = new ArrayList<>();
+        linkArgs.add(args.getString(ARG_CAMPUS_TAG));
+        linkArgs.add(args.getString(ARG_LEVEL_TAG));
+        linkArgs.add(args.getString(ARG_SEMESTER_TAG));
+        linkArgs.add(args.getString(ARG_SUBJECT_TAG));
+        return new Link("soc", linkArgs);
     }
 
     @Override

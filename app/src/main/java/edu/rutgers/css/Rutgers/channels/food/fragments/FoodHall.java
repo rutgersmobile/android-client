@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -36,10 +37,11 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuLoader;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkMaps;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -140,6 +142,15 @@ public class FoodHall extends Fragment
 
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Link link = getLink();
+                PrefUtils.addBookmark(getContext(), link);
+            }
+        });
+
         return v;
     }
 
@@ -149,15 +160,24 @@ public class FoodHall extends Fragment
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-
-            Uri uri = LinkUtils.buildUri(Config.SCHEMA, "food", LinkMaps.diningHallsInv.get(mLocation));
-            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-
-            shareActionProvider.setShareIntent(intent);
+            setShareIntent();
         }
+    }
+
+    private void setShareIntent() {
+        Uri uri = getLink().getUri(Config.SCHEMA);
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+
+        shareActionProvider.setShareIntent(intent);
+    }
+
+    private Link getLink() {
+        final List<String> pathParts = new ArrayList<>();
+        pathParts.add(LinkMaps.diningHallsInv.get(mLocation));
+        return new Link("food", pathParts);
     }
 
     @Override

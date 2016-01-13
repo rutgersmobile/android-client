@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -32,11 +33,12 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSAdapter;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
 import edu.rutgers.css.Rutgers.channels.reader.model.loader.RSSItemLoader;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -140,7 +142,16 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
                 }
             }
         });
-        
+
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Link link = getLink();
+                PrefUtils.addBookmark(getContext(), link);
+            }
+        });
+
         return v;
     }
 
@@ -150,27 +161,38 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-
-            String topHandle = getArguments().getString(ComponentFactory.ARG_HANDLE_TAG);
-            List<String> history = getArguments().getStringArrayList(ComponentFactory.ARG_HIST_TAG);
-            String pathPart = getArguments().getString(ARG_TITLE_TAG);
-
-            if (topHandle != null && history != null && pathPart != null) {
-                List<String> linkArgs = new ArrayList<>();
-                linkArgs.add(topHandle);
-                for (final String title : history) {
-                    linkArgs.add(title);
-                }
-                linkArgs.add(pathPart.replaceAll("\\s+", "").toLowerCase());
-
-                Uri uri = LinkUtils.buildUri(Config.SCHEMA,  linkArgs.toArray(new String[linkArgs.size()]));
-
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-                shareActionProvider.setShareIntent(intent);
-            }
+            setShareIntent();
         }
+    }
+
+    private void setShareIntent() {
+        final Link link = getLink();
+        if (link != null) {
+            Uri uri = link.getUri(Config.SCHEMA);
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+            shareActionProvider.setShareIntent(intent);
+        }
+    }
+
+    private Link getLink() {
+        final Bundle args = getArguments();
+        final String topHandle = args.getString(ComponentFactory.ARG_HANDLE_TAG);
+        final List<String> history = args.getStringArrayList(ComponentFactory.ARG_HIST_TAG);
+        final String pathPart = args.getString(ARG_TITLE_TAG);
+
+        if (topHandle != null && history != null && pathPart != null) {
+            final List<String> linkArgs = new ArrayList<>();
+            for (final String title : history) {
+                linkArgs.add(title);
+            }
+            linkArgs.add(pathPart.replaceAll("\\s+", "").toLowerCase());
+            return new Link(topHandle, linkArgs);
+        }
+
+        return null;
     }
 
     @Override

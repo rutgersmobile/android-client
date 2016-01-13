@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -25,12 +26,14 @@ import android.widget.Toast;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.loader.PlaceLoader;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
@@ -38,7 +41,7 @@ import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.LinkUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**
  * Display information about a Rutgers location from the Places database.
@@ -148,6 +151,15 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
             }
         });
 
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Link link = getLink();
+                PrefUtils.addBookmark(getContext(), link);
+            }
+        });
+
         return v;
     }
 
@@ -157,12 +169,22 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         if (shareItem != null) {
             shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            Uri uri = LinkUtils.buildUri(Config.SCHEMA, "places", getArguments().getString(ARG_PLACEKEY_TAG));
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-            shareActionProvider.setShareIntent(intent);
+            setShareIntent();
         }
+    }
+
+    private void setShareIntent() {
+        Uri uri = getLink().getUri(Config.SCHEMA);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+        shareActionProvider.setShareIntent(intent);
+    }
+
+    private Link getLink() {
+        final List<String> pathParts = new ArrayList<>();
+        pathParts.add(getArguments().getString(ARG_PLACEKEY_TAG));
+        return new Link("places", pathParts);
     }
 
     /**
