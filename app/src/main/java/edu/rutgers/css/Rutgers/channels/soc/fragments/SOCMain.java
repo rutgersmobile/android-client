@@ -1,12 +1,9 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -29,7 +26,6 @@ import android.widget.EditText;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
@@ -208,15 +204,6 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         });
 
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Link link = getLink();
-                PrefUtils.addBookmark(getContext(), link);
-            }
-        });
-
         return v;
     }
 
@@ -240,22 +227,17 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         }
     }
 
-    private void setShareIntent() {
-        if (shareActionProvider != null) {
-            Uri uri = getLink().getUri(Config.SCHEMA);
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-            shareActionProvider.setShareIntent(intent);
-        }
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
     }
 
-    private Link getLink() {
+    public Link getLink() {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(mCampus.toLowerCase());
         pathParts.add(mSemester);
         pathParts.add(mLevel.toLowerCase());
-        return new Link("soc", pathParts);
+        return new Link("soc", pathParts, getLinkTitle());
     }
 
     @Override

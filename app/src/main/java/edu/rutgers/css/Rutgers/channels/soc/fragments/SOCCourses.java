@@ -1,10 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -28,7 +25,6 @@ import org.apache.commons.lang3.text.WordUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
@@ -38,7 +34,6 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
@@ -160,15 +155,6 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
         });
 
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Link link = getLink();
-                PrefUtils.addBookmark(getContext(), link);
-            }
-        });
-
         return v;
     }
 
@@ -200,23 +186,19 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         return false;
     }
 
-    private void setShareIntent() {
-        Uri uri = getLink().getUri(Config.SCHEMA);
-
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
     }
 
-    private Link getLink() {
+    public Link getLink() {
         final Bundle args = getArguments();
         final List<String> linkArgs = new ArrayList<>();
         linkArgs.add(args.getString(ARG_CAMPUS_TAG));
         linkArgs.add(args.getString(ARG_LEVEL_TAG));
         linkArgs.add(args.getString(ARG_SEMESTER_TAG));
         linkArgs.add(args.getString(ARG_SUBJECT_TAG));
-        return new Link("soc", linkArgs);
+        return new Link("soc", linkArgs, getLinkTitle());
     }
 
     @Override

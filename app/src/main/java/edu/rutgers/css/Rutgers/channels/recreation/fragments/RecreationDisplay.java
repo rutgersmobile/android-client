@@ -9,6 +9,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
 import edu.rutgers.css.Rutgers.channels.recreation.model.loader.FacilityLoader;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
@@ -273,5 +275,15 @@ public class RecreationDisplay extends BaseChannelFragment implements LoaderMana
     public void onLoaderReset(Loader<Facility> loader) {
         mLoading = false;
         hideProgressCircle();
+    }
+
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
     }
 }

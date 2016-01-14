@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.StopLoader;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -198,4 +200,13 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
         }
     }
 
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
+    }
 }

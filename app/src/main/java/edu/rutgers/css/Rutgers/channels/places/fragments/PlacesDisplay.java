@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -41,7 +40,6 @@ import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**
  * Display information about a Rutgers location from the Places database.
@@ -151,15 +149,6 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
             }
         });
 
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Link link = getLink();
-                PrefUtils.addBookmark(getContext(), link);
-            }
-        });
-
         return v;
     }
 
@@ -173,7 +162,7 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         }
     }
 
-    private void setShareIntent() {
+    public void setShareIntent() {
         Uri uri = getLink().getUri(Config.SCHEMA);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
@@ -181,10 +170,15 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         shareActionProvider.setShareIntent(intent);
     }
 
-    private Link getLink() {
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
+    }
+
+    public Link getLink() {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(getArguments().getString(ARG_PLACEKEY_TAG));
-        return new Link("places", pathParts);
+        return new Link("places", pathParts, getLinkTitle());
     }
 
     /**

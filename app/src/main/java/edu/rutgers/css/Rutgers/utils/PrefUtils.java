@@ -105,4 +105,11 @@ public final class PrefUtils {
         setBookmarks(context, links);
     }
 
+    public static void removeBookmark(@NonNull Context context, int position) {
+        List<Link> links = getBookmarks(context);
+        if (position < links.size()) {
+            links.remove(position);
+        }
+        setBookmarks(context, links);
+    }
 }

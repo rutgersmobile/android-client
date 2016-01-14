@@ -97,7 +97,7 @@ public class DrawerAdapter extends BaseAdapter implements Swappable {
 
         if (positionIsURI(position)) {
             Link link = (Link) getItem(position);
-            holder.textView.setText(link.getUri(Link.Schema.RUTGERS).toString());
+            holder.textView.setText(link.getTitle());
             holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), link.getHandle()));
         } else if (positionIsChannel(position)) {
             Channel channel = (Channel) getItem(position);

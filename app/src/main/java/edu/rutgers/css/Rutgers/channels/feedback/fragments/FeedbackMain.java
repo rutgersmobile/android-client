@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -43,6 +44,7 @@ import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.ruinfo.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -75,6 +77,16 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     private EditText mMessageEditText;
     private EditText mEmailEditText;
     private CheckBox mRequestReplyCheckbox;
+
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
+    }
 
     enum Status {
         SUCCESS, FAIL, IOFAIL

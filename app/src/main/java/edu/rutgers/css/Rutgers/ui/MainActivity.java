@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.ui;
 
-import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -17,7 +16,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -176,19 +174,15 @@ public class MainActivity extends GoogleApiProviderActivity implements
             }
         });
 
-        // attempt to get a good drag out of it
-        mDrawerListView.setOnDragListener(new View.OnDragListener() {
-            @Override
-            public boolean onDrag(View v, DragEvent event) {
-                return false;
-            }
-        });
-
         mDrawerListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Link link = (Link) parent.getAdapter().getItem(position);
-                ClipData.Item item = new ClipData.Item(link.getHandle(), null, link.getUri());
+                DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
+                if (adapter.positionIsURI(position)) {
+                    PrefUtils.removeBookmark(getApplicationContext(), position);
+                    return true;
+                }
+
                 return false;
             }
         });

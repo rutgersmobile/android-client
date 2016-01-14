@@ -1,19 +1,25 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**
  * Base channel fragment. Handles progress circle display and communication with parent activity.
  */
-public abstract class BaseChannelFragment extends BaseDisplay {
+public abstract class BaseChannelFragment extends BaseDisplay implements Linkable {
 
     private ProgressBar mProgressCircle;
 
@@ -21,6 +27,15 @@ public abstract class BaseChannelFragment extends BaseDisplay {
         final View v = inflater.inflate(resource, parent, false);
 
         mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PrefUtils.addBookmark(getContext(), getLink());
+                }
+            });
+        }
 
         return v;
     }
@@ -53,4 +68,15 @@ public abstract class BaseChannelFragment extends BaseDisplay {
         }
     }
 
+    public void setShareIntent() {
+        Uri uri = getLink().getUri(Config.SCHEMA);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
+        getShareActionProvider().setShareIntent(intent);
+    }
+
+    public String getLinkTitle() {
+        return getActivity().getTitle().toString();
+    }
 }

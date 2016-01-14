@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.ShareActionProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.model.NextbusItem;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.NextBusItemLoader;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -145,5 +147,15 @@ public class BusAll extends BaseChannelFragment
         mAdapter.clear();
         mLoading = false;
         hideProgressCircle();
+    }
+
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
     }
 }

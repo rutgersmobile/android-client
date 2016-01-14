@@ -6,6 +6,7 @@
     <style name="RutgersTheme.Base" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">@color/actbar_new</item>
         <item name="colorPrimaryDark">@color/actbar_dark</item>
+        <item name="colorAccent">@color/actbar_new</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>

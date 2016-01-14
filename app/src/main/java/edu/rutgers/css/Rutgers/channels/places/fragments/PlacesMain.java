@@ -8,7 +8,6 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
@@ -53,10 +52,10 @@ import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
@@ -208,15 +207,6 @@ public class PlacesMain extends BaseChannelFragment
             }
         });
 
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Link link = getLink();
-                PrefUtils.addBookmark(getContext(), link);
-            }
-        });
-
         return v;
     }
 
@@ -238,7 +228,7 @@ public class PlacesMain extends BaseChannelFragment
         }
     }
 
-    private void setShareIntent() {
+    public void setShareIntent() {
         Uri uri = getLink().getUri(Config.SCHEMA);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
@@ -246,8 +236,13 @@ public class PlacesMain extends BaseChannelFragment
         shareActionProvider.setShareIntent(intent);
     }
 
-    private Link getLink() {
-        return new Link("places", new ArrayList<String>());
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
+    }
+
+    public Link getLink() {
+        return new Link("places", new ArrayList<String>(), getLinkTitle());
     }
 
     @Override
@@ -372,7 +367,11 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     private void requestLocationUpdates() {
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClientProvider.getGoogleApiClient(), mLocationRequest, this);
+        } catch (SecurityException e) {
+            LOGE(TAG, e.getMessage());
+        }
     }
 
     @Override
@@ -381,7 +380,7 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if (requestCode == LOCATION_REQUEST
                 && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

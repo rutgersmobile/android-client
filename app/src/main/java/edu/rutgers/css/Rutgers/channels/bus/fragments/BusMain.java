@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -32,7 +31,6 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 public class BusMain extends Fragment {
 
@@ -130,7 +128,7 @@ public class BusMain extends Fragment {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 BusMain.this.position = position;
-                BusMain.this.setShareIntent(position);
+                BusMain.this.setShareIntent();
             }
         });
 
@@ -140,15 +138,6 @@ public class BusMain extends Fragment {
         }
 
         searchBox = (EditText) v.findViewById(R.id.search_box);
-
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Link link = createLink(BusMain.this.position);
-                PrefUtils.addBookmark(getContext(), link);
-            }
-        });
 
         return v;
     }
@@ -160,20 +149,22 @@ public class BusMain extends Fragment {
         MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
 
         if (searching) {
-            searchButton.setIcon(R.drawable.ic_clear_black_24dp);
+            searchButton.setIcon(R.drawable.ic_xiconwhite);
             shareItem.setVisible(false);
         } else {
-            searchButton.setIcon(R.drawable.ic_search_white_24dp);
+            searchButton.setIcon(R.drawable.ic_magnifyingglasswhite);
             shareItem.setVisible(true);
         }
 
         shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
         int startPage = getArguments().getInt(ARG_START_TAG, -1);
         if (startPage != -1) {
-            setShareIntent(startPage);
+            position = startPage;
         } else {
-            setShareIntent(0);
+            position = 0;
         }
+
+        setShareIntent();
     }
 
     @Override
@@ -188,34 +179,15 @@ public class BusMain extends Fragment {
         }
     }
 
-    private void setShareIntent(int position) {
+    private void setShareIntent() {
         if (shareActionProvider != null) {
-            Uri uri = createLink(position).getUri(Config.SCHEMA);
+            Uri uri = getLink().getUri(Config.SCHEMA);
 
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
             shareActionProvider.setShareIntent(intent);
         }
-    }
-
-    private Link createLink(int position) {
-        String tab;
-        switch (position) {
-            case 0:
-                tab = "route";
-                break;
-            case 1:
-                tab = "stop";
-                break;
-            default:
-                tab = "all";
-                break;
-        }
-
-        final List<String> pathParts = new ArrayList<>();
-        pathParts.add(tab);
-        return new Link("bus", pathParts);
     }
 
     @Override
@@ -254,6 +226,29 @@ public class BusMain extends Fragment {
 
     public void addSearchListener(TextWatcher watcher) {
         searchBox.addTextChangedListener(watcher);
+    }
+
+    public Link getLink() {
+        String tab;
+        switch (position) {
+            case 0:
+                tab = "route";
+                break;
+            case 1:
+                tab = "stop";
+                break;
+            default:
+                tab = "all";
+                break;
+        }
+
+        final List<String> pathParts = new ArrayList<>();
+        pathParts.add(tab);
+        return new Link("bus", pathParts, getLinkTitle());
+    }
+
+    private String getLinkTitle() {
+        return getActivity().getTitle().toString();
     }
 
     private class BusFragmentPager extends FragmentPagerAdapter {

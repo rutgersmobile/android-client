@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.channels.food.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -35,7 +34,6 @@ import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 /**
@@ -129,15 +127,6 @@ public class FoodMain extends BaseChannelFragment
             }
         });
 
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Link link = getLink();
-                PrefUtils.addBookmark(getContext(), link);
-            }
-        });
-        
         return v;
     }
 
@@ -151,7 +140,7 @@ public class FoodMain extends BaseChannelFragment
         }
     }
 
-    private void setShareIntent() {
+    public void setShareIntent() {
         Uri uri = getLink().getUri(Config.SCHEMA);
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
@@ -159,8 +148,13 @@ public class FoodMain extends BaseChannelFragment
         shareActionProvider.setShareIntent(intent);
     }
 
-    private Link getLink() {
-        return new Link("food", new ArrayList<String>());
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
+    }
+
+    public Link getLink() {
+        return new Link("food", new ArrayList<String>(), getLinkTitle());
     }
 
     @Override

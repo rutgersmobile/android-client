@@ -1,10 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
@@ -41,7 +38,6 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
@@ -251,15 +247,6 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
             }
         });
 
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Link link = getLink();
-                PrefUtils.addBookmark(getContext(), link);
-            }
-        });
-
         return v;
     }
 
@@ -275,22 +262,19 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
         }
     }
 
-    private void setShareIntent() {
-        Uri uri = getLink().getUri(Config.SCHEMA);
-
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return shareActionProvider;
     }
 
-    private Link getLink() {
+    @Override
+    public Link getLink() {
         final List<String> linkArgs = new ArrayList<>();
         for (final String title : getHistory()) {
             linkArgs.add(title);
         }
 
-        return  new Link(mTopHandle, linkArgs);
+        return  new Link(mTopHandle, linkArgs, getLinkTitle());
     }
 
     private ArrayList<String> getHistory() {

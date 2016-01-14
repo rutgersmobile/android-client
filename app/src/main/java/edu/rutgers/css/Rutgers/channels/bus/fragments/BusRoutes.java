@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.RouteLoader;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -94,5 +96,15 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<List<SimpleSection<RouteStub>>> loader) {
         mAdapter.clear();
+    }
+
+    @Override
+    public Link getLink() {
+        return null;
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
     }
 }
