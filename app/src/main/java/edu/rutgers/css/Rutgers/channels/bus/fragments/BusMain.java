@@ -149,7 +149,7 @@ public class BusMain extends Fragment {
         MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
 
         if (searching) {
-            searchButton.setIcon(R.drawable.ic_xiconwhite);
+            searchButton.setIcon(R.drawable.ic_xicon);
             shareItem.setVisible(false);
         } else {
             searchButton.setIcon(R.drawable.ic_magnifyingglasswhite);
