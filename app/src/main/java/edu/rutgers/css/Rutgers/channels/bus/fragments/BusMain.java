@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -29,10 +30,12 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
-public class BusMain extends Fragment {
+public class BusMain extends Fragment implements Linkable {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusMain";
@@ -139,6 +142,16 @@ public class BusMain extends Fragment {
 
         searchBox = (EditText) v.findViewById(R.id.search_box);
 
+        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PrefUtils.addBookmark(getContext(), getLink());
+                }
+            });
+        }
+
         return v;
     }
 
@@ -179,7 +192,7 @@ public class BusMain extends Fragment {
         }
     }
 
-    private void setShareIntent() {
+    public void setShareIntent() {
         if (shareActionProvider != null) {
             Uri uri = getLink().getUri(Config.SCHEMA);
 
@@ -188,6 +201,11 @@ public class BusMain extends Fragment {
             intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
             shareActionProvider.setShareIntent(intent);
         }
+    }
+
+    @Override
+    public ShareActionProvider getShareActionProvider() {
+        return null;
     }
 
     @Override
@@ -247,8 +265,20 @@ public class BusMain extends Fragment {
         return new Link("bus", pathParts, getLinkTitle());
     }
 
-    private String getLinkTitle() {
-        return getActivity().getTitle().toString();
+    public String getLinkTitle() {
+        String posName;
+        switch (position) {
+            case 0:
+                posName = "Routes";
+                break;
+            case 1:
+                posName = "Stops";
+                break;
+            default:
+                posName = "All";
+                break;
+        }
+        return getActivity().getTitle().toString() + " - " + posName;
     }
 
     private class BusFragmentPager extends FragmentPagerAdapter {

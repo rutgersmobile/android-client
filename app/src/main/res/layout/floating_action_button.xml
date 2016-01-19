@@ -7,4 +7,6 @@
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     android:layout_gravity="bottom|end"
+    android:src="@drawable/ic_bookmark"
+    app:rippleColor="@color/actbar_dark"
     app:layout_anchorGravity="bottom|right|end" />
