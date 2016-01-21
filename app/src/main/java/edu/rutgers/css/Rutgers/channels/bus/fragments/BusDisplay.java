@@ -202,16 +202,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            setShareIntent();
-        }
-    }
-
-    @Override
     public Link getLink() {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(mMode);

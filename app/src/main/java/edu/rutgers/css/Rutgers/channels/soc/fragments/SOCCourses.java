@@ -159,16 +159,6 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.search_and_share, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            setShareIntent();
-        }
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle options button
         if (item.getItemId() == R.id.search_button_toolbar) {

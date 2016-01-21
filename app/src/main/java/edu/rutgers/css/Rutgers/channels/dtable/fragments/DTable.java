@@ -251,18 +251,6 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.share_link, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
-        if (shareItem != null) {
-            shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-            if (mDRoot != null) {
-                setShareIntent();
-            }
-        }
-    }
-
-    @Override
     public ShareActionProvider getShareActionProvider() {
         return shareActionProvider;
     }

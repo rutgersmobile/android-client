@@ -213,17 +213,11 @@ public class PlacesMain extends BaseChannelFragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.search_and_share, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
-        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-
-        setShareIntent();
 
         if (searching) {
-            shareItem.setVisible(false);
             searchButton.setIcon(R.drawable.ic_clear_black_24dp);
         } else {
-            shareItem.setVisible(true);
             searchButton.setIcon(R.drawable.ic_search_white_24dp);
         }
     }

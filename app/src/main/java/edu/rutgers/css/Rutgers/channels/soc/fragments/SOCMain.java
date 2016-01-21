@@ -210,18 +210,13 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.soc_menu, menu);
-        MenuItem shareItem = menu.findItem(R.id.soc_share);
         MenuItem optionsItem = menu.findItem(R.id.action_options);
         MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
-        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
-        setShareIntent();
 
         if (searching) {
-            shareItem.setVisible(false);
             optionsItem.setVisible(false);
             searchButton.setIcon(R.drawable.ic_clear_black_24dp);
         } else {
-            shareItem.setVisible(true);
             optionsItem.setVisible(true);
             searchButton.setIcon(R.drawable.ic_search_white_24dp);
         }

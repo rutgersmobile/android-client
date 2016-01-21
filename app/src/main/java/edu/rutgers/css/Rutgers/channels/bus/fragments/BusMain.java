@@ -143,26 +143,20 @@ public class BusMain extends BaseChannelFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.search_and_share, menu);
-        MenuItem shareItem = menu.findItem(R.id.deep_link_share);
         MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
 
         if (searching) {
             searchButton.setIcon(R.drawable.ic_xicon);
-            shareItem.setVisible(false);
         } else {
             searchButton.setIcon(R.drawable.ic_magnifyingglasswhite);
-            shareItem.setVisible(true);
         }
 
-        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
         int startPage = getArguments().getInt(ARG_START_TAG, -1);
         if (startPage != -1) {
             position = startPage;
         } else {
             position = 0;
         }
-
-        setShareIntent();
     }
 
     @Override
