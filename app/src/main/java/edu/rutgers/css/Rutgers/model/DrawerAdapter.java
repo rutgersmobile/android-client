@@ -26,7 +26,7 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
  * Adapter for holding channels
  * TODO refactor this class to something more extensible
  */
-public class DrawerAdapter extends BaseAdapter implements Swappable {
+public class DrawerAdapter extends BaseAdapter {
     private final Context context;
     private final List<Channel> channels;
     private final List<Link> uris;
@@ -34,26 +34,18 @@ public class DrawerAdapter extends BaseAdapter implements Swappable {
     private final int itemLayout;
     private final int dividerLayout;
 
-    private static final int EXTRA = 4; // 2 dividers, 1 about, 1 settings
+    private static final int EXTRA = 5; // 2 dividers, 1 about, 1 settings, 1 bookmarks
 
     private static final int DIVIDER_SIZE = 1;
 
     private static final int DIVIDER_OFFSET = 0;
     private static final int ABOUT_OFFSET = 1;
-    private static final int SETTINGS_OFFSET = 2;
+    private static final int BOOKMARKS_OFFSET = 2;
+    private static final int SETTINGS_OFFSET = 3;
 
     private static final int VIEW_TYPES = 2;
     private static final int PRESSABLE_TYPE = 0;
     private static final int DIVIDER_TYPE = 1;
-
-    @Override
-    public void swapItems(int positionOne, int positionTwo) {
-        if (positionIsURI(positionOne) && positionIsURI(positionTwo)) {
-            Collections.swap(uris, positionOne, positionTwo);
-            PrefUtils.setBookmarks(context, uris);
-            notifyDataSetChanged();
-        }
-    }
 
     private class ViewHolder {
         TextView textView;
@@ -109,6 +101,9 @@ public class DrawerAdapter extends BaseAdapter implements Swappable {
         } else if (positionIsAbout(position)) {
             holder.textView.setText("About");
             holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), "info"));
+        } else if (positionIsBookmarks(position)) {
+            holder.textView.setText("Bookmarks");
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), "bookmark"));
         }
 
         return convertView;
@@ -204,6 +199,14 @@ public class DrawerAdapter extends BaseAdapter implements Swappable {
 
     public int getAboutPosition() {
         return uris.size() + DIVIDER_SIZE + channels.size() + ABOUT_OFFSET;
+    }
+
+    public boolean positionIsBookmarks(int position) {
+        return position == getBookmarksPosition();
+    }
+
+    public int getBookmarksPosition() {
+        return uris.size() + DIVIDER_SIZE + channels.size() + BOOKMARKS_OFFSET;
     }
 
     public boolean positionIsSettings(int position) {

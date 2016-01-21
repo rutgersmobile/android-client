@@ -41,6 +41,7 @@ import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
+import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
@@ -158,6 +159,11 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     fragmentMediator.switchFragments(aboutArgs);
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
+                } else if (adapter.positionIsBookmarks(position)) {
+                    Bundle bookmarksArgs = BookmarksDisplay.createArgs();
+                    fragmentMediator.switchFragments(bookmarksArgs);
+                    mDrawerLayout.closeDrawer(mDrawerListView);
+                    return;
                 }
 
                 Channel channel = (Channel) adapter.getItem(position);
@@ -173,30 +179,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
             }
         });
-
-        mDrawerListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
-                if (adapter.positionIsURI(position)) {
-                    PrefUtils.removeBookmark(getApplicationContext(), position);
-                    return true;
-                }
-
-                return false;
-            }
-        });
-
-//        mDrawerListView.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_UP) {
-//                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
 
         // Reload web channels when we change preferences to update campus-based names
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);

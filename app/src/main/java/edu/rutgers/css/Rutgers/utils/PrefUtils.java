@@ -10,6 +10,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.link.Link;
@@ -89,10 +90,12 @@ public final class PrefUtils {
         Gson gson = new Gson();
         Type type = new TypeToken<List<Link>>(){}.getType();
         String emptyList = gson.toJson(new ArrayList<Link>(), type);
-        return gson.fromJson(prefs.getString(KEY_PREF_BOOKMARK, emptyList), type);
+        List<Link> links = gson.fromJson(prefs.getString(KEY_PREF_BOOKMARK, emptyList), type);
+        return dedupLinks(links);
     }
 
     public static void setBookmarks(@NonNull Context context, List<Link> links) {
+        links = dedupLinks(links);
         Gson gson = new Gson();
         Type type = new TypeToken<List<Link>>(){}.getType();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -111,5 +114,9 @@ public final class PrefUtils {
             links.remove(position);
         }
         setBookmarks(context, links);
+    }
+
+    private static List<Link> dedupLinks(List<Link> links) {
+        return new ArrayList<>(new LinkedHashSet<>(links));
     }
 }
