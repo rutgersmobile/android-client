@@ -5,10 +5,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
@@ -33,6 +35,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
                 @Override
                 public void onClick(View v) {
                     PrefUtils.addBookmark(getContext(), getLink());
+                    Toast.makeText(getContext(), R.string.bookmark_added, Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -73,7 +76,10 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        getShareActionProvider().setShareIntent(intent);
+        final ShareActionProvider shareActionProvider = getShareActionProvider();
+        if (shareActionProvider != null) {
+            shareActionProvider.setShareIntent(intent);
+        }
     }
 
     public String getLinkTitle() {

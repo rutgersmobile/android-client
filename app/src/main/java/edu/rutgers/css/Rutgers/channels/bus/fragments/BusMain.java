@@ -1,9 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -26,16 +23,14 @@ import android.widget.EditText;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
-public class BusMain extends Fragment implements Linkable {
+public class BusMain extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusMain";
@@ -95,7 +90,7 @@ public class BusMain extends Fragment implements Linkable {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_search_tabbed_pager, parent, false);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_tabbed_pager);
         final Bundle args = getArguments();
 
         // Set title from JSON
@@ -142,16 +137,6 @@ public class BusMain extends Fragment implements Linkable {
 
         searchBox = (EditText) v.findViewById(R.id.search_box);
 
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        if (fab != null) {
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    PrefUtils.addBookmark(getContext(), getLink());
-                }
-            });
-        }
-
         return v;
     }
 
@@ -192,20 +177,9 @@ public class BusMain extends Fragment implements Linkable {
         }
     }
 
-    public void setShareIntent() {
-        if (shareActionProvider != null) {
-            Uri uri = getLink().getUri(Config.SCHEMA);
-
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-            shareActionProvider.setShareIntent(intent);
-        }
-    }
-
     @Override
     public ShareActionProvider getShareActionProvider() {
-        return null;
+        return shareActionProvider;
     }
 
     @Override

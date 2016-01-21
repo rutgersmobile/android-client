@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
@@ -38,8 +36,8 @@ import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkMaps;
-import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
+import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -48,8 +46,8 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
  * Displays available meals for a dining hall.
  * @author James Chambers
  */
-public class FoodHall extends Fragment
-    implements LoaderManager.LoaderCallbacks<DiningMenu>, Linkable {
+public class FoodHall extends BaseChannelFragment
+    implements LoaderManager.LoaderCallbacks<DiningMenu> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "FoodHall";
@@ -154,16 +152,6 @@ public class FoodHall extends Fragment
         }
     }
 
-    public void setShareIntent() {
-        Uri uri = getLink().getUri(Config.SCHEMA);
-
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-
-        getShareActionProvider().setShareIntent(intent);
-    }
-
     @Override
     public ShareActionProvider getShareActionProvider() {
         return shareActionProvider;
@@ -174,11 +162,6 @@ public class FoodHall extends Fragment
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(LinkMaps.diningHallsInv.get(mLocation));
         return new Link("food", pathParts, getLinkTitle());
-    }
-
-    @Override
-    public String getLinkTitle() {
-        return getActivity().getTitle().toString();
     }
 
     @Override
