@@ -144,9 +144,9 @@ public class BusMain extends BaseChannelFragment {
         MenuItem searchButton = menu.findItem(R.id.search_button_toolbar);
 
         if (searching) {
-            searchButton.setIcon(R.drawable.ic_xicon);
+            searchButton.setIcon(R.drawable.ic_clear_black_24dp);
         } else {
-            searchButton.setIcon(R.drawable.ic_magnifyingglasswhite);
+            searchButton.setIcon(R.drawable.ic_search_white_24dp);
         }
 
         int startPage = getArguments().getInt(ARG_START_TAG, -1);

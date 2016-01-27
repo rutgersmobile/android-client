@@ -276,6 +276,8 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     public void onSharedPreferenceChanged(SharedPreferences sharedPref, String key) {
         LOGV(TAG, "Setting changed: " + key);
 
+        if (!isAdded()) return;
+
         // All 3 changes are submitted at once by the dialog. This gets all of the changes at once
         // in order to avoid calling loadSubjects() multiple times each time the config is changed.
         boolean somethingChanged = false;

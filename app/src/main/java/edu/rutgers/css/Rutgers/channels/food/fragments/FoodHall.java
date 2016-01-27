@@ -155,6 +155,11 @@ public class FoodHall extends BaseChannelFragment
     }
 
     @Override
+    public String getLinkTitle() {
+        return mLocation;
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mData != null) outState.putSerializable(ARG_SAVED_DATA_TAG, mData);
