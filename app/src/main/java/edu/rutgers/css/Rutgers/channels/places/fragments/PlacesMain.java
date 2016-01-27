@@ -12,7 +12,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -73,7 +72,7 @@ public class PlacesMain extends BaseChannelFragment
     /* Log tag and component handle */
     private static final String TAG                 = "PlacesMain";
     public static final String HANDLE               = "places";
-    private static final int LOADER_ID              = 1;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
     private static final int LOCATION_REQUEST       = 101;
 
     /* Argument bundle tags */
@@ -337,7 +336,7 @@ public class PlacesMain extends BaseChannelFragment
         Bundle args = new Bundle();
         args.putDouble(ARG_LAT_TAG, location.getLatitude());
         args.putDouble(ARG_LON_TAG, location.getLongitude());
-        getLoaderManager().restartLoader(LOADER_ID, args, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
     @Override

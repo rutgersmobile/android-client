@@ -35,6 +35,8 @@ public class MainScreen extends BaseDisplay {
             ((MainActivity) getActivity()).syncDrawer();
         }
 
+        ((MainActivity) getActivity()).openDrawer();
+
         return v;
     }
 

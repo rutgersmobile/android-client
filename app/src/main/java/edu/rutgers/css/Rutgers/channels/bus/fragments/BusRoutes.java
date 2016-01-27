@@ -29,7 +29,7 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
     private static final String TAG                 = "BusRoutes";
     public static final String HANDLE               = "busroutes";
 
-    private static final int LOADER_ID              = 101;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Member data */
     private SimpleSectionedAdapter<RouteStub> mAdapter;
@@ -72,7 +72,7 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
         // Clear out everything
         mAdapter.clear();
         showProgressCircle();
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override

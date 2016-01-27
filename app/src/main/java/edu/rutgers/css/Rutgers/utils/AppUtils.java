@@ -29,12 +29,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ChannelManager;
-import edu.rutgers.css.Rutgers.model.Channel;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * General helper methods & global variables for the app
@@ -45,6 +46,8 @@ public final class AppUtils {
 
     private static final String INSTALLATION = "INSTALLATION";
     private static String installID = null;
+
+    private static final AtomicInteger loaderCounter = new AtomicInteger();
 
     private AppUtils() {}
 
@@ -74,6 +77,10 @@ public final class AppUtils {
             }
         }
         return installID;
+    }
+
+    public static int getUniqueLoaderId() {
+        return loaderCounter.getAndIncrement();
     }
 
     /**

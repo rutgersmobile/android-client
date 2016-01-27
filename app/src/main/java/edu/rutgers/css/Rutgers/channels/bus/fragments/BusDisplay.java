@@ -5,15 +5,11 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -38,6 +34,7 @@ import edu.rutgers.css.Rutgers.channels.bus.model.loader.PredictionLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -76,7 +73,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private String mAgency;
     private ShareActionProvider shareActionProvider;
 
-    private static final int LOADER_ID              = 101;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     public BusDisplay() {
         // Required empty public constructor
@@ -163,7 +160,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
         // Start loading predictions
         showProgressCircle();
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
     @Override
@@ -229,7 +226,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
                 mUpdateHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        getLoaderManager().getLoader(LOADER_ID).forceLoad();
+                        getActivity().getSupportLoaderManager().getLoader(LOADER_ID).forceLoad();
                     }
                 });
             }

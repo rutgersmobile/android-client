@@ -36,7 +36,7 @@ public class BusAll extends BaseChannelFragment
     public static final String HANDLE               = "busall";
 
     /* ID for loader */
-    private static final int LOADER_ID              = 1;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".filter";
@@ -63,7 +63,7 @@ public class BusAll extends BaseChannelFragment
 
         // Start loading all stops and routes in the background
         mLoading = true;
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
     @Override

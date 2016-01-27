@@ -69,7 +69,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
     private boolean mShowedMotd;
 
     /* Constants */
-    private static final int LOADER_ID = 1;
+    private static final int LOADER_ID = AppUtils.getUniqueLoaderId();
     public static final String SHOWED_MOTD = "showedMotd";
 
     /* View references */
@@ -342,10 +342,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         mDrawerAdapter.clearChannels();
         mDrawerAdapter.addAllChannels(mChannelManager.getChannels());
+    }
 
-        if (!wantsLink()) {
-            mDrawerLayout.openDrawer(mDrawerListView);
-        }
+    public void openDrawer() {
+        mDrawerLayout.openDrawer(mDrawerListView);
     }
 
     @Override

@@ -65,7 +65,7 @@ public class RecreationDisplay extends BaseChannelFragment implements LoaderMana
     private static final int BUSINESS_ROW = 2;
     private static final int DESCRIPTION_ROW = 3;
     private static final int HOURS_ROW = 4;
-    private static final int LOADER_ID = 1;
+    private static final int LOADER_ID = AppUtils.getUniqueLoaderId();
 
     /* Member data */
     private Facility mFacility;
@@ -101,7 +101,7 @@ public class RecreationDisplay extends BaseChannelFragment implements LoaderMana
         }
 
         mLoading = true;
-        getLoaderManager().initLoader(LOADER_ID, args, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, args, this);
     }
     
     @Override

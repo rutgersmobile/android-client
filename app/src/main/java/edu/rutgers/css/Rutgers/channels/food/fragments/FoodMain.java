@@ -5,15 +5,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -47,7 +43,7 @@ public class FoodMain extends BaseChannelFragment
     private static final String TAG                 = "FoodMain";
     public static final String HANDLE               = "food";
 
-    private static final int LOADER_ID              = 101;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
 
     /* Argument bundle tags */
@@ -79,7 +75,7 @@ public class FoodMain extends BaseChannelFragment
                 R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         // start loading dining menus
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
     
     @Override

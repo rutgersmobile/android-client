@@ -36,7 +36,7 @@ public class RecreationMain extends BaseChannelFragment implements LoaderManager
     /* Log tag and component handle */
     private static final String TAG                 = "RecreationMain";
     public static final String HANDLE               = "recreation";
-    private static final int LOADER_ID              = 1;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Argument bundle tags */
     public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;
@@ -64,7 +64,7 @@ public class RecreationMain extends BaseChannelFragment implements LoaderManager
         mAdapter = new FacilityAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         mLoading = true;
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override

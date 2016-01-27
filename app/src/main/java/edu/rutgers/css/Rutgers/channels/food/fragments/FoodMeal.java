@@ -38,7 +38,8 @@ public class FoodMeal extends BaseChannelFragment
     public static final String ARG_LOCATION_TAG    = "location";
     public static final String ARG_MEAL_TAG        = "meal";
 
-    private static final int LOADER_ID              = TAG.hashCode();
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
+    private static final String ARG_SAVED_DATA_TAG  = "diningGenreData";
 
     /* Member data */
     private DiningMenuAdapter mAdapter;
@@ -54,6 +55,24 @@ public class FoodMeal extends BaseChannelFragment
         args.remove(ComponentFactory.ARG_COMPONENT_TAG);
         foodMeal.setArguments(args);
         return foodMeal;
+    }
+
+    /** Create a new instance of the meal display fragment. */
+    public static FoodMeal newInstance(@NonNull String location, @NonNull DiningMenu.Meal meal) {
+        final FoodMeal foodMeal = new FoodMeal();
+        final Bundle args = createArgs(location, meal);
+        args.remove(ComponentFactory.ARG_COMPONENT_TAG);
+        foodMeal.setArguments(args);
+        return foodMeal;
+    }
+
+    /** Create argument bundle for a dining hall meal display. */
+    public static Bundle createArgs(@NonNull String location, @NonNull DiningMenu.Meal meal) {
+        final Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, FoodMeal.HANDLE);
+        bundle.putString(ARG_LOCATION_TAG, location);
+        bundle.putSerializable(ARG_SAVED_DATA_TAG, meal);
+        return bundle;
     }
 
     /** Create argument bundle for a dining hall meal display. */
@@ -77,12 +96,17 @@ public class FoodMeal extends BaseChannelFragment
             LOGE(TAG, "Location not set");
             return;
         } else if (args.getString(ARG_MEAL_TAG) == null) {
+            DiningMenu.Meal savedMeal = (DiningMenu.Meal) args.getSerializable(ARG_SAVED_DATA_TAG);
+            if (savedMeal != null) {
+                mAdapter.addAll(savedMeal.getGenres());
+                return;
+            }
             LOGE(TAG, "Meal not set");
             return;
         }
 
         // Start loading meal genres
-        getLoaderManager().initLoader(LOADER_ID, args, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, args, this);
     }
 
     @Override

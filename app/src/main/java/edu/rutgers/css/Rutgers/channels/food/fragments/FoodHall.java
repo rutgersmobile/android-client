@@ -22,10 +22,10 @@ import org.apache.commons.lang3.time.DatePrinter;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
@@ -50,12 +50,12 @@ public class FoodHall extends BaseChannelFragment
     public static final String HANDLE               = "foodhall";
 
     /* Argument bundle tags */
-    public static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
+    public static final String ARG_TITLE_TAG        = ComponentFactory.ARG_TITLE_TAG;
 
     /* Saved instance state tags */
-    private static final String SAVED_DATA_TAG    = Config.PACKAGE_NAME + ".dtable.saved.data";
+    private static final String ARG_SAVED_DATA_TAG  = "diningMenuData";
 
-    public static final int LOADER_ID               = TAG.hashCode();
+    public static final int LOADER_ID               = AppUtils.getUniqueLoaderId();
 
     /* Member data */
     private String mTitle;
@@ -93,11 +93,11 @@ public class FoodHall extends BaseChannelFragment
         mPagerAdapter = new MealPagerAdapter(getChildFragmentManager());
 
         if (savedInstanceState != null) {
-            mData = (DiningMenu) savedInstanceState.getSerializable(SAVED_DATA_TAG);
+            mData = (DiningMenu) savedInstanceState.getSerializable(ARG_SAVED_DATA_TAG);
         }
 
         if (mData == null) {
-            getLoaderManager().initLoader(LOADER_ID, savedInstanceState, this);
+            getActivity().getSupportLoaderManager().initLoader(LOADER_ID, savedInstanceState, this);
         }
     }
 
@@ -135,6 +135,10 @@ public class FoodHall extends BaseChannelFragment
 
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
 
+        if (mData != null) {
+            loadPages(mData);
+        }
+
         return v;
     }
 
@@ -153,16 +157,16 @@ public class FoodHall extends BaseChannelFragment
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mData != null) outState.putSerializable(SAVED_DATA_TAG, mData);
+        if (mData != null) outState.putSerializable(ARG_SAVED_DATA_TAG, mData);
     }
 
     private void loadPages(DiningMenu diningMenu) {
-        List<DiningMenu.Meal> meals = diningMenu.getMeals();
-        for (DiningMenu.Meal meal: meals) {
-            if (meal.isMealAvailable()) mPagerAdapter.add(meal);
-        }
+        mPagerAdapter.clear();
+        mPagerAdapter.addAllAvailable(diningMenu.getMeals());
 
-        tabLayout.setTabsFromPagerAdapter(mPagerAdapter);
+        if (tabLayout != null) {
+            tabLayout.setTabsFromPagerAdapter(mPagerAdapter);
+        }
 
         // Set title to show timestamp for dining data
         mTitle = mLocation + " (" + dout.format(diningMenu.getDate()) + ")";
@@ -204,9 +208,7 @@ public class FoodHall extends BaseChannelFragment
 
         @Override
         public Fragment getItem(int i) {
-            DiningMenu.Meal curMeal = mData.get(i);
-            String mealName = curMeal.getMealName();
-            return FoodMeal.newInstance(mLocation, mealName);
+            return FoodMeal.newInstance(mLocation, mData.get(i));
         }
 
         @Override
@@ -224,11 +226,21 @@ public class FoodHall extends BaseChannelFragment
             this.notifyDataSetChanged();
         }
 
+        public void addAllAvailable(Collection<DiningMenu.Meal> meals) {
+            List<DiningMenu.Meal> availMeals = new ArrayList<>();
+            for (final DiningMenu.Meal meal : meals) {
+                if (meal.isMealAvailable()) {
+                    availMeals.add(meal);
+                }
+            }
+
+            mData.addAll(availMeals);
+            notifyDataSetChanged();
+        }
+
         public void clear() {
             mData.clear();
             this.notifyDataSetChanged();
         }
-
     }
-
 }

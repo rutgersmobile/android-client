@@ -60,8 +60,7 @@ public final class PlacesAPI {
      * Grab the places flat-file from the API and convert it into a map.
      */
     private synchronized static void setup() throws JsonSyntaxException, IOException {
-        if (sSettingUp || sPlaces != null) return;
-        else sSettingUp = true;
+        if (sPlaces != null) return;
 
         sPlaces = new HashMap<>(1300);
         sTokens = new HashMap<>(1300);
@@ -77,8 +76,6 @@ public final class PlacesAPI {
                 }
             }
         }
-
-        sSettingUp = false;
     }
 
     /**
@@ -86,7 +83,7 @@ public final class PlacesAPI {
      * @param placeKey Key for place entry, returned from search results
      * @return Promise for a Place object representing the entry in the database
      */
-    public static Place getPlace(@NonNull final String placeKey) throws JsonSyntaxException, IOException {
+    public static synchronized Place getPlace(@NonNull final String placeKey) throws JsonSyntaxException, IOException {
         setup();
         return sPlaces.get(placeKey);
     }
@@ -97,7 +94,7 @@ public final class PlacesAPI {
      * @param sourceLon Longitude
      * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
-    public static List<Place> getPlacesNear(final double sourceLat, final double sourceLon) throws JsonSyntaxException, IOException {
+    public static synchronized List<Place> getPlacesNear(final double sourceLat, final double sourceLon) throws JsonSyntaxException, IOException {
         setup();
 
         List<Place> results = new ArrayList<>();
@@ -132,7 +129,7 @@ public final class PlacesAPI {
      * @param query Query string
      * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
      */
-    public static List<Place> searchPlaces(final String query) throws JsonSyntaxException, IOException {
+    public static synchronized List<Place> searchPlaces(final String query) throws JsonSyntaxException, IOException {
         setup();
 
         List<Place> results = new ArrayList<>();

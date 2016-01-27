@@ -105,7 +105,6 @@ public class BusMain extends BaseChannelFragment {
         final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-//            actionBar.setHomeButtonEnabled(true);
             ((MainActivity) getActivity()).syncDrawer();
         }
 

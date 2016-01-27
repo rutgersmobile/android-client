@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -12,8 +11,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +42,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     private static final String TAG                 = "SOCCourses";
     public static final String HANDLE               = "soccourses";
 
-    private static final int LOADER_ID              = 1;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -96,7 +93,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
         // Start loading courses
         mLoading = true;
-        getLoaderManager().initLoader(LOADER_ID, args, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, args, this);
     }
 
     @Override

@@ -4,15 +4,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -51,7 +47,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     private static final String TAG                 = "SOCSections";
     public static final String HANDLE               = "socsections";
 
-    private static final int LOADER_ID              = 1;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -112,7 +108,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
         }
 
         mLoading = true;
-        getLoaderManager().initLoader(LOADER_ID, args, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, args, this);
     }
 
     @Override

@@ -31,7 +31,7 @@ public final class GymsAPI {
      * Get all campuses from the Gyms API.
      * @return Promise for list of Campuses
      */
-    public static List<Campus> getCampuses() throws JsonSyntaxException, IOException {
+    public static synchronized List<Campus> getCampuses() throws JsonSyntaxException, IOException {
         Type type = new TypeToken<List<Campus>>(){}.getType();
         return ApiRequest.api("gyms_array.txt", EXPIRE, EXPIRE_UNIT, type);
     }
@@ -42,7 +42,7 @@ public final class GymsAPI {
      * @param facilityTitle Facility title
      * @return Promise for a facility. Fails if not found.
      */
-    public static Facility getFacility(@NonNull final String campusTitle, @NonNull final String facilityTitle) throws JsonSyntaxException, IOException {
+    public static synchronized Facility getFacility(@NonNull final String campusTitle, @NonNull final String facilityTitle) throws JsonSyntaxException, IOException {
         List<Campus> campuses = getCampuses();
         for (Campus campus : campuses) {
             // Find the correct campus to search

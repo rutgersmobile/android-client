@@ -43,8 +43,6 @@ public final class NextbusAPI {
     public static final String AGENCY_NB = "nb";
     public static final String AGENCY_NWK = "nwk";
 
-    private static boolean sSettingUp = false;
-
     /** This class only contains static utility methods. */
     private NextbusAPI() {}
 
@@ -52,9 +50,6 @@ public final class NextbusAPI {
      * Load agency configurations and lists of active routes/stops for each campus.
      */
     private static synchronized void setup () throws JsonSyntaxException, IOException {
-        if (sSettingUp) return;
-        else sSettingUp = true;
-
         ActiveStops.AgentlessActiveStops nbActive =
                 ApiRequest.api("nbactivestops.txt", activeExpireTime, activeTimeUnit, ActiveStops.AgentlessActiveStops.class);
         ActiveStops.AgentlessActiveStops nwkActive =
@@ -66,11 +61,9 @@ public final class NextbusAPI {
                 new AgencyConfigDeserializer(AGENCY_NB));
         sNWKConf = ApiRequest.api("rutgers-newarkrouteconfig.txt", configExpireTime, configTimeUnit, AgencyConfig.class,
                 new AgencyConfigDeserializer(AGENCY_NWK));
-
-        sSettingUp = false;
     }
 
-    public static boolean validRoute(@NonNull final String agency, @NonNull final String routeKey) {
+    public static synchronized boolean validRoute(@NonNull final String agency, @NonNull final String routeKey) {
         try {
             setup();
 
@@ -83,7 +76,7 @@ public final class NextbusAPI {
         }
     }
 
-    public static boolean validStop(@NonNull final String agency, @NonNull final String routeKey) {
+    public static synchronized boolean validStop(@NonNull final String agency, @NonNull final String routeKey) {
         try {
             setup();
 
@@ -102,7 +95,7 @@ public final class NextbusAPI {
      * @param routeKey Route to get predictions for.
      * @return Promise for list of arrival time predictions.
      */
-    public static List<Prediction> routePredict(@NonNull final String agency, @NonNull final String routeKey) throws JsonSyntaxException, XmlPullParserException, IOException {
+    public static synchronized List<Prediction> routePredict(@NonNull final String agency, @NonNull final String routeKey) throws JsonSyntaxException, XmlPullParserException, IOException {
         setup();
         
         LOGV(TAG, "routePredict: " + agency + ", " + routeKey);
@@ -143,7 +136,7 @@ public final class NextbusAPI {
      * @param stopTitleKey Full title of the stop to get predictions for.
      * @return Promise for list of arrival time predictions.
      */
-    public static List<Prediction> stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) throws JsonSyntaxException, XmlPullParserException, IOException {
+    public static synchronized List<Prediction> stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) throws JsonSyntaxException, XmlPullParserException, IOException {
         setup();
         LOGV(TAG, "stopPredict: " + agency + ", " + stopTitleKey);
 
@@ -192,7 +185,7 @@ public final class NextbusAPI {
      * @param agency Agency (campus) to get active routes for.
      * @return Promise for list of route stubs (tags and titles).
      */
-    public static List<RouteStub> getActiveRoutes(@NonNull final String agency) throws JsonSyntaxException, IOException {
+    public static synchronized List<RouteStub> getActiveRoutes(@NonNull final String agency) throws JsonSyntaxException, IOException {
         setup();
         ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
         return active.getRoutes();
@@ -203,7 +196,7 @@ public final class NextbusAPI {
      * @param agency Agency (campus) to get all routes for.
      * @return Promise for list of route stubs (tags and titles).
      */
-    public static List<RouteStub> getAllRoutes(@NonNull final String agency) throws JsonSyntaxException, IOException {
+    public static synchronized List<RouteStub> getAllRoutes(@NonNull final String agency) throws JsonSyntaxException, IOException {
         setup();
         AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
         return conf.getSortedRoutes();
@@ -214,7 +207,7 @@ public final class NextbusAPI {
      * @param agency Agency (campus) to active stops for.
      * @return Promise for list of stop stubs (titles and geohashes).
      */
-    public static List<StopStub> getActiveStops(@NonNull final String agency) throws JsonSyntaxException, IOException {
+    public static synchronized List<StopStub> getActiveStops(@NonNull final String agency) throws JsonSyntaxException, IOException {
         setup();
         ActiveStops active = AGENCY_NB.equals(agency) ? sNBActive : sNWKActive;
         return active.getStops();
@@ -225,7 +218,7 @@ public final class NextbusAPI {
      * @param agency Agency (campus) to get all stops for.
      * @return Promise for list of stop stubs (titles and geohashes).
      */
-    public static List<StopStub> getAllStops(@NonNull final String agency) throws JsonSyntaxException, IOException {
+    public static synchronized List<StopStub> getAllStops(@NonNull final String agency) throws JsonSyntaxException, IOException {
         setup();
         AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
         return conf.getSortedStops();
@@ -238,7 +231,7 @@ public final class NextbusAPI {
      * @param sourceLon Longitude
      * @return Promise for list of stop groups (unique stops grouped by title).
      */
-    public static List<StopGroup> getStopsByTitleNear(@NonNull final String agency, final double sourceLat, final double sourceLon) throws JsonSyntaxException, IOException {
+    public static synchronized List<StopGroup> getStopsByTitleNear(@NonNull final String agency, final double sourceLat, final double sourceLon) throws JsonSyntaxException, IOException {
         setup();
         AgencyConfig conf = AGENCY_NB.equals(agency) ? sNBConf : sNWKConf;
         HashMap<String, StopGroup> stopsByTitle = conf.getStopsByTitle();
@@ -280,7 +273,7 @@ public final class NextbusAPI {
      * @param sourceLon Longitude
      * @return Promise for list of stop groups (unique stops grouped by title).
      */
-    public static List<StopGroup> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) throws JsonSyntaxException, IOException {
+    public static synchronized List<StopGroup> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) throws JsonSyntaxException, IOException {
         setup();
 
         final List<StopGroup> nearbyStops = getStopsByTitleNear(agency, sourceLat, sourceLon);

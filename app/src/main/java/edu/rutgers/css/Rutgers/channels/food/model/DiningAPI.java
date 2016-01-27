@@ -27,8 +27,6 @@ public final class DiningAPI {
 
     private static List<DiningMenu> sNBDiningMenus;
 
-    private static boolean sSettingUp = false;
-
     private DiningAPI() {}
 
     /**
@@ -36,9 +34,6 @@ public final class DiningAPI {
      * <p>(Current API only has New Brunswick data; when multiple confs need to be read set this up like Nextbus.java)</p>
      */
     private static synchronized void setup() throws JsonSyntaxException, IOException {
-        if (sSettingUp) return;
-        else sSettingUp = true;
-
         Type type = new TypeToken<List<DiningMenu>>(){}.getType();
 
         try {
@@ -47,14 +42,13 @@ public final class DiningAPI {
             LOGE(TAG, "setup(): " + e.getMessage());
             throw e;
         }
-        sSettingUp = false;
     }
 
     /**
      * Get all dining hall menus.
      * @return List of all dining hall menus
      */
-    public static List<DiningMenu> getDiningHalls() throws JsonSyntaxException, IOException {
+    public static synchronized List<DiningMenu> getDiningHalls() throws JsonSyntaxException, IOException {
         setup();
         return sNBDiningMenus;
     }
@@ -64,7 +58,7 @@ public final class DiningAPI {
      * @param location Dining hall to get menu for
      * @return Promise for the dining hall menu
      */
-    public static DiningMenu getDiningLocation(@NonNull final String location) throws  JsonSyntaxException, IOException {
+    public static synchronized DiningMenu getDiningLocation(@NonNull final String location) throws  JsonSyntaxException, IOException {
         setup();
 
         for (DiningMenu diningMenu : sNBDiningMenus) {

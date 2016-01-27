@@ -44,7 +44,7 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
     private static final String TAG                 = "BusStops";
     public static final String HANDLE               = "busstops";
 
-    private static final int LOADER_ID              = 1;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
     private static final int LOCATION_REQUEST       = 1;
 
     /* Constants */
@@ -118,7 +118,7 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
             mGoogleApiClientProvider.registerListener(this);
         }
 
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
     private void loadNearby(Location location) {
         if (location != null) {
             lastLocation = location;
-            getLoaderManager().restartLoader(LOADER_ID, null, this);
+            getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
         }
     }
 

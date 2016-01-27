@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -55,7 +54,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private static final String TAG                 = "SOCMain";
     public static final String HANDLE               = "soc";
 
-    private static final int LOADER_ID              = 1;
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = "filter";
@@ -130,7 +129,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         mLoading = true;
         showProgressCircle();
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
     }
 
     @Override
@@ -308,7 +307,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         if (somethingChanged) {
             LOGV(TAG, "Loading new subjects");
-            getLoaderManager().restartLoader(LOADER_ID, null, this);
+            getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
         }
     }
 

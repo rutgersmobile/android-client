@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,6 +11,7 @@ import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -128,24 +130,117 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     final protected void openFab() {
         ObjectAnimator shareAnimator = ObjectAnimator.ofFloat(shareFab, "translationY", SHARE_POS);
+        shareAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         shareAnimator.setDuration(ANIM_DURATION);
+        shareAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                shareFab.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) { }
+
+            @Override
+            public void onAnimationCancel(Animator animation) { }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) { }
+        });
         shareAnimator.start();
 
         ObjectAnimator bookmarkAnimator = ObjectAnimator.ofFloat(bookmarkFab, "translationY", BOOKMARK_POS);
+        bookmarkAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         bookmarkAnimator.setDuration(ANIM_DURATION);
+        bookmarkAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                bookmarkFab.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
         bookmarkAnimator.start();
+
+        ObjectAnimator rotateFab = ObjectAnimator.ofFloat(fab, "rotation", 45);
+        rotateFab.setDuration(ANIM_DURATION);
+        rotateFab.start();
 
         open = true;
     }
 
     final protected void closeFab() {
         ObjectAnimator shareAnimator = ObjectAnimator.ofFloat(shareFab, "translationY", INIT_POS);
+        shareAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         shareAnimator.setDuration(ANIM_DURATION);
+        shareAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) { }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                shareFab.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) { }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) { }
+        });
         shareAnimator.start();
 
-        ObjectAnimator bookmarkAnimator = ObjectAnimator.ofFloat(bookmarkFab, "translationY", INIT_POS);
+        final ObjectAnimator bookmarkAnimator = ObjectAnimator.ofFloat(bookmarkFab, "translationY", INIT_POS);
+        bookmarkAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         bookmarkAnimator.setDuration(ANIM_DURATION);
+        bookmarkAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                bookmarkFab.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+            }
+        });
         bookmarkAnimator.start();
+
+        ObjectAnimator rotateFab = ObjectAnimator.ofFloat(fab, "rotation", 90);
+        rotateFab.setDuration(ANIM_DURATION);
+        rotateFab.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) { }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                fab.setRotation(0);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) { }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) { }
+        });
+        rotateFab.start();
 
         open = false;
     }
