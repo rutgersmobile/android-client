@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -12,6 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -72,8 +76,9 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private Timer mUpdateTimer;
     private String mAgency;
     private ShareActionProvider shareActionProvider;
+    private SwipeRefreshLayout refreshLayout;
 
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
+    private final int LOADER_ID                     = AppUtils.getUniqueLoaderId();
 
     public BusDisplay() {
         // Required empty public constructor
@@ -165,7 +170,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_refresh_progress);
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
 
@@ -194,6 +199,42 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             actionBar.setHomeButtonEnabled(true);
             ((MainActivity) getActivity()).syncDrawer();
         }
+
+        refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresh_layout);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getActivity().getSupportLoaderManager().getLoader(LOADER_ID).forceLoad();
+            }
+        });
+        refreshLayout.setEnabled(false);
+        refreshLayout.setColorSchemeResources(
+                R.color.actbar_new,
+                R.color.actbar_dark,
+                R.color.white);
+
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (!ViewCompat.canScrollVertically(listView, -1) && refreshLayout != null) {
+                    refreshLayout.setEnabled(true);
+                } else if (refreshLayout != null) {
+                    refreshLayout.setEnabled(false);
+                }
+                ;
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                return false;
+            }
+        });
 
         return v;
     }
@@ -276,6 +317,9 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         mAdapter.clear();
         mAdapter.addAll(predictions);
         hideProgressCircle();
+        if (refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
     }
 
     @Override
