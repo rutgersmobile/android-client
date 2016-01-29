@@ -1,21 +1,33 @@
 package edu.rutgers.css.Rutgers.ui;
 
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
+import edu.rutgers.css.Rutgers.link.LinkLoadArgs;
+import edu.rutgers.css.Rutgers.link.LinkLoadTask;
+import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 
 /**
  * Control where we're putting fragments
@@ -25,10 +37,10 @@ public class MainFragmentMediator implements FragmentMediator {
     private static final String TAG = "MainFragmentMediator";
 
     private final FragmentManager fm;
-    private final AppCompatActivity activity;
+    private final MainActivity activity;
     private final ComponentFactory componentFactory;
 
-    public MainFragmentMediator(final AppCompatActivity activity) {
+    public MainFragmentMediator(final MainActivity activity) {
         this.fm = activity.getSupportFragmentManager();
         this.activity = activity;
         this.componentFactory = new ComponentFactory();
@@ -42,7 +54,8 @@ public class MainFragmentMediator implements FragmentMediator {
      *             component to build. All other arguments will be passed to the new fragment.
      * @return True if the new fragment was successfully created, false if not.
      */
-    public boolean switchFragments(@NonNull Bundle args) {
+    @Override
+    public boolean switchFragments(@NonNull final Bundle args) {
         if (activity.isFinishing() || !RutgersApplication.isApplicationVisible()) return false;
 
         final String componentTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
@@ -74,6 +87,61 @@ public class MainFragmentMediator implements FragmentMediator {
         return true;
     }
 
+    /**
+     * Perform the deep linking. This breaks apart the input URI and
+     * creates a LinkLoadTask for parsing the URI and launching the
+     * destination fragment.
+     */
+    @Override
+    public void deepLink(@NonNull final Uri uri, final boolean backstack) {
+        LOGI(TAG, "Linking : " + uri.toString());
+
+        final String homeCampus = RutgersUtils.getHomeCampus(activity);
+        final List<String> pathParts = new ArrayList<>();
+        final List<String> encodedPathParts;
+        final String handle;
+        if (uri.getScheme().equals("rutgers")) {
+            // scheme "rutgers://<channel>/<args>"
+            encodedPathParts = uri.getPathSegments();
+            handle = uri.getHost();
+        } else {
+            // scheme "http://rumobile.rutgers.edu/link/<channel>/<args>"
+            encodedPathParts = uri.getPathSegments().subList(2, uri.getPathSegments().size());
+            handle = uri.getPathSegments().get(1);
+        }
+
+        // Change arguments into normal strings
+        for (final String part : encodedPathParts) {
+            pathParts.add(Uri.decode(part));
+        }
+
+        final Channel channel = activity.getChannelManager().getChannelByTag(handle);
+        if (channel != null) {
+            final String channelTag = channel.getView();
+
+            // Launch channel immediately if that's all we have
+            if (pathParts.size() == 0) {
+                LOGI(TAG, "Linking to channel: " + channelTag);
+                Bundle channelArgs = channel.getBundle();
+
+                channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
+                switchFragments(channelArgs);
+                return;
+            }
+
+            // We don't have a reference to the enclosing activity in the task
+            // so we have to get all this information here
+            final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
+            final String prefLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
+            final String prefCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
+            final String prefSemester = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null);
+
+            new LinkLoadTask(homeCampus, prefCampus, prefLevel, prefSemester, backstack)
+                    .execute(new LinkLoadArgs(channel, pathParts));
+        }
+    }
+
+    @Override
     public boolean backPressWebView() {
         // If web display is active, send back button presses to it for navigating browser history
         if (AppUtils.isOnTop(activity, WebDisplay.HANDLE)) {

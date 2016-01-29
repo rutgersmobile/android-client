@@ -10,7 +10,6 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
@@ -23,10 +22,11 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.google.gson.JsonArray;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
@@ -35,7 +35,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.link.fragments.LinkLoadFragment;
+import edu.rutgers.css.Rutgers.link.LinkBus;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
@@ -141,11 +141,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
                 if (adapter.positionIsURI(position)) {
                     final Link link = (Link) adapter.getItem(position);
-                    final Fragment taskFragment = new LinkLoadFragment();
-                    final Channel channel = mChannelManager.getChannelByTag(link.getHandle());
-                    final Bundle taskArgs = LinkLoadFragment.createBundle(channel, link.getPathParts(), true);
-                    taskFragment.setArguments(taskArgs);
-                    getSupportFragmentManager().beginTransaction().add(taskFragment, LinkLoadFragment.TAG).commit();
+                    deepLink(link.getUri(Config.SCHEMA));
                     mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
                     return;
                 } else if (adapter.positionIsSettings(position)) {
@@ -205,7 +201,13 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mDrawerAdapter.addAllLinks(PrefUtils.getBookmarks(getApplicationContext()));
 
         if (wantsLink()) {
-            deepLink();
+            final Intent intent = getIntent();
+            final String action = intent.getAction();
+            final Uri data = intent.getData();
+
+            if (action.equals(Intent.ACTION_VIEW) && data != null) {
+                deepLink(data, false);
+            }
         } else if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
@@ -213,6 +215,18 @@ public class MainActivity extends GoogleApiProviderActivity implements
         }
 
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LinkBus.getInstance().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LinkBus.getInstance().unregister(this);
     }
 
     @Override
@@ -365,46 +379,17 @@ public class MainActivity extends GoogleApiProviderActivity implements
         return action.equals(Intent.ACTION_VIEW) && data != null;
     }
 
-    /**
-     * Perform the deep linking. This breaks apart the input URI and
-     * creates a LinkLoadFragment for parsing the URI and launching the
-     * destination fragment.
-     */
-    private void deepLink() {
-        final Intent intent = getIntent();
-        final String action = intent.getAction();
-        final Uri data = intent.getData();
+    public void deepLink(@NonNull final Uri uri) {
+        deepLink(uri, true);
+    }
 
-        if (action.equals(Intent.ACTION_VIEW) && data != null) {
-            LOGI(TAG, "Intent received: action: " + action + " data: " + data.toString());
+    public void deepLink(@NonNull final Uri uri, final boolean backstack) {
+        fragmentMediator.deepLink(uri, backstack);
+    }
 
-            final List<String> pathParts = new ArrayList<>();
-            final List<String> encodedPathParts;
-            final String handle;
-            if (data.getScheme().equals("rutgers")) {
-                // scheme "rutgers://<channel>/<args>"
-                encodedPathParts = data.getPathSegments();
-                handle = data.getHost();
-            } else {
-                // scheme "http://rumobile.rutgers.edu/link/<channel>/<args>"
-                encodedPathParts = data.getPathSegments().subList(2, data.getPathSegments().size());
-                handle = data.getPathSegments().get(1);
-            }
-
-            // Change arguments into normal strings
-            for (final String part : encodedPathParts) {
-                pathParts.add(Uri.decode(part));
-            }
-
-            // Launch the processing fragment
-            final Channel channel = mChannelManager.getChannelByTag(handle);
-            if (channel != null) {
-                final Fragment taskFragment = new LinkLoadFragment();
-                final Bundle taskArgs = LinkLoadFragment.createBundle(channel, pathParts, false);
-                taskFragment.setArguments(taskArgs);
-                getSupportFragmentManager().beginTransaction().add(taskFragment, LinkLoadFragment.TAG).commit();
-            }
-        }
+    @Subscribe
+    public void switchFragments(final Bundle args) {
+        getFragmentMediator().switchFragments(args);
     }
 
     /**

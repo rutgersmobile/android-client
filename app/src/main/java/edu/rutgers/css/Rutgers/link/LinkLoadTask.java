@@ -43,6 +43,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
     private final String homeCampus;
     private final String defaultCampusCode;
     private final String defaultLevelCode;
+    private final boolean backstack;
     private String defaultSemesterCode;
 
     private static final String TAG = "InitLoadAsyncTask";
@@ -51,11 +52,20 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                         final String defaultCampusCode,
                         final String defaultLevelCode,
                         final String defaultSemesterCode) {
+        this(homeCampus, defaultCampusCode, defaultLevelCode, defaultSemesterCode, true);
+    }
+
+    public LinkLoadTask(final String homeCampus,
+                        final String defaultCampusCode,
+                        final String defaultLevelCode,
+                        final String defaultSemesterCode,
+                        final boolean backstack) {
         super();
         this.homeCampus = homeCampus;
         this.defaultCampusCode = defaultCampusCode;
         this.defaultLevelCode = defaultLevelCode;
         this.defaultSemesterCode = defaultSemesterCode;
+        this.backstack = backstack;
     }
 
     @Override
@@ -90,6 +100,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
     @Override
     protected void onPostExecute(Bundle args) {
         if (args != null) {
+            args.putBoolean(ComponentFactory.ARG_BACKSTACK_TAG, backstack);
             LinkBus.getInstance().post(args);
         }
     }
