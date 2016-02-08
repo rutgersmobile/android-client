@@ -34,6 +34,8 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
  */
 public class MainFragmentMediator implements FragmentMediator {
 
+    private static Object lock = new Object();
+
     private static final String TAG = "MainFragmentMediator";
 
     private final FragmentManager fm;

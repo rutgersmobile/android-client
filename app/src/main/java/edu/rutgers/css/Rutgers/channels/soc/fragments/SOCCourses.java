@@ -93,7 +93,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
         // Start loading courses
         mLoading = true;
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, args, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
     @Override

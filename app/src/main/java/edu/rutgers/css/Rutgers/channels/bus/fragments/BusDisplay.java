@@ -78,7 +78,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private ShareActionProvider shareActionProvider;
     private SwipeRefreshLayout refreshLayout;
 
-    private final int LOADER_ID                     = AppUtils.getUniqueLoaderId();
+    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     public BusDisplay() {
         // Required empty public constructor
@@ -165,7 +165,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
         // Start loading predictions
         showProgressCircle();
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
     
     @Override
