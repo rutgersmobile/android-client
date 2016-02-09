@@ -96,7 +96,7 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
             return;
         }
 
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, args, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
     @Override

@@ -118,7 +118,7 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
             mGoogleApiClientProvider.registerListener(this);
         }
 
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     @Override

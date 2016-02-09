@@ -63,7 +63,7 @@ public class BusAll extends BaseChannelFragment
 
         // Start loading all stops and routes in the background
         mLoading = true;
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
     
     @Override

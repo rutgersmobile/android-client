@@ -214,7 +214,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     .commit();
         }
 
-        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     @Override

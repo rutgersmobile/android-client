@@ -64,7 +64,7 @@ public class RecreationMain extends BaseChannelFragment implements LoaderManager
         mAdapter = new FacilityAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         mLoading = true;
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     @Override

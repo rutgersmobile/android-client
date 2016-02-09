@@ -97,7 +97,7 @@ public class FoodHall extends BaseChannelFragment
         }
 
         if (mData == null) {
-            getActivity().getSupportLoaderManager().initLoader(LOADER_ID, savedInstanceState, this);
+            getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, savedInstanceState, this);
         }
     }
 

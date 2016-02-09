@@ -75,7 +75,7 @@ public class FoodMain extends BaseChannelFragment
                 R.layout.row_title, R.layout.row_section_header, R.id.title);
 
         // start loading dining menus
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
     
     @Override

@@ -72,7 +72,7 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
         // Clear out everything
         mAdapter.clear();
         showProgressCircle();
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     @Override

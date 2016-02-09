@@ -129,7 +129,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         mLoading = true;
         showProgressCircle();
-        getActivity().getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
     @Override
