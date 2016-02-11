@@ -267,7 +267,10 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
                 mUpdateHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        getActivity().getSupportLoaderManager().getLoader(LOADER_ID).forceLoad();
+                        Loader loader = getActivity().getSupportLoaderManager().getLoader(LOADER_ID);
+                        if (loader != null) {
+                            loader.forceLoad();
+                        }
                     }
                 });
             }
