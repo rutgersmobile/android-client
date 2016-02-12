@@ -304,6 +304,10 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<PredictionLoader.PredictionHolder> loader, PredictionLoader.PredictionHolder data) {
+        if (!isAdded() || isRemoving()) {
+            return;
+        }
+
         List<Prediction> predictions = data.getPredictions();
         String title = data.getTitle();
         if (title != null) {
@@ -312,9 +316,9 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         // If there are no active routes or stops, show a message
         if (predictions.isEmpty()) {
             if (BusDisplay.STOP_MODE.equals(mMode)) {
-                if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_stops, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.bus_no_active_stops, Toast.LENGTH_SHORT).show();
             } else {
-                if (isAdded()) Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
             }
         }
         mAdapter.clear();
