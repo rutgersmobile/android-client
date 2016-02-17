@@ -19,25 +19,18 @@ public final class ActiveStops {
     private String agencyTag; // Not part of Nextbus results
 
     /**
-     * Agency is not returned by the api, however it is required by the ActiveStops class.
-     * Gson parses the api info into this object before it is used to initialize ActiveStops.
+     * Update the agency tag on this ActiveStops container
+     * and all route and stop information contained within.
      */
-    @Data
-    public class AgentlessActiveStops {
-        private final List<RouteStub> routes;
-        private final List<StopStub> stops;
-        @SerializedName("time") private final long timestamp;
-    }
+    public void setAgencyTag(@NonNull String agencyTag) {
+        this.agencyTag = agencyTag;
 
-    public ActiveStops(@NonNull String agencyTag, @NonNull AgentlessActiveStops activeStops) {
-        setAgencyTag(agencyTag);
+        for (RouteStub routeStub: routes) {
+            routeStub.setAgencyTag(agencyTag);
+        }
 
-        this.routes = activeStops.getRoutes();
-        this.stops = activeStops.getStops();
-        this.timestamp = activeStops.getTimestamp();
-
-        // Set the agency on each route and stop
-        for (RouteStub routeStub: routes) routeStub.setAgencyTag(getAgencyTag());
-        for (StopStub stopStub: stops) stopStub.setAgencyTag(getAgencyTag());
+        for (StopStub stopStub: stops) {
+            stopStub.setAgencyTag(agencyTag);
+        }
     }
 }

@@ -50,12 +50,11 @@ public final class NextbusAPI {
      * Load agency configurations and lists of active routes/stops for each campus.
      */
     private static synchronized void setup () throws JsonSyntaxException, IOException {
-        ActiveStops.AgentlessActiveStops nbActive =
-                ApiRequest.api("nbactivestops.txt", activeExpireTime, activeTimeUnit, ActiveStops.AgentlessActiveStops.class);
-        ActiveStops.AgentlessActiveStops nwkActive =
-                ApiRequest.api("nwkactivestops.txt", activeExpireTime, activeTimeUnit, ActiveStops.AgentlessActiveStops.class);
-        sNBActive = new ActiveStops(AGENCY_NB, nbActive);
-        sNWKActive = new ActiveStops(AGENCY_NWK, nwkActive);
+        sNBActive = ApiRequest.api("nbactivestops.txt", activeExpireTime, activeTimeUnit, ActiveStops.class);
+        sNBActive.setAgencyTag(AGENCY_NB);
+
+        sNWKActive = ApiRequest.api("nwkactivestops.txt", activeExpireTime, activeTimeUnit, ActiveStops.class);
+        sNWKActive.setAgencyTag(AGENCY_NWK);
 
         sNBConf = ApiRequest.api("rutgersrouteconfig.txt", configExpireTime, configTimeUnit, AgencyConfig.class,
                 new AgencyConfigDeserializer(AGENCY_NB));
