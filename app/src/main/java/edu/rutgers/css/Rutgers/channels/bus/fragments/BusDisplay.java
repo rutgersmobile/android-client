@@ -313,14 +313,21 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         if (title != null) {
             getActivity().setTitle(title);
         }
+
         // If there are no active routes or stops, show a message
         if (predictions.isEmpty()) {
+            int message;
+
+            // A stop may have no active routes; a route may have no active stops
             if (BusDisplay.STOP_MODE.equals(mMode)) {
-                Toast.makeText(getActivity(), R.string.bus_no_active_stops, Toast.LENGTH_SHORT).show();
+                message = R.string.bus_no_active_routes;
             } else {
-                Toast.makeText(getActivity(), R.string.bus_no_active_routes, Toast.LENGTH_SHORT).show();
+                message = R.string.bus_no_active_stops;
             }
+
+            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
         }
+
         mAdapter.clear();
         mAdapter.addAll(predictions);
         hideProgressCircle();
