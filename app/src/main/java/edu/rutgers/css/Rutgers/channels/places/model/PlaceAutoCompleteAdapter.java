@@ -6,6 +6,8 @@ import android.widget.Filter;
 
 import com.google.gson.JsonSyntaxException;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,11 +60,15 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
             results.count = 0;
 
             // Empty or null constraint returns nothing
-            if (charSequence == null || charSequence.toString().isEmpty()) return results;
+            if (charSequence == null) return results;
+
+            final String filterString = StringUtils.trim(charSequence.toString());
+
+            if (StringUtils.isBlank(filterString)) return results;
 
             try {
-                // Do request for search results
-                List<Place> places = PlacesAPI.searchPlaces(charSequence.toString());
+                // Do request for search results. Cap at 15 results.
+                List<Place> places = PlacesAPI.searchPlaces(filterString, 15);
                 List<KeyValPair> keyValPairs = new ArrayList<>(places.size());
                 for (Place place: places) {
                     keyValPairs.add(new KeyValPair(place.getId(), place.getTitle()));

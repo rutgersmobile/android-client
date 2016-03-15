@@ -29,26 +29,24 @@ public final class PlacesAPI {
     
     private static final String TAG = "PlacesAPI";
 
-    private static boolean sSettingUp;
-
     /** Map of Place keys to Place objects. Initialized in {@link #setup()}. */
     private static Map<String, Place> sPlaces;
     private static Map<String, Place> sTokens;
 
     private PlacesAPI() {}
 
-    private class KVHolder {
+    private static final class KVHolder {
         public HashMap<String, Place> all;
         public Lunr lunr;
 
         private KVHolder() { }
 
-        private class Lunr {
+        private static final class Lunr {
             public DocStore documentStore;
 
             private Lunr() { }
 
-            private class DocStore {
+            private static final class DocStore {
                 public HashMap<String, List<String>> store;
 
                 private DocStore() { }
@@ -81,7 +79,7 @@ public final class PlacesAPI {
     /**
      * Get a specific place from the Places API.
      * @param placeKey Key for place entry, returned from search results
-     * @return Promise for a Place object representing the entry in the database
+     * @return The place object that has the given key, or null if it does not exist
      */
     public static synchronized Place getPlace(@NonNull final String placeKey) throws JsonSyntaxException, IOException {
         setup();
@@ -92,7 +90,7 @@ public final class PlacesAPI {
      * Search for places near a given location.
      * @param sourceLat Latitude
      * @param sourceLon Longitude
-     * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
+     * @return List of places that are near the given location.
      */
     public static synchronized List<Place> getPlacesNear(final double sourceLat, final double sourceLon) throws JsonSyntaxException, IOException {
         setup();
@@ -125,37 +123,46 @@ public final class PlacesAPI {
     }
 
     /**
-     * <p>Search places by title.</p>
+     * Search places by Lunr index tokens and title. Limit maxmimum number of results.
      * @param query Query string
-     * @return Promise for a list of results as key-value pairs, with the place ID as key and name as value.
+     * @param maxResults Maximum number of results to return. A non-positive value disables the cap.
+     * @return List of place objects that match the query string.
      */
-    public static synchronized List<Place> searchPlaces(final String query) throws JsonSyntaxException, IOException {
+    public static synchronized List<Place> searchPlaces(@NonNull final String query, final int maxResults)
+            throws JsonSyntaxException, IOException {
         setup();
 
         List<Place> results = new ArrayList<>();
 
-        Place p = sTokens.get(query.toLowerCase(Locale.US));
-        if (p != null) {
-            results.add(p);
+        // Check if this query matches a lunr token
+        Place tokenMatch = sTokens.get(query.toLowerCase(Locale.US));
+        if (tokenMatch != null) {
+            results.add(tokenMatch);
         }
 
-        // Split each place title up into individual words and see if the query is a prefix of any of them
+        // See if the query is a substring of any of the place titles
         for (Place place : sPlaces.values()) {
-            String parts[] = StringUtils.split(place.getTitle(), ' ');
-            boolean found = false;
-            for (String part : parts) {
-                if (StringUtils.startsWithIgnoreCase(part, query)) {
-                    // The check makes sure we don't duplicate the special token match 'p'
-                    found = true;
-                    if (place != p) results.add(place);
-                    break;
-                }
-            }
-            if (!found && StringUtils.containsIgnoreCase(place.getTitle(), query) && place != p) {
+            if (place == tokenMatch) continue;
+
+            if (StringUtils.containsIgnoreCase(place.getTitle(), query)) {
                 results.add(place);
+
+                // Use maxResults as the cap if it's positive
+                if (maxResults > 0 && results.size() >= maxResults) break;
             }
         }
 
         return results;
     }
+
+    /**
+     * Search places by Lunr index tokens and title, with no cap on the number of results.
+     * @param query Query string
+     * @return List of place objects that match the query string.
+     */
+    public static synchronized List<Place> searchPlaces(@NonNull final String query)
+            throws JsonSyntaxException, IOException, IllegalArgumentException  {
+        return searchPlaces(query, 0);
+    }
+
 }
