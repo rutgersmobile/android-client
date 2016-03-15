@@ -80,7 +80,7 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         final Bundle args = getArguments();
-        
+
         mData = new ArrayList<>();
         mAdapter = new RSSAdapter(this.getActivity(), R.layout.row_rss, mData);
 
