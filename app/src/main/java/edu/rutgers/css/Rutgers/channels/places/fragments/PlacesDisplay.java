@@ -34,6 +34,7 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.ui.fragments.MapDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
@@ -130,7 +131,9 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
 
                 switch (clicked.getArgs().getInt(ID_KEY)) {
                     case ADDRESS_ROW:
-                        launchMap();
+//                        launchMap();
+                        final Bundle mapArgs = MapDisplay.createArgs();
+                        switchFragments(mapArgs);
                         break;
                     case DESC_ROW:
                         final Bundle textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
