@@ -93,11 +93,25 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
         return bundle;
     }
 
+    /** Create argument bundle for course sections display. */
+    public static Bundle createArgs(@NonNull final String semester, @NonNull final String campusCode,
+                                    @NonNull final String subject, @NonNull final String courseNumber) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, SOCSections.HANDLE);
+        bundle.putString(ARG_SEMESTER_TAG, semester);
+        bundle.putString(ARG_CAMPUS_TAG, campusCode);
+        bundle.putString(ARG_SUBJECT_TAG, subject);
+        bundle.putString(ARG_COURSE_TAG, courseNumber);
+        return bundle;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         final Bundle args = getArguments();
+
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
         mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, new ArrayList<SectionAdapterItem>());
 
@@ -128,8 +142,6 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
         final Bundle args = getArguments();
 
         if (mLoading) showProgressCircle();
-
-        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
         final String semester = args.getString(ARG_SEMESTER_TAG);
 
@@ -192,6 +204,8 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     private void loadCourse(@NonNull Course course) {
         mCourse = course;
         mAdapter.clear();
+
+        getActivity().setTitle(course.getTitle());
 
         // Add course description if set
         if (StringUtils.isNotBlank(mCourse.getCourseDescription())) {

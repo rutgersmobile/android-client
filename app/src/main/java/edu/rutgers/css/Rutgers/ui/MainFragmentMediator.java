@@ -1,9 +1,7 @@
 package edu.rutgers.css.Rutgers.ui;
 
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,14 +14,13 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.link.LinkLoadArgs;
 import edu.rutgers.css.Rutgers.link.LinkLoadTask;
+import edu.rutgers.css.Rutgers.link.LinkLoadTaskSync;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
@@ -131,15 +128,15 @@ public class MainFragmentMediator implements FragmentMediator {
                 return;
             }
 
-            // We don't have a reference to the enclosing activity in the task
-            // so we have to get all this information here
-            final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(activity);
-            final String prefLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
-            final String prefCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
-            final String prefSemester = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null);
-
-            new LinkLoadTask(homeCampus, prefCampus, prefLevel, prefSemester, backstack)
-                    .execute(new LinkLoadArgs(channel, pathParts));
+            LinkLoadArgs linkArgs = new LinkLoadArgs(channel, pathParts);
+            if (channel.getView().equals("dtable")) {
+                new LinkLoadTask(homeCampus).execute(linkArgs);
+            } else {
+                Bundle args = new LinkLoadTaskSync(homeCampus, backstack).execute(linkArgs);
+                if (args != null) {
+                    switchFragments(args);
+                }
+            }
         }
     }
 

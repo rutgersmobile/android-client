@@ -93,11 +93,8 @@ public class BusMain extends BaseChannelFragment {
         final Bundle args = getArguments();
 
         // Set title from JSON
-        if (args.getString(ARG_TITLE_TAG) != null) {
-            getActivity().setTitle(args.getString(ARG_TITLE_TAG));
-        } else {
-            getActivity().setTitle(R.string.bus_title);
-        }
+        final String title = args.getString(ARG_TITLE_TAG, getResources().getString(R.string.bus_title));
+        getActivity().setTitle(title);
 
         toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -115,7 +112,6 @@ public class BusMain extends BaseChannelFragment {
 
         tabs = (TabLayout) v.findViewById(R.id.tabs);
         tabs.setupWithViewPager(mViewPager);
-        tabs.setTabsFromPagerAdapter(pagerAdapter);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabs));
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {

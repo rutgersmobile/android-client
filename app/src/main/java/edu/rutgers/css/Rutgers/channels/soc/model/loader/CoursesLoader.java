@@ -5,23 +5,31 @@ import android.content.Context;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.channels.soc.model.Course;
+import edu.rutgers.css.Rutgers.channels.soc.model.SOCIndex;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
+import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
+import lombok.Data;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * Loader for getting multiple courses from the SoC API
  */
-public class CoursesLoader extends SimpleAsyncLoader<List<Course>> {
+public class CoursesLoader extends SimpleAsyncLoader<CoursesLoader.CourseData> {
     String campus;
     String level;
     String semester;
     String subjectCode;
+
+    @Data
+    public final class CourseData {
+        final Subject subject;
+        final List<Course> courses;
+    }
 
     public static final String TAG = "CoursesLoader";
 
@@ -41,12 +49,15 @@ public class CoursesLoader extends SimpleAsyncLoader<List<Course>> {
     }
 
     @Override
-    public List<Course> loadInBackground() {
+    public CourseData loadInBackground() {
         try {
-            return ScheduleAPI.getCourses(campus, level, semester, subjectCode);
+            SOCIndex index = ScheduleAPI.getIndex(campus, level, semester);
+            Subject subject = index.getSubjectByCode(subjectCode);
+            List<Course> courses = ScheduleAPI.getCourses(campus, level, semester, subjectCode);
+            return new CourseData(subject, courses);
         } catch (JsonSyntaxException | IOException e) {
             LOGE(TAG, e.getMessage());
-            return new ArrayList<>();
+            return null;
         }
     }
 }

@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
@@ -36,7 +37,7 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 /**
  * Lists courses under a subject/department.
  */
-public class SOCCourses extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<Course>> {
+public class SOCCourses extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<CoursesLoader.CourseData> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "SOCCourses";
@@ -78,11 +79,25 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         return bundle;
     }
 
+    /** Create argument bundle for courses display */
+    public static Bundle createArgs(@NonNull String campus, @NonNull String semester,
+                                    @NonNull String level, @NonNull String subjectCode) {
+        Bundle bundle = new Bundle();
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, SOCCourses.HANDLE);
+        bundle.putString(ARG_CAMPUS_TAG, campus);
+        bundle.putString(ARG_SEMESTER_TAG, semester);
+        bundle.putString(ARG_LEVEL_TAG, level);
+        bundle.putString(ARG_SUBJECT_TAG, subjectCode);
+        return bundle;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         Bundle args = getArguments();
+
+        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString(ARG_TITLE_TAG)));
 
         mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, R.layout.row_section_header);
 
@@ -113,7 +128,6 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
-        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString(ARG_TITLE_TAG)));
 
         final String semester = args.getString(ARG_SEMESTER_TAG);
         final String campus = args.getString(ARG_CAMPUS_TAG);
@@ -195,7 +209,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     }
 
     @Override
-    public Loader<List<Course>> onCreateLoader(int id, Bundle args) {
+    public Loader<CoursesLoader.CourseData> onCreateLoader(int id, Bundle args) {
         final String campus = args.getString(ARG_CAMPUS_TAG);
         final String level = args.getString(ARG_LEVEL_TAG);
         final String semester = args.getString(ARG_SEMESTER_TAG);
@@ -205,22 +219,29 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Course>> loader, List<Course> data) {
+    public void onLoadFinished(Loader<CoursesLoader.CourseData> loader, CoursesLoader.CourseData data) {
         // If response is empty assume that there was an error
-        if (data.isEmpty()) {
-            AppUtils.showFailedLoadToast(getContext());
-        }
         mLoading = false;
         hideProgressCircle();
         mAdapter.clear();
-        mAdapter.addAllCourses(data);
+
+        if (data == null) {
+            AppUtils.showFailedLoadToast(getContext());
+            return;
+        }
+
+        mAdapter.addAllCourses(data.getCourses());
+        final Activity activity = getActivity();
+        if (activity != null) {
+            activity.setTitle(data.getSubject().getTitle());
+        }
 
         // Re-apply filter
         if (mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Course>> loader) {
+    public void onLoaderReset(Loader<CoursesLoader.CourseData> loader) {
         mLoading = false;
         hideProgressCircle();
         mAdapter.clear();

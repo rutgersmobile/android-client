@@ -93,6 +93,7 @@ public class PlacesMain extends BaseChannelFragment
     private AutoCompleteTextView autoComp;
     private Toolbar toolbar;
     private boolean searching = false;
+    private String oldSearch;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -141,8 +142,7 @@ public class PlacesMain extends BaseChannelFragment
 
         if (savedInstanceState != null) {
             searching = savedInstanceState.getBoolean(SEARCHING_TAG);
-            final String search = savedInstanceState.getString(SEARCH_TAG);
-            autoComp.setText(search);
+            oldSearch = savedInstanceState.getString(SEARCH_TAG);
         }
     }
     
@@ -192,6 +192,10 @@ public class PlacesMain extends BaseChannelFragment
             }
             
         });
+
+        if (searching && oldSearch != null) {
+            autoComp.setText(oldSearch);
+        }
 
         // Click listener for nearby places list
         listView.setOnItemClickListener(new OnItemClickListener() {

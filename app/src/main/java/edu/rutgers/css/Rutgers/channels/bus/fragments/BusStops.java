@@ -168,6 +168,8 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
 
     @Override
     public void onLoadFinished(Loader<List<SimpleSection<StopStub>>> loader, List<SimpleSection<StopStub>> data) {
+        if (getContext() == null) return;
+
         mAdapter.clear();
         mAdapter.addAll(data);
 

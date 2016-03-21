@@ -82,6 +82,10 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<List<SimpleSection<RouteStub>>> loader, List<SimpleSection<RouteStub>> data) {
+        if (getContext() == null) {
+            return;
+        }
+
         mAdapter.clear();
         mAdapter.addAll(data);
         hideProgressCircle();

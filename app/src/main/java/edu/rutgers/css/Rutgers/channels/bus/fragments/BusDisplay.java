@@ -1,8 +1,10 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewCompat;
@@ -66,12 +68,14 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private static final String SAVED_TAG_TAG       = Config.PACKAGE_NAME+"."+HANDLE+".tag";
     private static final String SAVED_MODE_TAG      = Config.PACKAGE_NAME+"."+HANDLE+".mode";
     private static final String SAVED_DATA_TAG      = Config.PACKAGE_NAME+"."+HANDLE+".data";
+    private static final String SAVED_TITLE_TAG     = Config.PACKAGE_NAME+"."+HANDLE+".title";
 
     /* Member data */
     private ArrayList<Prediction> mData;
     private PredictionAdapter mAdapter;
     private String mMode;
     private String mTag;
+    private String mTitle;
     private Handler mUpdateHandler;
     private Timer mUpdateTimer;
     private String mAgency;
@@ -126,6 +130,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             mTag = savedInstanceState.getString(SAVED_TAG_TAG);
             mMode = savedInstanceState.getString(SAVED_MODE_TAG);
             mAdapter.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable(SAVED_DATA_TAG));
+            mTitle = savedInstanceState.getString(SAVED_TITLE_TAG);
             return;
         }
 
@@ -159,9 +164,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         mTag = args.getString(ARG_TAG_TAG);
 
         // Get title
-        String title = args.getString(ARG_TITLE_TAG, getString(R.string.bus_title));
-
-        getActivity().setTitle(title);
+        mTitle = args.getString(ARG_TITLE_TAG, getString(R.string.bus_title));
 
         // Start loading predictions
         showProgressCircle();
@@ -177,6 +180,10 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         final ScaleInAnimationAdapter scaleInAnimationAdapter = new ScaleInAnimationAdapter(mAdapter);
         scaleInAnimationAdapter.setAbsListView(listView);
         listView.setAdapter(scaleInAnimationAdapter);
+
+        if (mTitle != null) {
+            getActivity().setTitle(mTitle);
+        }
 
         mAdapter.setExpandCollapseListener(new ExpandableListItemAdapter.ExpandCollapseListener() {
             @Override
@@ -267,9 +274,9 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
                 mUpdateHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Loader loader = getActivity().getSupportLoaderManager().getLoader(LOADER_ID);
-                        if (loader != null) {
-                            loader.forceLoad();
+                        final FragmentActivity activity = getActivity();
+                        if (activity != null) {
+                            activity.getSupportLoaderManager().getLoader(LOADER_ID).forceLoad();
                         }
                     }
                 });
@@ -295,6 +302,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         outState.putString(SAVED_TAG_TAG, mTag);
         outState.putString(SAVED_MODE_TAG, mMode);
         outState.putSerializable(SAVED_DATA_TAG, mData);
+        outState.putSerializable(SAVED_TITLE_TAG, mTitle);
     }
 
     @Override
@@ -304,14 +312,15 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<PredictionLoader.PredictionHolder> loader, PredictionLoader.PredictionHolder data) {
-        if (!isAdded() || isRemoving()) {
+        final Activity activity = getActivity();
+        if (activity == null) {
             return;
         }
 
         List<Prediction> predictions = data.getPredictions();
         String title = data.getTitle();
         if (title != null) {
-            getActivity().setTitle(title);
+            activity.setTitle(title);
         }
 
         // If there are no active routes or stops, show a message
