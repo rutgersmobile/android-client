@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.channels.recreation.fragments;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.recreation.model.MeetingAreaHours;
+import edu.rutgers.css.Rutgers.api.recreation.model.facility.MeetingAreaHours;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 

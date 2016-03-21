@@ -26,7 +26,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.places.model.Place;
+import edu.rutgers.css.Rutgers.api.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.loader.PlaceLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;

@@ -6,8 +6,8 @@ import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 
-import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
-import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
+import edu.rutgers.css.Rutgers.api.recreation.model.facility.Facility;
+import edu.rutgers.css.Rutgers.api.recreation.GymsAPI;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;

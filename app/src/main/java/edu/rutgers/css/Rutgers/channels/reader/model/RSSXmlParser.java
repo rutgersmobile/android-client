@@ -11,7 +11,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.interfaces.XmlParser;
+import edu.rutgers.css.Rutgers.api.XmlParser;
 
 /**
  * Parser for getting RSS item information.

@@ -7,10 +7,10 @@ import com.google.gson.JsonSyntaxException;
 import java.io.IOException;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.channels.soc.model.Course;
-import edu.rutgers.css.Rutgers.channels.soc.model.SOCIndex;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
-import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
+import edu.rutgers.css.Rutgers.api.soc.model.Course;
+import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
+import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
+import edu.rutgers.css.Rutgers.api.soc.model.Subject;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import lombok.Data;
 

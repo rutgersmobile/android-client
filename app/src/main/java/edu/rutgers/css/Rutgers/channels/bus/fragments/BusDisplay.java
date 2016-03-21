@@ -34,7 +34,7 @@ import java.util.TimerTask;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.bus.model.Prediction;
+import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.PredictionLoader;
 import edu.rutgers.css.Rutgers.link.Link;

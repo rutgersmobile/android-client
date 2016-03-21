@@ -21,7 +21,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
+import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuSectionLoader;
 import edu.rutgers.css.Rutgers.link.Link;

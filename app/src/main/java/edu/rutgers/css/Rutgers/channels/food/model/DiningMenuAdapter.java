@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.channels.food.model;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.model.SectionedListAdapter;
 
 /**

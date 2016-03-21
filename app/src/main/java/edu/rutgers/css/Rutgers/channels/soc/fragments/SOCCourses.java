@@ -25,7 +25,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.soc.model.Course;
+import edu.rutgers.css.Rutgers.api.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
 import edu.rutgers.css.Rutgers.link.Link;

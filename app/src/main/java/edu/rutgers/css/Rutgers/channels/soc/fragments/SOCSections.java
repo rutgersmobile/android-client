@@ -22,12 +22,12 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.soc.model.Course;
+import edu.rutgers.css.Rutgers.api.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
-import edu.rutgers.css.Rutgers.channels.soc.model.Section;
-import edu.rutgers.css.Rutgers.channels.soc.model.SectionAdapterItem;
+import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
+import edu.rutgers.css.Rutgers.api.soc.model.ScheduleText;
+import edu.rutgers.css.Rutgers.api.soc.model.Section;
+import edu.rutgers.css.Rutgers.api.soc.Titleable;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CourseLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
@@ -113,7 +113,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
 
         if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
 
-        mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, new ArrayList<SectionAdapterItem>());
+        mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, new ArrayList<Titleable>());
 
         Course course = (Course) args.getSerializable(ARG_DATA_TAG);
         if (course != null) {
@@ -150,7 +150,7 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final SectionAdapterItem clickedItem = (SectionAdapterItem) parent.getAdapter().getItem(position);
+                final Titleable clickedItem = (Titleable) parent.getAdapter().getItem(position);
 
                 if (clickedItem instanceof ScheduleText) {
                     ScheduleText scheduleText = (ScheduleText) clickedItem;

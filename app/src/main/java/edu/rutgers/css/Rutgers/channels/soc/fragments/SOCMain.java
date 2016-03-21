@@ -27,13 +27,13 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.soc.model.Course;
-import edu.rutgers.css.Rutgers.channels.soc.model.SOCIndex;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
+import edu.rutgers.css.Rutgers.api.soc.model.Course;
+import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
+import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapterItem;
-import edu.rutgers.css.Rutgers.channels.soc.model.Semesters;
-import edu.rutgers.css.Rutgers.channels.soc.model.Subject;
+import edu.rutgers.css.Rutgers.api.soc.Registerable;
+import edu.rutgers.css.Rutgers.api.soc.model.Semesters;
+import edu.rutgers.css.Rutgers.api.soc.model.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
@@ -164,7 +164,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ScheduleAdapterItem clickedItem = (ScheduleAdapterItem) parent.getItemAtPosition(position);
+                Registerable clickedItem = (Registerable) parent.getItemAtPosition(position);
 
                 if (clickedItem instanceof Subject) {
                     Bundle coursesArgs = SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,

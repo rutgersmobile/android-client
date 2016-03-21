@@ -29,8 +29,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
-import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
+import edu.rutgers.css.Rutgers.api.recreation.model.facility.Facility;
+import edu.rutgers.css.Rutgers.api.recreation.model.facility.FacilityDaySchedule;
 import edu.rutgers.css.Rutgers.channels.recreation.model.loader.FacilityLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;

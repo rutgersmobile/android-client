@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.channels.food.model.DiningAPI;
-import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
+import edu.rutgers.css.Rutgers.api.food.DiningAPI;
+import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;

@@ -14,7 +14,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
+import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.RouteLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;

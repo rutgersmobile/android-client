@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.places.model.Place;
-import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
+import edu.rutgers.css.Rutgers.api.places.model.Place;
+import edu.rutgers.css.Rutgers.api.places.PlacesAPI;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 

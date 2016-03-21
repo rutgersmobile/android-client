@@ -16,11 +16,11 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
-import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
-import edu.rutgers.css.Rutgers.channels.bus.model.StopGroup;
+import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.bus.model.stop.StopGroup;
 import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesDisplay;
-import edu.rutgers.css.Rutgers.channels.places.model.Place;
-import edu.rutgers.css.Rutgers.channels.places.model.PlacesAPI;
+import edu.rutgers.css.Rutgers.api.places.model.Place;
+import edu.rutgers.css.Rutgers.api.places.PlacesAPI;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;

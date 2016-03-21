@@ -18,8 +18,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.recreation.model.Campus;
-import edu.rutgers.css.Rutgers.channels.recreation.model.Facility;
+import edu.rutgers.css.Rutgers.api.recreation.model.Campus;
+import edu.rutgers.css.Rutgers.api.recreation.model.facility.Facility;
 import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityAdapter;
 import edu.rutgers.css.Rutgers.channels.recreation.model.loader.CampusLoader;
 import edu.rutgers.css.Rutgers.link.Link;

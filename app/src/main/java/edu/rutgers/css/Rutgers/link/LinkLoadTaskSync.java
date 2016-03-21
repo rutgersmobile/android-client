@@ -8,13 +8,13 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusMain;
-import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.food.fragments.FoodHall;
 import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCCourses;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAPI;
+import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.model.Channel;
 
 /**

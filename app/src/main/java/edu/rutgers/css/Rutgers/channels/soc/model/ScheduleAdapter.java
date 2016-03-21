@@ -27,6 +27,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.soc.Registerable;
+import edu.rutgers.css.Rutgers.api.soc.model.Course;
+import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
+import edu.rutgers.css.Rutgers.api.soc.model.Subject;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 /**
@@ -189,7 +193,7 @@ public class ScheduleAdapter extends BaseAdapter
             holder = (ViewHolder) convertView.getTag();
         }
 
-        String displayTitle = ((ScheduleAdapterItem) getItem(position)).getDisplayTitle();
+        String displayTitle = ((Registerable) getItem(position)).getDisplayTitle();
         StringBuilder stringBuilder = new StringBuilder();
 
         for (String s : displayTitle.split(" ")) {

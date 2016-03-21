@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.bus.model.NextbusAPI;
-import edu.rutgers.css.Rutgers.channels.bus.model.NextbusItem;
-import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
-import edu.rutgers.css.Rutgers.channels.bus.model.StopStub;
+import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.bus.NextbusItem;
+import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
+import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;

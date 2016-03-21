@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.soc.model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.soc.Titleable;
+import edu.rutgers.css.Rutgers.api.soc.model.Section;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -30,7 +31,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
  *
  * @author James Chambers
  */
-public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
+public class CourseSectionAdapter extends ArrayAdapter<Titleable> {
 
     private static final String TAG = "CourseSectionAdapter";
 
@@ -66,7 +67,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
                 put("S", 5);
             }});
 
-    public CourseSectionAdapter(Context context, int resource, List<SectionAdapterItem> objects) {
+    public CourseSectionAdapter(Context context, int resource, List<Titleable> objects) {
         super(context, resource, objects);
         this.layoutResource = resource;
 
@@ -81,7 +82,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
 
     @Override
     public int getItemViewType(int position) {
-        SectionAdapterItem item = getItem(position);
+        Titleable item = getItem(position);
         if (item instanceof Section) {
             return ViewTypes.MEETTIME_TYPE.ordinal();
         } else {
@@ -127,7 +128,7 @@ public class CourseSectionAdapter extends ArrayAdapter<SectionAdapterItem> {
             holder = (DescViewHolder) convertView.getTag();
         }
 
-        SectionAdapterItem item = getItem(position);
+        Titleable item = getItem(position);
         holder.titleTextView.setText(item.getDisplayTitle());
 
         return convertView;

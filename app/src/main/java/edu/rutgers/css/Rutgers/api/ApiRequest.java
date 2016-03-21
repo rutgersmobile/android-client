@@ -18,7 +18,6 @@ import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
-import edu.rutgers.css.Rutgers.interfaces.XmlParser;
 
 /** Convenience class for making requests */
 public final class ApiRequest {

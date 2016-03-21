@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.places.model.Place;
+import edu.rutgers.css.Rutgers.api.places.PlacesAPI;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;

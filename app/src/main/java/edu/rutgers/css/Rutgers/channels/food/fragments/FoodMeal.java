@@ -13,7 +13,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.food.model.DiningMenu;
+import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.MealGenreLoader;
 import edu.rutgers.css.Rutgers.link.Link;

@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +18,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.recreation.model.FacilityDaySchedule;
-import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
+import edu.rutgers.css.Rutgers.api.recreation.model.facility.FacilityDaySchedule;
+import edu.rutgers.css.Rutgers.api.recreation.GymsAPI;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 

@@ -18,8 +18,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.bus.model.NextbusItem;
-import edu.rutgers.css.Rutgers.channels.bus.model.RouteStub;
+import edu.rutgers.css.Rutgers.api.bus.NextbusItem;
+import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.NextBusItemLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;

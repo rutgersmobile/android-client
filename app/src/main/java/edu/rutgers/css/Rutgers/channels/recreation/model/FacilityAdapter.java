@@ -3,6 +3,8 @@ package edu.rutgers.css.Rutgers.channels.recreation.model;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import edu.rutgers.css.Rutgers.api.recreation.model.Campus;
+import edu.rutgers.css.Rutgers.api.recreation.model.facility.Facility;
 import edu.rutgers.css.Rutgers.model.SectionedListAdapter;
 
 /**

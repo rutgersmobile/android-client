@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.channels.recreation.model.Campus;
-import edu.rutgers.css.Rutgers.channels.recreation.model.GymsAPI;
+import edu.rutgers.css.Rutgers.api.recreation.model.Campus;
+import edu.rutgers.css.Rutgers.api.recreation.GymsAPI;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
