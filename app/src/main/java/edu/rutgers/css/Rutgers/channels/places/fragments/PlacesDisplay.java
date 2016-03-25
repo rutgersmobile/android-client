@@ -7,10 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +29,6 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.MapDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
@@ -106,16 +102,6 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_list_progress);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
-
         if (mLoading) showProgressCircle();
 
         // Set title
@@ -132,7 +118,8 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
                 switch (clicked.getArgs().getInt(ID_KEY)) {
                     case ADDRESS_ROW:
 //                        launchMap();
-                        final Bundle mapArgs = MapDisplay.createArgs();
+                        final Place.Location location = mPlace.getLocation();
+                        final Bundle mapArgs = MapDisplay.createArgs(new MapDisplay.MapPoint(location.getLatitude(), location.getLongitude(), 18));
                         switchFragments(mapArgs);
                         break;
                     case DESC_ROW:
