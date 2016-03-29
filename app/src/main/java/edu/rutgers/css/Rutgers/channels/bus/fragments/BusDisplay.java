@@ -276,7 +276,13 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
                     public void run() {
                         final FragmentActivity activity = getActivity();
                         if (activity != null) {
-                            activity.getSupportLoaderManager().getLoader(LOADER_ID).forceLoad();
+                            final LoaderManager loaderManager = activity.getSupportLoaderManager();
+                            if (loaderManager != null) {
+                                final Loader loader = loaderManager.getLoader(LOADER_ID);
+                                if (loader != null) {
+                                    loader.forceLoad();
+                                }
+                            }
                         }
                     }
                 });
