@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Arrival time predictions for a bus stop.
  */
 @Data
+@EqualsAndHashCode(exclude = "minutes")
 public final class Prediction implements Serializable {
     private String tag;
     private String title;
@@ -28,26 +30,4 @@ public final class Prediction implements Serializable {
     public String toString() {
         return this.title + ", " + this.direction + ", " + this.minutes.toString();
     }
-
-    /**
-     * Compares two predictions by the route or stop they represent, but not the minute values.
-     * @param other Prediction to be compared to
-     * @return True if tag, title, and direction match. False if not.
-     */
-    @Override
-    public boolean equals(Object other) {
-        if (other == null) return false;
-        if (!(other instanceof Prediction)) return false;
-
-        if (this.getTag() == null || this.getTitle() == null) return false;
-
-        Prediction otherPrediction = (Prediction) other;
-        return  this.getTag().equals(otherPrediction.getTag()) &&
-                this.getTitle().equals(otherPrediction.getTitle()) &&
-                (
-                        (otherPrediction.getDirection() == null && this.getDirection() == null) ||
-                        (this.getDirection() != null && this.getDirection().equals(otherPrediction.getDirection()))
-                );
-    }
-
 }
