@@ -89,9 +89,7 @@ public class PlacesMain extends BaseChannelFragment
     private SimpleSectionedAdapter<KeyValPair> mAdapter;
     private GoogleApiClientProvider mGoogleApiClientProvider;
     private LocationRequest mLocationRequest;
-    private ShareActionProvider shareActionProvider;
     private AutoCompleteTextView autoComp;
-    private Toolbar toolbar;
     private boolean searching = false;
     private String oldSearch;
 
@@ -148,17 +146,7 @@ public class PlacesMain extends BaseChannelFragment
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places);
-
-        toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places, R.id.toolbar_search);
 
         // Set title from JSON
         final Bundle args = getArguments();
@@ -225,19 +213,6 @@ public class PlacesMain extends BaseChannelFragment
         }
     }
 
-    public void setShareIntent() {
-        Uri uri = getLink().getUri(Config.SCHEMA);
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
-    }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
-    }
-
     public Link getLink() {
         return new Link("places", new ArrayList<String>(), getLinkTitle());
     }
@@ -257,12 +232,12 @@ public class PlacesMain extends BaseChannelFragment
         if (searching) {
             autoComp.setVisibility(View.VISIBLE);
             autoComp.requestFocus();
-            toolbar.setBackgroundColor(getResources().getColor(R.color.white));
+            getToolbar().setBackgroundColor(getResources().getColor(R.color.white));
             AppUtils.openKeyboard(getActivity());
         } else {
             autoComp.setVisibility(View.GONE);
             autoComp.setText("");
-            toolbar.setBackgroundColor(getResources().getColor(R.color.actbar_new));
+            getToolbar().setBackgroundColor(getResources().getColor(R.color.actbar_new));
             AppUtils.closeKeyboard(getActivity());
         }
         getActivity().invalidateOptionsMenu();

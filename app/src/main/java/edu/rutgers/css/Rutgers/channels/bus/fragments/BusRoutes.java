@@ -106,9 +106,4 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
     public Link getLink() {
         return null;
     }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return null;
-    }
 }

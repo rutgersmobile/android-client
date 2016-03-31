@@ -60,7 +60,6 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     private EditText mFilterEditText;
     private String mFilterString;
     private boolean mLoading;
-    private ShareActionProvider shareActionProvider;
 
     public SOCCourses() {
         // Required empty public constructor
@@ -113,17 +112,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
-
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress, R.id.toolbar_search);
 
         if (mLoading) showProgressCircle();
 
@@ -188,10 +177,6 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     }
 
     @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
-    }
-
     public Link getLink() {
         final Bundle args = getArguments();
         final List<String> linkArgs = new ArrayList<>();

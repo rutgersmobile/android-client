@@ -74,9 +74,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private String mLevel;
     private String mFilterString;
     private boolean mLoading;
-    private ShareActionProvider shareActionProvider;
     private EditText filterEditText;
-    private Toolbar toolbar;
     private boolean searching = false;
 
     public SOCMain() {
@@ -140,17 +138,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress);
-
-        toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress, R.id.toolbar_search);
 
         setScheduleTitle();
 
@@ -222,10 +210,6 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     }
 
     @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
-    }
-
     public Link getLink() {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(mCampus.toLowerCase());
@@ -254,11 +238,11 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         if (searching) {
             filterEditText.setVisibility(View.VISIBLE);
             filterEditText.requestFocus();
-            toolbar.setBackgroundColor(getResources().getColor(R.color.white));
+            getToolbar().setBackgroundColor(getResources().getColor(R.color.white));
             AppUtils.openKeyboard(getActivity());
         } else {
             filterEditText.setVisibility(View.GONE);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.actbar_new));
+            getToolbar().setBackgroundColor(getResources().getColor(R.color.actbar_new));
             filterEditText.setText("");
             AppUtils.closeKeyboard(getActivity());
         }
@@ -409,7 +393,6 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         mAdapter.addAllSubjects(subjects);
 
         setScheduleTitle();
-        setShareIntent();
     }
 
     @Override

@@ -62,7 +62,6 @@ public class FoodHall extends BaseChannelFragment
     private String mLocation;
     private MealPagerAdapter mPagerAdapter;
     private DiningMenu mData;
-    private ShareActionProvider shareActionProvider;
     private TabLayout tabLayout;
 
     private final static DatePrinter dout = FastDateFormat.getInstance("MMM dd", Locale.US); // Mon, May 26
@@ -106,16 +105,6 @@ public class FoodHall extends BaseChannelFragment
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_tabbed_pager);
         final Bundle args = getArguments();
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
-
         if (mTitle != null) {
             getActivity().setTitle(mTitle);
         } else if (args.getString(ARG_TITLE_TAG) != null) {
@@ -140,11 +129,6 @@ public class FoodHall extends BaseChannelFragment
         }
 
         return v;
-    }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
     }
 
     @Override

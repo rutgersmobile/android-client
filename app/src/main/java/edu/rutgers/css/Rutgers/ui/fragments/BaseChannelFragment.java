@@ -3,22 +3,30 @@ package edu.rutgers.css.Rutgers.ui.fragments;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
+import edu.rutgers.css.Rutgers.ui.ToggleFloatingActionButton;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**
@@ -27,55 +35,57 @@ import edu.rutgers.css.Rutgers.utils.PrefUtils;
 public abstract class BaseChannelFragment extends BaseDisplay implements Linkable {
 
     private ProgressBar mProgressCircle;
-    private FloatingActionButton fab;
-    private FloatingActionButton shareFab;
-    private FloatingActionButton bookmarkFab;
-    private boolean open = false;
-
-    private static final long ANIM_DURATION = 250;
-    private static final float INIT_POS = 0;
-    private static final float SHARE_POS = -200;
-    private static final float BOOKMARK_POS = -325;
+    private Toolbar toolbar;
+    private ActionBar actionBar;
 
     final protected View createView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState, int resource) {
+        return createView(inflater, parent, savedInstanceState, resource, R.id.toolbar);
+    }
+
+    final protected View createView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState, int resource, int tbResource) {
         final View v = inflater.inflate(resource, parent, false);
 
-        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
-        fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        shareFab = (FloatingActionButton) v.findViewById(R.id.mini_share_fab);
-        bookmarkFab = (FloatingActionButton) v.findViewById(R.id.mini_bookmark_fab);
-        if (fab != null) {
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (open) {
-                        closeFab();
-                    } else {
-                        openFab();
-                    }
-                }
-            });
+        toolbar = (Toolbar) v.findViewById(tbResource);
+        if (toolbar != null) {
+            ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        }
 
+        actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            ((MainActivity) getActivity()).syncDrawer();
+        }
+
+        mProgressCircle = (ProgressBar) v.findViewById(R.id.progressCircle);
+
+        final FloatingActionButton mainFab = (FloatingActionButton) v.findViewById(R.id.fab);
+        if (mainFab != null) {
+            final ToggleFloatingActionButton toggleFab = new ToggleFloatingActionButton(getContext(), mainFab, new ArrayList<FloatingActionButton>());
+
+            final FloatingActionButton shareFab = (FloatingActionButton) v.findViewById(R.id.mini_share_fab);
             shareFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (open) {
+                    if (toggleFab.isOpen())
                         startActivity(Intent.createChooser(getShareIntent(), "Share via"));
-                        closeFab();
-                    }
+                    toggleFab.closeFab();
                 }
             });
+            toggleFab.addFab(shareFab);
 
+            final FloatingActionButton bookmarkFab = (FloatingActionButton) v.findViewById(R.id.mini_bookmark_fab);
             bookmarkFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (open) {
+                    if (toggleFab.isOpen()) {
                         PrefUtils.addBookmark(getContext(), getLink());
                         Toast.makeText(getContext(), R.string.bookmark_added, Toast.LENGTH_SHORT).show();
-                        closeFab();
+                        toggleFab.closeFab();
                     }
                 }
             });
+            toggleFab.addFab(bookmarkFab);
         }
 
         return v;
@@ -87,9 +97,6 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
         // Get rid of view references
         mProgressCircle = null;
-        fab = null;
-        shareFab = null;
-        bookmarkFab = null;
     }
 
     final protected void showProgressCircle() {
@@ -112,139 +119,6 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         }
     }
 
-    final protected void showFab() {
-        if (fab != null) {
-            fab.setVisibility(View.VISIBLE);
-            shareFab.setVisibility(View.VISIBLE);
-            bookmarkFab.setVisibility(View.VISIBLE);
-        }
-    }
-
-    final protected void hideFab() {
-        if (fab != null) {
-            fab.setVisibility(View.GONE);
-            shareFab.setVisibility(View.GONE);
-            bookmarkFab.setVisibility(View.GONE);
-        }
-    }
-
-    final protected void openFab() {
-        ObjectAnimator shareAnimator = ObjectAnimator.ofFloat(shareFab, "translationY", SHARE_POS);
-        shareAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-        shareAnimator.setDuration(ANIM_DURATION);
-        shareAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                shareFab.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) { }
-
-            @Override
-            public void onAnimationCancel(Animator animation) { }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) { }
-        });
-        shareAnimator.start();
-
-        ObjectAnimator bookmarkAnimator = ObjectAnimator.ofFloat(bookmarkFab, "translationY", BOOKMARK_POS);
-        bookmarkAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-        bookmarkAnimator.setDuration(ANIM_DURATION);
-        bookmarkAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                bookmarkFab.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-            }
-        });
-        bookmarkAnimator.start();
-
-        ObjectAnimator rotateFab = ObjectAnimator.ofFloat(fab, "rotation", 45);
-        rotateFab.setDuration(ANIM_DURATION);
-        rotateFab.start();
-
-        open = true;
-    }
-
-    final protected void closeFab() {
-        ObjectAnimator shareAnimator = ObjectAnimator.ofFloat(shareFab, "translationY", INIT_POS);
-        shareAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-        shareAnimator.setDuration(ANIM_DURATION);
-        shareAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) { }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                shareFab.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) { }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) { }
-        });
-        shareAnimator.start();
-
-        final ObjectAnimator bookmarkAnimator = ObjectAnimator.ofFloat(bookmarkFab, "translationY", INIT_POS);
-        bookmarkAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-        bookmarkAnimator.setDuration(ANIM_DURATION);
-        bookmarkAnimator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                bookmarkFab.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-            }
-        });
-        bookmarkAnimator.start();
-
-        ObjectAnimator rotateFab = ObjectAnimator.ofFloat(fab, "rotation", 90);
-        rotateFab.setDuration(ANIM_DURATION);
-        rotateFab.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) { }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                fab.setRotation(0);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) { }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) { }
-        });
-        rotateFab.start();
-
-        open = false;
-    }
-
     protected Intent getShareIntent() {
         Uri uri = getLink().getUri(Config.SCHEMA);
         Intent intent = new Intent(Intent.ACTION_SEND);
@@ -253,12 +127,12 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         return intent;
     }
 
-    public void setShareIntent() {
-        final Intent intent = getShareIntent();
-        final ShareActionProvider shareActionProvider = getShareActionProvider();
-        if (shareActionProvider != null) {
-            shareActionProvider.setShareIntent(intent);
-        }
+    protected ActionBar getActionBar() {
+        return actionBar;
+    }
+
+    protected Toolbar getToolbar() {
+        return toolbar;
     }
 
     public String getLinkTitle() {

@@ -60,7 +60,6 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
     private ArrayList<RSSItem> mData;
     private RSSAdapter mAdapter;
     private boolean mLoading;
-    private ShareActionProvider shareActionProvider;
 
     public RSSReader() {
         // Required empty public constructor
@@ -103,16 +102,6 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
-
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -136,11 +125,6 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
         });
 
         return v;
-    }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
     }
 
     @Override

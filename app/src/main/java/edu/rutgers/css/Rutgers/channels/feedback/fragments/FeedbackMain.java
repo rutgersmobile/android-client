@@ -83,11 +83,6 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         return null;
     }
 
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return null;
-    }
-
     enum Status {
         SUCCESS, FAIL, IOFAIL
     };
@@ -122,19 +117,9 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     }
     
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_feedback_main, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
         final Bundle args = getArguments();
-
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
 
         // Set title from JSON
         if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));

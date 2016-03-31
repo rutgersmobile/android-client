@@ -206,9 +206,4 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
     public Link getLink() {
         return null;
     }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return null;
-    }
 }

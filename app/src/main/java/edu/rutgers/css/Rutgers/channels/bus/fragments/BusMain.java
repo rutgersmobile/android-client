@@ -41,10 +41,8 @@ public class BusMain extends BaseChannelFragment {
 
     /* Member data */
     private ViewPager mViewPager;
-    private ShareActionProvider shareActionProvider;
     private EditText searchBox;
     private TabLayout tabs;
-    private Toolbar toolbar;
     private boolean searching = false;
     private int position = 0;
 
@@ -89,21 +87,12 @@ public class BusMain extends BaseChannelFragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_tabbed_pager);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_tabbed_pager, R.id.toolbar_search);
         final Bundle args = getArguments();
 
         // Set title from JSON
         final String title = args.getString(ARG_TITLE_TAG, getResources().getString(R.string.bus_title));
         getActivity().setTitle(title);
-
-        toolbar = (Toolbar) v.findViewById(R.id.toolbar_search);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
 
         final BusFragmentPager pagerAdapter = new BusFragmentPager(getChildFragmentManager());
 
@@ -120,7 +109,6 @@ public class BusMain extends BaseChannelFragment {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 BusMain.this.position = position;
-                BusMain.this.setShareIntent();
             }
         });
 
@@ -166,11 +154,6 @@ public class BusMain extends BaseChannelFragment {
     }
 
     @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
-    }
-
-    @Override
     public void onDestroyView() {
         mViewPager = null;
         super.onDestroyView();
@@ -190,14 +173,14 @@ public class BusMain extends BaseChannelFragment {
                 tabs.setVisibility(View.GONE);
                 mViewPager.setCurrentItem(2, true);
                 searchBox.requestFocus();
-                toolbar.setBackgroundColor(getResources().getColor(R.color.white));
+                getToolbar().setBackgroundColor(getResources().getColor(R.color.white));
                 AppUtils.openKeyboard(getActivity());
             } else {
                 searching = false;
                 searchBox.setVisibility(View.GONE);
                 tabs.setVisibility(View.VISIBLE);
                 searchBox.setText("");
-                toolbar.setBackgroundColor(getResources().getColor(R.color.actbar_new));
+                getToolbar().setBackgroundColor(getResources().getColor(R.color.actbar_new));
                 AppUtils.closeKeyboard(getActivity());
             }
             getActivity().invalidateOptionsMenu();

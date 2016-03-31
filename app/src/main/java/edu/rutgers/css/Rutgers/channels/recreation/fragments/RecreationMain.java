@@ -71,16 +71,6 @@ public class RecreationMain extends BaseChannelFragment implements LoaderManager
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
-
         if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
@@ -134,11 +124,6 @@ public class RecreationMain extends BaseChannelFragment implements LoaderManager
 
     @Override
     public Link getLink() {
-        return null;
-    }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
         return null;
     }
 }

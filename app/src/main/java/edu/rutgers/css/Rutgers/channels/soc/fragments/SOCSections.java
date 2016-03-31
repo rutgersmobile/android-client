@@ -60,7 +60,6 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     /* Member data */
     private CourseSectionAdapter mAdapter;
     private Course mCourse;
-    private ShareActionProvider shareActionProvider;
 
     private boolean mLoading;
 
@@ -129,16 +128,6 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
-
         final Bundle args = getArguments();
 
         if (mLoading) showProgressCircle();
@@ -175,11 +164,6 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
         });
 
         return v;
-    }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
     }
 
     @Override

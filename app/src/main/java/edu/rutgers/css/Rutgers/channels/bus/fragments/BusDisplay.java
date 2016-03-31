@@ -197,16 +197,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             }
         });
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
-
         refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresh_layout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -252,11 +242,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         pathParts.add(mMode);
         pathParts.add(mTag);
         return new Link("bus", pathParts, getLinkTitle());
-    }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
     }
 
     @Override

@@ -55,16 +55,6 @@ public class RUInfoMain extends BaseChannelFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_ruinfo_main, container, false);
 
-        final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-            ((MainActivity) getActivity()).syncDrawer();
-        }
-
         final Bundle args = getArguments();
 
         // Set title from JSON
@@ -166,10 +156,4 @@ public class RUInfoMain extends BaseChannelFragment {
     public Link getLink() {
         return null;
     }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return null;
-    }
-
 }

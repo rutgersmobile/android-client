@@ -61,7 +61,6 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
     private RMenuAdapter mAdapter;
     private boolean mLoading;
     private String mTitle;
-    private ShareActionProvider shareActionProvider;
 
     public PlacesDisplay() {
         // Required empty public constructor
@@ -117,10 +116,10 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
 
                 switch (clicked.getArgs().getInt(ID_KEY)) {
                     case ADDRESS_ROW:
-//                        launchMap();
-                        final Place.Location location = mPlace.getLocation();
-                        final Bundle mapArgs = MapDisplay.createArgs(new MapDisplay.MapPoint(location.getLatitude(), location.getLongitude(), 18));
-                        switchFragments(mapArgs);
+                        launchMap();
+//                        final Place.Location location = mPlace.getLocation();
+//                        final Bundle mapArgs = MapDisplay.createArgs(new MapDisplay.MapPoint(location.getLatitude(), location.getLongitude(), 18));
+//                        switchFragments(mapArgs);
                         break;
                     case DESC_ROW:
                         final Bundle textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
@@ -136,19 +135,6 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         });
 
         return v;
-    }
-
-    public void setShareIntent() {
-        Uri uri = getLink().getUri(Config.SCHEMA);
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
-        shareActionProvider.setShareIntent(intent);
-    }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return shareActionProvider;
     }
 
     public Link getLink() {

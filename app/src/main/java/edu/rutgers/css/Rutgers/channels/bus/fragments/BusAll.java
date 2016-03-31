@@ -153,9 +153,4 @@ public class BusAll extends BaseChannelFragment
     public Link getLink() {
         return null;
     }
-
-    @Override
-    public ShareActionProvider getShareActionProvider() {
-        return null;
-    }
 }
