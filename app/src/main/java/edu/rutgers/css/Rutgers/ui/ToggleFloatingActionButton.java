@@ -97,9 +97,9 @@ public final class ToggleFloatingActionButton {
         final int mainOffset = mainSize + padding;
         int fabsOffset = fabSize + padding;
         for (int i = 0; i < fabs.size(); i++) {
-
+            final int position = i * fabsOffset + mainOffset;
             final FloatingActionButton fab = fabs.get(i);
-            ObjectAnimator shareAnimator = ObjectAnimator.ofFloat(fab, "translationY", - (i * fabsOffset + mainOffset));
+            ObjectAnimator shareAnimator = ObjectAnimator.ofFloat(fab, "translationY", - position);
             shareAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
             shareAnimator.setDuration(ANIM_DURATION);
             shareAnimator.start();
