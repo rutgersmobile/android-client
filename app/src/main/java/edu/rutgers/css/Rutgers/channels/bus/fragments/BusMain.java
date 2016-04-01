@@ -6,10 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,7 +21,6 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
@@ -87,7 +82,8 @@ public class BusMain extends BaseChannelFragment {
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_tabbed_pager, R.id.toolbar_search);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_tabbed_pager,
+                CreateArgs.builder().toolbarRes(R.id.toolbar_search).build());
         final Bundle args = getArguments();
 
         // Set title from JSON
@@ -155,7 +151,6 @@ public class BusMain extends BaseChannelFragment {
 
     @Override
     public void onDestroyView() {
-        mViewPager = null;
         super.onDestroyView();
     }
 

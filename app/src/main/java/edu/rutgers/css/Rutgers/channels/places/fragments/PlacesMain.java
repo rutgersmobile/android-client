@@ -2,20 +2,14 @@ package edu.rutgers.css.Rutgers.channels.places.fragments;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,7 +32,6 @@ import com.google.android.gms.location.LocationServices;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
@@ -48,7 +41,6 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
@@ -146,7 +138,8 @@ public class PlacesMain extends BaseChannelFragment
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places, R.id.toolbar_search);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places,
+                CreateArgs.builder().toolbarRes(R.id.toolbar_search).build());
 
         // Set title from JSON
         final Bundle args = getArguments();

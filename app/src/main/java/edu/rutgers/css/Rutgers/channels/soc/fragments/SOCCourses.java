@@ -5,10 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -29,7 +25,6 @@ import edu.rutgers.css.Rutgers.api.soc.model.Course;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
@@ -112,7 +107,8 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress, R.id.toolbar_search);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress,
+                CreateArgs.builder().toolbarRes(R.id.toolbar_search).build());
 
         if (mLoading) showProgressCircle();
 

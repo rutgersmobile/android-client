@@ -9,10 +9,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +28,6 @@ import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkMaps;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
@@ -119,7 +114,6 @@ public class FoodHall extends BaseChannelFragment
         viewPager.setAdapter(mPagerAdapter);
 
         tabLayout = (TabLayout) v.findViewById(R.id.tabs);
-        tabLayout.setTabsFromPagerAdapter(mPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
 
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -152,10 +146,6 @@ public class FoodHall extends BaseChannelFragment
     private void loadPages(DiningMenu diningMenu) {
         mPagerAdapter.clear();
         mPagerAdapter.addAllAvailable(diningMenu.getMeals());
-
-        if (tabLayout != null) {
-            tabLayout.setTabsFromPagerAdapter(mPagerAdapter);
-        }
 
         // Set title to show timestamp for dining data
         mTitle = mLocation + " (" + dout.format(diningMenu.getDate()) + ")";
