@@ -311,7 +311,8 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         List<Prediction> predictions = data.getPredictions();
         String title = data.getTitle();
         if (title != null) {
-            activity.setTitle(title);
+            mTitle = title;
+            activity.setTitle(mTitle);
         }
 
         // If there are no active routes or stops, show a message
