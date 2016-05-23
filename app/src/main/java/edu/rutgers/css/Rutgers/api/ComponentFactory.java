@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.channels.athletics.fragments.AthleticsDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusMain;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
@@ -80,6 +81,9 @@ public final class ComponentFactory {
         put(RSSReader.HANDLE, RSSReader.class);
         put(TextDisplay.HANDLE, TextDisplay.class);
         put(WebDisplay.HANDLE, WebDisplay.class);
+
+        // Athletics views
+        put(AthleticsDisplay.HANDLE, AthleticsDisplay.class);
 
         // Bus views
         put(BusMain.HANDLE, BusMain.class);

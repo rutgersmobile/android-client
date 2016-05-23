@@ -4,10 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,9 +22,7 @@ import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSAdapter;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
 import edu.rutgers.css.Rutgers.channels.reader.model.loader.RSSItemLoader;
-import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
-import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
@@ -38,7 +32,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 /**
  * RSS feed reader
  */
-public class RSSReader extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<RSSItem>> {
+public class RSSReader extends DtableChannelFragment implements LoaderManager.LoaderCallbacks<List<RSSItem>> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "RSSReader";
@@ -125,25 +119,6 @@ public class RSSReader extends BaseChannelFragment implements LoaderManager.Load
         });
 
         return v;
-    }
-
-    @Override
-    public Link getLink() {
-        final Bundle args = getArguments();
-        final String topHandle = args.getString(ComponentFactory.ARG_HANDLE_TAG);
-        final List<String> history = args.getStringArrayList(ComponentFactory.ARG_HIST_TAG);
-        final String pathPart = args.getString(ARG_TITLE_TAG);
-
-        if (topHandle != null && history != null && pathPart != null) {
-            final List<String> linkArgs = new ArrayList<>();
-            for (final String title : history) {
-                linkArgs.add(title);
-            }
-            linkArgs.add(pathPart.replaceAll("\\s+", "").toLowerCase());
-            return new Link(topHandle, linkArgs, getLinkTitle());
-        }
-
-        return null;
     }
 
     @Override

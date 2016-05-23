@@ -113,7 +113,8 @@ public final class ApiRequest {
     public static <T> T json(String resource, int expire, TimeUnit unit, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
         setup();
         Response response = getResponse(resource, expire, unit);
-        GsonBuilder gson = new GsonBuilder();
+        GsonBuilder gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         if (deserializer != null) {
             gson = gson.registerTypeAdapter(type, deserializer);
         }
