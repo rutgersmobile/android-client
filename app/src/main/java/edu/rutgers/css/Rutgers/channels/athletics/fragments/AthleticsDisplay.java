@@ -23,7 +23,7 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 /**
  * Show athletics scores
  */
-public class AthleticsDisplay extends DtableChannelFragment implements LoaderManager.LoaderCallbacks<AthleticsGames> {
+public final class AthleticsDisplay extends DtableChannelFragment implements LoaderManager.LoaderCallbacks<AthleticsGames> {
 
     public static final String HANDLE = "athletics";
     private static final int LOADER_ID = AppUtils.getUniqueLoaderId();

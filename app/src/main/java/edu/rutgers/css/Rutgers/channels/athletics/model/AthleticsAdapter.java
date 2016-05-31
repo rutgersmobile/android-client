@@ -22,9 +22,10 @@ import lombok.Data;
 /**
  * Array adapter extended for Athletics items
  */
-public class AthleticsAdapter extends ArrayAdapter<AthleticsGame> {
+public final class AthleticsAdapter extends ArrayAdapter<AthleticsGame> {
     private final int layoutResource;
     private final String RUTGERS_CODE = "rutu";
+    private int loserColor;
 
     @Data
     @Builder
@@ -68,6 +69,18 @@ public class AthleticsAdapter extends ArrayAdapter<AthleticsGame> {
             holder = (ViewHolder) convertView.getTag();
         }
 
+        final int defaultTextColor = holder.getHomeTeam().getCurrentTextColor();
+        final int black = ContextCompat.getColor(getContext(), R.color.black);
+
+        if (defaultTextColor != black) {
+            loserColor = defaultTextColor;
+        }
+
+        holder.getHomeTeam().setTextColor(loserColor);
+        holder.getHomeScore().setTextColor(loserColor);
+        holder.getAwayTeam().setTextColor(loserColor);
+        holder.getAwayScore().setTextColor(loserColor);
+
         final AthleticsGame game = getItem(position);
 
         final String opponent = StringUtils.capitalize(game.getHome().getCode().equals(RUTGERS_CODE)
@@ -88,7 +101,6 @@ public class AthleticsAdapter extends ArrayAdapter<AthleticsGame> {
         holder.getGameDate().setText(DateFormat.getDateInstance().format(game.getStart()));
         holder.getGameTime().setText(DateFormat.getTimeInstance(DateFormat.SHORT).format(game.getStart()));
 
-        final int black = ContextCompat.getColor(getContext(), R.color.black);
         if (game.getHome().getScore() > game.getAway().getScore()) {
             holder.getHomeTeam().setTextColor(black);
             holder.getHomeScore().setTextColor(black);
