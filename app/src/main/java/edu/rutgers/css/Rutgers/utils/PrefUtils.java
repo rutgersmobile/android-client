@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.model.Channel;
 
 /**
  * Preference keys and helpers.
@@ -85,38 +85,38 @@ public final class PrefUtils {
         prefs.edit().putInt(KEY_PREF_TUTORIAL_STAGE, stage).apply();
     }
 
-    public static List<Link> getBookmarks(@NonNull Context context) {
+    public static List<Channel> getBookmarks(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         Gson gson = new Gson();
-        Type type = new TypeToken<List<Link>>(){}.getType();
-        String emptyList = gson.toJson(new ArrayList<Link>(), type);
-        List<Link> links = gson.fromJson(prefs.getString(KEY_PREF_BOOKMARK, emptyList), type);
+        Type type = new TypeToken<List<Channel>>(){}.getType();
+        String emptyList = gson.toJson(new ArrayList<Channel>(), type);
+        List<Channel> links = gson.fromJson(prefs.getString(KEY_PREF_BOOKMARK, emptyList), type);
         return dedupLinks(links);
     }
 
-    public static void setBookmarks(@NonNull Context context, List<Link> links) {
+    public static void setBookmarks(@NonNull Context context, List<Channel> links) {
         links = dedupLinks(links);
         Gson gson = new Gson();
-        Type type = new TypeToken<List<Link>>(){}.getType();
+        Type type = new TypeToken<List<Channel>>(){}.getType();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.edit().putString(KEY_PREF_BOOKMARK, gson.toJson(links, type)).apply();
     }
 
-    public static void addBookmark(@NonNull Context context, @NonNull Link link) {
-        List<Link> links = getBookmarks(context);
+    public static void addBookmark(@NonNull Context context, @NonNull Channel link) {
+        List<Channel> links = getBookmarks(context);
         links.add(link);
         setBookmarks(context, links);
     }
 
     public static void removeBookmark(@NonNull Context context, int position) {
-        List<Link> links = getBookmarks(context);
+        List<Channel> links = getBookmarks(context);
         if (position < links.size()) {
             links.remove(position);
         }
         setBookmarks(context, links);
     }
 
-    private static List<Link> dedupLinks(List<Link> links) {
+    private static List<Channel> dedupLinks(List<Channel> links) {
         return new ArrayList<>(new LinkedHashSet<>(links));
     }
 }

@@ -8,18 +8,14 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nhaarman.listviewanimations.util.Swappable;
-
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.SettingsActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
+import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
@@ -29,14 +25,11 @@ import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 public class DrawerAdapter extends BaseAdapter {
     private final Context context;
     private final List<Channel> channels;
-    private final List<Link> uris;
 
     private final int itemLayout;
     private final int dividerLayout;
 
-    private static final int EXTRA = 5; // 2 dividers, 1 about, 1 settings, 1 bookmarks
-
-    private static final int DIVIDER_SIZE = 1;
+    private static final int EXTRA = 4; // 1 divider, 1 about, 1 settings, 1 bookmarks
 
     private static final int DIVIDER_OFFSET = 0;
     private static final int ABOUT_OFFSET = 1;
@@ -52,12 +45,11 @@ public class DrawerAdapter extends BaseAdapter {
         ImageView imageView;
     }
 
-    public DrawerAdapter(Context context, int itemLayout, int dividerLayout, List<Link> uris, List<Channel> channels) {
+    public DrawerAdapter(Context context, int itemLayout, int dividerLayout, List<Channel> channels) {
         this.context = context;
         this.itemLayout = itemLayout;
         this.dividerLayout = dividerLayout;
         this.channels = channels;
-        this.uris = uris;
     }
 
     @Override
@@ -87,11 +79,7 @@ public class DrawerAdapter extends BaseAdapter {
             return convertView;
         }
 
-        if (positionIsURI(position)) {
-            Link link = (Link) getItem(position);
-            holder.textView.setText(link.getTitle());
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), link.getHandle()));
-        } else if (positionIsChannel(position)) {
+        if (positionIsChannel(position)) {
             Channel channel = (Channel) getItem(position);
             holder.textView.setText(channel.getTitle(homeCampus));
             holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), channel.getHandle()));
@@ -113,7 +101,7 @@ public class DrawerAdapter extends BaseAdapter {
     public int getCount() {
         // The total count is the number of channels plus one for each of:
         // settings, about, divider
-        return uris.size() + channels.size() + EXTRA;
+        return channels.size() + EXTRA;
     }
 
     @Override
@@ -131,12 +119,12 @@ public class DrawerAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int i) {
-        if (positionIsURI(i)) {
-            return uris.get(i);
-        } else if (positionIsChannel(i)) {
-            return channels.get(i - (uris.size() + DIVIDER_SIZE));
+        if (positionIsChannel(i)) {
+            return channels.get(i);
         } else if (positionIsSettings(i)) {
             return SettingsActivity.class;
+        } else if (positionIsBookmarks(i)){
+            return BookmarksDisplay.class;
         } else if (positionIsAbout(i)) {
             return AboutDisplay.class;
         }
@@ -153,67 +141,33 @@ public class DrawerAdapter extends BaseAdapter {
         return i;
     }
 
-    public void addAllChannels(Collection<Channel> channels) {
+    public void addAll(Collection<Channel> channels) {
         this.channels.addAll(channels);
         notifyDataSetChanged();
     }
 
-    public void addAllLinks(Collection<Link> links) {
-        this.uris.addAll(links);
-        notifyDataSetChanged();
-    }
-
-    public void clearLinks() {
-        this.uris.clear();
-        notifyDataSetChanged();
-    }
-
-    public void clearChannels() {
+    public void clear() {
         channels.clear();
         notifyDataSetChanged();
     }
 
-    public boolean positionIsURI(int position) {
-        return position < uris.size();
-    }
-
     public boolean positionIsChannel(int position) {
-        return position > uris.size() && position <= uris.size() + channels.size();
+        return position < channels.size();
     }
 
     public boolean positionIsDivider(int position) {
-        return position == getLowDividerPosition() || position == getHighDividerPosition();
-    }
-
-    public int getHighDividerPosition() {
-        return uris.size() + DIVIDER_OFFSET;
-    }
-
-    public int getLowDividerPosition() {
-        return uris.size() + channels.size() + DIVIDER_SIZE + DIVIDER_OFFSET;
+        return position == channels.size() - 1 + DIVIDER_OFFSET;
     }
 
     public boolean positionIsAbout(int position) {
-        return position == getAboutPosition();
-    }
-
-    public int getAboutPosition() {
-        return uris.size() + DIVIDER_SIZE + channels.size() + ABOUT_OFFSET;
+        return position == channels.size() - 1 + ABOUT_OFFSET;
     }
 
     public boolean positionIsBookmarks(int position) {
-        return position == getBookmarksPosition();
-    }
-
-    public int getBookmarksPosition() {
-        return uris.size() + DIVIDER_SIZE + channels.size() + BOOKMARKS_OFFSET;
+        return position == channels.size() - 1 + BOOKMARKS_OFFSET;
     }
 
     public boolean positionIsSettings(int position) {
-        return position == getSettingsPosition();
-    }
-
-    public int getSettingsPosition() {
-        return uris.size() + DIVIDER_SIZE + channels.size() + SETTINGS_OFFSET;
+        return position == channels.size() - 1 + SETTINGS_OFFSET;
     }
 }

@@ -26,7 +26,6 @@ import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
@@ -34,7 +33,6 @@ import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
-import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkBus;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
@@ -108,7 +106,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
         firstLaunchChecks();
 
         // Set up navigation drawer
-        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Link>(), new ArrayList<Channel>());
+        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Channel>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -131,7 +129,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
             }
         };
 
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
 
         mDrawerListView.setAdapter(mDrawerAdapter);
@@ -139,12 +137,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
-                if (adapter.positionIsURI(position)) {
-                    final Link link = (Link) adapter.getItem(position);
-                    deepLink(link.getUri(Config.SCHEMA));
-                    mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
-                    return;
-                } else if (adapter.positionIsSettings(position)) {
+                if (adapter.positionIsSettings(position)) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     mDrawerLayout.closeDrawer(mDrawerListView);
                     return;
@@ -161,6 +154,11 @@ public class MainActivity extends GoogleApiProviderActivity implements
                 }
 
                 Channel channel = (Channel) adapter.getItem(position);
+                if (channel.getLink() != null) {
+                    deepLink(channel.getLink());
+                    return;
+                }
+
                 Bundle channelArgs = channel.getBundle();
                 String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
 
@@ -179,8 +177,8 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
-                mDrawerAdapter.clearLinks();
-                mDrawerAdapter.addAllLinks(PrefUtils.getBookmarks(getApplicationContext()));
+                mDrawerAdapter.clear();
+                mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
                 mDrawerAdapter.notifyDataSetChanged();
             }
         };
@@ -195,10 +193,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
         JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
         if (array != null) {
             mChannelManager.loadChannelsFromJSONArray(array);
-            mDrawerAdapter.addAllChannels(mChannelManager.getChannels());
+            mDrawerAdapter.addAll(mChannelManager.getChannels());
         }
 
-        mDrawerAdapter.addAllLinks(PrefUtils.getBookmarks(getApplicationContext()));
+        mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
 
         if (wantsLink()) {
             final Intent intent = getIntent();
@@ -354,8 +352,8 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mChannelManager.clear();
         mChannelManager.loadChannelsFromJSONArray(array);
 
-        mDrawerAdapter.clearChannels();
-        mDrawerAdapter.addAllChannels(mChannelManager.getChannels());
+        mDrawerAdapter.clear();
+        mDrawerAdapter.addAll(mChannelManager.getChannels());
     }
 
     public void openDrawer() {
@@ -365,7 +363,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
     @Override
     public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {
         mChannelManager.clear();
-        mDrawerAdapter.clearChannels();
+        mDrawerAdapter.clear();
     }
 
     /**
