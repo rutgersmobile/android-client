@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public final class AthleticsGame {
     private final String description;
+    private final boolean isEvent;
     private final AthleticsTeam home;
     private final AthleticsTeam away;
     private final Date start;
