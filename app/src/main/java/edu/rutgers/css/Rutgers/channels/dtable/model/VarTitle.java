@@ -17,6 +17,12 @@ public class VarTitle implements Serializable {
     public String homeTitle;
     public String foreignTitle;
 
+    public VarTitle(VarTitle other) {
+        this.homeCampus = other.homeCampus;
+        this.homeTitle = other.homeTitle;
+        this.foreignTitle = other.foreignTitle;
+    }
+
     public VarTitle(String homeTitle) {
         this.homeTitle = homeTitle;
     }

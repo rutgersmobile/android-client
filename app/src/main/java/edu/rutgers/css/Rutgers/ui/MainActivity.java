@@ -30,9 +30,9 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ChannelManager;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkBus;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
@@ -44,7 +44,6 @@ import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
-import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
@@ -106,7 +105,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
         firstLaunchChecks();
 
         // Set up navigation drawer
-        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Channel>());
+        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Link>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -153,21 +152,8 @@ public class MainActivity extends GoogleApiProviderActivity implements
                     return;
                 }
 
-                Channel channel = (Channel) adapter.getItem(position);
-                if (channel.getLink() != null) {
-                    deepLink(channel.getLink());
-                    return;
-                }
-
-                Bundle channelArgs = channel.getBundle();
-                String homeCampus = RutgersUtils.getHomeCampus(MainActivity.this);
-
-                channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
-
-                mDrawerListView.invalidateViews();
-                // Launch component
-                fragmentMediator.switchFragments(channelArgs);
-
+                Link link = (Link) adapter.getItem(position);
+                deepLink(link.getUri());
                 mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
             }
         });
@@ -193,7 +179,9 @@ public class MainActivity extends GoogleApiProviderActivity implements
         JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
         if (array != null) {
             mChannelManager.loadChannelsFromJSONArray(array);
-            mDrawerAdapter.addAll(mChannelManager.getChannels());
+            for (final Channel channel : mChannelManager.getChannels()) {
+                PrefUtils.addBookmark(getApplicationContext(), channel.getLink());
+            }
         }
 
         mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
@@ -353,7 +341,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mChannelManager.loadChannelsFromJSONArray(array);
 
         mDrawerAdapter.clear();
-        mDrawerAdapter.addAll(mChannelManager.getChannels());
+        for (final Channel channel : mChannelManager.getChannels()) {
+            PrefUtils.addBookmark(getApplicationContext(), channel.getLink());
+        }
+        mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
     }
 
     public void openDrawer() {

@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,11 +29,17 @@ import edu.rutgers.css.Rutgers.utils.PrefUtils;
  */
 public final class BookmarkAdapter extends BaseAdapter implements Swappable {
 
-    private final int rowLayout;
+    private final int removableResource;
+    private final int lockedResource;
     private final Context context;
     private final List<Link> list;
 
+    private static final int REMOVABLE = 0;
+    private static final int LOCKED = 1;
+
     private final class ViewHolder {
+        CheckBox checkBox;
+        ImageButton imageButton;
         TextView textView;
         ImageView imageView;
     }
@@ -42,9 +50,10 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
         notifyDataSetChanged();
     }
 
-    public BookmarkAdapter(final Context context, int resource) {
+    public BookmarkAdapter(final Context context, int removableResource, int lockedResource) {
         this.context = context;
-        this.rowLayout = resource;
+        this.removableResource = removableResource;
+        this.lockedResource = lockedResource;
         this.list = new ArrayList<>();
 
         registerDataSetObserver(new DataSetObserver() {
@@ -54,6 +63,21 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
                 PrefUtils.setBookmarks(context, list);
             }
         });
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        final Link link = (Link) getItem(position);
+        if (link.isRemovable()) {
+            return REMOVABLE;
+        }
+
+        return LOCKED;
     }
 
     @Override
@@ -92,12 +116,27 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
         final LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ViewHolder holder;
 
+        final int type = getItemViewType(position);
+
         if (convertView == null) {
-            convertView = layoutInflater.inflate(rowLayout, null);
-            holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById(R.id.title);
-            holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
-            convertView.setTag(holder);
+            switch (type) {
+                case REMOVABLE:
+                    convertView = layoutInflater.inflate(removableResource, null);
+                    holder = new ViewHolder();
+                    holder.imageButton = (ImageButton) convertView.findViewById(R.id.delete_bookmark);
+                    holder.textView = (TextView) convertView.findViewById(R.id.title);
+                    holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
+                    convertView.setTag(holder);
+                    break;
+                default:
+                    convertView = layoutInflater.inflate(lockedResource, null);
+                    holder = new ViewHolder();
+                    holder.checkBox = (CheckBox) convertView.findViewById(R.id.toggle_bookmark);
+                    holder.textView = (TextView) convertView.findViewById(R.id.title);
+                    holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
+                    convertView.setTag(holder);
+                    break;
+            }
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
@@ -108,6 +147,17 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
         int iconRes = context.getResources().getIdentifier("ic_"+link.getHandle(), "drawable", Config.PACKAGE_NAME);
         holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), iconRes, R.color.dark_gray));
 
+        if (!link.isRemovable()) {
+            holder.checkBox.setChecked(link.isEnabled());
+            holder.checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CheckBox checkBox = (CheckBox) v;
+                    link.setEnabled(checkBox.isChecked());
+                    notifyDataSetChanged();
+                }
+            });
+        }
         return convertView;
     }
 }

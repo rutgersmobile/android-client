@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.ToggleFloatingActionButton;
@@ -58,6 +59,15 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         final Integer mainFabRes;
         final Integer shareFabRes;
         final Integer bookmarkFabRes;
+    }
+
+    private ActionBar actionBar;
+    private ChannelManager cm;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        cm = ((MainActivity) getActivity()).getChannelManager();
     }
 
     final protected View createView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState, int resource) {

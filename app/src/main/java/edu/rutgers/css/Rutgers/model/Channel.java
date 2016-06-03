@@ -14,6 +14,7 @@ import java.io.Serializable;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.JsonUtils;
 import lombok.Data;
@@ -29,8 +30,18 @@ public class Channel implements Serializable {
     private final String view;
     private final String api;
     private final String url;
-    private final Uri link;
+    private Link link;
     private final boolean canOverride;
+
+    public Channel(Channel other) {
+        this.title = new VarTitle(other.title);
+        this.handle = other.handle;
+        this.view = other.view;
+        this.api = other.api;
+        this.url = other.url;
+        this.link = new Link(other.link);
+        this.canOverride = other.canOverride;
+    }
 
     /** Construct channel from JSON. */
     public Channel(JsonObject channelJson) throws JsonSyntaxException {
@@ -56,9 +67,9 @@ public class Channel implements Serializable {
         }
 
         if (JsonUtils.exists(channelJson, "link")) {
-            this.link = Uri.parse(channelJson.getAsJsonPrimitive("link").getAsString());
+            this.link = Link.createLink(Uri.parse(channelJson.getAsJsonPrimitive("link").getAsString()), getTitle(), false);
         } else {
-            this.link = null;
+            this.link = Link.createLink(Uri.parse("rutgers://" + handle), getTitle(), false);
         }
 
         JsonElement elem = channelJson.get("canOverride");

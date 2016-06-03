@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.model;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,19 +11,20 @@ import java.util.Collection;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.SettingsActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
-import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
  * Adapter for holding channels
  * TODO refactor this class to something more extensible
  */
 public class DrawerAdapter extends BaseAdapter {
-    private final Context context;
-    private final List<Channel> channels;
+    private final MainActivity activity;
+    private final List<Link> links;
 
     private final int itemLayout;
     private final int dividerLayout;
@@ -45,17 +45,16 @@ public class DrawerAdapter extends BaseAdapter {
         ImageView imageView;
     }
 
-    public DrawerAdapter(Context context, int itemLayout, int dividerLayout, List<Channel> channels) {
-        this.context = context;
+    public DrawerAdapter(MainActivity activity, int itemLayout, int dividerLayout, List<Link> links) {
+        this.activity = activity;
         this.itemLayout = itemLayout;
         this.dividerLayout = dividerLayout;
-        this.channels = channels;
+        this.links = links;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater layoutInflater = LayoutInflater.from(context);
-        String homeCampus = RutgersUtils.getHomeCampus(context);
+        LayoutInflater layoutInflater = LayoutInflater.from(activity.getApplicationContext());
         ViewHolder holder;
         final int type = getItemViewType(position);
 
@@ -80,28 +79,39 @@ public class DrawerAdapter extends BaseAdapter {
         }
 
         if (positionIsChannel(position)) {
-            Channel channel = (Channel) getItem(position);
-            holder.textView.setText(channel.getTitle(homeCampus));
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), channel.getHandle()));
+            Link link = (Link) getItem(position);
+            holder.textView.setText(link.getTitle());
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(activity.getApplicationContext().getResources(), link.getHandle()));
         } else if (positionIsSettings(position)) {
             holder.textView.setText("Settings");
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), "settings_black_24dp"));
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(activity.getApplicationContext().getResources(), "settings_black_24dp"));
         } else if (positionIsAbout(position)) {
             holder.textView.setText("About");
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), "info"));
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(activity.getApplicationContext().getResources(), "info"));
         } else if (positionIsBookmarks(position)) {
             holder.textView.setText("Bookmarks");
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), "bookmark"));
+            holder.imageView.setImageDrawable(ImageUtils.getIcon(activity.getApplicationContext().getResources(), "bookmark"));
         }
 
         return convertView;
+    }
+
+    private int getDisabled() {
+        int disabled = 0;
+        for (final Link link : links) {
+            if (!link.isEnabled()) {
+                disabled++;
+            }
+        }
+
+        return disabled;
     }
 
     @Override
     public int getCount() {
         // The total count is the number of channels plus one for each of:
         // settings, about, divider
-        return channels.size() + EXTRA;
+        return links.size() - getDisabled() + EXTRA;
     }
 
     @Override
@@ -120,7 +130,15 @@ public class DrawerAdapter extends BaseAdapter {
     @Override
     public Object getItem(int i) {
         if (positionIsChannel(i)) {
-            return channels.get(i);
+            int j = 0;
+            for (final Link link : links) {
+                if (j == i && link.isEnabled()) {
+                    return link;
+                } else if (link.isEnabled()) {
+                    j++;
+                }
+            }
+            throw new IndexOutOfBoundsException();
         } else if (positionIsSettings(i)) {
             return SettingsActivity.class;
         } else if (positionIsBookmarks(i)){
@@ -132,42 +150,42 @@ public class DrawerAdapter extends BaseAdapter {
     }
 
     @Override
-    public boolean hasStableIds() {
-        return true;
+    public long getItemId(int position) {
+        return position;
     }
 
-    @Override
-    public long getItemId(int i) {
-        return i;
+    public void add(Link link) {
+        this.links.add(link);
+        notifyDataSetChanged();
     }
 
-    public void addAll(Collection<Channel> channels) {
-        this.channels.addAll(channels);
+    public void addAll(Collection<Link> links) {
+        this.links.addAll(links);
         notifyDataSetChanged();
     }
 
     public void clear() {
-        channels.clear();
+        links.clear();
         notifyDataSetChanged();
     }
 
     public boolean positionIsChannel(int position) {
-        return position < channels.size();
+        return position < links.size() - getDisabled();
     }
 
     public boolean positionIsDivider(int position) {
-        return position == channels.size() - 1 + DIVIDER_OFFSET;
+        return position == links.size() - getDisabled() + DIVIDER_OFFSET;
     }
 
     public boolean positionIsAbout(int position) {
-        return position == channels.size() - 1 + ABOUT_OFFSET;
+        return position == links.size() - getDisabled() + ABOUT_OFFSET;
     }
 
     public boolean positionIsBookmarks(int position) {
-        return position == channels.size() - 1 + BOOKMARKS_OFFSET;
+        return position == links.size() - getDisabled() + BOOKMARKS_OFFSET;
     }
 
     public boolean positionIsSettings(int position) {
-        return position == channels.size() - 1 + SETTINGS_OFFSET;
+        return position == links.size() - getDisabled() + SETTINGS_OFFSET;
     }
 }

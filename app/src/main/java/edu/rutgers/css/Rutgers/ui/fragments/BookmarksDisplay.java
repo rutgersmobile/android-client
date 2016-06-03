@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
-import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -57,7 +55,7 @@ public class BookmarksDisplay extends BaseDisplay {
             ((MainActivity) getActivity()).syncDrawer();
         }
 
-        final BookmarkAdapter adapter = new BookmarkAdapter(getContext(), R.layout.row_bookmark_item);
+        final BookmarkAdapter adapter = new BookmarkAdapter(getContext(), R.layout.row_bookmark_item, R.layout.row_bookmark_toggle_item);
         adapter.addAll(PrefUtils.getBookmarks(getContext()));
 
         final DynamicListView bookmarks = (DynamicListView) v.findViewById(R.id.dynamic_list);
@@ -68,15 +66,6 @@ public class BookmarksDisplay extends BaseDisplay {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 bookmarks.startDragging(position);
                 return true;
-            }
-        });
-
-        bookmarks.enableSwipeToDismiss(new OnDismissCallback() {
-            @Override
-            public void onDismiss(@NonNull ViewGroup listView, @NonNull int[] reverseSortedPositions) {
-                for (int position : reverseSortedPositions) {
-                    adapter.remove(position);
-                }
             }
         });
 
