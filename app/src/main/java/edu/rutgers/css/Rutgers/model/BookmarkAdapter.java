@@ -157,6 +157,17 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
                     notifyDataSetChanged();
                 }
             });
+        } else {
+            holder.imageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    for (int i = 0; i < list.size(); i++) {
+                        if (list.get(i).equals(link)) {
+                            remove(i);
+                        }
+                    }
+                }
+            });
         }
         return convertView;
     }
