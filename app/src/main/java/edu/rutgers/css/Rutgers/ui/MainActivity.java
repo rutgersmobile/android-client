@@ -173,19 +173,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         fragmentMediator = new MainFragmentMediator(this);
 
-        // Load the drawer content synchronously first. This will allow us to have something in the
-        // drawer while we're loading. When the loader comes back it will erase this and fill
-        // in new values
-        JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
-        if (array != null) {
-            mChannelManager.loadChannelsFromJSONArray(array);
-            for (final Channel channel : mChannelManager.getChannels()) {
-                PrefUtils.addBookmark(getApplicationContext(), channel.getLink());
-            }
-        }
-
-        mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
-
         if (wantsLink()) {
             final Intent intent = getIntent();
             final String action = intent.getAction();
