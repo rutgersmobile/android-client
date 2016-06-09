@@ -16,7 +16,6 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.model.BookmarkAdapter;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
-import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**
  * Fragment for bookmark management
@@ -55,8 +54,8 @@ public class BookmarksDisplay extends BaseDisplay {
             ((MainActivity) getActivity()).syncDrawer();
         }
 
-        final BookmarkAdapter adapter = new BookmarkAdapter(getContext(), R.layout.row_bookmark_item, R.layout.row_bookmark_toggle_item);
-        adapter.addAll(PrefUtils.getBookmarks(getContext()));
+        final BookmarkAdapter adapter = new BookmarkAdapter(getContext(), R.layout.row_bookmark_item, R.layout.row_bookmark_toggle_item, R.layout.row_divider);
+        adapter.addFromPrefs();
 
         final DynamicListView bookmarks = (DynamicListView) v.findViewById(R.id.dynamic_list);
         bookmarks.setAdapter(adapter);

@@ -97,6 +97,7 @@ public final class PrefUtils {
 
     public static void setBookmarks(@NonNull Context context, List<Link> links) {
         links = dedupLinks(links);
+        links = arrangeLinks(links);
         Gson gson = new Gson();
         Type type = new TypeToken<List<Link>>(){}.getType();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -126,4 +127,19 @@ public final class PrefUtils {
     private static List<Link> dedupLinks(List<Link> links) {
         return new ArrayList<>(new LinkedHashSet<>(links));
     }
+
+    private static List<Link> arrangeLinks(List<Link> links) {
+        final List<Link> enabled = new ArrayList<>();
+        final List<Link> disabled = new ArrayList<>();
+        for (final Link link : links) {
+            if (link.isEnabled()) {
+                enabled.add(link);
+            } else {
+                disabled.add(link);
+            }
+        }
+        enabled.addAll(disabled);
+        return enabled;
+    }
+
 }
