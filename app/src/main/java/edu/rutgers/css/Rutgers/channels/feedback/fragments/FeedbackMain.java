@@ -80,7 +80,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
 
     enum Status {
         SUCCESS, FAIL, IOFAIL
-    };
+    }
 
     /**
      * Class for holding result status.
