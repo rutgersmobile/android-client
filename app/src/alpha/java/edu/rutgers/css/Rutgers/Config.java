@@ -23,10 +23,10 @@ public final class Config {
     // Alpha server 192.168.160.226 for use on emulator only, devices can't connect
     //public static final String API_BASE = "http://192.168.160.226/~gts37/mobile/"+API_LEVEL+"/";
     // Use doxa on device
-    public static final String API_MACHINE = "10.0.2.2";
-    public static final String API_BASE = "http://"+API_MACHINE+":8000/mobile/"+API_LEVEL+"/";
+    public static final String API_MACHINE = "192.168.160.226";
+    public static final String API_BASE = "http://"+API_MACHINE+"/~richton/mobile/"+API_LEVEL+"/";
     // Location-based services config
-    public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
+    public static final float NEARBY_RANGE = 300.0f; // Within 301 meters is considered "nearby"
 
     // Deep link schema info
     public static final Link.Schema SCHEMA = Link.Schema.HTTP;

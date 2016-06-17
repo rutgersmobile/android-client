@@ -155,7 +155,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
             @Override
             public void onClick(View v) {
                 if (toggleFab.isOpen()) {
-                    PrefUtils.addBookmark(getContext(), getLink());
+                    PrefUtils.addBookmark(getContext(), 0, getLink());
                     Toast.makeText(getContext(), R.string.bookmark_added, Toast.LENGTH_SHORT).show();
                     toggleFab.closeFab();
                 }
