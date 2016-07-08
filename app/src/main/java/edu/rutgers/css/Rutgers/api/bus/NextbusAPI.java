@@ -21,15 +21,17 @@ import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.bus.model.ActiveStops;
 import edu.rutgers.css.Rutgers.api.bus.model.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
+import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
 import edu.rutgers.css.Rutgers.api.bus.model.route.Route;
-import edu.rutgers.css.Rutgers.api.bus.model.stop.Stop;
 import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
+import edu.rutgers.css.Rutgers.api.bus.model.stop.Stop;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopGroup;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
 import edu.rutgers.css.Rutgers.api.bus.parsers.AgencyConfigDeserializer;
 import edu.rutgers.css.Rutgers.api.bus.parsers.PredictionXmlParser;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Provides static methods for access to the Nextbus API.
@@ -104,7 +106,7 @@ public final class NextbusAPI {
      * @param routeKey Route to get predictions for.
      * @return Promise for list of arrival time predictions.
      */
-    public static synchronized List<Prediction> routePredict(@NonNull final String agency, @NonNull final String routeKey) throws JsonSyntaxException, XmlPullParserException, IOException {
+    public static synchronized Predictions routePredict(@NonNull final String agency, @NonNull final String routeKey) throws JsonSyntaxException, XmlPullParserException, IOException {
         setup();
         
         LOGV(TAG, "routePredict: " + agency + ", " + routeKey);
@@ -128,8 +130,8 @@ public final class NextbusAPI {
         }
 
         // Run the query we built and sort the prediction results
-        List<Prediction> predictions = ApiRequest.xml(queryBuilder.toString(), new PredictionXmlParser(PredictionXmlParser.PredictionType.ROUTE));
-        Collections.sort(predictions, new Comparator<Prediction>() {
+        Predictions predictions = ApiRequest.xml(queryBuilder.toString(), new PredictionXmlParser(PredictionXmlParser.PredictionType.ROUTE));
+        Collections.sort(predictions.getPredictions(), new Comparator<Prediction>() {
             @Override
             public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
                 return route.getStopTags().indexOf(p1.getTag()) - route.getStopTags().indexOf(p2.getTag());
@@ -145,7 +147,7 @@ public final class NextbusAPI {
      * @param stopTitleKey Full title of the stop to get predictions for.
      * @return Promise for list of arrival time predictions.
      */
-    public static synchronized List<Prediction> stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) throws JsonSyntaxException, XmlPullParserException, IOException {
+    public static synchronized Predictions stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) throws JsonSyntaxException, XmlPullParserException, IOException {
         setup();
         LOGV(TAG, "stopPredict: " + agency + ", " + stopTitleKey);
 
@@ -175,8 +177,8 @@ public final class NextbusAPI {
         }
 
         // Run the query we built and sort the prediction results
-        List<Prediction> predictions = ApiRequest.xml(queryBuilder.toString(), new PredictionXmlParser(PredictionXmlParser.PredictionType.STOP));
-        Collections.sort(predictions, new Comparator<Prediction>() {
+        Predictions predictions = ApiRequest.xml(queryBuilder.toString(), new PredictionXmlParser(PredictionXmlParser.PredictionType.STOP));
+        Collections.sort(predictions.getPredictions(), new Comparator<Prediction>() {
             @Override
             public int compare(@NonNull Prediction p1, @NonNull Prediction p2) {
                 int res = p1.getTitle().compareTo(p2.getTitle());

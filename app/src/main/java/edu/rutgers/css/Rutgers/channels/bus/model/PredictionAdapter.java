@@ -38,7 +38,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
     private Context mContext;
 
     private final Handler handler = new Handler();
-    
+
     static class ViewHolder {
         TextView titleTextView;
         TextView directionTextView;

@@ -51,7 +51,7 @@ public class CoursesLoader extends SimpleAsyncLoader<CoursesLoader.CourseData> {
     @Override
     public CourseData loadInBackground() {
         try {
-            SOCIndex index = ScheduleAPI.getIndex(campus, level, semester);
+            SOCIndex index = ScheduleAPI.getIndex(semester, campus, level);
             Subject subject = index.getSubjectByCode(subjectCode);
             List<Course> courses = ScheduleAPI.getCourses(campus, level, semester, subjectCode);
             return new CourseData(subject, courses);

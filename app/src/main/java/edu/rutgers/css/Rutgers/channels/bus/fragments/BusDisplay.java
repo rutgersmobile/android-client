@@ -9,10 +9,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,10 +32,10 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
+import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.PredictionLoader;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
@@ -308,7 +305,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             return;
         }
 
-        List<Prediction> predictions = data.getPredictions();
+        Predictions predictions = data.getPredictions();
         String title = data.getTitle();
         if (title != null) {
             mTitle = title;
@@ -316,7 +313,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         }
 
         // If there are no active routes or stops, show a message
-        if (predictions.isEmpty()) {
+        if (predictions.getPredictions().isEmpty()) {
             int message;
 
             // A stop may have no active routes; a route may have no active stops
@@ -330,7 +327,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         }
 
         mAdapter.clear();
-        mAdapter.addAll(predictions);
+        mAdapter.addAll(predictions.getPredictions());
         hideProgressCircle();
         if (refreshLayout != null) {
             refreshLayout.setRefreshing(false);

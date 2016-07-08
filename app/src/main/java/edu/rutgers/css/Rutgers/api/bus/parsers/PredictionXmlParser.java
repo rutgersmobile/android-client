@@ -8,15 +8,16 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 
-import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.api.XmlParser;
+import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
+import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
 
 /**
  * Xml parser used to get predictions for routes in the bus channel
  */
-public class PredictionXmlParser implements XmlParser<List<Prediction>> {
+public class PredictionXmlParser implements XmlParser<Predictions> {
     private static final String ns = null;
 
     public enum PredictionType {
@@ -29,7 +30,7 @@ public class PredictionXmlParser implements XmlParser<List<Prediction>> {
         this.type = type;
     }
 
-    public List<Prediction> parse(InputStream in) throws XmlPullParserException, IOException {
+    public Predictions parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -41,8 +42,8 @@ public class PredictionXmlParser implements XmlParser<List<Prediction>> {
         }
     }
 
-    private List<Prediction> readBody(XmlPullParser parser) throws XmlPullParserException, IOException {
-        List<Prediction> entries = new ArrayList<>();
+    private Predictions readBody(XmlPullParser parser) throws XmlPullParserException, IOException {
+        Predictions predictions = new Predictions(new LinkedHashSet<String>(), new ArrayList<Prediction>());
 
         parser.require(XmlPullParser.START_TAG, ns, "body");
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -51,17 +52,17 @@ public class PredictionXmlParser implements XmlParser<List<Prediction>> {
             }
             String name = parser.getName();
             if (name.equals("predictions")) {
-                entries.addAll(readPredictions(parser));
+                predictions.add(readPredictions(parser));
             } else {
                 skip(parser);
             }
         }
 
-        return entries;
+        return predictions;
     }
 
-    private List<Prediction> readPredictions(XmlPullParser parser) throws XmlPullParserException, IOException {
-        List<Prediction> entries = new ArrayList<>();
+    private Predictions readPredictions(XmlPullParser parser) throws XmlPullParserException, IOException {
+        Predictions predictions = new Predictions(new LinkedHashSet<String>(), new ArrayList<Prediction>());
         parser.require(XmlPullParser.START_TAG, ns, "predictions");
         String title;
         String tag;
@@ -77,13 +78,28 @@ public class PredictionXmlParser implements XmlParser<List<Prediction>> {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("direction")) {
-                entries.add(readDirection(parser, title, tag));
-            } else {
-                skip(parser);
+            switch (name) {
+                case "direction":
+                    predictions.getPredictions().add(readDirection(parser, title, tag));
+                    break;
+                case "message":
+                    predictions.getMessages().add(readMessage(parser));
+                    break;
+                default:
+                    skip(parser);
+                    break;
             }
         }
-        return entries;
+        return predictions;
+    }
+
+    private String readMessage(XmlPullParser parser) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, ns, "message");
+        String message = parser.getAttributeValue(ns, "text");
+        while (parser.next() != XmlPullParser.END_TAG) {
+            skip(parser);
+        }
+        return message;
     }
 
     private Prediction readDirection(XmlPullParser parser, String stopTitle, String stopTag) throws XmlPullParserException, IOException {

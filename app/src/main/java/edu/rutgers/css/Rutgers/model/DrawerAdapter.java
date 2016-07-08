@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.model;
 
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +41,10 @@ public class DrawerAdapter extends BaseAdapter {
     private static final int PRESSABLE_TYPE = 0;
     private static final int DIVIDER_TYPE = 1;
 
+    private enum PositionType {
+        CHANNEL, SETTINGS, ABOUT, BOOKMARKS
+    }
+
     private class ViewHolder {
         TextView textView;
         ImageView imageView;
@@ -78,22 +83,61 @@ public class DrawerAdapter extends BaseAdapter {
             return convertView;
         }
 
-        if (positionIsChannel(position)) {
-            Link link = (Link) getItem(position);
-            holder.textView.setText(link.getTitle());
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(activity.getApplicationContext().getResources(), link.getHandle()));
-        } else if (positionIsSettings(position)) {
-            holder.textView.setText("Settings");
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(activity.getApplicationContext().getResources(), "settings_black_24dp"));
-        } else if (positionIsAbout(position)) {
-            holder.textView.setText("About");
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(activity.getApplicationContext().getResources(), "info"));
-        } else if (positionIsBookmarks(position)) {
-            holder.textView.setText("Bookmarks");
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(activity.getApplicationContext().getResources(), "bookmark"));
+        switch (typeForPosition(position)) {
+            case CHANNEL:
+                Link link = (Link) getItem(position);
+                holder.textView.setText(link.getTitle());
+                holder.imageView.setImageDrawable(iconForPosition(position));
+                break;
+            case SETTINGS:
+                holder.textView.setText("Settings");
+                holder.imageView.setImageDrawable(iconForPosition(position));
+                break;
+            case ABOUT:
+                holder.textView.setText("About");
+                holder.imageView.setImageDrawable(iconForPosition(position));
+                break;
+            default:
+                holder.textView.setText("Bookmarks");
+                holder.imageView.setImageDrawable(iconForPosition(position));
         }
 
         return convertView;
+    }
+
+    private PositionType typeForPosition(int position) {
+        if (positionIsChannel(position)) {
+            return PositionType.CHANNEL;
+        } else if (positionIsSettings(position)) {
+            return PositionType.SETTINGS;
+        } else if (positionIsAbout(position)) {
+            return PositionType.ABOUT;
+        } else {
+            return PositionType.BOOKMARKS;
+        }
+    }
+
+    private Drawable iconForPosition(int position) {
+        String iconName;
+        switch (typeForPosition(position)) {
+            case CHANNEL:
+                iconName = ((Link) getItem(position)).getHandle();
+                break;
+            case SETTINGS:
+                iconName = "settings_black_24dp";
+                break;
+            case ABOUT:
+                iconName = "info";
+                break;
+            default:
+                iconName = "bookmark";
+        }
+
+        Drawable icon = ImageUtils.getIcon(activity.getApplicationContext().getResources(), iconName);
+        if (icon == null) {
+            icon = ImageUtils.getIcon(activity.getApplicationContext().getResources(), "no_icon");
+        }
+        return icon;
     }
 
     private int getDisabled() {

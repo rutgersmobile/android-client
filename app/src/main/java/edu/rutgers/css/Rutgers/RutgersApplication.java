@@ -4,9 +4,8 @@ import android.app.Application;
 import android.content.Context;
 
 import edu.rutgers.css.Rutgers.api.Analytics;
-import edu.rutgers.css.Rutgers.utils.MainActivityLifecycleHandler;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
 public class RutgersApplication extends Application {
 
@@ -14,14 +13,10 @@ public class RutgersApplication extends Application {
 
     private static Context context;
 
-
-    private static MainActivityLifecycleHandler lh = new MainActivityLifecycleHandler();
-
     @Override
     public void onCreate() {
         super.onCreate();
         RutgersApplication.context = getApplicationContext();
-        registerActivityLifecycleCallbacks(lh);
 
         LOGV(TAG, "Application started");
 
@@ -31,13 +26,5 @@ public class RutgersApplication extends Application {
 
     public static Context getAppContext() {
         return RutgersApplication.context;
-    }
-
-    public static boolean isApplicationVisible() {
-        return lh.isApplicationVisible();
-    }
-
-    public static boolean isApplicationInForeground() {
-        return lh.isApplicationInForeground();
     }
 }

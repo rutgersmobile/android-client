@@ -173,6 +173,11 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
         fragmentMediator = new MainFragmentMediator(this);
 
+        JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
+        if (array != null) {
+            mChannelManager.loadChannelsFromJSONArray(array);
+        }
+
         if (wantsLink()) {
             final Intent intent = getIntent();
             final String action = intent.getAction();

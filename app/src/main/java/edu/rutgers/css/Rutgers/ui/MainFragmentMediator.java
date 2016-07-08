@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
@@ -55,7 +54,7 @@ public class MainFragmentMediator implements FragmentMediator {
      */
     @Override
     public boolean switchFragments(@NonNull final Bundle args) {
-        if (activity.isFinishing() || !RutgersApplication.isApplicationVisible()) return false;
+        if (activity.isFinishing()) return false;
 
         final String componentTag = args.getString(ComponentFactory.ARG_COMPONENT_TAG);
         final boolean backStack = args.getBoolean(ComponentFactory.ARG_BACKSTACK_TAG, true);
