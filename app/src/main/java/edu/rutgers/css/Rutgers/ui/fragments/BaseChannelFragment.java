@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -23,6 +24,7 @@ import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.ToggleFloatingActionButton;
+import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import lombok.Builder;
 import lombok.Data;
@@ -161,6 +163,8 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
                 }
             }
         });
+        Drawable bookmarkIcon = ImageUtils.getIcon(getResources(), R.drawable.ic_bookmark, R.color.white);
+        bookmarkFab.setImageDrawable(bookmarkIcon);
         toggleFab.addFab(bookmarkFab);
 
         this.toggleFab = toggleFab;
