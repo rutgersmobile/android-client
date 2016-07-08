@@ -18,13 +18,24 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ListView
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/list" />
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/messages"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/list" />
+        </LinearLayout>
 
         <include layout="@layout/progress_circle" />
-
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <include layout="@layout/floating_action_button"/>

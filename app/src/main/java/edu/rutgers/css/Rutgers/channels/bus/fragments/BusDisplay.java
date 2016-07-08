@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
@@ -78,6 +79,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private String mAgency;
     private ShareActionProvider shareActionProvider;
     private SwipeRefreshLayout refreshLayout;
+    private TextView messagesView;
 
     private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
@@ -170,7 +172,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_refresh_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_refresh_progress_sticky);
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
 
@@ -193,6 +195,8 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             public void onItemCollapsed(int position) {
             }
         });
+
+        messagesView = (TextView)  v.findViewById(R.id.messages);
 
         refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresh_layout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -328,6 +332,13 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
         mAdapter.clear();
         mAdapter.addAll(predictions.getPredictions());
+
+        final String message = StringUtils.join(predictions.getMessages(), "\n");
+        if (!message.isEmpty()) {
+            messagesView.setVisibility(View.VISIBLE);
+            messagesView.setText(message);
+        }
+
         hideProgressCircle();
         if (refreshLayout != null) {
             refreshLayout.setRefreshing(false);
