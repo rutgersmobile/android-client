@@ -78,6 +78,7 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
             final Link link = links.get(positionTwo);
             if (!link.isRemovable()) {
                 link.setEnabled(false);
+                return true;
             }
             return false;
         } else if (positionOne == dividerPosition && positionTwo > dividerPosition) {
