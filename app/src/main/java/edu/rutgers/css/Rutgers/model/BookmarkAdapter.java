@@ -61,14 +61,16 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
      * @param positionTwo The position being dragged from
      */
     @Override
-    public void swapItems(int positionOne, int positionTwo) {
+    public boolean swapItems(int positionOne, int positionTwo) {
         final int dividerPosition = dividerPosition();
         if (positionOne < dividerPosition && positionTwo < dividerPosition) {
             // They are both enabled so just swap them
             Collections.swap(links, positionOne, positionTwo);
+            return true;
         } else if (positionOne > dividerPosition && positionTwo > dividerPosition) {
             // They are both disabled. Just swap them, but remember to subtract for the divider
             Collections.swap(links, positionOne - 1, positionTwo - 1);
+            return true;
         } else if (positionOne == dividerPosition && positionTwo < dividerPosition) {
             // We're dragging over the divider from above
             // Don't do anything to user added links since they can only be deleted
@@ -77,11 +79,14 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
             if (!link.isRemovable()) {
                 link.setEnabled(false);
             }
+            return false;
         } else if (positionOne == dividerPosition && positionTwo > dividerPosition) {
             // We're dragging over the divider from below. Just enable it
             // subtract one from the position to account for the divider
             links.get(positionTwo - 1).setEnabled(true);
+            return true;
         }
+        return false;
     }
 
     @Override
