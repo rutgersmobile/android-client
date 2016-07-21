@@ -25,7 +25,7 @@ public class DtableChannelFragment extends BaseChannelFragment {
             for (final String title : history) {
                 linkArgs.add(title);
             }
-            linkArgs.add(pathPart.replaceAll("\\s+", "").toLowerCase());
+            linkArgs.add(pathPart);
             return new Link(topHandle, linkArgs, getLinkTitle());
         }
 

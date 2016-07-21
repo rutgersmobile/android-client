@@ -9,6 +9,7 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -82,10 +83,8 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                 boolean found = false;
                 for (final DTableElement child : root.getChildren()) {
                     // no spaces or capital letters in input
-                    if (child.getTitle()
-                            .replaceAll("\\s+", "")
-                            .toLowerCase()
-                            .equals(part)) {
+                    final String decoded = URLDecoder.decode(child.getTitle(), "UTF-8");
+                    if (decoded.equals(part)) {
                         if (child instanceof DTableRoot) {
                             // look for the next element in this root's children
                             root = (DTableRoot) child;
@@ -101,6 +100,8 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                             // Must have view and title set to launch a channel
                             newArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, dTableChannel.getView());
                             newArgs.putString(ComponentFactory.ARG_TITLE_TAG, dTableChannel.getChannelTitle(homeCampus));
+                            newArgs.putString(ComponentFactory.ARG_HANDLE_TAG, channel.getHandle());
+                            newArgs.putStringArrayList(ComponentFactory.ARG_HIST_TAG, dTableChannel.getParent().getHistory());
 
                             // Add optional fields to the arg bundle
                             if (dTableChannel.getUrl() != null) {

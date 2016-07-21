@@ -4,10 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +15,6 @@ import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.Expan
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
@@ -31,7 +26,6 @@ import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
 import edu.rutgers.css.Rutgers.channels.dtable.model.loader.DTableLoader;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -213,7 +207,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
                     newArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
                     newArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getChannelTitle(homeCampus));
                     newArgs.putString(ComponentFactory.ARG_HANDLE_TAG, mTopHandle);
-                    newArgs.putStringArrayList(ComponentFactory.ARG_HIST_TAG, getHistory());
+                    newArgs.putStringArrayList(ComponentFactory.ARG_HIST_TAG, mDRoot.getHistory());
 
                     // Add optional fields to the arg bundle
                     if (channel.getUrl() != null)
@@ -238,20 +232,11 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     @Override
     public Link getLink() {
         final List<String> linkArgs = new ArrayList<>();
-        for (final String title : getHistory()) {
+        for (final String title : mDRoot.getHistory()) {
             linkArgs.add(title);
         }
 
         return  new Link(mTopHandle, linkArgs, getLinkTitle());
-    }
-
-    private ArrayList<String> getHistory() {
-        ArrayList<String> titles = new ArrayList<>();
-        for (DTableElement cur = mDRoot; cur.getParent() != null; cur = cur.getParent()) {
-            titles.add(cur.getTitle().replaceAll("\\s+", "").toLowerCase());
-        }
-        Collections.reverse(titles);
-        return titles;
     }
 
     @Override

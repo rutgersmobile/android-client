@@ -214,7 +214,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         mAdapter.addAllCourses(data.getCourses());
         final Activity activity = getActivity();
         if (activity != null) {
-            activity.setTitle(data.getSubject().getTitle());
+            activity.setTitle(data.getSubject().getDisplayTitle());
         }
 
         // Re-apply filter

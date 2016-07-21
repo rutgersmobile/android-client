@@ -96,10 +96,14 @@ public class RSSAdapter extends ArrayAdapter<RSSItem> {
         } else {
             holder.iconImageView.setVisibility(View.VISIBLE);
             // Download the image
-            Picasso.with(getContext())
-                    .load(curItem.getImgUrl().toString())
-                    .transform(new CropTransformation(mTargetWidth, mTargetWidth, CropTransformation.CropType.TOP))
-                    .into(holder.iconImageView);
+            final String imageURL = curItem.getImgUrl().toString();
+            final String imageExtension = imageURL.substring(imageURL.lastIndexOf("."));
+            if (!imageExtension.equals(".gif")) {
+                Picasso.with(getContext())
+                        .load(imageURL)
+                        .transform(new CropTransformation(mTargetWidth, mTargetWidth, CropTransformation.CropType.TOP))
+                        .into(holder.iconImageView);
+            }
         }
         
         return convertView;

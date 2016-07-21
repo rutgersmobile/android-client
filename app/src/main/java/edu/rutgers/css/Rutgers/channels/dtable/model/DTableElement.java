@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Basic DTable element with title that may be localized by campus.
@@ -23,6 +25,15 @@ public class DTableElement implements Serializable {
 
     public DTableElement getParent() {
         return parent;
+    }
+
+    public ArrayList<String> getHistory() {
+        ArrayList<String> titles = new ArrayList<>();
+        for (DTableElement cur = this; cur.getParent() != null; cur = cur.getParent()) {
+            titles.add(cur.getTitle());
+        }
+        Collections.reverse(titles);
+        return titles;
     }
 
     /**
