@@ -26,18 +26,6 @@
     "icon": "places"
   },
   {
-    "handle": "recreation",
-    "title": {
-      "homeCampus": "New Brunswick",
-      "homeTitle": "Recreation",
-      "foreignTitle": "NB Recreation"
-    },
-    "api": "rec.txt",
-    "grouped": true,
-    "view": "dtable",
-    "icon": "recreation"
-  },
-  {
     "handle": "events",
     "title": "Events",
     "api": "events.txt",
