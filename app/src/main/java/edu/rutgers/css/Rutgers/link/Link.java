@@ -76,8 +76,8 @@ public class Link implements Serializable {
                 uriBuilder.authority(handle);
                 break;
             case HTTP:
-                uriBuilder.scheme("http");
-                uriBuilder.authority("rumobile.rutgers.edu");
+                uriBuilder.scheme(Config.API_SCHEME);
+                uriBuilder.authority(Config.API_HOSTNAME);
                 uriBuilder.appendPath("link");
                 uriBuilder.appendPath(handle);
                 break;

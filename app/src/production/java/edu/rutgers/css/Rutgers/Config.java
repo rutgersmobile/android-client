@@ -20,8 +20,10 @@ public final class Config {
 
     // Server and API level
     public static final String API_LEVEL = "1";
+    public static final String API_SCHEME = "https";
     public static final String API_MACHINE = "rumobile";
-    public static final String API_BASE = "https://"+API_MACHINE+".rutgers.edu/"+API_LEVEL+"/";
+    public static final String API_HOSTNAME = API_MACHINE + ".rutgers.edu";
+    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/"+API_LEVEL+"/";
 
     // Location-based services config
     public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
