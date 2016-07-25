@@ -134,18 +134,23 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
 
     @Override
     public void onLoadFinished(Loader<List<RSSItem>> loader, List<RSSItem> data) {
+        reset();
+
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
+            return;
         }
-        mAdapter.clear();
+
         mData = new ArrayList<>(data);
         mAdapter.addAll(mData);
-        mLoading = false;
-        hideProgressCircle();
     }
 
     @Override
     public void onLoaderReset(Loader<List<RSSItem>> loader) {
+        reset();
+    }
+
+    private void reset() {
         mAdapter.clear();
         mLoading = false;
         hideProgressCircle();

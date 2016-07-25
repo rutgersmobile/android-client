@@ -202,9 +202,7 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<CoursesLoader.CourseData> loader, CoursesLoader.CourseData data) {
         // If response is empty assume that there was an error
-        mLoading = false;
-        hideProgressCircle();
-        mAdapter.clear();
+        reset();
 
         if (data == null) {
             AppUtils.showFailedLoadToast(getContext());
@@ -223,6 +221,10 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
 
     @Override
     public void onLoaderReset(Loader<CoursesLoader.CourseData> loader) {
+        reset();
+    }
+
+    private void reset() {
         mLoading = false;
         hideProgressCircle();
         mAdapter.clear();

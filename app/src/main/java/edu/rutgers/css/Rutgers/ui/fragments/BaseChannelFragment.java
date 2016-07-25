@@ -47,7 +47,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     @Getter
     private boolean setUp;
 
-    public static final int DEF_PROGRESS_RES = R.id.progressBar;
+    public static final int DEF_PROGRESS_RES = R.id.progressCircle;
     public static final int DEF_TOOLBAR_RES = R.id.toolbar;
     public static final int DEF_MAIN_FAB_RES = R.id.fab;
     public static final int DEF_SHARE_FAB_RES = R.id.mini_share_fab;

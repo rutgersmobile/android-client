@@ -39,6 +39,7 @@ import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
+import edu.rutgers.css.Rutgers.ui.fragments.LinkErrorDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
@@ -178,6 +179,12 @@ public class MainActivity extends GoogleApiProviderActivity implements
             mChannelManager.loadChannelsFromJSONArray(array);
         }
 
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
+                    .commit();
+        }
+
         if (wantsLink()) {
             final Intent intent = getIntent();
             final String action = intent.getAction();
@@ -186,10 +193,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
             if (action.equals(Intent.ACTION_VIEW) && data != null) {
                 deepLink(data, false);
             }
-        } else if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
-                    .commit();
         }
 
         getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
@@ -370,7 +373,11 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
     @Subscribe
     public void switchFragments(final Bundle args) {
-        getFragmentMediator().switchFragments(args);
+        if (args == null) {
+            LinkErrorDialogFragment.defaultError.show(getSupportFragmentManager(), LinkErrorDialogFragment.TAG);
+        } else {
+            getFragmentMediator().switchFragments(args);
+        }
     }
 
     /**

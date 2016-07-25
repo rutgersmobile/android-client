@@ -358,9 +358,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     @Override
     public void onLoadFinished(Loader<SubjectLoader.SubjectHolder> loader, SubjectLoader.SubjectHolder data) {
-        mAdapter.clear();
-        mLoading = false;
-        hideProgressCircle();
+        reset();
 
         final SOCIndex socIndex = data.getIndex();
         final List<Subject> subjects = data.getSubjects();
@@ -393,6 +391,10 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     @Override
     public void onLoaderReset(Loader<SubjectLoader.SubjectHolder> loader) {
+        reset();
+    }
+
+    private void reset() {
         mAdapter.clear();
         mLoading = false;
         hideProgressCircle();

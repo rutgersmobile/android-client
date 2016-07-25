@@ -82,22 +82,24 @@ public final class AthleticsDisplay extends DtableChannelFragment implements Loa
 
     @Override
     public void onLoadFinished(Loader<AthleticsGames> loader, AthleticsGames data) {
+        reset();
+
         if (data == null) {
             AppUtils.showFailedLoadToast(getContext());
+            return;
         }
 
-        loading = false;
-        hideProgressCircle();
-        adapter.clear();
-        if (data != null) {
-            adapter.addAll(data.getGames());
-        }
+        adapter.addAll(data.getGames());
     }
 
     @Override
     public void onLoaderReset(Loader<AthleticsGames> loader) {
-        adapter.clear();
+        reset();
+    }
+
+    private void reset() {
         loading = false;
+        adapter.clear();
         hideProgressCircle();
     }
 }

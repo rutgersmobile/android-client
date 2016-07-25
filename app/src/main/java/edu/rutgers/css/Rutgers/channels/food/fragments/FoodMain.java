@@ -1,14 +1,8 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +12,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
@@ -26,7 +19,6 @@ import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuSectionLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -129,18 +121,25 @@ public class FoodMain extends BaseChannelFragment
 
     @Override
     public void onLoadFinished(Loader<List<SimpleSection<DiningMenu>>> loader, List<SimpleSection<DiningMenu>> data) {
+        reset();
+
         // Assume an empty response is an error
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
+            return;
         }
-        mAdapter.clear();
+
         mAdapter.addAll(data);
+    }
+
+    private void reset() {
+        mAdapter.clear();
         mLoading = false;
         hideProgressCircle();
     }
 
     @Override
     public void onLoaderReset(Loader<List<SimpleSection<DiningMenu>>> loader) {
-        mAdapter.clear();
+        reset();
     }
 }

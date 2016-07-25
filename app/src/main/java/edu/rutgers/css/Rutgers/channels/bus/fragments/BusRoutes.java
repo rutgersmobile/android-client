@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +28,8 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
     private static final String TAG                 = "BusRoutes";
     public static final String HANDLE               = "busroutes";
 
+    private boolean loading = false;
+
     private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Member data */
@@ -42,11 +43,14 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
+        loading = true;
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress_simple);
+
+        if (loading) showProgressCircle();
 
         final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
         listView.setAdapter(mAdapter);
@@ -71,7 +75,7 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
 
         // Clear out everything
         mAdapter.clear();
-        showProgressCircle();
+        loading = true;
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
@@ -86,9 +90,9 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
             return;
         }
 
-        mAdapter.clear();
+        reset();
+
         mAdapter.addAll(data);
-        hideProgressCircle();
 
         // Assume an empty response is an error
         // TODO: Is that actually reasonable?
@@ -99,7 +103,13 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
 
     @Override
     public void onLoaderReset(Loader<List<SimpleSection<RouteStub>>> loader) {
+        reset();
+    }
+
+    private void reset() {
         mAdapter.clear();
+        loading = false;
+        hideProgressCircle();
     }
 
     @Override

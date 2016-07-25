@@ -80,6 +80,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private ShareActionProvider shareActionProvider;
     private SwipeRefreshLayout refreshLayout;
     private TextView messagesView;
+    private boolean mLoading = false;
 
     private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
@@ -166,13 +167,15 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         mTitle = args.getString(ARG_TITLE_TAG, getString(R.string.bus_title));
 
         // Start loading predictions
-        showProgressCircle();
+        mLoading = true;
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_refresh_progress_sticky);
+
+        if (mLoading) showProgressCircle();
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
 
@@ -304,12 +307,23 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<PredictionLoader.PredictionHolder> loader, PredictionLoader.PredictionHolder data) {
+        reset();
+
         final Activity activity = getActivity();
         if (activity == null) {
             return;
         }
 
+        if (refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
+
         Predictions predictions = data.getPredictions();
+        if (predictions == null) {
+            AppUtils.showFailedLoadToast(getContext());
+            return;
+        }
+
         String title = data.getTitle();
         if (title != null) {
             mTitle = title;
@@ -330,7 +344,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
         }
 
-        mAdapter.clear();
         mAdapter.addAll(predictions.getPredictions());
 
         final String message = StringUtils.join(predictions.getMessages(), "\n");
@@ -338,16 +351,16 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             messagesView.setVisibility(View.VISIBLE);
             messagesView.setText(message);
         }
-
-        hideProgressCircle();
-        if (refreshLayout != null) {
-            refreshLayout.setRefreshing(false);
-        }
     }
 
     @Override
     public void onLoaderReset(Loader<PredictionLoader.PredictionHolder> loader) {
+        reset();
+    }
+
+    private void reset() {
         mAdapter.clear();
+        mLoading = false;
         hideProgressCircle();
     }
 }

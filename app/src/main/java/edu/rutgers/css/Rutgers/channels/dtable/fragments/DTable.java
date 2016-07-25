@@ -257,21 +257,27 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<DTableRoot> loader, DTableRoot data) {
-        // Data will always be returned as non-null unless there was an error
-        if (data != null) {
-            mDRoot = data;
-            mAdapter.clear();
-            mAdapter.addAll(data.getChildren());
-        } else {
+        reset();
+
+        if (data == null) {
             AppUtils.showFailedLoadToast(getActivity());
+            return;
         }
 
+        // Data will always be returned as non-null unless there was an error
+        mDRoot = data;
+        mAdapter.addAll(data.getChildren());
+
+    }
+
+    private void reset() {
+        mAdapter.clear();
         mLoading = false;
         hideProgressCircle();
     }
 
     @Override
     public void onLoaderReset(Loader<DTableRoot> loader) {
-        mAdapter.clear();
+        reset();
     }
 }

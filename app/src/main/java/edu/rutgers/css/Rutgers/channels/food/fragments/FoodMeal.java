@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,16 +127,21 @@ public class FoodMeal extends BaseChannelFragment
 
     @Override
     public void onLoadFinished(Loader<List<DiningMenu.Genre>> loader, List<DiningMenu.Genre> data) {
+        reset();
         // Assume and empty response is an error
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
+            return;
         }
-        mAdapter.clear();
         mAdapter.addAll(data);
     }
 
     @Override
     public void onLoaderReset(Loader<List<DiningMenu.Genre>> loader) {
+        reset();
+    }
+
+    private void reset() {
         mAdapter.clear();
     }
 

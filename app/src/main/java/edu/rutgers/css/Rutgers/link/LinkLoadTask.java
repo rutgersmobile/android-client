@@ -57,9 +57,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
 
     @Override
     protected void onPostExecute(Bundle args) {
-        if (args != null) {
-            LinkBus.getInstance().post(args);
-        }
+        LinkBus.getInstance().post(args);
     }
 
     /**

@@ -161,7 +161,7 @@ public class FoodHall extends BaseChannelFragment
 
     @Override
     public void onLoadFinished(Loader<DiningMenu> loader, DiningMenu data) {
-        mPagerAdapter.clear();
+        reset();
         // Data will only be null if there is an error
         if (data == null) {
             AppUtils.showFailedLoadToast(getContext());
@@ -173,6 +173,10 @@ public class FoodHall extends BaseChannelFragment
 
     @Override
     public void onLoaderReset(Loader<DiningMenu> loader) {
+        reset();
+    }
+
+    private void reset() {
         mPagerAdapter.clear();
     }
 

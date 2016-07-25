@@ -325,9 +325,18 @@ public class PlacesMain extends BaseChannelFragment
 
     @Override
     public void onLoadFinished(Loader<List<KeyValPair>> loader, List<KeyValPair> data) {
+        reset();
         final String nearbyPlacesString = getString(R.string.places_nearby);
-        mAdapter.clear();
         mAdapter.add(new SimpleSection<>(nearbyPlacesString, data));
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<KeyValPair>> loader) {
+        reset();
+    }
+
+    private void reset() {
+        mAdapter.clear();
         hideProgressCircle();
     }
 
@@ -337,11 +346,6 @@ public class PlacesMain extends BaseChannelFragment
         } catch (SecurityException e) {
             LOGE(TAG, e.getMessage());
         }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<KeyValPair>> loader) {
-        mAdapter.clear();
     }
 
     @Override

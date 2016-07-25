@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.ShareActionProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -126,15 +125,14 @@ public class BusAll extends BaseChannelFragment
 
     @Override
     public void onLoadFinished(Loader<List<SimpleSection<NextbusItem>>> loader, List<SimpleSection<NextbusItem>> data) {
-        mAdapter.clear();
-        mAdapter.addAll(data);
-        mLoading = false;
-        hideProgressCircle();
+        reset();
 
         // If we get nothing back assume it's an error
         if (data.isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
         }
+
+        mAdapter.addAll(data);
 
         // Set filter after info is re-loaded
         if (mFilterString != null) {
@@ -144,6 +142,10 @@ public class BusAll extends BaseChannelFragment
 
     @Override
     public void onLoaderReset(Loader<List<SimpleSection<NextbusItem>>> loader) {
+        reset();
+    }
+
+    private void reset() {
         mAdapter.clear();
         mLoading = false;
         hideProgressCircle();

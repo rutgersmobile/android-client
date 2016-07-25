@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,6 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.ui.fragments.MapDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 
@@ -177,20 +175,27 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
 
     @Override
     public void onLoadFinished(Loader<PlaceLoader.PlaceHolder> loader, PlaceLoader.PlaceHolder data) {
+        reset();
+
         // These fields will be non-null and non-empty on success
         if (data.getPlace() == null || data.getRows().isEmpty()) {
             AppUtils.showFailedLoadToast(getContext());
+            return;
         }
+
         mTitle = data.getPlace().getTitle();
-        mAdapter.clear();
         mAdapter.addAll(data.getRows());
         mPlace = data.getPlace();
-        hideProgressCircle();
-        mLoading = false;
     }
 
     @Override
     public void onLoaderReset(Loader<PlaceLoader.PlaceHolder> loader) {
+        reset();
+    }
+
+    private void reset() {
+        hideProgressCircle();
+        mLoading = false;
         mAdapter.clear();
     }
 }

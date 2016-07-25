@@ -4,10 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,15 +18,14 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.soc.model.Course;
-import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
 import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
+import edu.rutgers.css.Rutgers.api.soc.Titleable;
+import edu.rutgers.css.Rutgers.api.soc.model.Course;
 import edu.rutgers.css.Rutgers.api.soc.model.ScheduleText;
 import edu.rutgers.css.Rutgers.api.soc.model.Section;
-import edu.rutgers.css.Rutgers.api.soc.Titleable;
+import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
 import edu.rutgers.css.Rutgers.channels.soc.model.loader.CourseLoader;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
@@ -219,17 +214,20 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
 
     @Override
     public void onLoadFinished(Loader<Course> loader, Course data) {
+        reset();
         if (data == null) {
             AppUtils.showFailedLoadToast(getContext());
             return;
         }
-        mLoading = false;
-        hideProgressCircle();
         loadCourse(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Course> loader) {
+        reset();
+    }
+
+    private void reset() {
         mLoading = false;
         hideProgressCircle();
         mAdapter.clear();

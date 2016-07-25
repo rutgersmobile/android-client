@@ -170,7 +170,8 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
     public void onLoadFinished(Loader<List<SimpleSection<StopStub>>> loader, List<SimpleSection<StopStub>> data) {
         if (getContext() == null) return;
 
-        mAdapter.clear();
+        reset();
+
         mAdapter.addAll(data);
 
         // Assume an empty response is an error
@@ -181,6 +182,10 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
 
     @Override
     public void onLoaderReset(Loader<List<SimpleSection<StopStub>>> loader) {
+        reset();
+    }
+
+    private void reset() {
         mAdapter.clear();
     }
 

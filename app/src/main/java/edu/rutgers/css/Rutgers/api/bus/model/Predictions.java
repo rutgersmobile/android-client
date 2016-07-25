@@ -9,7 +9,7 @@ import lombok.Data;
  * Used to collect a list of Predictions and their message (if it exists)
  */
 @Data
-public class Predictions {
+public final class Predictions {
     private final Set<String> messages;
     private final List<Prediction> predictions;
 
