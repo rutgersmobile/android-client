@@ -1,21 +1,23 @@
 package edu.rutgers.css.Rutgers.link;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusMain;
-import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
 import edu.rutgers.css.Rutgers.channels.food.fragments.FoodHall;
 import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCCourses;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
-import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.model.Channel;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**
  * Temporary class for synchronous loading of links
@@ -26,10 +28,12 @@ public class LinkLoadTaskSync {
 
     private String homeCampus;
     private boolean backstack;
+    private Context context;
 
-    public LinkLoadTaskSync(String homeCampus, boolean backstack) {
+    public LinkLoadTaskSync(String homeCampus, boolean backstack, Context context) {
         this.homeCampus = homeCampus;
         this.backstack = backstack;
+        this.context = context;
     }
 
     public Bundle execute(LinkLoadArgs linkArgs) {
@@ -147,7 +151,7 @@ public class LinkLoadTaskSync {
     public Bundle switchSOC(List<String> pathParts) {
         List<String> stripped = new ArrayList<>();
 
-        String campusCode = null;
+        String campusCode = PrefUtils.getHomeCampus(context);
         String levelCode = null;
         String semesterCode = null;
         String subjectCode = null;
@@ -201,7 +205,7 @@ public class LinkLoadTaskSync {
             return null;
         }
 
-        if (semesterCode == null || campusCode == null) {
+        if (semesterCode == null) {
             return null;
         }
 

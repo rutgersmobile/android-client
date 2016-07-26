@@ -80,7 +80,6 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                 final String part = pathParts.get(i);
                 boolean found = false;
                 for (final DTableElement child : root.getChildren()) {
-                    // no spaces or capital letters in input
                     final String decoded = URLDecoder.decode(child.getTitle(), "UTF-8");
                     if (decoded.equals(part)) {
                         if (child instanceof DTableRoot) {

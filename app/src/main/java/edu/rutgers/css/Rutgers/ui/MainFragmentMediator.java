@@ -131,7 +131,7 @@ public class MainFragmentMediator implements FragmentMediator {
                 new LinkLoadTask(homeCampus).execute(linkArgs);
                 return;
             } else {
-                Bundle args = new LinkLoadTaskSync(homeCampus, backstack).execute(linkArgs);
+                Bundle args = new LinkLoadTaskSync(homeCampus, backstack, activity).execute(linkArgs);
                 if (args != null) {
                     switchFragments(args);
                     return;

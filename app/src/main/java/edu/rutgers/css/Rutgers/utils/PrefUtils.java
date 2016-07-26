@@ -47,6 +47,11 @@ public final class PrefUtils {
 
     public static final String KEY_PREF_BOOKMARK        = "pref_bookmark";
 
+    public static String getHomeCampus(@NonNull Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString(KEY_PREF_HOME_CAMPUS, "NB");
+    }
+
     public static boolean isFirstLaunch(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean(KEY_PREF_FIRST_LAUNCH, true);
