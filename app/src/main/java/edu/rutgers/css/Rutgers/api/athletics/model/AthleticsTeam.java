@@ -9,5 +9,5 @@ import lombok.Data;
 public final class AthleticsTeam {
     private final String name;
     private final String code;
-    private final int score;
+    private final Integer score;
 }

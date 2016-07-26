@@ -93,17 +93,19 @@ public final class AthleticsAdapter extends ArrayAdapter<AthleticsGame> {
 
         final String homeName = game.isEvent() ? game.getDescription() : game.getHome().getName();
         holder.getHomeTeam().setText(homeName);
-        final int homeScore = game.getHome().getScore();
-        holder.getHomeScore().setText(homeScore == -1 ? "" : String.valueOf(homeScore));
+        final Integer homeScore = game.getHome().getScore();
+        holder.getHomeScore().setText(homeScore == null ? "" : String.valueOf(homeScore));
 
         final String awayName = game.isEvent() ? "" : game.getAway().getName();
         holder.getAwayTeam().setText(awayName);
-        final int awayScore = game.getAway().getScore();
-        holder.getAwayScore().setText(awayScore == -1 ? "" : String.valueOf(awayScore));
+        final Integer awayScore = game.getAway().getScore();
+        holder.getAwayScore().setText(awayScore == null ? "" : String.valueOf(awayScore));
 
         holder.getGameLocation().setText(game.getLocation());
-        holder.getGameDate().setText(DateFormat.getDateInstance().format(game.getStart()));
-        holder.getGameTime().setText(DateFormat.getTimeInstance(DateFormat.SHORT).format(game.getStart()));
+        holder.getGameDate().setText(DateFormat.getDateInstance().format(game.getStart().getDate()));
+        holder.getGameTime().setText(game.getStart().isTime()
+                ? DateFormat.getTimeInstance(DateFormat.SHORT).format(game.getStart().getDate())
+                : "");
 
         if (game.getHome().getScore() > game.getAway().getScore()) {
             holder.getHomeTeam().setTextColor(black);

@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers.api.athletics.model;
 
-import java.util.Date;
-
 import lombok.Data;
 
 /**
@@ -13,6 +11,6 @@ public final class AthleticsGame {
     private final boolean isEvent;
     private final AthleticsTeam home;
     private final AthleticsTeam away;
-    private final Date start;
+    private final AthleticsDateTime start;
     private final String location;
 }
