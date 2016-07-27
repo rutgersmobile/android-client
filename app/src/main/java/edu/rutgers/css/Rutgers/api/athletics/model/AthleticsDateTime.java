@@ -11,4 +11,5 @@ import lombok.Data;
 public final class AthleticsDateTime {
     private final Date date;
     private final boolean time;
+    private final String timeString;
 }

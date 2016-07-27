@@ -105,14 +105,21 @@ public final class AthleticsAdapter extends ArrayAdapter<AthleticsGame> {
         holder.getGameDate().setText(DateFormat.getDateInstance().format(game.getStart().getDate()));
         holder.getGameTime().setText(game.getStart().isTime()
                 ? DateFormat.getTimeInstance(DateFormat.SHORT).format(game.getStart().getDate())
-                : "");
+                : game.getStart().getTimeString());
 
-        if (game.getHome().getScore() > game.getAway().getScore()) {
-            holder.getHomeTeam().setTextColor(black);
-            holder.getHomeScore().setTextColor(black);
-        } else if (game.getHome().getScore() < game.getAway().getScore()) {
-            holder.getAwayTeam().setTextColor(black);
-            holder.getAwayScore().setTextColor(black);
+        // Only do coloring if at least one score exists
+        if (homeScore != null || awayScore != null) {
+            // If away score is doesn't exist (and therefore homeScore does)
+            // OR if home score does exist (and so must away score)
+            // AND if home score is higher (they both must exist here)
+            if (awayScore == null || homeScore != null && homeScore > awayScore) {
+                // Then color the home team as the winner
+                holder.getHomeTeam().setTextColor(black);
+                holder.getHomeScore().setTextColor(black);
+            } else if (homeScore == null || homeScore < awayScore) {
+                holder.getAwayTeam().setTextColor(black);
+                holder.getAwayScore().setTextColor(black);
+            }
         }
 
         return convertView;
