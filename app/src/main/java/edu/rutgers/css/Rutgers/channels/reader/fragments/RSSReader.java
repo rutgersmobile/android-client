@@ -89,6 +89,7 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
             return;
         }
 
+        mLoading = true;
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
