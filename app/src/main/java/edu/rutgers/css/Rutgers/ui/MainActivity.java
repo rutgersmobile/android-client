@@ -155,7 +155,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
                 Link link = (Link) adapter.getItem(position);
                 deepLink(link.getUri());
-                mDrawerLayout.closeDrawer(mDrawerListView); // Close menu after a click
             }
         });
 
@@ -180,8 +179,11 @@ public class MainActivity extends GoogleApiProviderActivity implements
         }
 
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            final MainScreen mainScreen = new MainScreen();
+            final Bundle mainScreenArgs = MainScreen.createArgs(!wantsLink());
+            mainScreen.setArguments(mainScreenArgs);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_content_frame, new MainScreen(), MainScreen.HANDLE)
+                    .replace(R.id.main_content_frame, mainScreen, MainScreen.HANDLE)
                     .commit();
         }
 
@@ -346,6 +348,10 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mDrawerLayout.openDrawer(mDrawerListView);
     }
 
+    public void closeDrawer() {
+        mDrawerLayout.closeDrawer(mDrawerListView);
+    }
+
     @Override
     public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {
         mChannelManager.clear();
@@ -377,6 +383,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
             LinkErrorDialogFragment.defaultError.show(getSupportFragmentManager(), LinkErrorDialogFragment.TAG);
         } else {
             getFragmentMediator().switchFragments(args);
+            closeDrawer();
         }
     }
 

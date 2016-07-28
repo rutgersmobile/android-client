@@ -294,18 +294,6 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     }
 
     /**
-     * Set title based on current campus, semester, and level configuration.
-     */
-    private void setScheduleTitle() {
-        // Only change title if SOC Main fragment on screen (possibly covered by selection dialog)
-        if (!isAdded() || getResources() == null) return;
-        if (!(AppUtils.isOnTop(getActivity(), SOCMain.HANDLE)
-                || AppUtils.isOnTop(getActivity(), SOCDialogFragment.HANDLE))) return;
-        if (mSemester == null) getActivity().setTitle(R.string.soc_title);
-        else getActivity().setTitle(ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel);
-    }
-
-    /**
      * Show dialog for choosing semester, campus, level.
      */
     private void showSelectDialog() {
@@ -385,8 +373,14 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         mAdapter.setFilterIndex(mSOCIndex);
 
         mAdapter.addAllSubjects(subjects);
-
         setScheduleTitle();
+    }
+
+    private void setScheduleTitle() {
+        if (mSemester != null && mCampus != null && mLevel != null) {
+            final String title = ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel;
+            getActivity().setTitle(title);
+        }
     }
 
     @Override

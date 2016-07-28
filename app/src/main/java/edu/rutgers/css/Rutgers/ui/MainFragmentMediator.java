@@ -18,7 +18,6 @@ import edu.rutgers.css.Rutgers.link.LinkLoadArgs;
 import edu.rutgers.css.Rutgers.link.LinkLoadTask;
 import edu.rutgers.css.Rutgers.link.LinkLoadTaskSync;
 import edu.rutgers.css.Rutgers.model.Channel;
-import edu.rutgers.css.Rutgers.ui.fragments.LinkErrorDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -122,23 +121,18 @@ public class MainFragmentMediator implements FragmentMediator {
                 Bundle channelArgs = channel.getBundle();
 
                 channelArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getTitle(homeCampus));
-                switchFragments(channelArgs);
+                activity.switchFragments(channelArgs);
                 return;
             }
 
             LinkLoadArgs linkArgs = new LinkLoadArgs(channel, pathParts);
             if (channel.getView().equals("dtable")) {
                 new LinkLoadTask(homeCampus).execute(linkArgs);
-                return;
             } else {
                 Bundle args = new LinkLoadTaskSync(homeCampus, backstack, activity).execute(linkArgs);
-                if (args != null) {
-                    switchFragments(args);
-                    return;
-                }
+                activity.switchFragments(args);
             }
         }
-        LinkErrorDialogFragment.defaultError.show(fm, LinkErrorDialogFragment.TAG);
     }
 
     @Override

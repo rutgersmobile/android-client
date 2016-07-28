@@ -28,11 +28,12 @@ import edu.rutgers.css.Rutgers.model.Channel;
 @RunWith(AndroidJUnit4.class)
 public class LinkLoadTaskTest {
 
-    private LinkLoadTask task;
+    private LinkLoadTaskSync task;
+    private LinkLoadTask asyncTask;
 
     @Before
     public void setUp() {
-        task = new LinkLoadTask("New Brunswick", "NB", "U", "92015");
+        task = new LinkLoadTaskSync("New Brunswick", "NB", "U", "92015");
     }
 
     @Test
@@ -137,7 +138,7 @@ public class LinkLoadTaskTest {
         final List<String> rootParts = new ArrayList<>();
         rootParts.add("athleticsschedules");
 
-        final Bundle rootBundle = task.switchDtable(channel, rootParts);
+        final Bundle rootBundle = asyncTask.switchDtable(channel, rootParts);
         String component = rootBundle.getString("component");
         String title = rootBundle.getString("title");
         String handle = rootBundle.getString("handle");
@@ -155,7 +156,7 @@ public class LinkLoadTaskTest {
         expectedChannelBundle.putString("url", "https://rumobile.rutgers.edu/1/sports/m_basketball.xml");
         expectedChannelBundle.putString("title", "Basketball - Men");
 
-        final Bundle channelBundle = task.switchDtable(channel, rootParts);
+        final Bundle channelBundle = asyncTask.switchDtable(channel, rootParts);
         Assert.assertTrue("should switch to rss reader channel", equalBundles(expectedChannelBundle, channelBundle));
     }
 
@@ -165,14 +166,14 @@ public class LinkLoadTaskTest {
         final List<String> singleBadPath = new ArrayList<>();
         singleBadPath.add("nonsense");
 
-        final Bundle singleBad = task.switchDtable(channel, singleBadPath);
+        final Bundle singleBad = asyncTask.switchDtable(channel, singleBadPath);
         Assert.assertNull("should not switch on bad path", singleBad);
 
         final List<String> lastBadPath = new ArrayList<>();
         lastBadPath.add("athleticsschedules");
         lastBadPath.add("nonsense");
 
-        final Bundle lastBad = task.switchDtable(channel, lastBadPath);
+        final Bundle lastBad = asyncTask.switchDtable(channel, lastBadPath);
         Assert.assertNull("should not switch on bad path", lastBad);
 
         final List<String> extraPath = new ArrayList<>();
@@ -180,7 +181,7 @@ public class LinkLoadTaskTest {
         extraPath.add("basketball-men");
         extraPath.add("nonsense");
 
-        final Bundle extra = task.switchDtable(channel, extraPath);
+        final Bundle extra = asyncTask.switchDtable(channel, extraPath);
         Assert.assertNull("should not switch on bad path", extra);
     }
 
