@@ -31,8 +31,17 @@
         \t <a href="http://square.github.io/picasso/">Picasso</a><br/>
         \t <i>by Square, Inc.</i><br/><br/>
 
+        \t <a href="http://square.github.io/otto/">Otto</a><br/>
+        \t <i>by Square, Inc.</i><br/><br/>
+
         \t <a href="https://github.com/emilsjolander/StickyListHeaders">StickyListHeaders</a><br/>
         \t <i>by Emil Sj&#246;lander</i><br/><br/>
+
+        \t <a href="https://projectlombok.org">Lombok</a><br/>
+        \t <i>The Project Lombok Authors</i><br/><br/>
+
+        \t <a href="https://github.com/wasabeef/picasso-transformations">Picasso Transformations</a><br/>
+        \t <i>Wasabeef</i><br/><br/>
     ]]></string>
 
 </resources>
