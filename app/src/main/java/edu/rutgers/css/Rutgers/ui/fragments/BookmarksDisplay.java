@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
+import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.OnItemMovedListener;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
@@ -63,8 +64,17 @@ public class BookmarksDisplay extends BaseDisplay {
         bookmarks.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                adapter.setDragging(true);
                 bookmarks.startDragging(position);
                 return true;
+            }
+        });
+
+        bookmarks.setOnItemMovedListener(new OnItemMovedListener() {
+            @Override
+            public void onItemMoved(int originalPosition, int newPosition) {
+                adapter.setDragging(false);
+                adapter.notifyDataSetChanged();
             }
         });
 

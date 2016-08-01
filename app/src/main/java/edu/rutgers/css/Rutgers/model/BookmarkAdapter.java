@@ -25,6 +25,8 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Adapter for bookmarks
@@ -49,6 +51,10 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
     // Android bug makes you have to keep a reference to this because otherwise
     // it gets GC'd for some reason
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
+
+    @Getter
+    @Setter
+    private boolean dragging = false;
 
     // View type ids for user created bookmarks, rutgers bookmarks, and the divider
     private static final int REMOVABLE = 0;
@@ -160,7 +166,9 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
             @Override
             public void onChanged() {
                 super.onChanged();
-                PrefUtils.setBookmarks(context, links);
+                if (!dragging) {
+                    PrefUtils.setBookmarks(context, links);
+                }
             }
         });
 
@@ -315,4 +323,5 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
         }
         return convertView;
     }
+
 }
