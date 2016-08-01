@@ -32,11 +32,11 @@ import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
-import edu.rutgers.css.Rutgers.ui.fragments.MapDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
 /**
  * Component builder
@@ -113,7 +113,6 @@ public final class ComponentFactory {
         put(FeedbackMain.HANDLE, FeedbackMain.class);
         put(AboutDisplay.HANDLE, AboutDisplay.class);
         put(BookmarksDisplay.HANDLE, BookmarksDisplay.class);
-        put(MapDisplay.HANDLE, MapDisplay.class);
     }});
 
     public ComponentFactory() {
