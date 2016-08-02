@@ -1,12 +1,17 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -53,6 +58,8 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     public static final int DEF_SHARE_FAB_RES = R.id.mini_share_fab;
     public static final int DEF_BOOKMARK_FAB_RES = R.id.mini_bookmark_fab;
 
+    protected static final int LOCATION_REQUEST = 101;
+
     @Builder
     @Data
     public static final class CreateArgs {
@@ -65,6 +72,8 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     private ActionBar actionBar;
     private ChannelManager cm;
+
+    public static final String TAG = "BaseChannelFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -204,6 +213,27 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, uri.toString());
         return intent;
+    }
+
+    protected boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+    }
+
+    protected void requestGPS() {
+        final PackageManager pm = getContext().getPackageManager();
+        if (PrefUtils.getGPSRequest(getContext())
+                && pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
+            PrefUtils.setGPSRequest(getContext(), false);
+            InfoDialogFragment f = InfoDialogFragment.gpsDialog();
+            f.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+                }
+            });
+            f.show(getFragmentManager(), BaseChannelFragment.TAG);
+        }
     }
 
     public String getLinkTitle() {

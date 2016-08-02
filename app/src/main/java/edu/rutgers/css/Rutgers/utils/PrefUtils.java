@@ -47,9 +47,21 @@ public final class PrefUtils {
 
     public static final String KEY_PREF_BOOKMARK        = "pref_bookmark";
 
+    public static final String KEY_PREF_GPS_REQUEST = "pref_gps_request";
+
     public static String getHomeCampus(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(KEY_PREF_HOME_CAMPUS, "NB");
+    }
+
+    public static void setGPSRequest(@NonNull Context context, boolean b) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean(KEY_PREF_GPS_REQUEST, b).apply();
+    }
+
+    public static boolean getGPSRequest(@NonNull Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean(KEY_PREF_GPS_REQUEST, true);
     }
 
     public static boolean isFirstLaunch(@NonNull Context context) {

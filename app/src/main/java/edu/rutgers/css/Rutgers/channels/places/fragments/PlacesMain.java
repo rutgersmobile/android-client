@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
@@ -65,7 +64,6 @@ public class PlacesMain extends BaseChannelFragment
     private static final String TAG                 = "PlacesMain";
     public static final String HANDLE               = "places";
     private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
-    private static final int LOCATION_REQUEST       = 101;
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -290,8 +288,8 @@ public class PlacesMain extends BaseChannelFragment
                 mAdapter.clear();
                 mAdapter.add(nearbyPlacesSection);
                 hideProgressCircle();
-                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+                if (hasLocationPermission()) {
+                    requestGPS();
                 } else {
                     requestLocationUpdates();
                 }
@@ -346,8 +344,8 @@ public class PlacesMain extends BaseChannelFragment
         } catch (SecurityException e) {
             LOGE(TAG, e.getMessage());
         }
-    }
 
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         if (requestCode == LOCATION_REQUEST

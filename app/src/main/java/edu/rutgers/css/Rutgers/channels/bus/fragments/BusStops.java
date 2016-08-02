@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +34,7 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.ui.fragments.InfoDialogFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -137,8 +140,8 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
         if (mAdapter != null && isAdded()) {
             Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
             if (location == null) {
-                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+                if (hasLocationPermission()) {
+                    requestGPS();
                 } else {
                     requestLocationUpdates();
                 }

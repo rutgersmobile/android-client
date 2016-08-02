@@ -293,7 +293,6 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
                     @Override
                     public void onClick(View v) {
                         CheckBox checkBox = (CheckBox) v;
-                        link.setEnabled(checkBox.isChecked());
 
                         // We need to move the link between sections so we just insert it at the divider position
                         // if it was enabled it will go to the end of the enabled section
@@ -301,6 +300,7 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
                         // This is due to the divider position being entirely defined by where
                         // the first disabled item is
                         removeNoNotify(position);
+                        link.setEnabled(checkBox.isChecked());
                         links.add(dividerPosition(), link);
                         notifyDataSetChanged();
                     }
