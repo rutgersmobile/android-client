@@ -45,6 +45,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
+import lombok.Getter;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
@@ -72,6 +73,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
     /* View references */
     private DrawerLayout mDrawerLayout;
+    @Getter
     private ListView mDrawerListView;
 
     /* Callback for changed preferences */

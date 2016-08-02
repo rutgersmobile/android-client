@@ -3,7 +3,6 @@ package edu.rutgers.css.Rutgers.model;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,12 +79,14 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
         } else if (positionOne == dividerPosition && positionTwo < dividerPosition) {
             // We're dragging over the divider from above
             // Don't do anything to user added links since they can only be deleted
-            // TODO This causes a visual bug, but there's probably a fix for it
             final Link link = links.get(positionTwo);
             if (!link.isRemovable()) {
                 link.setEnabled(false);
                 return true;
             }
+
+            // If we made it here then we're not actually swapping anything
+            // This is the case when we try to drag a user link over the divider
             return false;
         } else if (positionOne == dividerPosition && positionTwo > dividerPosition) {
             // We're dragging over the divider from below. Just enable it
@@ -166,22 +167,12 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
             @Override
             public void onChanged() {
                 super.onChanged();
+                // We don't want to be writing JSON every time we drag an inch
                 if (!dragging) {
                     PrefUtils.setBookmarks(context, links);
                 }
             }
         });
-
-        // When the bookmarks are changed, reload the drawer
-        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                links.clear();
-                links.addAll(PrefUtils.getBookmarks(context));
-                notifyDataSetChanged();
-            }
-        };
-        PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
     }
 
     @Override
@@ -307,6 +298,8 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
                         // We need to move the link between sections so we just insert it at the divider position
                         // if it was enabled it will go to the end of the enabled section
                         // otherwise it goes to the beginning of the disabled section
+                        // This is due to the divider position being entirely defined by where
+                        // the first disabled item is
                         removeNoNotify(position);
                         links.add(dividerPosition(), link);
                         notifyDataSetChanged();

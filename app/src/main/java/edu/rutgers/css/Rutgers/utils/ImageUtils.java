@@ -6,12 +6,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Image utilities
@@ -46,7 +45,7 @@ public final class ImageUtils {
         try {
             Drawable drawable = resources.getDrawable(drawableResource);
             int color = resources.getColor(colorResource);
-            drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            drawable.mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
             return drawable;
         } catch(Resources.NotFoundException e) {
             LOGW(TAG, "getIcon(): " + e.getMessage());
