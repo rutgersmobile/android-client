@@ -11,22 +11,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@id/progressBar"
+        android:layout_alignParentStart="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/replace_me"/>
-
-    <ProgressBar
-        style="?android:attr/progressBarStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_gravity="center_vertical|right"
-        android:id="@+id/progressBar"
-        android:indeterminate="true"
-        android:indeterminateOnly="true"
-        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,21 +21,39 @@
         android:layout_below="@id/title"
         android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/credits"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/replace_me"
+        <LinearLayout
+            android:id="@+id/credits_display"
             android:layout_weight="1"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="Credits: "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/credits"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/replace_me"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/sections"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/replace_me"
+        <LinearLayout
+            android:id="@+id/sections_display"
             android:layout_weight="1"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+            <TextView
+                android:text="Sections: "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/sections"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/replace_me"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

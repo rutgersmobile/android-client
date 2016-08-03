@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.soc.model;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +31,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.soc.Registerable;
 import edu.rutgers.css.Rutgers.api.soc.model.Course;
 import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
+import edu.rutgers.css.Rutgers.api.soc.model.Section;
 import edu.rutgers.css.Rutgers.api.soc.model.Subject;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
@@ -64,7 +66,8 @@ public class ScheduleAdapter extends BaseAdapter
         TextView titleTextView;
         TextView creditsTextView;
         TextView sectionsTextView;
-        ProgressBar progressBar;
+        LinearLayout sectionsDisplay;
+        LinearLayout creditsDisplay;
     }
 
     private static class SectionHolder {
@@ -141,7 +144,18 @@ public class ScheduleAdapter extends BaseAdapter
      */
     public void addAllCourses(Collection<Course> courses) {
         synchronized (mLock) {
-            mCourseSection.addAll(courses);
+            for (final Course course : courses) {
+                Iterator<Section> i = course.getSections().iterator();
+                while (i.hasNext()) {
+                    final Section section = i.next();
+                    if (!section.getPrinted().equals("Y")) {
+                        i.remove();
+                    }
+                }
+                if (!course.getSections().isEmpty()) {
+                    mCourseSection.add(course);
+                }
+            }
         }
         notifyDataSetChanged();
     }
@@ -187,7 +201,8 @@ public class ScheduleAdapter extends BaseAdapter
             holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
             holder.creditsTextView = (TextView) convertView.findViewById(R.id.credits);
             holder.sectionsTextView = (TextView) convertView.findViewById(R.id.sections);
-            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progressBar);
+            holder.creditsDisplay = (LinearLayout)  convertView.findViewById(R.id.credits_display);
+            holder.sectionsDisplay = (LinearLayout)  convertView.findViewById(R.id.sections_display);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -207,12 +222,32 @@ public class ScheduleAdapter extends BaseAdapter
             stringBuilder.append(" ");
         }
 
+        try {
+            final Course course = (Course) getItem(position);
+            holder.creditsTextView.setText(String.valueOf(course.getCredits()));
+            holder.sectionsTextView.setText(formatSections(course.getSections()));
+            holder.titleTextView.setTypeface(null, Typeface.BOLD);
+        } catch (ClassCastException|NullPointerException e) {
+            holder.creditsTextView.setVisibility(View.GONE);
+            holder.sectionsTextView.setVisibility(View.GONE);
+            holder.creditsDisplay.setVisibility(View.GONE);
+            holder.sectionsDisplay.setVisibility(View.GONE);
+        }
+
         holder.titleTextView.setText(stringBuilder.toString().trim());
-        holder.creditsTextView.setVisibility(View.GONE);
-        holder.sectionsTextView.setVisibility(View.GONE);
-        holder.progressBar.setVisibility(View.GONE);
 
         return convertView;
+    }
+
+    private static String formatSections(List<Section> sections) {
+        int open = 0;
+        for (final Section section : sections) {
+            if (section.isOpen()) {
+                open++;
+            }
+        }
+
+        return open + " / " + sections.size();
     }
 
     protected Context getContext() {

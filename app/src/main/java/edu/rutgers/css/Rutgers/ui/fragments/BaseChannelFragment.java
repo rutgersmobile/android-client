@@ -25,7 +25,6 @@ import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ChannelManager;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.ToggleFloatingActionButton;
@@ -71,14 +70,12 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     }
 
     private ActionBar actionBar;
-    private ChannelManager cm;
 
     public static final String TAG = "BaseChannelFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        cm = ((MainActivity) getActivity()).getChannelManager();
     }
 
     final protected View createView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState, int resource) {
@@ -222,8 +219,8 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     protected void requestGPS() {
         final PackageManager pm = getContext().getPackageManager();
         if (PrefUtils.getGPSRequest(getContext())
-                && pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)
-                || pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)) {
+                && (pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS))) {
             PrefUtils.setGPSRequest(getContext(), false);
             InfoDialogFragment f = InfoDialogFragment.gpsDialog();
             f.setOnDismissListener(new DialogInterface.OnDismissListener() {

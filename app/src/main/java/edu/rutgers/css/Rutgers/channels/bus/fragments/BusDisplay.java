@@ -80,6 +80,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private ShareActionProvider shareActionProvider;
     private SwipeRefreshLayout refreshLayout;
     private TextView messagesView;
+    private View dividerView;
     private boolean mLoading = false;
 
     private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
@@ -200,6 +201,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         });
 
         messagesView = (TextView)  v.findViewById(R.id.messages);
+        dividerView = v.findViewById(R.id.message_separator);
 
         refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresh_layout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -348,6 +350,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
         final String message = StringUtils.join(predictions.getMessages(), "\n");
         if (!message.isEmpty()) {
+            dividerView.setVisibility(View.VISIBLE);
             messagesView.setVisibility(View.VISIBLE);
             messagesView.setText(message);
         }
