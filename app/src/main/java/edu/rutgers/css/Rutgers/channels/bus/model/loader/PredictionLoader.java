@@ -4,12 +4,11 @@ import android.content.Context;
 
 import com.google.gson.JsonSyntaxException;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
@@ -102,7 +101,7 @@ public class PredictionLoader extends SimpleAsyncLoader<PredictionLoader.Predict
                     oldPrediction.setMinutes(newPrediction.getMinutes());
                 }
             }
-        } catch (JsonSyntaxException | XmlPullParserException | IOException | IllegalArgumentException e) {
+        } catch (JsonSyntaxException | ParseException | IOException | IllegalArgumentException e) {
             LOGE(TAG, e.getMessage());
         }
 

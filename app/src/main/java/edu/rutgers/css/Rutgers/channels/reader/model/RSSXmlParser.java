@@ -11,6 +11,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
 
 /**
@@ -20,13 +21,15 @@ public class RSSXmlParser implements XmlParser<List<RSSItem>> {
     private static final String ns = null;
 
     @Override
-    public List<RSSItem> parse(InputStream in) throws XmlPullParserException, IOException {
+    public List<RSSItem> parse(InputStream in) throws ParseException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
             parser.nextTag();
             return readRSS(parser);
+        } catch (XmlPullParserException e) {
+            throw new ParseException(e);
         } finally {
             in.close();
         }

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
@@ -30,13 +31,15 @@ public class PredictionXmlParser implements XmlParser<Predictions> {
         this.type = type;
     }
 
-    public Predictions parse(InputStream in) throws XmlPullParserException, IOException {
+    public Predictions parse(InputStream in) throws ParseException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
             parser.nextTag();
             return readBody(parser);
+        } catch (XmlPullParserException e) {
+            throw new ParseException(e);
         } finally {
             in.close();
         }

@@ -11,8 +11,6 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.concurrent.TimeUnit;
@@ -167,20 +165,20 @@ public final class ApiRequest {
      *               XmlPullParser
      * @param <T> Type of object to be returned from the parser
      * @return Object parsed from xml
-     * @throws XmlPullParserException
+     * @throws ParseException
      * @throws IOException
      */
-    public static <T> T xml(String resource, int expire, TimeUnit unit, XmlParser<T> parser) throws XmlPullParserException, IOException {
+    public static <T> T xml(String resource, int expire, TimeUnit unit, XmlParser<T> parser) throws ParseException, IOException {
         setup();
         Response response = getResponse(resource, expire, unit);
         return parser.parse(response.body().byteStream());
     }
 
-    public static <T> T xml(String resource, TimeUnit unit, XmlParser<T> parser) throws XmlPullParserException, IOException {
+    public static <T> T xml(String resource, TimeUnit unit, XmlParser<T> parser) throws ParseException, IOException {
         return xml(resource, 1, unit, parser);
     }
 
-    public static <T> T xml(String resource, XmlParser<T> parser) throws XmlPullParserException, IOException {
+    public static <T> T xml(String resource, XmlParser<T> parser) throws ParseException, IOException {
         return xml(resource, CACHE_NEVER, TimeUnit.DAYS, parser);
     }
 }

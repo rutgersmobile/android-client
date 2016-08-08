@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
+import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.bus.model.ActiveStops;
 import edu.rutgers.css.Rutgers.api.bus.model.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
@@ -106,7 +106,7 @@ public final class NextbusAPI {
      * @param routeKey Route to get predictions for.
      * @return Promise for list of arrival time predictions.
      */
-    public static synchronized Predictions routePredict(@NonNull final String agency, @NonNull final String routeKey) throws JsonSyntaxException, XmlPullParserException, IOException {
+    public static synchronized Predictions routePredict(@NonNull final String agency, @NonNull final String routeKey) throws JsonSyntaxException, ParseException, IOException {
         setup();
         
         LOGV(TAG, "routePredict: " + agency + ", " + routeKey);
@@ -147,7 +147,7 @@ public final class NextbusAPI {
      * @param stopTitleKey Full title of the stop to get predictions for.
      * @return Promise for list of arrival time predictions.
      */
-    public static synchronized Predictions stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) throws JsonSyntaxException, XmlPullParserException, IOException {
+    public static synchronized Predictions stopPredict(@NonNull final String agency, @NonNull final String stopTitleKey) throws JsonSyntaxException, ParseException, IOException {
         setup();
         LOGV(TAG, "stopPredict: " + agency + ", " + stopTitleKey);
 
