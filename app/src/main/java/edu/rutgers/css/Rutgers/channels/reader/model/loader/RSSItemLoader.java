@@ -10,7 +10,7 @@ import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.channels.reader.fragments.RSSReader;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
-import edu.rutgers.css.Rutgers.channels.reader.model.RomeParser;
+import edu.rutgers.css.Rutgers.channels.reader.model.RSSOrAtomParser;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -32,7 +32,7 @@ public class RSSItemLoader extends SimpleAsyncLoader<List<RSSItem>> {
     public List<RSSItem> loadInBackground() {
         List<RSSItem> rssItems = new ArrayList<>();
         try {
-            rssItems.addAll(ApiRequest.xml(url, RSSReader.EXPIRE, RSSReader.EXPIRE_UNIT, new RomeParser()));
+            rssItems.addAll(ApiRequest.xml(url, RSSReader.EXPIRE, RSSReader.EXPIRE_UNIT, new RSSOrAtomParser()));
         } catch (ParseException | IOException e) {
             LOGE(TAG, e.getMessage());
         }

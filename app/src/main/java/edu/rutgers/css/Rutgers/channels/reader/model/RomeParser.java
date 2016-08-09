@@ -5,7 +5,10 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
+import com.squareup.okhttp.Response;
 
+import org.apache.commons.lang3.time.DatePrinter;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
@@ -13,14 +16,22 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
+import lombok.Setter;
 
 /**
  * Parser for RSS and Atom feeds powered by Rome
  */
 public class RomeParser implements XmlParser<List<RSSItem>> {
+
+    private final static DatePrinter printer = FastDateFormat.getInstance("MMM dd, yyyy, h:mm a", Locale.US);
+
+    @Setter
+    private Response response;
+
     @Override
     public List<RSSItem> parse(InputStream in) throws ParseException, IOException {
         try {
@@ -41,9 +52,9 @@ public class RomeParser implements XmlParser<List<RSSItem>> {
                         description.getValue(),
                         link,
                         author,
-                        publishedDate != null ? publishedDate.toString() : null,
-                        updatedDate != null ? updatedDate.toString() : null,
-                        updatedDate != null ? updatedDate.toString() : null,
+                        publishedDate != null ? printer.format(publishedDate) : null,
+                        updatedDate != null ? printer.format(updatedDate) : null,
+                        updatedDate != null ? printer.format(updatedDate) : null,
                         uri
                 ));
             }

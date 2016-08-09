@@ -2,6 +2,8 @@ package edu.rutgers.css.Rutgers.channels.reader.model;
 
 import android.util.Xml;
 
+import com.squareup.okhttp.Response;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -13,12 +15,16 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
+import lombok.Setter;
 
 /**
  * Parser for getting RSS item information.
  */
 public class RSSXmlParser implements XmlParser<List<RSSItem>> {
     private static final String ns = null;
+
+    @Setter
+    private Response response;
 
     @Override
     public List<RSSItem> parse(InputStream in) throws ParseException, IOException {

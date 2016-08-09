@@ -171,6 +171,7 @@ public final class ApiRequest {
     public static <T> T xml(String resource, int expire, TimeUnit unit, XmlParser<T> parser) throws ParseException, IOException {
         setup();
         Response response = getResponse(resource, expire, unit);
+        parser.setResponse(response);
         return parser.parse(response.body().byteStream());
     }
 
