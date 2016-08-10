@@ -112,6 +112,11 @@ public final class PrefUtils {
         return dedupLinks(links);
     }
 
+    public static void setBookmarksFromUpstream(@NonNull Context context, List<Link> links) {
+        links = mergeLinks(links, getBookmarks(context));
+        setBookmarks(context, links);
+    }
+
     public static void setBookmarks(@NonNull Context context, List<Link> links) {
         links = dedupLinks(links);
         links = arrangeLinks(links);
@@ -139,6 +144,37 @@ public final class PrefUtils {
             links.remove(position);
         }
         setBookmarks(context, links);
+    }
+
+    private static List<Link> mergeLinks(List<Link> upstream, List<Link> user) {
+        final List<Link> mergedLinks = new ArrayList<>();
+        for (final Link userLink : user) {
+            for (final Link upstreamLink : upstream) {
+                // If we can't find a link upstream then we should remove it
+                // This means that the channel was deleted
+                if (upstreamLink.getHandle().equals(userLink.getHandle())) {
+                    mergedLinks.add(userLink);
+                    break;
+                }
+            }
+        }
+
+        for (final Link upstreamLink : upstream) {
+            boolean found = false;
+            for (final Link userLink : user) {
+                if (upstreamLink.getHandle().equals(userLink.getHandle())) {
+                    found = true;
+                    break;
+                }
+            }
+
+            // Upstream channels not found should be added to the top
+            if (!found) {
+                mergedLinks.add(0, upstreamLink);
+            }
+        }
+
+        return mergedLinks;
     }
 
     private static List<Link> dedupLinks(List<Link> links) {

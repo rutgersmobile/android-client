@@ -25,6 +25,7 @@ import com.google.gson.JsonArray;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.Analytics;
@@ -178,6 +179,16 @@ public class MainActivity extends GoogleApiProviderActivity implements
         JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
         if (array != null) {
             mChannelManager.loadChannelsFromJSONArray(array);
+            final List<Link> userLinks = PrefUtils.getBookmarks(getApplicationContext());
+            if (!userLinks.isEmpty()) {
+                mDrawerAdapter.addAll(userLinks);
+            } else {
+                final List<Link> defaultLinks = new ArrayList<>();
+                for (final Channel channel : mChannelManager.getChannels()) {
+                    defaultLinks.add(channel.getLink());
+                }
+                mDrawerAdapter.addAll(defaultLinks);
+            }
         }
 
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
@@ -336,14 +347,18 @@ public class MainActivity extends GoogleApiProviderActivity implements
         }
 
         // Load nav drawer items
-        mChannelManager.clear();
-        mChannelManager.loadChannelsFromJSONArray(array);
+        if (array.size() > 0) {
+            mChannelManager.clear();
+            mChannelManager.loadChannelsFromJSONArray(array);
 
-        mDrawerAdapter.clear();
-        for (final Channel channel : mChannelManager.getChannels()) {
-            PrefUtils.addBookmark(getApplicationContext(), channel.getLink());
+            mDrawerAdapter.clear();
+            final List<Link> upstreamLinks = new ArrayList<>();
+            for (final Channel channel : mChannelManager.getChannels()) {
+                upstreamLinks.add(channel.getLink());
+            }
+            PrefUtils.setBookmarksFromUpstream(getApplicationContext(), upstreamLinks);
+            mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
         }
-        mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
     }
 
     public void openDrawer() {
@@ -355,10 +370,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
     }
 
     @Override
-    public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {
-        mChannelManager.clear();
-        mDrawerAdapter.clear();
-    }
+    public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {}
 
     /**
      * Determine if the current intent will cause deep linking
