@@ -209,7 +209,11 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     public Link getLink() {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(mCampus.toLowerCase());
-        pathParts.add(mSemester);
+
+        if (mSemester != null) {
+            pathParts.add(mSemester);
+        }
+
         pathParts.add(mLevel.toLowerCase());
         return new Link("soc", pathParts, getLinkTitle());
     }
