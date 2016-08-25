@@ -13,29 +13,23 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
+import lombok.Getter;
 
 /** Convenience class for making requests */
 public final class ApiRequest {
 
     private static final String TAG = "ApiRequest";
 
-    private static OkHttpClient client;
+    @Getter
+    private static final OkHttpClient client = new OkHttpClient();
 
     private static final int CACHE_NEVER = -1; // -1 means always refresh -- never use cache
 
     private ApiRequest() {}
-
-    /** Initialize the singleton OkHttp object */
-    private static boolean setup () {
-        if (client == null) {
-            client = new OkHttpClient();
-            return true;
-        }
-        return false;
-    }
 
     /**
      * This should be in setup, but since it requires a
@@ -43,12 +37,9 @@ public final class ApiRequest {
      * by itself in onCreate in MainActivity
      * @param context Context to get cache directory from
      */
-    public static void enableCache(Context context) {
-        if (setup()) {
-            int cacheSize = 10 * 1024 * 1024;
-            Cache cache = new Cache(context.getCacheDir(), cacheSize);
-            client.setCache(cache);
-        }
+    public static void enableCache(Context context, int cacheSize) {
+        Cache cache = new Cache(context.getCacheDir(), cacheSize);
+        client.setCache(cache);
     }
 
     /**
@@ -109,10 +100,9 @@ public final class ApiRequest {
      * @return Promise for a JSON object
      */
     public static <T> T json(String resource, int expire, TimeUnit unit, Type type, JsonDeserializer<T> deserializer) throws JsonSyntaxException, IOException {
-        setup();
         Response response = getResponse(resource, expire, unit);
         GsonBuilder gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                .registerTypeAdapter(Date.class, new GsonUTCDateAdapter());
         if (deserializer != null) {
             gson = gson.registerTypeAdapter(type, deserializer);
         }
@@ -169,7 +159,6 @@ public final class ApiRequest {
      * @throws IOException
      */
     public static <T> T xml(String resource, int expire, TimeUnit unit, XmlParser<T> parser) throws ParseException, IOException {
-        setup();
         Response response = getResponse(resource, expire, unit);
         parser.setResponse(response);
         return parser.parse(response.body().byteStream());

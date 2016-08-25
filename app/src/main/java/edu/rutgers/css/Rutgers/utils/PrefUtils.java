@@ -113,7 +113,10 @@ public final class PrefUtils {
     }
 
     public static void setBookmarksFromUpstream(@NonNull Context context, List<Link> links) {
-        links = mergeLinks(links, getBookmarks(context));
+        final List<Link> userLinks = getBookmarks(context);
+        if (!userLinks.isEmpty()) {
+            links = mergeLinks(links, userLinks);
+        }
         setBookmarks(context, links);
     }
 

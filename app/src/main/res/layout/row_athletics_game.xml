@@ -1,132 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:paddingBottom="3dp"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="6dp"
+    android:layout_marginRight="6dp"
+    card_view:cardElevation="4dp">
 
     <LinearLayout
-        android:orientation="horizontal" android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <RelativeLayout
+        <View
+            android:id="@+id/rutgers_home"
+            android:layout_width="10dp"
+            android:layout_height="match_parent"
+            android:background="@color/pantone186" />
+
+        <ImageView
+            android:id="@+id/opponent_icon"
+            android:src="@drawable/stjo_lg"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_margin="10dp">
-
-            <ImageView
-                android:id="@+id/opponent_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:id="@+id/opponent_icon_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textColor="@color/white"
-                android:background="@drawable/circle"
-                android:text="H"
-                android:gravity="center"
-                android:textSize="50dp" />
-
-        </RelativeLayout>
+            android:layout_margin="10dp" />
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:layout_weight="1">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Rutgers"
-                android:id="@+id/home_team" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_room_black_24dp"
-                android:drawableLeft="@drawable/ic_room_black_24dp"
-                android:text="RAC"
-                android:id="@+id/game_location"
-                android:layout_marginLeft="10dp"
-                android:textSize="10dp"
-                android:gravity="center"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Howard"
-                android:id="@+id/away_team" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:background="@color/black"
-            android:layout_marginTop="7dp"
-            android:layout_marginBottom="7dp" />
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="120dp"
-            android:layout_height="match_parent"
+            android:layout_gravity="center"
             android:gravity="center_vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="82"
-                android:id="@+id/home_score"
-                android:layout_marginLeft="3dp" />
-
             <LinearLayout
+                android:id="@+id/score"
                 android:orientation="horizontal"
-                android:layout_gravity="center_horizontal"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <ImageView
-                    android:src="@drawable/ic_schedule_black_24dp"
-                    android:layout_marginRight="2dp"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="82"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:id="@+id/home_score"/>
+
+                <TextView
+                    android:text=" - "
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_gravity="center_vertical"
+                <TextView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:text="70"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:id="@+id/away_score"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1:00PM"
-                        android:id="@+id/game_time"
-                        android:textSize="10dp"
-                        android:textColor="@color/black" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="10-23-2015"
-                        android:id="@+id/game_date"
-                        android:textSize="7dp"/>
-
-                </LinearLayout>
             </LinearLayout>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="70"
-                android:id="@+id/away_score"
-                android:layout_marginLeft="3dp" />
+                android:layout_marginTop="-5dp"
+                android:textSize="18sp"
+                android:text="Howard"
+                android:id="@+id/not_rutgers" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RAC"
+                android:id="@+id/game_location"/>
         </LinearLayout>
-
     </LinearLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:paddingRight="10dp"
+        android:layout_gravity="right|top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10-23-2015"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:id="@+id/game_date"/>
+
+        <TextView
+            android:text=" @ "
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1:00PM"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:id="@+id/game_time"/>
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
