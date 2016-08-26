@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -106,7 +105,7 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
     // have to look them up every time we get a view we've already inflated
     private final class ViewHolder {
         CheckBox checkBox;
-        ImageButton imageButton;
+        ImageView imageButton;
         TextView textView;
         ImageView imageView;
     }
@@ -257,7 +256,7 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
                 case REMOVABLE:
                     convertView = layoutInflater.inflate(removableResource, null);
                     holder = new ViewHolder();
-                    holder.imageButton = (ImageButton) convertView.findViewById(R.id.delete_bookmark);
+                    holder.imageButton = (ImageView) convertView.findViewById(R.id.delete_bookmark);
                     holder.textView = (TextView) convertView.findViewById(R.id.title);
                     holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
                     convertView.setTag(holder);

@@ -6,7 +6,7 @@
     android:descendantFocusability="blocksDescendants"
     android:padding="10dp">
 
-    <ImageButton
+    <ImageView
         android:id="@+id/delete_bookmark"
         android:src="@drawable/ic_delete_forever_black_24dp"
         android:focusable="false"
