@@ -4,11 +4,10 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.internal.NavigationMenu;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
@@ -16,20 +15,18 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
-import edu.rutgers.css.Rutgers.ui.ToggleFloatingActionButton;
-import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
+import io.github.yavski.fabspeeddial.FabSpeedDial;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -46,16 +43,11 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     private Toolbar toolbar;
 
     @Getter
-    private ToggleFloatingActionButton toggleFab;
-
-    @Getter
     private boolean setUp;
 
     public static final int DEF_PROGRESS_RES = R.id.progressCircle;
     public static final int DEF_TOOLBAR_RES = R.id.toolbar;
-    public static final int DEF_MAIN_FAB_RES = R.id.fab;
-    public static final int DEF_SHARE_FAB_RES = R.id.mini_share_fab;
-    public static final int DEF_BOOKMARK_FAB_RES = R.id.mini_bookmark_fab;
+    public static final int DEF_FAB_RES = R.id.fab_speed_dial;
 
     protected static final int LOCATION_REQUEST = 101;
 
@@ -64,11 +56,10 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     public static final class CreateArgs {
         final Integer progressRes;
         final Integer toolbarRes;
-        final Integer mainFabRes;
-        final Integer shareFabRes;
-        final Integer bookmarkFabRes;
+        final Integer fabRes;
     }
 
+    @Getter
     private ActionBar actionBar;
 
     public static final String TAG = "BaseChannelFragment";
@@ -89,26 +80,21 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
                 resource,
                 args.getProgressRes(),
                 args.getToolbarRes(),
-                args.getMainFabRes(),
-                args.getShareFabRes(),
-                args.getBookmarkFabRes()
+                args.getFabRes()
         );
     }
 
     final protected View createView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState,
-                                    int resource, Integer progressRes, Integer toolbarRes, Integer mainFabRes,
-                                    Integer shareFabRes, Integer bookmarkFabRes) {
+                                    int resource, Integer progressRes, Integer toolbarRes, Integer fabRes) {
         final View v = inflater.inflate(resource, parent, false);
 
         progressRes = progressRes == null ? DEF_PROGRESS_RES : progressRes;
         toolbarRes = toolbarRes == null ? DEF_TOOLBAR_RES : toolbarRes;
-        mainFabRes = mainFabRes == null ? DEF_MAIN_FAB_RES : mainFabRes;
-        shareFabRes = shareFabRes == null ? DEF_SHARE_FAB_RES : shareFabRes;
-        bookmarkFabRes = bookmarkFabRes == null ? DEF_BOOKMARK_FAB_RES : bookmarkFabRes;
+        fabRes = fabRes == null ? DEF_FAB_RES : fabRes;
 
         setupProgressBar(v, progressRes);
         setupToolbar(v, toolbarRes);
-        setupToggleFab(v, mainFabRes, shareFabRes, bookmarkFabRes);
+        setupToggleFab(v, fabRes);
 
         setUp = true;
 
@@ -139,41 +125,36 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         this.toolbar = toolbar;
     }
 
-    protected void setupToggleFab(final @NonNull View v, final int mainFabRes, final int shareFabRes, final int bookmarkFabRes) {
-        final FloatingActionButton mainFab = (FloatingActionButton) v.findViewById(mainFabRes);
-        if (mainFab == null) {
+    protected void setupToggleFab(final @NonNull View v, final int fabRes) {
+        final FabSpeedDial fab = (FabSpeedDial) v.findViewById(fabRes);
+        if (fab == null) {
             return;
         }
 
-        final ToggleFloatingActionButton toggleFab = new ToggleFloatingActionButton(getContext(), mainFab, new ArrayList<FloatingActionButton>());
-
-        final FloatingActionButton shareFab = (FloatingActionButton) v.findViewById(shareFabRes);
-        shareFab.setOnClickListener(new View.OnClickListener() {
+        fab.setMenuListener(new FabSpeedDial.MenuListener() {
             @Override
-            public void onClick(View v) {
-                if (toggleFab.isOpen())
-                    startActivity(Intent.createChooser(getShareIntent(), "Share via"));
-                toggleFab.closeFab();
+            public boolean onPrepareMenu(NavigationMenu navigationMenu) {
+                return true;
             }
-        });
-        toggleFab.addFab(shareFab);
 
-        final FloatingActionButton bookmarkFab = (FloatingActionButton) v.findViewById(bookmarkFabRes);
-        bookmarkFab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                if (toggleFab.isOpen()) {
-                    PrefUtils.addBookmark(getContext(), 0, getLink());
-                    Toast.makeText(getContext(), R.string.bookmark_added, Toast.LENGTH_SHORT).show();
-                    toggleFab.closeFab();
+            public boolean onMenuItemSelected(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.action_share:
+                        startActivity(Intent.createChooser(getShareIntent(), "Share via"));
+                        return true;
+                    case R.id.action_bookmark:
+                        PrefUtils.addBookmark(getContext(), 0, getLink());
+                        Toast.makeText(getContext(), R.string.bookmark_added, Toast.LENGTH_SHORT).show();
+                        return true;
+                    default:
+                        return false;
                 }
             }
-        });
-        Drawable bookmarkIcon = ImageUtils.getIcon(getResources(), R.drawable.ic_bookmark, R.color.white);
-        bookmarkFab.setImageDrawable(bookmarkIcon);
-        toggleFab.addFab(bookmarkFab);
 
-        this.toggleFab = toggleFab;
+            @Override
+            public void onMenuClosed() { }
+        });
     }
 
     @Override

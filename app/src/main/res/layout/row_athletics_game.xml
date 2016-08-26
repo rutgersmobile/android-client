@@ -20,7 +20,6 @@
 
         <ImageView
             android:id="@+id/opponent_icon"
-            android:src="@drawable/stjo_lg"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_margin="10dp" />

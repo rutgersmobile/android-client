@@ -1,42 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<merge
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/mini_share_fab"
+    <io.github.yavski.fabspeeddial.FabSpeedDial
+        android:id="@+id/fab_speed_dial"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_share_white_24dp"
-        app:fabSize="mini"
-        android:visibility="gone"
-        android:translationX="-8dp"
+        app:layout_behavior="edu.rutgers.css.Rutgers.ui.ScrollingViewBehavior"
         android:layout_gravity="bottom|end"
-        app:layout_anchorGravity="bottom|right|end"
+        app:fabGravity="bottom_end"
+        app:fabMenu="@menu/fab_menu"
+        app:miniFabTitleTextColor="@color/white"
+        app:miniFabBackgroundTint="@color/actbar_new"
+        app:miniFabTitleBackgroundTint="@color/actbar_new"
+        app:miniFabDrawableTint="@color/white"
         app:rippleColor="@color/actbar_dark"/>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/mini_bookmark_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:fabSize="mini"
-        android:visibility="gone"
-        android:translationX="-8dp"
-        android:layout_gravity="bottom|end"
-        app:layout_anchorGravity="bottom|right|end"
-        app:rippleColor="@color/actbar_dark"/>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_add_white_24dp"
-        android:layout_gravity="bottom|end"
-        app:layout_anchorGravity="bottom|right|end"
-        app:rippleColor="@color/actbar_dark"/>
-</FrameLayout>
+</merge>

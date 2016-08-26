@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,6 +16,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.model.BookmarkAdapter;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
+import io.github.yavski.fabspeeddial.FabSpeedDial;
 
 /**
  * Fragment for bookmark management
@@ -37,13 +37,9 @@ public class BookmarksDisplay extends BaseDisplay {
 
         getActivity().setTitle("Bookmarks");
 
-        final FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
-        final FloatingActionButton shareFab = (FloatingActionButton) v.findViewById(R.id.mini_share_fab);
-        final FloatingActionButton bookmarkFab = (FloatingActionButton) v.findViewById(R.id.mini_bookmark_fab);
+        final FabSpeedDial fab = (FabSpeedDial) v.findViewById(R.id.fab_speed_dial);
 
         fab.setVisibility(View.GONE);
-        shareFab.setVisibility(View.GONE);
-        bookmarkFab.setVisibility(View.GONE);
 
         final Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
