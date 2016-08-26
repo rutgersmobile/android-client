@@ -20,14 +20,14 @@ public final class Config {
 
     // Server and API level
     public static final String API_LEVEL = "2";
-    public static final String API_MACHINE = "doxa";
+//    public static final String API_MACHINE = "doxa";
 //    rumobile enabled for gamma
-//    public static final String API_MACHINE = "rumobile";
+    public static final String API_MACHINE = "rumobile";
     public static final String API_HOSTNAME = API_MACHINE + ".rutgers.edu";
     public static final String API_SCHEME = "https";
-    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/mobile/"+API_LEVEL+"/";
+//    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/mobile/"+API_LEVEL+"/";
 //    rumobile enabled for gamma
-//    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/"+API_LEVEL+"/";
+    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/"+API_LEVEL+"/";
 
     // Location-based services config
     public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
