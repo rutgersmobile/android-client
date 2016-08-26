@@ -38,13 +38,25 @@
         \t <i>by Emil Sj&#246;lander</i><br/><br/>
 
         \t <a href="https://projectlombok.org">Lombok</a><br/>
-        \t <i>The Project Lombok Authors</i><br/><br/>
+        \t <i>by The Project Lombok Authors</i><br/><br/>
 
         \t <a href="https://github.com/wasabeef/picasso-transformations">Picasso Transformations</a><br/>
-        \t <i>Wasabeef</i><br/><br/>
+        \t <i>by Wasabeef</i><br/><br/>
 
         \t <a href="https://rometools.github.io/rome/index.html">ROME</a><br/>
-        \t <i>Rome Tools Developers</i><br/><br/>
+        \t <i>by Rome Tools Developers</i><br/><br/>
+
+        \t <a href="https://github.com/ReactiveX/RxJava">RxJava</a><br/>
+        \t <i>by Netflix Inc</i><br/><br/>
+
+        \t <a href="https://github.com/ReactiveX/RxJava">RxJava</a><br/>
+        \t <i>by Netflix Inc</i><br/><br/>
+
+        \t <a href="https://github.com/ReactiveX/RxAndroid">RxAndroid</a><br/>
+        \t <i>by Netflix Inc</i><br/><br/>
+
+        \t <a href="https://github.com/yavski/fab-speed-dial">FabSpeedDial</a><br/>
+        \t <i>by Yavor Ivanov</i><br/><br/>
     ]]></string>
 
 </resources>
