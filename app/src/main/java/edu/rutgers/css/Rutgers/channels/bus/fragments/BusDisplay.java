@@ -9,7 +9,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,7 +76,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private Handler mUpdateHandler;
     private Timer mUpdateTimer;
     private String mAgency;
-    private ShareActionProvider shareActionProvider;
     private SwipeRefreshLayout refreshLayout;
     private TextView messagesView;
     private View dividerView;

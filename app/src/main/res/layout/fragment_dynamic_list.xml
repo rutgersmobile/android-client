@@ -12,19 +12,12 @@
         <include layout="@layout/toolbar" />
     </android.support.design.widget.AppBarLayout>
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    <com.nhaarman.listviewanimations.itemmanipulation.DynamicListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:id="@+id/dynamic_list" />
 
-        <com.nhaarman.listviewanimations.itemmanipulation.DynamicListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/dynamic_list" />
-
-        <include layout="@layout/progress_circle" />
-
-    </FrameLayout>
-
+    <include layout="@layout/progress_circle" />
     <include layout="@layout/floating_action_button"/>
 </android.support.design.widget.CoordinatorLayout>
