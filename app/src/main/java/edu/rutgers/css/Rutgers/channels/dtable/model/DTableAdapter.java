@@ -27,7 +27,7 @@ public class DTableAdapter extends ExpandableListItemAdapter<DTableElement> {
     private List<DTableElement> mItems;
     private String mHomeCampus;
 
-    public static enum ViewTypes {
+    public enum ViewTypes {
         ROOT_TYPE, CAT_TYPE, FAQ_TYPE, TEXT_TYPE
     }
     private static ViewTypes[] viewTypes = ViewTypes.values();
