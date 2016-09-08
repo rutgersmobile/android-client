@@ -33,4 +33,5 @@ public final class Config {
 
     // Deep link schema info
     public static final Link.Schema SCHEMA = Link.Schema.HTTP;
+    public static final String LINK_HOSTNAME = "rumobile";
 }

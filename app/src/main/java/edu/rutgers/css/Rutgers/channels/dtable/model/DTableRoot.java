@@ -9,14 +9,17 @@ import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+
 /**
  * Root DTable element: can contain a mix of channel, FAQ, and other DTable items.
  */
 public class DTableRoot extends DTableElement {
 
+    @Getter
     private String schema;
-    private boolean grouped;
-    private boolean window;
+    @Getter
+    private String layout;
     private List<DTableElement> children;
 
     public DTableRoot(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
@@ -27,39 +30,34 @@ public class DTableRoot extends DTableElement {
             schema = p.getAsString();
         }
 
-        p = jsonObject.getAsJsonPrimitive("grouped");
-        grouped = p != null && p.getAsBoolean();
-
-        p = jsonObject.getAsJsonPrimitive("window");
-        window = p != null && p.getAsBoolean();
+        p = jsonObject.getAsJsonPrimitive("layout");
+        if (p != null) {
+            layout = p.getAsString();
+        }
 
         JsonArray childrenJson = jsonObject.getAsJsonArray("children");
         children = new ArrayList<>(childrenJson.size());
 
         for (JsonElement childElement : childrenJson) {
             JsonObject child = childElement.getAsJsonObject();
-            if (child.has("answer")) children.add(new DTableFAQ(child, this));
-            else if (child.has("children") && child.get("children").isJsonArray())
+            if (child.has("answer")) {
+                children.add(new DTableFAQ(child, this));
+            } else if (child.has("children") && child.get("children").isJsonArray()) {
                 children.add(new DTableRoot(child, this));
-            else if (child.has("channel")) children.add(new DTableChannel(child, this));
-            else if (child.has("title")) children.add(new DTableElement(child, this));
+            } else if (child.has("channel")) {
+                children.add(new DTableChannel(child, this));
+            } else if (child.has("title")) {
+                children.add(new DTableElement(child, this));
+            }
         }
-    }
-
-    public String getSchema() {
-        return schema;
-    }
-
-    public boolean isGrouped() {
-        return grouped;
-    }
-
-    public boolean isWindow() {
-        return window;
     }
 
     public List<DTableElement> getChildren() {
         return children;
     }
 
+    @Override
+    public List<DTableElement> getChildItemList() {
+        return children;
+    }
 }

@@ -77,7 +77,7 @@ public class Link implements Serializable {
                 break;
             case HTTP:
                 uriBuilder.scheme(Config.API_SCHEME);
-                uriBuilder.authority(Config.API_HOSTNAME);
+                uriBuilder.authority(Config.LINK_HOSTNAME);
                 uriBuilder.appendPath("link");
                 uriBuilder.appendPath(handle);
                 break;

@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
@@ -47,6 +48,9 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     @Getter
     private boolean setUp;
+
+    @Getter
+    private FragmentMediator fragmentMediator;
 
     public static final int DEF_PROGRESS_RES = R.id.progressCircle;
     public static final int DEF_TOOLBAR_RES = R.id.toolbar;
@@ -83,6 +87,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.fragmentMediator = ((MainActivity) getActivity()).getFragmentMediator();
     }
 
     final protected View createView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState, int resource) {

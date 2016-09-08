@@ -16,7 +16,7 @@ public class DtableChannelFragment extends BaseChannelFragment {
     @Override
     public Link getLink() {
         final Bundle args = getArguments();
-        final String topHandle = args.getString(ComponentFactory.ARG_HANDLE_TAG);
+        final String topHandle = args.getString(ComponentFactory.ARG_TOP_HANDLE_TAG);
         final List<String> history = args.getStringArrayList(ComponentFactory.ARG_HIST_TAG);
         final String pathPart = args.getString(ComponentFactory.ARG_TITLE_TAG);
 

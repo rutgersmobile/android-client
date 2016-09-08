@@ -4,14 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.Toast;
-
-import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
-import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,14 +19,16 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
-import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
+import edu.rutgers.css.Rutgers.channels.dtable.model.DTableLinearAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
 import edu.rutgers.css.Rutgers.channels.dtable.model.loader.DTableLoader;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
+import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -37,7 +37,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
  * Dynamic Table
  * <p>Use {@link #dTag()} instead of TAG when logging</p>
  */
-public class DTable extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<DTableRoot> {
+public class DTable extends DtableChannelFragment implements LoaderManager.LoaderCallbacks<DTableRoot> {
 
     /* Log tag and component handle */
     private static final String TAG                 = "DTable";
@@ -64,6 +64,7 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
     private String mHandle;
     private String mTopHandle;
     private boolean mLoading;
+    private String mTitle;
 
     public DTable() {
         // Required empty public constructor
@@ -116,115 +117,99 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
 
         final Bundle args = getArguments();
 
-        List<DTableElement> data = new ArrayList<>();
-        mAdapter = new DTableAdapter(getActivity(), data);
-
-        // If recreating, restore state
-        if (savedInstanceState != null && savedInstanceState.getSerializable(SAVED_ROOT_TAG) != null) {
-            mHandle = savedInstanceState.getString(SAVED_HANDLE_TAG);
-            mDRoot = (DTableRoot) savedInstanceState.getSerializable(SAVED_ROOT_TAG);
-            mAdapter.addAll(mDRoot.getChildren());
-            LOGD(dTag(), "Restoring mData");
-            return;
-        }
-
         // Get handle for this DTable instance
-        if (args.getString(ARG_HANDLE_TAG) != null) mHandle = args.getString(ARG_HANDLE_TAG);
-        else if (args.getString(ARG_API_TAG) != null) mHandle = args.getString(ARG_API_TAG).replace(".txt","");
-        else if (args.getString(ARG_TITLE_TAG) != null) mHandle = args.getString(ARG_TITLE_TAG);
-        else mHandle = "invalid";
+        final String handle = args.getString(ARG_HANDLE_TAG);
+        final String api = args.getString(ARG_API_TAG);
+        mTitle = args.getString(ARG_TITLE_TAG);
+        if (handle != null) {
+            mHandle = handle;
+        } else if (api != null) {
+            mHandle = api.replace(".txt","");
+        } else if (mTitle != null) {
+            mHandle = mTitle;
+        } else {
+            mHandle = "invalid";
+        }
 
         mTopHandle = args.getString(ARG_TOP_HANDLE_TAG, mHandle);
 
-        // If table data was provided in "data" field, load it
-        if (args.getSerializable(ARG_DATA_TAG) != null) {
-            try {
-                mDRoot = (DTableRoot) args.getSerializable(ARG_DATA_TAG);
-                mAdapter.addAll(mDRoot.getChildren());
+        // If recreating, restore state
+        if (savedInstanceState != null ) {
+            mDRoot = (DTableRoot) savedInstanceState.getSerializable(SAVED_ROOT_TAG);
+            if (mDRoot != null) {
+                mHandle = savedInstanceState.getString(SAVED_HANDLE_TAG);
+                createAdapter();
+                LOGD(dTag(), "Restoring mData");
                 return;
-            } catch (ClassCastException e) {
-                LOGE(dTag(), "onCreateView(): " + e.getMessage());
             }
         }
 
-        // Otherwise, check for URL or API to load table from
-        else if (args.getString(ARG_URL_TAG) != null) mURL = args.getString(ARG_URL_TAG);
-        else if (args.getString(ARG_API_TAG) != null) mAPI = args.getString(ARG_API_TAG);
-        else {
-            LOGE(dTag(), "DTable must have URL, API, or data in its arguments bundle");
-            Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
-            return;
+        try {
+            final DTableRoot dataRoot = (DTableRoot) args.getSerializable(ARG_DATA_TAG);
+            // If table data was provided in "data" field, load it
+            if (dataRoot != null) {
+                mDRoot = dataRoot;
+                createAdapter();
+                return;
+            }
+        } catch (ClassCastException e) {
+            LOGE(dTag(), "onCreateView(): " + e.getMessage());
         }
+
+        // Otherwise, check for URL or API to load table from
+        if (mDRoot == null) {
+            final String url = args.getString(ARG_URL_TAG);
+            if (url != null) {
+                mURL = url;
+            } else if (api != null) {
+                mAPI = api;
+            } else {
+                LOGE(dTag(), "DTable must have URL, API, or data in its arguments bundle");
+                Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        mAdapter = new DTableLinearAdapter(
+                new ArrayList<DTableElement>(),
+                getFragmentMediator(),
+                mHandle,
+                mTopHandle,
+                RutgersUtils.getHomeCampus(getContext()),
+                new ArrayList<String>()
+        );
 
         // Start loading DTableRoot object in another thread
         mLoading = true;
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
     }
+
+    private void createAdapter() {
+        mAdapter = new DTableLinearAdapter(
+                mDRoot.getChildren(),
+                getFragmentMediator(),
+                mHandle,
+                mTopHandle,
+                RutgersUtils.getHomeCampus(getContext()),
+                mDRoot.getHistory()
+        );
+    }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
+
+        if (mTitle != null) {
+            getActivity().setTitle(mTitle);
+        }
 
         if (mLoading) showProgressCircle();
 
-        final Bundle args = getArguments();
-        if (args.getString(ARG_TITLE_TAG) != null) {
-            getActivity().setTitle(args.getString(ARG_TITLE_TAG));
-        }
-
-        final ListView listView = (ListView) v.findViewById(R.id.list);
-        AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(mAdapter);
-        alphaInAnimationAdapter.setAbsListView(listView);
-        assert alphaInAnimationAdapter.getViewAnimator() != null;
-        alphaInAnimationAdapter.getViewAnimator().disableAnimations();
-        listView.setAdapter(alphaInAnimationAdapter);
-
-        final String homeCampus = RutgersUtils.getHomeCampus(getActivity());
-
-        mAdapter.setExpandCollapseListener(new ExpandableListItemAdapter.ExpandCollapseListener() {
-            @Override
-            public void onItemExpanded(int position) {
-                DTableElement element = mAdapter.getItem(position);
-
-                // FAQ View expansion is handled by adapter. If it's not a FAQ row, don't expand it.
-                if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.FAQ_TYPE.ordinal()) {
-                    return;
-                } else {
-                    mAdapter.collapse(position);
-                }
-
-
-                if (mAdapter.getItemViewType(position) == DTableAdapter.ViewTypes.CAT_TYPE.ordinal()) {
-                    // DTable root - launch a new DTable
-                    String newHandle = mHandle + "_" + element.getTitle(homeCampus).replace(" ", "_").toLowerCase();
-                    Bundle newArgs = DTable.createArgs(element.getTitle(homeCampus), newHandle, mTopHandle, (DTableRoot) element);
-                    switchFragments(newArgs);
-                } else {
-                    // Channel row - launch channel
-                    DTableChannel channel = (DTableChannel) element;
-                    Bundle newArgs = new Bundle();
-                    // Must have view and title set to launch a channel
-                    newArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
-                    newArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getChannelTitle(homeCampus));
-                    newArgs.putString(ComponentFactory.ARG_HANDLE_TAG, mTopHandle);
-                    newArgs.putStringArrayList(ComponentFactory.ARG_HIST_TAG, mDRoot.getHistory());
-
-                    // Add optional fields to the arg bundle
-                    if (channel.getUrl() != null)
-                        newArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
-                    if (channel.getData() != null)
-                        newArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
-                    if (channel.getCount() > 0)
-                        newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
-                    switchFragments(newArgs);
-                }
-            }
-
-            @Override
-            public void onItemCollapsed(int position) {
-
-            }
-        });
+        final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setItemAnimator(new FadeInAnimator());
+        recyclerView.setAdapter((RecyclerView.Adapter) mAdapter);
 
         return v;
     }
@@ -267,11 +252,12 @@ public class DTable extends BaseChannelFragment implements LoaderManager.LoaderC
         // Data will always be returned as non-null unless there was an error
         mDRoot = data;
         mAdapter.addAll(data.getChildren());
-
+        mAdapter.addAllHistory(data.getHistory());
     }
 
     private void reset() {
         mAdapter.clear();
+        mAdapter.clearHistory();
         mLoading = false;
         hideProgressCircle();
     }

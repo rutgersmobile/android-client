@@ -29,6 +29,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
     private final String homeCampus;
 
+    public static final String ARG_ERROR = "error";
     private static final String TAG = "InitLoadAsyncTask";
 
     public LinkLoadTask(final String homeCampus) {
@@ -57,6 +58,10 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
 
     @Override
     protected void onPostExecute(Bundle args) {
+        if (args == null) {
+            args = new Bundle();
+            args.putBoolean(ARG_ERROR, true);
+        }
         LinkBus.getInstance().post(args);
     }
 

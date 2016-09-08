@@ -1,40 +1,33 @@
 package edu.rutgers.css.Rutgers.channels.dtable.model;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.Getter;
 
 /**
  * A question/answer pair.
  */
-public class DTableFAQ extends DTableElement {
+public class DTableFAQ extends DTableElement implements Serializable {
 
-    private boolean window;
-    private String answer;
-    private boolean opened;
+    @Getter
+    private final String answer;
+    private final List<String> answerList;
 
     public DTableFAQ(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
         super(jsonObject, parent);
 
-        JsonPrimitive p = jsonObject.getAsJsonPrimitive("window");
-        window = p != null && p.getAsBoolean();
-        answer = jsonObject.getAsJsonPrimitive("answer").getAsString();
+        answer = jsonObject.get("answer").getAsString();
+        answerList = new ArrayList<>();
+        answerList.add(answer);
     }
 
-    public boolean isWindow() {
-        return window;
+    @Override
+    public List<?> getChildItemList() {
+        return answerList;
     }
-
-    public String getAnswer() {
-        return answer;
-    }
-
-    public boolean isOpened() {
-        return opened;
-    }
-
-    public void setOpened(boolean opened) {
-        this.opened = opened;
-    }
-
 }

@@ -57,6 +57,9 @@ public final class ComponentFactory {
     /** Channel handle, usually JSON-defined. */
     public static final String ARG_HANDLE_TAG       = "handle";
 
+    /** Top handle in heirarchy. Currently used for DTables. */
+    public static final String ARG_TOP_HANDLE_TAG       = "topHandle";
+
     /** JSON data passed as a string. */
     public static final String ARG_DATA_TAG         = "data";
 

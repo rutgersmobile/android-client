@@ -34,12 +34,13 @@ import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkBus;
+import edu.rutgers.css.Rutgers.link.LinkLoadTask;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
-import edu.rutgers.css.Rutgers.ui.fragments.LinkErrorDialogFragment;
+import edu.rutgers.css.Rutgers.ui.fragments.InfoDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.MainScreen;
 import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
@@ -390,8 +391,8 @@ public class MainActivity extends GoogleApiProviderActivity implements
 
     @Subscribe
     public void switchFragments(final Bundle args) {
-        if (args == null) {
-            LinkErrorDialogFragment.defaultError.show(getSupportFragmentManager(), LinkErrorDialogFragment.TAG);
+        if (args == null || args.getBoolean(LinkLoadTask.ARG_ERROR, false)) {
+            InfoDialogFragment.newInstance("Link Error", "Invalid Link").show(getSupportFragmentManager(), InfoDialogFragment.TAG);
         } else {
             getFragmentMediator().switchFragments(args);
             closeDrawer();
