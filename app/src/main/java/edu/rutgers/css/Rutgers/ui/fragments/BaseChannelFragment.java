@@ -10,7 +10,10 @@ import android.support.annotation.NonNull;
 import android.support.design.internal.NavigationMenu;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -63,6 +66,19 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     private ActionBar actionBar;
 
     public static final String TAG = "BaseChannelFragment";
+
+    protected void safeForceLoad(int loaderId) {
+        final FragmentActivity activity = getActivity();
+        if (activity != null) {
+            final LoaderManager loaderManager = activity.getSupportLoaderManager();
+            if (loaderManager != null) {
+                final Loader loader = loaderManager.getLoader(loaderId);
+                if (loader != null) {
+                    loader.forceLoad();
+                }
+            }
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

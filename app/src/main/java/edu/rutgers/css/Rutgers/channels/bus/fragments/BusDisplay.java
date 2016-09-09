@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewCompat;
@@ -205,7 +204,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                getActivity().getSupportLoaderManager().getLoader(LOADER_ID).forceLoad();
+                safeForceLoad(LOADER_ID);
             }
         });
         refreshLayout.setEnabled(false);
@@ -263,16 +262,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
                 mUpdateHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        final FragmentActivity activity = getActivity();
-                        if (activity != null) {
-                            final LoaderManager loaderManager = activity.getSupportLoaderManager();
-                            if (loaderManager != null) {
-                                final Loader loader = loaderManager.getLoader(LOADER_ID);
-                                if (loader != null) {
-                                    loader.forceLoad();
-                                }
-                            }
-                        }
+                        safeForceLoad(LOADER_ID);
                     }
                 });
             }
