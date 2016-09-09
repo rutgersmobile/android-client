@@ -2,17 +2,13 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,25 +18,35 @@ import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.Expan
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.ParseException;
+import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
+import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
+import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
-import edu.rutgers.css.Rutgers.channels.bus.model.loader.PredictionLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import lombok.Data;
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 
-public class BusDisplay extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<PredictionLoader.PredictionHolder> {
+public class BusDisplay extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusDisplay";
@@ -72,15 +78,20 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     private String mMode;
     private String mTag;
     private String mTitle;
-    private Handler mUpdateHandler;
-    private Timer mUpdateTimer;
     private String mAgency;
     private SwipeRefreshLayout refreshLayout;
     private TextView messagesView;
     private View dividerView;
     private boolean mLoading = false;
 
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
+    private PublishSubject<Long> refreshSubject = PublishSubject.create();
+    private Subscription subscription;
+
+    @Data
+    public static class PredictionHolder {
+        public final Predictions predictions;
+        public final String title;
+    }
 
     public BusDisplay() {
         // Required empty public constructor
@@ -116,9 +127,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         mData = new ArrayList<>();
         mAdapter = new PredictionAdapter(getActivity(), mData);
 
-        // Set up handler for bus prediction update timer
-        mUpdateHandler = new Handler();
-
         mAgency = null;
         mTag = null;
 
@@ -146,10 +154,10 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         if (missingArg) return;
 
         // Set route or stop display mode
-        String mode = args.getString(ARG_MODE_TAG);
-        if (BusDisplay.ROUTE_MODE.equalsIgnoreCase(mode)) {
+        String argMode = args.getString(ARG_MODE_TAG);
+        if (BusDisplay.ROUTE_MODE.equalsIgnoreCase(argMode)) {
             mMode = BusDisplay.ROUTE_MODE;
-        } else if (BusDisplay.STOP_MODE.equalsIgnoreCase(mode)) {
+        } else if (BusDisplay.STOP_MODE.equalsIgnoreCase(argMode)) {
             mMode = BusDisplay.STOP_MODE;
         } else {
             LOGE(TAG, "Invalid mode \""+args.getString(ARG_MODE_TAG)+"\"");
@@ -166,7 +174,104 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
         // Start loading predictions
         mLoading = true;
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+
+        final String agency = mAgency;
+        final String tag = mTag;
+        final String mode = mMode;
+        Observable<PredictionHolder> predictionsObservable = Observable.merge(
+            Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
+            refreshSubject
+        )
+        .observeOn(Schedulers.io())
+        .flatMap(t -> {
+            LOGI(TAG, "Starting load");
+            Predictions predictions = null;
+            String title = null;
+            try {
+                if (BusDisplay.ROUTE_MODE.equals(mode)) {
+                    predictions = NextbusAPI.routePredict(agency, tag);
+                    for (RouteStub route : NextbusAPI.getActiveRoutes(agency)) {
+                        if (route.getTag().equals(tag)) {
+                            title = route.getTitle();
+                            break;
+                        }
+                    }
+                } else if (BusDisplay.STOP_MODE.equals(mode)) {
+                    predictions = NextbusAPI.stopPredict(agency, tag);
+                    for (StopStub stop : NextbusAPI.getActiveStops(agency)) {
+                        if (stop.getTag().equals(tag)) {
+                            title = stop.getTitle();
+                            break;
+                        }
+                    }
+                }
+            } catch (IOException|ParseException e) {
+                return Observable.error(e);
+            }
+
+            if (predictions == null) {
+                return Observable.error(
+                    new IllegalArgumentException("Invalid mode (stop / route only)")
+                );
+            }
+
+            return Observable.just(new PredictionHolder(predictions, title));
+        });
+
+        subscription = predictionsObservable
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(data -> {
+                    LOGI(TAG, "Ran subscription");
+                    reset();
+
+                    final Activity activity = getActivity();
+                    if (activity == null) {
+                        return;
+                    }
+
+                    if (refreshLayout != null) {
+                        refreshLayout.setRefreshing(false);
+                    }
+
+                    Predictions predictions = data.getPredictions();
+                    if (predictions == null) {
+                        AppUtils.showFailedLoadToast(getContext());
+                        return;
+                    }
+
+                    String title = data.getTitle();
+                    if (title != null) {
+                        mTitle = title;
+                        activity.setTitle(mTitle);
+                    }
+
+                    // If there are no active routes or stops, show a message
+                    if (predictions.getPredictions().isEmpty()) {
+                        int message;
+
+                        // A stop may have no active routes; a route may have no active stops
+                        if (BusDisplay.STOP_MODE.equals(mMode)) {
+                            message = R.string.bus_no_active_routes;
+                        } else {
+                            message = R.string.bus_no_active_stops;
+                        }
+
+                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                    }
+
+                    mAdapter.addAll(predictions.getPredictions());
+
+                    final String message = StringUtils.join(predictions.getMessages(), "\n");
+                    if (!message.isEmpty()) {
+                        dividerView.setVisibility(View.VISIBLE);
+                        messagesView.setVisibility(View.VISIBLE);
+                        messagesView.setText(message);
+                    }
+                }, error -> {
+                    reset();
+                    LOGE(TAG, error.getMessage());
+                    AppUtils.showFailedLoadToast(getContext());
+                });
     }
     
     @Override
@@ -201,12 +306,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         dividerView = v.findViewById(R.id.message_separator);
 
         refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresh_layout);
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                safeForceLoad(LOADER_ID);
-            }
-        });
+        refreshLayout.setOnRefreshListener(() -> refreshSubject.onNext(0L));
         refreshLayout.setEnabled(false);
         refreshLayout.setColorSchemeResources(
                 R.color.actbar_new,
@@ -215,8 +315,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
 
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-            }
+            public void onScrollStateChanged(AbsListView view, int scrollState) { }
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
@@ -228,12 +327,7 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
             }
         });
 
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                return false;
-            }
-        });
+        listView.setOnItemLongClickListener((parent1, view, position, id) -> false);
 
         return v;
     }
@@ -247,36 +341,9 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        
-        // Don't run if required args aren't loaded
-        if (mAgency == null || mTag == null) return;
-        
-        // Start the update thread when screen is active
-        mUpdateTimer = new Timer();
-        mUpdateTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                mUpdateHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        safeForceLoad(LOADER_ID);
-                    }
-                });
-            }
-        }, 0, 1000 * REFRESH_INTERVAL);
-    }
-    
-    @Override
-    public void onPause() {
-        super.onPause();
-        
-        // Stop the update thread from running when screen isn't active
-        if (mUpdateTimer != null) {
-            mUpdateTimer.cancel();
-            mUpdateTimer = null;
-        }
+    public void onDestroy() {
+        super.onDestroy();
+        subscription.unsubscribe();
     }
 
     @Override
@@ -287,65 +354,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
         outState.putString(SAVED_MODE_TAG, mMode);
         outState.putSerializable(SAVED_DATA_TAG, mData);
         outState.putSerializable(SAVED_TITLE_TAG, mTitle);
-    }
-
-    @Override
-    public Loader<PredictionLoader.PredictionHolder> onCreateLoader(int id, Bundle args) {
-        return new PredictionLoader(getActivity(), mAgency, mTag, mMode);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<PredictionLoader.PredictionHolder> loader, PredictionLoader.PredictionHolder data) {
-        reset();
-
-        final Activity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-
-        if (refreshLayout != null) {
-            refreshLayout.setRefreshing(false);
-        }
-
-        Predictions predictions = data.getPredictions();
-        if (predictions == null) {
-            AppUtils.showFailedLoadToast(getContext());
-            return;
-        }
-
-        String title = data.getTitle();
-        if (title != null) {
-            mTitle = title;
-            activity.setTitle(mTitle);
-        }
-
-        // If there are no active routes or stops, show a message
-        if (predictions.getPredictions().isEmpty()) {
-            int message;
-
-            // A stop may have no active routes; a route may have no active stops
-            if (BusDisplay.STOP_MODE.equals(mMode)) {
-                message = R.string.bus_no_active_routes;
-            } else {
-                message = R.string.bus_no_active_stops;
-            }
-
-            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-        }
-
-        mAdapter.addAll(predictions.getPredictions());
-
-        final String message = StringUtils.join(predictions.getMessages(), "\n");
-        if (!message.isEmpty()) {
-            dividerView.setVisibility(View.VISIBLE);
-            messagesView.setVisibility(View.VISIBLE);
-            messagesView.setText(message);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<PredictionLoader.PredictionHolder> loader) {
-        reset();
     }
 
     private void reset() {
