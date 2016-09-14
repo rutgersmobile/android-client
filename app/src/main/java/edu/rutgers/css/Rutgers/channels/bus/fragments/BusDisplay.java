@@ -38,7 +38,6 @@ import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import lombok.Data;
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
@@ -85,7 +84,6 @@ public class BusDisplay extends BaseChannelFragment {
     private boolean mLoading = false;
 
     private PublishSubject<Long> refreshSubject = PublishSubject.create();
-    private Subscription subscription;
 
     @Data
     public static class PredictionHolder {
@@ -178,10 +176,9 @@ public class BusDisplay extends BaseChannelFragment {
         final String agency = mAgency;
         final String tag = mTag;
         final String mode = mMode;
-        Observable<PredictionHolder> predictionsObservable = Observable.merge(
-            Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
-            refreshSubject
-        )
+        Observable.merge(
+                Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
+                refreshSubject)
         .observeOn(Schedulers.io())
         .flatMap(t -> {
             LOGI(TAG, "Starting load");
@@ -216,62 +213,61 @@ public class BusDisplay extends BaseChannelFragment {
             }
 
             return Observable.just(new PredictionHolder(predictions, title));
+        })
+        .observeOn(AndroidSchedulers.mainThread())
+        .compose(bindToLifecycle())
+        .subscribe(data -> {
+            LOGI(TAG, "Ran subscription");
+            reset();
+
+            final Activity activity = getActivity();
+            if (activity == null) {
+                return;
+            }
+
+            if (refreshLayout != null) {
+                refreshLayout.setRefreshing(false);
+            }
+
+            Predictions predictions = data.getPredictions();
+            if (predictions == null) {
+                AppUtils.showFailedLoadToast(getContext());
+                return;
+            }
+
+            String title = data.getTitle();
+            if (title != null) {
+                mTitle = title;
+                activity.setTitle(mTitle);
+            }
+
+            // If there are no active routes or stops, show a message
+            if (predictions.getPredictions().isEmpty()) {
+                int message;
+
+                // A stop may have no active routes; a route may have no active stops
+                if (BusDisplay.STOP_MODE.equals(mMode)) {
+                    message = R.string.bus_no_active_routes;
+                } else {
+                    message = R.string.bus_no_active_stops;
+                }
+
+                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+            }
+
+            mAdapter.addAll(predictions.getPredictions());
+
+            final String message = StringUtils.join(predictions.getMessages(), "\n");
+            if (!message.isEmpty()) {
+                dividerView.setVisibility(View.VISIBLE);
+                messagesView.setVisibility(View.VISIBLE);
+                messagesView.setText(message);
+            }
+        }, error -> {
+            reset();
+            LOGE(TAG, error.getMessage());
+            AppUtils.showFailedLoadToast(getContext());
         });
-
-        subscription = predictionsObservable
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(data -> {
-                    LOGI(TAG, "Ran subscription");
-                    reset();
-
-                    final Activity activity = getActivity();
-                    if (activity == null) {
-                        return;
-                    }
-
-                    if (refreshLayout != null) {
-                        refreshLayout.setRefreshing(false);
-                    }
-
-                    Predictions predictions = data.getPredictions();
-                    if (predictions == null) {
-                        AppUtils.showFailedLoadToast(getContext());
-                        return;
-                    }
-
-                    String title = data.getTitle();
-                    if (title != null) {
-                        mTitle = title;
-                        activity.setTitle(mTitle);
-                    }
-
-                    // If there are no active routes or stops, show a message
-                    if (predictions.getPredictions().isEmpty()) {
-                        int message;
-
-                        // A stop may have no active routes; a route may have no active stops
-                        if (BusDisplay.STOP_MODE.equals(mMode)) {
-                            message = R.string.bus_no_active_routes;
-                        } else {
-                            message = R.string.bus_no_active_stops;
-                        }
-
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    }
-
-                    mAdapter.addAll(predictions.getPredictions());
-
-                    final String message = StringUtils.join(predictions.getMessages(), "\n");
-                    if (!message.isEmpty()) {
-                        dividerView.setVisibility(View.VISIBLE);
-                        messagesView.setVisibility(View.VISIBLE);
-                        messagesView.setText(message);
-                    }
-                }, error -> {
-                    reset();
-                    LOGE(TAG, error.getMessage());
-                    AppUtils.showFailedLoadToast(getContext());
-                });
     }
     
     @Override
@@ -338,12 +334,6 @@ public class BusDisplay extends BaseChannelFragment {
         pathParts.add(mMode);
         pathParts.add(mTag);
         return new Link("bus", pathParts, getLinkTitle());
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        subscription.unsubscribe();
     }
 
     @Override

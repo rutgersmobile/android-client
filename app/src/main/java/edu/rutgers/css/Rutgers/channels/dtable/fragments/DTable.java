@@ -2,8 +2,6 @@ package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,24 +9,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.gson.JsonObject;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableLinearAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
-import edu.rutgers.css.Rutgers.channels.dtable.model.loader.DTableLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -37,12 +41,11 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
  * Dynamic Table
  * <p>Use {@link #dTag()} instead of TAG when logging</p>
  */
-public class DTable extends DtableChannelFragment implements LoaderManager.LoaderCallbacks<DTableRoot> {
+public class DTable extends DtableChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "DTable";
     public static final String HANDLE               = "dtable";
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -58,9 +61,8 @@ public class DTable extends DtableChannelFragment implements LoaderManager.Loade
 
     /* Member data */
     private DTableRoot mDRoot;
-    private DTableAdapter mAdapter;
+    private DTableAdapter<DTableElement> mAdapter;
     private String mURL;
-    private String mAPI;
     private String mHandle;
     private String mTopHandle;
     private boolean mLoading;
@@ -161,9 +163,7 @@ public class DTable extends DtableChannelFragment implements LoaderManager.Loade
             final String url = args.getString(ARG_URL_TAG);
             if (url != null) {
                 mURL = url;
-            } else if (api != null) {
-                mAPI = api;
-            } else {
+            } else if (api == null) {
                 LOGE(dTag(), "DTable must have URL, API, or data in its arguments bundle");
                 Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
                 return;
@@ -171,17 +171,39 @@ public class DTable extends DtableChannelFragment implements LoaderManager.Loade
         }
 
         mAdapter = new DTableLinearAdapter(
-                new ArrayList<DTableElement>(),
+                new ArrayList<>(),
                 getFragmentMediator(),
                 mHandle,
                 mTopHandle,
                 RutgersUtils.getHomeCampus(getContext()),
-                new ArrayList<String>()
+                new ArrayList<>()
         );
 
         // Start loading DTableRoot object in another thread
         mLoading = true;
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        final String url = mURL;
+        Observable.fromCallable(() -> {
+            JsonObject json;
+            if (url != null) {
+                json = ApiRequest.json(url, TimeUnit.HOURS, JsonObject.class);
+            } else {
+                json = ApiRequest.api(api, TimeUnit.HOURS, JsonObject.class);
+            }
+            return new DTableRoot(json, null);
+        })
+        .compose(bindToLifecycle())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(root -> {
+            reset();
+            mDRoot = root;
+            mAdapter.addAll(root.getChildren());
+            mAdapter.addAllHistory(root.getHistory());
+        }, error -> {
+            reset();
+            LOGE(TAG, error.getMessage());
+            AppUtils.showFailedLoadToast(getContext());
+        });
     }
 
     private void createAdapter() {
@@ -235,35 +257,10 @@ public class DTable extends DtableChannelFragment implements LoaderManager.Loade
         }
     }
 
-    @Override
-    public Loader<DTableRoot> onCreateLoader(int id, Bundle args) {
-        return new DTableLoader(getContext(), mURL, mAPI, dTag());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<DTableRoot> loader, DTableRoot data) {
-        reset();
-
-        if (data == null) {
-            AppUtils.showFailedLoadToast(getActivity());
-            return;
-        }
-
-        // Data will always be returned as non-null unless there was an error
-        mDRoot = data;
-        mAdapter.addAll(data.getChildren());
-        mAdapter.addAllHistory(data.getHistory());
-    }
-
     private void reset() {
         mAdapter.clear();
         mAdapter.clearHistory();
         mLoading = false;
         hideProgressCircle();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<DTableRoot> loader) {
-        reset();
     }
 }

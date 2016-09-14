@@ -9,22 +9,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.athletics.AthleticsAPI;
-import edu.rutgers.css.Rutgers.api.athletics.model.AthleticsGame;
-import edu.rutgers.css.Rutgers.api.athletics.model.AthleticsGames;
 import edu.rutgers.css.Rutgers.channels.athletics.model.AthleticsAdapter;
 import edu.rutgers.css.Rutgers.ui.VerticalSpaceItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import rx.Single;
-import rx.SingleSubscriber;
-import rx.Subscription;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * Show athletics scores
@@ -35,7 +32,6 @@ public final class AthleticsDisplay extends DtableChannelFragment {
 
     private boolean loading = false;
     private AthleticsAdapter adapter;
-    private Subscription athleticsGamesSubscription;
     private String title;
 
     public static Bundle createArgs(@NonNull String title, @NonNull String resource) {
@@ -55,7 +51,7 @@ public final class AthleticsDisplay extends DtableChannelFragment {
         if (title != null) {
             getActivity().setTitle(title);
         }
-        adapter = new AthleticsAdapter(getContext(), R.layout.row_athletics_game, new ArrayList<AthleticsGame>());
+        adapter = new AthleticsAdapter(getContext(), R.layout.row_athletics_game, new ArrayList<>());
 
         final String resource = args.getString(ComponentFactory.ARG_DATA_TAG);
         if (resource == null) {
@@ -63,29 +59,18 @@ public final class AthleticsDisplay extends DtableChannelFragment {
             return;
         }
 
-        Single<AthleticsGames> athleticsGames = Single.fromCallable(new Callable<AthleticsGames>() {
-            @Override
-            public AthleticsGames call() throws Exception {
-                return AthleticsAPI.getGames(resource);
-            }
-        });
-
-        athleticsGamesSubscription = athleticsGames
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleSubscriber<AthleticsGames>() {
-                    @Override
-                    public void onSuccess(AthleticsGames value) {
-                        reset();
-                        adapter.addAll(value.getGames());
-                    }
-
-                    @Override
-                    public void onError(Throwable error) {
-                        reset();
-                        AppUtils.showFailedLoadToast(getContext());
-                    }
-                });
+        Observable.fromCallable(() -> AthleticsAPI.getGames(resource))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .subscribe(value -> {
+                reset();
+                adapter.addAll(value.getGames());
+            }, error -> {
+                reset();
+                LOGE(TAG, error.getMessage());
+                AppUtils.showFailedLoadToast(getContext());
+            });
     }
 
     @Override
@@ -104,12 +89,6 @@ public final class AthleticsDisplay extends DtableChannelFragment {
         recyclerView.setAdapter(adapter);
 
         return v;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        athleticsGamesSubscription.unsubscribe();
     }
 
     private void reset() {
