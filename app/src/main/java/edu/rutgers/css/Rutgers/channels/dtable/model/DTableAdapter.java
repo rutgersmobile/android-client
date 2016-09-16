@@ -7,8 +7,8 @@ import java.util.Collection;
  *
  * Basically they have history and ways to add stuff
  */
-public interface DTableAdapter<T> {
-    void addAll(Collection<? extends T> elements);
+public interface DTableAdapter {
+    void addAll(Collection<? extends DTableElement> elements);
     void clear();
     void addAllHistory(Collection<? extends String> history);
     void clearHistory();

@@ -29,7 +29,7 @@ public final class ChannelManager {
     private Map<String, Channel> channelsMap;
 
     public ChannelManager() {
-        channelsMap = Collections.synchronizedMap(new LinkedHashMap<String, Channel>());
+        channelsMap = Collections.synchronizedMap(new LinkedHashMap<>());
     }
 
     /**

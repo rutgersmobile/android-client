@@ -1,17 +1,30 @@
 [
   {
+    "handle": "fixit",
+    "title": "Fix It",
+    "url": "https://apps.ufcp.rutgers.edu/CR/Landing.html",
+    "view": "www",
+    "icon": "fixit"
+  },
+  {
     "handle": "bus",
     "title": "Bus",
     "view": "bus",
     "icon": "bus"
   },
   {
-    "handle": "news",
-    "title": "News",
-    "api": "news.txt",
-    "grouped": true,
-    "view": "dtable",
-    "icon": "news"
+    "handle": "myrutgers",
+    "title": "myRutgers",
+    "url": "https://my.rutgers.edu/",
+    "icon": "myrutgers4",
+    "view": "www"
+  },
+  {
+    "handle": "sakai",
+    "title": "Sakai",
+    "url": "https://sakai.rutgers.edu/mobile",
+    "view": "www",
+    "icon": "sakai4"
   },
   {
     "handle": "food",
@@ -20,10 +33,58 @@
     "icon": "food"
   },
   {
+    "handle": "ecollege",
+    "title": "Pearson eCollege",
+    "url": "https://ecollege.rutgers.edu/",
+    "view": "www",
+    "icon": "ecollege10"
+  },
+  {
+    "handle": "knights",
+    "title": "Scarlet Knights",
+    "icon": "knights",
+    "grouped": true,
+    "view": "dtable",
+    "api": "athleticsfaq.txt",
+    "layout": "grid"
+  },
+  {
+    "handle": "soc",
+    "title": "Schedule of Classes",
+    "view": "soc",
+    "icon": "soc"
+  },
+  {
+    "handle": "libraries",
+    "title": "Libraries",
+    "url": "http://m.libraries.rutgers.edu/",
+    "view": "www",
+    "icon": "library15"
+  },
+  {
     "handle": "places",
     "title": "Places",
     "view": "places",
     "icon": "places"
+  },
+  {
+    "handle": "campus_status",
+    "title": "Emergency Services",
+    "api": "emergency.txt",
+    "grouped": true,
+    "view": "dtable",
+    "icon": "emergency"
+  },
+  {
+    "handle": "housing",
+    "title": {
+      "homeCampus": "New Brunswick",
+      "homeTitle": "Residence Life",
+      "foreignTitle": "NB Residence Life"
+    },
+    "url": "http://ruoncampus.rutgers.edu/?ref=RUapp",
+    "view": "www",
+    "icon": "housing3"
   },
   {
     "handle": "events",
@@ -34,16 +95,30 @@
     "icon": "events"
   },
   {
-    "handle": "soc",
-    "title": "Schedule of Classes",
-    "view": "soc",
-    "icon": "soc"
+    "handle": "stud_life",
+    "title": {
+      "homeCampus": "New Brunswick",
+      "homeTitle": "Student Affairs",
+      "foreignTitle": "NB Student Affairs"
+    },
+    "url": "http://studentaffairs.rutgers.edu/mobile-landing/?ref=RUapp",
+    "view": "www",
+    "icon": "studlife8"
   },
   {
-    "handle": "ruinfo",
-    "title": "RU-Info",
-    "view": "ruinfo",
-    "icon": "ruinfo"
+    "handle": "news",
+    "title": "News",
+    "api": "news.txt",
+    "grouped": true,
+    "view": "dtable",
+    "icon": "news"
+  },
+  {
+    "handle": "kiosk",
+    "title": "NB Kiosk",
+    "url": "http://nbkiosk.rutgers.edu/",
+    "view": "www",
+    "icon": "kiosk4"
   },
   {
     "handle": "career_services",
@@ -58,65 +133,10 @@
     "icon": "careers"
   },
   {
-    "handle": "campus_status",
-    "title": "Emergency Services",
-    "api": "emergency.txt",
-    "grouped": true,
-    "view": "dtable",
-    "icon": "emergency"
-  },
-  {
-    "handle": "feedback",
-    "title": "Feedback",
-    "view": "feedback",
-    "icon": "feedback"
-  },
-  {
-    "handle": "knights",
-    "title": "Scarlet Knights",
-    "icon": "knights",
-    "grouped": true,
-    "view": "dtable",
-    "api": "athleticsfaq.txt"
-  },
-  {
-    "handle": "housing",
-    "title": {
-      "homeCampus": "New Brunswick",
-      "homeTitle": "Housing & ResLife",
-      "foreignTitle": "NB Housing & ResLife"
-    },
-    "url": "http://ruoncampus.rutgers.edu/mobile",
-    "view": "www",
-    "icon": "housing3"
-  },
-  {
-    "handle": "kiosk",
-    "title": "NB Kiosk",
-    "url": "http://nbkiosk.rutgers.edu/",
-    "view": "www",
-    "icon": "kiosk4"
-  },
-  {
-    "handle": "libraries",
-    "title": "Libraries",
-    "url": "http://m.libraries.rutgers.edu/",
-    "view": "www",
-    "icon": "library15"
-  },
-  {
-    "handle": "myrutgers",
-    "title": "myRutgers",
-    "url": "https://my.rutgers.edu/",
-    "icon": "myrutgers4",
-    "view": "www"
-  },
-  {
-    "handle": "ecollege",
-    "title": "Pearson eCollege",
-    "url": "https://ecollege.rutgers.edu/",
-    "view": "www",
-    "icon": "ecollege10"
+    "handle": "ruinfo",
+    "title": "RU-Info",
+    "view": "ruinfo",
+    "icon": "ruinfo"
   },
   {
     "handle": "ralumni",
@@ -126,21 +146,9 @@
     "icon": "rualumni6"
   },
   {
-    "handle": "sakai",
-    "title": "Sakai",
-    "url": "https://sakai.rutgers.edu/mobile",
-    "view": "www",
-    "icon": "sakai4"
-  },
-  {
-    "handle": "stud_life",
-    "title": {
-      "homeCampus": "New Brunswick",
-      "homeTitle": "Student Life",
-      "foreignTitle": "NB Student Life"
-    },
-    "url": "http://getinvolved.rutgers.edu/m/",
-    "view": "www",
-    "icon": "studlife8"
+    "handle": "feedback",
+    "title": "Feedback",
+    "view": "feedback",
+    "icon": "feedback"
   }
 ]

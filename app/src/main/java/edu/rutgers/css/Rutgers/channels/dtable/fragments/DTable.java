@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.channels.dtable.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
+import com.squareup.picasso.Picasso;
+import com.synnapps.carouselview.CarouselView;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,11 +24,13 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
-import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
+import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
+import edu.rutgers.css.Rutgers.channels.dtable.model.DTableGridAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableLinearAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
+import edu.rutgers.css.Rutgers.ui.GridSpacingItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
@@ -59,49 +64,73 @@ public class DTable extends DtableChannelFragment {
     private static final String SAVED_HANDLE_TAG    = Config.PACKAGE_NAME + ".dtable.saved.handle";
     private static final String SAVED_ROOT_TAG      = Config.PACKAGE_NAME + ".dtable.saved.root";
 
+    public static final int GRID_SPACING = 25;
+
     /* Member data */
     private DTableRoot mDRoot;
-    private DTableAdapter<DTableElement> mAdapter;
+    private DTableAdapter mAdapter;
     private String mURL;
     private String mHandle;
     private String mTopHandle;
     private boolean mLoading;
     private String mTitle;
+    private String mLayout;
 
     public DTable() {
         // Required empty public constructor
     }
 
     /** Creates basic argument bundle - fields common to all bundles */
-    private static Bundle baseArgs(@NonNull String title, @NonNull String handle, @NonNull String topHandle) {
+    private static Bundle baseArgs(@NonNull String title, @NonNull String handle, @NonNull String topHandle, @NonNull String layout) {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, DTable.HANDLE);
         bundle.putString(ARG_TITLE_TAG, title);
         bundle.putString(ARG_HANDLE_TAG, handle);
         bundle.putString(ARG_TOP_HANDLE_TAG, topHandle);
+        bundle.putString(ComponentFactory.ARG_LAYOUT_TAG, layout);
         return bundle;
     }
 
     /** Create argument bundle for a DTable that loads from a URL. */
-    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull URL url) {
-        Bundle bundle = baseArgs(title, handle, topHandle);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull String layout, @NonNull URL url) {
+        Bundle bundle = baseArgs(title, handle, topHandle, layout);
         bundle.putString(ARG_URL_TAG, url.toString());
         return bundle;
     }
 
     /** Create argument bundle for a DTable that loads from the RUMobile API. */
-    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull String api) {
-        Bundle bundle = baseArgs(title, handle, topHandle);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull String layout, @NonNull String api) {
+        Bundle bundle = baseArgs(title, handle, topHandle, layout);
         bundle.putString(ARG_API_TAG, api);
         return bundle;
     }
 
     /** Create argument bundle for a DTable that launches with pre-loaded table data. */
-    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull DTableRoot tableRoot) {
-        Bundle bundle = baseArgs(title, handle, topHandle);
+    public static Bundle createArgs(@NonNull String title, @NonNull String handle, String topHandle, @NonNull String layout, @NonNull DTableRoot tableRoot) {
+        Bundle bundle = baseArgs(title, handle, topHandle, layout);
         bundle.putSerializable(ARG_DATA_TAG, tableRoot);
         return bundle;
     }
+
+    public static Bundle createChannelArgs(DTableChannel channel, String homeCampus, String topHandle, ArrayList<String> history) {
+        final Bundle bundle = new Bundle();
+        // Must have view and title set to launch a channel
+        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
+        bundle.putString(ComponentFactory.ARG_TITLE_TAG, channel.getChannelTitle(homeCampus));
+        bundle.putString(ComponentFactory.ARG_TOP_HANDLE_TAG, topHandle);
+        bundle.putStringArrayList(ComponentFactory.ARG_HIST_TAG, history);
+
+        // Add optional fields to the arg bundle
+        if (channel.getUrl() != null)
+            bundle.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
+        if (channel.getData() != null)
+            bundle.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
+        if (channel.getCount() > 0)
+            bundle.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
+
+        return bundle;
+    }
+
 
     /**
      * Get channel-specific DTable tag to use for logging.
@@ -111,7 +140,7 @@ public class DTable extends DtableChannelFragment {
         if (mHandle != null) return TAG + "_" + mHandle;
         else return TAG;
     }
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,7 +169,7 @@ public class DTable extends DtableChannelFragment {
             mDRoot = (DTableRoot) savedInstanceState.getSerializable(SAVED_ROOT_TAG);
             if (mDRoot != null) {
                 mHandle = savedInstanceState.getString(SAVED_HANDLE_TAG);
-                createAdapter();
+                mAdapter = createAdapter();
                 LOGD(dTag(), "Restoring mData");
                 return;
             }
@@ -151,7 +180,7 @@ public class DTable extends DtableChannelFragment {
             // If table data was provided in "data" field, load it
             if (dataRoot != null) {
                 mDRoot = dataRoot;
-                createAdapter();
+                mAdapter = createAdapter();
                 return;
             }
         } catch (ClassCastException e) {
@@ -170,14 +199,26 @@ public class DTable extends DtableChannelFragment {
             }
         }
 
-        mAdapter = new DTableLinearAdapter(
+        mLayout = args.getString(ComponentFactory.ARG_LAYOUT_TAG, "linear");
+        if (mLayout.equals("linear")) {
+            mAdapter = new DTableLinearAdapter(
                 new ArrayList<>(),
                 getFragmentMediator(),
                 mHandle,
                 mTopHandle,
                 RutgersUtils.getHomeCampus(getContext()),
                 new ArrayList<>()
-        );
+            );
+        } else {
+            mAdapter = new DTableGridAdapter(
+                new ArrayList<>(),
+                getFragmentMediator(),
+                mHandle,
+                mTopHandle,
+                RutgersUtils.getHomeCampus(getContext()),
+                new ArrayList<>()
+            );
+        }
 
         // Start loading DTableRoot object in another thread
         mLoading = true;
@@ -196,7 +237,6 @@ public class DTable extends DtableChannelFragment {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(root -> {
             reset();
-            mDRoot = root;
             mAdapter.addAll(root.getChildren());
             mAdapter.addAllHistory(root.getHistory());
         }, error -> {
@@ -206,20 +246,41 @@ public class DTable extends DtableChannelFragment {
         });
     }
 
-    private void createAdapter() {
-        mAdapter = new DTableLinearAdapter(
-                mDRoot.getChildren(),
-                getFragmentMediator(),
-                mHandle,
-                mTopHandle,
-                RutgersUtils.getHomeCampus(getContext()),
-                mDRoot.getHistory()
+    private DTableAdapter createAdapter() {
+        if (mDRoot.getLayout().equals("linear")) {
+            mLayout = "linear";
+            return createLinearAdapter();
+        } else {
+            mLayout = "grid";
+            return createGridAdapter();
+        }
+    }
+
+    private DTableLinearAdapter createLinearAdapter() {
+        return new DTableLinearAdapter(
+            mDRoot.getChildren(),
+            getFragmentMediator(),
+            mHandle,
+            mTopHandle,
+            RutgersUtils.getHomeCampus(getContext()),
+            mDRoot.getHistory()
         );
     }
-    
+
+    private DTableGridAdapter createGridAdapter() {
+        return new DTableGridAdapter(
+            mDRoot.getChildren(),
+            getFragmentMediator(),
+            mHandle,
+            mTopHandle,
+            RutgersUtils.getHomeCampus(getContext()),
+            mDRoot.getHistory()
+        );
+    }
+
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_carousel_recycler_progress);
 
         if (mTitle != null) {
             getActivity().setTitle(mTitle);
@@ -227,9 +288,22 @@ public class DTable extends DtableChannelFragment {
 
         if (mLoading) showProgressCircle();
 
+        final CarouselView carouselView = (CarouselView) v.findViewById(R.id.carousel);
+        carouselView.setPageCount(3);
+        carouselView.setImageListener((position, imageView) ->
+            Picasso.with(getContext())
+                .load(R.drawable.small_stripe)
+                .into(imageView)
+        );
+
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        if (mLayout.equals("linear")) {
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        } else {
+            recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, GRID_SPACING, true));
+        }
         recyclerView.setItemAnimator(new FadeInAnimator());
         recyclerView.setAdapter((RecyclerView.Adapter) mAdapter);
 

@@ -31,6 +31,7 @@ public class Channel implements Serializable {
     private final String api;
     private final String url;
     private Link link;
+    private final String layout;
     private final boolean canOverride;
 
     public Channel(Channel other) {
@@ -40,6 +41,7 @@ public class Channel implements Serializable {
         this.api = other.api;
         this.url = other.url;
         this.link = new Link(other.link);
+        this.layout = other.layout;
         this.canOverride = other.canOverride;
     }
 
@@ -72,6 +74,12 @@ public class Channel implements Serializable {
             this.link = Link.createLink(Uri.parse("rutgers://" + handle), getTitle(), false);
         }
 
+        if (JsonUtils.exists(channelJson, "layout")) {
+            this.layout = channelJson.getAsJsonPrimitive("layout").getAsString();
+        } else {
+            this.layout = "linear";
+        }
+
         JsonElement elem = channelJson.get("canOverride");
 
         this.canOverride = elem != null && !elem.isJsonNull() && elem.getAsBoolean();
@@ -91,6 +99,7 @@ public class Channel implements Serializable {
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, getView());
         bundle.putString(ComponentFactory.ARG_HANDLE_TAG, getHandle());
         bundle.putString(ComponentFactory.ARG_TITLE_TAG, getTitle());
+        bundle.putString(ComponentFactory.ARG_LAYOUT_TAG, getLayout());
         if (StringUtils.isNotBlank(getApi())) {
             bundle.putString(ComponentFactory.ARG_API_TAG, getApi());
         }

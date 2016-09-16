@@ -18,11 +18,8 @@ import java.util.Collection;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
-
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 
 /**
  * Adapter for making menus from DTable roots.
@@ -31,7 +28,7 @@ public class DTableLinearAdapter
         extends ExpandableRecyclerAdapter<
             DTableLinearAdapter.QuestionViewHolder,
             DTableLinearAdapter.AnswerViewHolder>
-        implements DTableAdapter<DTableElement> {
+        implements DTableAdapter {
 
     private final static String TAG = "DTableLinearAdapter";
     private final FragmentMediator fm;
@@ -114,38 +111,23 @@ public class DTableLinearAdapter
     public void onBindParentViewHolder(final QuestionViewHolder parentViewHolder, final int position, final ParentListItem parentListItem) {
         final DTableElement item = (DTableElement) parentListItem;
         parentViewHolder.bind(item);
-        parentViewHolder.questionText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (item instanceof DTableFAQ && !parentViewHolder.isExpanded()) {
-                    expandParent(item);
-                } else {
-                    collapseParent(item);
-                }
+        parentViewHolder.itemView.setOnClickListener(view -> {
+            if (item instanceof DTableFAQ && !parentViewHolder.isExpanded()) {
+                expandParent(item);
+            } else {
+                collapseParent(item);
+            }
 
-                if (item instanceof DTableRoot) {
-                    String newHandle = handle + "_" + item.getTitle(homeCampus).replace(" ", "_").toLowerCase();
-                    Bundle newArgs = DTable.createArgs(item.getTitle(homeCampus), newHandle, topHandle, (DTableRoot) item);
-                    fm.switchFragments(newArgs);
-                } else if (item instanceof DTableChannel) {
-                    // Channel row - launch channel
-                    DTableChannel channel = (DTableChannel) item;
-                    Bundle newArgs = new Bundle();
-                    // Must have view and title set to launch a channel
-                    newArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, channel.getView());
-                    newArgs.putString(ComponentFactory.ARG_TITLE_TAG, channel.getChannelTitle(homeCampus));
-                    newArgs.putString(ComponentFactory.ARG_TOP_HANDLE_TAG, topHandle);
-                    newArgs.putStringArrayList(ComponentFactory.ARG_HIST_TAG, history);
-
-                    // Add optional fields to the arg bundle
-                    if (channel.getUrl() != null)
-                        newArgs.putString(ComponentFactory.ARG_URL_TAG, channel.getUrl());
-                    if (channel.getData() != null)
-                        newArgs.putString(ComponentFactory.ARG_DATA_TAG, channel.getData());
-                    if (channel.getCount() > 0)
-                        newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, channel.getCount());
-                    fm.switchFragments(newArgs);
-                }
+            if (item instanceof DTableRoot) {
+                final DTableRoot root = (DTableRoot) item;
+                String newHandle = handle + "_" + item.getTitle(homeCampus).replace(" ", "_").toLowerCase();
+                Bundle newArgs = DTable.createArgs(item.getTitle(homeCampus), newHandle, topHandle, root.getLayout(), root);
+                fm.switchFragments(newArgs);
+            } else if (item instanceof DTableChannel) {
+                // Channel row - launch channel
+                final DTableChannel channel = (DTableChannel) item;
+                final Bundle args = DTable.createChannelArgs(channel, homeCampus, topHandle, history);
+                fm.switchFragments(args);
             }
         });
     }
@@ -155,13 +137,10 @@ public class DTableLinearAdapter
         if (childListItem instanceof String) {
             final String answer = (String) childListItem;
             childViewHolder.bind(answer);
-            childViewHolder.answerText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final int adapterPosition = childViewHolder.getAdapterPosition();
-                    final ParentWrapper item = (ParentWrapper)mItemList.get(adapterPosition - 1);
-                    collapseParent(item.getParentListItem());
-                }
+            childViewHolder.itemView.setOnClickListener(view -> {
+                final int adapterPosition = childViewHolder.getAdapterPosition();
+                final ParentWrapper item = (ParentWrapper)mItemList.get(adapterPosition - 1);
+                collapseParent(item.getParentListItem());
             });
         }
     }

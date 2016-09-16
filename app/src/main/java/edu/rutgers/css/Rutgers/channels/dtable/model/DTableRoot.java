@@ -33,6 +33,8 @@ public class DTableRoot extends DTableElement {
         p = jsonObject.getAsJsonPrimitive("layout");
         if (p != null) {
             layout = p.getAsString();
+        } else {
+            layout = "linear";
         }
 
         JsonArray childrenJson = jsonObject.getAsJsonArray("children");

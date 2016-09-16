@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.api.ApiRequest;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;
@@ -98,27 +97,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                             }
 
                             DTableChannel dTableChannel = (DTableChannel) child;
-                            Bundle newArgs = new Bundle();
-                            // Must have view and title set to launch a channel
-                            newArgs.putString(ComponentFactory.ARG_COMPONENT_TAG, dTableChannel.getView());
-                            newArgs.putString(ComponentFactory.ARG_TITLE_TAG, dTableChannel.getChannelTitle(homeCampus));
-                            newArgs.putString(ComponentFactory.ARG_HANDLE_TAG, channel.getHandle());
-                            newArgs.putStringArrayList(ComponentFactory.ARG_HIST_TAG, dTableChannel.getParent().getHistory());
-
-                            // Add optional fields to the arg bundle
-                            if (dTableChannel.getUrl() != null) {
-                                newArgs.putString(ComponentFactory.ARG_URL_TAG, dTableChannel.getUrl());
-                            }
-
-                            if (dTableChannel.getData() != null) {
-                                newArgs.putString(ComponentFactory.ARG_DATA_TAG, dTableChannel.getData());
-                            }
-
-                            if (dTableChannel.getCount() > 0) {
-                                newArgs.putInt(ComponentFactory.ARG_COUNT_TAG, dTableChannel.getCount());
-                            }
-
-                            return newArgs;
+                            return DTable.createChannelArgs(dTableChannel, homeCampus, channel.getHandle(), dTableChannel.getParent().getHistory());
                         }
                     }
                 }
@@ -127,7 +106,7 @@ public class LinkLoadTask extends AsyncTask<LinkLoadArgs, Void, Bundle> {
                 }
             }
 
-            return DTable.createArgs(root.getTitle(), channel.getHandle(), null, root);
+            return DTable.createArgs(root.getTitle(), channel.getHandle(), null, root.getLayout(), root);
         } catch (JsonSyntaxException | IOException e) {
             LOGE(TAG, e.getMessage());
             return null;

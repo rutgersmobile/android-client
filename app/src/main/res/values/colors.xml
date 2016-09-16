@@ -10,6 +10,7 @@
     <color name="dark_gray">#505050</color>
     <color name="pantone186">#D21034</color>
     <color name="pantone431">#5F6A72</color>
+    <color name="pantone431_trans">#CC5F6A72</color>
     <color name="faded">#7A7A62</color>
     <color name="pale_red">#FF9999</color>
     <color name="pale_green">#C8FFC8</color>

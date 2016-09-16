@@ -17,8 +17,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.google.gson.JsonArray;
@@ -107,7 +105,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
         firstLaunchChecks();
 
         // Set up navigation drawer
-        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<Link>());
+        mDrawerAdapter = new DrawerAdapter(this, R.layout.row_drawer_item, R.layout.row_divider, new ArrayList<>());
         mDrawerListView = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -134,40 +132,35 @@ public class MainActivity extends GoogleApiProviderActivity implements
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.LEFT);
 
         mDrawerListView.setAdapter(mDrawerAdapter);
-        mDrawerListView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
-                if (adapter.positionIsSettings(position)) {
-                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                    mDrawerLayout.closeDrawer(mDrawerListView);
-                    return;
-                } else if (adapter.positionIsAbout(position)) {
-                    Bundle aboutArgs = AboutDisplay.createArgs();
-                    fragmentMediator.switchFragments(aboutArgs);
-                    mDrawerLayout.closeDrawer(mDrawerListView);
-                    return;
-                } else if (adapter.positionIsBookmarks(position)) {
-                    Bundle bookmarksArgs = BookmarksDisplay.createArgs();
-                    fragmentMediator.switchFragments(bookmarksArgs);
-                    mDrawerLayout.closeDrawer(mDrawerListView);
-                    return;
-                }
-
-                Link link = (Link) adapter.getItem(position);
-                deepLink(link.getUri());
+        mDrawerListView.setOnItemClickListener((parent, view, position, id) -> {
+            DrawerAdapter adapter = (DrawerAdapter) parent.getAdapter();
+            if (adapter.positionIsSettings(position)) {
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                mDrawerLayout.closeDrawer(mDrawerListView);
+                return;
+            } else if (adapter.positionIsAbout(position)) {
+                Bundle aboutArgs = AboutDisplay.createArgs();
+                fragmentMediator.switchFragments(aboutArgs);
+                mDrawerLayout.closeDrawer(mDrawerListView);
+                return;
+            } else if (adapter.positionIsBookmarks(position)) {
+                Bundle bookmarksArgs = BookmarksDisplay.createArgs();
+                fragmentMediator.switchFragments(bookmarksArgs);
+                mDrawerLayout.closeDrawer(mDrawerListView);
+                return;
             }
+
+            Link link = (Link) adapter.getItem(position);
+            deepLink(link.getUri());
         });
 
         // Reload web channels when we change preferences to update campus-based names
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        this.listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override public void onSharedPreferenceChanged(SharedPreferences preferences, String key) {
-                mDrawerAdapter.clear();
-                mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
-                mDrawerAdapter.notifyDataSetChanged();
-            }
+        this.listener = (preferences1, key) -> {
+            mDrawerAdapter.clear();
+            mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
+            mDrawerAdapter.notifyDataSetChanged();
         };
 
         preferences.registerOnSharedPreferenceChangeListener(listener);
