@@ -14,6 +14,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.NestedScrollView
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -24,7 +25,8 @@
 
             <com.synnapps.carouselview.CarouselView
                 android:id="@+id/carousel"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:visibility="gone"
+                android:focusableInTouchMode="true"
                 app:fillColor="@color/white"
                 app:pageColor="#00000000"
                 app:radius="6dp"

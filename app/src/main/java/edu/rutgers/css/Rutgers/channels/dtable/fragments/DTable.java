@@ -75,6 +75,9 @@ public class DTable extends DtableChannelFragment {
     private boolean mLoading;
     private String mTitle;
     private String mLayout;
+    private List<String> banner;
+
+    private CarouselView carouselView;
 
     public DTable() {
         // Required empty public constructor
@@ -145,6 +148,8 @@ public class DTable extends DtableChannelFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        banner = new ArrayList<>();
 
         final Bundle args = getArguments();
 
@@ -237,6 +242,12 @@ public class DTable extends DtableChannelFragment {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(root -> {
             reset();
+            banner.addAll(root.getBanner());
+            carouselView.setPageCount(banner.size());
+            if (banner.size() != 0) {
+                carouselView.setVisibility(View.VISIBLE);
+            }
+            carouselView.invalidate();
             mAdapter.addAll(root.getChildren());
             mAdapter.addAllHistory(root.getHistory());
         }, error -> {
@@ -247,6 +258,7 @@ public class DTable extends DtableChannelFragment {
     }
 
     private DTableAdapter createAdapter() {
+        banner.addAll(mDRoot.getBanner());
         if (mDRoot.getLayout().equals("linear")) {
             mLayout = "linear";
             return createLinearAdapter();
@@ -288,15 +300,22 @@ public class DTable extends DtableChannelFragment {
 
         if (mLoading) showProgressCircle();
 
-        final CarouselView carouselView = (CarouselView) v.findViewById(R.id.carousel);
-        carouselView.setPageCount(3);
+        carouselView = (CarouselView) v.findViewById(R.id.carousel);
+        if (banner.size() != 0) {
+            carouselView.setVisibility(View.VISIBLE);
+        }
+        carouselView.setPageCount(banner.size());
         carouselView.setImageListener((position, imageView) ->
             Picasso.with(getContext())
-                .load(R.drawable.small_stripe)
+                .load(Config.API_BASE + "img/" + banner.get(position))
                 .into(imageView)
         );
 
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+
+        // makes fling work for some reason
+        recyclerView.setNestedScrollingEnabled(false);
+
         if (mLayout.equals("linear")) {
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));

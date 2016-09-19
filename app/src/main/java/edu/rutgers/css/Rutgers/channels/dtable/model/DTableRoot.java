@@ -21,6 +21,8 @@ public class DTableRoot extends DTableElement {
     @Getter
     private String layout;
     private List<DTableElement> children;
+    @Getter
+    private List<String> banner;
 
     public DTableRoot(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
         super(jsonObject, parent);
@@ -35,6 +37,17 @@ public class DTableRoot extends DTableElement {
             layout = p.getAsString();
         } else {
             layout = "linear";
+        }
+
+        banner = new ArrayList<>();
+        JsonArray bannerArray = jsonObject.getAsJsonArray("banner");
+        if (bannerArray != null) {
+            for (final JsonElement bannerElement : bannerArray) {
+                String bannerString = bannerElement.getAsString();
+                if (bannerString != null) {
+                    banner.add(bannerString);
+                }
+            }
         }
 
         JsonArray childrenJson = jsonObject.getAsJsonArray("children");
