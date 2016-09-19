@@ -258,6 +258,7 @@ public class MainActivity extends GoogleApiProviderActivity implements
         super.onConfigurationChanged(newConfig);
 
         mDrawerToggle.onConfigurationChanged(newConfig);
+        fragmentMediator = new MainFragmentMediator(this);
     }
 
     @Override
