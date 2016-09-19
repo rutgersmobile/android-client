@@ -10,6 +10,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
@@ -85,6 +86,12 @@ public class MainActivity extends GoogleApiProviderActivity implements
     @Override
     public ChannelManager getChannelManager() {
         return mChannelManager;
+    }
+
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        super.onAttachFragment(fragment);
+        fragmentMediator = new MainFragmentMediator(this);
     }
 
     @Override
@@ -164,8 +171,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
         };
 
         preferences.registerOnSharedPreferenceChangeListener(listener);
-
-        fragmentMediator = new MainFragmentMediator(this);
 
         JsonArray array = AppUtils.loadRawJSONArray(getResources(), R.raw.channels);
         if (array != null) {
@@ -258,7 +263,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
         super.onConfigurationChanged(newConfig);
 
         mDrawerToggle.onConfigurationChanged(newConfig);
-        fragmentMediator = new MainFragmentMediator(this);
     }
 
     @Override
