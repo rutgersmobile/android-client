@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.dtable.model;
 
+import android.net.Uri;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,6 +11,7 @@ import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
 import lombok.Getter;
 
 /**
@@ -22,7 +25,13 @@ public class DTableRoot extends DTableElement {
     private String layout;
     private List<DTableElement> children;
     @Getter
-    private List<String> banner;
+    private List<BannerItem> banner;
+
+    @Data
+    public static class BannerItem {
+        private final String image;
+        private final Uri url;
+    }
 
     public DTableRoot(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
         super(jsonObject, parent);
@@ -43,9 +52,11 @@ public class DTableRoot extends DTableElement {
         JsonArray bannerArray = jsonObject.getAsJsonArray("banner");
         if (bannerArray != null) {
             for (final JsonElement bannerElement : bannerArray) {
-                String bannerString = bannerElement.getAsString();
-                if (bannerString != null) {
-                    banner.add(bannerString);
+                JsonObject bannerItem = bannerElement.getAsJsonObject();
+                if (bannerItem != null) {
+                    final String image = bannerItem.get("image").getAsString();
+                    final Uri url = Uri.parse(bannerItem.get("url").getAsString());
+                    banner.add(new BannerItem(image, url));
                 }
             }
         }

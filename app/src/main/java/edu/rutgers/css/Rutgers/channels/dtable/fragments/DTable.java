@@ -75,7 +75,7 @@ public class DTable extends DtableChannelFragment {
     private boolean mLoading;
     private String mTitle;
     private String mLayout;
-    private List<String> banner;
+    private List<DTableRoot.BannerItem> banner;
 
     private CarouselView carouselView;
 
@@ -307,11 +307,15 @@ public class DTable extends DtableChannelFragment {
             carouselView.setVisibility(View.VISIBLE);
         }
         carouselView.setPageCount(banner.size());
-        carouselView.setImageListener((position, imageView) ->
+        carouselView.setImageListener((position, imageView) -> {
+            final DTableRoot.BannerItem bannerItem = banner.get(position);
             Picasso.with(getContext())
-                .load(Config.API_BASE + "img/" + banner.get(position))
-                .into(imageView)
-        );
+                .load(Config.API_BASE + "img/" + bannerItem.getImage())
+                .into(imageView);
+            imageView.setOnClickListener(view ->
+                getFragmentMediator().deepLink(bannerItem.getUrl(), true)
+            );
+        });
 
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
 
