@@ -243,11 +243,13 @@ public class DTable extends DtableChannelFragment {
         .subscribe(root -> {
             reset();
             banner.addAll(root.getBanner());
-            carouselView.setPageCount(banner.size());
-            if (banner.size() != 0) {
-                carouselView.setVisibility(View.VISIBLE);
+            if (carouselView != null) {
+                carouselView.setPageCount(banner.size());
+                if (banner.size() != 0) {
+                    carouselView.setVisibility(View.VISIBLE);
+                }
+                carouselView.invalidate();
             }
-            carouselView.invalidate();
             mAdapter.addAll(root.getChildren());
             mAdapter.addAllHistory(root.getHistory());
         }, error -> {

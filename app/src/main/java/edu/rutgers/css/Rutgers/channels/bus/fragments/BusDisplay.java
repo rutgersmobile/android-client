@@ -70,6 +70,7 @@ public class BusDisplay extends BaseChannelFragment {
     private static final String SAVED_MODE_TAG      = Config.PACKAGE_NAME+"."+HANDLE+".mode";
     private static final String SAVED_DATA_TAG      = Config.PACKAGE_NAME+"."+HANDLE+".data";
     private static final String SAVED_TITLE_TAG     = Config.PACKAGE_NAME+"."+HANDLE+".title";
+    private static final String SAVED_MESSAGE_TAG   = Config.PACKAGE_NAME+"."+HANDLE+".message";
 
     /* Member data */
     private ArrayList<Prediction> mData;
@@ -78,6 +79,7 @@ public class BusDisplay extends BaseChannelFragment {
     private String mTag;
     private String mTitle;
     private String mAgency;
+    private String mMessage;
     private SwipeRefreshLayout refreshLayout;
     private TextView messagesView;
     private View dividerView;
@@ -135,6 +137,7 @@ public class BusDisplay extends BaseChannelFragment {
             mMode = savedInstanceState.getString(SAVED_MODE_TAG);
             mAdapter.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable(SAVED_DATA_TAG));
             mTitle = savedInstanceState.getString(SAVED_TITLE_TAG);
+            mMessage = savedInstanceState.getString(SAVED_MESSAGE_TAG);
             return;
         }
 
@@ -257,11 +260,11 @@ public class BusDisplay extends BaseChannelFragment {
 
             mAdapter.addAll(predictions.getPredictions());
 
-            final String message = StringUtils.join(predictions.getMessages(), "\n");
-            if (!message.isEmpty()) {
+            mMessage = StringUtils.join(predictions.getMessages(), "\n");
+            if (!mMessage.isEmpty()) {
                 dividerView.setVisibility(View.VISIBLE);
                 messagesView.setVisibility(View.VISIBLE);
-                messagesView.setText(message);
+                messagesView.setText(mMessage);
             }
         }, error -> {
             reset();
@@ -300,6 +303,12 @@ public class BusDisplay extends BaseChannelFragment {
 
         messagesView = (TextView)  v.findViewById(R.id.messages);
         dividerView = v.findViewById(R.id.message_separator);
+
+        if (mMessage != null && !mMessage.isEmpty()) {
+            dividerView.setVisibility(View.VISIBLE);
+            messagesView.setVisibility(View.VISIBLE);
+            messagesView.setText(mMessage);
+        }
 
         refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.refresh_layout);
         refreshLayout.setOnRefreshListener(() -> refreshSubject.onNext(0L));
@@ -344,6 +353,7 @@ public class BusDisplay extends BaseChannelFragment {
         outState.putString(SAVED_MODE_TAG, mMode);
         outState.putSerializable(SAVED_DATA_TAG, mData);
         outState.putSerializable(SAVED_TITLE_TAG, mTitle);
+        outState.putString(SAVED_MESSAGE_TAG, mMessage);
     }
 
     private void reset() {
