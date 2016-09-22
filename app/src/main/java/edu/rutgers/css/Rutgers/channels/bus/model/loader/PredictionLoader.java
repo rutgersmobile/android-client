@@ -102,7 +102,10 @@ public class PredictionLoader extends SimpleAsyncLoader<PredictionLoader.Predict
                 }
             }
         } catch (JsonSyntaxException | ParseException | IOException | IllegalArgumentException e) {
-            LOGE(TAG, e.getMessage());
+            final String message = e.getMessage();
+            if (e.getMessage() != null) {
+                LOGE(TAG, message);
+            }
         }
 
         return new PredictionHolder(predictions, title);

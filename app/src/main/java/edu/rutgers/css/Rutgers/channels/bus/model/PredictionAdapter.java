@@ -61,6 +61,9 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
 
     @Override
     public boolean isEnabled(int position) {
+        if (position < 0 || position >= getCount()) {
+            return false;
+        }
         Prediction prediction = this.getItem(position);
         return !(prediction.getMinutes()).isEmpty();
     }

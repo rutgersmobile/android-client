@@ -225,7 +225,6 @@ public class BusDisplay extends BaseChannelFragment implements LoaderManager.Loa
                 } else if (refreshLayout != null) {
                     refreshLayout.setEnabled(false);
                 }
-                ;
             }
         });
 
