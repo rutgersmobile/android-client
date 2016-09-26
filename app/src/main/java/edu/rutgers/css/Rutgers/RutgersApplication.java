@@ -7,12 +7,21 @@ import com.squareup.picasso.Picasso;
 
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
 public class RutgersApplication extends Application {
 
     private static final String TAG = "RutgersApplication";
+
+    public static Retrofit retrofit = new Retrofit.Builder()
+        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create())
+        .baseUrl(Config.API_BASE)
+        .build();
 
     @Override
     public void onCreate() {
