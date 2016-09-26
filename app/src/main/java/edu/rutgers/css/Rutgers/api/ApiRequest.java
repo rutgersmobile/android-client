@@ -17,15 +17,17 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
-import lombok.Getter;
 
 /** Convenience class for making requests */
 public final class ApiRequest {
 
     private static final String TAG = "ApiRequest";
 
-    @Getter
     private static final OkHttpClient client = new OkHttpClient();
+
+    public static OkHttpClient getClient() {
+        return client;
+    }
 
     private static final int CACHE_NEVER = -1; // -1 means always refresh -- never use cache
 

@@ -5,16 +5,27 @@ import android.support.annotation.NonNull;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.recreation.model.facility.Facility;
-import lombok.Data;
 
 /**
  * Rutgers campus with recreation facilities. Construct with GSON.
  */
-@Data
 public class Campus {
 
     private final String title;
     private final List<Facility> facilities;
+
+    public Campus(final String title, final List<Facility> facilities) {
+        this.title = title;
+        this.facilities = facilities;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public List<Facility> getFacilities() {
+        return facilities;
+    }
 
     /**
      * Get a facility by title.

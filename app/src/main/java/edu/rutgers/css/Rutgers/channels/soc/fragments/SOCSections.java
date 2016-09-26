@@ -7,7 +7,6 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -131,29 +130,25 @@ public class SOCSections extends BaseChannelFragment implements LoaderManager.Lo
 
         ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final Titleable clickedItem = (Titleable) parent.getAdapter().getItem(position);
+        listView.setOnItemClickListener((parent1, view, position, id) -> {
+            final Titleable clickedItem = (Titleable) parent1.getAdapter().getItem(position);
 
-                if (clickedItem instanceof ScheduleText) {
-                    ScheduleText scheduleText = (ScheduleText) clickedItem;
+            if (clickedItem instanceof ScheduleText) {
+                ScheduleText scheduleText = (ScheduleText) clickedItem;
 
-                    if (scheduleText.getType().equals(ScheduleText.TextType.PREREQS)) {
-                        Bundle newArgs = TextDisplay.createArgs(mCourse.getSubject() + ":" + mCourse.getCourseNumber() + " Prerequisites", mCourse.getPreReqNotes());
-                        switchFragments(newArgs);
-                        return;
-                    }
-                } else if (clickedItem instanceof Section) {
-                    Section section = (Section) clickedItem;
+                if (scheduleText.getType().equals(ScheduleText.TextType.PREREQS)) {
+                    Bundle newArgs = TextDisplay.createArgs(mCourse.getSubject() + ":" + mCourse.getCourseNumber() + " Prerequisites", mCourse.getPreReqNotes());
+                    switchFragments(newArgs);
+                }
+            } else if (clickedItem instanceof Section) {
+                Section section = (Section) clickedItem;
 
-                    if (StringUtils.isNotBlank(section.getIndex()) && semester != null) {
-                        String index = StringUtils.trim(section.getIndex());
-                        switchFragments(WebDisplay.createArgs("WebReg", ScheduleAPI.getRegistrationLink(semester, index)));
-                    } else {
-                        Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
-                        LOGW(TAG, "Section had no index field. Failed to launch webreg.");
-                    }
+                if (StringUtils.isNotBlank(section.getIndex()) && semester != null) {
+                    String index = StringUtils.trim(section.getIndex());
+                    switchFragments(WebDisplay.createArgs("WebReg", ScheduleAPI.getRegistrationLink(semester, index)));
+                } else {
+                    Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();
+                    LOGW(TAG, "Section had no index field. Failed to launch webreg.");
                 }
             }
         });

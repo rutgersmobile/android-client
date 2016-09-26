@@ -7,8 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
-import lombok.Setter;
-
 /**
  * Generic class for creating info dialogs
  */
@@ -22,8 +20,11 @@ public class InfoDialogFragment extends DialogFragment {
         return newInstance("GPS Permission Request",
             "To get nearby bus stops, we need access to your location. To allow this, press \"Allow\" in the following dialog. This is not required.");
     }
-    @Setter
+
     private DialogInterface.OnDismissListener onDismissListener;
+    public void setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
+        this.onDismissListener = onDismissListener;
+    }
 
     public static InfoDialogFragment newInstance(String title, String message) {
         InfoDialogFragment f = new InfoDialogFragment();

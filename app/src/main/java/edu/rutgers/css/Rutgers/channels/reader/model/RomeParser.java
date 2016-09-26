@@ -20,7 +20,6 @@ import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
-import lombok.Setter;
 
 /**
  * Parser for RSS and Atom feeds powered by Rome
@@ -29,8 +28,10 @@ public class RomeParser implements XmlParser<List<RSSItem>> {
 
     private final static DatePrinter printer = FastDateFormat.getInstance("MMM dd, yyyy, h:mm a", Locale.US);
 
-    @Setter
     private Response response;
+    public void setResponse(final Response response) {
+        this.response = response;
+    }
 
     @Override
     public List<RSSItem> parse(InputStream in) throws ParseException, IOException {

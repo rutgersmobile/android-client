@@ -45,7 +45,6 @@ import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
-import lombok.Data;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
@@ -85,10 +84,22 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
     /**
      * Class for holding result status.
      */
-    @Data
-    class ResultHolder {
-        final String statusMessage;
-        final Status status;
+    public static class ResultHolder {
+        private final String statusMessage;
+        private final Status status;
+
+        public ResultHolder(final String statusMessage, final Status status) {
+            this.statusMessage = statusMessage;
+            this.status = status;
+        }
+
+        public String getStatusMessage() {
+            return statusMessage;
+        }
+
+        public Status getStatus() {
+            return status;
+        }
     }
 
 

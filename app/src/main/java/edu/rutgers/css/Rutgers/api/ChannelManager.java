@@ -108,7 +108,7 @@ public final class ChannelManager {
             final String handle = channel.getHandle();
             if (channelsMap.get(handle) != null) {
                 // If the new channel has override permission, insert it over the old one
-                if (channel.isCanOverride()) {
+                if (channel.getCanOverride()) {
                     LOGI(TAG, "Overriding channel " + handle);
                     channelsMap.put(handle, channel);
                 } else {

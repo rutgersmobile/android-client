@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers;
 
 import android.app.Application;
-import android.content.Context;
 
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
@@ -15,12 +14,9 @@ public class RutgersApplication extends Application {
 
     private static final String TAG = "RutgersApplication";
 
-    private static Context context;
-
     @Override
     public void onCreate() {
         super.onCreate();
-        RutgersApplication.context = getApplicationContext();
 
         LOGV(TAG, "Application started");
 
@@ -35,9 +31,5 @@ public class RutgersApplication extends Application {
 //        picasso.setIndicatorsEnabled(true);
         picasso.setLoggingEnabled(true);
         Picasso.setSingletonInstance(picasso);
-    }
-
-    public static Context getAppContext() {
-        return RutgersApplication.context;
     }
 }

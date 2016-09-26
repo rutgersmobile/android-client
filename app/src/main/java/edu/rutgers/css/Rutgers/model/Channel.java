@@ -17,12 +17,10 @@ import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.JsonUtils;
-import lombok.Data;
 
 /**
  * RU Mobile channel.
  */
-@Data
 public class Channel implements Serializable {
 
     private final VarTitle title;
@@ -43,6 +41,18 @@ public class Channel implements Serializable {
         this.link = new Link(other.link);
         this.layout = other.layout;
         this.canOverride = other.canOverride;
+    }
+
+    public Channel(final VarTitle title, final String handle, final String view, final String api,
+                   final String url, final Link link, final String layout, final boolean canOverride) {
+        this.title = title;
+        this.handle = handle;
+        this.view = view;
+        this.api = api;
+        this.url = url;
+        this.link = link;
+        this.layout = layout;
+        this.canOverride = canOverride;
     }
 
     /** Construct channel from JSON. */
@@ -110,6 +120,34 @@ public class Channel implements Serializable {
             bundle.putString(ComponentFactory.ARG_DATA_TAG, getLink().toString());
         }
         return bundle;
+    }
+
+    public String getHandle() {
+        return handle;
+    }
+
+    public String getView() {
+        return view;
+    }
+
+    public String getApi() {
+        return api;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public Link getLink() {
+        return link;
+    }
+
+    public String getLayout() {
+        return layout;
+    }
+
+    public boolean getCanOverride() {
+        return canOverride;
     }
 
 }

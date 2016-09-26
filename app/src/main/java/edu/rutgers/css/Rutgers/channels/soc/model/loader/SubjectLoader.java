@@ -13,7 +13,6 @@ import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.api.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.api.soc.model.Subject;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
-import lombok.Data;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 
@@ -27,13 +26,41 @@ public class SubjectLoader extends SimpleAsyncLoader<SubjectLoader.SubjectHolder
     String level;
     String campus;
 
-    @Data
     public class SubjectHolder {
-        final SOCIndex index;
-        final List<Subject> subjects;
-        final Semesters semesters;
-        final String semester;
-        final String defaultSemester;
+        private final SOCIndex index;
+        private final List<Subject> subjects;
+        private final Semesters semesters;
+        private final String semester;
+        private final String defaultSemester;
+
+        public SubjectHolder(final SOCIndex index, final List<Subject> subjects, final Semesters semesters,
+                             final String semester, final String defaultSemester) {
+            this.index = index;
+            this.subjects = subjects;
+            this.semesters = semesters;
+            this.semester = semester;
+            this.defaultSemester = defaultSemester;
+        }
+
+        public SOCIndex getIndex() {
+            return index;
+        }
+
+        public List<Subject> getSubjects() {
+            return subjects;
+        }
+
+        public Semesters getSemesters() {
+            return semesters;
+        }
+
+        public String getSemester() {
+            return semester;
+        }
+
+        public String getDefaultSemester() {
+            return defaultSemester;
+        }
     }
 
     public SubjectLoader(Context context, String semester, String level, String campus) {

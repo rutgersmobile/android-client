@@ -22,9 +22,6 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Adapter for bookmarks
@@ -50,9 +47,15 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
     // it gets GC'd for some reason
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
-    @Getter
-    @Setter
     private boolean dragging = false;
+
+    public boolean isDragging() {
+        return dragging;
+    }
+
+    public void setDragging(boolean dragging) {
+        this.dragging = dragging;
+    }
 
     // View type ids for user created bookmarks, rutgers bookmarks, and the divider
     private static final int REMOVABLE = 0;
@@ -112,10 +115,22 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
 
     // Java doesn't have tuples so this is what you have to do if
     // you want to return multiple values
-    @Data
     private final class TwoLists {
         private final List<Link> visible;
         private final List<Link> hidden;
+
+        public TwoLists(final List<Link> visible, final List<Link> hidden) {
+            this.visible = visible;
+            this.hidden = hidden;
+        }
+
+        public List<Link> getVisible() {
+            return visible;
+        }
+
+        public List<Link> getHidden() {
+            return hidden;
+        }
     }
 
     // This function will split a list of links into a list of visible links and a list of hidden links

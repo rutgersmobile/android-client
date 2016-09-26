@@ -15,20 +15,19 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopGroup;
-import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesDisplay;
-import edu.rutgers.css.Rutgers.api.places.model.Place;
 import edu.rutgers.css.Rutgers.api.places.PlacesAPI;
+import edu.rutgers.css.Rutgers.api.places.model.Place;
+import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
+import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import lombok.Data;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * Loads places
@@ -60,10 +59,22 @@ public class PlaceLoader extends SimpleAsyncLoader<PlaceLoader.PlaceHolder> {
         put("Health Sciences at Newark", NextbusAPI.AGENCY_NWK);
     }});
 
-    @Data
     public class PlaceHolder {
-        final List<RMenuRow> rows;
-        final Place place;
+        private final List<RMenuRow> rows;
+        private final Place place;
+
+        public PlaceHolder(final List<RMenuRow> rows, final Place place) {
+            this.rows = rows;
+            this.place = place;
+        }
+
+        public List<RMenuRow> getRows() {
+            return rows;
+        }
+
+        public Place getPlace() {
+            return place;
+        }
     }
 
     public PlaceLoader(Context context, String key, String idKey, int addressRow, int descRow, int busRow) {

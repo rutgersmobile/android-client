@@ -1,7 +1,6 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -31,26 +30,28 @@ import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
 
 /**
  * Base channel fragment. Handles progress circle display and communication with parent activity.
  */
 public abstract class BaseChannelFragment extends BaseDisplay implements Linkable {
 
-    @Getter
     private ProgressBar mProgressCircle;
 
-    @Getter
     private Toolbar toolbar;
+    public Toolbar getToolbar() {
+        return toolbar;
+    }
 
-    @Getter
     private boolean setUp;
+    public boolean isSetUp() {
+        return setUp;
+    }
 
-    @Getter
     private FragmentMediator fragmentMediator;
+    public FragmentMediator getFragmentMediator() {
+        return fragmentMediator;
+    }
 
     public static final int DEF_PROGRESS_RES = R.id.progressCircle;
     public static final int DEF_TOOLBAR_RES = R.id.toolbar;
@@ -58,16 +59,65 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     protected static final int LOCATION_REQUEST = 101;
 
-    @Builder
-    @Data
     public static final class CreateArgs {
-        final Integer progressRes;
-        final Integer toolbarRes;
-        final Integer fabRes;
+        private final Integer progressRes;
+        private final Integer toolbarRes;
+        private final Integer fabRes;
+
+        public static class CreateArgsBuilder {
+            private Integer progressRes;
+            private Integer toolbarRes;
+            private Integer fabRes;
+
+            private CreateArgsBuilder() {}
+
+            public CreateArgsBuilder progressRes(final Integer progressRes) {
+                this.progressRes = progressRes;
+                return this;
+            }
+
+            public CreateArgsBuilder toolbarRes(final Integer toolbarRes) {
+                this.toolbarRes = toolbarRes;
+                return this;
+            }
+
+            public CreateArgsBuilder fabRes(final Integer fabRes) {
+                this.fabRes = fabRes;
+                return this;
+            }
+
+            public CreateArgs build() {
+                return new CreateArgs(progressRes, toolbarRes, fabRes);
+            }
+        }
+
+        public static CreateArgsBuilder builder() {
+            return new CreateArgsBuilder();
+        }
+
+        public CreateArgs(final Integer progressRes, final Integer toolbarRes, final Integer fabRes) {
+            this.progressRes = progressRes;
+            this.toolbarRes = toolbarRes;
+            this.fabRes = fabRes;
+        }
+
+        public Integer getProgressRes() {
+            return progressRes;
+        }
+
+        public Integer getToolbarRes() {
+            return toolbarRes;
+        }
+
+        public Integer getFabRes() {
+            return fabRes;
+        }
     }
 
-    @Getter
     private ActionBar actionBar;
+    public ActionBar getActionBar() {
+        return actionBar;
+    }
 
     public static final String TAG = "BaseChannelFragment";
 
@@ -225,12 +275,12 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
                 || pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS))) {
             PrefUtils.setGPSRequest(getContext(), false);
             InfoDialogFragment f = InfoDialogFragment.gpsDialog();
-            f.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialogInterface) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
-                }
-            });
+            f.setOnDismissListener(dialogInterface ->
+                ActivityCompat.requestPermissions(
+                    getActivity(),
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    LOCATION_REQUEST)
+            );
             f.show(getFragmentManager(), BaseChannelFragment.TAG);
         }
     }

@@ -16,7 +16,6 @@ import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
-import lombok.Setter;
 
 /**
  * Xml parser used to get predictions for routes in the bus channel
@@ -24,8 +23,10 @@ import lombok.Setter;
 public class PredictionXmlParser implements XmlParser<Predictions> {
     private static final String ns = null;
 
-    @Setter
     private Response response;
+    public void setResponse(final Response response) {
+        this.response = response;
+    }
 
     public enum PredictionType {
         ROUTE, STOP

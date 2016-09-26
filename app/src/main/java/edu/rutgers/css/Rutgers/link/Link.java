@@ -7,16 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * POJO for holding link info
  */
-@Data
-@AllArgsConstructor
-@EqualsAndHashCode(exclude = {"enabled", "removable"})
 public class Link implements Serializable {
     public enum Schema {
         RUTGERS, HTTP
@@ -42,6 +36,40 @@ public class Link implements Serializable {
         this.title = title;
         this.removable = true;
         this.enabled = true;
+    }
+
+    public Link(final String handle, final List<String> pathParts, final String title,
+                final boolean removable, final boolean enabled) {
+        this.handle = handle;
+        this.pathParts = pathParts;
+        this.title = title;
+        this.removable = removable;
+        this.enabled = enabled;
+    }
+
+    @Override
+    public boolean equals(Object otherObj) {
+        if (otherObj == null) {
+            return false;
+        }
+
+        if (otherObj instanceof Link) {
+            final Link other = (Link) otherObj;
+            return this.handle.equals(other.handle)
+                && this.pathParts.equals(other.pathParts)
+                && this.title.equals(other.title);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * 17 + handle.hashCode();
+        hash = hash * 31 + pathParts.hashCode();
+        hash = hash * 13 + title.hashCode();
+        return hash;
     }
 
     public static Link createLink(Uri uri, String title) {
@@ -88,5 +116,29 @@ public class Link implements Serializable {
         }
 
         return uriBuilder.build();
+    }
+
+    public String getHandle() {
+        return handle;
+    }
+
+    public List<String> getPathParts() {
+        return pathParts;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public boolean isRemovable() {
+        return removable;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

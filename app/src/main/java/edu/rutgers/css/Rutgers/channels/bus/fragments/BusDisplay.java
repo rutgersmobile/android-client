@@ -36,7 +36,6 @@ import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import lombok.Data;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -87,10 +86,22 @@ public class BusDisplay extends BaseChannelFragment {
 
     private PublishSubject<Long> refreshSubject = PublishSubject.create();
 
-    @Data
     public static class PredictionHolder {
-        public final Predictions predictions;
-        public final String title;
+        private final Predictions predictions;
+        private final String title;
+
+        public PredictionHolder(final Predictions predictions, final String title) {
+            this.predictions = predictions;
+            this.title = title;
+        }
+
+        public Predictions getPredictions() {
+            return predictions;
+        }
+
+        public String getTitle() {
+            return title;
+        }
     }
 
     public BusDisplay() {

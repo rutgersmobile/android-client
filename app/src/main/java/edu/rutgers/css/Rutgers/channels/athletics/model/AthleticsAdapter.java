@@ -19,7 +19,6 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.athletics.model.AthleticsGame;
-import lombok.Getter;
 
 /**
  * Recycler adapter for AthleticsGames backed by a list.
@@ -34,8 +33,11 @@ public final class AthleticsAdapter extends RecyclerView.Adapter<AthleticsAdapte
     private static final String imageExtSmall =  "-sm.png";
     private static final String imageRutgersLarge = imageURLBase + RUTGERS_CODE + imageExtLarge;
 
-    @Getter
     private final Context context;
+
+    public Context getContext() {
+        return context;
+    }
 
     private final int layoutResource;
     private final List<AthleticsGame> games;
@@ -50,120 +52,63 @@ public final class AthleticsAdapter extends RecyclerView.Adapter<AthleticsAdapte
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        @Getter View rutgersHome;
-        @Getter ImageView opponentIcon;
-        @Getter TextView notRutgers;
-        @Getter LinearLayout score;
-        @Getter TextView homeScore;
-        @Getter TextView awayScore;
-        @Getter TextView gameLocation;
-        @Getter TextView gameDate;
-        @Getter TextView gameTime;
+        private final View rutgersHome;
+        private final ImageView opponentIcon;
+        private final TextView notRutgers;
+        private final LinearLayout score;
+        private final TextView homeScore;
+        private final TextView awayScore;
+        private final TextView gameLocation;
+        private final TextView gameDate;
+        private final TextView gameTime;
 
-        public static ViewHolderBuilder builder() {
-            return new ViewHolderBuilder();
-        }
-
-        public static class ViewHolderBuilder {
-            View rootView;
-            View rutgersHome;
-            ImageView opponentIcon;
-            TextView notRutgers;
-            LinearLayout score;
-            TextView homeScore;
-            TextView awayScore;
-            TextView gameLocation;
-            TextView gameDate;
-            TextView gameTime;
-
-            private ViewHolderBuilder() { }
-
-            public ViewHolderBuilder rootView(View rootView) {
-                this.rootView = rootView;
-                return this;
-            }
-
-            public ViewHolderBuilder rutgersHome(View rutgersHome) {
-                this.rutgersHome = rutgersHome;
-                return this;
-            }
-
-            public ViewHolderBuilder opponentIcon(ImageView opponentIcon) {
-                this.opponentIcon = opponentIcon;
-                return this;
-            }
-
-            public ViewHolderBuilder notRutgers(TextView notRutgers) {
-                this.notRutgers = notRutgers;
-                return this;
-            }
-
-            public ViewHolderBuilder score(LinearLayout score) {
-                this.score = score;
-                return this;
-            }
-
-            public ViewHolderBuilder homeScore(TextView homeScore) {
-                this.homeScore = homeScore;
-                return this;
-            }
-
-            public ViewHolderBuilder awayScore(TextView awayScore) {
-                this.awayScore = awayScore;
-                return this;
-            }
-
-            public ViewHolderBuilder gameLocation(TextView gameLocation) {
-                this.gameLocation = gameLocation;
-                return this;
-            }
-
-            public ViewHolderBuilder gameDate(TextView gameDate) {
-                this.gameDate = gameDate;
-                return this;
-            }
-
-            public ViewHolderBuilder gameTime(TextView gameTime) {
-                this.gameTime = gameTime;
-                return this;
-            }
-
-            public ViewHolder build() {
-                return new ViewHolder(
-                        rootView,
-                        rutgersHome,
-                        opponentIcon,
-                        notRutgers,
-                        score,
-                        homeScore,
-                        awayScore,
-                        gameLocation,
-                        gameDate,
-                        gameTime
-                );
-            }
-        }
-
-        public ViewHolder(View v,
-                          View rutgersHome,
-                          ImageView opponentIcon,
-                          TextView notRutgers,
-                          LinearLayout score,
-                          TextView homeScore,
-                          TextView awayScore,
-                          TextView gameLocation,
-                          TextView gameDate,
-                          TextView gameTime) {
+        public ViewHolder(View v) {
             super(v);
-            this.rutgersHome = rutgersHome;
-            this.opponentIcon = opponentIcon;
-            this.notRutgers = notRutgers;
-            this.score = score;
-            this.homeScore = homeScore;
-            this.awayScore = awayScore;
-            this.gameLocation = gameLocation;
-            this.gameDate = gameDate;
-            this.gameTime = gameTime;
+            this.rutgersHome = v.findViewById(R.id.rutgers_home);
+            this.opponentIcon = (ImageView) v.findViewById(R.id.opponent_icon);
+            this.notRutgers = (TextView) v.findViewById(R.id.not_rutgers);
+            this.score = (LinearLayout) v.findViewById(R.id.score);
+            this.homeScore = (TextView) v.findViewById(R.id.home_score);
+            this.awayScore = (TextView) v.findViewById(R.id.away_score);
+            this.gameLocation = (TextView) v.findViewById(R.id.game_location);
+            this.gameDate = (TextView) v.findViewById(R.id.game_date);
+            this.gameTime = (TextView) v.findViewById(R.id.game_time);
+        }
+
+        public View getRutgersHome() {
+            return rutgersHome;
+        }
+
+        public ImageView getOpponentIcon() {
+            return opponentIcon;
+        }
+
+        public TextView getNotRutgers() {
+            return notRutgers;
+        }
+
+        public LinearLayout getScore() {
+            return score;
+        }
+
+        public TextView getHomeScore() {
+            return homeScore;
+        }
+
+        public TextView getAwayScore() {
+            return awayScore;
+        }
+
+        public TextView getGameLocation() {
+            return gameLocation;
+        }
+
+        public TextView getGameDate() {
+            return gameDate;
+        }
+
+        public TextView getGameTime() {
+            return gameTime;
         }
     }
 
@@ -173,18 +118,7 @@ public final class AthleticsAdapter extends RecyclerView.Adapter<AthleticsAdapte
                 .from(parent.getContext())
                 .inflate(layoutResource, parent, false);
 
-        return ViewHolder.builder()
-                .rootView(v)
-                .rutgersHome(v.findViewById(R.id.rutgers_home))
-                .opponentIcon((ImageView) v.findViewById(R.id.opponent_icon))
-                .notRutgers((TextView) v.findViewById(R.id.not_rutgers))
-                .score((LinearLayout) v.findViewById(R.id.score))
-                .homeScore((TextView) v.findViewById(R.id.home_score))
-                .awayScore((TextView) v.findViewById(R.id.away_score))
-                .gameLocation((TextView) v.findViewById(R.id.game_location))
-                .gameDate((TextView) v.findViewById(R.id.game_date))
-                .gameTime((TextView) v.findViewById(R.id.game_time))
-                .build();
+        return new ViewHolder(v);
     }
 
     @Override

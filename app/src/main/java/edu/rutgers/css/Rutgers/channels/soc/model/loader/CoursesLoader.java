@@ -12,7 +12,6 @@ import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
 import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.api.soc.model.Subject;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
-import lombok.Data;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -25,10 +24,22 @@ public class CoursesLoader extends SimpleAsyncLoader<CoursesLoader.CourseData> {
     String semester;
     String subjectCode;
 
-    @Data
     public final class CourseData {
-        final Subject subject;
-        final List<Course> courses;
+        private final Subject subject;
+        private final List<Course> courses;
+
+        public CourseData(final Subject subject, final List<Course> courses) {
+            this.subject = subject;
+            this.courses = courses;
+        }
+
+        public Subject getSubject() {
+            return subject;
+        }
+
+        public List<Course> getCourses() {
+            return courses;
+        }
     }
 
     public static final String TAG = "CoursesLoader";

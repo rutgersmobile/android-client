@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import lombok.Getter;
-
 /**
  * Basic DTable element with title that may be localized by campus.
  */
@@ -22,8 +20,11 @@ public class DTableElement implements Serializable, ParentListItem {
     private VarTitle varTitle;
     private DTableElement parent;
     private final static List<?> noChildrenList = new ArrayList<>();
-    @Getter
     private String image;
+
+    public String getImage() {
+        return image;
+    }
 
     public DTableElement(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {
         // Set the element title. JSON may have a string or object containing campus-local strings

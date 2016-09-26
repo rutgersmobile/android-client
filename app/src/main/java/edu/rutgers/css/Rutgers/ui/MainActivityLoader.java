@@ -14,7 +14,6 @@ import edu.rutgers.css.Rutgers.model.Motd;
 import edu.rutgers.css.Rutgers.model.MotdAPI;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import lombok.Data;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -28,10 +27,22 @@ public class MainActivityLoader extends SimpleAsyncLoader<MainActivityLoader.Ini
         super(context);
     }
 
-    @Data
     public class InitLoadHolder {
         private final JsonArray array;
         private final Motd motd;
+
+        public InitLoadHolder(final JsonArray array, final Motd motd) {
+            this.array = array;
+            this.motd = motd;
+        }
+
+        public JsonArray getArray() {
+            return array;
+        }
+
+        public Motd getMotd() {
+            return motd;
+        }
     }
 
     @Override

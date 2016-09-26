@@ -10,10 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * SOC Index.
  */
@@ -21,30 +17,101 @@ public class SOCIndex {
 
     private static final String TAG = "SOCIndex";
 
-    @Data
     public static class IndexCourse {
-        String course;
-        String subj;
+        private String course;
+        private String subj;
+
+        public IndexCourse() {}
+
+        public IndexCourse(final String course, final String subj) {
+            this.course = course;
+            this.subj = subj;
+        }
+
+        public String getCourse() {
+            return course;
+        }
+
+        public void setCourse(String course) {
+            this.course = course;
+        }
+
+        public String getSubj() {
+            return subj;
+        }
+
+        public void setSubj(String subj) {
+            this.subj = subj;
+        }
     }
 
-    @Data
     public static class IndexSubject {
-        String id;
-        String name;
-        HashMap<String, String> courses;
+        private String id;
+        private String name;
+        private HashMap<String, String> courses;
+
+        public IndexSubject() {}
+
+        public IndexSubject(final String id, final String name, final HashMap<String, String> courses) {
+            this.id = id;
+            this.name = name;
+            this.courses = courses;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public HashMap<String, String> getCourses() {
+            return courses;
+        }
+
+        public void setCourses(HashMap<String, String> courses) {
+            this.courses = courses;
+        }
     }
 
-    @Getter
-    @Setter
     private String semesterCode;
 
-    @Getter
-    @Setter
+    public String getSemesterCode() {
+        return semesterCode;
+    }
+
+    public void setSemesterCode(String semesterCode) {
+        this.semesterCode = semesterCode;
+    }
+
     private String campusCode;
 
-    @Getter
-    @Setter
+    public String getCampusCode() {
+        return campusCode;
+    }
+
+    public void setCampusCode(String campusCode) {
+        this.campusCode = campusCode;
+    }
+
     private String levelCode;
+
+    public String getLevelCode() {
+        return levelCode;
+    }
+
+    public void setLevelCode(String levelCode) {
+        this.levelCode = levelCode;
+    }
 
     private HashMap<String, String[]> mAbbreviations;
     private HashMap<String, IndexCourse> mCoursesByName;

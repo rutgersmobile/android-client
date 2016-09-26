@@ -216,6 +216,7 @@ public class DTable extends DtableChannelFragment {
             );
         } else {
             mAdapter = new DTableGridAdapter(
+                getContext(),
                 new ArrayList<>(),
                 getFragmentMediator(),
                 mHandle,
@@ -283,6 +284,7 @@ public class DTable extends DtableChannelFragment {
 
     private DTableGridAdapter createGridAdapter() {
         return new DTableGridAdapter(
+            getContext(),
             mDRoot.getChildren(),
             getFragmentMediator(),
             mHandle,

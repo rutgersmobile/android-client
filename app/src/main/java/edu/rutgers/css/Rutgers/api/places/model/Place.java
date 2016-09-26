@@ -4,16 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-import lombok.Data;
-
 /**
  * Represents a building from the places database. Equivalent to a "place" JSON object from the
  * places API. Use GSON to construct.
  * @author James Chambers
  */
-@Data
 public final class Place {
-
     private final String id;
     private final String title;
     private final String description;
@@ -26,9 +22,24 @@ public final class Place {
     private final List<String> offices;
     private final Location location;
 
-    @Data
-    public static final class Location {
+    public Place(final String id, final String title, final String description, final String cid,
+                 final String buildingID, final String buildingNumber, final String buildingCode,
+                 final String campusCode, final String campusName, final List<String> offices,
+                 final Location location) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.cid = cid;
+        this.buildingID = buildingID;
+        this.buildingNumber = buildingNumber;
+        this.buildingCode = buildingCode;
+        this.campusCode = campusCode;
+        this.campusName = campusName;
+        this.offices = offices;
+        this.location = location;
+    }
 
+    public static final class Location {
         private final String name;
         private final String street;
         private final String additional;
@@ -40,6 +51,60 @@ public final class Place {
         private final double latitude;
         private final double longitude;
 
+        public Location(final String name, final String street, final String additional,
+                        final String city, final String state, final String stateAbbr,
+                        final String postalCode, final String country, final double latitude, final double longitude) {
+            this.name = name;
+            this.street = street;
+            this.additional = additional;
+            this.city = city;
+            this.state = state;
+            this.stateAbbr = stateAbbr;
+            this.postalCode = postalCode;
+            this.country = country;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getStreet() {
+            return street;
+        }
+
+        public String getAdditional() {
+            return additional;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public String getStateAbbr() {
+            return stateAbbr;
+        }
+
+        public String getPostalCode() {
+            return postalCode;
+        }
+
+        public String getCountry() {
+            return country;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public double getLongitude() {
+            return longitude;
+        }
     }
 
     @Override
@@ -47,4 +112,47 @@ public final class Place {
         return getTitle();
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getCid() {
+        return cid;
+    }
+
+    public String getBuildingID() {
+        return buildingID;
+    }
+
+    public String getBuildingNumber() {
+        return buildingNumber;
+    }
+
+    public String getBuildingCode() {
+        return buildingCode;
+    }
+
+    public String getCampusCode() {
+        return campusCode;
+    }
+
+    public String getCampusName() {
+        return campusName;
+    }
+
+    public List<String> getOffices() {
+        return offices;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
 }

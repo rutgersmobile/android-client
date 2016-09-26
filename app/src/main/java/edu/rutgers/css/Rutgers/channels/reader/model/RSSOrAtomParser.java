@@ -8,7 +8,6 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
-import lombok.Setter;
 
 /**
  * Parser that chooses another parser to use
@@ -16,8 +15,12 @@ import lombok.Setter;
 public class RSSOrAtomParser implements XmlParser<List<RSSItem>> {
     private static final String atomType = "application/atom+xml";
 
-    @Setter
     private Response response;
+
+    @Override
+    public void setResponse(Response response) {
+        this.response = response;
+    }
 
     @Override
     public List<RSSItem> parse(InputStream in) throws ParseException, IOException {

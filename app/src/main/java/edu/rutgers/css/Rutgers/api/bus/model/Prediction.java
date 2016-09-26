@@ -4,14 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 /**
  * Arrival time predictions for a bus stop.
  */
-@Data
-@EqualsAndHashCode(exclude = "minutes")
 public final class Prediction implements Serializable {
     private String tag;
     private String title;
@@ -23,8 +18,28 @@ public final class Prediction implements Serializable {
         this.title = title;
         minutes = new ArrayList<>();
     }
-    
+
     public void addMinutes(int mins) { minutes.add(mins); }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+
+    public List<Integer> getMinutes() {
+        return minutes;
+    }
 
     @Override
     public String toString() {

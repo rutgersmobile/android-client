@@ -11,26 +11,44 @@ import com.google.gson.JsonSyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
-import lombok.Getter;
-
 /**
  * Root DTable element: can contain a mix of channel, FAQ, and other DTable items.
  */
 public class DTableRoot extends DTableElement {
 
-    @Getter
     private String schema;
-    @Getter
-    private String layout;
-    private List<DTableElement> children;
-    @Getter
-    private List<BannerItem> banner;
+    public String getSchema() {
+        return schema;
+    }
 
-    @Data
+    private String layout;
+    public String getLayout() {
+        return layout;
+    }
+
+    private List<DTableElement> children;
+
+    private List<BannerItem> banner;
+    public List<BannerItem> getBanner() {
+        return banner;
+    }
+
     public static class BannerItem {
         private final String image;
         private final Uri url;
+
+        BannerItem(final String image, final Uri url) {
+            this.image = image;
+            this.url = url;
+        }
+
+        public String getImage() {
+            return image;
+        }
+
+        public Uri getUrl() {
+            return url;
+        }
     }
 
     public DTableRoot(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {

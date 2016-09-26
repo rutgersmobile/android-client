@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.dtable.model;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -17,7 +18,6 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 
@@ -32,6 +32,8 @@ public class DTableGridAdapter extends RecyclerView.Adapter<DTableGridAdapter.Vi
     private final String homeCampus;
     private final ArrayList<String> history;
 
+    private final Context context;
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView title;
         ImageView image;
@@ -41,24 +43,26 @@ public class DTableGridAdapter extends RecyclerView.Adapter<DTableGridAdapter.Vi
             image = (ImageView) itemView.findViewById(R.id.card_image);
         }
 
-        public void bind(DTableElement element) {
+        public void bind(Context context, DTableElement element) {
             title.setText(element.getTitle());
             String imageUrl = element.getImage();
             if (imageUrl != null) {
                 imageUrl = Config.API_BASE + "img/" + imageUrl;
-                Picasso.with(RutgersApplication.getAppContext())
+                Picasso.with(context)
                     .load(imageUrl)
                     .into(image);
             }
         }
     }
 
-    public DTableGridAdapter(@NonNull List<DTableElement> parentItemList,
+    public DTableGridAdapter(Context context,
+                             @NonNull List<DTableElement> parentItemList,
                              FragmentMediator fm,
                              String handle,
                              String topHandle,
                              String homeCampus,
                              ArrayList<String> history) {
+        this.context = context;
         this.elements = parentItemList;
         this.fm = fm;
         this.handle = handle;
@@ -81,7 +85,7 @@ public class DTableGridAdapter extends RecyclerView.Adapter<DTableGridAdapter.Vi
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final DTableElement item = elements.get(position);
-        holder.bind(item);
+        holder.bind(context, item);
         holder.itemView.setOnClickListener(view -> {
             if (item instanceof DTableRoot) {
                 final DTableRoot root = (DTableRoot) item;

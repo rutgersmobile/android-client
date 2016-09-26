@@ -8,25 +8,53 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.List;
 
-import lombok.Data;
-
 /**
  * Represents a menu from the Dining API. Use GSON to construct.
  * @author James Chambers
  */
-@Data
 public class DiningMenu implements Serializable{
 
     @SerializedName("location_name") private final String locationName;
     private final long date;
     private final List<Meal> meals;
 
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public List<Meal> getMeals() {
+        return meals;
+    }
+
+    public DiningMenu(final String locationName, final long date, final List<Meal> meals) {
+        this.locationName = locationName;
+        this.date = date;
+        this.meals = meals;
+    }
+
     /** A single meal on the dining menu (breakfast, lunch, etc.). */
-    @Data
     public static class Meal implements Serializable {
         @SerializedName("meal_name") private final String mealName;
         @SerializedName("meal_avail") private final boolean mealAvailable;
         private final List<Genre> genres;
+
+        public Meal(final String mealName, final boolean mealAvailable, final List<Genre> genres) {
+            this.mealName = mealName;
+            this.mealAvailable = mealAvailable;
+            this.genres = genres;
+        }
+
+        public String getMealName() {
+            return mealName;
+        }
+
+        public boolean isMealAvailable() {
+            return mealAvailable;
+        }
+
+        public List<Genre> getGenres() {
+            return genres;
+        }
 
         @Override
         public String toString() {
@@ -35,10 +63,22 @@ public class DiningMenu implements Serializable{
     }
 
     /** List of foods of a certain category on the dining menu. */
-    @Data
     public static class Genre implements Serializable {
         @SerializedName("genre_name") private final String genreName;
         private final List<String> items;
+
+        public Genre(final String genreName, final List<String> items) {
+            this.genreName = genreName;
+            this.items = items;
+        }
+
+        public String getGenreName() {
+            return genreName;
+        }
+
+        public List<String> getItems() {
+            return items;
+        }
 
         @Override
         public String toString() {

@@ -6,27 +6,21 @@ import java.io.Serializable;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.soc.Registerable;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Setter;
 
 /**
  * Course from Schedule of Classes. Construct with GSON.
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
 public class Course implements Registerable, Comparable<Course>, Serializable {
 
     private final String title;
     private final String subject;
     private final String courseNumber;
-    @Setter(AccessLevel.NONE) private String courseDescription;
-    @Setter(AccessLevel.NONE) private String preReqNotes;
-    @Setter(AccessLevel.NONE) private String synopsisUrl;
-    @Setter(AccessLevel.NONE) private float credits;
-    @Setter(AccessLevel.NONE) private List<Section> sections;
-    @Setter(AccessLevel.NONE) private boolean stub;
+    private String courseDescription;
+    private String preReqNotes;
+    private String synopsisUrl;
+    private float credits;
+    private List<Section> sections;
+    private boolean stub;
 
     /** Create course stub. */
     public Course(String title, String subjectCode, String courseNumber) {
@@ -34,6 +28,43 @@ public class Course implements Registerable, Comparable<Course>, Serializable {
         this.subject = subjectCode;
         this.courseNumber = courseNumber;
         this.stub = true;
+    }
+
+    @Override
+    public String getTitle() {
+        return title;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public String getCourseNumber() {
+        return courseNumber;
+    }
+
+    public String getCourseDescription() {
+        return courseDescription;
+    }
+
+    public String getPreReqNotes() {
+        return preReqNotes;
+    }
+
+    public String getSynopsisUrl() {
+        return synopsisUrl;
+    }
+
+    public float getCredits() {
+        return credits;
+    }
+
+    public List<Section> getSections() {
+        return sections;
+    }
+
+    public boolean isStub() {
+        return stub;
     }
 
     @Override

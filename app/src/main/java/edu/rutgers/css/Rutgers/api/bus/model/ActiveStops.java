@@ -8,17 +8,39 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
-import lombok.Data;
 
 /**
  * Nextbus active stop list.
  */
-@Data
 public final class ActiveStops {
     private final List<RouteStub> routes;
     private final List<StopStub> stops;
     @SerializedName("time") private final long timestamp;
     private String agencyTag; // Not part of Nextbus results
+
+    public ActiveStops(final List<RouteStub> routes, final List<StopStub> stops, final long timestamp,
+                       final String agencyTag) {
+        this.routes = routes;
+        this.stops = stops;
+        this.timestamp = timestamp;
+        this.agencyTag = agencyTag;
+    }
+
+    public List<RouteStub> getRoutes() {
+        return routes;
+    }
+
+    public List<StopStub> getStops() {
+        return stops;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getAgencyTag() {
+        return agencyTag;
+    }
 
     /**
      * Update the agency tag on this ActiveStops container
