@@ -6,8 +6,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,11 +23,14 @@ import java.util.Locale;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
-import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkMaps;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -37,8 +38,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
  * Displays available meals for a dining hall.
  * @author James Chambers
  */
-public class FoodHall extends BaseChannelFragment
-    implements LoaderManager.LoaderCallbacks<DiningMenu> {
+public class FoodHall extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "FoodHall";
@@ -88,11 +88,27 @@ public class FoodHall extends BaseChannelFragment
 
         if (savedInstanceState != null) {
             mData = (DiningMenu) savedInstanceState.getSerializable(ARG_SAVED_DATA_TAG);
+            return;
         }
 
-        if (mData == null) {
-            getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, savedInstanceState, this);
-        }
+        RutgersAPI.dining.getDiningHalls()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            // Lift list of dining halls into observable stream
+            .flatMap(Observable::from)
+            // find the first hall with the specified location
+            .filter(diningMenu -> diningMenu.getLocationName().equals(mLocation))
+            .first()
+            .subscribe(diningMenu -> {
+                reset();
+                mData = diningMenu;
+                loadPages(diningMenu);
+            }, error -> {
+                reset();
+                LOGE(TAG, error.getMessage());
+                AppUtils.showFailedLoadToast(getContext());
+            });
     }
 
     @Override
@@ -152,28 +168,6 @@ public class FoodHall extends BaseChannelFragment
         if (getActivity() != null && AppUtils.isOnTop(getActivity(), FoodHall.HANDLE)) {
             getActivity().setTitle(mTitle);
         }
-    }
-
-    @Override
-    public Loader<DiningMenu> onCreateLoader(int id, Bundle args) {
-        return new DiningMenuLoader(getActivity(), mLocation);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<DiningMenu> loader, DiningMenu data) {
-        reset();
-        // Data will only be null if there is an error
-        if (data == null) {
-            AppUtils.showFailedLoadToast(getContext());
-            return;
-        }
-        mData = data;
-        loadPages(mData);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<DiningMenu> loader) {
-        reset();
     }
 
     private void reset() {

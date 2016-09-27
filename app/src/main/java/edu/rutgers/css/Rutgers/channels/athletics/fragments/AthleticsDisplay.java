@@ -11,10 +11,9 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.athletics.AthleticsService;
 import edu.rutgers.css.Rutgers.channels.athletics.model.AthleticsAdapter;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import edu.rutgers.css.Rutgers.ui.VerticalSpaceItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -33,9 +32,6 @@ public final class AthleticsDisplay extends DtableChannelFragment {
     private boolean loading = false;
     private AthleticsAdapter adapter;
     private String title;
-
-    private static AthleticsService athleticsService = RutgersApplication.retrofit
-        .create(AthleticsService.class);
 
     public static Bundle createArgs(@NonNull String title, @NonNull String resource) {
         Bundle bundle = new Bundle();
@@ -62,7 +58,7 @@ public final class AthleticsDisplay extends DtableChannelFragment {
             return;
         }
 
-        athleticsService.getGames(sport)
+        RutgersAPI.athletics.getGames(sport)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
