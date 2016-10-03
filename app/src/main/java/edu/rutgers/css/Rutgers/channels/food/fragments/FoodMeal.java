@@ -4,10 +4,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
@@ -16,9 +19,10 @@ import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.MealGenreLoader;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -88,8 +92,8 @@ public class FoodMeal extends BaseChannelFragment
         super.onCreate(savedInstanceState);
         final Bundle args = getArguments();
         
-        mAdapter = new DiningMenuAdapter(getActivity(),
-                R.layout.row_title, R.layout.row_section_header, R.id.title);
+        mAdapter = new DiningMenuAdapter(new ArrayList<>(),
+                R.layout.row_section_header, R.layout.row_title, R.id.title);
 
         if (args.getString(ARG_LOCATION_TAG) == null) {
             LOGE(TAG, "Location not set");
@@ -97,7 +101,9 @@ public class FoodMeal extends BaseChannelFragment
         } else if (args.getString(ARG_MEAL_TAG) == null) {
             DiningMenu.Meal savedMeal = (DiningMenu.Meal) args.getSerializable(ARG_SAVED_DATA_TAG);
             if (savedMeal != null) {
-                mAdapter.addAll(savedMeal.getGenres());
+                for (final DiningMenu.Genre genre : savedMeal.getGenres()) {
+                    mAdapter.add(genreToSection(genre));
+                }
                 return;
             }
             LOGE(TAG, "Meal not set");
@@ -110,10 +116,13 @@ public class FoodMeal extends BaseChannelFragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_stickylist_progress_simple, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_recycler_progress_simple, parent, false);
 
-        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
-        listView.setAdapter(mAdapter);
+        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         return v;
     }
@@ -133,7 +142,9 @@ public class FoodMeal extends BaseChannelFragment
             AppUtils.showFailedLoadToast(getContext());
             return;
         }
-        mAdapter.addAll(data);
+        for (final DiningMenu.Genre genre : data) {
+            mAdapter.add(genreToSection(genre));
+        }
     }
 
     @Override
@@ -148,5 +159,9 @@ public class FoodMeal extends BaseChannelFragment
     @Override
     public Link getLink() {
         return null;
+    }
+
+    private static SimpleSection<String> genreToSection(DiningMenu.Genre genre) {
+        return new SimpleSection<>(genre.getGenreName(), genre.getItems());
     }
 }

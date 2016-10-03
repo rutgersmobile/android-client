@@ -31,6 +31,8 @@ import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+
 /**
  * Base channel fragment. Handles progress circle display and communication with parent activity.
  */
@@ -244,7 +246,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
     }
 
-    final protected void switchFragments(Bundle args) {
+    final public void switchFragments(Bundle args) {
         if (getActivity() != null) {
             ((MainActivity)getActivity()).getFragmentMediator().switchFragments(args);
         }
@@ -287,5 +289,13 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     public String getLinkTitle() {
         return getActivity().getTitle().toString();
+    }
+
+    public String getLogTag() {
+        return TAG;
+    }
+
+    public void logError(Throwable throwable) {
+        LOGE(getLogTag(), throwable.getMessage());
     }
 }

@@ -7,15 +7,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-
 /**
  * A question/answer pair.
  */
 public class DTableFAQ extends DTableElement implements Serializable {
 
-    @Getter
     private final String answer;
+
+    public String getAnswer() {
+        return answer;
+    }
+
     private final List<String> answerList;
 
     public DTableFAQ(JsonObject jsonObject, DTableElement parent) throws JsonSyntaxException {

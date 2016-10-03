@@ -1,70 +1,41 @@
 package edu.rutgers.css.Rutgers.channels.food.model;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.support.annotation.NonNull;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.support.v4.content.ContextCompat;
+
+import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
-import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 
 /**
  * Adapter for listing dining hall facilities in a school.
  */
-public class SchoolFacilitiesAdapter extends SimpleSectionedAdapter<DiningMenu> {
+public class SchoolFacilitiesAdapter extends SimpleSectionedRecyclerAdapter<DiningMenu> {
+    private Context context;
 
-    static class ViewHolder {
-        TextView textView;
-    }
-
-    public SchoolFacilitiesAdapter(@NonNull Context context, int itemResource, int headerResource, int textViewId) {
-        super(context, itemResource, headerResource, textViewId);
-    }
-
-    @Override
-    public String getSectionHeader(SimpleSection<DiningMenu> section) {
-        return section.getHeader();
+    public SchoolFacilitiesAdapter(Context context,
+                                   List<SimpleSection<DiningMenu>> menus,
+                                   int itemResource,
+                                   int headerResource,
+                                   int textViewId) {
+        super(menus, itemResource, headerResource, textViewId);
+        this.context = context;
     }
 
     @Override
-    public DiningMenu getSectionItem(SimpleSection<DiningMenu> section, int position) {
-        return section.getItems().get(position);
-    }
-
-    @Override
-    public int getSectionItemCount(SimpleSection<DiningMenu> section) {
-        return section.getItems().size();
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
-
-        if (convertView == null) {
-            convertView = getLayoutInflater().inflate(getItemResource(), null);
-            holder = new ViewHolder();
-            holder.textView = (TextView) convertView.findViewById(getTextViewId());
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        final Resources res = getContext().getResources();
-
-        DiningMenu dm = getItem(position);
-        holder.textView.setText(dm.getLocationName());
+    public void onBindViewHolder(SimpleSectionedRecyclerAdapter.ViewHolder holder,
+                                 int section, int relativePosition, int absolutePosition) {
+        final DiningMenu dm = getItem(section, relativePosition);
+        holder.getTextView().setText(dm.getLocationName());
+        holder.itemView.setOnClickListener(view -> getOnClickSubject().onNext(dm));
 
         if (!dm.hasActiveMeals()) {
-            holder.textView.setTextColor(res.getColor(R.color.light_gray));
+            holder.getTextView().setTextColor(ContextCompat.getColor(context, R.color.light_gray));
         } else {
-            holder.textView.setTextColor(res.getColor(R.color.black));
+            holder.getTextView().setTextColor(ContextCompat.getColor(context, R.color.black));
         }
-
-        return convertView;
     }
-
 }

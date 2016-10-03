@@ -3,11 +3,11 @@ package edu.rutgers.css.Rutgers.channels.food.fragments;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +19,11 @@ import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
 import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuSectionLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
+import edu.rutgers.css.Rutgers.utils.FuncUtils;
 
 /**
  * Displays dining halls that have menus available in the Dining API.
@@ -33,6 +34,10 @@ public class FoodMain extends BaseChannelFragment
 
     /* Log tag and component handle */
     private static final String TAG                 = "FoodMain";
+    @Override
+    public String getLogTag() {
+        return TAG;
+    }
     public static final String HANDLE               = "food";
 
     private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
@@ -62,8 +67,32 @@ public class FoodMain extends BaseChannelFragment
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        mAdapter = new SchoolFacilitiesAdapter(getActivity(),
-                R.layout.row_title, R.layout.row_section_header, R.id.title);
+        mAdapter = new SchoolFacilitiesAdapter(getActivity(), new ArrayList<>(),
+                R.layout.row_section_header, R.layout.row_title, R.id.title);
+
+        final String stonsbyTitle = getString(R.string.dining_stonsby_title);
+        final String stonsbyDescription = getString(R.string.dining_stonsby_description);
+
+        final String gatewayTitle = getString(R.string.dining_gateway_title);
+        final String gatewayDescription = getString(R.string.dining_gateway_description);
+
+        mAdapter.getPositionClicks()
+            .compose(bindToLifecycle())
+            .map(diningMenu -> {
+                if (diningMenu.getLocationName().equals(stonsbyTitle)) {
+                    return TextDisplay.createArgs(stonsbyTitle, stonsbyDescription);
+                } else if (diningMenu.getLocationName().equals(gatewayTitle)) {
+                    return TextDisplay.createArgs(gatewayTitle, gatewayDescription);
+                } else if (diningMenu.hasActiveMeals()) {
+                    return FoodHall.createArgs(diningMenu.getLocationName());
+                } else {
+                    return null;
+                }
+            }).onErrorReturn(error -> {
+                logError(error);
+                return null;
+            }).filter(FuncUtils::nonNull)
+            .subscribe(this::switchFragments, this::logError);
 
         // start loading dining menus
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
@@ -71,7 +100,7 @@ public class FoodMain extends BaseChannelFragment
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
 
         if (mLoading) showProgressCircle();
 
@@ -81,28 +110,11 @@ public class FoodMain extends BaseChannelFragment
         if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.dining_title);
 
-        StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DiningMenu clickedMenu = (DiningMenu) parent.getAdapter().getItem(position);
-
-                // Launch text display if static hall is clicked. Otherwise, regular menu display.
-                if (clickedMenu.getLocationName().equals(getString(R.string.dining_stonsby_title))) {
-                    switchFragments(TextDisplay.createArgs(getString(R.string.dining_stonsby_title),
-                            getString(R.string.dining_stonsby_description)));
-                } else if (clickedMenu.getLocationName().equals(getString(R.string.dining_gateway_title))) {
-                    switchFragments(TextDisplay.createArgs(getString(R.string.dining_gateway_title),
-                            getString(R.string.dining_gateway_description)));
-                } else {
-                    if (clickedMenu.hasActiveMeals()) {
-                        switchFragments(FoodHall.createArgs(clickedMenu.getLocationName()));
-                    }
-                }
-            }
-        });
+        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         return v;
     }
