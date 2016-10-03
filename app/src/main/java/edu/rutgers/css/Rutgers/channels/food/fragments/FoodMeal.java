@@ -2,8 +2,6 @@ package edu.rutgers.css.Rutgers.channels.food.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,18 +9,20 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
-import edu.rutgers.css.Rutgers.channels.food.model.loader.MealGenreLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -30,8 +30,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
  * Displays all food items available for a specific meal at a specific dining location.
  * @author James Chambers
  */
-public class FoodMeal extends BaseChannelFragment
-    implements LoaderManager.LoaderCallbacks<List<DiningMenu.Genre>> {
+public class FoodMeal extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "FoodMeal";
@@ -41,7 +40,6 @@ public class FoodMeal extends BaseChannelFragment
     public static final String ARG_LOCATION_TAG    = "location";
     public static final String ARG_MEAL_TAG        = "meal";
 
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
     private static final String ARG_SAVED_DATA_TAG  = "diningGenreData";
 
     /* Member data */
@@ -110,8 +108,39 @@ public class FoodMeal extends BaseChannelFragment
             return;
         }
 
+        final String meal = args.getString(FoodMeal.ARG_MEAL_TAG);
+        final String location = args.getString(FoodMeal.ARG_LOCATION_TAG);
+
+        if (meal == null || location == null) {
+            LOGE(TAG, "Bad arguments");
+            return;
+        }
+
         // Start loading meal genres
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
+        RutgersAPI.dining.getDiningHalls()
+            .observeOn(Schedulers.io())
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            // Map dining halls into stream
+            .flatMap(Observable::from)
+            // Find correct location and make sure one exists
+            .filter(diningMenu -> diningMenu.getLocationName().equals(location)).first()
+            // Make sure the meal is not null
+            .map(diningMenu -> diningMenu.getMeal(meal))
+            .flatMap(foundMeal -> foundMeal == null
+                ? Observable.error(new IllegalArgumentException("Bad meal name"))
+                : Observable.just(foundMeal.getGenres())
+            )
+            .subscribe(genres -> {
+                reset();
+                for (final DiningMenu.Genre genre : genres) {
+                    mAdapter.add(genreToSection(genre));
+                }
+            }, error -> {
+                reset();
+                LOGE(TAG, error.getMessage());
+                AppUtils.showFailedLoadToast(getContext());
+            });
     }
 
     @Override
@@ -125,31 +154,6 @@ public class FoodMeal extends BaseChannelFragment
         recyclerView.setAdapter(mAdapter);
 
         return v;
-    }
-
-    @Override
-    public Loader<List<DiningMenu.Genre>> onCreateLoader(int id, Bundle args) {
-        final String meal = args.getString(FoodMeal.ARG_MEAL_TAG);
-        final String location = args.getString(FoodMeal.ARG_LOCATION_TAG);
-        return new MealGenreLoader(getContext(), meal, location);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<DiningMenu.Genre>> loader, List<DiningMenu.Genre> data) {
-        reset();
-        // Assume and empty response is an error
-        if (data.isEmpty()) {
-            AppUtils.showFailedLoadToast(getContext());
-            return;
-        }
-        for (final DiningMenu.Genre genre : data) {
-            mAdapter.add(genreToSection(genre));
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<DiningMenu.Genre>> loader) {
-        reset();
     }
 
     private void reset() {

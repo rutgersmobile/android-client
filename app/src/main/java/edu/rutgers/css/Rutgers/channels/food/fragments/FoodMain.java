@@ -1,8 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.food.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,21 +14,25 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
-import edu.rutgers.css.Rutgers.channels.food.model.loader.DiningMenuSectionLoader;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.FuncUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * Displays dining halls that have menus available in the Dining API.
  * @author James Chambers
  */
-public class FoodMain extends BaseChannelFragment
-    implements LoaderManager.LoaderCallbacks<List<SimpleSection<DiningMenu>>> {
+public class FoodMain extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "FoodMain";
@@ -39,9 +41,6 @@ public class FoodMain extends BaseChannelFragment
         return TAG;
     }
     public static final String HANDLE               = "food";
-
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
-
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -94,10 +93,65 @@ public class FoodMain extends BaseChannelFragment
             }).filter(FuncUtils::nonNull)
             .subscribe(this::switchFragments, this::logError);
 
+        // Get user's home campus
+        final String userHome = RutgersUtils.getHomeCampus(getContext());
+
+        // Static dining hall entries
+        // Prevents static entries from being grayed out
+        final List<DiningMenu.Meal> dummyMeal = new ArrayList<>(1);
+        dummyMeal.add(new DiningMenu.Meal("fake", true, null));
+
+        final String nbCampusFullString = getContext().getString(R.string.campus_nb_full);
+        final String nwkCampusFullString = getContext().getString(R.string.campus_nwk_full);
+        final String camCampusFullString = getContext().getString(R.string.campus_cam_full);
+
+        final List<DiningMenu> stonsby = new ArrayList<>(1);
+        stonsby.add(new DiningMenu(stonsbyTitle, 0, dummyMeal));
+        final SimpleSection<DiningMenu> newarkHalls =
+            new SimpleSection<>(nwkCampusFullString, stonsby);
+
+        final List<DiningMenu> gateway = new ArrayList<>(1);
+        gateway.add(new DiningMenu(gatewayTitle, 0, dummyMeal));
+        final SimpleSection<DiningMenu> camdenHalls =
+            new SimpleSection<>(camCampusFullString, gateway);
+
         // start loading dining menus
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        RutgersAPI.dining.getDiningHalls()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .map(diningMenus -> {
+                final List<SimpleSection<DiningMenu>> simpleSections = new ArrayList<>();
+                final SimpleSection<DiningMenu> nbHalls =
+                    new SimpleSection<>(nbCampusFullString, diningMenus);
+
+                // Determine campus ordering
+                if (userHome.equals(nwkCampusFullString)) {
+                    simpleSections.add(newarkHalls);
+                    simpleSections.add(camdenHalls);
+                    simpleSections.add(nbHalls);
+                } else if (userHome.equals(camCampusFullString)) {
+                    simpleSections.add(camdenHalls);
+                    simpleSections.add(newarkHalls);
+                    simpleSections.add(nbHalls);
+                } else {
+                    simpleSections.add(nbHalls);
+                    simpleSections.add(camdenHalls);
+                    simpleSections.add(newarkHalls);
+                }
+
+                return simpleSections;
+            })
+            .subscribe(simpleSections -> {
+                reset();
+                mAdapter.addAll(simpleSections);
+            }, error -> {
+                reset();
+                LOGE(TAG, error.getMessage());
+                AppUtils.showFailedLoadToast(getContext());
+            });
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
@@ -119,39 +173,13 @@ public class FoodMain extends BaseChannelFragment
         return v;
     }
 
-
     public Link getLink() {
-        return new Link("food", new ArrayList<String>(), getLinkTitle());
-    }
-
-    @Override
-    public Loader<List<SimpleSection<DiningMenu>>> onCreateLoader(int id, Bundle args) {
-        mLoading = true;
-        showProgressCircle();
-        return new DiningMenuSectionLoader(getActivity());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<SimpleSection<DiningMenu>>> loader, List<SimpleSection<DiningMenu>> data) {
-        reset();
-
-        // Assume an empty response is an error
-        if (data.isEmpty()) {
-            AppUtils.showFailedLoadToast(getContext());
-            return;
-        }
-
-        mAdapter.addAll(data);
+        return new Link("food", new ArrayList<>(), getLinkTitle());
     }
 
     private void reset() {
         mAdapter.clear();
         mLoading = false;
         hideProgressCircle();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<SimpleSection<DiningMenu>>> loader) {
-        reset();
     }
 }

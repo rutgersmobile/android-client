@@ -12,12 +12,11 @@ import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.athletics.AthleticsAPI;
 import edu.rutgers.css.Rutgers.channels.athletics.model.AthleticsAdapter;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import edu.rutgers.css.Rutgers.ui.VerticalSpaceItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -53,13 +52,13 @@ public final class AthleticsDisplay extends DtableChannelFragment {
         }
         adapter = new AthleticsAdapter(getContext(), R.layout.row_athletics_game, new ArrayList<>());
 
-        final String resource = args.getString(ComponentFactory.ARG_DATA_TAG);
-        if (resource == null) {
+        final String sport = args.getString(ComponentFactory.ARG_DATA_TAG);
+        if (sport == null) {
             AppUtils.showFailedLoadToast(getContext());
             return;
         }
 
-        Observable.fromCallable(() -> AthleticsAPI.getGames(resource))
+        RutgersAPI.athletics.getGames(sport)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
