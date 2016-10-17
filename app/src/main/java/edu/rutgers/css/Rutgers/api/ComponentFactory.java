@@ -15,6 +15,7 @@ import java.util.Map;
 import edu.rutgers.css.Rutgers.channels.athletics.fragments.AthleticsDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusMain;
+import edu.rutgers.css.Rutgers.channels.cinema.fragments.CinemaMain;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
 import edu.rutgers.css.Rutgers.channels.feedback.fragments.FeedbackMain;
 import edu.rutgers.css.Rutgers.channels.food.fragments.FoodHall;
@@ -112,6 +113,9 @@ public final class ComponentFactory {
         put(SOCMain.HANDLE, SOCMain.class);
         put(SOCCourses.HANDLE, SOCCourses.class);
         put(SOCSections.HANDLE, SOCSections.class);
+
+        // Cinema views
+        put(CinemaMain.HANDLE, CinemaMain.class);
 
         // Other views
         put(RUInfoMain.HANDLE, RUInfoMain.class);

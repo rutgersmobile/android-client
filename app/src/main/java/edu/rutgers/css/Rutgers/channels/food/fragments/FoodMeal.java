@@ -117,7 +117,7 @@ public class FoodMeal extends BaseChannelFragment {
         }
 
         // Start loading meal genres
-        RutgersAPI.dining.getDiningHalls()
+        RutgersAPI.service.getDiningHalls()
             .observeOn(Schedulers.io())
             .subscribeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
