@@ -28,10 +28,6 @@ public class DTableFAQ extends DTableElement implements Serializable {
         answerList.add(answer);
     }
 
-    public String getAnswer() {
-        return answer;
-    }
-
     @Override
     public List<?> getChildItemList() {
         return answerList;

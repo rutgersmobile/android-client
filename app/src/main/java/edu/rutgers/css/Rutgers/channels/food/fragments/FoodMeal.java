@@ -129,14 +129,11 @@ public class FoodMeal extends BaseChannelFragment {
             .map(diningMenu -> diningMenu.getMeal(meal))
             .flatMap(foundMeal -> foundMeal == null
                 ? Observable.error(new IllegalArgumentException("Bad meal name"))
-                : Observable.just(foundMeal.getGenres())
+                : Observable.from(foundMeal.getGenres())
             )
-            .subscribe(genres -> {
-                reset();
-                for (final DiningMenu.Genre genre : genres) {
-                    mAdapter.add(genreToSection(genre));
-                }
-            }, error -> {
+            .map(FoodMeal::genreToSection)
+            .subscribe(section -> mAdapter.add(section)
+            , error -> {
                 reset();
                 LOGE(TAG, error.getMessage());
                 AppUtils.showFailedLoadToast(getContext());

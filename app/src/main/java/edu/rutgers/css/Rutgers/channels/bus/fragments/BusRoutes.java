@@ -1,15 +1,15 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
@@ -17,10 +17,10 @@ import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.loader.RouteLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
-import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class BusRoutes extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<SimpleSection<RouteStub>>> {
 
@@ -33,7 +33,7 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
     private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Member data */
-    private SimpleSectionedAdapter<RouteStub> mAdapter;
+    private SimpleSectionedRecyclerAdapter<RouteStub> mAdapter;
 
     public BusRoutes() {
         // Required empty public constructor
@@ -42,29 +42,29 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
+        mAdapter = new SimpleSectionedRecyclerAdapter<>(new ArrayList<>(),
+            R.layout.row_section_header, R.layout.row_title, R.id.title);
+        mAdapter.getPositionClicks()
+            .compose(bindToLifecycle())
+            .map(routeStub -> BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
+                routeStub.getAgencyTag(), routeStub.getTag())
+            )
+            .subscribe(this::switchFragments, this::logError);
+
         loading = true;
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress_simple);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress_simple);
 
         if (loading) showProgressCircle();
 
-        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(@NonNull AdapterView<?> parent, @NonNull View view, int position, long id) {
-                RouteStub routeStub = (RouteStub) parent.getAdapter().getItem(position);
-                Bundle displayArgs = BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
-                        routeStub.getAgencyTag(), routeStub.getTag());
-                switchFragments(displayArgs);
-            }
-
-        });
+        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         return v;
     }

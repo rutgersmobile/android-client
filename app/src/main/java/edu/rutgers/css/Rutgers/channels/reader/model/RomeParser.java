@@ -1,6 +1,11 @@
 package edu.rutgers.css.Rutgers.channels.reader.model;
 
+import com.rometools.modules.mediarss.MediaEntryModuleImpl;
+import com.rometools.modules.mediarss.MediaModule;
+import com.rometools.modules.mediarss.types.MediaContent;
+import com.rometools.rome.feed.module.Module;
 import com.rometools.rome.feed.synd.SyndContent;
+import com.rometools.rome.feed.synd.SyndEnclosure;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
@@ -41,13 +46,28 @@ public class RomeParser implements XmlParser<List<RSSItem>> {
 
             final List<RSSItem> items = new ArrayList<>();
             for (final SyndEntry entry : feed.getEntries()) {
+                final Module module = entry.getModule(MediaModule.URI);
                 final String title = entry.getTitle();
                 final SyndContent description = entry.getDescription();
                 final String link = entry.getLink();
                 final String author = entry.getAuthor();
                 final Date publishedDate = entry.getPublishedDate();
                 final Date updatedDate = entry.getUpdatedDate();
-                final String uri = entry.getUri();
+                final List<SyndEnclosure> enclosures = entry.getEnclosures();
+                String url = null;
+                for (final SyndEnclosure enclosure : enclosures) {
+                    if (enclosure.getType().contains("image")) {
+                        url = enclosure.getUrl();
+                    }
+                }
+                if (module instanceof MediaEntryModuleImpl) {
+                    final MediaEntryModuleImpl mediaModule = (MediaEntryModuleImpl) module;
+                    for (final MediaContent content : mediaModule.getMediaContents()) {
+                        if (content.getMedium().equals("image")) {
+                            url = content.getReference().toString();
+                        }
+                    }
+                }
                 items.add(new RSSItem(
                         title,
                         description.getValue(),
@@ -56,7 +76,7 @@ public class RomeParser implements XmlParser<List<RSSItem>> {
                         publishedDate != null ? printer.format(publishedDate) : null,
                         updatedDate != null ? printer.format(updatedDate) : null,
                         updatedDate != null ? printer.format(updatedDate) : null,
-                        uri
+                        url
                 ));
             }
             return items;

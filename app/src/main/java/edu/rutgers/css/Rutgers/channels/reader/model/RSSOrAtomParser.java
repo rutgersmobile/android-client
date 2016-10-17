@@ -24,7 +24,7 @@ public class RSSOrAtomParser implements XmlParser<List<RSSItem>> {
 
     @Override
     public List<RSSItem> parse(InputStream in) throws ParseException, IOException {
-        final XmlParser<List<RSSItem>> parser = response.header("Content-Type").contains(atomType)
+        final XmlParser<List<RSSItem>> parser = !response.request().httpUrl().host().contains("ruevents.rutgers.edu")
                 ? new RomeParser()
                 : new RSSXmlParser();
         return parser.parse(in);

@@ -88,6 +88,8 @@ public class FoodMain extends BaseChannelFragment {
                     return null;
                 }
             }).onErrorReturn(error -> {
+                // Errors shouldn't break the stream
+                // Just log and ignore
                 logError(error);
                 return null;
             }).filter(FuncUtils::nonNull)

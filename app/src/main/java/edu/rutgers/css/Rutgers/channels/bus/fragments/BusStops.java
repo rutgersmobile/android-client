@@ -1,17 +1,13 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.PopupMenu;
-import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +19,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.BuildConfig;
@@ -32,13 +29,14 @@ import edu.rutgers.css.Rutgers.channels.bus.model.loader.StopLoader;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
-import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.ui.fragments.InfoDialogFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 
 public class BusStops extends BaseChannelFragment implements GoogleApiClient.ConnectionCallbacks,
         LoaderManager.LoaderCallbacks<List<SimpleSection<StopStub>>>, LocationListener {
@@ -54,7 +52,7 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
     private static final int REFRESH_INTERVAL = 60 * 2; // nearby stop refresh interval in seconds
 
     /* Member data */
-    private SimpleSectionedAdapter<StopStub> mAdapter;
+    private SimpleSectionedRecyclerAdapter<StopStub> mAdapter;
     private GoogleApiClientProvider mGoogleApiClientProvider;
     private LocationRequest mLocationRequest;
     private Location lastLocation;
@@ -81,34 +79,30 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
+        mAdapter = new SimpleSectionedRecyclerAdapter<>(new ArrayList<>(),
+            R.layout.row_section_header, R.layout.row_title, R.id.title);
+        mAdapter.getPositionClicks()
+            .compose(bindToLifecycle())
+            .map(stopStub -> BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
+                        stopStub.getAgencyTag(), stopStub.getTitle())
+            )
+            .subscribe(this::switchFragments, this::logError);
+
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setInterval(REFRESH_INTERVAL * 1000)
                 .setFastestInterval(1000);
     }
-    
+
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_stickylist_progress_simple);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress_simple);
 
-        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new OnItemClickListener() {
-
-            /**
-             * Clicking on one of the stops will launch the bus display in stop mode, which lists
-             * routes going through that stop.
-             */
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                StopStub stopStub = (StopStub) parent.getAdapter().getItem(position);
-                Bundle displayArgs = BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
-                        stopStub.getAgencyTag(), stopStub.getTitle());
-                switchFragments(displayArgs);
-            }
-
-        });
+        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         return v;
     }
