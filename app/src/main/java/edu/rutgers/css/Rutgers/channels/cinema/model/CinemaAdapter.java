@@ -38,11 +38,12 @@ public class CinemaAdapter extends RecyclerView.Adapter<CinemaAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         final Movie movie = movies.get(position);
-        String text = WordUtils.capitalizeFully(movie.getName());
+        final StringBuilder textBuilder = new StringBuilder(WordUtils.capitalizeFully(movie.getName()));
         for (final Showing showing : movie.getShowings()) {
-            text += " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(showing.getDateTime());
+            textBuilder.append(" ");
+            textBuilder.append(DateFormat.getTimeInstance(DateFormat.SHORT).format(showing.getDateTime()));
         }
-        holder.textView.setText(text);
+        holder.textView.setText(textBuilder.toString());
     }
 
     @Override
