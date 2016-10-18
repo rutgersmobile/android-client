@@ -43,6 +43,7 @@ public class CinemaMain extends BaseChannelFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().setTitle("Cinema");
         adapter = new CinemaAdapter(new ArrayList<>());
         RutgersAPI.service.getMovies()
             .subscribeOn(Schedulers.io())
