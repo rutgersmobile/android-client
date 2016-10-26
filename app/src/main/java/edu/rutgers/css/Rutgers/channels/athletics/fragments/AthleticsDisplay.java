@@ -23,11 +23,11 @@ import rx.schedulers.Schedulers;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
- * Show athletics scores
+ * Show service scores
  */
 public final class AthleticsDisplay extends DtableChannelFragment {
 
-    public static final String HANDLE = "athletics";
+    public static final String HANDLE = "service";
 
     private boolean loading = false;
     private AthleticsAdapter adapter;
@@ -58,7 +58,7 @@ public final class AthleticsDisplay extends DtableChannelFragment {
             return;
         }
 
-        RutgersAPI.athletics.getGames(sport)
+        RutgersAPI.service.getGames(sport)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())

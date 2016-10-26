@@ -118,7 +118,7 @@ public class FoodMain extends BaseChannelFragment {
             new SimpleSection<>(camCampusFullString, gateway);
 
         // start loading dining menus
-        RutgersAPI.dining.getDiningHalls()
+        RutgersAPI.service.getDiningHalls()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())

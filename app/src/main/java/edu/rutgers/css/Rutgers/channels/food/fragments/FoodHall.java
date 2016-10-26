@@ -91,7 +91,7 @@ public class FoodHall extends BaseChannelFragment {
             return;
         }
 
-        RutgersAPI.dining.getDiningHalls()
+        RutgersAPI.service.getDiningHalls()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
