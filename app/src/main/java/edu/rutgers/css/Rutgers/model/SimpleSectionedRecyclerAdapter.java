@@ -77,7 +77,7 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
     @Override
     public int getItemCount(int section) {
         if (filteredSections != null) {
-            filteredSections.get(section).matches.size();
+            return filteredSections.get(section).matches.size();
         }
         return sections.get(section).getItems().size();
     }

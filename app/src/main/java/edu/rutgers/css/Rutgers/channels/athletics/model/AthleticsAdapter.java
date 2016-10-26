@@ -167,7 +167,7 @@ public final class AthleticsAdapter extends RecyclerView.Adapter<AthleticsAdapte
         final String imageURL = imageURLBase + opponentCode + imageExtLarge;
         Picasso.with(getContext())
                 .load(imageURL)
-                .into(holder.opponentIcon, new Callback() {
+                .into(holder.getOpponentIcon(), new Callback() {
                     @Override
                     public void onSuccess() { }
 
