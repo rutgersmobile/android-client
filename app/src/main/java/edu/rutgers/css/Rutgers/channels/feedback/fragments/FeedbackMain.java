@@ -25,10 +25,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,6 +41,10 @@ import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
@@ -226,7 +226,7 @@ public class FeedbackMain extends BaseChannelFragment implements OnItemSelectedL
         Integer wantsResonse = mRequestReplyCheckbox.isChecked() && mRequestReplyCheckbox.isEnabled() ? 1 : 0;
         
         // Build POST request
-        final FormEncodingBuilder builder = new FormEncodingBuilder()
+        final FormBody.Builder builder = new FormBody.Builder()
             .add("subject", (String)(mSubjectSpinner.getSelectedItem()))
             .add("email", mEmailEditText.getText().toString().trim())
             .add("uuid", AppUtils.getUUID(getActivity()))

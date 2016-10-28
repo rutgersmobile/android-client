@@ -10,7 +10,6 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
-import com.squareup.okhttp.Response;
 
 import org.apache.commons.lang3.time.DatePrinter;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -25,6 +24,7 @@ import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
+import okhttp3.Response;
 
 /**
  * Parser for RSS and Atom feeds powered by Rome

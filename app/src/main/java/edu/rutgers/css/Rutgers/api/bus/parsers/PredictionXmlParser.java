@@ -2,8 +2,6 @@ package edu.rutgers.css.Rutgers.api.bus.parsers;
 
 import android.util.Xml;
 
-import com.squareup.okhttp.Response;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -16,6 +14,7 @@ import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
+import okhttp3.Response;
 
 /**
  * Xml parser used to get predictions for routes in the bus channel

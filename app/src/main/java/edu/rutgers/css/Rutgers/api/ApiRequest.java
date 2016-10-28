@@ -1,15 +1,8 @@
 package edu.rutgers.css.Rutgers.api;
 
-import android.content.Context;
-
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
-import com.squareup.okhttp.Cache;
-import com.squareup.okhttp.CacheControl;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -17,32 +10,19 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
+import edu.rutgers.css.Rutgers.RutgersApplication;
+import okhttp3.CacheControl;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /** Convenience class for making requests */
 public final class ApiRequest {
 
     private static final String TAG = "ApiRequest";
 
-    private static final OkHttpClient client = new OkHttpClient();
-
-    public static OkHttpClient getClient() {
-        return client;
-    }
-
     private static final int CACHE_NEVER = -1; // -1 means always refresh -- never use cache
 
     private ApiRequest() {}
-
-    /**
-     * This should be in setup, but since it requires a
-     * context to get the directory, it needs to to be called
-     * by itself in onCreate in MainActivity
-     * @param context Context to get cache directory from
-     */
-    public static void enableCache(Context context, int cacheSize) {
-        Cache cache = new Cache(context.getCacheDir(), cacheSize);
-        client.setCache(cache);
-    }
 
     /**
      * Parse JSON from the mobile server into an object of the given type
@@ -146,7 +126,7 @@ public final class ApiRequest {
         }
 
         Request request = builder.cacheControl(control).build();
-        return client.newCall(request).execute();
+        return RutgersApplication.getClient().newCall(request).execute();
     }
 
     /**

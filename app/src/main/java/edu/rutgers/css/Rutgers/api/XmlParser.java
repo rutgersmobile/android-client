@@ -1,9 +1,9 @@
 package edu.rutgers.css.Rutgers.api;
 
-import com.squareup.okhttp.Response;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import okhttp3.Response;
 
 /**
  * Get the types you want from an XML document

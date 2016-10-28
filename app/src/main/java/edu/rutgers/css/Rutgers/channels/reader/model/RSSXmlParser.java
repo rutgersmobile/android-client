@@ -2,8 +2,6 @@ package edu.rutgers.css.Rutgers.channels.reader.model;
 
 import android.util.Xml;
 
-import com.squareup.okhttp.Response;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -15,6 +13,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.XmlParser;
+import okhttp3.Response;
 
 /**
  * Parser for getting RSS item information.

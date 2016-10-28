@@ -32,6 +32,10 @@ public class AgencyConfigDeserializer implements JsonDeserializer<AgencyConfig> 
         this.agency = agency;
     }
 
+    public AgencyConfigDeserializer() {
+        this.agency = "rutgers";
+    }
+
     @Override
     public AgencyConfig deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();

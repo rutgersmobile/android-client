@@ -3,6 +3,8 @@ package edu.rutgers.css.Rutgers.api;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.athletics.model.AthleticsGames;
+import edu.rutgers.css.Rutgers.api.bus.model.ActiveStops;
+import edu.rutgers.css.Rutgers.api.bus.model.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.cinema.model.Movie;
 import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import retrofit2.http.GET;
@@ -22,4 +24,16 @@ public interface RutgersService {
 
     @GET("cinema.json")
     Observable<List<Movie>> getMovies();
+
+    @GET("nbactivestops.txt")
+    Observable<ActiveStops> getNewBrunswickActiveStops();
+
+    @GET("nwkactivestops.txt")
+    Observable<ActiveStops> getNewarkActiveStops();
+
+    @GET("rutgersrouteconfig.txt")
+    Observable<AgencyConfig> getNewBrunswickAgencyConfig();
+
+    @GET("rutgers-newarkrouteconfig.txt")
+    Observable<AgencyConfig> getNewarkAgencyConfig();
 }

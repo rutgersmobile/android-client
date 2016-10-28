@@ -18,7 +18,6 @@ import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.Expan
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.ParseException;
 import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
@@ -196,37 +194,33 @@ public class BusDisplay extends BaseChannelFragment {
         .observeOn(Schedulers.io())
         .flatMap(t -> {
             LOGI(TAG, "Starting load");
-            Predictions predictions = null;
-            String title = null;
-            try {
-                if (BusDisplay.ROUTE_MODE.equals(mode)) {
-                    predictions = NextbusAPI.routePredict(agency, tag);
-                    for (RouteStub route : NextbusAPI.getActiveRoutes(agency)) {
-                        if (route.getTag().equals(tag)) {
-                            title = route.getTitle();
-                            break;
+            if (BusDisplay.ROUTE_MODE.equals(mode)) {
+                return NextbusAPI.routePredict(agency, tag)
+                    .flatMap(predictions -> NextbusAPI.getActiveRoutes(agency)
+                    .flatMap(routeStubs -> {
+                        for (final RouteStub route : routeStubs) {
+                            if (route.getTag().equals(tag)) {
+                                return Observable.just(new PredictionHolder(predictions, route.getTitle()));
+                            }
                         }
-                    }
-                } else if (BusDisplay.STOP_MODE.equals(mode)) {
-                    predictions = NextbusAPI.stopPredict(agency, tag);
-                    for (StopStub stop : NextbusAPI.getActiveStops(agency)) {
-                        if (stop.getTag().equals(tag)) {
-                            title = stop.getTitle();
-                            break;
+                        return Observable.error(new IllegalArgumentException("Route tag not found"));
+                    }));
+            } else if (BusDisplay.STOP_MODE.equals(mode)) {
+                return NextbusAPI.stopPredict(agency, tag)
+                    .flatMap(predictions -> NextbusAPI.getActiveStops(agency)
+                    .flatMap(stopStubs -> {
+                        for (final StopStub stop : stopStubs) {
+                            if (stop.getTag().equals(tag)) {
+                                return Observable.just(new PredictionHolder(predictions, stop.getTitle()));
+                            }
                         }
-                    }
-                }
-            } catch (IOException|ParseException e) {
-                return Observable.error(e);
+                        return Observable.error(new IllegalArgumentException("Stop tag not found"));
+                    }));
             }
 
-            if (predictions == null) {
-                return Observable.error(
-                    new IllegalArgumentException("Invalid mode (stop / route only)")
-                );
-            }
-
-            return Observable.just(new PredictionHolder(predictions, title));
+            return Observable.error(
+                new IllegalArgumentException("Invalid mode (stop / route only)")
+            );
         })
         .observeOn(AndroidSchedulers.mainThread())
         .compose(bindToLifecycle())
@@ -282,6 +276,7 @@ public class BusDisplay extends BaseChannelFragment {
             LOGE(TAG, error.getMessage());
             AppUtils.showFailedLoadToast(getContext());
         });
+
     }
     
     @Override

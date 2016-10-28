@@ -1,8 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,24 +12,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
-import edu.rutgers.css.Rutgers.channels.bus.model.loader.RouteLoader;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
-public class BusRoutes extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<List<SimpleSection<RouteStub>>> {
+public class BusRoutes extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusRoutes";
     public static final String HANDLE               = "busroutes";
 
     private boolean loading = false;
-
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Member data */
     private SimpleSectionedRecyclerAdapter<RouteStub> mAdapter;
@@ -50,8 +49,6 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
                 routeStub.getAgencyTag(), routeStub.getTag())
             )
             .subscribe(this::switchFragments, this::logError);
-
-        loading = true;
     }
     
     @Override
@@ -74,42 +71,56 @@ public class BusRoutes extends BaseChannelFragment implements LoaderManager.Load
         super.onResume();
 
         // Clear out everything
-        mAdapter.clear();
         loading = true;
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
-    }
+        NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NB).flatMap(nbActive ->
+            NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NWK).map(nwkActive -> {
+                final List<SimpleSection<RouteStub>> routes = new ArrayList<>();
+                final String userHome = RutgersUtils.getHomeCampus(getContext());
+                if (userHome.equals(getContext().getString(R.string.campus_nb_full))) {
+                    routes.add(loadAgency(NextbusAPI.AGENCY_NB, nbActive));
+                    routes.add(loadAgency(NextbusAPI.AGENCY_NWK, nwkActive));
+                } else {
+                    routes.add(loadAgency(NextbusAPI.AGENCY_NWK, nwkActive));
+                    routes.add(loadAgency(NextbusAPI.AGENCY_NB, nbActive));
+                }
+                return routes;
+            }))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .subscribe(sections -> {
+                reset();
+                mAdapter.addAll(sections);
+            }, this::logError);
 
-    @Override
-    public Loader<List<SimpleSection<RouteStub>>> onCreateLoader(int id, Bundle args) {
-        return new RouteLoader(getContext());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<SimpleSection<RouteStub>>> loader, List<SimpleSection<RouteStub>> data) {
-        if (getContext() == null) {
-            return;
-        }
-
-        reset();
-
-        mAdapter.addAll(data);
-
-        // Assume an empty response is an error
-        // TODO: Is that actually reasonable?
-        if (data.isEmpty()) {
-            AppUtils.showFailedLoadToast(getContext());
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<SimpleSection<RouteStub>>> loader) {
-        reset();
     }
 
     private void reset() {
         mAdapter.clear();
         loading = false;
         hideProgressCircle();
+    }
+
+    /**
+     * Populate list with bus routes for agency, with a section header for that agency
+     * @param agencyTag Agency tag for API request
+     * @param routeStubs List of routes (stubs)
+     */
+    private SimpleSection<RouteStub> loadAgency(@NonNull String agencyTag, @NonNull List<RouteStub> routeStubs) {
+        // Get header for routes section
+        String header;
+        switch (agencyTag) {
+            case NextbusAPI.AGENCY_NB:
+                header = getContext().getString(R.string.bus_nb_active_routes_header);
+                break;
+            case NextbusAPI.AGENCY_NWK:
+                header = getContext().getString(R.string.bus_nwk_active_routes_header);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid Nextbus agency \"" + agencyTag + "\"");
+        }
+
+        return new SimpleSection<>(header, routeStubs);
     }
 
     @Override
