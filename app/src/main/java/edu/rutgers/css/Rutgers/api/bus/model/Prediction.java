@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.api.bus.model;
 
+import com.bignerdranch.expandablerecyclerview.Model.ParentListItem;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +9,7 @@ import java.util.List;
 /**
  * Arrival time predictions for a bus stop.
  */
-public final class Prediction implements Serializable {
+public final class Prediction implements Serializable, ParentListItem {
     private String tag;
     private String title;
     private String direction;
@@ -44,5 +46,15 @@ public final class Prediction implements Serializable {
     @Override
     public String toString() {
         return this.title + ", " + this.direction + ", " + this.minutes.toString();
+    }
+
+    @Override
+    public List<?> getChildItemList() {
+        return null;
+    }
+
+    @Override
+    public boolean isInitiallyExpanded() {
+        return false;
     }
 }

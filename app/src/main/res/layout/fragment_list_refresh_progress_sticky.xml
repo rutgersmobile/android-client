@@ -44,10 +44,12 @@
                     android:layout_marginTop="7dp"
                     android:layout_marginBottom="7dp" />
 
-                <ListView
+                <android.support.v7.widget.RecyclerView
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/list" />
+                    android:scrollbars="vertical"
+                    android:id="@+id/recycler_view" />
             </LinearLayout>
         </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>

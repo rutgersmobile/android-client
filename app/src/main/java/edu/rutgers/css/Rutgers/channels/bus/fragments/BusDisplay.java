@@ -5,11 +5,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import rx.Observable;
@@ -39,6 +41,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
+import static android.R.attr.id;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 
@@ -285,11 +288,12 @@ public class BusDisplay extends BaseChannelFragment {
 
         if (mLoading) showProgressCircle();
 
-        final ListView listView = (ListView) v.findViewById(R.id.list);
+        final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
 
-        final ScaleInAnimationAdapter scaleInAnimationAdapter = new ScaleInAnimationAdapter(mAdapter);
-        scaleInAnimationAdapter.setAbsListView(listView);
-        listView.setAdapter(scaleInAnimationAdapter);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         if (mTitle != null) {
             getActivity().setTitle(mTitle);
@@ -324,21 +328,15 @@ public class BusDisplay extends BaseChannelFragment {
                 R.color.actbar_dark,
                 R.color.white);
 
-        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) { }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (!ViewCompat.canScrollVertically(listView, -1) && refreshLayout != null) {
-                    refreshLayout.setEnabled(true);
-                } else if (refreshLayout != null) {
-                    refreshLayout.setEnabled(false);
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (refreshLayout != null) {
+                    refreshLayout.setEnabled(!recyclerView.canScrollVertically(-1));
                 }
             }
         });
-
-        listView.setOnItemLongClickListener((parent1, view, position, id) -> false);
 
         return v;
     }

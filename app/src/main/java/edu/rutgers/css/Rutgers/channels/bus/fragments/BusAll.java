@@ -1,8 +1,7 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -18,18 +17,21 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.NextbusItem;
 import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
-import edu.rutgers.css.Rutgers.channels.bus.model.loader.NextBusItemLoader;
+import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
-public class BusAll extends BaseChannelFragment
-    implements LoaderManager.LoaderCallbacks<List<SimpleSection<NextbusItem>>> {
+public class BusAll extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "BusAll";
@@ -73,7 +75,38 @@ public class BusAll extends BaseChannelFragment
 
         // Start loading all stops and routes in the background
         mLoading = true;
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NB).flatMap(nbRoutes ->
+        NextbusAPI.getAllStops(NextbusAPI.AGENCY_NB).flatMap(nbStops ->
+        NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NWK).flatMap(nwkRoutes ->
+        NextbusAPI.getAllStops(NextbusAPI.AGENCY_NWK).map(nwkStops -> {
+            final List<SimpleSection<NextbusItem>> nextbusItems = new ArrayList<>();
+            final String userHome = RutgersUtils.getHomeCampus(getContext());
+            final boolean nbHome = userHome.equals(getContext().getString(R.string.campus_nb_full));
+
+            if (nbHome) {
+                nextbusItems.add(loadRoutes(NextbusAPI.AGENCY_NB, nbRoutes));
+                nextbusItems.add(loadStops(NextbusAPI.AGENCY_NB, nbStops));
+                nextbusItems.add(loadRoutes(NextbusAPI.AGENCY_NWK, nwkRoutes));
+                nextbusItems.add(loadStops(NextbusAPI.AGENCY_NWK, nwkStops));
+            } else {
+                nextbusItems.add(loadRoutes(NextbusAPI.AGENCY_NWK, nwkRoutes));
+                nextbusItems.add(loadStops(NextbusAPI.AGENCY_NWK, nwkStops));
+                nextbusItems.add(loadRoutes(NextbusAPI.AGENCY_NB, nbRoutes));
+                nextbusItems.add(loadStops(NextbusAPI.AGENCY_NB, nbStops));
+            }
+
+            return nextbusItems;
+        }))))
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .compose(bindToLifecycle())
+        .subscribe(simpleSections -> {
+            reset();
+            mAdapter.addAll(simpleSections);
+            if (mFilterString != null) {
+                mAdapter.getFilter().filter(mFilterString);
+            }
+        }, this::logError);
     }
     
     @Override
@@ -118,33 +151,6 @@ public class BusAll extends BaseChannelFragment
         if (StringUtils.isNotBlank(mFilterString)) outState.putString(SAVED_FILTER_TAG, mFilterString);
     }
 
-    @Override
-    public Loader<List<SimpleSection<NextbusItem>>> onCreateLoader(int id, Bundle args) {
-        return new NextBusItemLoader(getContext());
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<SimpleSection<NextbusItem>>> loader, List<SimpleSection<NextbusItem>> data) {
-        reset();
-
-        // If we get nothing back assume it's an error
-        if (data.isEmpty()) {
-            AppUtils.showFailedLoadToast(getContext());
-        }
-
-        mAdapter.addAll(data);
-
-        // Set filter after info is re-loaded
-        if (mFilterString != null) {
-            mAdapter.getFilter().filter(mFilterString);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<SimpleSection<NextbusItem>>> loader) {
-        reset();
-    }
-
     private void reset() {
         mAdapter.clear();
         mLoading = false;
@@ -154,5 +160,45 @@ public class BusAll extends BaseChannelFragment
     @Override
     public Link getLink() {
         return null;
+    }
+
+    private SimpleSection<NextbusItem> loadStops(@NonNull String agency, @NonNull List<StopStub> stopStubs) {
+        // Get header for stops section
+        String header;
+        switch (agency) {
+            case NextbusAPI.AGENCY_NB:
+                header = getContext().getString(R.string.bus_nb_all_stops_header);
+                break;
+            case NextbusAPI.AGENCY_NWK:
+                header = getContext().getString(R.string.bus_nwk_all_stops_header);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid Nextbus agency \"" + agency + "\"");
+        }
+
+        List<NextbusItem> nextbusItems = new ArrayList<>(stopStubs.size());
+        nextbusItems.addAll(stopStubs);
+
+        return new SimpleSection<>(header, nextbusItems);
+    }
+
+    private SimpleSection<NextbusItem> loadRoutes(@NonNull String agency, @NonNull List<RouteStub> routeStubs) {
+        // Get header for routes section
+        String header;
+        switch (agency) {
+            case NextbusAPI.AGENCY_NB:
+                header = getContext().getString(R.string.bus_nb_all_routes_header);
+                break;
+            case NextbusAPI.AGENCY_NWK:
+                header = getContext().getString(R.string.bus_nwk_all_routes_header);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid Nextbus agency \"" + agency + "\"");
+        }
+
+        List<NextbusItem> nextbusItems = new ArrayList<>(routeStubs.size());
+        nextbusItems.addAll(routeStubs);
+
+        return new SimpleSection<>(header, nextbusItems);
     }
 }

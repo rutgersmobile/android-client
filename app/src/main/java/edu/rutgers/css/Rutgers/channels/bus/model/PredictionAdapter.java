@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bignerdranch.expandablerecyclerview.Adapter.ExpandableRecyclerAdapter;
+import com.bignerdranch.expandablerecyclerview.Model.ParentListItem;
 import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
 import java.text.SimpleDateFormat;
@@ -27,7 +29,7 @@ import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 /**
  * Bus arrival time predictions adapter.
  */
-public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
+public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapter.ViewHolder, PredictionAdapter.PopViewHolder> {
 
     private static final String TAG = "PredictionAdapter";
 
@@ -38,6 +40,26 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
     private Context mContext;
 
     private final Handler handler = new Handler();
+
+    @Override
+    public ViewHolder onCreateParentViewHolder(ViewGroup parentViewGroup) {
+        return null;
+    }
+
+    @Override
+    public PopViewHolder onCreateChildViewHolder(ViewGroup childViewGroup) {
+        return null;
+    }
+
+    @Override
+    public void onBindParentViewHolder(ViewHolder parentViewHolder, int position, ParentListItem parentListItem) {
+
+    }
+
+    @Override
+    public void onBindChildViewHolder(PopViewHolder childViewHolder, int position, Object childListItem) {
+
+    }
 
     static class ViewHolder {
         TextView titleTextView;
@@ -50,7 +72,7 @@ public class PredictionAdapter extends ExpandableListItemAdapter<Prediction> {
     }
     
     public PredictionAdapter(Context context, List<Prediction> objects) {
-        super(context, R.layout.row_bus_prediction, R.id.titleFrame, R.id.contentFrame, objects);
+        super(objects);
         mContext = context;
     }
 
