@@ -44,20 +44,24 @@ public final class NextbusAPI {
 
     public static final String AGENCY_NB = "nb";
     public static final String AGENCY_NWK = "nwk";
+    public static final String AGENCY_RUTGERS = "rutgers";
 
     /** This class only contains static utility methods. */
     private NextbusAPI() {}
 
     private static Observable<AgencyConfig> configForAgency(final String agency) {
-        return AGENCY_NB.equals(agency)
+        return AGENCY_NB.equals(agency) || AGENCY_RUTGERS.equals(agency)
             ? RutgersAPI.service.getNewBrunswickAgencyConfig()
             : RutgersAPI.service.getNewarkAgencyConfig();
     }
 
     private static Observable<ActiveStops> activeStopsForAgency(final String agency) {
-        return AGENCY_NB.equals(agency)
+        return (AGENCY_NB.equals(agency) || AGENCY_RUTGERS.equals(agency)
             ? RutgersAPI.service.getNewBrunswickActiveStops()
-            : RutgersAPI.service.getNewarkActiveStops();
+            : RutgersAPI.service.getNewarkActiveStops()).map(activeStops -> {
+            activeStops.setAgencyTag(agency);
+            return activeStops;
+        });
     }
 
     /**
@@ -148,14 +152,19 @@ public final class NextbusAPI {
         final Predictions predictions = new Predictions(new HashSet<>(), new ArrayList<>());
         for (final SimplePredictions simplePredictions : simpleBody.getPredictions()) {
             final Prediction prediction = itemType == NBItemType.ROUTE
-                ? new Prediction(simplePredictions.getRouteTitle(), simplePredictions.getRouteTag())
-                : new Prediction(simplePredictions.getStopTitle(), simplePredictions.getStopTag());
+                ? new Prediction(simplePredictions.getStopTitle(), simplePredictions.getStopTag())
+                : new Prediction(simplePredictions.getRouteTitle(), simplePredictions.getRouteTag());
 
-            for (final SimplePrediction simplePrediction : simplePredictions.getDirection().getPredictions()) {
-                prediction.addMinutes(simplePrediction.getMinutes());
-                prediction.setDirection(simplePredictions.getDirection().getTitle());
-                predictions.getPredictions().add(prediction);
+            if (simplePredictions.getDirection() != null) {
+                for (final SimplePrediction simplePrediction : simplePredictions.getDirection().getPredictions()) {
+                    prediction.addMinutes(simplePrediction.getMinutes());
+                    prediction.setDirection(simplePredictions.getDirection().getTitle());
+                }
+            } else {
+                prediction.setDirection(simplePredictions.getDirTitleBecauseNoPredictions());
             }
+
+            predictions.getPredictions().add(prediction);
         }
 
         return predictions;

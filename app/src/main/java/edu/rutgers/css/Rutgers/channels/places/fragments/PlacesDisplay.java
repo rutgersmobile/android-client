@@ -5,38 +5,45 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.bus.model.stop.StopGroup;
 import edu.rutgers.css.Rutgers.api.places.model.Place;
-import edu.rutgers.css.Rutgers.channels.places.model.loader.PlaceLoader;
+import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
+import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Display information about a Rutgers location from the Places database.
  * @author James Chambers
  */
-public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<PlaceLoader.PlaceHolder> {
+public class PlacesDisplay extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "PlacesDisplay";
@@ -59,6 +66,35 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
     private RMenuAdapter mAdapter;
     private boolean mLoading;
     private String mTitle;
+
+    // Maps campuses to Nextbus agencies. Used for listing nearby bus stops.
+    private static final Map<String, String> sAgencyMap = Collections.unmodifiableMap(new HashMap<String, String>() {{
+        put("Busch", NextbusAPI.AGENCY_NB);
+        put("College Avenue", NextbusAPI.AGENCY_NB);
+        put("Douglass", NextbusAPI.AGENCY_NB);
+        put("Cook", NextbusAPI.AGENCY_NB);
+        put("Livingston", NextbusAPI.AGENCY_NB);
+        put("Newark", NextbusAPI.AGENCY_NWK);
+        put("Health Sciences at Newark", NextbusAPI.AGENCY_NWK);
+    }});
+
+    public static class PlaceHolder {
+        private final List<RMenuRow> rows;
+        private final Place place;
+
+        public PlaceHolder(final List<RMenuRow> rows, final Place place) {
+            this.rows = rows;
+            this.place = place;
+        }
+
+        public List<RMenuRow> getRows() {
+            return rows;
+        }
+
+        public Place getPlace() {
+            return place;
+        }
+    }
 
     public PlacesDisplay() {
         // Required empty public constructor
@@ -85,14 +121,104 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, new ArrayList<RMenuRow>());
+        mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, new ArrayList<>());
 
         final Bundle args = getArguments();
         mTitle = args.getString(ARG_TITLE_TAG);
 
         // start loading place
         mLoading = true;
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
+        final String addressHeader = getContext().getString(R.string.address_header);
+        final String buildingNoHeader = getContext().getString(R.string.building_no_header);
+        final String campusHeader = getContext().getString(R.string.campus_header);
+        final String descriptionHeader = getContext().getString(R.string.description_header);
+        final String officesHeader = getContext().getString(R.string.offices_header);
+        final String nearbyHeader = getContext().getString(R.string.nearby_bus_header);
+
+        RutgersAPI.getPlace(args.getString(ARG_PLACEKEY_TAG))
+            .flatMap(place -> getStopsNearPlace(place).map(stopGroups -> {
+                final List<RMenuRow> rows = new ArrayList<>();
+                if (place.getLocation() != null) {
+                    final Bundle addressArgs = new Bundle();
+                    addressArgs.putInt(ID_KEY, ADDRESS_ROW);
+                    addressArgs.putString("title", formatAddress(place.getLocation()));
+                    rows.add(new RMenuHeaderRow(addressHeader));
+                    rows.add(new RMenuItemRow(addressArgs));
+                }
+
+                if (!StringUtils.isEmpty(place.getDescription())) {
+                    final Bundle descArgs = new Bundle();
+                    descArgs.putInt(ID_KEY, DESC_ROW);
+                    descArgs.putString("title", StringUtils.abbreviate(place.getDescription(), 80));
+                    descArgs.putString("data", place.getDescription());
+                    rows.add(new RMenuHeaderRow(descriptionHeader));
+                    rows.add(new RMenuItemRow(descArgs));
+                }
+
+                if (!stopGroups.isEmpty()) {
+                    int insertPos = rows.size();
+                    rows.add(insertPos++, new RMenuHeaderRow(nearbyHeader));
+
+                    final String agency = sAgencyMap.get(place.getCampusName());
+
+                    for (final StopGroup stopGroup : stopGroups) {
+                        final Bundle stopArgs = BusDisplay.createArgs(stopGroup.getTitle(), BusDisplay.STOP_MODE, agency, stopGroup.getTitle());
+                        stopArgs.putInt(ID_KEY, BUS_ROW);
+                        rows.add(insertPos++, new RMenuItemRow(stopArgs));
+                    }
+                }
+
+                // Add offices housed in this building
+                if (place.getOffices() != null) {
+                    rows.add(new RMenuHeaderRow(officesHeader));
+                    for (final String office : place.getOffices()) {
+                        rows.add(new RMenuItemRow(office));
+                    }
+                }
+
+                // Add building number row
+                if (!StringUtils.isEmpty(place.getBuildingNumber())) {
+                    rows.add(new RMenuHeaderRow(buildingNoHeader));
+                    rows.add(new RMenuItemRow(place.getBuildingNumber()));
+                }
+
+                // Add campus rows
+                if (!StringUtils.isEmpty(place.getCampusName())) {
+                    rows.add(new RMenuHeaderRow(campusHeader));
+                    rows.add(new RMenuItemRow(place.getCampusName()));
+                }
+
+                return new PlaceHolder(rows, place);
+            }))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .subscribe(placeHolder -> {
+                reset();
+                mTitle = placeHolder.getPlace().getTitle();
+                mAdapter.addAll(placeHolder.getRows());
+                mPlace = placeHolder.getPlace();
+            }, error -> {
+                reset();
+                logError(error);
+            });
+    }
+
+    private static Observable<List<StopGroup>> getStopsNearPlace(final Place place) {
+        if (place.getLocation() != null) {
+            final Place.Location location = place.getLocation();
+            final double buildLat = location.getLatitude();
+            final double buildLon = location.getLongitude();
+
+            // Determine Nextbus agency by campus
+            final String agency = sAgencyMap.get(place.getCampusName());
+
+            if (agency != null) {
+                return NextbusAPI.getStopsByTitleNear(agency, buildLat, buildLon);
+            }
+        }
+
+        return Observable.just(new ArrayList<>());
     }
     
     @Override
@@ -107,25 +233,22 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
 
         final ListView listView = (ListView) v.findViewById(R.id.list);
         listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final RMenuItemRow clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            final RMenuItemRow clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
 
-                switch (clicked.getArgs().getInt(ID_KEY)) {
-                    case ADDRESS_ROW:
-                        launchMap();
-                        break;
-                    case DESC_ROW:
-                        final Bundle textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
-                        switchFragments(textArgs);
-                        break;
-                    case BUS_ROW:
-                        final Bundle busArgs = new Bundle(clicked.getArgs());
-                        busArgs.remove(ID_KEY);
-                        switchFragments(busArgs);
-                        break;
-                }
+            switch (clicked.getArgs().getInt(ID_KEY)) {
+                case ADDRESS_ROW:
+                    launchMap();
+                    break;
+                case DESC_ROW:
+                    final Bundle textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
+                    switchFragments(textArgs);
+                    break;
+                case BUS_ROW:
+                    final Bundle busArgs = new Bundle(clicked.getArgs());
+                    busArgs.remove(ID_KEY);
+                    switchFragments(busArgs);
+                    break;
             }
         });
 
@@ -164,35 +287,27 @@ public class PlacesDisplay extends BaseChannelFragment implements LoaderManager.
         }
     }
 
-    @Override
-    public Loader<PlaceLoader.PlaceHolder> onCreateLoader(int id, Bundle args) {
-        final String key = args.getString(ARG_PLACEKEY_TAG);
-        return new PlaceLoader(getActivity(), key, ID_KEY, ADDRESS_ROW, DESC_ROW, BUS_ROW);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<PlaceLoader.PlaceHolder> loader, PlaceLoader.PlaceHolder data) {
-        reset();
-
-        // These fields will be non-null and non-empty on success
-        if (data.getPlace() == null || data.getRows().isEmpty()) {
-            AppUtils.showFailedLoadToast(getContext());
-            return;
-        }
-
-        mTitle = data.getPlace().getTitle();
-        mAdapter.addAll(data.getRows());
-        mPlace = data.getPlace();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<PlaceLoader.PlaceHolder> loader) {
-        reset();
-    }
-
     private void reset() {
         hideProgressCircle();
         mLoading = false;
         mAdapter.clear();
+    }
+
+    /**
+     * Compile location information into readable string form
+     * @param location Place location info
+     * @return Multi-line string containing address
+     */
+    private static String formatAddress(Place.Location location) {
+        if (location == null) return null;
+
+        String resultString = "";
+        if (!StringUtils.isEmpty(location.getName())) resultString += location.getName() + "\n";
+        if (!StringUtils.isEmpty(location.getStreet())) resultString += location.getStreet() + "\n";
+        if (!StringUtils.isEmpty(location.getAdditional())) resultString += location.getAdditional() + "\n";
+        if (!StringUtils.isEmpty(location.getCity())) resultString += location.getCity() + ", " +
+            location.getStateAbbr() + " " + location.getPostalCode();
+
+        return StringUtils.trim(resultString);
     }
 }

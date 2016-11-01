@@ -7,6 +7,7 @@ import edu.rutgers.css.Rutgers.api.bus.model.ActiveStops;
 import edu.rutgers.css.Rutgers.api.bus.model.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.cinema.model.Movie;
 import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
+import edu.rutgers.css.Rutgers.api.places.PlacesAPI;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import rx.Observable;
@@ -36,4 +37,7 @@ public interface RutgersService {
 
     @GET("rutgers-newarkrouteconfig.txt")
     Observable<AgencyConfig> getNewarkAgencyConfig();
+
+    @GET("places.txt")
+    Observable<PlacesAPI.KVHolder> getPlacesMap();
 }

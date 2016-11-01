@@ -115,7 +115,8 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
             mGoogleApiClientProvider.registerListener(this);
         }
 
-        locationSubject.asObservable().flatMap(location -> {
+
+        locationSubject.asObservable().observeOn(Schedulers.io()).flatMap(location -> {
             // create our stops with nearby stops initially empty
             final List<SimpleSection<StopStub>> stops = new ArrayList<>();
             final List<StopStub> nearbyStops = new ArrayList<>();

@@ -36,18 +36,18 @@ public final class PlacesAPI {
 
     private PlacesAPI() {}
 
-    private static final class KVHolder {
+    public static final class KVHolder {
         public HashMap<String, Place> all;
         public Lunr lunr;
 
         private KVHolder() { }
 
-        private static final class Lunr {
+        public static final class Lunr {
             public DocStore documentStore;
 
             private Lunr() { }
 
-            private static final class DocStore {
+            public static final class DocStore {
                 public HashMap<String, List<String>> store;
 
                 private DocStore() { }

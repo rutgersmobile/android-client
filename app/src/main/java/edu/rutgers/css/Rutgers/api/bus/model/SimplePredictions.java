@@ -25,7 +25,10 @@ public final class SimplePredictions {
     @Attribute
     private String stopTag;
 
-    @Element
+    @Attribute(required = false)
+    private String dirTitleBecauseNoPredictions;
+
+    @Element(required = false)
     private SimpleDirection direction;
 
     @Element(required = false)
@@ -35,13 +38,14 @@ public final class SimplePredictions {
 
     public SimplePredictions(final String agencyTitle, final String routeTitle,
                              final String routeTag, final String stopTitle,
-                             final String stopTag, final SimpleDirection direction,
-                             final SimpleMessage message) {
+                             final String stopTag, final String dirTitleBecauseNoPredictions,
+                             final SimpleDirection direction, final SimpleMessage message) {
         this.agencyTitle = agencyTitle;
         this.routeTitle = routeTitle;
         this.routeTag = routeTag;
         this.stopTitle = stopTitle;
         this.stopTag = stopTag;
+        this.dirTitleBecauseNoPredictions = dirTitleBecauseNoPredictions;
         this.direction = direction;
         this.message = message;
     }
@@ -64,6 +68,10 @@ public final class SimplePredictions {
 
     public String getStopTag() {
         return stopTag;
+    }
+
+    public String getDirTitleBecauseNoPredictions() {
+        return dirTitleBecauseNoPredictions;
     }
 
     public SimpleDirection getDirection() {
