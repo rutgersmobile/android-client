@@ -10,10 +10,12 @@ import org.simpleframework.xml.Root;
 @Root(name = "message")
 public class SimpleMessage {
     @Attribute
-    private final String text;
+    private String text;
 
     @Attribute
-    private final String priority;
+    private String priority;
+
+    public SimpleMessage() {}
 
     public SimpleMessage(final String text, final String priority) {
         this.text = text;

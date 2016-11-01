@@ -25,7 +25,7 @@ public class SimplePrediction {
     private String dirTag;
 
     @Attribute
-    private int vehicle;
+    private String vehicle;
 
     @Attribute
     private String block;
@@ -36,7 +36,7 @@ public class SimplePrediction {
     public SimplePrediction() {}
 
     public SimplePrediction(long epochTime, int seconds, int minutes,
-                            boolean isDeparture, String dirTag, int vehicle,
+                            boolean isDeparture, String dirTag, String vehicle,
                             String block, boolean affectedByLayover) {
         this.epochTime = epochTime;
         this.seconds = seconds;
@@ -68,7 +68,7 @@ public class SimplePrediction {
         return dirTag;
     }
 
-    public int getVehicle() {
+    public String getVehicle() {
         return vehicle;
     }
 

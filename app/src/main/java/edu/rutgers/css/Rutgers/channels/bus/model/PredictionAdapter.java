@@ -119,7 +119,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
             final ParentWrapper item = (ParentWrapper) mItemList.get(adapterPosition - 1);
             collapseParent(item.getParentListItem());
         });
-        if (minutes.isEmpty()) {
+        if (!minutes.isEmpty()) {
             // Set pop-down contents
             childViewHolder.popdownTextView.setText(formatMinutesDetails(minutes));
             childViewHolder.popdownTextView.setGravity(Gravity.END);

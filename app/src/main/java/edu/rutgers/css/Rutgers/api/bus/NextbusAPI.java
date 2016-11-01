@@ -19,6 +19,7 @@ import edu.rutgers.css.Rutgers.api.bus.model.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
 import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
 import edu.rutgers.css.Rutgers.api.bus.model.SimpleBody;
+import edu.rutgers.css.Rutgers.api.bus.model.SimpleMessage;
 import edu.rutgers.css.Rutgers.api.bus.model.SimplePrediction;
 import edu.rutgers.css.Rutgers.api.bus.model.SimplePredictions;
 import edu.rutgers.css.Rutgers.api.bus.model.route.Route;
@@ -164,7 +165,15 @@ public final class NextbusAPI {
                 prediction.setDirection(simplePredictions.getDirTitleBecauseNoPredictions());
             }
 
-            predictions.getPredictions().add(prediction);
+            // remove this if statement to include disabled routes/stops
+            if (!prediction.getMinutes().isEmpty()) {
+                predictions.getPredictions().add(prediction);
+            }
+
+            final SimpleMessage message = simplePredictions.getMessage();
+            if (message != null) {
+                predictions.getMessages().add(message.getText());
+            }
         }
 
         return predictions;

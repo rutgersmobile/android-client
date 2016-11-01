@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -188,6 +187,7 @@ public class BusDisplay extends BaseChannelFragment {
         Observable.merge(
                 Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
                 refreshSubject)
+        // need to specify io scheduler because refreshSubject exists on main thread
         .observeOn(Schedulers.io())
         .flatMap(t -> {
             LOGI(TAG, "Starting load");
@@ -225,37 +225,20 @@ public class BusDisplay extends BaseChannelFragment {
             LOGI(TAG, "Ran subscription");
             reset();
 
-            final Activity activity = getActivity();
-            if (activity == null) {
-                return;
-            }
-
             if (refreshLayout != null) {
                 refreshLayout.setRefreshing(false);
             }
 
             Predictions predictions = data.getPredictions();
-            if (predictions == null) {
-                AppUtils.showFailedLoadToast(getContext());
-                return;
-            }
-
-            String title = data.getTitle();
-            if (title != null) {
-                mTitle = title;
-                activity.setTitle(mTitle);
-            }
+            mTitle = data.getTitle();
+            getActivity().setTitle(mTitle);
 
             // If there are no active routes or stops, show a message
             if (predictions.getPredictions().isEmpty()) {
-                int message;
-
                 // A stop may have no active routes; a route may have no active stops
-                if (BusDisplay.STOP_MODE.equals(mMode)) {
-                    message = R.string.bus_no_active_routes;
-                } else {
-                    message = R.string.bus_no_active_stops;
-                }
+                int message = BusDisplay.STOP_MODE.equals(mMode)
+                    ? R.string.bus_no_active_routes
+                    : R.string.bus_no_active_stops;
 
                 Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
             }

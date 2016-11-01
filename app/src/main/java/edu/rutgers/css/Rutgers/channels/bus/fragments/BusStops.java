@@ -115,8 +115,11 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
             mGoogleApiClientProvider.registerListener(this);
         }
 
-
-        locationSubject.asObservable().observeOn(Schedulers.io()).flatMap(location -> {
+        // The null value is to make sure this runs once without a location and will be updated
+        // on subsequent calls to locationSubject::onNext
+        Observable.merge(Observable.just(null), locationSubject.asObservable()).observeOn(Schedulers.io())
+            .flatMap(location -> {
+            LOGI(TAG, "Started stop load with location");
             // create our stops with nearby stops initially empty
             final List<SimpleSection<StopStub>> stops = new ArrayList<>();
             final List<StopStub> nearbyStops = new ArrayList<>();
@@ -170,9 +173,6 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
             reset();
             mAdapter.addAll(simpleSections);
         }, this::logError);
-
-        // do at least one load without location
-        locationSubject.onNext(null);
     }
 
     @Override
