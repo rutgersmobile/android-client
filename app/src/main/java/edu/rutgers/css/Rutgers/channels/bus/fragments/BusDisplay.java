@@ -3,19 +3,14 @@ package edu.rutgers.css.Rutgers.channels.bus.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
-import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,7 +36,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
-import static android.R.attr.id;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 
@@ -298,18 +292,6 @@ public class BusDisplay extends BaseChannelFragment {
         if (mTitle != null) {
             getActivity().setTitle(mTitle);
         }
-
-        mAdapter.setExpandCollapseListener(new ExpandableListItemAdapter.ExpandCollapseListener() {
-            @Override
-            public void onItemExpanded(int position) {
-                // Don't expand the view if there are no predictions to display
-                if (mAdapter.getItem(position).getMinutes().isEmpty()) mAdapter.collapse(position);
-            }
-
-            @Override
-            public void onItemCollapsed(int position) {
-            }
-        });
 
         messagesView = (TextView)  v.findViewById(R.id.messages);
         dividerView = v.findViewById(R.id.message_separator);

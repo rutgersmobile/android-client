@@ -13,12 +13,15 @@ public final class Prediction implements Serializable, ParentListItem {
     private String tag;
     private String title;
     private String direction;
-    private List<Integer> minutes;
+    private final List<Integer> minutes;
+    private final List<List<Integer>> childItemSingleList;
     
     public Prediction (String title, String tag) {
         this.tag = tag;
         this.title = title;
         minutes = new ArrayList<>();
+        childItemSingleList = new ArrayList<>();
+        childItemSingleList.add(minutes);
     }
 
     public void addMinutes(int mins) { minutes.add(mins); }
@@ -50,7 +53,7 @@ public final class Prediction implements Serializable, ParentListItem {
 
     @Override
     public List<?> getChildItemList() {
-        return null;
+        return childItemSingleList;
     }
 
     @Override

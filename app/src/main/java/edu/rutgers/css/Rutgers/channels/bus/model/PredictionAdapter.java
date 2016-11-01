@@ -3,8 +3,6 @@ package edu.rutgers.css.Rutgers.channels.bus.model;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.view.Gravity;
@@ -15,10 +13,13 @@ import android.widget.TextView;
 
 import com.bignerdranch.expandablerecyclerview.Adapter.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.Model.ParentListItem;
-import com.nhaarman.listviewanimations.itemmanipulation.expandablelistitem.ExpandableListItemAdapter;
+import com.bignerdranch.expandablerecyclerview.Model.ParentWrapper;
+import com.bignerdranch.expandablerecyclerview.ViewHolder.ChildViewHolder;
+import com.bignerdranch.expandablerecyclerview.ViewHolder.ParentViewHolder;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -36,6 +37,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
     private static final SimpleDateFormat arriveDf12 = new SimpleDateFormat("h:mm a", Locale.US);
     private static final SimpleDateFormat arriveDf24 = new SimpleDateFormat("H:mm", Locale.US);
     private static final Calendar cal = Calendar.getInstance(Locale.US);
+    private final List<Prediction> predictions;
 
     private Context mContext;
 
@@ -43,151 +45,138 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
 
     @Override
     public ViewHolder onCreateParentViewHolder(ViewGroup parentViewGroup) {
-        return null;
+        final View itemView = LayoutInflater
+            .from(parentViewGroup.getContext())
+            .inflate(R.layout.row_bus_prediction_title, parentViewGroup, false);
+        return new ViewHolder(itemView);
     }
 
     @Override
     public PopViewHolder onCreateChildViewHolder(ViewGroup childViewGroup) {
-        return null;
+        final View itemView = LayoutInflater
+            .from(childViewGroup.getContext())
+            .inflate(R.layout.popdown, childViewGroup, false);
+        return new PopViewHolder(itemView);
     }
 
     @Override
     public void onBindParentViewHolder(ViewHolder parentViewHolder, int position, ParentListItem parentListItem) {
-
-    }
-
-    @Override
-    public void onBindChildViewHolder(PopViewHolder childViewHolder, int position, Object childListItem) {
-
-    }
-
-    static class ViewHolder {
-        TextView titleTextView;
-        TextView directionTextView;
-        TextView minutesTextView;
-    }
-
-    static class PopViewHolder {
-        TextView popdownTextView;
-    }
-    
-    public PredictionAdapter(Context context, List<Prediction> objects) {
-        super(objects);
-        mContext = context;
-    }
-
-    @Override
-    public boolean areAllItemsEnabled() {
-        return false;
-    }
-
-    @Override
-    public boolean isEnabled(int position) {
-        if (position < 0 || position >= getCount()) {
-            return false;
-        }
-        Prediction prediction = this.getItem(position);
-        return !(prediction.getMinutes()).isEmpty();
-    }
-
-    @NonNull
-    @Override
-    public View getTitleView(final int position, @Nullable View convertView, @NonNull ViewGroup viewGroup) {
-        LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewHolder holder;
-
-        if (convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.row_bus_prediction_title, null);
-            holder = new ViewHolder();
-            holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
-            holder.directionTextView = (TextView) convertView.findViewById(R.id.direction);
-            holder.minutesTextView = (TextView) convertView.findViewById(R.id.minutes);
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        Prediction prediction = this.getItem(position);
+        final Prediction prediction = (Prediction) parentListItem;
         Resources res = mContext.getResources();
 
+        parentViewHolder.itemView.setOnClickListener(view -> {
+            if (parentViewHolder.isExpanded() || prediction.getMinutes().isEmpty()) {
+                collapseParent(parentListItem);
+            } else {
+                expandParent(parentListItem);
+            }
+        });
+
         // Set title
-        holder.titleTextView.setText(prediction.getTitle());
+        parentViewHolder.titleTextView.setText(prediction.getTitle());
 
         // Set prediction minutes
         if (!prediction.getMinutes().isEmpty()) {
             // Reset title color to default
-            holder.titleTextView.setTextColor(res.getColor(R.color.black));
-            holder.directionTextView.setTextColor(res.getColor(R.color.black));
+            parentViewHolder.titleTextView.setTextColor(res.getColor(R.color.black));
+            parentViewHolder.directionTextView.setTextColor(res.getColor(R.color.black));
 
             // Change color of text based on how much time is remaining before the first bus arrives
             int first = prediction.getMinutes().get(0);
 
             if (first < 2) {
-                holder.minutesTextView.setTextColor(res.getColor(R.color.bus_soonest));
+                parentViewHolder.minutesTextView.setTextColor(res.getColor(R.color.bus_soonest));
             } else if (first < 6) {
-                holder.minutesTextView.setTextColor(res.getColor(R.color.bus_soon));
+                parentViewHolder.minutesTextView.setTextColor(res.getColor(R.color.bus_soon));
             } else {
-                holder.minutesTextView.setTextColor(res.getColor(R.color.bus_later));
+                parentViewHolder.minutesTextView.setTextColor(res.getColor(R.color.bus_later));
             }
 
-            holder.minutesTextView.setText(formatMinutes(prediction.getMinutes()));
+            parentViewHolder.minutesTextView.setText(formatMinutes(prediction.getMinutes()));
         } else {
             // No predictions loaded - gray out all text
-            holder.titleTextView.setTextColor(res.getColor(R.color.light_gray));
-            holder.minutesTextView.setTextColor(res.getColor(R.color.light_gray));
-            holder.minutesTextView.setText(R.string.bus_no_predictions);
+            parentViewHolder.titleTextView.setTextColor(res.getColor(R.color.light_gray));
+            parentViewHolder.minutesTextView.setTextColor(res.getColor(R.color.light_gray));
+            parentViewHolder.minutesTextView.setText(R.string.bus_no_predictions);
         }
 
         // Set direction
         if (prediction.getDirection() == null || prediction.getDirection().isEmpty()) {
             // If there's no direction string, don't let that text field take up space
-            holder.directionTextView.setVisibility(View.GONE);
+            parentViewHolder.directionTextView.setVisibility(View.GONE);
         } else {
-            holder.directionTextView.setText(prediction.getDirection());
-            holder.directionTextView.setVisibility(View.VISIBLE);
+            parentViewHolder.directionTextView.setText(prediction.getDirection());
+            parentViewHolder.directionTextView.setVisibility(View.VISIBLE);
         }
-
-        return convertView;
     }
 
-    @NonNull
+    @SuppressWarnings("unchecked")
     @Override
-    public View getContentView(final int position, @Nullable View convertView, @NonNull ViewGroup viewGroup) {
-        LayoutInflater layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        PopViewHolder holder;
-
-        if (convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.popdown, null);
-            holder = new PopViewHolder();
-            holder.popdownTextView = (TextView) convertView.findViewById(R.id.popdownTextView);
-            convertView.setTag(holder);
-        } else {
-            holder = (PopViewHolder) convertView.getTag();
-        }
-
-        Prediction prediction = getItem(position);
-
-        // Set prediction minutes
-        if (!prediction.getMinutes().isEmpty()) {
+    public void onBindChildViewHolder(PopViewHolder childViewHolder, int position, Object childListItem) {
+        final List<Integer> minutes = (List<Integer>) childListItem;
+        childViewHolder.itemView.setOnClickListener(view -> {
+            final int adapterPosition = childViewHolder.getAdapterPosition();
+            final ParentWrapper item = (ParentWrapper) mItemList.get(adapterPosition - 1);
+            collapseParent(item.getParentListItem());
+        });
+        if (minutes.isEmpty()) {
             // Set pop-down contents
-            holder.popdownTextView.setText(formatMinutesDetails(prediction.getMinutes()));
-            holder.popdownTextView.setGravity(Gravity.RIGHT);
+            childViewHolder.popdownTextView.setText(formatMinutesDetails(minutes));
+            childViewHolder.popdownTextView.setGravity(Gravity.END);
         } else {
             // No predictions loaded
-            holder.popdownTextView.setText("");
+            childViewHolder.popdownTextView.setText("");
         }
-
-        return convertView;
     }
 
-    public void setPredictions(final List<Prediction> predictions) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                clear();
-                addAll(predictions);
-            }
-        });
+    public void addAll(Collection<? extends Prediction> predictions) {
+        final int currentSize = this.predictions.size();
+        this.predictions.addAll(predictions);
+        notifyParentItemRangeInserted(currentSize, currentSize + predictions.size());
+    }
+
+    public void clear() {
+        final int currentSize = this.predictions.size();
+        predictions.clear();
+        notifyParentItemRangeRemoved(0, currentSize);
+    }
+
+    static class ViewHolder extends ParentViewHolder {
+        TextView titleTextView;
+        TextView directionTextView;
+        TextView minutesTextView;
+
+        /**
+         * Default constructor.
+         *
+         * @param itemView The {@link View} being hosted in this ViewHolder
+         */
+        public ViewHolder(View itemView) {
+            super(itemView);
+            titleTextView = (TextView) itemView.findViewById(R.id.title);
+            directionTextView = (TextView) itemView.findViewById(R.id.direction);
+            minutesTextView = (TextView) itemView.findViewById(R.id.minutes);
+        }
+    }
+
+    static class PopViewHolder extends ChildViewHolder {
+        TextView popdownTextView;
+
+        /**
+         * Default constructor.
+         *
+         * @param itemView The {@link View} being hosted in this ViewHolder
+         */
+        public PopViewHolder(View itemView) {
+            super(itemView);
+            popdownTextView = (TextView) itemView.findViewById(R.id.popdownTextView);
+        }
+    }
+    
+    public PredictionAdapter(Context context, List<Prediction> objects) {
+        super(objects);
+        mContext = context;
+        predictions = objects;
     }
 
     /**
