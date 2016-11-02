@@ -1,15 +1,10 @@
 package edu.rutgers.css.Rutgers.channels.places.fragments;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,13 +12,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.data.DataBufferObserver;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -33,15 +25,20 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
-import edu.rutgers.css.Rutgers.channels.places.model.loader.KeyValPairLoader;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
@@ -57,22 +54,20 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
  * @author James Chambers
  */
 public class PlacesMain extends BaseChannelFragment
-        implements GoogleApiClient.ConnectionCallbacks, LoaderManager.LoaderCallbacks<List<KeyValPair>>,
-        LocationListener {
+        implements GoogleApiClient.ConnectionCallbacks, LocationListener {
 
     /* Log tag and component handle */
     private static final String TAG                 = "PlacesMain";
     public static final String HANDLE               = "places";
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
-    private static final String ARG_LAT_TAG         = "lat";
-    private static final String ARG_LON_TAG         = "lon";
 
     /* State tags */
     private static final String SEARCHING_TAG       = "searching";
     private static final String SEARCH_TAG          = "search";
+
+    private PublishSubject<Location> locationSubject = PublishSubject.create();
 
     /* Member data */
     private PlaceAutoCompleteAdapter mSearchAdapter;
@@ -151,41 +146,26 @@ public class PlacesMain extends BaseChannelFragment
         autoComp.setAdapter(mSearchAdapter);
 
         // Item selected from auto-complete list
-        autoComp.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                KeyValPair placeStub = (KeyValPair) parent.getAdapter().getItem(position);
-                Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
-                switchFragments(newArgs);
-            }
-            
+        autoComp.setOnItemClickListener((parent1, view, position, id) -> {
+            KeyValPair placeStub = (KeyValPair) parent1.getAdapter().getItem(position);
+            Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
+            switchFragments(newArgs);
         });
         
         // Text placed in field from soft-keyboard/autocomplete (may happen in landscape)
-        autoComp.setOnEditorActionListener(new OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                return actionId == EditorInfo.IME_ACTION_SEARCH;
-            }
-            
-        });
+        autoComp.setOnEditorActionListener((view, actionId, event) -> actionId == EditorInfo.IME_ACTION_SEARCH);
 
         if (searching && oldSearch != null) {
             autoComp.setText(oldSearch);
         }
 
         // Click listener for nearby places list
-        listView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                KeyValPair placeStub = (KeyValPair) parent.getItemAtPosition(position);
+        listView.setOnItemClickListener((parent12, view, position, id) -> {
+            KeyValPair placeStub = (KeyValPair) parent12.getItemAtPosition(position);
 
-                if (placeStub.getKey() != null) {
-                    Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
-                    switchFragments(newArgs);
-                }
+            if (placeStub.getKey() != null) {
+                Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
+                switchFragments(newArgs);
             }
         });
 
@@ -205,7 +185,7 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     public Link getLink() {
-        return new Link("places", new ArrayList<String>(), getLinkTitle());
+        return new Link("places", new ArrayList<>(), getLinkTitle());
     }
 
     @Override
@@ -243,6 +223,20 @@ public class PlacesMain extends BaseChannelFragment
         // Reload nearby places
         showProgressCircle();
         updateSearchUI();
+        final String noneNearbyString = getString(R.string.places_none_nearby);
+        final String nearbyPlacesString = getString(R.string.places_nearby);
+        locationSubject.asObservable().observeOn(Schedulers.io())
+            .flatMap(location -> RutgersAPI.getPlacesNear(location.getLatitude(), location.getLongitude()))
+            .flatMap(Observable::from)
+            .map(place -> new KeyValPair(place.getId(), place.getTitle()))
+            .defaultIfEmpty(new KeyValPair(null, noneNearbyString))
+            .toList()
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .subscribe(nearbyPlaces -> {
+                reset();
+                mAdapter.add(new SimpleSection<>(nearbyPlacesString, nearbyPlaces));
+            }, this::logError);
     }
 
     @Override
@@ -303,34 +297,12 @@ public class PlacesMain extends BaseChannelFragment
     private void loadNearby(Location location) {
         showProgressCircle();
 
-        Bundle args = new Bundle();
-        args.putDouble(ARG_LAT_TAG, location.getLatitude());
-        args.putDouble(ARG_LON_TAG, location.getLongitude());
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
+        locationSubject.onNext(location);
     }
 
     @Override
     public void onConnectionSuspended(int cause) {
         LOGI(TAG, "Suspended from services for cause: " + cause);
-    }
-
-    @Override
-    public Loader<List<KeyValPair>> onCreateLoader(int id, Bundle args) {
-        final double lat = args.getDouble(ARG_LAT_TAG);
-        final double lon = args.getDouble(ARG_LON_TAG);
-        return new KeyValPairLoader(getActivity(), lat, lon);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<KeyValPair>> loader, List<KeyValPair> data) {
-        reset();
-        final String nearbyPlacesString = getString(R.string.places_nearby);
-        mAdapter.add(new SimpleSection<>(nearbyPlacesString, data));
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<KeyValPair>> loader) {
-        reset();
     }
 
     private void reset() {
