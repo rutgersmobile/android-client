@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.api.places;
 
-import android.location.Location;
 import android.support.annotation.NonNull;
 
 import com.google.gson.JsonSyntaxException;
@@ -8,17 +7,13 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.ApiRequest;
 import edu.rutgers.css.Rutgers.api.places.model.Place;
 
@@ -78,52 +73,6 @@ public final class PlacesAPI {
     }
 
     /**
-     * Get a specific place from the Places API.
-     * @param placeKey Key for place entry, returned from search results
-     * @return The place object that has the given key, or null if it does not exist
-     */
-    public static synchronized Place getPlace(@NonNull final String placeKey) throws JsonSyntaxException, IOException {
-        setup();
-        return sPlaces.get(placeKey);
-    }
-
-    /**
-     * Search for places near a given location.
-     * @param sourceLat Latitude
-     * @param sourceLon Longitude
-     * @return List of places that are near the given location.
-     */
-    public static synchronized List<Place> getPlacesNear(final double sourceLat, final double sourceLon) throws JsonSyntaxException, IOException {
-        setup();
-
-        List<Place> results = new ArrayList<>();
-        List<AbstractMap.SimpleEntry<Float, Place>> nearbyPlaces = new ArrayList<>();
-
-        for (Place place : sPlaces.values()) {
-            if (place.getLocation() == null) continue;
-            final double placeLat = place.getLocation().getLatitude();
-            final double placeLon = place.getLocation().getLongitude();
-            float dist[] = new float[1];
-            Location.distanceBetween(placeLat, placeLon, sourceLat, sourceLon, dist);
-            if (dist[0] <= Config.NEARBY_RANGE)
-                nearbyPlaces.add(new AbstractMap.SimpleEntry<>(dist[0], place));
-        }
-
-        Collections.sort(nearbyPlaces, new Comparator<AbstractMap.SimpleEntry<Float, Place>>() {
-            @Override
-            public int compare(AbstractMap.SimpleEntry<Float, Place> left, AbstractMap.SimpleEntry<Float, Place> right) {
-                return left.getKey().compareTo(right.getKey());
-            }
-        });
-
-        for (AbstractMap.SimpleEntry<Float, Place> entry : nearbyPlaces) {
-            results.add(entry.getValue());
-        }
-
-        return results;
-    }
-
-    /**
      * Search places by Lunr index tokens and title. Limit maxmimum number of results.
      * @param query Query string
      * @param maxResults Maximum number of results to return. A non-positive value disables the cap.
@@ -155,15 +104,4 @@ public final class PlacesAPI {
 
         return results;
     }
-
-    /**
-     * Search places by Lunr index tokens and title, with no cap on the number of results.
-     * @param query Query string
-     * @return List of place objects that match the query string.
-     */
-    public static synchronized List<Place> searchPlaces(@NonNull final String query)
-            throws JsonSyntaxException, IOException, IllegalArgumentException  {
-        return searchPlaces(query, 0);
-    }
-
 }

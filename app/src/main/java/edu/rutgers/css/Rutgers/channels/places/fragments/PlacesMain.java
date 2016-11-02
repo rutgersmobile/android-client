@@ -5,6 +5,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,7 +17,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.data.DataBufferObserver;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -25,21 +26,20 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
-import edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter;
+import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
-import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -71,7 +71,7 @@ public class PlacesMain extends BaseChannelFragment
 
     /* Member data */
     private PlaceAutoCompleteAdapter mSearchAdapter;
-    private SimpleSectionedAdapter<KeyValPair> mAdapter;
+    private SimpleSectionedRecyclerAdapter<KeyValPair> mAdapter;
     private GoogleApiClientProvider mGoogleApiClientProvider;
     private LocationRequest mLocationRequest;
     private AutoCompleteTextView autoComp;
@@ -117,7 +117,12 @@ public class PlacesMain extends BaseChannelFragment
         setHasOptionsMenu(true);
 
         mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
-        mAdapter = new SimpleSectionedAdapter<>(getActivity(), R.layout.row_title, R.layout.row_section_header, R.id.title);
+        mAdapter = new SimpleSectionedRecyclerAdapter<>(new ArrayList<>(), R.layout.row_section_header, R.layout.row_title, R.id.title);
+        mAdapter.getPositionClicks()
+            .flatMap(placeStub -> placeStub.getKey() == null
+                ? Observable.error(new IllegalArgumentException("Place has no key"))
+                : Observable.just(PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey())))
+            .subscribe(this::switchFragments, this::logError);
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setInterval(10 * 1000)
@@ -128,10 +133,10 @@ public class PlacesMain extends BaseChannelFragment
             oldSearch = savedInstanceState.getString(SEARCH_TAG);
         }
     }
-    
+
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_places,
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress_auto,
                 CreateArgs.builder().toolbarRes(R.id.toolbar_search).build());
 
         // Set title from JSON
@@ -139,8 +144,11 @@ public class PlacesMain extends BaseChannelFragment
         if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         else getActivity().setTitle(R.string.places_title);
 
-        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
-        listView.setAdapter(mAdapter);
+        final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         autoComp = (AutoCompleteTextView) v.findViewById(R.id.buildingSearchField);
         autoComp.setAdapter(mSearchAdapter);
@@ -151,23 +159,13 @@ public class PlacesMain extends BaseChannelFragment
             Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
             switchFragments(newArgs);
         });
-        
+
         // Text placed in field from soft-keyboard/autocomplete (may happen in landscape)
         autoComp.setOnEditorActionListener((view, actionId, event) -> actionId == EditorInfo.IME_ACTION_SEARCH);
 
         if (searching && oldSearch != null) {
             autoComp.setText(oldSearch);
         }
-
-        // Click listener for nearby places list
-        listView.setOnItemClickListener((parent12, view, position, id) -> {
-            KeyValPair placeStub = (KeyValPair) parent12.getItemAtPosition(position);
-
-            if (placeStub.getKey() != null) {
-                Bundle newArgs = PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey());
-                switchFragments(newArgs);
-            }
-        });
 
         return v;
     }
@@ -226,11 +224,12 @@ public class PlacesMain extends BaseChannelFragment
         final String noneNearbyString = getString(R.string.places_none_nearby);
         final String nearbyPlacesString = getString(R.string.places_nearby);
         locationSubject.asObservable().observeOn(Schedulers.io())
-            .flatMap(location -> RutgersAPI.getPlacesNear(location.getLatitude(), location.getLongitude()))
-            .flatMap(Observable::from)
-            .map(place -> new KeyValPair(place.getId(), place.getTitle()))
-            .defaultIfEmpty(new KeyValPair(null, noneNearbyString))
-            .toList()
+            .flatMap(location -> RutgersAPI.getPlacesNear(location.getLatitude(), location.getLongitude())
+                .flatMap(Observable::from)
+                .map(place -> new KeyValPair(place.getId(), place.getTitle()))
+                .defaultIfEmpty(new KeyValPair(null, noneNearbyString))
+                .toList()
+            )
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
             .subscribe(nearbyPlaces -> {

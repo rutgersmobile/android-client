@@ -24,9 +24,6 @@ import edu.rutgers.css.Rutgers.channels.food.fragments.FoodMeal;
 import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesDisplay;
 import edu.rutgers.css.Rutgers.channels.places.fragments.PlacesMain;
 import edu.rutgers.css.Rutgers.channels.reader.fragments.RSSReader;
-import edu.rutgers.css.Rutgers.channels.recreation.fragments.RecreationDisplay;
-import edu.rutgers.css.Rutgers.channels.recreation.fragments.RecreationHoursDisplay;
-import edu.rutgers.css.Rutgers.channels.recreation.fragments.RecreationMain;
 import edu.rutgers.css.Rutgers.channels.ruinfo.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCCourses;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
@@ -103,11 +100,6 @@ public final class ComponentFactory {
         // Places views
         put(PlacesMain.HANDLE, PlacesMain.class);
         put(PlacesDisplay.HANDLE, PlacesDisplay.class);
-
-        // Recreation views
-        put(RecreationMain.HANDLE, RecreationMain.class);
-        put(RecreationDisplay.HANDLE, RecreationDisplay.class);
-        put(RecreationHoursDisplay.HANDLE, RecreationHoursDisplay.class);
 
         // SOC views
         put(SOCMain.HANDLE, SOCMain.class);

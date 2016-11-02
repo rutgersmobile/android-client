@@ -132,8 +132,11 @@ public class FoodMeal extends BaseChannelFragment {
                 : Observable.from(foundMeal.getGenres())
             )
             .map(FoodMeal::genreToSection)
-            .subscribe(section -> mAdapter.add(section)
-            , error -> {
+            .toList()
+            .subscribe(sections -> {
+                reset();
+                mAdapter.addAll(sections);
+            } , error -> {
                 reset();
                 LOGE(TAG, error.getMessage());
                 AppUtils.showFailedLoadToast(getContext());

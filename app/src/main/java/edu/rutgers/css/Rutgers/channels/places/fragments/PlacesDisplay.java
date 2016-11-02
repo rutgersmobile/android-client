@@ -5,10 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +33,7 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -122,6 +124,27 @@ public class PlacesDisplay extends BaseChannelFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, new ArrayList<>());
+        mAdapter.getPositionClicks()
+            .map(rMenuRow -> (RMenuItemRow) rMenuRow)
+            .subscribe(rMenuItemRow -> {
+                switch (rMenuItemRow.getArgs().getInt(ID_KEY)) {
+                    case ADDRESS_ROW:
+                        launchMap();
+                        break;
+                    case DESC_ROW:
+                        final Bundle textArgs = TextDisplay.createArgs(
+                            mPlace.getTitle(),
+                            rMenuItemRow.getArgs().getString("data")
+                        );
+                        switchFragments(textArgs);
+                        break;
+                    case BUS_ROW:
+                        final Bundle busArgs = new Bundle(rMenuItemRow.getArgs());
+                        busArgs.remove(ID_KEY);
+                        switchFragments(busArgs);
+                        break;
+                }
+            }, this::logError);
 
         final Bundle args = getArguments();
         mTitle = args.getString(ARG_TITLE_TAG);
@@ -223,7 +246,7 @@ public class PlacesDisplay extends BaseChannelFragment {
     
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_list_progress);
+        final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_recycler_progress);
 
         if (mLoading) showProgressCircle();
 
@@ -231,26 +254,11 @@ public class PlacesDisplay extends BaseChannelFragment {
         if (mTitle != null) getActivity().setTitle(mTitle);
         else getActivity().setTitle(R.string.places_title);
 
-        final ListView listView = (ListView) v.findViewById(R.id.list);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            final RMenuItemRow clicked = (RMenuItemRow) parent.getAdapter().getItem(position);
-
-            switch (clicked.getArgs().getInt(ID_KEY)) {
-                case ADDRESS_ROW:
-                    launchMap();
-                    break;
-                case DESC_ROW:
-                    final Bundle textArgs = TextDisplay.createArgs(mPlace.getTitle(), clicked.getArgs().getString("data"));
-                    switchFragments(textArgs);
-                    break;
-                case BUS_ROW:
-                    final Bundle busArgs = new Bundle(clicked.getArgs());
-                    busArgs.remove(ID_KEY);
-                    switchFragments(busArgs);
-                    break;
-            }
-        });
+        final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         return v;
     }

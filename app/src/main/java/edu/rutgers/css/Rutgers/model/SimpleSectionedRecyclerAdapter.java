@@ -29,11 +29,29 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
     private final int itemResource;
     private final int textViewId;
 
-    private final PublishSubject<T> onClickSubject = PublishSubject.create();
+    private final PublishSubject<IndexedItem<T>> onClickSubject = PublishSubject.create();
 
     private final Object mLock = new Object();
     private List<FilteredSection> filteredSections;
     private SectionAdapterFilter filter;
+
+    public static class IndexedItem<U> {
+        private U item;
+        private int index;
+
+        public IndexedItem(U item, int index) {
+            this.item = item;
+            this.index = index;
+        }
+
+        public U getItem() {
+            return item;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+    }
 
     @Override
     public Filter getFilter() {
@@ -105,7 +123,7 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
     public void onBindViewHolder(ViewHolder holder, int section, int relativePosition, int absolutePosition) {
         final T item = getItem(section, relativePosition);
         holder.getTextView().setText(item.toString());
-        holder.itemView.setOnClickListener(view -> getOnClickSubject().onNext(item));
+        holder.itemView.setOnClickListener(view -> getOnClickSubject().onNext(new IndexedItem<>(item, absolutePosition)));
     }
 
     @Override
@@ -131,11 +149,15 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
         notifyDataSetChanged();
     }
 
-    public Observable<T> getPositionClicks() {
+    public Observable<IndexedItem<T>> getIndexedPositionClicks() {
         return onClickSubject.asObservable();
     }
 
-    protected PublishSubject<T> getOnClickSubject() {
+    public Observable<T> getPositionClicks() {
+        return getIndexedPositionClicks().map(IndexedItem::getItem);
+    }
+
+    protected PublishSubject<IndexedItem<T>> getOnClickSubject() {
         return onClickSubject;
     }
 
