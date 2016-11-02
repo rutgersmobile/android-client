@@ -114,7 +114,11 @@ public final class ScheduleAPI {
      */
     public static SOCIndex getIndex(final String semesterCode, final String campusCode, final String levelCode) throws JsonSyntaxException, IOException {
         String resource = "indexes/" + semesterCode + "_" + campusCode + "_" + levelCode + ".json";
-        return ApiRequest.api(resource, 1, TimeUnit.DAYS, SOCIndex.class, new SOCIndexDeserializer(campusCode, levelCode, semesterCode));
+        SOCIndex index = ApiRequest.api(resource, 1, TimeUnit.DAYS, SOCIndex.class, new SOCIndexDeserializer());
+        index.setCampusCode(campusCode);
+        index.setLevelCode(levelCode);
+        index.setSemesterCode(semesterCode);
+        return index;
     }
 
     /**

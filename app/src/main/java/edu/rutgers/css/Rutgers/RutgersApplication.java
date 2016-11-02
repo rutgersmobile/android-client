@@ -9,6 +9,8 @@ import com.squareup.picasso.Picasso;
 import edu.rutgers.css.Rutgers.api.Analytics;
 import edu.rutgers.css.Rutgers.api.bus.model.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.bus.parsers.AgencyConfigDeserializer;
+import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
+import edu.rutgers.css.Rutgers.api.soc.parsers.SOCIndexDeserializer;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -31,6 +33,8 @@ public class RutgersApplication extends Application {
     public static Retrofit retrofit;
 
     public static Retrofit nbRetrofit;
+
+    public static Retrofit socRetrofit;
 
     public void onCreate() {
         super.onCreate();
@@ -62,6 +66,17 @@ public class RutgersApplication extends Application {
             .addConverterFactory(SimpleXmlConverterFactory.create())
             .client(client)
             .baseUrl(Config.NB_API_BASE)
+            .build();
+
+        socRetrofit = new Retrofit.Builder()
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(
+                new GsonBuilder()
+                    .registerTypeAdapter(SOCIndex.class, new SOCIndexDeserializer())
+                    .create()
+            ))
+            .client(client)
+            .baseUrl(Config.SOC_API_BASE)
             .build();
 
         Picasso picasso = new Picasso.Builder(this)

@@ -12,7 +12,7 @@ import java.util.List;
  * Represents a menu from the Dining API. Use GSON to construct.
  * @author James Chambers
  */
-public class DiningMenu implements Serializable{
+public class DiningMenu implements Serializable {
 
     @SerializedName("location_name") private final String locationName;
     private final long date;

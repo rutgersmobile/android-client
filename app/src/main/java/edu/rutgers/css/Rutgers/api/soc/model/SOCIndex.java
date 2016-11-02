@@ -118,13 +118,8 @@ public class SOCIndex {
     private HashMap<String, IndexSubject> mSubjectsByCode;
     private HashMap<String, String> mSubjectsByName;
 
-    public SOCIndex(String campusCode, String levelCode, String semesterCode,
-                    HashMap<String, String[]> abbreviations, HashMap<String, IndexCourse> coursesByName,
+    public SOCIndex(HashMap<String, String[]> abbreviations, HashMap<String, IndexCourse> coursesByName,
                     HashMap<String, IndexSubject> subjectsByCode, HashMap<String, String> subjectsByName) {
-
-        setSemesterCode(semesterCode);
-        setCampusCode(campusCode);
-        setLevelCode(levelCode);
 
         mAbbreviations = abbreviations;
         mCoursesByName = coursesByName;

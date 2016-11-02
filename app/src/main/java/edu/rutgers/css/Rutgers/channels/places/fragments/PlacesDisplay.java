@@ -23,7 +23,7 @@ import java.util.Map;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
+import edu.rutgers.css.Rutgers.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopGroup;
 import edu.rutgers.css.Rutgers.api.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;

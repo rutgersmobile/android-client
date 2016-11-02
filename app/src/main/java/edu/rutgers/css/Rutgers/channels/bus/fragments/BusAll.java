@@ -17,7 +17,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.bus.NextbusAPI;
+import edu.rutgers.css.Rutgers.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.NextbusItem;
 import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;

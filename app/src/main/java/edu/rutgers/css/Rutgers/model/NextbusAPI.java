@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers.api.bus;
+package edu.rutgers.css.Rutgers.model;
 
 import android.location.Location;
 
@@ -27,7 +27,6 @@ import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.Stop;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopGroup;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
-import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import rx.Observable;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;

@@ -30,6 +30,7 @@ public final class Config {
     public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/mobile/"+API_LEVEL+"/";
     // Location-based services config
     public static final float NEARBY_RANGE = 300.0f; // Within 301 meters is considered "nearby"
+    public static final String SOC_API_BASE = "http://sis.rutgers.edu/soc/";
 
     // Deep link schema info
     public static final Link.Schema SCHEMA = Link.Schema.HTTP;

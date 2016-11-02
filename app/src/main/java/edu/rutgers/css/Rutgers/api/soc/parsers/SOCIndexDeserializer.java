@@ -19,16 +19,6 @@ import edu.rutgers.css.Rutgers.utils.JsonUtils;
  * difficult to automatically deserialize with GSON
  */
 public class SOCIndexDeserializer implements JsonDeserializer<SOCIndex> {
-    String campusCode;
-    String levelCode;
-    String semesterCode;
-
-    public SOCIndexDeserializer(String campusCode, String levelCode, String semesterCode) {
-        this.campusCode = campusCode;
-        this.levelCode = levelCode;
-        this.semesterCode = semesterCode;
-    }
-
     @Override
     public SOCIndex deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();
@@ -85,6 +75,6 @@ public class SOCIndexDeserializer implements JsonDeserializer<SOCIndex> {
             coursesByName.put(curCourseName, newCourse);
         }
 
-        return new SOCIndex(campusCode, levelCode, semesterCode, abbreviations, coursesByName, subjectsByCode, subjectsByName);
+        return new SOCIndex(abbreviations, coursesByName, subjectsByCode, subjectsByName);
     }
 }

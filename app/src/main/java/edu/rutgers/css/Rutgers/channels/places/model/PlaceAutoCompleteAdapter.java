@@ -1,22 +1,19 @@
 package edu.rutgers.css.Rutgers.channels.places.model;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 
-import com.google.gson.JsonSyntaxException;
-
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.places.model.Place;
-import edu.rutgers.css.Rutgers.api.places.PlacesAPI;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
-
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
+import rx.observables.BlockingObservable;
 
 /**
  * Adapter for place auto-completion results. The filter executes queries on the Places API and
@@ -48,6 +45,7 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
         return position;
     }
 
+    @NonNull
     @Override
     public Filter getFilter() {
         return mFilter;
@@ -68,19 +66,16 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
 
             if (StringUtils.isBlank(filterString)) return results;
 
-            try {
-                // Do request for search results. Cap at 15 results.
-                List<Place> places = PlacesAPI.searchPlaces(filterString, 15);
-                List<KeyValPair> keyValPairs = new ArrayList<>(places.size());
-                for (Place place: places) {
-                    keyValPairs.add(new KeyValPair(place.getId(), place.getTitle()));
-                }
+            List<Place> places = BlockingObservable.from(RutgersAPI.searchPlaces(filterString, 15))
+                .getIterator().next();
 
-                results.values = keyValPairs;
-                results.count = keyValPairs.size();
-            } catch (JsonSyntaxException | IOException e) {
-                LOGE(TAG, e.getMessage());
+            List<KeyValPair> keyValPairs = new ArrayList<>(places.size());
+            for (Place place: places) {
+                keyValPairs.add(new KeyValPair(place.getId(), place.getTitle()));
             }
+
+            results.values = keyValPairs;
+            results.count = keyValPairs.size();
 
             return results;
         }
