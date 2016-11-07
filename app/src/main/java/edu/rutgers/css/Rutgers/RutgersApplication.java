@@ -13,6 +13,7 @@ import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
 import edu.rutgers.css.Rutgers.api.soc.parsers.SOCIndexDeserializer;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -44,8 +45,12 @@ public class RutgersApplication extends Application {
         // Queue "app launched" event
         Analytics.queueEvent(this, Analytics.LAUNCH, null);
 
+        final HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
         client = new OkHttpClient.Builder()
             .cache(new Cache(getCacheDir(), 10 * 1024 * 1024))
+            .addInterceptor(interceptor)
             .build();
 
         // AgencyConfig has a special deserializer because the JSON is a weird format
@@ -54,6 +59,7 @@ public class RutgersApplication extends Application {
             .addConverterFactory(GsonConverterFactory.create(
                 new GsonBuilder()
                     .registerTypeAdapter(AgencyConfig.class, new AgencyConfigDeserializer())
+                    .registerTypeAdapter(SOCIndex.class, new SOCIndexDeserializer())
                     .create()
             ))
             .client(client)
@@ -70,11 +76,7 @@ public class RutgersApplication extends Application {
 
         socRetrofit = new Retrofit.Builder()
             .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create(
-                new GsonBuilder()
-                    .registerTypeAdapter(SOCIndex.class, new SOCIndexDeserializer())
-                    .create()
-            ))
+            .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .baseUrl(Config.SOC_API_BASE)
             .build();

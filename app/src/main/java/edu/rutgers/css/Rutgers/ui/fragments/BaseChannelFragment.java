@@ -28,6 +28,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
+import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 
@@ -297,5 +298,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     public void logError(Throwable throwable) {
         LOGE(getLogTag(), throwable.getMessage());
+        hideProgressCircle();
+        AppUtils.showFailedLoadToast(getContext());
     }
 }

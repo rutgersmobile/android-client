@@ -8,6 +8,7 @@ import edu.rutgers.css.Rutgers.api.bus.model.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.cinema.model.Movie;
 import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
 import edu.rutgers.css.Rutgers.api.places.model.KVHolder;
+import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
 import edu.rutgers.css.Rutgers.api.soc.model.Semesters;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -44,4 +45,11 @@ public interface RutgersService {
 
     @GET("soc_conf.txt")
     Observable<Semesters> getSemesters();
+
+    @GET("indexes/{semesterCode}_{campusCode}_{levelCode}.json")
+    Observable<SOCIndex> getSOCIndex(
+        @Path("semesterCode") String semesterCode,
+        @Path("campusCode") String campusCode,
+        @Path("levelCode") String levelCode
+    );
 }

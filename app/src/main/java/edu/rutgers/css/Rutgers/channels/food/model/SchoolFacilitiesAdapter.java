@@ -30,7 +30,9 @@ public class SchoolFacilitiesAdapter extends SimpleSectionedRecyclerAdapter<Dini
                                  int section, int relativePosition, int absolutePosition) {
         final DiningMenu dm = getItem(section, relativePosition);
         holder.getTextView().setText(dm.getLocationName());
-        holder.itemView.setOnClickListener(view -> getOnClickSubject().onNext(new IndexedItem<>(dm, absolutePosition)));
+        holder.itemView.setOnClickListener(view -> getOnClickSubject().onNext(
+            new IndexedItem<>(dm, section, relativePosition, absolutePosition)
+        ));
 
         if (!dm.hasActiveMeals()) {
             holder.getTextView().setTextColor(ContextCompat.getColor(context, R.color.light_gray));

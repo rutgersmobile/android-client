@@ -23,11 +23,11 @@ import java.util.Map;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.bus.model.stop.StopGroup;
 import edu.rutgers.css.Rutgers.api.places.model.Place;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.model.NextbusAPI;
 import edu.rutgers.css.Rutgers.model.RutgersAPI;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
@@ -36,7 +36,6 @@ import edu.rutgers.css.Rutgers.model.rmenu.RMenuRow;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -50,8 +49,6 @@ public class PlacesDisplay extends BaseChannelFragment {
     /* Log tag and component handle */
     private static final String TAG                 = "PlacesDisplay";
     public static final String HANDLE               = "placesdisplay";
-
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;

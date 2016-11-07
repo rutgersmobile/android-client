@@ -2,10 +2,11 @@ package edu.rutgers.css.Rutgers.channels.soc.model;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -22,8 +24,10 @@ import java.util.Map;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.soc.Titleable;
 import edu.rutgers.css.Rutgers.api.soc.model.Section;
+import rx.Observable;
+import rx.subjects.PublishSubject;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * An array adapter for course sections. Displays each section with instructor and meeting times.
@@ -31,12 +35,34 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
  *
  * @author James Chambers
  */
-public class CourseSectionAdapter extends ArrayAdapter<Titleable> {
+public class CourseSectionAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "CourseSectionAdapter";
 
+    private final List<Titleable> elements;
+    private PublishSubject<Titleable> elementSubject = PublishSubject.create();
+
+    public Observable<Titleable> getPositionClicks() {
+        return elementSubject.asObservable();
+    }
+
+    public void add(Titleable element) {
+        elements.add(element);
+        notifyDataSetChanged();
+    }
+
+    public void addAll(Collection<? extends Titleable> elements) {
+        this.elements.addAll(elements);
+        notifyDataSetChanged();
+    }
+
+    public void clear() {
+        elements.clear();
+        notifyDataSetChanged();
+    }
+
     // IDs for view types
-    private static enum ViewTypes {
+    private enum ViewTypes {
         BASIC_TYPE, MEETTIME_TYPE
     }
     private static ViewTypes[] viewTypes = ViewTypes.values();
@@ -45,121 +71,95 @@ public class CourseSectionAdapter extends ArrayAdapter<Titleable> {
     private int resolvedGreen;
     private int resolvedRed;
 
-    static class MeetTimeViewHolder {
+    private static class MeetTimeViewHolder extends RecyclerView.ViewHolder {
         TextView sectionIndexTextView;
         TextView instructorTextView;
         TextView descriptionTextView;
         TableLayout meetingTimesLayout;
+
+        MeetTimeViewHolder(View itemView) {
+            super(itemView);
+
+            sectionIndexTextView = (TextView) itemView.findViewById(R.id.sectionIndexTextView);
+            instructorTextView = (TextView) itemView.findViewById(R.id.instructorTextView);
+            descriptionTextView = (TextView) itemView.findViewById(R.id.descriptionTextView);
+            meetingTimesLayout = (TableLayout) itemView.findViewById(R.id.meetingTimesLayout);
+        }
     }
 
-    static class DescViewHolder {
+    private static class DescViewHolder extends RecyclerView.ViewHolder {
         TextView titleTextView;
+
+        DescViewHolder(View itemView) {
+            super(itemView);
+
+            titleTextView = (TextView) itemView.findViewById(R.id.title);
+        }
+    }
+
+    public Titleable getItem(int position) {
+        return elements.get(position);
     }
 
     // Assign numeric values to days of the week, for sorting meet times
     private static final Map<String, Integer> sDayMap =
-            Collections.unmodifiableMap(new HashMap<String, Integer>() {{
-                put("M", 0);
-                put("T", 1);
-                put("W", 2);
-                put("TH", 3);
-                put("F", 4);
-                put("S", 5);
-            }});
+        Collections.unmodifiableMap(new HashMap<String, Integer>() {{
+            put("M", 0);
+            put("T", 1);
+            put("W", 2);
+            put("TH", 3);
+            put("F", 4);
+            put("S", 5);
+        }});
 
     public CourseSectionAdapter(Context context, int resource, List<Titleable> objects) {
-        super(context, resource, objects);
+        super();
+
         this.layoutResource = resource;
+        this.elements = objects;
 
-        resolvedGreen = context.getResources().getColor(R.color.pale_green);
-        resolvedRed = context.getResources().getColor(R.color.pale_red);
+        resolvedGreen = ContextCompat.getColor(context, R.color.pale_green);
+        resolvedRed = ContextCompat.getColor(context, R.color.pale_red);
     }
 
     @Override
-    public int getViewTypeCount() {
-        return viewTypes.length;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        Titleable item = getItem(position);
-        if (item instanceof Section) {
-            return ViewTypes.MEETTIME_TYPE.ordinal();
-        } else {
-            return ViewTypes.BASIC_TYPE.ordinal();
-        }
-    }
-
-    @Override
-    public boolean areAllItemsEnabled() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled(int position) {
-        return true;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        switch(viewTypes[getItemViewType(position)]) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        switch (viewTypes[viewType]) {
             case BASIC_TYPE:
-                return getBasicView(position, convertView, parent);
-
-            case MEETTIME_TYPE:
+                final View basicItemView = inflater.inflate(R.layout.row_title, parent, false);
+                return new DescViewHolder(basicItemView);
             default:
-                return getSectionView(position, convertView, parent);
+                final View meetTimeItemView = inflater.inflate(layoutResource, parent, false);
+                return new MeetTimeViewHolder(meetTimeItemView);
         }
     }
 
-    /**
-     * Get basic text row view
-     */
-    public View getBasicView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        DescViewHolder holder;
-
-        if (convertView == null) {
-            convertView = layoutInflater.inflate(R.layout.row_title, null);
-            holder = new DescViewHolder();
-            holder.titleTextView = (TextView) convertView.findViewById(R.id.title);
-            convertView.setTag(holder);
-        } else {
-            holder = (DescViewHolder) convertView.getTag();
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        final Titleable item = getItem(position);
+        holder.itemView.setOnClickListener(view -> elementSubject.onNext(item));
+        switch (viewTypes[getItemViewType(position)]) {
+            case BASIC_TYPE:
+                bindBasicViewHolder((DescViewHolder) holder, item);
+                return;
+            default:
+                bindMeetTimeViewHolder((MeetTimeViewHolder) holder, item);
         }
+    }
 
-        Titleable item = getItem(position);
+    private void bindBasicViewHolder(DescViewHolder holder, Titleable item) {
         holder.titleTextView.setText(item.getDisplayTitle());
-
-        return convertView;
     }
 
-    /**
-     * Get section row
-     */
-    public View getSectionView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater layoutInflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        MeetTimeViewHolder holder;
-
-        if (convertView == null) {
-            convertView = layoutInflater.inflate(layoutResource, null);
-            holder = new MeetTimeViewHolder();
-            holder.sectionIndexTextView = (TextView) convertView.findViewById(R.id.sectionIndexTextView);
-            holder.instructorTextView = (TextView) convertView.findViewById(R.id.instructorTextView);
-            holder.descriptionTextView = (TextView) convertView.findViewById(R.id.descriptionTextView);
-            holder.meetingTimesLayout = (TableLayout) convertView.findViewById(R.id.meetingTimesLayout);
-            convertView.setTag(holder);
-        } else {
-            holder = (MeetTimeViewHolder) convertView.getTag();
-        }
-
-        Section section = (Section) getItem(position);
+    private void bindMeetTimeViewHolder(MeetTimeViewHolder holder, Titleable item) {
+        Section section = (Section) item;
 
         // Open sections have a green background, closed sections have a red background
         if (section.isOpen()) {
-            convertView.setBackgroundColor(resolvedGreen);
+            holder.itemView.setBackgroundColor(resolvedGreen);
         } else {
-            convertView.setBackgroundColor(resolvedRed);
+            holder.itemView.setBackgroundColor(resolvedRed);
         }
 
         // Set section number & index number
@@ -193,7 +193,9 @@ public class CourseSectionAdapter extends ArrayAdapter<Titleable> {
                 boolean keepView = false;
 
                 // Meeting time row (e.g. M 12:30-1:50 HCK 110)
-                TableRow timeRow = (TableRow) layoutInflater.inflate(R.layout.row_course_section_time, null);
+                TableRow timeRow = (TableRow) LayoutInflater
+                    .from(holder.itemView.getContext())
+                    .inflate(R.layout.row_course_section_time, holder.meetingTimesLayout, false);
                 TextView dayTextView = (TextView) timeRow.findViewById(R.id.dayTextView);
                 TextView timeTextView = (TextView) timeRow.findViewById(R.id.timeTextView);
                 TextView locationTextView = (TextView) timeRow.findViewById(R.id.locationTextView);
@@ -214,9 +216,9 @@ public class CourseSectionAdapter extends ArrayAdapter<Titleable> {
                 }
 
                 String[] locationElements = new String[]{
-                        meetingTime.getCampusAbbrev(),
-                        meetingTime.getBuildingCode(),
-                        meetingTime.getRoomNumber()
+                    meetingTime.getCampusAbbrev(),
+                    meetingTime.getBuildingCode(),
+                    meetingTime.getRoomNumber()
                 };
 
                 StringBuilder locationBuilder = new StringBuilder();
@@ -234,8 +236,21 @@ public class CourseSectionAdapter extends ArrayAdapter<Titleable> {
                 if (keepView) holder.meetingTimesLayout.addView(timeRow);
             }
         }
+    }
 
-        return convertView;
+    @Override
+    public int getItemViewType(int position) {
+        Titleable item = getItem(position);
+        if (item instanceof Section) {
+            return ViewTypes.MEETTIME_TYPE.ordinal();
+        } else {
+            return ViewTypes.BASIC_TYPE.ordinal();
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return elements.size();
     }
 
     /**
@@ -246,23 +261,18 @@ public class CourseSectionAdapter extends ArrayAdapter<Titleable> {
     private List<Section.MeetingTime> sortMeetingTimes(@NonNull List<Section.MeetingTime> meetingTimes) {
         List<Section.MeetingTime> result = new ArrayList<>(meetingTimes);
 
-        Comparator<Section.MeetingTime> meetingTimeComparator = new Comparator<Section.MeetingTime>() {
-
-            @Override
-            public int compare(Section.MeetingTime lhs, Section.MeetingTime rhs) {
-                if (StringUtils.isBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
-                    return 0;
-                } else if (StringUtils.isNotBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
-                    return 1;
-                } else if (StringUtils.isBlank(lhs.getMeetingDay()) && StringUtils.isNotBlank(rhs.getMeetingDay())) {
-                    return -1;
-                } else {
-                    Integer l = sDayMap.get(lhs.getMeetingDay());
-                    Integer r = sDayMap.get(rhs.getMeetingDay());
-                    return l.compareTo(r);
-                }
+        Comparator<Section.MeetingTime> meetingTimeComparator = (lhs, rhs) -> {
+            if (StringUtils.isBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
+                return 0;
+            } else if (StringUtils.isNotBlank(lhs.getMeetingDay()) && StringUtils.isBlank(rhs.getMeetingDay())) {
+                return 1;
+            } else if (StringUtils.isBlank(lhs.getMeetingDay()) && StringUtils.isNotBlank(rhs.getMeetingDay())) {
+                return -1;
+            } else {
+                Integer l = sDayMap.get(lhs.getMeetingDay());
+                Integer r = sDayMap.get(rhs.getMeetingDay());
+                return l.compareTo(r);
             }
-
         };
 
         Collections.sort(result, meetingTimeComparator);

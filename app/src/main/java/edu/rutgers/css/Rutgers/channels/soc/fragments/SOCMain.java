@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -15,7 +15,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.EditText;
 
 import java.util.ArrayList;
@@ -23,19 +22,24 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.soc.Registerable;
 import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.api.soc.model.Course;
 import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
 import edu.rutgers.css.Rutgers.api.soc.model.Semesters;
 import edu.rutgers.css.Rutgers.api.soc.model.Subject;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
-import edu.rutgers.css.Rutgers.channels.soc.model.loader.SubjectLoader;
+import edu.rutgers.css.Rutgers.channels.soc.model.SectionedScheduleAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
+import edu.rutgers.css.Rutgers.model.SOCAPI;
+import edu.rutgers.css.Rutgers.model.SimpleSection;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
-import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
@@ -43,13 +47,13 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 /**
  * Schedule of Classes channel main screen. Lists subjects/departments in catalogue.
  */
-public class SOCMain extends BaseChannelFragment implements SharedPreferences.OnSharedPreferenceChangeListener, LoaderManager.LoaderCallbacks<SubjectLoader.SubjectHolder> {
+public class SOCMain
+    extends BaseChannelFragment
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     /* Log tag and component handle */
     private static final String TAG                 = "SOCMain";
     public static final String HANDLE               = "soc";
-
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = "filter";
@@ -61,7 +65,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     /* Member data */
     private SOCIndex mSOCIndex;
-    private ScheduleAdapter mAdapter;
+    private SectionedScheduleAdapter mAdapter;
     private List<String> mSemesters;
     private String mDefaultSemester;
     private String mSemester;
@@ -71,6 +75,13 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
     private boolean mLoading;
     private EditText filterEditText;
     private boolean searching = false;
+
+    private final PublishSubject<ScheduleArgHolder> argHolderPublishSubject = PublishSubject.create();
+
+    @Override
+    public String getLogTag() {
+        return TAG;
+    }
 
     public SOCMain() {
         // Required empty public constructor
@@ -91,12 +102,98 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         return bundle;
     }
 
+    public static class SubjectHolder {
+        private final SOCIndex index;
+        private final List<Subject> subjects;
+        private final Semesters semesters;
+        private final String semester;
+        private final String defaultSemester;
+
+        public SubjectHolder(final SOCIndex index, final List<Subject> subjects, final Semesters semesters,
+                             final String semester, final String defaultSemester) {
+            this.index = index;
+            this.subjects = subjects;
+            this.semesters = semesters;
+            this.semester = semester;
+            this.defaultSemester = defaultSemester;
+        }
+
+        public SOCIndex getIndex() {
+            return index;
+        }
+
+        public List<Subject> getSubjects() {
+            return subjects;
+        }
+
+        public Semesters getSemesters() {
+            return semesters;
+        }
+
+        public String getSemester() {
+            return semester;
+        }
+
+        public String getDefaultSemester() {
+            return defaultSemester;
+        }
+    }
+
+    public static class ScheduleArgHolder {
+        private final String level;
+        private final String campus;
+        private final String semester;
+
+        public ScheduleArgHolder(final String level, final String campus, final String semester) {
+            this.level = level;
+            this.campus = campus;
+            this.semester = semester;
+        }
+
+        public String getLevel() {
+            return level;
+        }
+
+        public String getCampus() {
+            return campus;
+        }
+
+        public String getSemester() {
+            return semester;
+        }
+    }
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, R.layout.row_section_header);
+        mAdapter = new SectionedScheduleAdapter(
+            new SimpleSection<>("Subjects", new ArrayList<>()),
+            new SimpleSection<>("Courses", new ArrayList<>()),
+            R.layout.row_section_header,
+            R.layout.row_title,
+            R.id.title
+        );
+
+        mAdapter.getPositionClicks()
+            .flatMap(clickedItem -> {
+                if (clickedItem instanceof Subject) {
+                    return Observable.just(SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
+                        mSemester, mLevel, clickedItem.getCode()));
+                } else if (clickedItem instanceof Course) {
+                    // This is for when courses are loaded into the list by user-supplied filter
+                    final Course course = (Course) clickedItem;
+                    return Observable.just(SOCSections.createArgs(
+                        course.getDisplayTitle(), mSemester, mSOCIndex.getCampusCode(),
+                        course.getSubject(), course.getCourseNumber()
+                    ));
+                }
+
+                return Observable.error(new IllegalStateException("SOC item must be Subject or Course"));
+            })
+            .subscribe(this::switchFragments, this::logError);
+
 
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -122,7 +219,54 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         mLoading = true;
         showProgressCircle();
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+
+        Observable.merge(
+            Observable.just(new ScheduleArgHolder(mLevel, mCampus, mSemester)),
+            argHolderPublishSubject.asObservable()
+        ).observeOn(Schedulers.io()).flatMap(scheduleArgHolder -> RutgersAPI.service.getSemesters()
+            .flatMap(semesters -> {
+                final String levelArg = scheduleArgHolder.getLevel();
+                final String campusArg = scheduleArgHolder.getCampus();
+                final String semesterArg = scheduleArgHolder.getSemester();
+
+                int defaultIndex = semesters.getDefaultSemester();
+                List<String> semesterStrings = semesters.getSemesters();
+
+                if (semesterStrings.isEmpty()) {
+                    return Observable.error(new IllegalStateException("Semesters list is empty"));
+                }
+
+                if (defaultIndex < 0 || defaultIndex >= semesterStrings.size()) {
+                    defaultIndex = 0;
+                }
+
+                final String defaultSemester = semesterStrings.get(defaultIndex);
+
+                final String semester = semesterArg != null && semesterStrings.contains(semesterArg)
+                    ? semesterArg
+                    : defaultSemester;
+
+                return RutgersAPI.service.getSOCIndex(semester, campusArg, levelArg).flatMap(socIndex ->
+                    SOCAPI.service.getSubjects(semester, campusArg, levelArg).map(subjects ->
+                        new SubjectHolder(socIndex, subjects, semesters, semester, defaultSemester)
+                    )
+                );
+            }))
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .subscribe(subjectHolder -> {
+                reset();
+
+                mSemester = subjectHolder.getSemester();
+                mDefaultSemester = subjectHolder.getDefaultSemester();
+                mSemesters = subjectHolder.getSemesters().getSemesters();
+                mSOCIndex = subjectHolder.getIndex();
+
+                mAdapter.setFilterIndex(mSOCIndex);
+                mAdapter.addAllSubjects(subjectHolder.getSubjects());
+
+                setScheduleTitle();
+            }, this::logError);
     }
 
     @Override
@@ -133,7 +277,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress,
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_recycler_progress,
                 CreateArgs.builder().toolbarRes(R.id.toolbar_search).build());
 
         setScheduleTitle();
@@ -142,30 +286,11 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         filterEditText = (EditText) v.findViewById(R.id.search_box);
 
-        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Registerable clickedItem = (Registerable) parent.getItemAtPosition(position);
-
-                if (clickedItem instanceof Subject) {
-                    Bundle coursesArgs = SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
-                            mSemester, mLevel, clickedItem.getCode());
-                    switchFragments(coursesArgs);
-                } else if (clickedItem instanceof Course) {
-                    // This is for when courses are loaded into the list by user-supplied filter
-                    final Course course = (Course) clickedItem;
-                    Bundle courseArgs = SOCSections.createArgs(
-                            course.getDisplayTitle(), mSemester, mSOCIndex.getCampusCode(),
-                            course.getSubject(), course.getCourseNumber()
-                    );
-                    switchFragments(courseArgs);
-                }
-            }
-
-        });
+        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         // Search text listener
         filterEditText.addTextChangedListener(new TextWatcher() {
@@ -293,7 +418,7 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
 
         if (somethingChanged) {
             LOGV(TAG, "Loading new subjects");
-            getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+            argHolderPublishSubject.onNext(new ScheduleArgHolder(mLevel, mCampus, mSemester));
         }
     }
 
@@ -343,53 +468,11 @@ public class SOCMain extends BaseChannelFragment implements SharedPreferences.On
         editor.apply();
     }
 
-    @Override
-    public Loader<SubjectLoader.SubjectHolder> onCreateLoader(int id, Bundle args) {
-        return new SubjectLoader(getContext(), mSemester, mLevel, mCampus);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<SubjectLoader.SubjectHolder> loader, SubjectLoader.SubjectHolder data) {
-        reset();
-
-        final SOCIndex socIndex = data.getIndex();
-        final List<Subject> subjects = data.getSubjects();
-        final Semesters semesters = data.getSemesters();
-        final String semester = data.getSemester();
-        final String defaultSemester = data.getDefaultSemester();
-
-        // all of these values will be filled out if there is not an error
-        if (socIndex == null || subjects == null || semesters == null) {
-            AppUtils.showFailedLoadToast(getContext());
-            return;
-        }
-
-        // Set all the values we got back
-
-        mSemester = semester;
-        mDefaultSemester = defaultSemester;
-
-        mSemesters = semesters.getSemesters();
-
-        // the index has important information for searching so we
-        // get it during this load
-        mSOCIndex = socIndex;
-        mAdapter.setFilterIndex(mSOCIndex);
-
-        mAdapter.addAllSubjects(subjects);
-        setScheduleTitle();
-    }
-
     private void setScheduleTitle() {
         if (mSemester != null && mCampus != null && mLevel != null) {
             final String title = ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel;
             getActivity().setTitle(title);
         }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<SubjectLoader.SubjectHolder> loader) {
-        reset();
     }
 
     private void reset() {

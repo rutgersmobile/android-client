@@ -87,7 +87,6 @@ repositories {
 
 dependencies {
     compile fileTree(include: '*.jar', dir: 'libs')
-    compile project(':PagerSlidingTabStrip')
     compile project(':ListViewAnimations:lib-core')
     compile project(':ListViewAnimations:lib-core-slh')
     compile project(':ListViewAnimations:lib-manipulation')
@@ -119,6 +118,7 @@ dependencies {
         exclude module: 'stax-api'
         exclude module: 'xpp3'
     }
+    compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
     // square can't update their libs
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
 

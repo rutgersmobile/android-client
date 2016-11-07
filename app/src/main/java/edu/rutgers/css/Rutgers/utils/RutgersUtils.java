@@ -5,15 +5,19 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Utilities for Rutgers-specific data
@@ -21,6 +25,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
 public final class RutgersUtils {
 
     private static final String TAG = "RutgersUtils";
+    private static final Pattern romanNumeral = Pattern.compile("^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$");
 
     private RutgersUtils() {}
 
@@ -40,6 +45,23 @@ public final class RutgersUtils {
         } catch (Resources.NotFoundException e) {
             return null;
         }
+    }
+
+    public static String formatSubject(String subject) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (String s : subject.split(" ")) {
+            Matcher matcher = romanNumeral.matcher(s);
+            if (!matcher.find()) {
+                s = WordUtils.capitalizeFully(s);
+            } else {
+                s = WordUtils.capitalize(s);
+            }
+            stringBuilder.append(s);
+            stringBuilder.append(" ");
+        }
+
+        return stringBuilder.toString().trim();
     }
 
     /**

@@ -1,6 +1,3 @@
-[submodule "libs/pagerslidingtabstrip"]
-	path = libs/pagerslidingtabstrip
-	url = https://github.com/rutgersmobile/PagerSlidingTabStrip
 [submodule "ListViewAnimations"]
 	path = ListViewAnimations
 	url = git@phab.rutgers.edu:diffusion/LVA/listviewanimations

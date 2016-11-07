@@ -50,4 +50,12 @@ public interface SOCService {
         @Query("subject") String subject,
         @Query("courseNumber") String courseNumber
     );
+
+    @GET("course.json")
+    Observable<Course> getCourse(
+        @Query("semester") String semester,
+        @Query("campus") String campus,
+        @Query("subject") String subject,
+        @Query("courseNumber") String courseNumber
+    );
 }

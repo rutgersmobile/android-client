@@ -1,18 +1,12 @@
 package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.EditText;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -22,23 +16,24 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.soc.model.Course;
+import edu.rutgers.css.Rutgers.api.soc.model.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
-import edu.rutgers.css.Rutgers.channels.soc.model.loader.CoursesLoader;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.model.RutgersAPI;
+import edu.rutgers.css.Rutgers.model.SOCAPI;
+import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
-import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Lists courses under a subject/department.
  */
-public class SOCCourses extends BaseChannelFragment implements LoaderManager.LoaderCallbacks<CoursesLoader.CourseData> {
+public class SOCCourses extends BaseChannelFragment {
 
     /* Log tag and component handle */
     private static final String TAG                 = "SOCCourses";
     public static final String HANDLE               = "soccourses";
-
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
 
     /* Argument bundle tags */
     private static final String ARG_TITLE_TAG       = ComponentFactory.ARG_TITLE_TAG;
@@ -47,14 +42,28 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
     private static final String ARG_LEVEL_TAG       = "level";
     private static final String ARG_SUBJECT_TAG     = "subject";
 
-    /* Saved instance state tags */
-    private static final String SAVED_FILTER_TAG    = "filter";
-
     /* Member data */
     private ScheduleAdapter mAdapter;
-    private EditText mFilterEditText;
-    private String mFilterString;
     private boolean mLoading;
+    private String title;
+
+    public static final class CourseData {
+        private final Subject subject;
+        private final List<Course> courses;
+
+        public CourseData(final Subject subject, final List<Course> courses) {
+            this.subject = subject;
+            this.courses = courses;
+        }
+
+        public Subject getSubject() {
+            return subject;
+        }
+
+        public List<Course> getCourses() {
+            return courses;
+        }
+    }
 
     public SOCCourses() {
         // Required empty public constructor
@@ -91,85 +100,58 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         setHasOptionsMenu(true);
         Bundle args = getArguments();
 
-        if (args.getString(ARG_TITLE_TAG) != null) getActivity().setTitle(WordUtils.capitalizeFully(args.getString(ARG_TITLE_TAG)));
-
-        mAdapter = new ScheduleAdapter(getActivity(), R.layout.row_course, R.layout.row_section_header);
-
-        // Restore filter
-        if (savedInstanceState != null && savedInstanceState.getString(SAVED_FILTER_TAG) != null) {
-            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
+        title = WordUtils.capitalizeFully(args.getString(ARG_TITLE_TAG));
+        if (title != null) {
+            getActivity().setTitle(title);
         }
+
+        final String campus = args.getString(ARG_CAMPUS_TAG);
+        final String level = args.getString(ARG_LEVEL_TAG);
+        final String semester = args.getString(ARG_SEMESTER_TAG);
+        final String subjectCode = args.getString(ARG_SUBJECT_TAG);
+
+        mAdapter = new ScheduleAdapter(new ArrayList<>(), R.layout.row_course);
+        mAdapter.getPositionClicks()
+            .map(course ->
+                SOCSections.createArgs(course.getDisplayTitle(), campus,  semester, course)
+            )
+            .subscribe(this::switchFragments, this::logError);
 
         // Start loading courses
         mLoading = true;
-        getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
+        RutgersAPI.service.getSOCIndex(semester, campus, level)
+            .flatMap(index -> SOCAPI.service.getCourses(semester, campus, level, subjectCode)
+                .map(courses -> new CourseData(index.getSubjectByCode(subjectCode), courses))
+            )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .subscribe(courseData -> {
+                reset();
+
+                mAdapter.addAll(courseData.getCourses());
+                title = WordUtils.capitalizeFully(courseData.getSubject().getDisplayTitle());
+                getActivity().setTitle(title);
+            }, this::logError);
     }
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_search_stickylist_progress,
-                CreateArgs.builder().toolbarRes(R.id.toolbar_search).build());
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
 
         if (mLoading) showProgressCircle();
 
-        final Bundle args = getArguments();
+        if (title != null) {
+            getActivity().setTitle(title);
+        }
 
-        final String semester = args.getString(ARG_SEMESTER_TAG);
-        final String campus = args.getString(ARG_CAMPUS_TAG);
-
-        mFilterEditText = (EditText) v.findViewById(R.id.search_box);
-
-        final StickyListHeadersListView listView = (StickyListHeadersListView) v.findViewById(R.id.stickyList);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Course clickedCourse = (Course) parent.getItemAtPosition(position);
-
-                Bundle newArgs = SOCSections.createArgs(clickedCourse.getDisplayTitle(), campus,  semester, clickedCourse);
-                switchFragments(newArgs);
-            }
-        });
-
-        // Search text listener
-        mFilterEditText.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Set filter for list adapter
-                mFilterString = s.toString().trim();
-                mAdapter.getFilter().filter(mFilterString);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-
-        });
+        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
+        recyclerView.setAdapter(mAdapter);
 
         return v;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle options button
-        if (item.getItemId() == R.id.search_button_toolbar) {
-            if (mFilterEditText.getVisibility() == View.VISIBLE) {
-                mFilterEditText.setVisibility(View.GONE);
-                mFilterEditText.setText("");
-                AppUtils.closeKeyboard(getActivity());
-            } else {
-                mFilterEditText.setVisibility(View.VISIBLE);
-                mFilterEditText.requestFocus();
-                AppUtils.openKeyboard(getActivity());
-            }
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -181,47 +163,6 @@ public class SOCCourses extends BaseChannelFragment implements LoaderManager.Loa
         linkArgs.add(args.getString(ARG_SEMESTER_TAG));
         linkArgs.add(args.getString(ARG_SUBJECT_TAG));
         return new Link("soc", linkArgs, getLinkTitle());
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (mFilterEditText != null) outState.putString(SAVED_FILTER_TAG, mFilterString);
-    }
-
-    @Override
-    public Loader<CoursesLoader.CourseData> onCreateLoader(int id, Bundle args) {
-        final String campus = args.getString(ARG_CAMPUS_TAG);
-        final String level = args.getString(ARG_LEVEL_TAG);
-        final String semester = args.getString(ARG_SEMESTER_TAG);
-        final String subjectCode = args.getString(ARG_SUBJECT_TAG);
-
-        return new CoursesLoader(getContext(), campus, level, semester, subjectCode);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<CoursesLoader.CourseData> loader, CoursesLoader.CourseData data) {
-        // If response is empty assume that there was an error
-        reset();
-
-        if (data == null) {
-            AppUtils.showFailedLoadToast(getContext());
-            return;
-        }
-
-        mAdapter.addAllCourses(data.getCourses());
-        final Activity activity = getActivity();
-        if (activity != null) {
-            activity.setTitle(data.getSubject().getDisplayTitle());
-        }
-
-        // Re-apply filter
-        if (mFilterString != null && !mFilterString.isEmpty()) mAdapter.getFilter().filter(mFilterString);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<CoursesLoader.CourseData> loader) {
-        reset();
     }
 
     private void reset() {

@@ -1,3 +1,2 @@
-include ':app', ':PagerSlidingTabStrip'
+include ':app'
 include 'ListViewAnimations:lib-core', 'ListViewAnimations:lib-core-slh', 'ListViewAnimations:lib-manipulation'
-project(':PagerSlidingTabStrip').projectDir = new File('libs/pagerslidingtabstrip/library')

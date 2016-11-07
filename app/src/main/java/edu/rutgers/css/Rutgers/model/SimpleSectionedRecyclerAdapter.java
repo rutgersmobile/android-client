@@ -32,24 +32,41 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
     private final PublishSubject<IndexedItem<T>> onClickSubject = PublishSubject.create();
 
     private final Object mLock = new Object();
-    private List<FilteredSection> filteredSections;
+    private List<FilteredSection<T>> filteredSections;
     private SectionAdapterFilter filter;
+
+    protected void setFilteredSections(List<FilteredSection<T>> filteredSections) {
+        this.filteredSections = filteredSections;
+        notifyDataSetChanged();
+    }
 
     public static class IndexedItem<U> {
         private U item;
-        private int index;
+        private int section;
+        private int relativePosition;
+        private int absolutePosition;
 
-        public IndexedItem(U item, int index) {
+        public IndexedItem(U item, int section, int relativePosition, int absolutePosition) {
             this.item = item;
-            this.index = index;
+            this.section = section;
+            this.relativePosition = relativePosition;
+            this.absolutePosition = absolutePosition;
         }
 
         public U getItem() {
             return item;
         }
 
-        public int getIndex() {
-            return index;
+        public int getSection() {
+            return section;
+        }
+
+        public int getRelativePosition() {
+            return relativePosition;
+        }
+
+        public int getAbsolutePosition() {
+            return absolutePosition;
         }
     }
 
@@ -122,8 +139,12 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
     @Override
     public void onBindViewHolder(ViewHolder holder, int section, int relativePosition, int absolutePosition) {
         final T item = getItem(section, relativePosition);
-        holder.getTextView().setText(item.toString());
-        holder.itemView.setOnClickListener(view -> getOnClickSubject().onNext(new IndexedItem<>(item, absolutePosition)));
+        holder.getTextView().setText(getItemRepresentation(item));
+        holder.itemView.setOnClickListener(view -> getOnClickSubject().onNext(new IndexedItem<>(item, section, relativePosition, absolutePosition)));
+    }
+
+    protected String getItemRepresentation(T item) {
+        return item.toString();
     }
 
     @Override
@@ -161,9 +182,22 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
         return onClickSubject;
     }
 
-    private class FilteredSection {
-        SimpleSection<T> section;
-        ArrayList<T> matches;
+    protected static class FilteredSection<U> {
+        private SimpleSection<U> section;
+        private ArrayList<U> matches;
+
+        public FilteredSection(SimpleSection<U> section, ArrayList<U> matches) {
+            this.section = section;
+            this.matches = matches;
+        }
+
+        public SimpleSection<U> getSection() {
+            return section;
+        }
+
+        public ArrayList<U> getMatches() {
+            return matches;
+        }
     }
 
     private class SectionAdapterFilter extends Filter {
@@ -175,46 +209,46 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
             if (StringUtils.isBlank(prefix)) {
                 results.values = null;
                 results.count = 0;
-            } else {
-                final ArrayList<SimpleSection<T>> originalSections;
-                synchronized (mLock) {
-                    originalSections = new ArrayList<>(sections);
-                }
 
-                final ArrayList<FilteredSection> filteredSections = new ArrayList<>();
+                return results;
+            }
 
-                // Filter the items of each section.
-                for (SimpleSection<T> section: originalSections) {
-                    final ArrayList<T> sectionMatches = new ArrayList<>();
-                    for (T value : section.getItems()) {
-                        final String valueText = value.toString();
+            final ArrayList<SimpleSection<T>> originalSections;
+            synchronized (mLock) {
+                originalSections = new ArrayList<>(sections);
+            }
 
-                        if (StringUtils.startsWithIgnoreCase(valueText, prefix)) {
-                            sectionMatches.add(value);
-                        } else {
-                            final String[] words = StringUtils.split(valueText, ' ');
+            final ArrayList<FilteredSection> filteredSections = new ArrayList<>();
 
-                            for (String word: words) {
-                                if (StringUtils.startsWithIgnoreCase(word, prefix)) {
-                                    sectionMatches.add(value);
-                                    break;
-                                }
+            // Filter the items of each section.
+            for (SimpleSection<T> section: originalSections) {
+                final ArrayList<T> sectionMatches = new ArrayList<>();
+                for (T value : section.getItems()) {
+                    final String valueText = value.toString();
+
+                    if (StringUtils.startsWithIgnoreCase(valueText, prefix)) {
+                        sectionMatches.add(value);
+                    } else {
+                        final String[] words = StringUtils.split(valueText, ' ');
+
+                        for (String word: words) {
+                            if (StringUtils.startsWithIgnoreCase(word, prefix)) {
+                                sectionMatches.add(value);
+                                break;
                             }
                         }
                     }
-
-                    // If this section had matches, include it.
-                    if (!sectionMatches.isEmpty()) {
-                        FilteredSection filteredSection = new FilteredSection();
-                        filteredSection.section = section;
-                        filteredSection.matches = sectionMatches;
-                        filteredSections.add(filteredSection);
-                    }
                 }
 
-                results.values = filteredSections;
-                results.count = filteredSections.size();
+                // If this section had matches, include it.
+                if (!sectionMatches.isEmpty()) {
+                    FilteredSection filteredSection = new FilteredSection<>(section, sectionMatches);
+                    filteredSections.add(filteredSection);
+                }
             }
+
+            results.values = filteredSections;
+            results.count = filteredSections.size();
 
             return results;
         }
@@ -223,13 +257,11 @@ public class SimpleSectionedRecyclerAdapter<T> extends SectionedRecyclerViewAdap
         protected void publishResults(CharSequence prefix, Filter.FilterResults filterResults) {
             if (filterResults.values == null) {
                 // The constraint was null or blank; show original values.
-                filteredSections = null;
+                setFilteredSections(null);
             } else {
                 // Show filter results
-                filteredSections = (List<FilteredSection>) filterResults.values;
+                setFilteredSections((List<FilteredSection<T>>) filterResults.values);
             }
-
-            notifyDataSetChanged();
         }
     }
 }
