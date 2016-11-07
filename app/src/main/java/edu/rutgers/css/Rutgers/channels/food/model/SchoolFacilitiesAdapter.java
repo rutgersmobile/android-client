@@ -6,7 +6,7 @@ import android.support.v4.content.ContextCompat;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
+import edu.rutgers.css.Rutgers.api.model.food.DiningMenu;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 

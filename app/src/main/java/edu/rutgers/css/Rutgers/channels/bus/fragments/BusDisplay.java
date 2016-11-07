@@ -19,12 +19,12 @@ import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.model.NextbusAPI;
-import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
-import edu.rutgers.css.Rutgers.api.bus.model.Predictions;
-import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
-import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
+import edu.rutgers.css.Rutgers.api.model.bus.Predictions;
+import edu.rutgers.css.Rutgers.api.model.bus.route.RouteStub;
+import edu.rutgers.css.Rutgers.api.model.bus.stop.StopStub;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;

@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ApiRequest;
+import edu.rutgers.css.Rutgers.oldapi.ApiRequest;
 import edu.rutgers.css.Rutgers.model.Motd;
 import edu.rutgers.css.Rutgers.model.MotdAPI;
 import edu.rutgers.css.Rutgers.model.SimpleAsyncLoader;

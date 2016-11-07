@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.bus.model.Prediction;
+import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
 
 /**
  * Bus arrival time predictions adapter.

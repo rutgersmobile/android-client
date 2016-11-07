@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.api.places.model.Place;
+import edu.rutgers.css.Rutgers.api.model.places.Place;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
-import edu.rutgers.css.Rutgers.model.RutgersAPI;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import rx.observables.BlockingObservable;
 
 /**

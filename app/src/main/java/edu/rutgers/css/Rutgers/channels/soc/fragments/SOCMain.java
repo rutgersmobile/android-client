@@ -21,16 +21,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
-import edu.rutgers.css.Rutgers.api.soc.model.Course;
-import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
-import edu.rutgers.css.Rutgers.api.soc.model.Semesters;
-import edu.rutgers.css.Rutgers.api.soc.model.Subject;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.model.soc.ScheduleAPI;
+import edu.rutgers.css.Rutgers.api.model.soc.Course;
+import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
+import edu.rutgers.css.Rutgers.api.model.soc.Semesters;
+import edu.rutgers.css.Rutgers.api.model.soc.Subject;
 import edu.rutgers.css.Rutgers.channels.soc.model.SectionedScheduleAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.model.RutgersAPI;
-import edu.rutgers.css.Rutgers.model.SOCAPI;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
+import edu.rutgers.css.Rutgers.api.SOCAPI;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -223,7 +223,7 @@ public class SOCMain
         Observable.merge(
             Observable.just(new ScheduleArgHolder(mLevel, mCampus, mSemester)),
             argHolderPublishSubject.asObservable()
-        ).observeOn(Schedulers.io()).flatMap(scheduleArgHolder -> RutgersAPI.service.getSemesters()
+        ).observeOn(Schedulers.io()).flatMap(scheduleArgHolder -> RutgersAPI.getSemesters()
             .flatMap(semesters -> {
                 final String levelArg = scheduleArgHolder.getLevel();
                 final String campusArg = scheduleArgHolder.getCampus();
@@ -246,8 +246,8 @@ public class SOCMain
                     ? semesterArg
                     : defaultSemester;
 
-                return RutgersAPI.service.getSOCIndex(semester, campusArg, levelArg).flatMap(socIndex ->
-                    SOCAPI.service.getSubjects(semester, campusArg, levelArg).map(subjects ->
+                return RutgersAPI.getSOCIndex(semester, campusArg, levelArg).flatMap(socIndex ->
+                    SOCAPI.getSubjects(semester, campusArg, levelArg).map(subjects ->
                         new SubjectHolder(socIndex, subjects, semesters, semester, defaultSemester)
                     )
                 );

@@ -13,8 +13,8 @@ import java.util.Collection;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.cinema.model.Movie;
-import edu.rutgers.css.Rutgers.api.cinema.model.Showing;
+import edu.rutgers.css.Rutgers.api.model.cinema.Movie;
+import edu.rutgers.css.Rutgers.api.model.cinema.Showing;
 
 /**
  * Adapter for movie times

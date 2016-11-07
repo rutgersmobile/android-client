@@ -14,10 +14,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import edu.rutgers.css.Rutgers.api.soc.Registerable;
-import edu.rutgers.css.Rutgers.api.soc.model.Course;
-import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
-import edu.rutgers.css.Rutgers.api.soc.model.Subject;
+import edu.rutgers.css.Rutgers.api.model.soc.Registerable;
+import edu.rutgers.css.Rutgers.api.model.soc.Course;
+import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
+import edu.rutgers.css.Rutgers.api.model.soc.Subject;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;

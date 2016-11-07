@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.food.model.DiningMenu;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.model.food.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.model.RutgersAPI;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -118,7 +118,7 @@ public class FoodMain extends BaseChannelFragment {
             new SimpleSection<>(camCampusFullString, gateway);
 
         // start loading dining menus
-        RutgersAPI.service.getDiningHalls()
+        RutgersAPI.getDiningHalls()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())

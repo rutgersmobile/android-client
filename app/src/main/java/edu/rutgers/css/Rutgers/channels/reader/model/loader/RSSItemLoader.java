@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.api.ApiRequest;
-import edu.rutgers.css.Rutgers.api.ParseException;
+import edu.rutgers.css.Rutgers.oldapi.ApiRequest;
+import edu.rutgers.css.Rutgers.oldapi.ParseException;
 import edu.rutgers.css.Rutgers.channels.reader.fragments.RSSReader;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSItem;
 import edu.rutgers.css.Rutgers.channels.reader.model.RSSOrAtomParser;

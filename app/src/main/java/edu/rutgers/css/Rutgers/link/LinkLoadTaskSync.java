@@ -6,9 +6,9 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.model.NextbusAPI;
-import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.model.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusMain;
 import edu.rutgers.css.Rutgers.channels.food.fragments.FoodHall;

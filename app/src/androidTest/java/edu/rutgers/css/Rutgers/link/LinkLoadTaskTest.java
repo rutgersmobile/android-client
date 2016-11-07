@@ -2,11 +2,9 @@ package edu.rutgers.css.Rutgers.link;
 
 import android.os.Bundle;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.v7.transition.ActionBarTransition;
 
 import junit.framework.Assert;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,11 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
 import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
-import edu.rutgers.css.Rutgers.channels.food.fragments.FoodHall;
 import edu.rutgers.css.Rutgers.model.Channel;
 
 /**

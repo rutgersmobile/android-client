@@ -11,8 +11,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.api.ParseException;
-import edu.rutgers.css.Rutgers.api.XmlParser;
+import edu.rutgers.css.Rutgers.oldapi.ParseException;
+import edu.rutgers.css.Rutgers.oldapi.XmlParser;
 import okhttp3.Response;
 
 /**

@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.athletics.model.AthleticsGame;
+import edu.rutgers.css.Rutgers.api.model.athletics.AthleticsGame;
 
 /**
  * Recycler adapter for AthleticsGames backed by a list.

@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.soc.model.Course;
-import edu.rutgers.css.Rutgers.api.soc.model.Section;
+import edu.rutgers.css.Rutgers.api.model.soc.Course;
+import edu.rutgers.css.Rutgers.api.model.soc.Section;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import rx.Observable;
 import rx.subjects.PublishSubject;

@@ -2,22 +2,16 @@ package edu.rutgers.css.Rutgers;
 
 import android.app.Application;
 
-import com.google.gson.GsonBuilder;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
-import edu.rutgers.css.Rutgers.api.Analytics;
-import edu.rutgers.css.Rutgers.api.bus.model.AgencyConfig;
-import edu.rutgers.css.Rutgers.api.bus.parsers.AgencyConfigDeserializer;
-import edu.rutgers.css.Rutgers.api.soc.model.SOCIndex;
-import edu.rutgers.css.Rutgers.api.soc.parsers.SOCIndexDeserializer;
+import edu.rutgers.css.Rutgers.api.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
+import edu.rutgers.css.Rutgers.api.SOCAPI;
+import edu.rutgers.css.Rutgers.oldapi.Analytics;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
@@ -30,12 +24,6 @@ public class RutgersApplication extends Application {
     public static OkHttpClient getClient() {
         return client;
     }
-
-    public static Retrofit retrofit;
-
-    public static Retrofit nbRetrofit;
-
-    public static Retrofit socRetrofit;
 
     public void onCreate() {
         super.onCreate();
@@ -53,33 +41,9 @@ public class RutgersApplication extends Application {
             .addInterceptor(interceptor)
             .build();
 
-        // AgencyConfig has a special deserializer because the JSON is a weird format
-        retrofit = new Retrofit.Builder()
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create(
-                new GsonBuilder()
-                    .registerTypeAdapter(AgencyConfig.class, new AgencyConfigDeserializer())
-                    .registerTypeAdapter(SOCIndex.class, new SOCIndexDeserializer())
-                    .create()
-            ))
-            .client(client)
-            .baseUrl(Config.API_BASE)
-            .build();
-
-        // retrofit instance just for Nextbus
-        nbRetrofit = new Retrofit.Builder()
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .addConverterFactory(SimpleXmlConverterFactory.create())
-            .client(client)
-            .baseUrl(Config.NB_API_BASE)
-            .build();
-
-        socRetrofit = new Retrofit.Builder()
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
-            .baseUrl(Config.SOC_API_BASE)
-            .build();
+        RutgersAPI.simpleSetup(client, Config.API_BASE);
+        NextbusAPI.simpleSetup(client, Config.NB_API_BASE);
+        SOCAPI.simpleSetup(client, Config.SOC_API_BASE);
 
         Picasso picasso = new Picasso.Builder(this)
             .downloader(new OkHttp3Downloader(client))

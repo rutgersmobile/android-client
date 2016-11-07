@@ -13,7 +13,7 @@ import java.net.URLDecoder;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import edu.rutgers.css.Rutgers.api.ApiRequest;
+import edu.rutgers.css.Rutgers.oldapi.ApiRequest;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableElement;

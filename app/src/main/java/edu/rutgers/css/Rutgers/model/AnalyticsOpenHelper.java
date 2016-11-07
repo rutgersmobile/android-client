@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import edu.rutgers.css.Rutgers.api.Analytics;
+import edu.rutgers.css.Rutgers.oldapi.Analytics;
 
 /**
  * Created by jamchamb on 8/6/14.

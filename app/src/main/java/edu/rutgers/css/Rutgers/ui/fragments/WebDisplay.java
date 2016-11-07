@@ -28,7 +28,7 @@ import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;

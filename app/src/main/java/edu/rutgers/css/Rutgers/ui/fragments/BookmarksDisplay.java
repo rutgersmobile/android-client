@@ -13,7 +13,7 @@ import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
 import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.OnItemMovedListener;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.model.BookmarkAdapter;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import io.github.yavski.fabspeeddial.FabSpeedDial;

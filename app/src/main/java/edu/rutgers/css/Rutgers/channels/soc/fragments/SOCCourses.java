@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.soc.model.Course;
-import edu.rutgers.css.Rutgers.api.soc.model.Subject;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
+import edu.rutgers.css.Rutgers.api.SOCAPI;
+import edu.rutgers.css.Rutgers.api.model.soc.Course;
+import edu.rutgers.css.Rutgers.api.model.soc.Subject;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.model.RutgersAPI;
-import edu.rutgers.css.Rutgers.model.SOCAPI;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import rx.android.schedulers.AndroidSchedulers;
@@ -119,8 +119,8 @@ public class SOCCourses extends BaseChannelFragment {
 
         // Start loading courses
         mLoading = true;
-        RutgersAPI.service.getSOCIndex(semester, campus, level)
-            .flatMap(index -> SOCAPI.service.getCourses(semester, campus, level, subjectCode)
+        RutgersAPI.getSOCIndex(semester, campus, level)
+            .flatMap(index -> SOCAPI.getCourses(semester, campus, level, subjectCode)
                 .map(courses -> new CourseData(index.getSubjectByCode(subjectCode), courses))
             )
             .subscribeOn(Schedulers.io())

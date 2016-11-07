@@ -17,14 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.soc.ScheduleAPI;
-import edu.rutgers.css.Rutgers.api.soc.model.Course;
-import edu.rutgers.css.Rutgers.api.soc.model.ScheduleText;
-import edu.rutgers.css.Rutgers.api.soc.model.Section;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.model.soc.ScheduleAPI;
+import edu.rutgers.css.Rutgers.api.model.soc.Course;
+import edu.rutgers.css.Rutgers.api.model.soc.ScheduleText;
+import edu.rutgers.css.Rutgers.api.model.soc.Section;
 import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.model.SOCAPI;
+import edu.rutgers.css.Rutgers.api.SOCAPI;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
@@ -153,7 +153,7 @@ public class SOCSections extends BaseChannelFragment {
         final String semester = args.getString(ARG_SEMESTER_TAG);
         final String subject = args.getString(ARG_SUBJECT_TAG);
         final String courseCode = args.getString(ARG_COURSE_TAG);
-        SOCAPI.service.getCourse(semester, campus, subject, courseCode)
+        SOCAPI.getCourse(semester, campus, subject, courseCode)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())

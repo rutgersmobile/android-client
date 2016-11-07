@@ -4,7 +4,7 @@ import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 
-import edu.rutgers.css.Rutgers.api.ApiRequest;
+import edu.rutgers.css.Rutgers.oldapi.ApiRequest;
 
 /**
  * Class for getting the message of the day from the Rutgers API

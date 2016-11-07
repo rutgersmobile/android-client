@@ -21,9 +21,9 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.BuildConfig;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.model.NextbusAPI;
-import edu.rutgers.css.Rutgers.api.bus.model.stop.StopGroup;
-import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
+import edu.rutgers.css.Rutgers.api.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.model.bus.stop.StopGroup;
+import edu.rutgers.css.Rutgers.api.model.bus.stop.StopStub;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;

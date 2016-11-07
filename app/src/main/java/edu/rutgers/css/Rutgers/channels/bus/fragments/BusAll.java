@@ -17,10 +17,10 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.model.NextbusAPI;
-import edu.rutgers.css.Rutgers.api.bus.NextbusItem;
-import edu.rutgers.css.Rutgers.api.bus.model.route.RouteStub;
-import edu.rutgers.css.Rutgers.api.bus.model.stop.StopStub;
+import edu.rutgers.css.Rutgers.api.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.model.bus.NextbusItem;
+import edu.rutgers.css.Rutgers.api.model.bus.route.RouteStub;
+import edu.rutgers.css.Rutgers.api.model.bus.stop.StopStub;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;

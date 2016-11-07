@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.soc.Titleable;
-import edu.rutgers.css.Rutgers.api.soc.model.Section;
+import edu.rutgers.css.Rutgers.api.model.soc.Titleable;
+import edu.rutgers.css.Rutgers.api.model.soc.Section;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
