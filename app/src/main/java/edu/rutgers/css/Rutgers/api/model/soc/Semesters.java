@@ -14,6 +14,9 @@ public class Semesters {
         this.defaultSemester = defaultSemester;
     }
 
+    /**
+     * Strings of the form Month + year of semester, ex. "092016"
+     */
     public List<String> getSemesters() {
         return semesters;
     }

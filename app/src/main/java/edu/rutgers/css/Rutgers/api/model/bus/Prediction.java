@@ -34,6 +34,9 @@ public final class Prediction implements Serializable, ParentListItem {
         return title;
     }
 
+    /**
+     * Readable representation of prediction direction
+     */
     public String getDirection() {
         return direction;
     }
@@ -42,6 +45,9 @@ public final class Prediction implements Serializable, ParentListItem {
         this.direction = direction;
     }
 
+    /**
+     * List of predicted arrival times in minutes
+     */
     public List<Integer> getMinutes() {
         return minutes;
     }

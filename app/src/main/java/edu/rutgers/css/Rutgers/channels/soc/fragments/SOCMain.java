@@ -22,7 +22,6 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.model.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.api.model.soc.Course;
 import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
 import edu.rutgers.css.Rutgers.api.model.soc.Semesters;
@@ -198,8 +197,8 @@ public class SOCMain
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         defaultSettings(sharedPref);
-        final String prefLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
-        final String prefCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
+        final String prefLevel = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, SOCAPI.CODE_LEVEL_UNDERGRAD);
+        final String prefCampus = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, SOCAPI.CODE_CAMPUS_NB);
         final String prefSemester = sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null);
 
         final Bundle args = getArguments();
@@ -397,13 +396,13 @@ public class SOCMain
 
             String temp;
 
-            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, ScheduleAPI.CODE_CAMPUS_NB);
+            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_CAMPUS, SOCAPI.CODE_CAMPUS_NB);
             if (!mCampus.equals(temp)) {
                 somethingChanged = true;
                 mCampus = temp;
             }
 
-            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, ScheduleAPI.CODE_LEVEL_UNDERGRAD);
+            temp = sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, SOCAPI.CODE_LEVEL_UNDERGRAD);
             if (!mLevel.equals(temp)) {
                 somethingChanged = true;
                 mLevel = temp;
@@ -452,15 +451,15 @@ public class SOCMain
         String userLevel = sharedPref.getString(PrefUtils.KEY_PREF_USER_TYPE, getString(R.string.role_undergrad_tag));
 
         // Pick default campus code based on prefs (fall back to New Brunswick)
-        if (userHome.equals(getString(R.string.campus_nb_tag))) campus = ScheduleAPI.CODE_CAMPUS_NB;
-        else if (userHome.equals(getString(R.string.campus_nwk_tag))) campus = ScheduleAPI.CODE_CAMPUS_NWK;
-        else if (userHome.equals(getString(R.string.campus_cam_tag))) campus = ScheduleAPI.CODE_CAMPUS_CAM;
-        else campus = ScheduleAPI.CODE_CAMPUS_NB;
+        if (userHome.equals(getString(R.string.campus_nb_tag))) campus = SOCAPI.CODE_CAMPUS_NB;
+        else if (userHome.equals(getString(R.string.campus_nwk_tag))) campus = SOCAPI.CODE_CAMPUS_NWK;
+        else if (userHome.equals(getString(R.string.campus_cam_tag))) campus = SOCAPI.CODE_CAMPUS_CAM;
+        else campus = SOCAPI.CODE_CAMPUS_NB;
 
         // Pick default user-level code based on prefs (fall back to Undergrad)
-        if (userLevel.equals(getString(R.string.role_undergrad_tag))) level = ScheduleAPI.CODE_LEVEL_UNDERGRAD;
-        else if (userLevel.equals(getString(R.string.role_grad_tag))) level = ScheduleAPI.CODE_LEVEL_GRAD;
-        else level = ScheduleAPI.CODE_LEVEL_UNDERGRAD;
+        if (userLevel.equals(getString(R.string.role_undergrad_tag))) level = SOCAPI.CODE_LEVEL_UNDERGRAD;
+        else if (userLevel.equals(getString(R.string.role_grad_tag))) level = SOCAPI.CODE_LEVEL_GRAD;
+        else level = SOCAPI.CODE_LEVEL_UNDERGRAD;
 
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, campus);
@@ -470,7 +469,7 @@ public class SOCMain
 
     private void setScheduleTitle() {
         if (mSemester != null && mCampus != null && mLevel != null) {
-            final String title = ScheduleAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel;
+            final String title = SOCAPI.translateSemester(mSemester) + " " + mCampus + " " + mLevel;
             getActivity().setTitle(title);
         }
     }

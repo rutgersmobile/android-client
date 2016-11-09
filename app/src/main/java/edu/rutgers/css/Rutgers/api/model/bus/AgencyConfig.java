@@ -31,26 +31,44 @@ public final class AgencyConfig {
         this.agencyTag = agencyTag;
     }
 
+    /**
+     * Get mapping of Route tags to route objects
+     */
     public HashMap<String, Route> getRoutes() {
         return routes;
     }
 
+    /**
+     * Get mapping of Stop tags to stop objects
+     */
     public HashMap<String, Stop> getStops() {
         return stops;
     }
 
+    /**
+     * Mapping of titles to a list of stops
+     */
     public HashMap<String, StopGroup> getStopsByTitle() {
         return stopsByTitle;
     }
 
+    /**
+     * All stops in sorted order
+     */
     public List<StopStub> getSortedStops() {
         return sortedStops;
     }
 
+    /**
+     * All routes in sorted order
+     */
     public List<RouteStub> getSortedRoutes() {
         return sortedRoutes;
     }
 
+    /**
+     * Nextbus agency tag. Probably "rutgers"
+     */
     public String getAgencyTag() {
         return agencyTag;
     }

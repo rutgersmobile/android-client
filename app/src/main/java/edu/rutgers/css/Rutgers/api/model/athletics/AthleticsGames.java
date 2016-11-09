@@ -14,6 +14,10 @@ public final class AthleticsGames {
         this.games = games;
     }
 
+    /**
+     * Get readable name of sport
+     * @return A string name, ex. "Baseball"
+     */
     public String getDescription() {
         return description;
     }

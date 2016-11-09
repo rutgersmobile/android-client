@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.model.bus.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.model.bus.NextbusItem;
 
 /**
@@ -22,6 +23,9 @@ public final class StopGroup implements NextbusItem {
         this.agencyTag = agencyTag;
     }
 
+    /**
+     * Readable representation of stop
+     */
     @Override
     public String getTitle() {
         return title;
@@ -31,6 +35,10 @@ public final class StopGroup implements NextbusItem {
         this.title = title;
     }
 
+    /**
+     * List of all stops in the group
+     * @see AgencyConfig#getStops()
+     */
     public List<String> getStopTags() {
         return stopTags;
     }

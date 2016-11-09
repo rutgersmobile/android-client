@@ -155,7 +155,9 @@ public class PlacesDisplay extends BaseChannelFragment {
         final String officesHeader = getContext().getString(R.string.offices_header);
         final String nearbyHeader = getContext().getString(R.string.nearby_bus_header);
 
-        RutgersAPI.getPlace(args.getString(ARG_PLACEKEY_TAG))
+        final String placeKey = args.getString(ARG_PLACEKEY_TAG);
+
+        RutgersAPI.getPlace(placeKey)
             .flatMap(place -> getStopsNearPlace(place).map(stopGroups -> {
                 final List<RMenuRow> rows = new ArrayList<>();
                 if (place.getLocation() != null) {

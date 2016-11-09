@@ -1,6 +1,6 @@
 package edu.rutgers.css.Rutgers;
 
-import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
@@ -15,7 +15,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
 
-public class RutgersApplication extends Application {
+public class RutgersApplication extends MultiDexApplication {
 
     private static final String TAG = "RutgersApplication";
 
@@ -38,7 +38,7 @@ public class RutgersApplication extends Application {
 
         client = new OkHttpClient.Builder()
             .cache(new Cache(getCacheDir(), 10 * 1024 * 1024))
-            .addInterceptor(interceptor)
+//            .addInterceptor(interceptor)
             .build();
 
         RutgersAPI.simpleSetup(client, Config.API_BASE);

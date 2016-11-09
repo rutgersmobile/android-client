@@ -52,10 +52,19 @@ public final class NextbusAPI {
 
     private static NextbusService service;
 
+    /**
+     * Set the retrofit service that will be used to make requests
+     * @param service A retrofit service for making calls
+     */
     public static void setService(NextbusService service) {
         NextbusAPI.service = service;
     }
 
+    /**
+     * Get the service previously set. You probably don't want to use this. Instead just call the
+     * other static, public methods in the class
+     * @return Service for making Rutgers API calls
+     */
     public static NextbusService getService() {
         if (service == null) {
             throw new IllegalStateException(NOT_SET_UP_MESSAGE);
@@ -64,6 +73,12 @@ public final class NextbusAPI {
         return service;
     }
 
+    /**
+     * An easy way to set up the API for making calls. This will correctly configure the service
+     * before using it.
+     * @param client You should use the same client for all APIs. This will do actual HTTP work.
+     * @param apiBase Base url for the api. Probably something like "http://webservices.nextbus.com/"
+     */
     public static void simpleSetup(OkHttpClient client, String apiBase) {
         if (service == null) {
             final Retrofit nbRetrofit = new Retrofit.Builder()
@@ -81,12 +96,22 @@ public final class NextbusAPI {
         return getService().predict(stops);
     }
 
+    /**
+     * Returns an agency config for the given agency
+     * @param agency An agency string like "nb" or "nwk"
+     * @return All route and stop information for the given agency
+     */
     public static Observable<AgencyConfig> configForAgency(final String agency) {
         return AGENCY_NB.equals(agency) || AGENCY_RUTGERS.equals(agency)
             ? RutgersAPI.getNewBrunswickAgencyConfig()
             : RutgersAPI.getNewarkAgencyConfig();
     }
 
+    /**
+     * Get stub information for currently active stops
+     * @param agency An agency string like "nb" or "nwk"
+     * @return Stub information for active stops
+     */
     public static Observable<ActiveStops> activeStopsForAgency(final String agency) {
         return (AGENCY_NB.equals(agency) || AGENCY_RUTGERS.equals(agency)
             ? RutgersAPI.getNewBrunswickActiveStops()

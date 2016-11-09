@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.model.bus.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.model.bus.NextbusItem;
 
 /**
@@ -27,6 +28,9 @@ public final class Stop implements NextbusItem {
         this.agencyTag = agencyTag;
     }
 
+    /**
+     * Readable title for stop
+     */
     @Override
     public String getTitle() {
         return title;
@@ -36,14 +40,24 @@ public final class Stop implements NextbusItem {
         this.title = title;
     }
 
+    /**
+     * List of all routes this stop appears on
+     * @see AgencyConfig#getRoutes()
+     */
     public List<String> getRouteTags() {
         return routeTags;
     }
 
+    /**
+     * String representation of decimal latitude of stop location
+     */
     public String getLatitude() {
         return latitude;
     }
 
+    /**
+     * String representation of decimal longitude of stop location
+     */
     public String getLongitude() {
         return longitude;
     }

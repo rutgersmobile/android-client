@@ -6,9 +6,9 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.SOCAPI;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.NextbusAPI;
-import edu.rutgers.css.Rutgers.api.model.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusMain;
 import edu.rutgers.css.Rutgers.channels.food.fragments.FoodHall;
@@ -166,14 +166,14 @@ public class LinkLoadTaskSync {
         // take out everything that isn't a number
         for (final String part : caps) {
             switch (part.toUpperCase()) {
-                case ScheduleAPI.CODE_CAMPUS_NB:
-                case ScheduleAPI.CODE_CAMPUS_CAM:
-                case ScheduleAPI.CODE_CAMPUS_NWK:
-                case ScheduleAPI.CODE_CAMPUS_ONLINE:
+                case SOCAPI.CODE_CAMPUS_NB:
+                case SOCAPI.CODE_CAMPUS_CAM:
+                case SOCAPI.CODE_CAMPUS_NWK:
+                case SOCAPI.CODE_CAMPUS_ONLINE:
                     campusCode = part;
                     break;
-                case ScheduleAPI.CODE_LEVEL_UNDERGRAD:
-                case ScheduleAPI.CODE_LEVEL_GRAD:
+                case SOCAPI.CODE_LEVEL_UNDERGRAD:
+                case SOCAPI.CODE_LEVEL_GRAD:
                     levelCode = part;
                     break;
                 default:

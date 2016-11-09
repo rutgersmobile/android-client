@@ -18,9 +18,8 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.model.soc.ScheduleAPI;
 import edu.rutgers.css.Rutgers.api.model.soc.Course;
-import edu.rutgers.css.Rutgers.api.model.soc.ScheduleText;
+import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
 import edu.rutgers.css.Rutgers.api.model.soc.Section;
 import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
@@ -127,7 +126,7 @@ public class SOCSections extends BaseChannelFragment {
                     if (StringUtils.isNotBlank(section.getIndex()) && semester != null) {
                         String index = StringUtils.trim(section.getIndex());
                         return Observable.just(
-                            WebDisplay.createArgs("WebReg", ScheduleAPI.getRegistrationLink(semester, index))
+                            WebDisplay.createArgs("WebReg", SOCAPI.getRegistrationLink(semester, index))
                         );
                     } else {
                         Toast.makeText(getActivity(), R.string.soc_error_index, Toast.LENGTH_SHORT).show();

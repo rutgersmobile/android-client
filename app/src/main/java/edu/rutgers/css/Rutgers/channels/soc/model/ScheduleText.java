@@ -1,4 +1,6 @@
-package edu.rutgers.css.Rutgers.api.model.soc;
+package edu.rutgers.css.Rutgers.channels.soc.model;
+
+import edu.rutgers.css.Rutgers.api.model.soc.Titleable;
 
 /**
  * Basic text for for schedule

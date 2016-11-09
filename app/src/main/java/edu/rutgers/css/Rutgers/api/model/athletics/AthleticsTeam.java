@@ -14,14 +14,24 @@ public final class AthleticsTeam {
         this.score = score;
     }
 
+    /**
+     * Name of the team
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Get code for looking up logo in CBS
+     * @return School code, ex. "rutu"
+     */
     public String getCode() {
         return code;
     }
 
+    /**
+     * Get team's score in the game
+     */
     public Integer getScore() {
         return score;
     }

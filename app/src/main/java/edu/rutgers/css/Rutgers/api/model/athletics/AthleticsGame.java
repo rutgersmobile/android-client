@@ -23,26 +23,47 @@ public final class AthleticsGame {
         this.location = location;
     }
 
+    /**
+     * Get readable description of game
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * True if the game is an event
+     */
     public boolean isEvent() {
         return event;
     }
 
+    /**
+     * Get the home team of this game
+     * @return Object representing a team with name and score
+     */
     public AthleticsTeam getHome() {
         return home;
     }
 
+    /**
+     * Get the away team of this game
+     * @return Object representing a team with name and score
+     */
     public AthleticsTeam getAway() {
         return away;
     }
 
+    /**
+     * Get the date / time that a game will start
+     * @return An object that may be just a date without a time
+     */
     public AthleticsDateTime getStart() {
         return start;
     }
 
+    /**
+     * String representation of where the game will take place
+     */
     public String getLocation() {
         return location;
     }

@@ -28,23 +28,38 @@ public class Course implements Registerable, Comparable<Course>, Serializable {
         this.stub = true;
     }
 
+    /**
+     * Readable course name
+     */
     @Override
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Subject that the course is in, ex. "198" for Computer Science
+     */
     public String getSubject() {
         return subject;
     }
 
+    /**
+     * Number of course, ex. "112" for Data Structures
+     */
     public String getCourseNumber() {
         return courseNumber;
     }
 
+    /**
+     * Readable description of course
+     */
     public String getCourseDescription() {
         return courseDescription;
     }
 
+    /**
+     * Readable description of courses needed to take this course
+     */
     public String getPreReqNotes() {
         return preReqNotes;
     }
@@ -53,10 +68,16 @@ public class Course implements Registerable, Comparable<Course>, Serializable {
         return synopsisUrl;
     }
 
+    /**
+     * Number of credits course is worth
+     */
     public float getCredits() {
         return credits;
     }
 
+    /**
+     * All sections with meeting times, instructors, closed/open status and more
+     */
     public List<Section> getSections() {
         return sections;
     }

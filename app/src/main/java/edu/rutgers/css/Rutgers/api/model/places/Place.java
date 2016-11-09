@@ -39,6 +39,9 @@ public final class Place {
         this.location = location;
     }
 
+    /**
+     * Exact geographic location of a place. Also contains address information.
+     */
     public static final class Location {
         private final String name;
         private final String street;
@@ -70,6 +73,9 @@ public final class Place {
             return name;
         }
 
+        /**
+         * Street that the location is on
+         */
         public String getStreet() {
             return street;
         }
@@ -78,30 +84,51 @@ public final class Place {
             return additional;
         }
 
+        /**
+         * City location is in
+         */
         public String getCity() {
             return city;
         }
 
+        /**
+         * State location is in
+         */
         public String getState() {
             return state;
         }
 
+        /**
+         * Abbreviation of state from {@link Location#getState()}
+         */
         public String getStateAbbr() {
             return stateAbbr;
         }
 
+        /**
+         * Get postal / zip code
+         */
         public String getPostalCode() {
             return postalCode;
         }
 
+        /**
+         * Country the place is in
+         */
         public String getCountry() {
             return country;
         }
 
+        /**
+         * Exact latitude of location
+         */
         public double getLatitude() {
             return latitude;
         }
 
+        /**
+         * Exact longitude of location
+         */
         public double getLongitude() {
             return longitude;
         }
@@ -116,10 +143,16 @@ public final class Place {
         return id;
     }
 
+    /**
+     * Readable place name
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Readable description of place
+     */
     public String getDescription() {
         return description;
     }
@@ -132,6 +165,9 @@ public final class Place {
         return buildingID;
     }
 
+    /**
+     * Get the building number of a rutgers place
+     */
     public String getBuildingNumber() {
         return buildingNumber;
     }
@@ -144,14 +180,23 @@ public final class Place {
         return campusCode;
     }
 
+    /**
+     * Readable name of campus building is on
+     */
     public String getCampusName() {
         return campusName;
     }
 
+    /**
+     * Offices located in this building
+     */
     public List<String> getOffices() {
         return offices;
     }
 
+    /**
+     * Exact geographic location of building
+     */
     public Location getLocation() {
         return location;
     }

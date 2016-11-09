@@ -4,10 +4,17 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by mattro on 11/2/16.
+ * Base container for place information
  */
 public final class KVHolder {
+    /**
+     * Mapping of all place names to Place objects
+     */
     public HashMap<String, Place> all;
+
+    /**
+     * Token store for autocompletion
+     */
     public Lunr lunr;
 
     private KVHolder() { }

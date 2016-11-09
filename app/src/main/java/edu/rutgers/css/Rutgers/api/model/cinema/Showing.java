@@ -29,6 +29,9 @@ public final class Showing {
         return movieId;
     }
 
+    /**
+     * Date / time that movie runs
+     */
     public Date getDateTime() {
         return dateTime;
     }

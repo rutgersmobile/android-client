@@ -5,8 +5,10 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.model.places.Place;
+
 /**
- * Created by jamchamb on 10/30/14.
+ * Section for a course
  */
 public class Section implements Titleable, Serializable {
 
@@ -43,6 +45,9 @@ public class Section implements Titleable, Serializable {
         this.meetingTimes = meetingTimes;
     }
 
+    /**
+     * Name of an instructor
+     */
     public static class Instructor implements Serializable {
         private final String name;
         public Instructor(final String name) {
@@ -54,6 +59,9 @@ public class Section implements Titleable, Serializable {
         }
     }
 
+    /**
+     * Day of week, time, and location that a section meets
+     */
     public static class MeetingTime implements Serializable {
         private final String meetingDay;
         private final String meetingModeDesc;
@@ -77,6 +85,9 @@ public class Section implements Titleable, Serializable {
             this.roomNumber = roomNumber;
         }
 
+        /**
+         * Day of the week for this MeetingTime
+         */
         public String getMeetingDay() {
             return meetingDay;
         }
@@ -85,10 +96,16 @@ public class Section implements Titleable, Serializable {
             return meetingModeDesc;
         }
 
+        /**
+         * Readable start time in EST
+         */
         public String getStartTime() {
             return startTime;
         }
 
+        /**
+         * Readable end time in EST
+         */
         public String getEndTime() {
             return endTime;
         }
@@ -97,14 +114,24 @@ public class Section implements Titleable, Serializable {
             return pmCode;
         }
 
+        /**
+         * Abbreviation of campus, ex. "CM", "NB", "ONLINE"
+         */
         public String getCampusAbbrev() {
             return campusAbbrev;
         }
 
+        /**
+         * Building code where course meets
+         * @see Place#getBuildingCode()
+         */
         public String getBuildingCode() {
             return buildingCode;
         }
 
+        /**
+         * Room number in building
+         */
         public String getRoomNumber() {
             return roomNumber;
         }
@@ -124,6 +151,9 @@ public class Section implements Titleable, Serializable {
         return subtitle;
     }
 
+    /**
+     * Index code of section
+     */
     public String getIndex() {
         return index;
     }
@@ -140,6 +170,9 @@ public class Section implements Titleable, Serializable {
         return printed;
     }
 
+    /**
+     * True if section is open
+     */
     public boolean isOpen() {
         return open;
     }

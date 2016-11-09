@@ -15,10 +15,16 @@ public final class Predictions {
         this.predictions = predictions;
     }
 
+    /**
+     * All messages that appear on this stop/route
+     */
     public Set<String> getMessages() {
         return messages;
     }
 
+    /**
+     * List of all predictions made from query
+     */
     public List<Prediction> getPredictions() {
         return predictions;
     }

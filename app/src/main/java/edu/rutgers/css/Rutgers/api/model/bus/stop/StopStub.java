@@ -2,6 +2,7 @@ package edu.rutgers.css.Rutgers.api.model.bus.stop;
 
 import android.support.annotation.NonNull;
 
+import edu.rutgers.css.Rutgers.api.model.bus.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.model.bus.NextbusItem;
 
 /**
@@ -19,6 +20,10 @@ public final class StopStub implements NextbusItem {
         this.agencyTag = stopGroup.getAgencyTag();
     }
 
+    /**
+     * Readable title of stop
+     * @see AgencyConfig#getStopsByTitle()
+     */
     @Override
     public String getTitle() {
         return title;
@@ -32,6 +37,9 @@ public final class StopStub implements NextbusItem {
         return geoHash;
     }
 
+    /**
+     * Nextbus agency tag. Probably "rutgers"
+     */
     @Override
     public String getAgencyTag() {
         return agencyTag;

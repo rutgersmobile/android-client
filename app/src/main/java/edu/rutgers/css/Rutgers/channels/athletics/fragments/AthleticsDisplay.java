@@ -27,7 +27,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
  */
 public final class AthleticsDisplay extends DtableChannelFragment {
 
-    public static final String HANDLE = "service";
+    public static final String HANDLE = "athletics";
 
     private boolean loading = false;
     private AthleticsAdapter adapter;

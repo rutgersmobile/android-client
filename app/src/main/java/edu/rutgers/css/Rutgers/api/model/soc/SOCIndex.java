@@ -17,6 +17,9 @@ public class SOCIndex {
 
     private static final String TAG = "SOCIndex";
 
+    /**
+     * Course object in the SOCIndex
+     */
     public static class IndexCourse {
         private String course;
         private String subj;
@@ -85,6 +88,9 @@ public class SOCIndex {
 
     private String semesterCode;
 
+    /**
+     * String for the semester, ex. "092016"
+     */
     public String getSemesterCode() {
         return semesterCode;
     }
@@ -95,6 +101,9 @@ public class SOCIndex {
 
     private String campusCode;
 
+    /**
+     * Code for campus, ex "NB", "NWK", "CM"
+     */
     public String getCampusCode() {
         return campusCode;
     }
@@ -105,6 +114,9 @@ public class SOCIndex {
 
     private String levelCode;
 
+    /**
+     * Graduate ("G") or Undergraduate ("U")
+     */
     public String getLevelCode() {
         return levelCode;
     }
@@ -169,6 +181,11 @@ public class SOCIndex {
         }
     }
 
+    /**
+     * Get courses in a particular subject
+     * @param subjectCode The subject of interest
+     * @return List of course objects
+     */
     public List<Course> getCoursesInSubject(String subjectCode) {
         List<Course> results = new ArrayList<>();
         IndexSubject subject = mSubjectsByCode.get(subjectCode);
@@ -184,6 +201,12 @@ public class SOCIndex {
         return results;
     }
 
+    /**
+     * Search for courses by a query string and a code
+     * @param queryCourseCode All or part of a course code
+     * @param query List of words to check against course names
+     * @return Courses that contain both the code and all the query words
+     */
     public List<Course> getCoursesByCodes(String queryCourseCode, List<String> query) {
         List<Course> results = new ArrayList<>();
         Set<Map.Entry<String, IndexCourse>> courseEntries = mCoursesByName.entrySet();
@@ -202,6 +225,9 @@ public class SOCIndex {
         return results;
     }
 
+    /**
+     * Same as {@link SOCIndex#getCoursesByCodes(String, List)}, but returns first result
+     */
     public Course getCourseByCode(final String sCode, final String cCode) {
         for (Map.Entry<String, IndexCourse> e : mCoursesByName.entrySet()) {
             final String courseName = e.getKey();
@@ -216,6 +242,12 @@ public class SOCIndex {
         return null;
     }
 
+    /**
+     * Search for Courses in certain subjects with part of a course code
+     * @param subjects List of subjects to look in for course
+     * @param courseCodeQuery All or part of a course code
+     * @return All courses in given subjects that contain the courseCodeQuery
+     */
     public List<Course> getCoursesByCodeInSubjects(Collection<Subject> subjects, String courseCodeQuery) {
         List<Course> results = new ArrayList<>();
 

@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.api.model.bus.route;
 
+import edu.rutgers.css.Rutgers.api.model.bus.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.model.bus.NextbusItem;
 
 /**
@@ -16,16 +17,26 @@ public final class RouteStub implements NextbusItem {
         this.agencyTag = agencyTag;
     }
 
+    /**
+     * Tag for the represented route
+     * @see AgencyConfig#getRoutes()
+     */
     @Override
     public String getTag() {
         return tag;
     }
 
+    /**
+     * Readable title for the route
+     */
     @Override
     public String getTitle() {
         return title;
     }
 
+    /**
+     * Nextbus agency for route. Probably "rutgers".
+     */
     @Override
     public String getAgencyTag() {
         return agencyTag;

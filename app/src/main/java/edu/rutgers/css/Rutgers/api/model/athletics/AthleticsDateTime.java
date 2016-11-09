@@ -16,14 +16,23 @@ public final class AthleticsDateTime {
         this.timeString = timeString;
     }
 
+    /**
+     * Date object with start date/time
+     */
     public Date getDate() {
         return date;
     }
 
+    /**
+     * True if the date contains a time. It may be just the date.
+     */
     public boolean isTime() {
         return time;
     }
 
+    /**
+     * Original time string from athletics API
+     */
     public String getTimeString() {
         return timeString;
     }

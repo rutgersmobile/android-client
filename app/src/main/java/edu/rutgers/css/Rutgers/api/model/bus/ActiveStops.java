@@ -26,10 +26,16 @@ public final class ActiveStops {
         this.agencyTag = agencyTag;
     }
 
+    /**
+     * Get all routes that are currently running
+     */
     public List<RouteStub> getRoutes() {
         return routes;
     }
 
+    /**
+     * Get all stops that buses are going to
+     */
     public List<StopStub> getStops() {
         return stops;
     }
@@ -38,6 +44,9 @@ public final class ActiveStops {
         return timestamp;
     }
 
+    /**
+     * Get Nextbus agency tag. Probably "rutgers"
+     */
     public String getAgencyTag() {
         return agencyTag;
     }

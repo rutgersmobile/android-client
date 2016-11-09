@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -24,6 +25,7 @@ import com.google.android.gms.location.LocationServices;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
@@ -224,7 +226,7 @@ public class PlacesMain extends BaseChannelFragment
         final String noneNearbyString = getString(R.string.places_none_nearby);
         final String nearbyPlacesString = getString(R.string.places_nearby);
         locationSubject.asObservable().observeOn(Schedulers.io())
-            .flatMap(location -> RutgersAPI.getPlacesNear(location.getLatitude(), location.getLongitude())
+            .flatMap(location -> RutgersAPI.getPlacesNear(location.getLatitude(), location.getLongitude(), Config.NEARBY_RANGE)
                 .flatMap(Observable::from)
                 .map(place -> new KeyValPair(place.getId(), place.getTitle()))
                 .defaultIfEmpty(new KeyValPair(null, noneNearbyString))
@@ -301,7 +303,15 @@ public class PlacesMain extends BaseChannelFragment
 
     @Override
     public void onConnectionSuspended(int cause) {
-        LOGI(TAG, "Suspended from services for cause: " + cause);
+        String reason;
+        switch(cause) {
+            case CAUSE_NETWORK_LOST:
+                reason = "Network lost";
+                break;
+            default:
+                reason = "Service disconnected";
+        }
+        LOGI(TAG, "Suspended from services for cause: " + reason);
     }
 
     private void reset() {

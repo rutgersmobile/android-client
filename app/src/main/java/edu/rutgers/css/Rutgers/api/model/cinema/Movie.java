@@ -30,14 +30,23 @@ public final class Movie {
         return movieId;
     }
 
+    /**
+     * Name of movie
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Rating of movie, ex. "R", "PG", etc.
+     */
     public String getRating() {
         return rating;
     }
 
+    /**
+     * Readable representation of movie run time
+     */
     public String getRuntime() {
         return runtime;
     }
@@ -46,6 +55,9 @@ public final class Movie {
         return studio;
     }
 
+    /**
+     * Schedule for when the movie runs
+     */
     public List<Showing> getShowings() {
         return showings;
     }

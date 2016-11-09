@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.api.model.soc.ScheduleAPI;
+import edu.rutgers.css.Rutgers.api.SOCAPI;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
@@ -63,8 +63,8 @@ public class SOCDialogFragment extends DialogFragment {
         ArrayList<KeyValPair> campuses = loadCampuses();
 
         ArrayList<KeyValPair> levels = new ArrayList<KeyValPair>(2);
-        levels.add(new KeyValPair(ScheduleAPI.CODE_LEVEL_UNDERGRAD, getString(R.string.soc_undergrad)));
-        levels.add(new KeyValPair(ScheduleAPI.CODE_LEVEL_GRAD, getString(R.string.soc_grad)));
+        levels.add(new KeyValPair(SOCAPI.CODE_LEVEL_UNDERGRAD, getString(R.string.soc_undergrad)));
+        levels.add(new KeyValPair(SOCAPI.CODE_LEVEL_GRAD, getString(R.string.soc_grad)));
 
         mSemesterSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSemesters);
         mCampusSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, campuses);
@@ -132,7 +132,7 @@ public class SOCDialogFragment extends DialogFragment {
     public void setSemesters(List<String> semesterCodes) {
         ArrayList<KeyValPair> semesters = new ArrayList<KeyValPair>(5);
         for (String code: semesterCodes) {
-            semesters.add(new KeyValPair(code, ScheduleAPI.translateSemester(code)));
+            semesters.add(new KeyValPair(code, SOCAPI.translateSemester(code)));
         }
         mSemesters = semesters;
     }
