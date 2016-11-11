@@ -19,23 +19,14 @@
         \t <a href="https://code.google.com/p/google-gson/">GSON</a><br/>
         \t <i>by Google Inc.</i><br/><br/>
 
-        \t <a href="http://nhaarman.github.io/ListViewAnimations/">ListViewAnimations</a><br/>
-        \t <i>by Niek Haarman</i><br/><br/>
-
         \t <a href="http://square.github.io/okhttp/">OkHttp</a><br/>
         \t <i>by Square, Inc.</i><br/><br/>
-
-        \t <a href="https://github.com/astuetz/PagerSlidingTabStrip">PagerSlidingTabStrip</a><br/>
-        \t <i>by Andreas Stuetz</i><br/><br/>
 
         \t <a href="http://square.github.io/picasso/">Picasso</a><br/>
         \t <i>by Square, Inc.</i><br/><br/>
 
         \t <a href="http://square.github.io/otto/">Otto</a><br/>
         \t <i>by Square, Inc.</i><br/><br/>
-
-        \t <a href="https://github.com/emilsjolander/StickyListHeaders">StickyListHeaders</a><br/>
-        \t <i>by Emil Sj&#246;lander</i><br/><br/>
 
         \t <a href="https://projectlombok.org">Lombok</a><br/>
         \t <i>by The Project Lombok Authors</i><br/><br/>
@@ -52,8 +43,20 @@
         \t <a href="https://github.com/ReactiveX/RxAndroid">RxAndroid</a><br/>
         \t <i>by Netflix Inc</i><br/><br/>
 
+        \t <a href="https://github.com/trello/RxLifecycle">RxLifecycle</a><br/>
+        \t <i>by Trello</i><br/><br/>
+
         \t <a href="https://github.com/yavski/fab-speed-dial">FabSpeedDial</a><br/>
         \t <i>by Yavor Ivanov</i><br/><br/>
+
+        \t <a href="https://github.com/bignerdranch/expandable-recycler-view">Expandable RecyclerView</a><br/>
+        \t <i>by Big Nerd Ranch</i><br/><br/>
+
+        \t <a href="https://github.com/afollestad/sectioned-recyclerview">Sectioned RecyclerView</a><br/>
+        \t <i>by Aidan Follestad</i><br/><br/>
+
+        \t <a href="https://github.com/sayyam/carouselview">CarouselView</a><br/>
+        \t <i>by Sayyam</i><br/><br/>
     ]]></string>
 
 </resources>
