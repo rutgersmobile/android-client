@@ -4,12 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ import edu.rutgers.css.Rutgers.channels.reader.model.loader.RSSItemLoader;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.FuncUtils;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -76,6 +77,11 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
 
         mData = new ArrayList<>();
         mAdapter = new RSSAdapter(this.getActivity(), R.layout.row_rss, mData);
+        mAdapter.getPositionClicks()
+            .map(RSSItem::getLink)
+            .filter(FuncUtils::nonNull)
+            .map(link -> WebDisplay.createArgs(args.getString(ARG_TITLE_TAG), link))
+            .subscribe(this::switchFragments, this::logError);
 
         if (savedInstanceState != null && savedInstanceState.getSerializable(SAVED_DATA_TAG) != null) {
             LOGD(TAG, "Restoring mData");
@@ -95,7 +101,7 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_progress);
+        final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
 
         if (mLoading) showProgressCircle();
 
@@ -104,20 +110,10 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
             getActivity().setTitle(args.getString(ARG_TITLE_TAG));
         }
 
-        // Adapter & click listener for RSS list view
-        final ListView listView = (ListView) v.findViewById(R.id.list);
-        listView.setAdapter(mAdapter);
-        listView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RSSItem item = mAdapter.getItem(position);
-
-                if (item.getLink() != null) {
-                    // Open web display fragment
-                    switchFragments(WebDisplay.createArgs(args.getString(ARG_TITLE_TAG), item.getLink()));
-                }
-            }
-        });
+        final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.setAdapter(mAdapter);
 
         return v;
     }

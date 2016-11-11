@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.api;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,6 +26,7 @@ import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
 import edu.rutgers.css.Rutgers.api.model.soc.Semesters;
 import edu.rutgers.css.Rutgers.api.model.soc.parsers.SOCIndexDeserializer;
 import edu.rutgers.css.Rutgers.api.service.RutgersService;
+import edu.rutgers.css.Rutgers.model.Motd;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -288,5 +290,22 @@ public final class RutgersAPI {
      */
     public static Observable<SOCIndex> getSOCIndex(String semester, String campus, String level) {
         return getService().getSOCIndex(semester, campus, level);
+    }
+
+    /**
+     * Get the message of the day.
+     * @return An object that may contain information to display to the user. This is also used
+     * on deprecated APIs that we are removing to lock the user out of old app versions.
+     */
+    public static Observable<Motd> getMotd() {
+        return getService().getMotd();
+    }
+
+    /**
+     * Get drawer listing
+     * @return Json array where each element represents an element in the app drawer
+     */
+    public static Observable<JsonArray> getOrderedContent() {
+        return getService().getOrderedContent();
     }
 }

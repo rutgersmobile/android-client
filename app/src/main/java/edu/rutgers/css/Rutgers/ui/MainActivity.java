@@ -5,14 +5,10 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Gravity;
@@ -27,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.oldapi.Analytics;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.channels.ChannelManager;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
@@ -37,6 +33,7 @@ import edu.rutgers.css.Rutgers.link.LinkLoadTask;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
 import edu.rutgers.css.Rutgers.model.Motd;
+import edu.rutgers.css.Rutgers.oldapi.Analytics;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.InfoDialogFragment;
@@ -45,6 +42,8 @@ import edu.rutgers.css.Rutgers.ui.fragments.MotdDialogFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGD;
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
@@ -54,8 +53,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGV;
  * Main activity. Handles navigation drawer, displayed fragments, and connection to location services.
  */
 
-public class MainActivity extends GoogleApiProviderActivity implements
-        ChannelManagerProvider, LoaderManager.LoaderCallbacks<MainActivityLoader.InitLoadHolder> {
+public class MainActivity extends GoogleApiProviderActivity implements ChannelManagerProvider {
 
     /** Log tag */
     private static final String TAG = "MainActivity";
@@ -208,7 +206,51 @@ public class MainActivity extends GoogleApiProviderActivity implements
             }
         }
 
-        getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        RutgersAPI.getMotd()
+            .flatMap(motd -> RutgersAPI.getOrderedContent()
+            .map(jsonElements -> new InitLoadHolder(jsonElements, motd)))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .subscribe(initLoadHolder -> {
+                final Motd motd = initLoadHolder.getMotd();
+                final JsonArray jsonElements = initLoadHolder.getArray();
+                if (!mShowedMotd && motd.getData() != null) {
+                    mShowedMotd = true;
+                    if (!motd.isWindow()) {
+                        // show a popup with the Motd
+                        MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
+                        f.show(getSupportFragmentManager(), MotdDialogFragment.TAG);
+                    } else {
+                        // switch to a fullscreen Motd
+                        switchFragments(TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
+                        if (!motd.hasCloseButton()) {
+                            // Lock the user to the Motd (bricks the app on purpose)
+                            if (getSupportActionBar() != null) {
+                                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                            }
+                            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                        }
+                        return;
+                    }
+                } else {
+                    LOGI(TAG, motd.getMotd());
+                }
+
+                // Load nav drawer items
+                if (jsonElements.size() > 0) {
+                    mChannelManager.clear();
+                    mChannelManager.loadChannelsFromJSONArray(jsonElements);
+
+                    mDrawerAdapter.clear();
+                    final List<Link> upstreamLinks = new ArrayList<>();
+                    for (final Channel channel : mChannelManager.getChannels()) {
+                        upstreamLinks.add(channel.getLink());
+                    }
+                    PrefUtils.setBookmarksFromUpstream(getApplicationContext(), upstreamLinks);
+                    mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
+                }
+            }, error -> AppUtils.showFailedLoadToast(getApplicationContext()));
     }
 
     @Override
@@ -304,61 +346,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
         tutorialMediator.showDialogFragment(dialogFragment, tag);
     }
 
-    @Override
-    public Loader<MainActivityLoader.InitLoadHolder> onCreateLoader(int id, Bundle args) {
-        return new MainActivityLoader(this);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<MainActivityLoader.InitLoadHolder> loader, MainActivityLoader.InitLoadHolder holder) {
-        // These will be non-null on success
-        if (holder.getArray() == null || holder.getMotd() == null) {
-            AppUtils.showFailedLoadToast(MainActivity.this);
-            return;
-        }
-
-        final Motd motd = holder.getMotd();
-        final JsonArray array = holder.getArray();
-        if (!mShowedMotd && motd.getData() != null) {
-            mShowedMotd = true;
-            if (!motd.isWindow()) {
-                // show a popup with the Motd
-                MotdDialogFragment f = MotdDialogFragment.newInstance(motd.getTitle(), motd.getMotd());
-                f.show(getSupportFragmentManager(), MotdDialogFragment.TAG);
-            } else {
-                // switch to a fullscreen Motd
-                // we have to cheat to do this, but since the goal
-                // is to brick the app it doesn't matter too much
-                switchFragmentsOnLoadFinished(
-                        TextDisplay.createArgs(motd.getTitle(), motd.getMotd()));
-                if (!motd.hasCloseButton()) {
-                    // Lock the user to the Motd (bricks the app on purpose)
-                    if (getSupportActionBar() != null) {
-                        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                    }
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                }
-                return;
-            }
-        } else {
-            LOGI(TAG, motd.getMotd());
-        }
-
-        // Load nav drawer items
-        if (array.size() > 0) {
-            mChannelManager.clear();
-            mChannelManager.loadChannelsFromJSONArray(array);
-
-            mDrawerAdapter.clear();
-            final List<Link> upstreamLinks = new ArrayList<>();
-            for (final Channel channel : mChannelManager.getChannels()) {
-                upstreamLinks.add(channel.getLink());
-            }
-            PrefUtils.setBookmarksFromUpstream(getApplicationContext(), upstreamLinks);
-            mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
-        }
-    }
-
     public void openDrawer() {
         mDrawerLayout.openDrawer(mDrawerListView);
     }
@@ -366,9 +353,6 @@ public class MainActivity extends GoogleApiProviderActivity implements
     public void closeDrawer() {
         mDrawerLayout.closeDrawer(mDrawerListView);
     }
-
-    @Override
-    public void onLoaderReset(Loader<MainActivityLoader.InitLoadHolder> loader) {}
 
     /**
      * Determine if the current intent will cause deep linking
@@ -399,23 +383,21 @@ public class MainActivity extends GoogleApiProviderActivity implements
         }
     }
 
-    /**
-     * You're not supposed to switch fragments after a loader
-     * but we're going to do it anyway cause we roll like that.
-     *
-     * Don't use this unless it's for a good reason
-     * @param args Args for the fragment to switch to
-     */
-    private void switchFragmentsOnLoadFinished(final Bundle args) {
-        final int WAT = 1;
-        Handler handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                if (msg.what == WAT) {
-                    fragmentMediator.switchFragments(args);
-                }
-            }
-        };
-        handler.sendEmptyMessage(WAT);
+    public static class InitLoadHolder {
+        private final JsonArray array;
+        private final Motd motd;
+
+        public InitLoadHolder(final JsonArray array, final Motd motd) {
+            this.array = array;
+            this.motd = motd;
+        }
+
+        public JsonArray getArray() {
+            return array;
+        }
+
+        public Motd getMotd() {
+            return motd;
+        }
     }
 }

@@ -4,12 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
  * Base for an activity that can connect to Google location services and provide location
  * information to child fragments.
  */
-public abstract class GoogleApiProviderActivity extends AppCompatActivity implements
+public abstract class GoogleApiProviderActivity extends RxAppCompatActivity implements
         GoogleApiClientProvider,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {

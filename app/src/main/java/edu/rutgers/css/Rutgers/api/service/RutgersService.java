@@ -1,5 +1,7 @@
 package edu.rutgers.css.Rutgers.api.service;
 
+import com.google.gson.JsonArray;
+
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.api.model.athletics.AthleticsGames;
@@ -10,6 +12,7 @@ import edu.rutgers.css.Rutgers.api.model.food.DiningMenu;
 import edu.rutgers.css.Rutgers.api.model.places.KVHolder;
 import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
 import edu.rutgers.css.Rutgers.api.model.soc.Semesters;
+import edu.rutgers.css.Rutgers.model.Motd;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import rx.Observable;
@@ -52,4 +55,10 @@ public interface RutgersService {
         @Path("campusCode") String campusCode,
         @Path("levelCode") String levelCode
     );
+
+    @GET("motd.txt")
+    Observable<Motd> getMotd();
+
+    @GET("ordered_content.json")
+    Observable<JsonArray> getOrderedContent();
 }
