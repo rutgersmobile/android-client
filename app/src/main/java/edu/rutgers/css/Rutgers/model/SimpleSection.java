@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Simple collection of items with a header string.
- * Used in the implementation of {@link edu.rutgers.css.Rutgers.model.SimpleSectionedAdapter}.
+ * Used in the implementation of {@link SimpleSectionedRecyclerAdapter}.
  */
 public class SimpleSection<T> {
     private final String header;
