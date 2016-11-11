@@ -38,7 +38,7 @@ public class RutgersApplication extends MultiDexApplication {
 
         client = new OkHttpClient.Builder()
             .cache(new Cache(getCacheDir(), 10 * 1024 * 1024))
-//            .addInterceptor(interceptor)
+            .addInterceptor(interceptor)
             .build();
 
         RutgersAPI.simpleSetup(client, Config.API_BASE);
@@ -47,11 +47,11 @@ public class RutgersApplication extends MultiDexApplication {
 
         Picasso picasso = new Picasso.Builder(this)
             .downloader(new OkHttp3Downloader(client))
+            .loggingEnabled(true)
+//             uncomment if you want to see if an image was cached
+//            .indicatorsEnabled(true)
             .build();
 
-        // uncomment if you want to see if an image was cached
-//        picasso.setIndicatorsEnabled(true);
-        picasso.setLoggingEnabled(true);
         Picasso.setSingletonInstance(picasso);
     }
 }

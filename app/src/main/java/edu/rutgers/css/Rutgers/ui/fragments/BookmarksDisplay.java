@@ -3,18 +3,22 @@ package edu.rutgers.css.Rutgers.ui.fragments;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-
-import com.nhaarman.listviewanimations.itemmanipulation.DynamicListView;
-import com.nhaarman.listviewanimations.itemmanipulation.dragdrop.OnItemMovedListener;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.model.BookmarkAdapter;
+import edu.rutgers.css.Rutgers.ui.BookmarkItemTouchHelperCallback;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 
@@ -23,6 +27,7 @@ import io.github.yavski.fabspeeddial.FabSpeedDial;
  */
 public class BookmarksDisplay extends BaseDisplay {
     public static final String HANDLE = "bookmarks";
+    private BookmarkAdapter adapter;
 
     public static Bundle createArgs() {
         Bundle args = new Bundle();
@@ -32,8 +37,14 @@ public class BookmarksDisplay extends BaseDisplay {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_dynamic_list, parent, false);
+        final View v = inflater.inflate(R.layout.fragment_recycler_progress, parent, false);
 
         getActivity().setTitle("Bookmarks");
 
@@ -51,29 +62,41 @@ public class BookmarksDisplay extends BaseDisplay {
             ((MainActivity) getActivity()).syncDrawer();
         }
 
-        final BookmarkAdapter adapter = new BookmarkAdapter(getContext(), R.layout.row_bookmark_item, R.layout.row_bookmark_toggle_item, R.layout.row_divider);
+        adapter = new BookmarkAdapter(
+            getContext(),
+            R.layout.row_bookmark_item,
+            R.layout.row_bookmark_toggle_item,
+            R.layout.row_divider
+        );
         adapter.addFromPrefs();
 
-        final DynamicListView bookmarks = (DynamicListView) v.findViewById(R.id.dynamic_list);
-        bookmarks.setAdapter(adapter);
-        bookmarks.enableDragAndDrop();
-        bookmarks.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                adapter.setDragging(true);
-                bookmarks.startDragging(position);
-                return true;
-            }
-        });
+        final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.setAdapter(adapter);
 
-        bookmarks.setOnItemMovedListener(new OnItemMovedListener() {
-            @Override
-            public void onItemMoved(int originalPosition, int newPosition) {
-                adapter.setDragging(false);
-                adapter.notifyDataSetChanged();
-            }
-        });
+        ItemTouchHelper helper = new ItemTouchHelper(new BookmarkItemTouchHelperCallback(adapter));
+        helper.attachToRecyclerView(recyclerView);
 
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.bookmark_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle options button
+        if (item.getItemId() == R.id.bookmark_enable_all) {
+            adapter.enableAll();
+            return true;
+        } else if (item.getItemId() == R.id.bookmark_disable_all) {
+            adapter.disableAll();
+            return true;
+        }
+
+        return false;
     }
 }

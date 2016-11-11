@@ -1,17 +1,14 @@
 package edu.rutgers.css.Rutgers.model;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.database.DataSetObserver;
+import android.graphics.drawable.Drawable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.nhaarman.listviewanimations.util.Swappable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,13 +17,14 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.ui.ItemTouchHelperAdapter;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 /**
  * Adapter for bookmarks
  */
-public final class BookmarkAdapter extends BaseAdapter implements Swappable {
+public final class BookmarkAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ItemTouchHelperAdapter {
 
     // User created bookmark
     private final int removableResource;
@@ -43,24 +41,24 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
     // Links in the drawer + hidden items
     private final List<Link> links;
 
-    // Android bug makes you have to keep a reference to this because otherwise
-    // it gets GC'd for some reason
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
+    private enum ViewTypes {
+        REMOVABLE, LOCKED, DIVIDER
+    }
+    private static final ViewTypes[] viewTypes = ViewTypes.values();
 
-    private boolean dragging = false;
-
-    public boolean isDragging() {
-        return dragging;
+    public void enableAll() {
+        for (final Link link : links) {
+            link.setEnabled(true);
+        }
+        notifyDataSetChanged();
     }
 
-    public void setDragging(boolean dragging) {
-        this.dragging = dragging;
+    public void disableAll() {
+        for (final Link link : links) {
+            link.setEnabled(false);
+        }
+        notifyDataSetChanged();
     }
-
-    // View type ids for user created bookmarks, rutgers bookmarks, and the divider
-    private static final int REMOVABLE = 0;
-    private static final int LOCKED = 1;
-    private static final int DIVIDER = 2;
 
     /**
      * This function controls what happens when you drag one item over another.
@@ -68,49 +66,124 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
      * @param positionTwo The position being dragged from
      */
     @Override
-    public boolean swapItems(int positionOne, int positionTwo) {
+    public boolean onItemMove(int positionOne, int positionTwo) {
         final int dividerPosition = dividerPosition();
         if (positionOne < dividerPosition && positionTwo < dividerPosition) {
             // They are both enabled so just swap them
-            Collections.swap(links, positionOne, positionTwo);
+            swapAll(links, positionOne, positionTwo);
+            notifyItemMoved(positionOne, positionTwo);
             return true;
         } else if (positionOne > dividerPosition && positionTwo > dividerPosition) {
             // They are both disabled. Just swap them, but remember to subtract for the divider
-            Collections.swap(links, positionOne - 1, positionTwo - 1);
+            swapAll(links, positionOne - 1, positionTwo - 1);
+            notifyItemMoved(positionOne, positionTwo);
             return true;
-        } else if (positionOne == dividerPosition && positionTwo < dividerPosition) {
+        } else if (positionOne < dividerPosition && positionTwo == dividerPosition) {
             // We're dragging over the divider from above
             // Don't do anything to user added links since they can only be deleted
-            final Link link = links.get(positionTwo);
+            final Link link = links.get(positionOne);
             if (!link.isRemovable()) {
                 link.setEnabled(false);
+                notifyItemMoved(positionOne, positionTwo);
                 return true;
             }
 
             // If we made it here then we're not actually swapping anything
             // This is the case when we try to drag a user link over the divider
             return false;
-        } else if (positionOne == dividerPosition && positionTwo > dividerPosition) {
+        } else if (positionOne > dividerPosition && positionTwo == dividerPosition) {
             // We're dragging over the divider from below. Just enable it
             // subtract one from the position to account for the divider
-            links.get(positionTwo - 1).setEnabled(true);
+            links.get(positionOne - 1).setEnabled(true);
+            notifyItemMoved(positionOne, positionTwo);
             return true;
         }
         return false;
     }
 
+    private static void swapAll(List list, int positionOne, int positionTwo) {
+        if (positionOne < positionTwo) {
+            for (int i = positionOne; i < positionTwo; i++) {
+                Collections.swap(list, i, i + 1);
+            }
+        } else {
+            for (int i = positionOne; i > positionTwo; i--) {
+                Collections.swap(list, i, i - 1);
+            }
+        }
+    }
+
     @Override
-    public boolean isEnabled(int position) {
-        return position != dividerPosition();
+    public void onItemDismiss(int position) {
+        final Link link = getItem(position);
+        if (link == null) {
+            return;
+        }
+
+        if (link.isRemovable()) {
+            remove(position);
+        } else {
+            uncheck(link, position, false);
+        }
     }
 
     // This class will keep references to the view so we don't
     // have to look them up every time we get a view we've already inflated
-    private final class ViewHolder {
-        CheckBox checkBox;
+    public final class RemovableViewHolder extends RecyclerView.ViewHolder{
         ImageView imageButton;
         TextView textView;
         ImageView imageView;
+
+        public RemovableViewHolder(View itemView) {
+            super(itemView);
+            imageButton = (ImageView) itemView.findViewById(R.id.delete_bookmark);
+            textView = (TextView) itemView.findViewById(R.id.title);
+            imageView = (ImageView) itemView.findViewById(R.id.imageView);
+        }
+
+        public ImageView getImageButton() {
+            return imageButton;
+        }
+
+        public TextView getTextView() {
+            return textView;
+        }
+
+        public ImageView getImageView() {
+            return imageView;
+        }
+    }
+
+    public final class LockedViewHolder extends RecyclerView.ViewHolder {
+        CheckBox checkBox;
+        TextView textView;
+        ImageView imageView;
+
+        public LockedViewHolder(View itemView) {
+            super(itemView);
+
+            checkBox = (CheckBox) itemView.findViewById(R.id.toggle_bookmark);
+            textView = (TextView) itemView.findViewById(R.id.title);
+            imageView = (ImageView) itemView.findViewById(R.id.imageView);
+        }
+
+        public CheckBox getCheckBox() {
+            return checkBox;
+        }
+
+        public TextView getTextView() {
+            return textView;
+        }
+
+        public ImageView getImageView() {
+            return imageView;
+        }
+    }
+
+    private final class DividerViewHolder extends RecyclerView.ViewHolder {
+        public DividerViewHolder(View itemView) {
+            super(itemView);
+        }
     }
 
     // Java doesn't have tuples so this is what you have to do if
@@ -177,50 +250,110 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
         this.links = new ArrayList<>();
 
         // Update persistent storage when the list is updated
-        registerDataSetObserver(new DataSetObserver() {
+        registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
                 super.onChanged();
-                // We don't want to be writing JSON every time we drag an inch
-                if (!dragging) {
-                    PrefUtils.setBookmarks(context, links);
-                }
+                PrefUtils.setBookmarks(context, links);
             }
         });
     }
 
     @Override
-    public int getViewTypeCount() {
-        return 3;
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        switch (viewTypes[viewType]) {
+            case REMOVABLE:
+                final View removeableItemView = inflater.inflate(removableResource, parent, false);
+                return new RemovableViewHolder(removeableItemView);
+            case LOCKED:
+                final View lockedItemView = inflater.inflate(lockedResource, parent, false);
+                return new LockedViewHolder(lockedItemView);
+            default:
+                final View dividerItemView = inflater.inflate(dividerResource, parent, false);
+                return new DividerViewHolder(dividerItemView);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        switch(viewTypes[getItemViewType(position)]) {
+            case REMOVABLE:
+                onBindRemovableViewHolder((RemovableViewHolder) holder, position);
+                return;
+            case LOCKED:
+                onBindLockedViewHolder((LockedViewHolder) holder, position);
+        }
+    }
+
+    private void onBindRemovableViewHolder(RemovableViewHolder holder, int position) {
+        final Link link = getItem(position);
+
+        holder.textView.setText(link.getTitle());
+        holder.imageView.setImageDrawable(getIconDrawableForLink(link));
+        holder.imageButton.setOnClickListener(v -> remove(position));
+    }
+
+    private void onBindLockedViewHolder(LockedViewHolder holder, int position) {
+        final Link link = getItem(position);
+
+        holder.textView.setText(link.getTitle());
+        holder.imageView.setImageDrawable(getIconDrawableForLink(link));
+
+        holder.checkBox.setChecked(link.isEnabled());
+        holder.checkBox.setOnClickListener(v -> {
+            CheckBox checkBox = (CheckBox) v;
+            uncheck(link, position, checkBox.isChecked());
+        });
+    }
+
+    /**
+     * We need to move the link between sections so we just insert it at the divider position
+     * if it was enabled it will go to the end of the enabled section
+     * otherwise it goes to the beginning of the disabled section
+     * This is due to the divider position being entirely defined by where
+     * the first disabled item is
+     */
+    private void uncheck(Link link, int position, boolean isChecked) {
+        removeNoNotify(position);
+        link.setEnabled(isChecked);
+        links.add(dividerPosition(), link);
+        notifyDataSetChanged();
+    }
+
+    private int getIconForLink(Link link) {
+        return context.getResources().getIdentifier("ic_" + link.getHandle(), "drawable", Config.PACKAGE_NAME);
+    }
+
+    private Drawable getIconDrawableForLink(Link link) {
+        return ImageUtils.getIcon(
+            context.getResources(),
+            getIconForLink(link),
+            R.color.dark_gray
+        );
     }
 
     @Override
     public int getItemViewType(int position) {
-        final Link link = (Link) getItem(position);
+        final Link link = getItem(position);
 
         if (link == null) {
-            return DIVIDER;
+            return ViewTypes.DIVIDER.ordinal();
         }
 
         if (link.isRemovable()) {
-            return REMOVABLE;
+            return ViewTypes.REMOVABLE.ordinal();
         }
 
-        return LOCKED;
+        return ViewTypes.LOCKED.ordinal();
     }
 
     @Override
-    public boolean hasStableIds() {
-        return true;
-    }
-
-    @Override
-    public int getCount() {
+    public int getItemCount() {
         return links.size() + 1;
     }
 
-    @Override
-    public Object getItem(int position) {
+    public Link getItem(int position) {
         final int dividerPosition = dividerPosition();
         if (position == dividerPosition) {
             return null;
@@ -235,7 +368,7 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
 
     @Override
     public long getItemId(int position) {
-        final Link link = (Link) getItem(position);
+        final Link link = getItem(position);
 
         if (link == null) {
             return 0;
@@ -257,78 +390,4 @@ public final class BookmarkAdapter extends BaseAdapter implements Swappable {
         removeNoNotify(position);
         notifyDataSetChanged();
     }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        final LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ViewHolder holder;
-
-        final int type = getItemViewType(position);
-
-        if (convertView == null) {
-            switch (type) {
-                case REMOVABLE:
-                    convertView = layoutInflater.inflate(removableResource, null);
-                    holder = new ViewHolder();
-                    holder.imageButton = (ImageView) convertView.findViewById(R.id.delete_bookmark);
-                    holder.textView = (TextView) convertView.findViewById(R.id.title);
-                    holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
-                    convertView.setTag(holder);
-                    break;
-                case LOCKED:
-                    convertView = layoutInflater.inflate(lockedResource, null);
-                    holder = new ViewHolder();
-                    holder.checkBox = (CheckBox) convertView.findViewById(R.id.toggle_bookmark);
-                    holder.textView = (TextView) convertView.findViewById(R.id.title);
-                    holder.imageView = (ImageView) convertView.findViewById(R.id.imageView);
-                    convertView.setTag(holder);
-                    break;
-                default:
-                    convertView = layoutInflater.inflate(dividerResource, null);
-                    holder = new ViewHolder();
-                    convertView.setTag(holder);
-                    break;
-            }
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        final Link link = (Link) getItem(position);
-        if (link != null) {
-            holder.textView.setText(link.getTitle());
-
-            int iconRes = context.getResources().getIdentifier("ic_" + link.getHandle(), "drawable", Config.PACKAGE_NAME);
-            holder.imageView.setImageDrawable(ImageUtils.getIcon(context.getResources(), iconRes, R.color.dark_gray));
-
-            if (!link.isRemovable()) {
-                holder.checkBox.setChecked(link.isEnabled());
-                holder.checkBox.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        CheckBox checkBox = (CheckBox) v;
-
-                        // We need to move the link between sections so we just insert it at the divider position
-                        // if it was enabled it will go to the end of the enabled section
-                        // otherwise it goes to the beginning of the disabled section
-                        // This is due to the divider position being entirely defined by where
-                        // the first disabled item is
-                        removeNoNotify(position);
-                        link.setEnabled(checkBox.isChecked());
-                        links.add(dividerPosition(), link);
-                        notifyDataSetChanged();
-                    }
-                });
-            } else {
-                holder.imageButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        remove(position);
-                    }
-                });
-            }
-        }
-        return convertView;
-    }
-
 }
