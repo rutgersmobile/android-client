@@ -2,8 +2,10 @@ package edu.rutgers.css.Rutgers.model;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -18,6 +20,7 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.ItemTouchHelperAdapter;
+import edu.rutgers.css.Rutgers.ui.OnStartDragListener;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
@@ -41,21 +44,36 @@ public final class BookmarkAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     // Links in the drawer + hidden items
     private final List<Link> links;
 
+    private final OnStartDragListener dragListener;
+
     private enum ViewTypes {
         REMOVABLE, LOCKED, DIVIDER
     }
     private static final ViewTypes[] viewTypes = ViewTypes.values();
 
+    private void sortRemovable() {
+        TwoLists lists = splitRemovable(links);
+        links.clear();
+        links.addAll(lists.getFirst());
+        links.addAll(lists.getSecond());
+    }
+
     public void enableAll() {
+        sortRemovable();
         for (final Link link : links) {
-            link.setEnabled(true);
+            if (!link.isRemovable()) {
+                link.setEnabled(true);
+            }
         }
         notifyDataSetChanged();
     }
 
     public void disableAll() {
+        sortRemovable();
         for (final Link link : links) {
-            link.setEnabled(false);
+            if (!link.isRemovable()) {
+                link.setEnabled(false);
+            }
         }
         notifyDataSetChanged();
     }
@@ -127,22 +145,20 @@ public final class BookmarkAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    // This class will keep references to the view so we don't
-    // have to look them up every time we get a view we've already inflated
-    public final class RemovableViewHolder extends RecyclerView.ViewHolder{
-        ImageView imageButton;
+    public class DraggableViewHolder extends RecyclerView.ViewHolder {
+        ImageView handleView;
         TextView textView;
         ImageView imageView;
 
-        public RemovableViewHolder(View itemView) {
+        public DraggableViewHolder(View itemView) {
             super(itemView);
-            imageButton = (ImageView) itemView.findViewById(R.id.delete_bookmark);
-            textView = (TextView) itemView.findViewById(R.id.title);
-            imageView = (ImageView) itemView.findViewById(R.id.imageView);
+            handleView = (ImageView) itemView.findViewById(R.id.reorder_drag);
+            textView = (TextView) itemView.findViewById(R.id.bookmark_name);
+            imageView = (ImageView) itemView.findViewById(R.id.bookmark_icon);
         }
 
-        public ImageView getImageButton() {
-            return imageButton;
+        public ImageView getHandleView() {
+            return handleView;
         }
 
         public TextView getTextView() {
@@ -154,29 +170,31 @@ public final class BookmarkAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
-    public final class LockedViewHolder extends RecyclerView.ViewHolder {
+    // This class will keep references to the view so we don't
+    // have to look them up every time we get a view we've already inflated
+    public final class RemovableViewHolder extends DraggableViewHolder {
+        ImageView imageButton;
+
+        public RemovableViewHolder(View itemView) {
+            super(itemView);
+            imageButton = (ImageView) itemView.findViewById(R.id.delete_bookmark);
+        }
+
+        public ImageView getImageButton() {
+            return imageButton;
+        }
+    }
+
+    public final class LockedViewHolder extends DraggableViewHolder {
         CheckBox checkBox;
-        TextView textView;
-        ImageView imageView;
 
         public LockedViewHolder(View itemView) {
             super(itemView);
-
             checkBox = (CheckBox) itemView.findViewById(R.id.toggle_bookmark);
-            textView = (TextView) itemView.findViewById(R.id.title);
-            imageView = (ImageView) itemView.findViewById(R.id.imageView);
         }
 
         public CheckBox getCheckBox() {
             return checkBox;
-        }
-
-        public TextView getTextView() {
-            return textView;
-        }
-
-        public ImageView getImageView() {
-            return imageView;
         }
     }
 
@@ -189,20 +207,20 @@ public final class BookmarkAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     // Java doesn't have tuples so this is what you have to do if
     // you want to return multiple values
     private final class TwoLists {
-        private final List<Link> visible;
-        private final List<Link> hidden;
+        private final List<Link> first;
+        private final List<Link> second;
 
-        public TwoLists(final List<Link> visible, final List<Link> hidden) {
-            this.visible = visible;
-            this.hidden = hidden;
+        public TwoLists(final List<Link> first, final List<Link> second) {
+            this.first = first;
+            this.second = second;
         }
 
-        public List<Link> getVisible() {
-            return visible;
+        public List<Link> getFirst() {
+            return first;
         }
 
-        public List<Link> getHidden() {
-            return hidden;
+        public List<Link> getSecond() {
+            return second;
         }
     }
 
@@ -222,6 +240,20 @@ public final class BookmarkAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return new TwoLists(visible, hidden);
     }
 
+    private TwoLists splitRemovable(List<Link> links) {
+        final List<Link> removable = new ArrayList<>();
+        final List<Link> locked = new ArrayList<>();
+        for (final Link link : links) {
+            if (link.isRemovable()) {
+                removable.add(link);
+            } else {
+                locked.add(link);
+            }
+        }
+
+        return new TwoLists(removable, locked);
+    }
+
     // Find the first disabled link
     // Everything after the divider is disabled
     private int dividerPosition() {
@@ -238,16 +270,17 @@ public final class BookmarkAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void addFromPrefs() {
         final List<Link> links = PrefUtils.getBookmarks(context);
         final TwoLists lists = splitVisible(links);
-        this.links.addAll(lists.getVisible());
-        this.links.addAll(lists.getHidden());
+        this.links.addAll(lists.getFirst());
+        this.links.addAll(lists.getSecond());
     }
 
-    public BookmarkAdapter(final Context context, int removableResource, int lockedResource, int dividerResource) {
+    public BookmarkAdapter(final Context context, int removableResource, int lockedResource, int dividerResource, OnStartDragListener dragListener) {
         this.context = context;
         this.removableResource = removableResource;
         this.lockedResource = lockedResource;
         this.dividerResource = dividerResource;
         this.links = new ArrayList<>();
+        this.dragListener = dragListener;
 
         // Update persistent storage when the list is updated
         registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -277,6 +310,15 @@ public final class BookmarkAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof DraggableViewHolder) {
+            ((DraggableViewHolder) holder).handleView.setOnTouchListener((view, motionEvent) -> {
+                if (MotionEventCompat.getActionMasked(motionEvent) == MotionEvent.ACTION_DOWN) {
+                    dragListener.onStartDrag(holder);
+                }
+                return false;
+            });
+        }
+
         switch(viewTypes[getItemViewType(position)]) {
             case REMOVABLE:
                 onBindRemovableViewHolder((RemovableViewHolder) holder, position);

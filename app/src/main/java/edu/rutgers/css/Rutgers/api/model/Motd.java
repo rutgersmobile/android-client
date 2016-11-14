@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers.model;
+package edu.rutgers.css.Rutgers.api.model;
 
 /**
  * POJO for holding Motd info from the API

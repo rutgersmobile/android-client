@@ -32,7 +32,7 @@ import edu.rutgers.css.Rutgers.link.LinkBus;
 import edu.rutgers.css.Rutgers.link.LinkLoadTask;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
-import edu.rutgers.css.Rutgers.model.Motd;
+import edu.rutgers.css.Rutgers.api.model.Motd;
 import edu.rutgers.css.Rutgers.oldapi.Analytics;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;

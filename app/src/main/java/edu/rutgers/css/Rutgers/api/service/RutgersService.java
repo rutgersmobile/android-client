@@ -12,7 +12,7 @@ import edu.rutgers.css.Rutgers.api.model.food.DiningMenu;
 import edu.rutgers.css.Rutgers.api.model.places.KVHolder;
 import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
 import edu.rutgers.css.Rutgers.api.model.soc.Semesters;
-import edu.rutgers.css.Rutgers.model.Motd;
+import edu.rutgers.css.Rutgers.api.model.Motd;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import rx.Observable;

@@ -26,7 +26,7 @@ import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
 import edu.rutgers.css.Rutgers.api.model.soc.Semesters;
 import edu.rutgers.css.Rutgers.api.model.soc.parsers.SOCIndexDeserializer;
 import edu.rutgers.css.Rutgers.api.service.RutgersService;
-import edu.rutgers.css.Rutgers.model.Motd;
+import edu.rutgers.css.Rutgers.api.model.Motd;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;

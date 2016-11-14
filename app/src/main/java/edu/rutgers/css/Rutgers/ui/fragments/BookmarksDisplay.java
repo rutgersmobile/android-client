@@ -20,14 +20,16 @@ import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.model.BookmarkAdapter;
 import edu.rutgers.css.Rutgers.ui.BookmarkItemTouchHelperCallback;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
+import edu.rutgers.css.Rutgers.ui.OnStartDragListener;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 
 /**
  * Fragment for bookmark management
  */
-public class BookmarksDisplay extends BaseDisplay {
+public class BookmarksDisplay extends BaseDisplay implements OnStartDragListener {
     public static final String HANDLE = "bookmarks";
     private BookmarkAdapter adapter;
+    private ItemTouchHelper itemTouchHelper;
 
     public static Bundle createArgs() {
         Bundle args = new Bundle();
@@ -40,6 +42,15 @@ public class BookmarksDisplay extends BaseDisplay {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        adapter = new BookmarkAdapter(
+            getContext(),
+            R.layout.row_removable_constraint_bookmark,
+            R.layout.row_constraint_bookmark,
+            R.layout.row_divider,
+            this
+        );
+        adapter.addFromPrefs();
     }
 
     @Override
@@ -62,21 +73,13 @@ public class BookmarksDisplay extends BaseDisplay {
             ((MainActivity) getActivity()).syncDrawer();
         }
 
-        adapter = new BookmarkAdapter(
-            getContext(),
-            R.layout.row_bookmark_item,
-            R.layout.row_bookmark_toggle_item,
-            R.layout.row_divider
-        );
-        adapter.addFromPrefs();
-
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(adapter);
 
-        ItemTouchHelper helper = new ItemTouchHelper(new BookmarkItemTouchHelperCallback(adapter));
-        helper.attachToRecyclerView(recyclerView);
+        itemTouchHelper = new ItemTouchHelper(new BookmarkItemTouchHelperCallback(adapter));
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         return v;
     }
@@ -98,5 +101,10 @@ public class BookmarksDisplay extends BaseDisplay {
         }
 
         return false;
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        itemTouchHelper.startDrag(viewHolder);
     }
 }
