@@ -181,6 +181,10 @@ public class BusDisplay extends BaseChannelFragment {
         // Start loading predictions
         mLoading = true;
 
+        mAdapter.setAgency(mAgency);
+        mAdapter.setTag(mTag);
+        mAdapter.setMode(mMode);
+
         final String agency = mAgency;
         final String tag = mTag;
         final String mode = mMode;

@@ -20,19 +20,22 @@ import com.google.gson.JsonArray;
 import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.RutgersAPI;
+import edu.rutgers.css.Rutgers.api.model.Motd;
 import edu.rutgers.css.Rutgers.channels.ChannelManager;
 import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
+import edu.rutgers.css.Rutgers.interfaces.OnActivityResultCallback;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkBus;
 import edu.rutgers.css.Rutgers.link.LinkLoadTask;
 import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.model.DrawerAdapter;
-import edu.rutgers.css.Rutgers.api.model.Motd;
 import edu.rutgers.css.Rutgers.oldapi.Analytics;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
@@ -63,6 +66,7 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerAdapter mDrawerAdapter;
     private boolean mShowedMotd;
+    private Map<Integer, OnActivityResultCallback> activityResultCallbackMap = new HashMap<>();
 
     /* Constants */
     private static final int LOADER_ID = AppUtils.getUniqueLoaderId();
@@ -354,6 +358,20 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
         mDrawerLayout.closeDrawer(mDrawerListView);
     }
 
+    public void addOnActivityResultCallback(int requestCode, OnActivityResultCallback callback) {
+        activityResultCallbackMap.put(requestCode, callback);
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
+        if (resultCode == RESULT_OK) {
+            final OnActivityResultCallback callback = activityResultCallbackMap.get(requestCode);
+            if (callback != null) {
+                callback.onActivityResult(requestCode, resultCode, intent);
+            }
+        }
+    }
+
     /**
      * Determine if the current intent will cause deep linking
      * @return True if the intent has a uri
@@ -370,6 +388,9 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
     }
 
     public void deepLink(@NonNull final Uri uri, final boolean backstack) {
+        if (fragmentMediator == null) {
+            fragmentMediator = new MainFragmentMediator(this);
+        }
         fragmentMediator.deepLink(uri, backstack);
     }
 

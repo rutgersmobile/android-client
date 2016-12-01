@@ -1,14 +1,17 @@
 package edu.rutgers.css.Rutgers.channels.bus.model;
 
-import android.content.Context;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bignerdranch.expandablerecyclerview.Adapter.ExpandableRecyclerAdapter;
@@ -18,6 +21,7 @@ import com.bignerdranch.expandablerecyclerview.ViewHolder.ChildViewHolder;
 import com.bignerdranch.expandablerecyclerview.ViewHolder.ParentViewHolder;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -26,6 +30,8 @@ import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
+import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
+import edu.rutgers.css.Rutgers.link.Link;
 
 /**
  * Bus arrival time predictions adapter.
@@ -39,7 +45,23 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
     private static final Calendar cal = Calendar.getInstance(Locale.US);
     private final List<Prediction> predictions;
 
-    private Context mContext;
+    private String agency;
+    private String tag;
+    private String mode;
+
+    public void setAgency(String agency) {
+        this.agency = agency;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
+
+    private FragmentActivity fragmentActivity;
 
     private final Handler handler = new Handler();
 
@@ -47,7 +69,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
     public ViewHolder onCreateParentViewHolder(ViewGroup parentViewGroup) {
         final View itemView = LayoutInflater
             .from(parentViewGroup.getContext())
-            .inflate(R.layout.row_bus_prediction_title, parentViewGroup, false);
+            .inflate(R.layout.row_bus_prediction_title_constraint, parentViewGroup, false);
         return new ViewHolder(itemView);
     }
 
@@ -62,7 +84,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
     @Override
     public void onBindParentViewHolder(ViewHolder parentViewHolder, int position, ParentListItem parentListItem) {
         final Prediction prediction = (Prediction) parentListItem;
-        Resources res = mContext.getResources();
+        Resources res = fragmentActivity.getResources();
 
         parentViewHolder.itemView.setOnClickListener(view -> {
             if (parentViewHolder.isExpanded() || prediction.getMinutes().isEmpty()) {
@@ -70,6 +92,32 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
             } else {
                 expandParent(parentListItem);
             }
+        });
+
+        parentViewHolder.alarmImageView.setOnClickListener(view -> {
+            String routeTag;
+            String stopTag;
+            if (mode.equals(BusDisplay.STOP_MODE)) {
+                routeTag = prediction.getTag();
+                stopTag = tag;
+            } else {
+                routeTag = tag;
+                stopTag = prediction.getTitle();
+            }
+
+            final List<String> pathParts = new ArrayList<>();
+            pathParts.add(mode);
+            pathParts.add(tag);
+            final Bundle notificationDialogArgs = BusNotificationDialogFragment.createArgs(
+                agency,
+                routeTag,
+                stopTag,
+                new Link("bus", pathParts, prediction.getTitle())
+            );
+
+            DialogFragment notificationDialog = new BusNotificationDialogFragment();
+            notificationDialog.setArguments(notificationDialogArgs);
+            notificationDialog.show(fragmentActivity.getSupportFragmentManager(), "notification");
         });
 
         // Set title
@@ -145,6 +193,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
         TextView titleTextView;
         TextView directionTextView;
         TextView minutesTextView;
+        ImageView alarmImageView;
 
         /**
          * Default constructor.
@@ -156,6 +205,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
             titleTextView = (TextView) itemView.findViewById(R.id.title);
             directionTextView = (TextView) itemView.findViewById(R.id.direction);
             minutesTextView = (TextView) itemView.findViewById(R.id.minutes);
+            alarmImageView = (ImageView) itemView.findViewById(R.id.add_alarm);
         }
     }
 
@@ -173,9 +223,9 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
         }
     }
     
-    public PredictionAdapter(Context context, List<Prediction> objects) {
+    public PredictionAdapter(FragmentActivity fragmentActivity, List<Prediction> objects) {
         super(objects);
-        mContext = context;
+        this.fragmentActivity = fragmentActivity;
         predictions = objects;
     }
 
@@ -189,7 +239,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
      * @return Formatted arrival time string
      */
     private String formatMinutes(List<Integer> minutes) {
-        Resources resources = mContext.getResources();
+        Resources resources = fragmentActivity.getResources();
         StringBuilder result = new StringBuilder(resources.getString(R.string.bus_prediction_begin));
         
         for (int i = 0; i < minutes.size(); i++) {
@@ -214,7 +264,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
      * @return Formatted and stylized arrival time details string
      */
     private CharSequence formatMinutesDetails(List<Integer> minutes) {
-        Resources resources = mContext.getResources();
+        Resources resources = fragmentActivity.getResources();
         SpannableStringBuilder result = new SpannableStringBuilder();
 
         for (int i = 0; i < minutes.size(); i++) {
@@ -226,7 +276,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
             Date date = new Date();
             cal.setTime(date);
             cal.add(Calendar.MINUTE, minutes.get(i));
-            String arrivalTime = android.text.format.DateFormat.is24HourFormat(mContext) ?
+            String arrivalTime = android.text.format.DateFormat.is24HourFormat(fragmentActivity) ?
                     PredictionAdapter.arriveDf24.format(cal.getTime()) :
                     PredictionAdapter.arriveDf12.format(cal.getTime());
 

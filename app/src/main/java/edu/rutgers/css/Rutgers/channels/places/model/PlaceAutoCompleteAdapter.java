@@ -10,10 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.api.model.places.Place;
 import edu.rutgers.css.Rutgers.model.KeyValPair;
-import edu.rutgers.css.Rutgers.api.RutgersAPI;
-import rx.observables.BlockingObservable;
 
 /**
  * Adapter for place auto-completion results. The filter executes queries on the Places API and
@@ -66,8 +65,8 @@ public class PlaceAutoCompleteAdapter extends ArrayAdapter<KeyValPair> {
 
             if (StringUtils.isBlank(filterString)) return results;
 
-            List<Place> places = BlockingObservable.from(RutgersAPI.searchPlaces(filterString, 15))
-                .getIterator().next();
+            List<Place> places = RutgersAPI.searchPlaces(filterString, 15)
+                .toBlocking().getIterator().next();
 
             List<KeyValPair> keyValPairs = new ArrayList<>(places.size());
             for (Place place: places) {
