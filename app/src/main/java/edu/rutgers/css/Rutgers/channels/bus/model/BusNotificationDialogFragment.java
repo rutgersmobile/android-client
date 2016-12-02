@@ -33,6 +33,14 @@ public class BusNotificationDialogFragment extends DialogFragment {
 
     private Uri chosenRingtone = null;
 
+    /**
+     * Create arguments for Bus Alarm Dialog
+     * @param agency Nextbus agency, probably "rutgers"
+     * @param routeTag Nextbus route tag, ex. "a", "b", "ee"
+     * @param stopTag Nextbus stop tag title, ex. "Scott Hall"
+     * @param link Link back to the app that will be run when the user clicks on the created notification
+     * @return The argument bundle that should be set with {@link android.support.v4.app.Fragment#setArguments(Bundle)}
+     */
     public static Bundle createArgs(String agency, String routeTag, String stopTag, Link link) {
         final Bundle bundle = new Bundle();
         bundle.putString(ARG_AGENCY_TAG, agency);
@@ -42,6 +50,11 @@ public class BusNotificationDialogFragment extends DialogFragment {
         return bundle;
     }
 
+    /**
+     * Get a {@link Ringtone} title from a Ringtone {@link Uri}
+     * @param uri Uri to a Ringtone, probably from {@link RingtoneManager}
+     * @return A readable String representation of the Ringtone
+     */
     private String getRingtoneTitle(Uri uri) {
         Ringtone ringtone = RingtoneManager.getRingtone(getContext(), uri);
         return ringtone.getTitle(getContext());
@@ -57,37 +70,56 @@ public class BusNotificationDialogFragment extends DialogFragment {
         final String stopTag = args.getString(ARG_STOP_TAG);
         final Link link = (Link) args.getSerializable(ARG_LINK_TAG);
 
+        // inflate the inner layout for the Dialog
         final View itemView = LayoutInflater
             .from(getContext())
             .inflate(R.layout.dialog_bus_alarm, null);
+        // EditText where the user inputs a String for the time before the bus arrives that they
+        // want to be alerted
         final EditText alarmSetInput = (EditText) itemView.findViewById(R.id.alarm_set_input);
+        // TextView that shows what Ringtone will play when the bus arrives
         final TextView toneNameText = (TextView) itemView.findViewById(R.id.tone_set_text);
 
+        // Set the text to be the default alarm ringtone
         toneNameText.setText(getRingtoneTitle(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)));
 
-        MainActivity activity = (MainActivity) getActivity();
-
-        activity.addOnActivityResultCallback(RINGTONE_REQUEST, (requestCode, resultCode, intent) -> {
-            chosenRingtone = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-            toneNameText.setText(getRingtoneTitle(chosenRingtone));
-        });
-
+        // Launch a ringtone picker dialog when this TextView is clicked
         toneNameText.setOnClickListener(view -> {
             Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
+            // If we don't call this from the Activity then our request id will get rewritten
             getActivity().startActivityForResult(intent, RINGTONE_REQUEST);
         });
 
+        MainActivity activity = (MainActivity) getActivity();
+
+        // Register a callback for when the Ringtone picker comes back with a result
+        // Use it to set the correct text for the selected Ringtone
+        activity.addOnActivityResultCallback(RINGTONE_REQUEST, (requestCode, resultCode, intent) -> {
+            chosenRingtone = intent.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+            toneNameText.setText(getRingtoneTitle(chosenRingtone));
+        });
+
+        // Construct the actual Dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setMessage(WordUtils.capitalize(routeTag) + " bus at " + stopTag)
             .setView(itemView)
             .setPositiveButton("Set Alarm", (dialogInterface, i) -> {
-                int minutes = 5;
+                int minutes;
                 try {
                     minutes = Integer.parseInt(alarmSetInput.getText().toString());
-                } catch (NumberFormatException ignored) { }
+                    if (minutes < 1) {
+                        throw new NumberFormatException();
+                    }
+                } catch (NumberFormatException ignored) {
+                    // Default to 5 minutes if the user inputs an invalid time
+                    minutes = 5;
+                }
+
+                // Fire off the service which starts the notification when
+                // the user clicks the confirmation
                 BusNotificationService.startAlarm(
                     getContext(),
                     agency,
@@ -100,6 +132,7 @@ public class BusNotificationDialogFragment extends DialogFragment {
                         : chosenRingtone
                 );
             })
+            // Just close the dialog when canceled
             .setNegativeButton("Cancel", ((dialogInterface, i) -> {}));
 
         return builder.create();

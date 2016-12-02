@@ -66,6 +66,8 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerAdapter mDrawerAdapter;
     private boolean mShowedMotd;
+
+    // Mapping of requestIds to callbacks
     private Map<Integer, OnActivityResultCallback> activityResultCallbackMap = new HashMap<>();
 
     /* Constants */
@@ -358,6 +360,11 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
         mDrawerLayout.closeDrawer(mDrawerListView);
     }
 
+    /**
+     * Add a callback that is called {@link android.app.Activity#onActivityResult(int, int, Intent)}
+     * @param requestCode Request code that was used to make the inital request
+     * @param callback method to be called after result is received
+     */
     public void addOnActivityResultCallback(int requestCode, OnActivityResultCallback callback) {
         activityResultCallbackMap.put(requestCode, callback);
     }
@@ -365,6 +372,7 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
         if (resultCode == RESULT_OK) {
+            // Lookup requestCode in the map and call the callback if it is there
             final OnActivityResultCallback callback = activityResultCallbackMap.get(requestCode);
             if (callback != null) {
                 callback.onActivityResult(requestCode, resultCode, intent);

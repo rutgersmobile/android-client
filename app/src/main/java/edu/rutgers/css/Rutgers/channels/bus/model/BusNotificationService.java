@@ -77,7 +77,9 @@ public final class BusNotificationService extends IntentService {
      * @param agencyTag NextBus agency (probably "rutgers")
      * @param routeTag Bus route for Nextbus, ex. "a", "wknd1"
      * @param stopTag Stop title for Nextbus, ex. "Werblin"
+     * @param alarmThreshold Alert if prediction is less than this time
      * @param link Deep link for when notification is tapped
+     * @param soundUri Uri of ringtone to play to alert the user
      */
     public static synchronized void startAlarm(final Context context, String agencyTag, String routeTag, String stopTag, int alarmThreshold, Link link, Uri soundUri) {
         // Create intent for service that will query NextBus and update the notification
@@ -127,15 +129,17 @@ public final class BusNotificationService extends IntentService {
         return (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
+    // Creates the notification that actually alerts the user
     private static Notification createAlertNotification(Context context, String shortText, String longText, Uri link, Uri soundUri) {
         // Base options for notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
             .setSmallIcon(R.drawable.ic_notifications_black_24dp)
             .setContentTitle("Rutgers Mobile Bus Prediction")
             .setContentText(shortText)
-            // 4 1-second long vibrations
+            // 4 1-second long vibrations spaced 1-second apart
             .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000})
             .setSound(soundUri)
+            // Causes notification to be heads-up
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setStyle(new NotificationCompat.BigTextStyle().bigText(longText));
 
@@ -153,11 +157,13 @@ public final class BusNotificationService extends IntentService {
         builder.setContentIntent(busPendingIntent);
 
         Notification notification = builder.build();
+        // Makes the notification keep playing the alarm until you dismiss it
         notification.flags |= NotificationCompat.FLAG_INSISTENT;
 
         return notification;
     }
 
+    // Creates the notification that displays information about the bus prediction to the user
     private static Notification createNotification(Context context, Intent alarmIntent, String shortText, String longText, Uri link) {
         // Base options for notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
@@ -203,11 +209,14 @@ public final class BusNotificationService extends IntentService {
         final Uri soundUri = intent.getParcelableExtra(ARG_SOUND_URI_TAG);
         final Uri link = intent.getData();
 
+        // The delete flag is set when the cancel action is chosen on the notification
         if (delete) {
             cancelAlarm(this, intent);
             return;
         }
 
+        // Perform Nextbus api request
+        // This job is already happening in the background so it's fine to block
         Predictions predictions = NextbusAPI.stopPredict(agencyTag, stopTag)
             .toBlocking().getIterator().next();
         Prediction foundPrediction = null;
@@ -218,19 +227,23 @@ public final class BusNotificationService extends IntentService {
             }
         }
 
+        // Cancel the alarm if there is an error so we're not waiting forever
         if (foundPrediction == null) {
             LOGE(TAG, "Could not find prediction");
             cancelAlarm(this, intent);
             return;
         }
 
+        // The predictions are sorted, so we're getting the next one
         final int predictionMinutes = foundPrediction.getMinutes().get(0);
 
+        // Text to display in the short notification
         final String shortText
             = String.valueOf(predictionMinutes)
             + (predictionMinutes == 1 ? " minute" : " minutes")
             + " remaining";
 
+        // Text to show in fully expanded view
         final String longText
             = WordUtils.capitalize(routeTag)
             + " bus arrives at "
@@ -246,6 +259,8 @@ public final class BusNotificationService extends IntentService {
         LOGI(TAG, longText);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
+        // If the prediction time is below the threshold we are looking for, alert the user
+        // and cancel the alarm
         if (predictionMinutes <= alarmThreshold) {
             Notification notification = createAlertNotification(
                 this,
@@ -260,6 +275,7 @@ public final class BusNotificationService extends IntentService {
             return;
         }
 
+        // Just update the old notification with the new prediction
         Notification notification = createNotification(
                 this,
                 intent,
