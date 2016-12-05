@@ -105,12 +105,20 @@ public class SOCCourses extends BaseChannelFragment {
             getActivity().setTitle(title);
         }
 
+        mAdapter = new ScheduleAdapter(new ArrayList<>(), R.layout.row_course);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final Bundle args = getArguments();
+
         final String campus = args.getString(ARG_CAMPUS_TAG);
         final String level = args.getString(ARG_LEVEL_TAG);
         final String semester = args.getString(ARG_SEMESTER_TAG);
         final String subjectCode = args.getString(ARG_SUBJECT_TAG);
 
-        mAdapter = new ScheduleAdapter(new ArrayList<>(), R.layout.row_course);
         mAdapter.getPositionClicks()
             .map(course ->
                 SOCSections.createArgs(course.getDisplayTitle(), campus,  semester, course)

@@ -81,12 +81,6 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
 
         mAdapter = new SimpleSectionedRecyclerAdapter<>(new ArrayList<>(),
             R.layout.row_section_header, R.layout.row_title, R.id.title);
-        mAdapter.getPositionClicks()
-            .compose(bindToLifecycle())
-            .map(stopStub -> BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
-                        stopStub.getAgencyTag(), stopStub.getTitle())
-            )
-            .subscribe(this::switchFragments, this::logError);
 
         mLocationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
@@ -110,6 +104,13 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
     @Override
     public void onResume() {
         super.onResume();
+
+        mAdapter.getPositionClicks()
+            .compose(bindToLifecycle())
+            .map(stopStub -> BusDisplay.createArgs(stopStub.getTitle(), BusDisplay.STOP_MODE,
+                stopStub.getAgencyTag(), stopStub.getTitle())
+            )
+            .subscribe(this::switchFragments, this::logError);
 
         if (mGoogleApiClientProvider != null) {
             mGoogleApiClientProvider.registerListener(this);

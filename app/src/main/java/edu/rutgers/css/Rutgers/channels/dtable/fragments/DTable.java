@@ -70,6 +70,7 @@ public class DTable extends DtableChannelFragment {
     private DTableRoot mDRoot;
     private DTableAdapter mAdapter;
     private String mURL;
+    private String mApi;
     private String mHandle;
     private String mTopHandle;
     private boolean mLoading;
@@ -155,12 +156,12 @@ public class DTable extends DtableChannelFragment {
 
         // Get handle for this DTable instance
         final String handle = args.getString(ARG_HANDLE_TAG);
-        final String api = args.getString(ARG_API_TAG);
+        mApi = args.getString(ARG_API_TAG);
         mTitle = args.getString(ARG_TITLE_TAG);
         if (handle != null) {
             mHandle = handle;
-        } else if (api != null) {
-            mHandle = api.replace(".txt","");
+        } else if (mApi != null) {
+            mHandle = mApi.replace(".txt","");
         } else if (mTitle != null) {
             mHandle = mTitle;
         } else {
@@ -197,7 +198,7 @@ public class DTable extends DtableChannelFragment {
             final String url = args.getString(ARG_URL_TAG);
             if (url != null) {
                 mURL = url;
-            } else if (api == null) {
+            } else if (mApi == null) {
                 LOGE(dTag(), "DTable must have URL, API, or data in its arguments bundle");
                 Toast.makeText(getActivity(), R.string.failed_internal, Toast.LENGTH_SHORT).show();
                 return;
@@ -225,6 +226,16 @@ public class DTable extends DtableChannelFragment {
                 new ArrayList<>()
             );
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mDRoot != null) {
+            LOGE(TAG, "");
+            return;
+        }
 
         // Start loading DTableRoot object in another thread
         mLoading = true;
@@ -234,30 +245,30 @@ public class DTable extends DtableChannelFragment {
             if (url != null) {
                 json = ApiRequest.json(url, TimeUnit.HOURS, JsonObject.class);
             } else {
-                json = ApiRequest.api(api, TimeUnit.HOURS, JsonObject.class);
+                json = ApiRequest.api(mApi, TimeUnit.HOURS, JsonObject.class);
             }
             return new DTableRoot(json, null);
         })
-        .compose(bindToLifecycle())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(root -> {
-            reset();
-            banner.addAll(root.getBanner());
-            if (carouselView != null) {
-                carouselView.setPageCount(banner.size());
-                if (banner.size() != 0) {
-                    carouselView.setVisibility(View.VISIBLE);
+            .compose(bindToLifecycle())
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(root -> {
+                reset();
+                banner.addAll(root.getBanner());
+                if (carouselView != null) {
+                    carouselView.setPageCount(banner.size());
+                    if (banner.size() != 0) {
+                        carouselView.setVisibility(View.VISIBLE);
+                    }
+                    carouselView.invalidate();
                 }
-                carouselView.invalidate();
-            }
-            mAdapter.addAll(root.getChildren());
-            mAdapter.addAllHistory(root.getHistory());
-        }, error -> {
-            reset();
-            LOGE(TAG, error.getMessage());
-            AppUtils.showFailedLoadToast(getContext());
-        });
+                mAdapter.addAll(root.getChildren());
+                mAdapter.addAllHistory(root.getHistory());
+            }, error -> {
+                reset();
+                LOGE(TAG, error.getMessage());
+                AppUtils.showFailedLoadToast(getContext());
+            });
     }
 
     private DTableAdapter createAdapter() {

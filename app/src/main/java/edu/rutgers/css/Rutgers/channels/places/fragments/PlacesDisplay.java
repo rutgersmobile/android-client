@@ -22,13 +22,13 @@ import java.util.Map;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.model.bus.stop.StopGroup;
-import edu.rutgers.css.Rutgers.api.model.places.Place;
-import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
-import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.api.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.RutgersAPI;
+import edu.rutgers.css.Rutgers.api.model.bus.stop.StopGroup;
+import edu.rutgers.css.Rutgers.api.model.places.Place;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuAdapter;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuHeaderRow;
 import edu.rutgers.css.Rutgers.model.rmenu.RMenuItemRow;
@@ -121,6 +121,12 @@ public class PlacesDisplay extends BaseChannelFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         mAdapter = new RMenuAdapter(getActivity(), R.layout.row_title, R.layout.row_section_header, new ArrayList<>());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
         mAdapter.getPositionClicks()
             .map(rMenuRow -> (RMenuItemRow) rMenuRow)
             .subscribe(rMenuItemRow -> {

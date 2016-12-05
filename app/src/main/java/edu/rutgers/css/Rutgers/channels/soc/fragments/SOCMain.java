@@ -21,15 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
+import edu.rutgers.css.Rutgers.api.SOCAPI;
 import edu.rutgers.css.Rutgers.api.model.soc.Course;
 import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
 import edu.rutgers.css.Rutgers.api.model.soc.Semesters;
 import edu.rutgers.css.Rutgers.api.model.soc.Subject;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.soc.model.SectionedScheduleAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.api.RutgersAPI;
-import edu.rutgers.css.Rutgers.api.SOCAPI;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -175,6 +175,19 @@ public class SOCMain
             R.id.title
         );
 
+        // Restore filter
+        if (savedInstanceState != null && filterEditText != null) {
+            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG, "");
+            searching = savedInstanceState.getBoolean(SEARCHING_TAG);
+            filterEditText.setText(mFilterString);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateSearchUI();
+
         mAdapter.getPositionClicks()
             .flatMap(clickedItem -> {
                 if (clickedItem instanceof Subject) {
@@ -208,13 +221,6 @@ public class SOCMain
 
         // Register settings listener
         sharedPref.registerOnSharedPreferenceChangeListener(this);
-
-        // Restore filter
-        if (savedInstanceState != null && filterEditText != null) {
-            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG, "");
-            searching = savedInstanceState.getBoolean(SEARCHING_TAG);
-            filterEditText.setText(mFilterString);
-        }
 
         mLoading = true;
         showProgressCircle();
@@ -266,12 +272,6 @@ public class SOCMain
 
                 setScheduleTitle();
             }, this::logError);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateSearchUI();
     }
 
     @Override

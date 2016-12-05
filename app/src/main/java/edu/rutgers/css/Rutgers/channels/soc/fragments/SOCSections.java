@@ -17,13 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.ComponentFactory;
-import edu.rutgers.css.Rutgers.api.model.soc.Course;
-import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
-import edu.rutgers.css.Rutgers.api.model.soc.Section;
-import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
-import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.api.SOCAPI;
+import edu.rutgers.css.Rutgers.api.model.soc.Course;
+import edu.rutgers.css.Rutgers.api.model.soc.Section;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.soc.model.CourseSectionAdapter;
+import edu.rutgers.css.Rutgers.channels.soc.model.ScheduleText;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
@@ -110,6 +110,19 @@ public class SOCSections extends BaseChannelFragment {
         semester = args.getString(ARG_SEMESTER_TAG);
 
         mAdapter = new CourseSectionAdapter(getActivity(), R.layout.row_course_section, new ArrayList<>());
+
+        Course course = (Course) args.getSerializable(ARG_DATA_TAG);
+        if (course != null) {
+            loadCourse(course);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final Bundle args = getArguments();
+
         mAdapter.getPositionClicks()
             .flatMap(clickedItem -> {
                 if (clickedItem instanceof ScheduleText) {
@@ -140,12 +153,6 @@ public class SOCSections extends BaseChannelFragment {
             })
             .compose(bindToLifecycle())
             .subscribe(this::switchFragments, this::logError);
-
-        Course course = (Course) args.getSerializable(ARG_DATA_TAG);
-        if (course != null) {
-            loadCourse(course);
-            return;
-        }
 
         mLoading = true;
         final String campus = args.getString(ARG_CAMPUS_TAG);

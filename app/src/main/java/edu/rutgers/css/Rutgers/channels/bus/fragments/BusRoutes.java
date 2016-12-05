@@ -43,12 +43,6 @@ public class BusRoutes extends BaseChannelFragment {
         super.onCreate(savedInstanceState);
         mAdapter = new SimpleSectionedRecyclerAdapter<>(new ArrayList<>(),
             R.layout.row_section_header, R.layout.row_title, R.id.title);
-        mAdapter.getPositionClicks()
-            .compose(bindToLifecycle())
-            .map(routeStub -> BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
-                routeStub.getAgencyTag(), routeStub.getTag())
-            )
-            .subscribe(this::switchFragments, this::logError);
     }
     
     @Override
@@ -69,6 +63,13 @@ public class BusRoutes extends BaseChannelFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        mAdapter.getPositionClicks()
+            .compose(bindToLifecycle())
+            .map(routeStub -> BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
+                routeStub.getAgencyTag(), routeStub.getTag())
+            )
+            .subscribe(this::switchFragments, this::logError);
 
         // Clear out everything
         loading = true;

@@ -58,20 +58,27 @@ public class BusAll extends BaseChannelFragment {
 
         mAdapter = new SimpleSectionedRecyclerAdapter<>(new ArrayList<>(),
             R.layout.row_section_header, R.layout.row_title, R.id.title);
+
+        // Restore filter
+        if (savedInstanceState != null) {
+            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
+        }
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
         mAdapter.getPositionClicks()
             .compose(bindToLifecycle())
             .map(nextbusItem -> {
                 final String mode = nextbusItem.getClass() == RouteStub.class ?
                     BusDisplay.ROUTE_MODE : BusDisplay.STOP_MODE;
                 return BusDisplay.createArgs(nextbusItem.getTitle(), mode,
-                        nextbusItem.getAgencyTag(), nextbusItem.getTag());
+                    nextbusItem.getAgencyTag(), nextbusItem.getTag());
             })
             .subscribe(this::switchFragments, this::logError);
-
-        // Restore filter
-        if (savedInstanceState != null) {
-            mFilterString = savedInstanceState.getString(SAVED_FILTER_TAG);
-        }
 
         // Start loading all stops and routes in the background
         mLoading = true;

@@ -19,12 +19,12 @@ import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.api.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
 import edu.rutgers.css.Rutgers.api.model.bus.Predictions;
 import edu.rutgers.css.Rutgers.api.model.bus.route.RouteStub;
 import edu.rutgers.css.Rutgers.api.model.bus.stop.StopStub;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
@@ -141,6 +141,9 @@ public class BusDisplay extends BaseChannelFragment {
             mTag = savedInstanceState.getString(SAVED_TAG_TAG);
             mMode = savedInstanceState.getString(SAVED_MODE_TAG);
             mAdapter.addAll((ArrayList<Prediction>) savedInstanceState.getSerializable(SAVED_DATA_TAG));
+            mAdapter.setAgency(mAgency);
+            mAdapter.setTag(mTag);
+            mAdapter.setMode(mMode);
             mTitle = savedInstanceState.getString(SAVED_TITLE_TAG);
             mMessage = savedInstanceState.getString(SAVED_MESSAGE_TAG);
             return;
@@ -178,89 +181,93 @@ public class BusDisplay extends BaseChannelFragment {
         // Get title
         mTitle = args.getString(ARG_TITLE_TAG, getString(R.string.bus_title));
 
-        // Start loading predictions
-        mLoading = true;
-
         mAdapter.setAgency(mAgency);
         mAdapter.setTag(mTag);
         mAdapter.setMode(mMode);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Start loading predictions
+        mLoading = true;
 
         final String agency = mAgency;
         final String tag = mTag;
         final String mode = mMode;
         Observable.merge(
-                Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
-                refreshSubject)
-        // need to specify io scheduler because refreshSubject exists on main thread
-        .observeOn(Schedulers.io())
-        .flatMap(t -> {
-            LOGI(TAG, "Starting load");
-            if (BusDisplay.ROUTE_MODE.equals(mode)) {
-                return NextbusAPI.routePredict(agency, tag)
-                    .flatMap(predictions -> NextbusAPI.getActiveRoutes(agency)
-                    .flatMap(routeStubs -> {
-                        for (final RouteStub route : routeStubs) {
-                            if (route.getTag().equals(tag)) {
-                                return Observable.just(new PredictionHolder(predictions, route.getTitle()));
+            Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
+            refreshSubject)
+            // need to specify io scheduler because refreshSubject exists on main thread
+            .observeOn(Schedulers.io())
+            .flatMap(t -> {
+                LOGI(TAG, "Starting load");
+                if (BusDisplay.ROUTE_MODE.equals(mode)) {
+                    return NextbusAPI.routePredict(agency, tag)
+                        .flatMap(predictions -> NextbusAPI.getActiveRoutes(agency)
+                        .flatMap(routeStubs -> {
+                            for (final RouteStub route : routeStubs) {
+                                if (route.getTag().equals(tag)) {
+                                    return Observable.just(new PredictionHolder(predictions, route.getTitle()));
+                                }
                             }
-                        }
-                        return Observable.error(new IllegalArgumentException("Route tag not found"));
-                    }));
-            } else if (BusDisplay.STOP_MODE.equals(mode)) {
-                return NextbusAPI.stopPredict(agency, tag)
-                    .flatMap(predictions -> NextbusAPI.getActiveStops(agency)
-                    .flatMap(stopStubs -> {
-                        for (final StopStub stop : stopStubs) {
-                            if (stop.getTag().equals(tag)) {
-                                return Observable.just(new PredictionHolder(predictions, stop.getTitle()));
+                            return Observable.error(new IllegalArgumentException("Route tag not found"));
+                        }));
+                } else if (BusDisplay.STOP_MODE.equals(mode)) {
+                    return NextbusAPI.stopPredict(agency, tag)
+                        .flatMap(predictions -> NextbusAPI.getActiveStops(agency)
+                        .flatMap(stopStubs -> {
+                            for (final StopStub stop : stopStubs) {
+                                if (stop.getTag().equals(tag)) {
+                                    return Observable.just(new PredictionHolder(predictions, stop.getTitle()));
+                                }
                             }
-                        }
-                        return Observable.error(new IllegalArgumentException("Stop tag not found"));
-                    }));
-            }
+                            return Observable.error(new IllegalArgumentException("Stop tag not found"));
+                        }));
+                }
 
-            return Observable.error(
-                new IllegalArgumentException("Invalid mode (stop / route only)")
-            );
-        })
-        .observeOn(AndroidSchedulers.mainThread())
-        .compose(bindToLifecycle())
-        .subscribe(data -> {
-            LOGI(TAG, "Ran subscription");
-            reset();
+                return Observable.error(
+                    new IllegalArgumentException("Invalid mode (stop / route only)")
+                );
+            })
+            .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .subscribe(data -> {
+                LOGI(TAG, "Ran subscription");
+                reset();
 
-            if (refreshLayout != null) {
-                refreshLayout.setRefreshing(false);
-            }
+                if (refreshLayout != null) {
+                    refreshLayout.setRefreshing(false);
+                }
 
-            Predictions predictions = data.getPredictions();
-            mTitle = data.getTitle();
-            getActivity().setTitle(mTitle);
+                Predictions predictions = data.getPredictions();
+                mTitle = data.getTitle();
+                getActivity().setTitle(mTitle);
 
-            // If there are no active routes or stops, show a message
-            if (predictions.getPredictions().isEmpty()) {
-                // A stop may have no active routes; a route may have no active stops
-                int message = BusDisplay.STOP_MODE.equals(mMode)
-                    ? R.string.bus_no_active_routes
-                    : R.string.bus_no_active_stops;
+                // If there are no active routes or stops, show a message
+                if (predictions.getPredictions().isEmpty()) {
+                    // A stop may have no active routes; a route may have no active stops
+                    int message = BusDisplay.STOP_MODE.equals(mMode)
+                        ? R.string.bus_no_active_routes
+                        : R.string.bus_no_active_stops;
 
-                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-            }
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                }
 
-            mAdapter.addAll(predictions.getPredictions());
+                mAdapter.addAll(predictions.getPredictions());
 
-            mMessage = StringUtils.join(predictions.getMessages(), "\n");
-            if (!mMessage.isEmpty()) {
-                dividerView.setVisibility(View.VISIBLE);
-                messagesView.setVisibility(View.VISIBLE);
-                messagesView.setText(mMessage);
-            }
-        }, error -> {
-            reset();
-            LOGE(TAG, error.getMessage());
-            AppUtils.showFailedLoadToast(getContext());
-        });
-
+                mMessage = StringUtils.join(predictions.getMessages(), "\n");
+                if (!mMessage.isEmpty()) {
+                    dividerView.setVisibility(View.VISIBLE);
+                    messagesView.setVisibility(View.VISIBLE);
+                    messagesView.setText(mMessage);
+                }
+            }, error -> {
+                reset();
+                LOGE(TAG, error.getMessage());
+                AppUtils.showFailedLoadToast(getContext());
+            });
     }
     
     @Override

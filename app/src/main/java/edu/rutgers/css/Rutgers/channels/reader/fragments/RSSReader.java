@@ -77,11 +77,6 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
 
         mData = new ArrayList<>();
         mAdapter = new RSSAdapter(this.getActivity(), R.layout.row_rss, mData);
-        mAdapter.getPositionClicks()
-            .map(RSSItem::getLink)
-            .filter(FuncUtils::nonNull)
-            .map(link -> WebDisplay.createArgs(args.getString(ARG_TITLE_TAG), link))
-            .subscribe(this::switchFragments, this::logError);
 
         if (savedInstanceState != null && savedInstanceState.getSerializable(SAVED_DATA_TAG) != null) {
             LOGD(TAG, "Restoring mData");
@@ -97,6 +92,24 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
 
         mLoading = true;
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final String title = getArguments().getString(ARG_TITLE_TAG);
+
+        if (title == null) {
+            LOGE(TAG, "No title tag provided");
+            return;
+        }
+
+        mAdapter.getPositionClicks()
+            .map(RSSItem::getLink)
+            .filter(FuncUtils::nonNull)
+            .map(link -> WebDisplay.createArgs(title, link))
+            .subscribe(this::switchFragments, this::logError);
     }
 
     @Override

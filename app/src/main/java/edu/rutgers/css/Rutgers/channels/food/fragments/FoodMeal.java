@@ -11,15 +11,15 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.api.model.food.DiningMenu;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.DiningMenuAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -95,18 +95,22 @@ public class FoodMeal extends BaseChannelFragment {
 
         if (args.getString(ARG_LOCATION_TAG) == null) {
             LOGE(TAG, "Location not set");
-            return;
         } else if (args.getString(ARG_MEAL_TAG) == null) {
             DiningMenu.Meal savedMeal = (DiningMenu.Meal) args.getSerializable(ARG_SAVED_DATA_TAG);
             if (savedMeal != null) {
                 for (final DiningMenu.Genre genre : savedMeal.getGenres()) {
                     mAdapter.add(genreToSection(genre));
                 }
-                return;
             }
             LOGE(TAG, "Meal not set");
-            return;
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        final Bundle args = getArguments();
 
         final String meal = args.getString(FoodMeal.ARG_MEAL_TAG);
         final String location = args.getString(FoodMeal.ARG_LOCATION_TAG);

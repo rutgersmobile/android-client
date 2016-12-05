@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.api.model.food.DiningMenu;
+import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.food.model.SchoolFacilitiesAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
-import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -68,6 +68,11 @@ public class FoodMain extends BaseChannelFragment {
 
         mAdapter = new SchoolFacilitiesAdapter(getActivity(), new ArrayList<>(),
                 R.layout.row_section_header, R.layout.row_title, R.id.title);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         final String stonsbyTitle = getString(R.string.dining_stonsby_title);
         final String stonsbyDescription = getString(R.string.dining_stonsby_description);
@@ -88,11 +93,11 @@ public class FoodMain extends BaseChannelFragment {
                     return null;
                 }
             }).onErrorReturn(error -> {
-                // Errors shouldn't break the stream
-                // Just log and ignore
-                logError(error);
-                return null;
-            }).filter(FuncUtils::nonNull)
+            // Errors shouldn't break the stream
+            // Just log and ignore
+            logError(error);
+            return null;
+        }).filter(FuncUtils::nonNull)
             .subscribe(this::switchFragments, this::logError);
 
         // Get user's home campus

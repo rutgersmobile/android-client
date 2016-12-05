@@ -120,11 +120,6 @@ public class PlacesMain extends BaseChannelFragment
 
         mSearchAdapter = new PlaceAutoCompleteAdapter(getActivity(), android.R.layout.simple_dropdown_item_1line);
         mAdapter = new SimpleSectionedRecyclerAdapter<>(new ArrayList<>(), R.layout.row_section_header, R.layout.row_title, R.id.title);
-        mAdapter.getPositionClicks()
-            .flatMap(placeStub -> placeStub.getKey() == null
-                ? Observable.error(new IllegalArgumentException("Place has no key"))
-                : Observable.just(PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey())))
-            .subscribe(this::switchFragments, this::logError);
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setInterval(10 * 1000)
@@ -217,6 +212,12 @@ public class PlacesMain extends BaseChannelFragment
     @Override
     public void onResume() {
         super.onResume();
+
+        mAdapter.getPositionClicks()
+            .flatMap(placeStub -> placeStub.getKey() == null
+                ? Observable.error(new IllegalArgumentException("Place has no key"))
+                : Observable.just(PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey())))
+            .subscribe(this::switchFragments, this::logError);
 
         if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.registerListener(this);
 

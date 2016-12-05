@@ -11,9 +11,9 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.athletics.model.AthleticsAdapter;
-import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.ui.VerticalSpaceItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
@@ -32,6 +32,8 @@ public final class AthleticsDisplay extends DtableChannelFragment {
     private boolean loading = false;
     private AthleticsAdapter adapter;
     private String title;
+
+    private String sport;
 
     public static Bundle createArgs(@NonNull String title, @NonNull String resource) {
         Bundle bundle = new Bundle();
@@ -52,9 +54,16 @@ public final class AthleticsDisplay extends DtableChannelFragment {
         }
         adapter = new AthleticsAdapter(getContext(), R.layout.row_athletics_game, new ArrayList<>());
 
-        final String sport = args.getString(ComponentFactory.ARG_DATA_TAG);
+        sport = args.getString(ComponentFactory.ARG_DATA_TAG);
         if (sport == null) {
             AppUtils.showFailedLoadToast(getContext());
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (sport == null) {
             return;
         }
 
