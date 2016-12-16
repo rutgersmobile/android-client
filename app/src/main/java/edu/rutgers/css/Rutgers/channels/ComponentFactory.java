@@ -28,6 +28,7 @@ import edu.rutgers.css.Rutgers.channels.ruinfo.fragments.RUInfoMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCCourses;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCMain;
 import edu.rutgers.css.Rutgers.channels.soc.fragments.SOCSections;
+import edu.rutgers.css.Rutgers.channels.stream.StreamDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
@@ -114,6 +115,7 @@ public final class ComponentFactory {
         put(FeedbackMain.HANDLE, FeedbackMain.class);
         put(AboutDisplay.HANDLE, AboutDisplay.class);
         put(BookmarksDisplay.HANDLE, BookmarksDisplay.class);
+        put(StreamDisplay.HANDLE, StreamDisplay.class);
     }});
 
     public ComponentFactory() {

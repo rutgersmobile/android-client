@@ -39,6 +39,10 @@
             android:name=".channels.bus.model.BusNotificationService"
             android:exported="false"/>
 
+        <service
+            android:name=".channels.stream.StreamService"
+            android:exported="false"/>
+
         <activity
             android:name=".ui.MainActivity"
             android:label="@string/app_name" >
