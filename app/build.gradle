@@ -79,6 +79,9 @@ android {
 repositories {
     mavenCentral()
     jcenter()
+    maven {
+        url "https://jitpack.io"
+    }
 
     // For inlcuding the showcaseview AAR
     flatDir {

@@ -244,18 +244,18 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
                 }
 
                 // Load nav drawer items
-                if (jsonElements.size() > 0) {
-                    mChannelManager.clear();
-                    mChannelManager.loadChannelsFromJSONArray(jsonElements);
-
-                    mDrawerAdapter.clear();
-                    final List<Link> upstreamLinks = new ArrayList<>();
-                    for (final Channel channel : mChannelManager.getChannels()) {
-                        upstreamLinks.add(channel.getLink());
-                    }
-                    PrefUtils.setBookmarksFromUpstream(getApplicationContext(), upstreamLinks);
-                    mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
-                }
+//                if (jsonElements.size() > 0) {
+//                    mChannelManager.clear();
+//                    mChannelManager.loadChannelsFromJSONArray(jsonElements);
+//
+//                    mDrawerAdapter.clear();
+//                    final List<Link> upstreamLinks = new ArrayList<>();
+//                    for (final Channel channel : mChannelManager.getChannels()) {
+//                        upstreamLinks.add(channel.getLink());
+//                    }
+//                    PrefUtils.setBookmarksFromUpstream(getApplicationContext(), upstreamLinks);
+//                    mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
+//                }
             }, error -> AppUtils.showFailedLoadToast(getApplicationContext()));
     }
 
