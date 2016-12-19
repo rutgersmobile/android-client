@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
@@ -24,7 +26,7 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 /**
  * Background service that controls a media stream
  */
-public class StreamService extends Service {
+public class StreamService extends Service implements AudioManager.OnAudioFocusChangeListener {
     private static final String ARG_PLAY_TAG = "play";
     private static final String ARG_URL_TAG = "url";
     private static final String ARG_STOP_TAG = "stop";
@@ -62,13 +64,19 @@ public class StreamService extends Service {
 
     private int startId;
     private boolean errored = false;
-    private String resourceUrl;
+    private static String resourceUrl;
+    public static String getResourceUrl() {
+        return resourceUrl;
+    }
+
     private MediaPlayer mediaPlayer;
     private boolean needsToStart = true;
+    private WifiManager.WifiLock wifiLock;
 
     private void startMediaPlayer(String url) {
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
 
         try {
             mediaPlayer.setDataSource(url);
@@ -86,6 +94,13 @@ public class StreamService extends Service {
                 LOGI(TAG, "Prepare finished, starting");
                 needsToStart = false;
                 mediaPlayer.start();
+                if (wifiLock == null) {
+                    wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE))
+                        .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+                    if (!wifiLock.isHeld()) {
+                        wifiLock.acquire();
+                    }
+                }
             });
 
             mediaPlayer.setOnErrorListener((mediaPlayer1, what, extra) -> {
@@ -118,6 +133,13 @@ public class StreamService extends Service {
         }
 
         if (play) {
+            AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+            int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+
+            if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                stop();
+                return START_NOT_STICKY;
+            }
             if (needsToStart) {
                 startMediaPlayer(resourceUrl);
             } else if (!mediaPlayer.isPlaying()) {
@@ -127,11 +149,12 @@ public class StreamService extends Service {
         } else if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             setPlaying(false);
+            releaseWifi();
         }
 
         startNotification(play);
 
-        return START_REDELIVER_INTENT;
+        return START_NOT_STICKY;
     }
 
     private static PendingIntent createPendingIntent(Context context, int id, Intent intent) {
@@ -176,10 +199,24 @@ public class StreamService extends Service {
         return null;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        disableMediaPlayer();
+        releaseWifi();
+    }
+
     private void stop() {
         setPlaying(false);
         disableMediaPlayer();
         stopSelf(startId);
+        releaseWifi();
+    }
+
+    private void releaseWifi() {
+        if (wifiLock != null && wifiLock.isHeld()) {
+            wifiLock.release();
+        }
     }
 
     private void disableMediaPlayer() {
@@ -188,6 +225,39 @@ public class StreamService extends Service {
             mediaPlayer.reset();
             mediaPlayer.release();
             mediaPlayer = null;
+        }
+    }
+
+    @Override
+    public void onAudioFocusChange(int i) {
+        switch (i) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                if (mediaPlayer == null) {
+                    startMediaPlayer(resourceUrl);
+                } else if (!mediaPlayer.isPlaying()) {
+                    mediaPlayer.start();
+                }
+                mediaPlayer.setVolume(1.0f, 1.0f);
+                startNotification(true);
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+                disableMediaPlayer();
+                startNotification(false);
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                }
+                startNotification(false);
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.setVolume(0.1f, 0.1f);
+                }
+                break;
         }
     }
 }
