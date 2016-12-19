@@ -1,12 +1,5 @@
 [
   {
-    "handle": "stream",
-    "title": "Radio",
-    "url": "https://apps.ufcp.rutgers.edu/CR/Landing.html",
-    "view": "stream",
-    "icon": "stream"
-  },
-  {
     "handle": "fixit",
     "title": "Fix It",
     "url": "https://apps.ufcp.rutgers.edu/CR/Landing.html",
