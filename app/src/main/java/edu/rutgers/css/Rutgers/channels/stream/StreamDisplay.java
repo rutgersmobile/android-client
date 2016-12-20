@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 
 /**
@@ -18,20 +19,32 @@ import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
  */
 
 public class StreamDisplay extends DtableChannelFragment {
-    public static final String HANDLE = "stream";
+    public static final String HANDLE = "radio";
     private static final String TAG = "StreamDisplay";
-    private static final String RADIO_URL = "http://crystalout.surfernetwork.com:8001/WRNU-FM_MP3";
+    private String radioUrl;
+    private String title;
     private ImageView playButton;
 
-    public static Bundle createArgs() {
+    public static Bundle createArgs(String title, String url) {
         final Bundle args = new Bundle();
         args.putString(ComponentFactory.ARG_COMPONENT_TAG, HANDLE);
+        args.putString(ComponentFactory.ARG_TITLE_TAG, title);
+        args.putString(ComponentFactory.ARG_URL_TAG, url);
         return args;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final Bundle args = getArguments();
+        radioUrl = args.getString(ComponentFactory.ARG_URL_TAG);
+        title = args.getString(ComponentFactory.ARG_TITLE_TAG);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        setPlayButtonIcon();
         StreamService.playing()
             .compose(bindToLifecycle())
             .subscribe(playing -> {
@@ -39,6 +52,7 @@ public class StreamDisplay extends DtableChannelFragment {
                     playButton.setImageDrawable(getIconForStream(playing));
                 }
             }, this::logError);
+        getActivity().setTitle(title);
     }
 
     @Nullable
@@ -46,15 +60,21 @@ public class StreamDisplay extends DtableChannelFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_radio);
         playButton = (ImageView) v.findViewById(R.id.play_button);
-        playButton.setImageDrawable(getIconForStream(StreamService.isPlaying()));
+        setPlayButtonIcon();
         playButton.setOnClickListener(view -> {
             if (!StreamService.isPlaying()) {
-                StreamService.startStream(getContext(), true, RADIO_URL);
+                StreamService.startStream(getContext(), true, radioUrl, getLink().getUri(Link.Schema.RUTGERS));
             } else {
-                StreamService.startStream(getContext(), false, RADIO_URL);
+                StreamService.startStream(getContext(), false, radioUrl, getLink().getUri(Link.Schema.RUTGERS));
             }
         });
         return v;
+    }
+
+    private void setPlayButtonIcon() {
+        if (playButton != null) {
+            playButton.setImageDrawable(getIconForStream(StreamService.isPlaying()));
+        }
     }
 
     private Drawable getIconForStream(boolean playing) {
