@@ -6,17 +6,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
@@ -30,6 +33,7 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     private static final String ARG_PLAY_TAG = "play";
     private static final String ARG_URL_TAG = "url";
     private static final String ARG_STOP_TAG = "stop";
+    private static final String ARG_LINKBACK_TAG = "linkBack";
 
     private static final String TAG = "StreamService";
 
@@ -37,15 +41,17 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
 
     private static final int DELETE_INTENT_ID = 0;
     private static final int PLAY_INTENT_ID = 1;
+    private static final int LINKBACK_INTENT_ID = 2;
 
-    public static void startStream(Context context, boolean play, String url) {
-        context.startService(createPlayIntent(context, play, url));
+    public static void startStream(Context context, boolean play, String url, Uri linkBack) {
+        context.startService(createPlayIntent(context, play, url, linkBack));
     }
 
-    private static Intent createPlayIntent(Context context, boolean play, String url) {
+    private static Intent createPlayIntent(Context context, boolean play, String url, Uri linkBack) {
         final Intent intent = new Intent(context, StreamService.class);
         intent.putExtra(ARG_PLAY_TAG, play);
         intent.putExtra(ARG_URL_TAG, url);
+        intent.putExtra(ARG_LINKBACK_TAG, linkBack);
         return intent;
     }
 
@@ -61,17 +67,18 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     public static boolean isPlaying() {
         return playing;
     }
-
-    private int startId;
-    private boolean errored = false;
     private static String resourceUrl;
     public static String getResourceUrl() {
         return resourceUrl;
     }
 
+    private int startId;
+    private boolean errored = false;
+
     private MediaPlayer mediaPlayer;
     private boolean needsToStart = true;
     private WifiManager.WifiLock wifiLock;
+    private Uri linkBack;
 
     private void startMediaPlayer(String url) {
         mediaPlayer = new MediaPlayer();
@@ -126,6 +133,7 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
         }
 
         final boolean play = intent.getBooleanExtra(ARG_PLAY_TAG, false);
+        linkBack = intent.getParcelableExtra(ARG_LINKBACK_TAG);
         final String url = intent.getStringExtra(ARG_URL_TAG);
         if (!StringUtils.equals(url, resourceUrl)) {
             resourceUrl = url;
@@ -157,8 +165,8 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
         return START_NOT_STICKY;
     }
 
-    private static PendingIntent createPendingIntent(Context context, int id, Intent intent) {
-        return PendingIntent.getService(context, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+    private static PendingIntent createPendingIntent(Context context, int intentId, Intent intent) {
+        return PendingIntent.getService(context, intentId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     private static PendingIntent createDeletePendingIntent(Context context) {
@@ -167,9 +175,21 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
         return createPendingIntent(context, DELETE_INTENT_ID, intent);
     }
 
-    private static PendingIntent createPlayPendingIntent(Context context, boolean play, String resourceUrl) {
-        Intent intent = createPlayIntent(context, play, resourceUrl);
+    private static PendingIntent createPlayPendingIntent(Context context, boolean play, String resourceUrl, Uri linkBack) {
+        Intent intent = createPlayIntent(context, play, resourceUrl, linkBack);
         return createPendingIntent(context, PLAY_INTENT_ID, intent);
+    }
+
+    private static PendingIntent createLinkBackPendingIntent(Context context, Uri linkBack) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setData(linkBack);
+        intent.setAction(Intent.ACTION_VIEW);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context)
+            .addParentStack(MainActivity.class)
+            .addNextIntent(intent);
+
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(LINKBACK_INTENT_ID, PendingIntent.FLAG_CANCEL_CURRENT);
+        return pendingIntent;
     }
 
     private void startNotification(boolean play) {
@@ -178,13 +198,14 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
             .setSmallIcon(R.drawable.ic_play_arrow_black_24dp)
             .setContentTitle("WRNU")
             .setContentText("Playing WRNU")
-            .setDeleteIntent(deletePendingIntent);
+            .setDeleteIntent(deletePendingIntent)
+            .setContentIntent(createLinkBackPendingIntent(getApplicationContext(), linkBack));
 
         if (!play) {
-            PendingIntent playPendingIntent = createPlayPendingIntent(getApplicationContext(), true, resourceUrl);
+            PendingIntent playPendingIntent = createPlayPendingIntent(getApplicationContext(), true, resourceUrl, linkBack);
             builder.addAction(R.drawable.ic_play_arrow_black_24dp, "Play", playPendingIntent);
         } else {
-            PendingIntent playPendingIntent = createPlayPendingIntent(getApplicationContext(), false, resourceUrl);
+            PendingIntent playPendingIntent = createPlayPendingIntent(getApplicationContext(), false, resourceUrl, linkBack);
             builder.addAction(R.drawable.ic_pause_black_24dp, "Pause", playPendingIntent);
         }
 
@@ -202,6 +223,7 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopForeground(true);
         disableMediaPlayer();
         releaseWifi();
     }
@@ -209,8 +231,9 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     private void stop() {
         setPlaying(false);
         disableMediaPlayer();
-        stopSelf(startId);
+        stopForeground(true);
         releaseWifi();
+        stopSelf(startId);
     }
 
     private void releaseWifi() {
@@ -241,20 +264,20 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
                 startNotification(true);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
-                if (mediaPlayer.isPlaying()) {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                     mediaPlayer.stop();
                 }
                 disableMediaPlayer();
                 startNotification(false);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                if (mediaPlayer.isPlaying()) {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
                 }
                 startNotification(false);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                if (mediaPlayer.isPlaying()) {
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                     mediaPlayer.setVolume(0.1f, 0.1f);
                 }
                 break;

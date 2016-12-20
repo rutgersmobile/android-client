@@ -1,5 +1,12 @@
 [
   {
+    "handle": "radio",
+    "title": "Radio",
+    "icon": "radio",
+    "view": "dtable",
+    "api": "radio.txt"
+  },
+  {
     "handle": "fixit",
     "title": "Fix It",
     "url": "https://apps.ufcp.rutgers.edu/CR/Landing.html",

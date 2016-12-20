@@ -24,6 +24,7 @@ public final class Config {
     public static final String API_MACHINE = "rumobile";
     public static final String API_HOSTNAME = API_MACHINE + ".rutgers.edu";
     public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/"+API_LEVEL+"/";
+    public static final String NB_API_BASE = "http://webservices.nextbus.com/";
     public static final String SOC_API_BASE = "http://sis.rutgers.edu/soc/";
 
     // Location-based services config
@@ -31,5 +32,5 @@ public final class Config {
 
     // Deep link schema info
     public static final Link.Schema SCHEMA = Link.Schema.HTTP;
-    public static final String LINK_HOSTNAME = API_MACHINE;
+    public static final String LINK_HOSTNAME = API_HOSTNAME;
 }
