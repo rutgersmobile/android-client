@@ -18,9 +18,11 @@ public class MusicIntentReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
             // I don't like this
-            final List<String> pathParts = new ArrayList<>();
-            pathParts.add("wrnu");
-            StreamService.startStream(context, false, StreamService.getResourceUrl(), new Link("radio", pathParts, "WRNU").getUri(Link.Schema.RUTGERS));
+            if (StreamService.isPlaying()) {
+                final List<String> pathParts = new ArrayList<>();
+                pathParts.add("wrnu");
+                StreamService.startStream(context, false, StreamService.getResourceUrl(), new Link("radio", pathParts, "WRNU").getUri(Link.Schema.RUTGERS));
+            }
         }
     }
 }
