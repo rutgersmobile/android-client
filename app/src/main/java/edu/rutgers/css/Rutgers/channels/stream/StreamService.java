@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.stream;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -45,6 +46,10 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
 
     public static void startStream(Context context, boolean play, String url, Uri linkBack) {
         context.startService(createPlayIntent(context, play, url, linkBack));
+    }
+
+    public static void stopStream(Context context) {
+        context.startService(createStopIntent(context));
     }
 
     private static Intent createPlayIntent(Context context, boolean play, String url, Uri linkBack) {
@@ -125,6 +130,7 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
         this.startId = startId;
         final boolean stop = intent.getBooleanExtra(ARG_STOP_TAG, false);
         if (stop) {
@@ -169,6 +175,12 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
         return PendingIntent.getService(context, intentId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
+    private static Intent createStopIntent(Context context) {
+        final Intent intent = new Intent(context, StreamService.class);
+        intent.putExtra(ARG_STOP_TAG, true);
+        return intent;
+    }
+
     private static PendingIntent createDeletePendingIntent(Context context) {
         final Intent intent = new Intent(context, StreamService.class);
         intent.putExtra(ARG_STOP_TAG, true);
@@ -188,8 +200,7 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
             .addParentStack(MainActivity.class)
             .addNextIntent(intent);
 
-        PendingIntent pendingIntent = stackBuilder.getPendingIntent(LINKBACK_INTENT_ID, PendingIntent.FLAG_CANCEL_CURRENT);
-        return pendingIntent;
+        return stackBuilder.getPendingIntent(LINKBACK_INTENT_ID, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     private void startNotification(boolean play) {
@@ -199,6 +210,7 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
             .setContentTitle("WRNU")
             .setContentText("Playing WRNU")
             .setDeleteIntent(deletePendingIntent)
+            .setPriority(Notification.PRIORITY_MAX)
             .setContentIntent(createLinkBackPendingIntent(getApplicationContext(), linkBack));
 
         if (!play) {

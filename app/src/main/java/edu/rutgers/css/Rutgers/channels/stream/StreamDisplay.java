@@ -24,6 +24,7 @@ public class StreamDisplay extends DtableChannelFragment {
     private String radioUrl;
     private String title;
     private ImageView playButton;
+    private ImageView stopButton;
 
     public static Bundle createArgs(String title, String url) {
         final Bundle args = new Bundle();
@@ -68,6 +69,8 @@ public class StreamDisplay extends DtableChannelFragment {
                 StreamService.startStream(getContext(), false, radioUrl, getLink().getUri(Link.Schema.RUTGERS));
             }
         });
+        stopButton = (ImageView) v.findViewById(R.id.stop_button);
+        stopButton.setOnClickListener(view -> StreamService.stopStream(getContext()));
         return v;
     }
 
