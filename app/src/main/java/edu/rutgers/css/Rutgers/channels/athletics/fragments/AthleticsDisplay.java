@@ -71,9 +71,9 @@ public final class AthleticsDisplay extends DtableChannelFragment {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
-            .subscribe(value -> {
+            .subscribe(athleticsGames -> {
                 reset();
-                adapter.addAll(value.getGames());
+                adapter.addAll(athleticsGames.getGames());
             }, error -> {
                 reset();
                 LOGE(TAG, error.getMessage());
