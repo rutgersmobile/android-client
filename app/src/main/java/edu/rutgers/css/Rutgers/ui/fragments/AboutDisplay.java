@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.APIUtils;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 
@@ -34,6 +35,12 @@ public final class AboutDisplay extends BaseDisplay {
         args.putString(ComponentFactory.ARG_HANDLE_TAG, AboutDisplay.HANDLE);
         args.putString(ComponentFactory.ARG_COMPONENT_TAG, AboutDisplay.HANDLE);
         return args;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        APIUtils.distanceBetween(40.52272445, -74.4628247, 40.5224388, -74.4626238);
     }
 
     @Override

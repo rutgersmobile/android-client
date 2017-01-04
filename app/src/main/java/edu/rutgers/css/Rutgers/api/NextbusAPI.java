@@ -1,7 +1,5 @@
 package edu.rutgers.css.Rutgers.api;
 
-import android.location.Location;
-
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -10,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.api.model.bus.ActiveStops;
 import edu.rutgers.css.Rutgers.api.model.bus.AgencyConfig;
 import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
@@ -278,7 +275,7 @@ public final class NextbusAPI {
      * @param sourceLon Longitude
      * @return Promise for list of stop groups (unique stops grouped by title).
      */
-    public static Observable<List<StopGroup>> getStopsByTitleNear(final String agency, final double sourceLat, final double sourceLon) {
+    public static Observable<List<StopGroup>> getStopsByTitleNear(final String agency, final double sourceLat, final double sourceLon, final double range) {
         return configForAgency(agency).map(agencyConfig -> {
             HashMap<String, StopGroup> stopsByTitle = agencyConfig.getStopsByTitle();
             final List<StopGroup> nearStops = new ArrayList<>();
@@ -293,10 +290,9 @@ public final class NextbusAPI {
                     // Calculate distance to stop
                     double stopLat = Double.parseDouble(stop.getLatitude());
                     double stopLon = Double.parseDouble(stop.getLongitude());
-                    float[] results = new float[1];
-                    Location.distanceBetween(sourceLat, sourceLon, stopLat, stopLon, results);
+                    double distance = APIUtils.distanceBetween(sourceLat, sourceLon, stopLat, stopLon);
 
-                    if (results[0] < Config.NEARBY_RANGE) {
+                    if (distance < range) {
                         nearStops.add(stopGroup);
                         break; // Skip to next group
                     }
@@ -314,8 +310,8 @@ public final class NextbusAPI {
      * @param sourceLon Longitude
      * @return Promise for list of stop groups (unique stops grouped by title).
      */
-    public static Observable<List<StopGroup>> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon) {
-        return getStopsByTitleNear(agency, sourceLat, sourceLon).flatMap(nearbyStops ->
+    public static Observable<List<StopGroup>> getActiveStopsByTitleNear(final String agency, final float sourceLat, final float sourceLon, final double range) {
+        return getStopsByTitleNear(agency, sourceLat, sourceLon, range).flatMap(nearbyStops ->
             activeStopsForAgency(agency).map(activeStops -> {
                 final List<StopGroup> results = new ArrayList<>();
 

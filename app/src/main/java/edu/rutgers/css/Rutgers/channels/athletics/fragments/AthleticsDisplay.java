@@ -55,26 +55,20 @@ public final class AthleticsDisplay extends DtableChannelFragment {
         adapter = new AthleticsAdapter(getContext(), R.layout.row_athletics_game, new ArrayList<>());
 
         sport = args.getString(ComponentFactory.ARG_DATA_TAG);
-        /*if (sport == null) {
-            AppUtils.showFailedLoadToast(getContext());
-        }*/
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        /*if (sport == null) {
-            return;
-        }*/
 
         RutgersAPI.getAthleticsGames(sport)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
             .retryWhen(this::logAndRetry)
-            .subscribe(value -> {
+            .subscribe(athleticsGames -> {
                 reset();
-                adapter.addAll(value.getGames());
+                adapter.addAll(athleticsGames.getGames());
             }, error -> {
                 reset();
                 logError(error);

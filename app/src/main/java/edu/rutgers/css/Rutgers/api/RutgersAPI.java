@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.api.model.Motd;
 import edu.rutgers.css.Rutgers.api.model.athletics.AthleticsGames;
 import edu.rutgers.css.Rutgers.api.model.bus.ActiveStops;
 import edu.rutgers.css.Rutgers.api.model.bus.AgencyConfig;
@@ -26,7 +27,6 @@ import edu.rutgers.css.Rutgers.api.model.soc.SOCIndex;
 import edu.rutgers.css.Rutgers.api.model.soc.Semesters;
 import edu.rutgers.css.Rutgers.api.model.soc.parsers.SOCIndexDeserializer;
 import edu.rutgers.css.Rutgers.api.service.RutgersService;
-import edu.rutgers.css.Rutgers.api.model.Motd;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -204,7 +204,7 @@ public final class RutgersAPI {
                 if (place.getLocation() == null) continue;
                 final double placeLat = place.getLocation().getLatitude();
                 final double placeLon = place.getLocation().getLongitude();
-                final double dist = distanceBetween(placeLat, placeLon, sourceLat, sourceLon);
+                final double dist = APIUtils.distanceBetween(placeLat, placeLon, sourceLat, sourceLon);
                 if (dist <= range)
                     nearbyPlaces.add(new AbstractMap.SimpleEntry<>((float)dist, place));
             }
@@ -217,28 +217,6 @@ public final class RutgersAPI {
 
             return results;
         });
-    }
-
-    /**
-     * Calculate the distance between to points on the earths surface
-     * @param lat0 Latitude of first point in degrees
-     * @param lon0 Longitude of first point in degrees
-     * @param lat1 Latitude of second point in degrees
-     * @param lon1 Longitude of second point in degrees
-     * @return Distance between points in meters
-     */
-    public static double distanceBetween(double lat0, double lon0, double lat1, double lon1) {
-        final double dlat = degreesToRadians(lat1 - lat0);
-        final double dlon = degreesToRadians(lon1 - lon0);
-        final double a = Math.sin(dlat / 2) * Math.sin(dlat / 2)
-            + Math.cos(degreesToRadians(lat0)) * Math.cos(degreesToRadians(lat1))
-            * Math.sin(dlon / 2) * Math.sin(dlon / 2);
-        final double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return 6371000 * c;
-    }
-
-    private static double degreesToRadians(double degrees) {
-        return degrees * Math.PI / 180;
     }
 
     /**

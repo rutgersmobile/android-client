@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.BuildConfig;
+import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.model.bus.stop.StopGroup;
@@ -131,11 +132,13 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
                 ? NextbusAPI.getActiveStopsByTitleNear(
                     NextbusAPI.AGENCY_NB,
                     (float) location.getLatitude(),
-                    (float) location.getLongitude()
+                    (float) location.getLongitude(),
+                    Config.NEARBY_RANGE
                 ).flatMap(nbNearby -> NextbusAPI.getActiveStopsByTitleNear(
                     NextbusAPI.AGENCY_NB,
                     (float) location.getLatitude(),
-                    (float) location.getLongitude()
+                    (float) location.getLongitude(),
+                    Config.NEARBY_RANGE
                 ).map(nwkNearby -> {
                     for (StopGroup stopGroup : nbNearby) {
                         nearbyStops.add(new StopStub(stopGroup));

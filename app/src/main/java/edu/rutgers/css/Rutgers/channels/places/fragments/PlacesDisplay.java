@@ -244,7 +244,7 @@ public class PlacesDisplay extends BaseChannelFragment {
             final String agency = sAgencyMap.get(place.getCampusName());
 
             if (agency != null) {
-                return NextbusAPI.getStopsByTitleNear(agency, buildLat, buildLon);
+                return NextbusAPI.getStopsByTitleNear(agency, buildLat, buildLon, Config.NEARBY_RANGE);
             }
         }
 
