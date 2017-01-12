@@ -1,6 +1,6 @@
-//plugins {
-//    id "me.tatarka.retrolambda" version "3.3.1"
-//}
+plugins {
+    id "me.tatarka.retrolambda" version "3.3.1"
+}
 
 apply plugin: 'com.android.application'
 apply plugin: 'idea'
@@ -34,7 +34,7 @@ android {
         multiDexEnabled true
 
         jackOptions {
-            enabled true
+            enabled false
             jackInProcess false
         }
     }
