@@ -16,7 +16,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -33,7 +32,6 @@ import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
-import edu.rutgers.css.Rutgers.utils.FuncWrapper;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import rx.Observable;
@@ -293,6 +291,13 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     public Observable<View> getErrorClicks() {
         return networkErrorSubject.asObservable();
+    }
+
+    public Observable<?> logAndRetry(Observable<? extends Throwable> onError) {
+        return onError.flatMap(error -> {
+            logError(error);
+            return getErrorClicks();
+        });
     }
 
     final public void switchFragments(Bundle args) {
