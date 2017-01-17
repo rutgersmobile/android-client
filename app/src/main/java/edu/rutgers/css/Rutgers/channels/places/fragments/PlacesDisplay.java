@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,30 +129,32 @@ public class PlacesDisplay extends BaseChannelFragment {
         super.onResume();
 
         mAdapter.getPositionClicks()
-            .map(rMenuRow -> (RMenuItemRow) rMenuRow)
-            .subscribe(rMenuItemRow -> {
-                switch (rMenuItemRow.getArgs().getInt(ID_KEY)) {
-                    case ADDRESS_ROW:
-                        launchMap();
-                        break;
-                    case DESC_ROW:
-                        final Bundle textArgs = TextDisplay.createArgs(
-                            mPlace.getTitle(),
-                            rMenuItemRow.getArgs().getString("data")
-                        );
-                        switchFragments(textArgs);
-                        break;
-                    case BUS_ROW:
-                        final Bundle busArgs = new Bundle(rMenuItemRow.getArgs());
-                        busArgs.remove(ID_KEY);
-                        switchFragments(busArgs);
-                        break;
-                }
-            }, this::logError);
+                .map(rMenuRow -> (RMenuItemRow) rMenuRow)
+                .subscribe(rMenuItemRow -> {
+                    switch (rMenuItemRow.getArgs().getInt(ID_KEY)) {
+                        case ADDRESS_ROW:
+                            launchMap();
+                            break;
+                        case DESC_ROW:
+                            final Bundle textArgs = TextDisplay.createArgs(
+                                    mPlace.getTitle(),
+                                    rMenuItemRow.getArgs().getString("data")
+                            );
+                            switchFragments(textArgs);
+                            break;
+                        case BUS_ROW:
+                            final Bundle busArgs = new Bundle(rMenuItemRow.getArgs());
+                            busArgs.remove(ID_KEY);
+                            switchFragments(busArgs);
+                            break;
+                    }
+                }, this::logError);
 
         final Bundle args = getArguments();
         mTitle = args.getString(ARG_TITLE_TAG);
-
+        loadPlace(args.getString(ARG_PLACEKEY_TAG));
+    }
+    private void loadPlace(String placeKey) {
         // start loading place
         mLoading = true;
         final String addressHeader = getContext().getString(R.string.address_header);
@@ -160,8 +163,6 @@ public class PlacesDisplay extends BaseChannelFragment {
         final String descriptionHeader = getContext().getString(R.string.description_header);
         final String officesHeader = getContext().getString(R.string.offices_header);
         final String nearbyHeader = getContext().getString(R.string.nearby_bus_header);
-
-        final String placeKey = args.getString(ARG_PLACEKEY_TAG);
 
         RutgersAPI.getPlace(placeKey)
             .flatMap(place -> getStopsNearPlace(place).map(stopGroups -> {

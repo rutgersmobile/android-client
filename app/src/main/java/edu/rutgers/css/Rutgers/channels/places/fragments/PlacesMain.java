@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -133,6 +134,7 @@ public class PlacesMain extends BaseChannelFragment
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        hideNetworkError();
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress_auto,
                 CreateArgs.builder().toolbarRes(R.id.toolbar_search).build());
 
@@ -214,16 +216,23 @@ public class PlacesMain extends BaseChannelFragment
         super.onResume();
 
         mAdapter.getPositionClicks()
-            .flatMap(placeStub -> placeStub.getKey() == null
-                ? Observable.error(new IllegalArgumentException("Place has no key"))
-                : Observable.just(PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey())))
-            .subscribe(this::switchFragments, this::logError);
+                .flatMap(placeStub -> placeStub.getKey() == null
+                        ? Observable.error(new IllegalArgumentException("Place has no key"))
+                        : Observable.just(PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey())))
+                .subscribe(this::switchFragments, error -> {
+                    Log.d(TAG, "ERROR'D ON RESUME");
+                    logError(error);
+                });
 
         if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.registerListener(this);
 
         // Reload nearby places
         showProgressCircle();
         updateSearchUI();
+        getNearbyLocations();
+    }
+    public void getNearbyLocations() {
+        Log.d(TAG, "GETTING NEARBY LOCATIONS");
         final String noneNearbyString = getString(R.string.places_none_nearby);
         final String nearbyPlacesString = getString(R.string.places_nearby);
         locationSubject.asObservable().observeOn(Schedulers.io())

@@ -29,6 +29,8 @@
     <string name="failed_no_activity">No appropriate app found.</string>
     <string name="location_updates">Location Updates</string>
     <string name="location_connecting">Getting location&#8230;</string>
+    <string name="network_error">Unable to fetch data. Please ensure that you are connected to
+                                    the internet and try again.</string>
 
     <!-- Web display -->
     <string name="www_handle_uri">Launching activity for %1$s</string>

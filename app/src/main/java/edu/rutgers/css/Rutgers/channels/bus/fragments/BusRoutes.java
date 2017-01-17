@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,7 @@ import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.utils.FuncWrapper;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -65,14 +68,17 @@ public class BusRoutes extends BaseChannelFragment {
         super.onResume();
 
         mAdapter.getPositionClicks()
-            .compose(bindToLifecycle())
-            .map(routeStub -> BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
-                routeStub.getAgencyTag(), routeStub.getTag())
-            )
-            .subscribe(this::switchFragments, this::logError);
+                .compose(bindToLifecycle())
+                .map(routeStub -> BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
+                        routeStub.getAgencyTag(), routeStub.getTag())
+                )
+                .subscribe(this::switchFragments, this::logError);
 
         // Clear out everything
         loading = true;
+        loadBusData();
+    }
+    private void loadBusData() {
         NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NB).flatMap(nbActive ->
             NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NWK).map(nwkActive -> {
                 final List<SimpleSection<RouteStub>> routes = new ArrayList<>();
@@ -92,8 +98,9 @@ public class BusRoutes extends BaseChannelFragment {
             .subscribe(sections -> {
                 reset();
                 mAdapter.addAll(sections);
-            }, this::logError);
-
+            }, error -> {
+                logError(error);
+            });
     }
 
     private void reset() {

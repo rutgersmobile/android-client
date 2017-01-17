@@ -13,4 +13,5 @@
         android:id="@+id/recycler_view" />
 
     <include layout="@layout/progress_circle" />
+    <include layout="@layout/network_error_page" />
 </FrameLayout>

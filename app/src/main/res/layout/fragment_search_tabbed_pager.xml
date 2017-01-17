@@ -25,4 +25,5 @@
         android:layout_height="match_parent"/>
 
     <include layout="@layout/floating_action_button"/>
+    <include layout="@layout/network_error_page"/>
 </android.support.design.widget.CoordinatorLayout>

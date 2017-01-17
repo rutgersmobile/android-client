@@ -3,6 +3,7 @@ package edu.rutgers.css.Rutgers.channels.food.fragments;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.FuncUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -81,28 +83,36 @@ public class FoodMain extends BaseChannelFragment {
         final String gatewayDescription = getString(R.string.dining_gateway_description);
 
         mAdapter.getPositionClicks()
-            .compose(bindToLifecycle())
-            .map(diningMenu -> {
-                if (diningMenu.getLocationName().equals(stonsbyTitle)) {
-                    return TextDisplay.createArgs(stonsbyTitle, stonsbyDescription);
-                } else if (diningMenu.getLocationName().equals(gatewayTitle)) {
-                    return TextDisplay.createArgs(gatewayTitle, gatewayDescription);
-                } else if (diningMenu.hasActiveMeals()) {
-                    return FoodHall.createArgs(diningMenu.getLocationName());
-                } else {
-                    return null;
-                }
-            }).onErrorReturn(error -> {
+                .compose(bindToLifecycle())
+                .map(diningMenu -> {
+                    if (diningMenu.getLocationName().equals(stonsbyTitle)) {
+                        return TextDisplay.createArgs(stonsbyTitle, stonsbyDescription);
+                    } else if (diningMenu.getLocationName().equals(gatewayTitle)) {
+                        return TextDisplay.createArgs(gatewayTitle, gatewayDescription);
+                    } else if (diningMenu.hasActiveMeals()) {
+                        return FoodHall.createArgs(diningMenu.getLocationName());
+                    } else {
+                        return null;
+                    }
+                }).onErrorReturn(error -> {
             // Errors shouldn't break the stream
             // Just log and ignore
             logError(error);
             return null;
         }).filter(FuncUtils::nonNull)
-            .subscribe(this::switchFragments, this::logError);
+                .subscribe(this::switchFragments, this::logError);
+        getDiningHalls();
+    }
 
+    public void getDiningHalls() {
         // Get user's home campus
         final String userHome = RutgersUtils.getHomeCampus(getContext());
 
+        final String stonsbyTitle = getString(R.string.dining_stonsby_title);
+        final String stonsbyDescription = getString(R.string.dining_stonsby_description);
+
+        final String gatewayTitle = getString(R.string.dining_gateway_title);
+        final String gatewayDescription = getString(R.string.dining_gateway_description);
         // Static dining hall entries
         // Prevents static entries from being grayed out
         final List<DiningMenu.Meal> dummyMeal = new ArrayList<>(1);
@@ -115,15 +125,17 @@ public class FoodMain extends BaseChannelFragment {
         final List<DiningMenu> stonsby = new ArrayList<>(1);
         stonsby.add(new DiningMenu(stonsbyTitle, 0, dummyMeal));
         final SimpleSection<DiningMenu> newarkHalls =
-            new SimpleSection<>(nwkCampusFullString, stonsby);
+                new SimpleSection<>(nwkCampusFullString, stonsby);
 
         final List<DiningMenu> gateway = new ArrayList<>(1);
         gateway.add(new DiningMenu(gatewayTitle, 0, dummyMeal));
         final SimpleSection<DiningMenu> camdenHalls =
-            new SimpleSection<>(camCampusFullString, gateway);
+                new SimpleSection<>(camCampusFullString, gateway);
 
         // start loading dining menus
-        RutgersAPI.getDiningHalls()
+        Observable.merge(
+        RutgersAPI.getDiningHalls(),
+                getErrorClicks().flatMap(view -> RutgersAPI.getDiningHalls()))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
@@ -154,8 +166,7 @@ public class FoodMain extends BaseChannelFragment {
                 mAdapter.addAll(simpleSections);
             }, error -> {
                 reset();
-                LOGE(TAG, error.getMessage());
-                AppUtils.showFailedLoadToast(getContext());
+                logError(error);
             });
     }
 

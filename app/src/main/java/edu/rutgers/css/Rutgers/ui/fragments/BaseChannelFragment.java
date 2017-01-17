@@ -16,10 +16,14 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -29,8 +33,11 @@ import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.link.Linkable;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
+import edu.rutgers.css.Rutgers.utils.FuncWrapper;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
+import rx.Observable;
+import rx.subjects.PublishSubject;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -40,6 +47,16 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 public abstract class BaseChannelFragment extends BaseDisplay implements Linkable {
 
     private ProgressBar mProgressCircle;
+    private LinearLayout mNetworkErrorPage;
+    private Button mNetworkRetry;
+    /*
+        Network codes : 0x00 empty
+                        0x01 default/first try
+                        0x02 subsequent try
+                        0x0f too many attempts
+     */
+    private static int errCode = 0;
+    protected PublishSubject<View> networkErrorSubject = PublishSubject.create();
 
     private Toolbar toolbar;
     public Toolbar getToolbar() {
@@ -169,6 +186,8 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         setupProgressBar(v, progressRes);
         setupToolbar(v, toolbarRes);
         setupToggleFab(v, fabRes);
+        setupNetworkError(v, R.id.network_error_container);
+
 
         setUp = true;
 
@@ -197,6 +216,18 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         ((MainActivity) getActivity()).syncDrawer();
 
         this.toolbar = toolbar;
+    }
+
+    protected void setupNetworkError(final @NonNull View v, final int toolbarRes) {
+        mNetworkErrorPage = (LinearLayout) v.findViewById(R.id.network_error_container);
+        mNetworkRetry = (Button) v.findViewById(R.id.network_retry_connection);
+        if (mNetworkRetry == null) { return; }
+        mNetworkRetry.setOnTouchListener((view, evt) -> {
+            if (evt.getAction() == MotionEvent.ACTION_UP) {
+                networkErrorSubject.onNext(view);
+            }
+            return true;
+        });
     }
 
     protected void setupToggleFab(final @NonNull View v, final int fabRes) {
@@ -245,6 +276,23 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     final protected void hideProgressCircle() {
         if (mProgressCircle != null) mProgressCircle.setVisibility(View.GONE);
+    }
+
+    final protected void showNetworkError() {
+        if (mNetworkErrorPage != null) {
+            mNetworkErrorPage.setVisibility(View.VISIBLE);
+
+        }
+    }
+
+    final protected void hideNetworkError() {
+        if (mNetworkErrorPage != null) {
+            mNetworkErrorPage.setVisibility(View.GONE);
+        }
+    }
+
+    public Observable<View> getErrorClicks() {
+        return networkErrorSubject.asObservable();
     }
 
     final public void switchFragments(Bundle args) {
@@ -299,6 +347,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     public void logError(Throwable throwable) {
         LOGE(getLogTag(), throwable.getMessage());
         hideProgressCircle();
+        showNetworkError();
         AppUtils.showFailedLoadToast(getContext());
     }
 }

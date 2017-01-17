@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +20,8 @@ import android.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.RutgersAPI;
@@ -33,10 +36,14 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 
@@ -189,24 +196,26 @@ public class SOCMain
         updateSearchUI();
 
         mAdapter.getPositionClicks()
-            .flatMap(clickedItem -> {
-                if (clickedItem instanceof Subject) {
-                    return Observable.just(SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
-                        mSemester, mLevel, clickedItem.getCode()));
-                } else if (clickedItem instanceof Course) {
-                    // This is for when courses are loaded into the list by user-supplied filter
-                    final Course course = (Course) clickedItem;
-                    return Observable.just(SOCSections.createArgs(
-                        course.getDisplayTitle(), mSemester, mSOCIndex.getCampusCode(),
-                        course.getSubject(), course.getCourseNumber()
-                    ));
-                }
+                .flatMap(clickedItem -> {
+                    if (clickedItem instanceof Subject) {
+                        return Observable.just(SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
+                                mSemester, mLevel, clickedItem.getCode()));
+                    } else if (clickedItem instanceof Course) {
+                        // This is for when courses are loaded into the list by user-supplied filter
+                        final Course course = (Course) clickedItem;
+                        return Observable.just(SOCSections.createArgs(
+                                course.getDisplayTitle(), mSemester, mSOCIndex.getCampusCode(),
+                                course.getSubject(), course.getCourseNumber()
+                        ));
+                    }
 
-                return Observable.error(new IllegalStateException("SOC item must be Subject or Course"));
-            })
-            .subscribe(this::switchFragments, this::logError);
+                    return Observable.error(new IllegalStateException("SOC item must be Subject or Course"));
+                })
+                .subscribe(this::switchFragments, this::logError);
+        getClasses();
 
-
+    }
+    public void getClasses() {
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         defaultSettings(sharedPref);
@@ -224,54 +233,55 @@ public class SOCMain
 
         mLoading = true;
         showProgressCircle();
-
+        ScheduleArgHolder argHolder = new ScheduleArgHolder(mLevel, mCampus, mSemester);
         Observable.merge(
-            Observable.just(new ScheduleArgHolder(mLevel, mCampus, mSemester)),
-            argHolderPublishSubject.asObservable()
+                Observable.just(argHolder),
+                argHolderPublishSubject.asObservable(),
+                getErrorClicks().map(view -> argHolder)
         ).observeOn(Schedulers.io()).flatMap(scheduleArgHolder -> RutgersAPI.getSemesters()
-            .flatMap(semesters -> {
-                final String levelArg = scheduleArgHolder.getLevel();
-                final String campusArg = scheduleArgHolder.getCampus();
-                final String semesterArg = scheduleArgHolder.getSemester();
+                .flatMap(semesters -> {
+                    hideNetworkError();
+                    final String levelArg = scheduleArgHolder.getLevel();
+                    final String campusArg = scheduleArgHolder.getCampus();
+                    final String semesterArg = scheduleArgHolder.getSemester();
 
-                int defaultIndex = semesters.getDefaultSemester();
-                List<String> semesterStrings = semesters.getSemesters();
+                    int defaultIndex = semesters.getDefaultSemester();
+                    List<String> semesterStrings = semesters.getSemesters();
 
-                if (semesterStrings.isEmpty()) {
-                    return Observable.error(new IllegalStateException("Semesters list is empty"));
-                }
+                    if (semesterStrings.isEmpty()) {
+                        return Observable.error(new IllegalStateException("Semesters list is empty"));
+                    }
 
-                if (defaultIndex < 0 || defaultIndex >= semesterStrings.size()) {
-                    defaultIndex = 0;
-                }
+                    if (defaultIndex < 0 || defaultIndex >= semesterStrings.size()) {
+                        defaultIndex = 0;
+                    }
 
-                final String defaultSemester = semesterStrings.get(defaultIndex);
+                    final String defaultSemester = semesterStrings.get(defaultIndex);
 
-                final String semester = semesterArg != null && semesterStrings.contains(semesterArg)
-                    ? semesterArg
-                    : defaultSemester;
+                    final String semester = semesterArg != null && semesterStrings.contains(semesterArg)
+                            ? semesterArg
+                            : defaultSemester;
 
-                return RutgersAPI.getSOCIndex(semester, campusArg, levelArg).flatMap(socIndex ->
-                    SOCAPI.getSubjects(semester, campusArg, levelArg).map(subjects ->
-                        new SubjectHolder(socIndex, subjects, semesters, semester, defaultSemester)
-                    )
-                );
-            }))
-            .observeOn(AndroidSchedulers.mainThread())
-            .compose(bindToLifecycle())
-            .subscribe(subjectHolder -> {
-                reset();
+                    return RutgersAPI.getSOCIndex(semester, campusArg, levelArg).flatMap(socIndex ->
+                            SOCAPI.getSubjects(semester, campusArg, levelArg).map(subjects ->
+                                    new SubjectHolder(socIndex, subjects, semesters, semester, defaultSemester)
+                            )
+                    );
+                }))
+                .observeOn(AndroidSchedulers.mainThread())
+                .compose(bindToLifecycle())
+                .subscribe(subjectHolder -> {
+                    reset();
 
-                mSemester = subjectHolder.getSemester();
-                mDefaultSemester = subjectHolder.getDefaultSemester();
-                mSemesters = subjectHolder.getSemesters().getSemesters();
-                mSOCIndex = subjectHolder.getIndex();
+                    mSemester = subjectHolder.getSemester();
+                    mDefaultSemester = subjectHolder.getDefaultSemester();
+                    mSemesters = subjectHolder.getSemesters().getSemesters();
+                    mSOCIndex = subjectHolder.getIndex();
 
-                mAdapter.setFilterIndex(mSOCIndex);
-                mAdapter.addAllSubjects(subjectHolder.getSubjects());
+                    mAdapter.addAllSubjects(subjectHolder.getSubjects());
 
-                setScheduleTitle();
-            }, this::logError);
+                    setScheduleTitle();
+                }, this::logError);
     }
 
     @Override
@@ -290,6 +300,9 @@ public class SOCMain
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
         recyclerView.setAdapter(mAdapter);
+        getErrorClicks().subscribe(view -> {
+            Log.d(TAG, "ADSDF");
+        });
 
         // Search text listener
         filterEditText.addTextChangedListener(new TextWatcher() {
