@@ -38,4 +38,12 @@
         android:layout_marginStart="8dp"
         app:layout_constraintLeft_toRightOf="@+id/play_button"
         android:layout_marginLeft="8dp"/>
+
+    <ImageView
+        android:layout_width="211dp"
+        android:layout_height="181dp"
+        app:srcCompat="@drawable/wrnu"
+        tools:layout_editor_absoluteY="35dp"
+        tools:layout_editor_absoluteX="78dp"
+        android:id="@+id/imageView2"/>
 </android.support.constraint.ConstraintLayout>
