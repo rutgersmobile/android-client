@@ -106,6 +106,7 @@ public class BusAll extends BaseChannelFragment {
         }))))
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+        .retryWhen(this::logAndRetry)
         .compose(bindToLifecycle())
         .subscribe(simpleSections -> {
             reset();

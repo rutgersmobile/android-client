@@ -233,6 +233,7 @@ public class BusDisplay extends BaseChannelFragment {
             })
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
+            .retryWhen(this::logAndRetry)
             .subscribe(data -> {
                 LOGI(TAG, "Ran subscription");
                 reset();

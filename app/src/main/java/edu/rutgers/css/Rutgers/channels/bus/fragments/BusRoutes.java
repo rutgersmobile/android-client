@@ -95,6 +95,7 @@ public class BusRoutes extends BaseChannelFragment {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
+            .retryWhen(this::logAndRetry)
             .subscribe(sections -> {
                 reset();
                 mAdapter.addAll(sections);

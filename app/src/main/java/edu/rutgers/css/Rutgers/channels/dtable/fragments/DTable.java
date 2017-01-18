@@ -249,9 +249,11 @@ public class DTable extends DtableChannelFragment {
             }
             return new DTableRoot(json, null);
         })
-            .compose(bindToLifecycle())
+
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .compose(bindToLifecycle())
+            .retryWhen(this::logAndRetry)
             .subscribe(root -> {
                 reset();
                 banner.addAll(root.getBanner());
@@ -266,8 +268,7 @@ public class DTable extends DtableChannelFragment {
                 mAdapter.addAllHistory(root.getHistory());
             }, error -> {
                 reset();
-                LOGE(TAG, error.getMessage());
-                AppUtils.showFailedLoadToast(getContext());
+                logError(error);
             });
     }
 

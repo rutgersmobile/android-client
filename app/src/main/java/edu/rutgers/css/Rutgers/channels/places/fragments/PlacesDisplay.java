@@ -222,6 +222,7 @@ public class PlacesDisplay extends BaseChannelFragment {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
+            .retryWhen(this::logAndRetry)
             .subscribe(placeHolder -> {
                 reset();
                 mTitle = placeHolder.getPlace().getTitle();

@@ -170,6 +170,7 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .compose(bindToLifecycle())
+        .retryWhen(this::logAndRetry)
         .subscribe(simpleSections -> {
             reset();
             mAdapter.addAll(simpleSections);

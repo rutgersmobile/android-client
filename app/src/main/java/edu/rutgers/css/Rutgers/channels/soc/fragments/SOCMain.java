@@ -236,8 +236,7 @@ public class SOCMain
         ScheduleArgHolder argHolder = new ScheduleArgHolder(mLevel, mCampus, mSemester);
         Observable.merge(
                 Observable.just(argHolder),
-                argHolderPublishSubject.asObservable(),
-                getErrorClicks().map(view -> argHolder)
+                argHolderPublishSubject.asObservable()
         ).observeOn(Schedulers.io()).flatMap(scheduleArgHolder -> RutgersAPI.getSemesters()
                 .flatMap(semesters -> {
                     hideNetworkError();
@@ -270,6 +269,7 @@ public class SOCMain
                 }))
                 .observeOn(AndroidSchedulers.mainThread())
                 .compose(bindToLifecycle())
+                .retryWhen(this::logAndRetry)
                 .subscribe(subjectHolder -> {
                     reset();
 
@@ -300,9 +300,6 @@ public class SOCMain
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
         recyclerView.setAdapter(mAdapter);
-        getErrorClicks().subscribe(view -> {
-            Log.d(TAG, "ADSDF");
-        });
 
         // Search text listener
         filterEditText.addTextChangedListener(new TextWatcher() {

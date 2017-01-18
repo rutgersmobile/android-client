@@ -28,6 +28,7 @@ import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.api.model.places.Place;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.places.model.PlaceAutoCompleteAdapter;
 import edu.rutgers.css.Rutgers.interfaces.GoogleApiClientProvider;
@@ -80,6 +81,7 @@ public class PlacesMain extends BaseChannelFragment
     private AutoCompleteTextView autoComp;
     private boolean searching = false;
     private String oldSearch;
+    private Location lastLocation;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -237,6 +239,7 @@ public class PlacesMain extends BaseChannelFragment
         final String nearbyPlacesString = getString(R.string.places_nearby);
         locationSubject.asObservable().observeOn(Schedulers.io())
             .flatMap(location -> RutgersAPI.getPlacesNear(location.getLatitude(), location.getLongitude(), Config.NEARBY_RANGE)
+                .retryWhen(this::logAndRetry)
                 .flatMap(Observable::from)
                 .map(place -> new KeyValPair(place.getId(), place.getTitle()))
                 .defaultIfEmpty(new KeyValPair(null, noneNearbyString))
@@ -286,8 +289,8 @@ public class PlacesMain extends BaseChannelFragment
             }
 
             // Get last location
-            final Location lastLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
-            if (lastLoc == null) {
+            lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
+            if (lastLocation == null) {
                 LOGW(TAG, "Couldn't get location");
                 nearbyPlaces.add(new KeyValPair(null, failedLocationString));
                 mAdapter.clear();
@@ -301,7 +304,7 @@ public class PlacesMain extends BaseChannelFragment
                 return;
             }
 
-            loadNearby(lastLoc);
+            loadNearby(lastLocation);
         }
     }
 

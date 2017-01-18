@@ -134,6 +134,7 @@ public class SOCCourses extends BaseChannelFragment {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
+            .retryWhen(this::logAndRetry)
             .subscribe(courseData -> {
                 reset();
 
