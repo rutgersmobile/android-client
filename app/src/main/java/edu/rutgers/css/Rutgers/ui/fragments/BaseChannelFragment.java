@@ -19,7 +19,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -48,13 +47,6 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     private ProgressBar mProgressCircle;
     private LinearLayout mNetworkErrorPage;
     private Button mNetworkRetry;
-    /*
-        Network codes : 0x00 empty
-                        0x01 default/first try
-                        0x02 subsequent try
-                        0x0f too many attempts
-     */
-    private static int errCode = 0;
     protected PublishSubject<View> networkErrorSubject = PublishSubject.create();
 
     private Toolbar toolbar;
@@ -75,6 +67,8 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     public static final int DEF_PROGRESS_RES = R.id.progressCircle;
     public static final int DEF_TOOLBAR_RES = R.id.toolbar;
     public static final int DEF_FAB_RES = R.id.fab_speed_dial;
+    public static final int DEF_NETWORK_CONTAINER_RES = R.id.network_error_container;
+    public static final int DEF_NETWORK_REFRESH_RES = R.id.network_retry_connection;
 
     protected static final int LOCATION_REQUEST = 101;
 
@@ -82,11 +76,15 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         private final Integer progressRes;
         private final Integer toolbarRes;
         private final Integer fabRes;
+        private final Integer networkErrorContainerRes;
+        private final Integer networkRefreshRes;
 
         public static class CreateArgsBuilder {
-            private Integer progressRes;
-            private Integer toolbarRes;
-            private Integer fabRes;
+            private Integer progressRes = DEF_PROGRESS_RES;
+            private Integer toolbarRes = DEF_TOOLBAR_RES;
+            private Integer fabRes = DEF_FAB_RES;
+            private Integer networkErrorContainerRes = DEF_NETWORK_CONTAINER_RES;
+            private Integer networkRefreshRes = DEF_NETWORK_REFRESH_RES;
 
             private CreateArgsBuilder() {}
 
@@ -105,8 +103,18 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
                 return this;
             }
 
+            public CreateArgsBuilder networkErrorRes(final Integer networkErrorRes) {
+                this.networkErrorContainerRes = networkErrorRes;
+                return this;
+            }
+
+            public CreateArgsBuilder networkRefreshRes(final Integer networkRefreshRes) {
+                this.networkRefreshRes = networkRefreshRes;
+                return this;
+            }
+
             public CreateArgs build() {
-                return new CreateArgs(progressRes, toolbarRes, fabRes);
+                return new CreateArgs(progressRes, toolbarRes, fabRes, networkErrorContainerRes, networkRefreshRes);
             }
         }
 
@@ -114,10 +122,13 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
             return new CreateArgsBuilder();
         }
 
-        public CreateArgs(final Integer progressRes, final Integer toolbarRes, final Integer fabRes) {
+        public CreateArgs(final Integer progressRes, final Integer toolbarRes,
+                          final Integer fabRes, final Integer networkErrorContainerRes, final Integer networkRefreshRes) {
             this.progressRes = progressRes;
             this.toolbarRes = toolbarRes;
             this.fabRes = fabRes;
+            this.networkErrorContainerRes = networkErrorContainerRes;
+            this.networkRefreshRes = networkRefreshRes;
         }
 
         public Integer getProgressRes() {
@@ -130,6 +141,14 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
         public Integer getFabRes() {
             return fabRes;
+        }
+
+        public Integer getNetworkErrorContainerRes() {
+            return networkErrorContainerRes;
+        }
+
+        public Integer getNetworkRefreshRes() {
+            return networkRefreshRes;
         }
     }
 
@@ -170,22 +189,21 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
                 resource,
                 args.getProgressRes(),
                 args.getToolbarRes(),
-                args.getFabRes()
+                args.getFabRes(),
+                args.getNetworkErrorContainerRes(),
+                args.getNetworkRefreshRes()
         );
     }
 
     final protected View createView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState,
-                                    int resource, Integer progressRes, Integer toolbarRes, Integer fabRes) {
+                                    int resource, Integer progressRes, Integer toolbarRes,
+                                    Integer fabRes, Integer networkErrorRes, Integer networkButtonRes) {
         final View v = inflater.inflate(resource, parent, false);
-
-        progressRes = progressRes == null ? DEF_PROGRESS_RES : progressRes;
-        toolbarRes = toolbarRes == null ? DEF_TOOLBAR_RES : toolbarRes;
-        fabRes = fabRes == null ? DEF_FAB_RES : fabRes;
 
         setupProgressBar(v, progressRes);
         setupToolbar(v, toolbarRes);
         setupToggleFab(v, fabRes);
-        setupNetworkError(v, R.id.network_error_container);
+        setupNetworkError(v, networkErrorRes, networkButtonRes);
 
         setUp = true;
 
@@ -216,12 +234,16 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         this.toolbar = toolbar;
     }
 
-    protected void setupNetworkError(final @NonNull View v, final int toolbarRes) {
-        mNetworkErrorPage = (LinearLayout) v.findViewById(R.id.network_error_container);
+    protected void setupNetworkError(final @NonNull View v, final int containerRes, final int buttonRes) {
+        mNetworkErrorPage = (LinearLayout) v.findViewById(containerRes);
+        mNetworkRetry = (Button) v.findViewById(buttonRes);
+
+        if (mNetworkRetry == null || mNetworkErrorPage == null) {
+            return;
+        }
+
         mNetworkErrorPage.setClickable(true);
-        mNetworkRetry = (Button) v.findViewById(R.id.network_retry_connection);
         mNetworkRetry.setClickable(true);
-        if (mNetworkRetry == null) { return; }
 
         mNetworkRetry.setOnClickListener(view -> {
             networkErrorSubject.onNext(view);
