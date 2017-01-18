@@ -13,6 +13,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +34,10 @@ import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import rx.Observable;
 import rx.subjects.PublishSubject;
+import tourguide.tourguide.Overlay;
+import tourguide.tourguide.Pointer;
+import tourguide.tourguide.ToolTip;
+import tourguide.tourguide.TourGuide;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
@@ -242,7 +248,12 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         if (fab == null) {
             return;
         }
-
+        TourGuide mTourGuide = TourGuide.init(getActivity()).with(TourGuide.Technique.Click)
+                .setPointer(new Pointer())
+                .setToolTip(new ToolTip().setTitle("Title").setDescription("Some long description")
+                        .setGravity(Gravity.CENTER))
+                .setOverlay(new Overlay())
+                .playOn(v);
         fab.setMenuListener(new FabSpeedDial.MenuListener() {
             @Override
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
