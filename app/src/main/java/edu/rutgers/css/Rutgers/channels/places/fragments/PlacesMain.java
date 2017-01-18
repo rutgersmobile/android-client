@@ -233,19 +233,21 @@ public class PlacesMain extends BaseChannelFragment
         updateSearchUI();
         getNearbyLocations();
     }
+
     public void getNearbyLocations() {
         Log.d(TAG, "GETTING NEARBY LOCATIONS");
         final String noneNearbyString = getString(R.string.places_none_nearby);
         final String nearbyPlacesString = getString(R.string.places_nearby);
-        locationSubject.asObservable().observeOn(Schedulers.io())
+        locationSubject.asObservable()
             .flatMap(location -> RutgersAPI.getPlacesNear(location.getLatitude(), location.getLongitude(), Config.NEARBY_RANGE)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .retryWhen(this::logAndRetry)
                 .flatMap(Observable::from)
                 .map(place -> new KeyValPair(place.getId(), place.getTitle()))
                 .defaultIfEmpty(new KeyValPair(null, noneNearbyString))
                 .toList()
             )
-            .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
             .subscribe(nearbyPlaces -> {
                 reset();
