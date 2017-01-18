@@ -16,6 +16,7 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -187,7 +188,6 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         setupToggleFab(v, fabRes);
         setupNetworkError(v, R.id.network_error_container);
 
-
         setUp = true;
 
         return v;
@@ -219,13 +219,14 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     protected void setupNetworkError(final @NonNull View v, final int toolbarRes) {
         mNetworkErrorPage = (LinearLayout) v.findViewById(R.id.network_error_container);
+        mNetworkErrorPage.setClickable(true);
         mNetworkRetry = (Button) v.findViewById(R.id.network_retry_connection);
+        mNetworkRetry.setClickable(true);
         if (mNetworkRetry == null) { return; }
-        mNetworkRetry.setOnTouchListener((view, evt) -> {
-            if (evt.getAction() == MotionEvent.ACTION_UP) {
-                networkErrorSubject.onNext(view);
-            }
-            return true;
+
+        mNetworkRetry.setOnClickListener(view -> {
+            networkErrorSubject.onNext(view);
+            Log.e(TAG, Boolean.toString(mNetworkRetry.isPressed()));
         });
     }
 
