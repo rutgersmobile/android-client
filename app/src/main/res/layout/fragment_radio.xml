@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/pantone186"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <ImageView
+        android:src="@drawable/wrnu_background_tiled"
+        android:scaleType="fitXY"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <LinearLayout
         android:orientation="vertical"

@@ -19,7 +19,8 @@
         app:layout_constraintRight_toLeftOf="@+id/stop_button"
         android:layout_marginBottom="104dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"/>
+        android:layout_marginRight="8dp"
+        android:tint="@color/white"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -33,13 +34,13 @@
         android:layout_marginBottom="104dp"
         android:layout_marginStart="8dp"
         app:layout_constraintLeft_toRightOf="@+id/play_button"
-        android:layout_marginLeft="8dp"/>
+        android:layout_marginLeft="8dp"
+        android:tint="@color/white"/>
 
     <ImageView
-        android:layout_width="200dp"
+        android:layout_width="250dp"
         app:srcCompat="@drawable/wrnu"
         android:id="@+id/wrnu_image"
-        android:layout_height="200dp"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginStart="16dp"
@@ -49,7 +50,8 @@
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginRight="16dp"
         app:layout_constraintBottom_toTopOf="@+id/wrnu_title"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="16dp"
+        android:layout_height="250dp"/>
 
     <TextView
         android:text="WRNU is the Rutgers-Newark radio station. We play anything you can think of! wrnurutgersradio@gmail.com."
@@ -60,7 +62,8 @@
         android:layout_width="0dp"
         app:layout_constraintLeft_toLeftOf="@+id/wrnu_image"
         app:layout_constraintRight_toRightOf="@+id/wrnu_image"
-        app:layout_constraintHorizontal_bias="0.0"/>
+        app:layout_constraintHorizontal_bias="0.0"
+        android:textColor="@color/white"/>
 
     <TextView
         android:text="WRNU"
@@ -70,5 +73,7 @@
         app:layout_constraintLeft_toLeftOf="@+id/wrnu_image"
         app:layout_constraintRight_toRightOf="@+id/wrnu_image"
         app:layout_constraintBottom_toTopOf="@+id/wrnu_description"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp"
+        android:textSize="18sp"
+        android:textColor="@color/white"/>
 </android.support.constraint.ConstraintLayout>
