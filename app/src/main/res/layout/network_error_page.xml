@@ -3,7 +3,7 @@
     android:id="@+id/network_error_container"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent" android:gravity="center"
-    android:visibility="gone">
+    android:visibility="visible">
     <TextView
         android:layout_width="175dp"
         android:layout_height="wrap_content"
@@ -12,9 +12,10 @@
         android:gravity="center"/>
     <Button
         android:id="@+id/network_retry_connection"
-        android:layout_width="100dp"
+        android:layout_width="175dp"
         android:layout_height="30dp"
         android:text="Retry"
         android:textColor="#999999"
+        android:layout_marginTop="20dp"
         android:background="@drawable/custom_button_1" />
 </LinearLayout>
