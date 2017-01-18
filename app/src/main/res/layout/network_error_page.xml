@@ -3,7 +3,7 @@
     android:id="@+id/network_error_container"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent" android:gravity="center"
-    android:visibility="visible">
+    android:visibility="gone">
     <TextView
         android:layout_width="175dp"
         android:layout_height="wrap_content"
