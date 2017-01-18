@@ -36,7 +36,6 @@ import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.subjects.PublishSubject;
 
 import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
@@ -298,7 +297,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     public Observable<?> logAndRetry(Observable<? extends Throwable> onError) {
         return onError.flatMap(error -> {
             logError(error);
-            return getErrorClicks().subscribeOn(AndroidSchedulers.mainThread());
+            return getErrorClicks();
         });
     }
 
