@@ -139,7 +139,6 @@ dependencies {
     compile 'com.bignerdranch.android:expandablerecyclerview:2.1.1'
     compile 'com.synnapps:carouselview:0.0.9'
     compile 'com.afollestad:sectioned-recyclerview:0.2.3'
-
     // Test
 //    testCompile 'junit:junit:4.12'
 //    testCompile 'org.mockito:mockito-core:1.10.19'

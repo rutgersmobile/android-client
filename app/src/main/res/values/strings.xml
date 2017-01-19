@@ -58,4 +58,7 @@
     <string name="channel_spinner_title">Channel</string>
     <string name="request_reply">Request Reply</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
