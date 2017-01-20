@@ -9,17 +9,20 @@
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
+        android:id="@+id/tutorial_fragment_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:text="@string/hello_blank_fragment" />
     <ImageView
+        android:id="@+id/tutorial_fragment_image"
         android:layout_width="200dp"
         android:layout_height="300dp"
         android:layout_marginTop="25dp"
         android:layout_marginBottom="25dp"/>
 
     <TextView
+        android:id="@+id/tutorial_fragment_body"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:text="Some long description here. Hello world! Trump will be president I hope you're happy. It's too late for Jesus now lmaoo."/>
@@ -27,7 +30,7 @@
     <Button
         android:layout_width="200dp"
         android:layout_height="50dp"
-        android:id="@+id/tutorial_page_okay"
+        android:id="@+id/tutorial_fragment_btn"
         android:layout_marginTop="20dp"
         android:text="Got it"
         android:background="@drawable/custom_button_2"
