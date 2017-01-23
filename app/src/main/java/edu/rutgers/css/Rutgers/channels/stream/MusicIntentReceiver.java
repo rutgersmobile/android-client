@@ -17,7 +17,8 @@ public class MusicIntentReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
-            // I don't like this
+            // TODO I don't like this
+//            waitForDebugger();
             if (StreamService.isPlaying()) {
                 final List<String> pathParts = new ArrayList<>();
                 pathParts.add("wrnu");

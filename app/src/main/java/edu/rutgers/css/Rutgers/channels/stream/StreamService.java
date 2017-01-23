@@ -267,13 +267,15 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     public void onAudioFocusChange(int i) {
         switch (i) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                if (mediaPlayer == null) {
-                    startMediaPlayer(resourceUrl);
-                } else if (!mediaPlayer.isPlaying()) {
-                    mediaPlayer.start();
+                if (isPlaying()) {
+                    if (mediaPlayer == null) {
+                        startMediaPlayer(resourceUrl);
+                    } else if (!mediaPlayer.isPlaying()) {
+                        mediaPlayer.start();
+                    }
+                    mediaPlayer.setVolume(1.0f, 1.0f);
+                    startNotification(true);
                 }
-                mediaPlayer.setVolume(1.0f, 1.0f);
-                startNotification(true);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 if (mediaPlayer != null && mediaPlayer.isPlaying()) {

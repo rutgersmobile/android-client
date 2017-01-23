@@ -23,7 +23,7 @@ public final class Config {
     public static final String API_MACHINE = "doxa";
     public static final String API_HOSTNAME = API_MACHINE + ".rutgers.edu";
     public static final String API_SCHEME = "https";
-    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/mobile/"+API_LEVEL+"/";
+    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/mobile-mattro/"+API_LEVEL+"/";
     public static final String NB_API_BASE = "http://webservices.nextbus.com/";
     public static final String SOC_API_BASE = "http://sis.rutgers.edu/soc/";
 

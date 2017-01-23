@@ -20,7 +20,8 @@
         android:layout_marginBottom="104dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:tint="@color/white"/>
+        android:tint="@color/white"
+        app:layout_constraintTop_toTopOf="@+id/stop_button"/>
 
     <ImageView
         android:layout_width="wrap_content"

@@ -38,7 +38,7 @@ public class RutgersApplication extends MultiDexApplication {
 
         client = new OkHttpClient.Builder()
             .cache(new Cache(getCacheDir(), 10 * 1024 * 1024))
-//            .addInterceptor(interceptor)
+            .addInterceptor(interceptor)
             .build();
 
         RutgersAPI.simpleSetup(client, Config.API_BASE);
