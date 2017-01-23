@@ -1,6 +1,8 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -40,6 +42,8 @@ public class BusMain extends BaseChannelFragment {
     private TabLayout tabs;
     private boolean searching = false;
     private int position = 0;
+
+    private CoordinatorLayout parent;
 
     public BusMain() {
         // Required empty public constructor
@@ -94,6 +98,7 @@ public class BusMain extends BaseChannelFragment {
 
         mViewPager = (ViewPager) v.findViewById(R.id.viewPager);
         mViewPager.setAdapter(pagerAdapter);
+        this.parent = (CoordinatorLayout)v.findViewById(R.id.fragment_search_tabbed_pager_parent_layout);
 
         tabs = (TabLayout) v.findViewById(R.id.tabs);
         tabs.setupWithViewPager(mViewPager);
@@ -114,7 +119,6 @@ public class BusMain extends BaseChannelFragment {
         }
 
         searchBox = (EditText) v.findViewById(R.id.search_box);
-
         return v;
     }
 

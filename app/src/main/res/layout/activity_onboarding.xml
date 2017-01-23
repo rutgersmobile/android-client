@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_onboarding_parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pantone186"
+    tools:context="edu.rutgers.css.Rutgers.OnboardingActivity">
+    <Button
+        android:layout_width="75dp"
+        android:layout_height="30dp"
+        android:text="Done"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:id="@+id/onboarding_done"
+        android:textColor="@color/white"
+        android:background="@android:color/transparent"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/tutorial_to_next_fragment"
+        android:background="@android:color/transparent"
+        android:layout_margin="5dp"
+        android:text="Got it"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:layout_alignParentBottom="true"/>
+    <android.support.v4.view.ViewPager
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/onboarding_view_pager"
+        android:layout_below="@id/onboarding_done"
+        android:layout_above="@id/tutorial_to_next_fragment"/>
+</RelativeLayout>

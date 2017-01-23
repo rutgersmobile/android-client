@@ -11,6 +11,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.rutgers.css.Rutgers.OnboardingActivity;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.api.model.Motd;
@@ -103,6 +105,7 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        boolean firstLaunch = PrefUtils.isFirstLaunch(getApplicationContext());
         setContentView(R.layout.activity_main);
 
         // See if we've showed the Motd before
@@ -257,6 +260,12 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
                     mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
                 }
             }, error -> AppUtils.showFailedLoadToast(getApplicationContext()));
+        if (firstLaunch) startOnboardingIntent();
+    }
+
+    private void startOnboardingIntent() {
+        Intent onboardingIntent = new Intent(this, OnboardingActivity.class);
+        startActivity(onboardingIntent);
     }
 
     @Override

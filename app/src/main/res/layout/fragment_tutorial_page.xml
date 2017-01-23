@@ -1,11 +1,10 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/basic_tutorial_page1"
     tools:context="edu.rutgers.css.Rutgers.ui.fragments.TutorialPageFragment"
-    android:orientation="vertical"
-    android:gravity="center">
+    android:background="@color/pantone186">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
@@ -13,27 +12,34 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAlignment="center"
+        android:textColor="@color/white"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
         android:text="@string/hello_blank_fragment" />
-    <ImageView
-        android:id="@+id/tutorial_fragment_image"
-        android:layout_width="200dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginBottom="25dp"/>
 
     <TextView
         android:id="@+id/tutorial_fragment_body"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
         android:text="Some long description here. Hello world! Trump will be president I hope you're happy. It's too late for Jesus now lmaoo."/>
 
-    <Button
-        android:layout_width="200dp"
-        android:layout_height="50dp"
-        android:id="@+id/tutorial_fragment_btn"
-        android:layout_marginTop="20dp"
-        android:text="Got it"
-        android:background="@drawable/custom_button_2"
-        android:textColor="@color/white" />
+    <ImageView
+        android:id="@+id/tutorial_fragment_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="15dp"
+        android:layout_below="@id/tutorial_fragment_title"
+        android:layout_above="@id/tutorial_fragment_body"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="30dp"
+        android:layout_marginBottom="15dp"/>
 
-</LinearLayout>
+
+</RelativeLayout>

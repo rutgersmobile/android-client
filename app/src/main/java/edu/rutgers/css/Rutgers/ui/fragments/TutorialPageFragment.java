@@ -4,19 +4,24 @@ package edu.rutgers.css.Rutgers.ui.fragments;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.function.Function;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.utils.FuncWrapper;
+import edu.rutgers.css.Rutgers.utils.LogUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -24,7 +29,21 @@ import edu.rutgers.css.Rutgers.utils.FuncWrapper;
 public class TutorialPageFragment extends Fragment {
     private TextView title, body;
     private ImageView img;
-    private Button nextBtn;
+    private RelativeLayout parent;
+    final private static String TAG = "TUTORIALPAGEFRAG";
+
+    class Changes {
+        public TutorialPageElement element;
+        public String text;
+        public ModifyValue mod;
+        public Changes(TutorialPageElement element, String text, ModifyValue mod) {
+            this.element = element;
+            this.text = text;
+            this.mod = mod;
+        }
+    }
+
+    private ArrayList<Changes> changes = new ArrayList<>();
     public TutorialPageFragment() {
         // Required empty public constructor
     }
@@ -32,12 +51,14 @@ public class TutorialPageFragment extends Fragment {
     public enum TutorialPageElement {
         TUTORIAL_PAGE_TITLE,
         TUTORIAL_PAGE_IMAGE,
-        TUTORIAL_PAGE_DESCR
+        TUTORIAL_PAGE_DESCR,
+        TUTORIAL_PAGE_BG
     }
 
     public enum ModifyValue {
         COLOR,
-        TEXT
+        TEXT,
+        NONE
     }
 
     @Override
@@ -48,31 +69,68 @@ public class TutorialPageFragment extends Fragment {
         this.title = (TextView) v.findViewById(R.id.tutorial_fragment_title);
         this.body = (TextView) v.findViewById(R.id.tutorial_fragment_body);
         this.img = (ImageView) v.findViewById(R.id.tutorial_fragment_image);
-        this.nextBtn = (Button) v.findViewById(R.id.tutorial_fragment_btn);
+        this.parent = (RelativeLayout) v.findViewById(R.id.basic_tutorial_page1);
+        Log.e(TAG, Boolean.toString(this.title == null));
+        applyAllChanges();
         return v;
     }
 
-    public void stylizeTextElement(TutorialPageElement element, String text, ModifyValue mod) {
-        switch(mod) {
+    public void stylizeElement(TutorialPageElement element, String text, ModifyValue mod) {
+        changes.add(new Changes(element, text, mod));
+    }
+
+    private void applyAllChanges() {
+        Changes[] changesArray = toArray();
+        for (Changes cng : changesArray) {
+            applyChange(cng);
+        }
+    }
+
+    private Changes[] toArray() {
+        Changes[] changesArray = new Changes[changes.size()];
+        for (int i = 0; i < changes.size(); i++) {
+            changesArray[i] = changes.get(i);
+        }
+        return changesArray;
+    }
+
+    private void applyChange(Changes cng) {
+        if (cng.element == TutorialPageElement.TUTORIAL_PAGE_IMAGE) {
+            setImage(Integer.parseInt(cng.text));
+            return;
+        }
+
+        if (cng.element == TutorialPageElement.TUTORIAL_PAGE_BG) {
+            this.parent.setBackgroundColor(Color.parseColor(cng.text));
+        }
+        switch(cng.mod) {
             case COLOR:
-                int color = Color.parseColor(text);
-                if (element == TutorialPageElement.TUTORIAL_PAGE_TITLE) {
+                int color = Color.parseColor(cng.text);
+                if (cng.element == TutorialPageElement.TUTORIAL_PAGE_TITLE) {
                     this.title.setTextColor(color);
-                } else if (element == TutorialPageElement.TUTORIAL_PAGE_DESCR) {
+                } else if (cng.element == TutorialPageElement.TUTORIAL_PAGE_DESCR) {
                     this.title.setTextColor(color);
                 }
                 break;
             case TEXT:
-                if (element == TutorialPageElement.TUTORIAL_PAGE_TITLE) {
-                    this.title.setText(text);
-                } else if (element == TutorialPageElement.TUTORIAL_PAGE_DESCR) {
-                    this.body.setText(text);
+                if (cng.element == TutorialPageElement.TUTORIAL_PAGE_TITLE) {
+                    this.title.setText(cng.text);
+                } else if (cng.element == TutorialPageElement.TUTORIAL_PAGE_DESCR) {
+                    this.body.setText(cng.text);
                 }
         }
     }
 
-    public void setImage(String src) {
+    public void setImageDisplayed(int src) {
+        changes.add(new Changes(TutorialPageElement.TUTORIAL_PAGE_IMAGE, Integer.toString(src), ModifyValue.NONE));
+    }
 
+    public void setBackground(String color) {
+        changes.add(new Changes(TutorialPageElement.TUTORIAL_PAGE_BG, color, ModifyValue.NONE));
+    }
+
+    private void setImage(int src) {
+        this.img.setImageResource(src);
     }
 
     public String[] getPageElementData(TutorialPageElement element) {
@@ -82,9 +140,5 @@ public class TutorialPageFragment extends Fragment {
             return new String[]{ this.body.getText().toString() };
         }
         return null;
-    }
-
-    public void overrideDefaultButtonBehaviour(FuncWrapper.Function0 fn) {
-        nextBtn.setOnClickListener(view -> fn.run());
     }
 }

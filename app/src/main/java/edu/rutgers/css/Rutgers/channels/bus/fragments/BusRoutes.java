@@ -1,7 +1,9 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -9,6 +11,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +30,6 @@ import edu.rutgers.css.Rutgers.utils.LogUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
-import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
 
 public class BusRoutes extends BaseChannelFragment {
 
@@ -65,6 +66,7 @@ public class BusRoutes extends BaseChannelFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
         recyclerView.setAdapter(mAdapter);
+        this.parent = (FrameLayout) v.findViewById(R.id.fragment_recycler_progress_simple_parent_layout);
         return v;
     }
 

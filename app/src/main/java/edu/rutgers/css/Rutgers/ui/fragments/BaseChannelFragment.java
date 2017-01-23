@@ -1,6 +1,7 @@
 package edu.rutgers.css.Rutgers.ui.fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -10,6 +11,8 @@ import android.support.design.internal.NavigationMenu;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -296,6 +299,10 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         if (mNetworkErrorPage != null) {
             mNetworkErrorPage.setVisibility(View.GONE);
         }
+    }
+    // testing code
+    protected void runTutorial(FragmentActivity fragmentActivity) {
+        LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     public Observable<View> getErrorClicks() {
