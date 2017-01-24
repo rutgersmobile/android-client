@@ -54,8 +54,6 @@ public class SOCSections extends BaseChannelFragment {
     private String semester;
     private String title;
 
-    private boolean mLoading;
-
     public SOCSections() {
         // Required empty public constructor
     }
@@ -154,7 +152,7 @@ public class SOCSections extends BaseChannelFragment {
             .compose(bindToLifecycle())
             .subscribe(this::switchFragments, this::logError);
 
-        mLoading = true;
+        setLoading(true);
         final String campus = args.getString(ARG_CAMPUS_TAG);
         final String semester = args.getString(ARG_SEMESTER_TAG);
         final String subject = args.getString(ARG_SUBJECT_TAG);
@@ -163,14 +161,14 @@ public class SOCSections extends BaseChannelFragment {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
-            .subscribe(this::loadCourse, this::logError);
+            .retryWhen(this::logAndRetry)
+            .subscribe(this::loadCourse, this::handleErrorWithRetry);
     }
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
 
-        if (mLoading) showProgressCircle();
         if (title != null) getActivity().setTitle(title);
 
         RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
@@ -224,9 +222,9 @@ public class SOCSections extends BaseChannelFragment {
         }
     }
 
-    private void reset() {
-        mLoading = false;
-        hideProgressCircle();
+    @Override
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
     }
 }

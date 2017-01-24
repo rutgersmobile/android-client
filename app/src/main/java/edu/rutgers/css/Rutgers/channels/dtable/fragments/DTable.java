@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
-import edu.rutgers.css.Rutgers.oldapi.ApiRequest;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
@@ -29,10 +28,10 @@ import edu.rutgers.css.Rutgers.channels.dtable.model.DTableGridAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableLinearAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.oldapi.ApiRequest;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.GridSpacingItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 import rx.Observable;
@@ -73,7 +72,6 @@ public class DTable extends DtableChannelFragment {
     private String mApi;
     private String mHandle;
     private String mTopHandle;
-    private boolean mLoading;
     private String mTitle;
     private String mLayout;
     private List<DTableRoot.BannerItem> banner;
@@ -238,7 +236,7 @@ public class DTable extends DtableChannelFragment {
         }
 
         // Start loading DTableRoot object in another thread
-        mLoading = true;
+        setLoading(true);
         final String url = mURL;
         Observable.fromCallable(() -> {
             JsonObject json;
@@ -249,27 +247,23 @@ public class DTable extends DtableChannelFragment {
             }
             return new DTableRoot(json, null);
         })
-
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .compose(bindToLifecycle())
-            .retryWhen(this::logAndRetry)
-            .subscribe(root -> {
-                reset();
-                banner.addAll(root.getBanner());
-                if (carouselView != null) {
-                    carouselView.setPageCount(banner.size());
-                    if (banner.size() != 0) {
-                        carouselView.setVisibility(View.VISIBLE);
-                    }
-                    carouselView.invalidate();
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .compose(bindToLifecycle())
+        .retryWhen(this::logAndRetry)
+        .subscribe(root -> {
+            reset();
+            banner.addAll(root.getBanner());
+            if (carouselView != null) {
+                carouselView.setPageCount(banner.size());
+                if (banner.size() != 0) {
+                    carouselView.setVisibility(View.VISIBLE);
                 }
-                mAdapter.addAll(root.getChildren());
-                mAdapter.addAllHistory(root.getHistory());
-            }, error -> {
-                reset();
-                logError(error);
-            });
+                carouselView.invalidate();
+            }
+            mAdapter.addAll(root.getChildren());
+            mAdapter.addAllHistory(root.getHistory());
+        }, this::handleErrorWithRetry);
     }
 
     private DTableAdapter createAdapter() {
@@ -314,8 +308,6 @@ public class DTable extends DtableChannelFragment {
             getActivity().setTitle(mTitle);
         }
 
-        if (mLoading) showProgressCircle();
-
         carouselView = (CarouselView) v.findViewById(R.id.carousel);
         if (banner.size() != 0) {
             carouselView.setVisibility(View.VISIBLE);
@@ -352,9 +344,7 @@ public class DTable extends DtableChannelFragment {
     @Override
     public Link getLink() {
         final List<String> linkArgs = new ArrayList<>();
-        for (final String title : mDRoot.getHistory()) {
-            linkArgs.add(title);
-        }
+        linkArgs.addAll(mDRoot.getHistory());
 
         return  new Link(mTopHandle, linkArgs, getLinkTitle());
     }
@@ -370,10 +360,10 @@ public class DTable extends DtableChannelFragment {
         }
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
         mAdapter.clearHistory();
-        mLoading = false;
-        hideProgressCircle();
     }
 }

@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
@@ -49,6 +48,7 @@ public class RUInfoMain extends BaseChannelFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = createView(inflater, container, savedInstanceState, R.layout.fragment_ruinfo_main);
+        hideProgressCircle();
 
         final Bundle args = getArguments();
 
@@ -66,83 +66,58 @@ public class RUInfoMain extends BaseChannelFragment {
         final Button websiteButton = (Button) v.findViewById(R.id.websiteButton);
 
         // "Call RU-info"
-        callButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse(mPhoneNumber));
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
-                }
+        callButton.setOnClickListener(v1 -> {
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse(mPhoneNumber));
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
             }
-            
         });
         
         // "Text Rutgers to 66746"
-        textButton1.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setType("vnd.android-dir/mms-sms");
-                intent.putExtra("address", mTextNumber);
-                intent.putExtra("sms_body", "Rutgers");
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
-                }
+        textButton1.setOnClickListener(v12 -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setType("vnd.android-dir/mms-sms");
+            intent.putExtra("address", mTextNumber);
+            intent.putExtra("sms_body", "Rutgers");
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
             }
-            
         });
 
         // "Text RU-info"
-        textButton2.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setType("vnd.android-dir/mms-sms");
-                intent.putExtra("address", mTextNumber);
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
-                }
+        textButton2.setOnClickListener(v13 -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setType("vnd.android-dir/mms-sms");
+            intent.putExtra("address", mTextNumber);
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
             }
-            
         });
         
         // "Email Colonel Henry"
-        emailButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("message/rfc822");
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{mEmailAddress});
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
-                }
+        emailButton.setOnClickListener(v14 -> {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("message/rfc822");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{mEmailAddress});
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(getActivity(), R.string.failed_no_activity, Toast.LENGTH_SHORT).show();
             }
-            
         });
 
         // "Visit our website"
-        websiteButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                String url = AppUtils.isTablet(getActivity()) ? mTabletURL : mMobileURL;
-                Bundle webArgs = WebDisplay.createArgs(getString(R.string.ruinfo_title), url);
-                switchFragments(webArgs);
-            }
-
+        websiteButton.setOnClickListener(v15 -> {
+            String url = AppUtils.isTablet(getActivity()) ? mTabletURL : mMobileURL;
+            Bundle webArgs = WebDisplay.createArgs(getString(R.string.ruinfo_title), url);
+            switchFragments(webArgs);
         });
 
         return v;

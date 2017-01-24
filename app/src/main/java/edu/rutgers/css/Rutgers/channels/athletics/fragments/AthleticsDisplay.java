@@ -16,11 +16,8 @@ import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.athletics.model.AthleticsAdapter;
 import edu.rutgers.css.Rutgers.ui.VerticalSpaceItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 
 /**
  * Show service scores
@@ -29,7 +26,6 @@ public final class AthleticsDisplay extends DtableChannelFragment {
 
     public static final String HANDLE = "athletics";
 
-    private boolean loading = false;
     private AthleticsAdapter adapter;
     private String title;
 
@@ -61,6 +57,7 @@ public final class AthleticsDisplay extends DtableChannelFragment {
     public void onResume() {
         super.onResume();
 
+        setLoading(true);
         RutgersAPI.getAthleticsGames(sport)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -69,17 +66,12 @@ public final class AthleticsDisplay extends DtableChannelFragment {
             .subscribe(athleticsGames -> {
                 reset();
                 adapter.addAll(athleticsGames.getGames());
-            }, error -> {
-                reset();
-                logError(error);
-            });
+            }, this::handleErrorWithRetry);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
-
-        if (loading) showProgressCircle();
 
         if (title != null) {
             getActivity().setTitle(title);
@@ -93,9 +85,13 @@ public final class AthleticsDisplay extends DtableChannelFragment {
         return v;
     }
 
-    private void reset() {
-        loading = false;
+    protected void reset() {
+        super.reset();
         adapter.clear();
-        hideProgressCircle();
+    }
+
+    @Override
+    public String getLogTag() {
+        return TAG;
     }
 }

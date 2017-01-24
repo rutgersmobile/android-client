@@ -4,11 +4,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +19,6 @@ import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.FuncWrapper;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -32,13 +29,16 @@ public class BusRoutes extends BaseChannelFragment {
     private static final String TAG                 = "BusRoutes";
     public static final String HANDLE               = "busroutes";
 
-    private boolean loading = false;
-
     /* Member data */
     private SimpleSectionedRecyclerAdapter<RouteStub> mAdapter;
 
     public BusRoutes() {
         // Required empty public constructor
+    }
+
+    @Override
+    public String getLogTag() {
+        return TAG;
     }
 
     @Override
@@ -51,8 +51,6 @@ public class BusRoutes extends BaseChannelFragment {
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress_simple);
-
-        if (loading) showProgressCircle();
 
         RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -67,47 +65,45 @@ public class BusRoutes extends BaseChannelFragment {
     public void onResume() {
         super.onResume();
 
-        mAdapter.getPositionClicks()
-                .compose(bindToLifecycle())
-                .map(routeStub -> BusDisplay.createArgs(routeStub.getTitle(), BusDisplay.ROUTE_MODE,
-                        routeStub.getAgencyTag(), routeStub.getTag())
-                )
-                .subscribe(this::switchFragments, this::logError);
+        mAdapter
+            .getPositionClicks()
+            .compose(bindToLifecycle())
+            .map(routeStub -> BusDisplay.createArgs(
+                routeStub.getTitle(),
+                BusDisplay.ROUTE_MODE,
+                routeStub.getAgencyTag(),
+                routeStub.getTag()
+            ))
+            .subscribe(this::switchFragments, this::logError);
 
         // Clear out everything
-        loading = true;
-        loadBusData();
-    }
-    private void loadBusData() {
+        setLoading(true);
         NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NB).flatMap(nbActive ->
-            NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NWK).map(nwkActive -> {
-                final List<SimpleSection<RouteStub>> routes = new ArrayList<>();
-                final String userHome = RutgersUtils.getHomeCampus(getContext());
-                if (userHome.equals(getContext().getString(R.string.campus_nb_full))) {
-                    routes.add(loadAgency(NextbusAPI.AGENCY_NB, nbActive));
-                    routes.add(loadAgency(NextbusAPI.AGENCY_NWK, nwkActive));
-                } else {
-                    routes.add(loadAgency(NextbusAPI.AGENCY_NWK, nwkActive));
-                    routes.add(loadAgency(NextbusAPI.AGENCY_NB, nbActive));
-                }
-                return routes;
-            }))
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .compose(bindToLifecycle())
-            .retryWhen(this::logAndRetry)
-            .subscribe(sections -> {
-                reset();
-                mAdapter.addAll(sections);
-            }, error -> {
-                logError(error);
-            });
+        NextbusAPI.getActiveRoutes(NextbusAPI.AGENCY_NWK).map(nwkActive -> {
+            final List<SimpleSection<RouteStub>> routes = new ArrayList<>();
+            final String userHome = RutgersUtils.getHomeCampus(getContext());
+            if (userHome.equals(getContext().getString(R.string.campus_nb_full))) {
+                routes.add(loadAgency(NextbusAPI.AGENCY_NB, nbActive));
+                routes.add(loadAgency(NextbusAPI.AGENCY_NWK, nwkActive));
+            } else {
+                routes.add(loadAgency(NextbusAPI.AGENCY_NWK, nwkActive));
+                routes.add(loadAgency(NextbusAPI.AGENCY_NB, nbActive));
+            }
+            return routes;
+        }))
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .compose(bindToLifecycle())
+        .retryWhen(this::logAndRetry)
+        .subscribe(sections -> {
+            reset();
+            mAdapter.addAll(sections);
+        }, this::handleErrorWithRetry);
     }
 
-    private void reset() {
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
-        loading = false;
-        hideProgressCircle();
     }
 
     /**

@@ -59,6 +59,7 @@ public class StreamDisplay extends DtableChannelFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_radio);
+        hideProgressCircle();
         playButton = (ImageView) v.findViewById(R.id.play_button);
         setPlayButtonIcon();
         playButton.setOnClickListener(view -> {

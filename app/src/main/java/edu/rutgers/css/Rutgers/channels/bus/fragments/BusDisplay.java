@@ -20,16 +20,14 @@ import java.util.concurrent.TimeUnit;
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.NextbusAPI;
+import edu.rutgers.css.Rutgers.api.model.bus.NextbusItem;
 import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
 import edu.rutgers.css.Rutgers.api.model.bus.Predictions;
-import edu.rutgers.css.Rutgers.api.model.bus.route.RouteStub;
-import edu.rutgers.css.Rutgers.api.model.bus.stop.StopStub;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -76,7 +74,6 @@ public class BusDisplay extends BaseChannelFragment {
     private SwipeRefreshLayout refreshLayout;
     private TextView messagesView;
     private View dividerView;
-    private boolean mLoading = false;
 
     private PublishSubject<Long> refreshSubject = PublishSubject.create();
 
@@ -191,7 +188,7 @@ public class BusDisplay extends BaseChannelFragment {
         super.onResume();
 
         // Start loading predictions
-        mLoading = true;
+        setLoading(true);
 
         final String agency = mAgency;
         final String tag = mTag;
@@ -200,40 +197,44 @@ public class BusDisplay extends BaseChannelFragment {
             Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
             refreshSubject)
             // need to specify io scheduler because refreshSubject exists on main thread
-            .observeOn(Schedulers.io())
             .flatMap(t -> {
                 LOGI(TAG, "Starting load");
+                Observable<Predictions> predictionsObservable;
+                Observable<List<? extends NextbusItem>> itemObservable;
                 if (BusDisplay.ROUTE_MODE.equals(mode)) {
-                    return NextbusAPI.routePredict(agency, tag)
-                        .flatMap(predictions -> NextbusAPI.getActiveRoutes(agency)
-                        .flatMap(routeStubs -> {
-                            for (final RouteStub route : routeStubs) {
-                                if (route.getTag().equals(tag)) {
-                                    return Observable.just(new PredictionHolder(predictions, route.getTitle()));
-                                }
-                            }
-                            return Observable.error(new IllegalArgumentException("Route tag not found"));
-                        }));
+                    // if we have a route
+                    predictionsObservable = NextbusAPI.routePredict(agency, tag);
+                    // that whooshing sound is the Java type system coming apart at the seams
+                    itemObservable = NextbusAPI.getActiveRoutes(agency).map(x -> x);
                 } else if (BusDisplay.STOP_MODE.equals(mode)) {
-                    return NextbusAPI.stopPredict(agency, tag)
-                        .flatMap(predictions -> NextbusAPI.getActiveStops(agency)
-                        .flatMap(stopStubs -> {
-                            for (final StopStub stop : stopStubs) {
-                                if (stop.getTag().equals(tag)) {
-                                    return Observable.just(new PredictionHolder(predictions, stop.getTitle()));
-                                }
-                            }
-                            return Observable.error(new IllegalArgumentException("Stop tag not found"));
-                        }));
+                    // else if we have a stop
+                    predictionsObservable = NextbusAPI.stopPredict(agency, tag);
+                    itemObservable = NextbusAPI.getActiveStops(agency).map(x -> x);
+                } else {
+                    // else error if we have neither
+                    predictionsObservable = Observable.error(
+                        new IllegalArgumentException("Invalid mode (stop / route only)")
+                    );
+                    itemObservable = Observable.error(
+                        new IllegalArgumentException("Invalid mode (stop / route only)")
+                    );
                 }
-
-                return Observable.error(
-                    new IllegalArgumentException("Invalid mode (stop / route only)")
-                );
+                return predictionsObservable.flatMap(predictions ->
+                    itemObservable.flatMap(nextbusItems -> {
+                    for (final NextbusItem item : nextbusItems) {
+                        if (item.getTag().equals(tag)) {
+                            return Observable.just(
+                                new PredictionHolder(predictions, item.getTitle())
+                            );
+                        }
+                    }
+                    return Observable.error(new IllegalArgumentException("Stop tag not found"));
+                }))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .retryWhen(this::logAndRetry);
             })
-            .observeOn(AndroidSchedulers.mainThread())
             .compose(bindToLifecycle())
-            .retryWhen(this::logAndRetry)
             .subscribe(data -> {
                 LOGI(TAG, "Ran subscription");
                 reset();
@@ -264,18 +265,12 @@ public class BusDisplay extends BaseChannelFragment {
                     messagesView.setVisibility(View.VISIBLE);
                     messagesView.setText(mMessage);
                 }
-            }, error -> {
-                reset();
-                LOGE(TAG, error.getMessage());
-                AppUtils.showFailedLoadToast(getContext());
-            });
+            }, this::handleErrorWithRetry);
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_refresh_progress_sticky);
-
-        if (mLoading) showProgressCircle();
 
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
 
@@ -337,9 +332,8 @@ public class BusDisplay extends BaseChannelFragment {
         outState.putString(SAVED_MESSAGE_TAG, mMessage);
     }
 
-    private void reset() {
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
-        mLoading = false;
-        hideProgressCircle();
     }
 }

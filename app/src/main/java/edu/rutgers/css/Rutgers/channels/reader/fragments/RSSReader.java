@@ -54,7 +54,6 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
     /* Member data */
     private ArrayList<RSSItem> mData;
     private RSSAdapter mAdapter;
-    private boolean mLoading;
 
     public RSSReader() {
         // Required empty public constructor
@@ -90,7 +89,7 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
             return;
         }
 
-        mLoading = true;
+        setLoading(true);
         getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, args, this);
     }
 
@@ -109,14 +108,19 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
             .map(RSSItem::getLink)
             .filter(FuncUtils::nonNull)
             .map(link -> WebDisplay.createArgs(title, link))
+            .compose(bindToLifecycle())
             .subscribe(this::switchFragments, this::logError);
+
+        getErrorClicks()
+            .doOnNext(view -> getActivity().getSupportLoaderManager().restartLoader(LOADER_ID, getArguments(), this))
+            .doOnNext(view -> showProgressCircle())
+            .compose(bindToLifecycle())
+            .subscribe();
     }
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
-
-        if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
         if (args.getString(ARG_TITLE_TAG) != null) {
@@ -147,7 +151,7 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
         reset();
 
         if (data.isEmpty()) {
-            AppUtils.showFailedLoadToast(getContext());
+            handleErrorWithRetry(new Exception("Something went wrong when getting RSS"));
             return;
         }
 
@@ -160,9 +164,9 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
         reset();
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
-        mLoading = false;
-        hideProgressCircle();
     }
 }

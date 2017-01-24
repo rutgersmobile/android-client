@@ -81,7 +81,6 @@ public class PlacesMain extends BaseChannelFragment
     private AutoCompleteTextView autoComp;
     private boolean searching = false;
     private String oldSearch;
-    private Location lastLocation;
 
     public PlacesMain() {
         // Required empty public constructor
@@ -218,26 +217,23 @@ public class PlacesMain extends BaseChannelFragment
         super.onResume();
 
         mAdapter.getPositionClicks()
-                .flatMap(placeStub -> placeStub.getKey() == null
-                        ? Observable.error(new IllegalArgumentException("Place has no key"))
-                        : Observable.just(PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey())))
-                .subscribe(this::switchFragments, error -> {
-                    Log.d(TAG, "ERROR'D ON RESUME");
-                    logError(error);
-                });
+            .flatMap(placeStub -> placeStub.getKey() == null
+                    ? Observable.error(new IllegalArgumentException("Place has no key"))
+                    : Observable.just(PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey()))
+            )
+            .subscribe(this::switchFragments, this::logError);
 
         if (mGoogleApiClientProvider != null) mGoogleApiClientProvider.registerListener(this);
 
         // Reload nearby places
-        showProgressCircle();
         updateSearchUI();
         getNearbyLocations();
     }
 
     public void getNearbyLocations() {
-        Log.d(TAG, "GETTING NEARBY LOCATIONS");
         final String noneNearbyString = getString(R.string.places_none_nearby);
         final String nearbyPlacesString = getString(R.string.places_nearby);
+        setLoading(true);
         locationSubject.asObservable()
             .flatMap(location -> RutgersAPI.getPlacesNear(location.getLatitude(), location.getLongitude(), Config.NEARBY_RANGE)
                 .subscribeOn(Schedulers.io())
@@ -252,7 +248,7 @@ public class PlacesMain extends BaseChannelFragment
             .subscribe(nearbyPlaces -> {
                 reset();
                 mAdapter.add(new SimpleSection<>(nearbyPlacesString, nearbyPlaces));
-            }, this::logError);
+            }, this::handleErrorWithRetry);
     }
 
     @Override
@@ -291,7 +287,7 @@ public class PlacesMain extends BaseChannelFragment
             }
 
             // Get last location
-            lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
+            Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClientProvider.getGoogleApiClient());
             if (lastLocation == null) {
                 LOGW(TAG, "Couldn't get location");
                 nearbyPlaces.add(new KeyValPair(null, failedLocationString));
@@ -329,9 +325,10 @@ public class PlacesMain extends BaseChannelFragment
         LOGI(TAG, "Suspended from services for cause: " + reason);
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
-        hideProgressCircle();
     }
 
     private void requestLocationUpdates() {

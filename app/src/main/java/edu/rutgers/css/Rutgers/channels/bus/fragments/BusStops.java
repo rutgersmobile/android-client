@@ -119,7 +119,8 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
 
         // The null value is to make sure this runs once without a location and will be updated
         // on subsequent calls to locationSubject::onNext
-        Observable.merge(Observable.just(null), locationSubject.asObservable()).observeOn(Schedulers.io())
+        Observable.merge(Observable.just(null), locationSubject.asObservable())
+            .observeOn(Schedulers.io())
             .flatMap(location -> {
             LOGI(TAG, "Started stop load with location");
             // create our stops with nearby stops initially empty
@@ -151,7 +152,8 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
 
                 // otherwise just use our empty nearby sections
                 : Observable.just(stops);
-        }).flatMap(stops ->
+        })
+        .flatMap(stops ->
             NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NB).flatMap(nbActive ->
             NextbusAPI.getActiveStops(NextbusAPI.AGENCY_NWK).map(nwkActive -> {
                 final String userHome = RutgersUtils.getHomeCampus(getContext());
@@ -177,7 +179,7 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
         .subscribe(simpleSections -> {
             reset();
             mAdapter.addAll(simpleSections);
-        }, this::logError);
+        }, this::handleErrorWithRetry);
     }
 
     @Override
@@ -221,7 +223,9 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
         LOGI(TAG, "Suspended from services for cause: " + cause);
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
     }
 

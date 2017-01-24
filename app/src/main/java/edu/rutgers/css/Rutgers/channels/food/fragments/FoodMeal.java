@@ -19,7 +19,6 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -124,6 +123,7 @@ public class FoodMeal extends BaseChannelFragment {
         RutgersAPI.getDiningHalls()
             .observeOn(Schedulers.io())
             .subscribeOn(AndroidSchedulers.mainThread())
+            .retryWhen(this::logAndRetry)
             .compose(bindToLifecycle())
             // Map dining halls into stream
             .flatMap(Observable::from)
@@ -140,11 +140,7 @@ public class FoodMeal extends BaseChannelFragment {
             .subscribe(sections -> {
                 reset();
                 mAdapter.addAll(sections);
-            } , error -> {
-                reset();
-                LOGE(TAG, error.getMessage());
-                AppUtils.showFailedLoadToast(getContext());
-            });
+            } , this::handleErrorWithRetry);
     }
 
     @Override
@@ -160,7 +156,9 @@ public class FoodMeal extends BaseChannelFragment {
         return v;
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
     }
 

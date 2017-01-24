@@ -44,7 +44,6 @@ public class FoodMain extends BaseChannelFragment {
 
     /* Member data */
     private SchoolFacilitiesAdapter mAdapter;
-    private boolean mLoading;
 
     public FoodMain() {
         // Required empty public constructor
@@ -126,6 +125,7 @@ public class FoodMain extends BaseChannelFragment {
         final SimpleSection<DiningMenu> camdenHalls =
                 new SimpleSection<>(camCampusFullString, gateway);
 
+        setLoading(true);
         // start loading dining menus
         RutgersAPI.getDiningHalls()
             .subscribeOn(Schedulers.io())
@@ -157,17 +157,12 @@ public class FoodMain extends BaseChannelFragment {
             .subscribe(simpleSections -> {
                 reset();
                 mAdapter.addAll(simpleSections);
-            }, error -> {
-                reset();
-                logError(error);
-            });
+            }, this::handleErrorWithRetry);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
-
-        if (mLoading) showProgressCircle();
 
         final Bundle args = getArguments();
 
@@ -188,10 +183,9 @@ public class FoodMain extends BaseChannelFragment {
         return new Link("food", new ArrayList<>(), getLinkTitle());
     }
 
-    private void reset() {
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
-        mLoading = false;
-        hideProgressCircle();
         hideNetworkError();
     }
 }

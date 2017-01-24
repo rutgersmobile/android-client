@@ -9,14 +9,10 @@ import android.support.annotation.NonNull;
 import android.support.design.internal.NavigationMenu;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,14 +45,25 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     private Button mNetworkRetry;
     protected PublishSubject<View> networkErrorSubject = PublishSubject.create();
 
+    private boolean loading = false;
+
+    public void setLoading(boolean loading) {
+        this.loading = loading;
+    }
+
+    public boolean isLoading() {
+        return loading;
+    }
+
+    protected void reset() {
+        setLoading(false);
+        hideProgressCircle();
+        hideNetworkError();
+    }
+
     private Toolbar toolbar;
     public Toolbar getToolbar() {
         return toolbar;
-    }
-
-    private boolean setUp;
-    public boolean isSetUp() {
-        return setUp;
     }
 
     private FragmentMediator fragmentMediator;
@@ -152,25 +159,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         }
     }
 
-    private ActionBar actionBar;
-    public ActionBar getActionBar() {
-        return actionBar;
-    }
-
     public static final String TAG = "BaseChannelFragment";
-
-    protected void safeForceLoad(int loaderId) {
-        final FragmentActivity activity = getActivity();
-        if (activity != null) {
-            final LoaderManager loaderManager = activity.getSupportLoaderManager();
-            if (loaderManager != null) {
-                final Loader loader = loaderManager.getLoader(loaderId);
-                if (loader != null) {
-                    loader.forceLoad();
-                }
-            }
-        }
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -205,7 +194,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         setupToggleFab(v, fabRes);
         setupNetworkError(v, networkErrorRes, networkButtonRes);
 
-        setUp = true;
+        if (isLoading()) showProgressCircle();
 
         return v;
     }
@@ -245,10 +234,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         mNetworkErrorPage.setClickable(true);
         mNetworkRetry.setClickable(true);
 
-        mNetworkRetry.setOnClickListener(view -> {
-            networkErrorSubject.onNext(view);
-            Log.e(TAG, Boolean.toString(mNetworkRetry.isPressed()));
-        });
+        mNetworkRetry.setOnClickListener(view -> networkErrorSubject.onNext(view));
     }
 
     protected void setupToggleFab(final @NonNull View v, final int fabRes) {
@@ -302,7 +288,6 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     final protected void showNetworkError() {
         if (mNetworkErrorPage != null) {
             mNetworkErrorPage.setVisibility(View.VISIBLE);
-
         }
     }
 
@@ -318,8 +303,8 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     public Observable<?> logAndRetry(Observable<? extends Throwable> onError) {
         return onError.flatMap(error -> {
-            logError(error);
-            return getErrorClicks();
+            handleErrorWithRetry(error);
+            return getErrorClicks().doOnNext(view -> showProgressCircle());
         });
     }
 
@@ -370,6 +355,11 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     public String getLogTag() {
         return TAG;
+    }
+
+    public void handleErrorWithRetry(Throwable throwable) {
+        reset();
+        logError(throwable);
     }
 
     public void logError(Throwable throwable) {

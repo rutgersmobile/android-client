@@ -21,7 +21,6 @@
         android:id="@+id/recycler_view" />
 
     <include layout="@layout/progress_circle" />
-
-    <include layout="@layout/floating_action_button" />
     <include layout="@layout/network_error_page" />
+    <include layout="@layout/floating_action_button" />
 </android.support.design.widget.CoordinatorLayout>

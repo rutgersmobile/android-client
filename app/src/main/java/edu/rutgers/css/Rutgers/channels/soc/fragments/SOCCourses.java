@@ -44,7 +44,6 @@ public class SOCCourses extends BaseChannelFragment {
 
     /* Member data */
     private ScheduleAdapter mAdapter;
-    private boolean mLoading;
     private String title;
 
     public static final class CourseData {
@@ -126,7 +125,7 @@ public class SOCCourses extends BaseChannelFragment {
             .subscribe(this::switchFragments, this::logError);
 
         // Start loading courses
-        mLoading = true;
+        setLoading(true);
         RutgersAPI.getSOCIndex(semester, campus, level)
             .flatMap(index -> SOCAPI.getCourses(semester, campus, level, subjectCode)
                 .map(courses -> new CourseData(index.getSubjectByCode(subjectCode), courses))
@@ -141,14 +140,12 @@ public class SOCCourses extends BaseChannelFragment {
                 mAdapter.addAll(courseData.getCourses());
                 title = WordUtils.capitalizeFully(courseData.getSubject().getDisplayTitle());
                 getActivity().setTitle(title);
-            }, this::logError);
+            }, this::handleErrorWithRetry);
     }
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
-
-        if (mLoading) showProgressCircle();
 
         if (title != null) {
             getActivity().setTitle(title);
@@ -174,9 +171,9 @@ public class SOCCourses extends BaseChannelFragment {
         return new Link("soc", linkArgs, getLinkTitle());
     }
 
-    private void reset() {
-        mLoading = false;
-        hideProgressCircle();
+    @Override
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
     }
 }

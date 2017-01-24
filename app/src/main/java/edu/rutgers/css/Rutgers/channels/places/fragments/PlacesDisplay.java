@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +63,6 @@ public class PlacesDisplay extends BaseChannelFragment {
     /* Member data */
     private Place mPlace;
     private RMenuAdapter mAdapter;
-    private boolean mLoading;
     private String mTitle;
 
     // Maps campuses to Nextbus agencies. Used for listing nearby bus stops.
@@ -128,27 +126,28 @@ public class PlacesDisplay extends BaseChannelFragment {
     public void onResume() {
         super.onResume();
 
-        mAdapter.getPositionClicks()
-                .map(rMenuRow -> (RMenuItemRow) rMenuRow)
-                .subscribe(rMenuItemRow -> {
-                    switch (rMenuItemRow.getArgs().getInt(ID_KEY)) {
-                        case ADDRESS_ROW:
-                            launchMap();
-                            break;
-                        case DESC_ROW:
-                            final Bundle textArgs = TextDisplay.createArgs(
-                                    mPlace.getTitle(),
-                                    rMenuItemRow.getArgs().getString("data")
-                            );
-                            switchFragments(textArgs);
-                            break;
-                        case BUS_ROW:
-                            final Bundle busArgs = new Bundle(rMenuItemRow.getArgs());
-                            busArgs.remove(ID_KEY);
-                            switchFragments(busArgs);
-                            break;
-                    }
-                }, this::logError);
+        mAdapter
+            .getPositionClicks()
+            .map(rMenuRow -> (RMenuItemRow) rMenuRow)
+            .subscribe(rMenuItemRow -> {
+                switch (rMenuItemRow.getArgs().getInt(ID_KEY)) {
+                    case ADDRESS_ROW:
+                        launchMap();
+                        break;
+                    case DESC_ROW:
+                        final Bundle textArgs = TextDisplay.createArgs(
+                                mPlace.getTitle(),
+                                rMenuItemRow.getArgs().getString("data")
+                        );
+                        switchFragments(textArgs);
+                        break;
+                    case BUS_ROW:
+                        final Bundle busArgs = new Bundle(rMenuItemRow.getArgs());
+                        busArgs.remove(ID_KEY);
+                        switchFragments(busArgs);
+                        break;
+                }
+            }, this::logError);
 
         final Bundle args = getArguments();
         mTitle = args.getString(ARG_TITLE_TAG);
@@ -156,7 +155,7 @@ public class PlacesDisplay extends BaseChannelFragment {
     }
     private void loadPlace(String placeKey) {
         // start loading place
-        mLoading = true;
+        setLoading(true);
         final String addressHeader = getContext().getString(R.string.address_header);
         final String buildingNoHeader = getContext().getString(R.string.building_no_header);
         final String campusHeader = getContext().getString(R.string.campus_header);
@@ -228,10 +227,7 @@ public class PlacesDisplay extends BaseChannelFragment {
                 mTitle = placeHolder.getPlace().getTitle();
                 mAdapter.addAll(placeHolder.getRows());
                 mPlace = placeHolder.getPlace();
-            }, error -> {
-                reset();
-                logError(error);
-            });
+            }, this::handleErrorWithRetry);
     }
 
     private static Observable<List<StopGroup>> getStopsNearPlace(final Place place) {
@@ -254,8 +250,6 @@ public class PlacesDisplay extends BaseChannelFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_recycler_progress);
-
-        if (mLoading) showProgressCircle();
 
         // Set title
         if (mTitle != null) getActivity().setTitle(mTitle);
@@ -302,9 +296,9 @@ public class PlacesDisplay extends BaseChannelFragment {
         }
     }
 
-    private void reset() {
-        hideProgressCircle();
-        mLoading = false;
+    @Override
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
     }
 

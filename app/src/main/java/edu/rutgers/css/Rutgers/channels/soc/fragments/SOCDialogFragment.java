@@ -2,7 +2,6 @@ package edu.rutgers.css.Rutgers.channels.soc.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -27,7 +26,9 @@ import edu.rutgers.css.Rutgers.model.KeyValPair;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.*;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGW;
 
 /**
  * Schedule of Classes catalogue selection menu.
@@ -66,9 +67,9 @@ public class SOCDialogFragment extends DialogFragment {
         levels.add(new KeyValPair(SOCAPI.CODE_LEVEL_UNDERGRAD, getString(R.string.soc_undergrad)));
         levels.add(new KeyValPair(SOCAPI.CODE_LEVEL_GRAD, getString(R.string.soc_grad)));
 
-        mSemesterSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSemesters);
-        mCampusSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, campuses);
-        mLevelSpinnerAdapter = new ArrayAdapter<KeyValPair>(getActivity(), android.R.layout.simple_dropdown_item_1line, levels);
+        mSemesterSpinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_dropdown_item_1line, mSemesters);
+        mCampusSpinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_dropdown_item_1line, campuses);
+        mLevelSpinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_dropdown_item_1line, levels);
 
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Holo_Light_Dialog);
     }
@@ -94,27 +95,20 @@ public class SOCDialogFragment extends DialogFragment {
         setSelectionByConfig(sharedPref.getString(PrefUtils.KEY_PREF_SOC_LEVEL, null), mLevelSpinnerAdapter, levelSpinner);
         setSelectionByConfig(sharedPref.getString(PrefUtils.KEY_PREF_SOC_SEMESTER, null), mSemesterSpinnerAdapter, semesterSpinner);
 
-        builder.setView(view)
-                .setTitle(R.string.soc_select)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // Save settings
-                        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                        SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, ((KeyValPair) campusSpinner.getSelectedItem()).getKey());
-                        editor.putString(PrefUtils.KEY_PREF_SOC_LEVEL, ((KeyValPair) levelSpinner.getSelectedItem()).getKey());
-                        editor.putString(PrefUtils.KEY_PREF_SOC_SEMESTER, ((KeyValPair) semesterSpinner.getSelectedItem()).getKey());
-                        editor.apply();
-                        LOGI(TAG, "Saved settings");
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialog, int id) {
-
-                   }
-                });
+        builder
+            .setView(view)
+            .setTitle(R.string.soc_select)
+            .setPositiveButton(android.R.string.ok, (dialog, id) -> {
+                // Save settings
+                SharedPreferences sharedPref1 = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                SharedPreferences.Editor editor = sharedPref1.edit();
+                editor.putString(PrefUtils.KEY_PREF_SOC_CAMPUS, ((KeyValPair) campusSpinner.getSelectedItem()).getKey());
+                editor.putString(PrefUtils.KEY_PREF_SOC_LEVEL, ((KeyValPair) levelSpinner.getSelectedItem()).getKey());
+                editor.putString(PrefUtils.KEY_PREF_SOC_SEMESTER, ((KeyValPair) semesterSpinner.getSelectedItem()).getKey());
+                editor.apply();
+                LOGI(TAG, "Saved settings");
+            })
+            .setNegativeButton(android.R.string.cancel, (dialog, id) -> { });
 
         return builder.create();
     }
@@ -130,7 +124,7 @@ public class SOCDialogFragment extends DialogFragment {
      * @param semesterCodes List of semester codes
      */
     public void setSemesters(List<String> semesterCodes) {
-        ArrayList<KeyValPair> semesters = new ArrayList<KeyValPair>(5);
+        ArrayList<KeyValPair> semesters = new ArrayList<>(5);
         for (String code: semesterCodes) {
             semesters.add(new KeyValPair(code, SOCAPI.translateSemester(code)));
         }
@@ -142,7 +136,7 @@ public class SOCDialogFragment extends DialogFragment {
      * @return Array of campus/code key value pairs
      */
     private ArrayList<KeyValPair> loadCampuses() {
-        ArrayList<KeyValPair> results = new ArrayList<KeyValPair>();
+        ArrayList<KeyValPair> results = new ArrayList<>();
         JsonArray campusJSONArray = AppUtils.loadRawJSONArray(getResources(), R.raw.soc_campuses);
         if (campusJSONArray == null) {
             LOGE(TAG, "Couldn't get list of campuses for SOC");
@@ -177,5 +171,4 @@ public class SOCDialogFragment extends DialogFragment {
             }
         }
     }
-
 }

@@ -32,8 +32,6 @@ public class CinemaMain extends BaseChannelFragment {
 
     private CinemaAdapter adapter;
 
-    private boolean mLoading = false;
-
     public Bundle createArgs() {
         final Bundle args = new Bundle();
         args.putString(ComponentFactory.ARG_COMPONENT_TAG, CinemaMain.HANDLE);
@@ -51,6 +49,7 @@ public class CinemaMain extends BaseChannelFragment {
     public void onResume() {
         super.onResume();
 
+        setLoading(true);
         RutgersAPI.getMovies()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -68,7 +67,6 @@ public class CinemaMain extends BaseChannelFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress);
-        if (mLoading) showProgressCircle();
 
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -84,9 +82,9 @@ public class CinemaMain extends BaseChannelFragment {
         return null;
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         adapter.clear();
-        mLoading = false;
-        hideProgressCircle();
     }
 }

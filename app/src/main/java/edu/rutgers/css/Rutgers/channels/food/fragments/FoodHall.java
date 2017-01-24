@@ -50,8 +50,6 @@ public class FoodHall extends BaseChannelFragment {
     /* Saved instance state tags */
     private static final String ARG_SAVED_DATA_TAG  = "diningMenuData";
 
-    public static final int LOADER_ID               = AppUtils.getUniqueLoaderId();
-
     /* Member data */
     private String mTitle;
     private String mLocation;
@@ -95,9 +93,16 @@ public class FoodHall extends BaseChannelFragment {
     public void onResume() {
         super.onResume();
 
+        // If we restored data, don't load anything
+        if (mData != null) {
+            return;
+        }
+
+        setLoading(true);
         RutgersAPI.getDiningHalls()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .retryWhen(this::logAndRetry)
             .compose(bindToLifecycle())
             // Lift list of dining halls into observable stream
             .flatMap(Observable::from)
@@ -108,11 +113,7 @@ public class FoodHall extends BaseChannelFragment {
                 reset();
                 mData = diningMenu;
                 loadPages(diningMenu);
-            }, error -> {
-                reset();
-                LOGE(TAG, error.getMessage());
-                AppUtils.showFailedLoadToast(getContext());
-            });
+            }, this::handleErrorWithRetry);
     }
 
     @Override
@@ -174,7 +175,9 @@ public class FoodHall extends BaseChannelFragment {
         }
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
+        super.reset();
         mPagerAdapter.clear();
     }
 

@@ -26,7 +26,6 @@ import edu.rutgers.css.Rutgers.model.SimpleSection;
 import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
-import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -37,16 +36,12 @@ public class BusAll extends BaseChannelFragment {
     private static final String TAG                 = "BusAll";
     public static final String HANDLE               = "busall";
 
-    /* ID for loader */
-    private static final int LOADER_ID              = AppUtils.getUniqueLoaderId();
-
     /* Saved instance state tags */
     private static final String SAVED_FILTER_TAG    = Config.PACKAGE_NAME+"."+HANDLE+".filter";
 
     /* Member data */
     private SimpleSectionedRecyclerAdapter<NextbusItem> mAdapter;
     private String mFilterString;
-    private boolean mLoading;
 
     public BusAll() {
         // Required empty public constructor
@@ -81,7 +76,7 @@ public class BusAll extends BaseChannelFragment {
             .subscribe(this::switchFragments, this::logError);
 
         // Start loading all stops and routes in the background
-        mLoading = true;
+        setLoading(true);
         NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NB).flatMap(nbRoutes ->
         NextbusAPI.getAllStops(NextbusAPI.AGENCY_NB).flatMap(nbStops ->
         NextbusAPI.getAllRoutes(NextbusAPI.AGENCY_NWK).flatMap(nwkRoutes ->
@@ -114,14 +109,12 @@ public class BusAll extends BaseChannelFragment {
             if (mFilterString != null) {
                 mAdapter.getFilter().filter(mFilterString);
             }
-        }, this::logError);
+        }, this::handleErrorWithRetry);
     }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress_simple);
-
-        if (mLoading) showProgressCircle();
 
         RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -159,10 +152,9 @@ public class BusAll extends BaseChannelFragment {
         if (StringUtils.isNotBlank(mFilterString)) outState.putString(SAVED_FILTER_TAG, mFilterString);
     }
 
-    private void reset() {
+    protected void reset() {
+        super.reset();
         mAdapter.clear();
-        mLoading = false;
-        hideProgressCircle();
     }
 
     @Override

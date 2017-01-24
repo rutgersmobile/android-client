@@ -19,7 +19,7 @@ public final class Config {
     public static final Boolean FORCE_DEBUG_LOGGING = true;
 
     // Server and API level
-    public static final String API_LEVEL = "2";
+    public static final String API_LEVEL = "3";
     public static final String API_MACHINE = "10.0.2.2:8000";
     public static final String API_HOSTNAME = API_MACHINE;
     public static final String API_SCHEME = "http";
