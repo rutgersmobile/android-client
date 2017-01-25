@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 import edu.rutgers.css.Rutgers.ui.OnboarderPagerAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.TutorialPageFragment;
+import edu.rutgers.css.Rutgers.utils.PrefUtils;
 
 public class OnboardingActivity extends AppCompatActivity {
     ViewPager pager;
@@ -29,7 +30,10 @@ public class OnboardingActivity extends AppCompatActivity {
         this.finish = (Button)findViewById(R.id.onboarding_done);
         this.nextFragment = (Button)findViewById(R.id.tutorial_to_next_fragment);
         this.parent = (RelativeLayout)findViewById(R.id.activity_onboarding_parent_layout);
-        this.finish.setOnClickListener(view -> finish());
+        this.finish.setOnClickListener(view -> {
+            PrefUtils.FirstLaunchCompleted(getApplicationContext());
+            finish();
+        });
         this.nextFragment.setOnClickListener(view -> loadNextItem());
         addPreloadedFragment(R.drawable.sample_image_1, "Report 1022", "We have encountered a mysterious object while out on observation. It appears to be solid in nature and yet our computers are unable to pick up its volumetrics. Approaching for inspection.");
         addPreloadedFragment(R.drawable.sample_image_2, "Report 1023", "Lt. Johnson approached the object at 2100 hours and \"fell\" into it. We have made repeated attempts to contact him but have been unable to reach his comms. Presumed dead.");
@@ -60,6 +64,7 @@ public class OnboardingActivity extends AppCompatActivity {
     public void loadNextItem() {
         int pos = this.pager.getCurrentItem();
         if (pos + 1 >= this.pager.getAdapter().getCount()) {
+            PrefUtils.FirstLaunchCompleted(getApplicationContext());
             finish();
         } else {
             this.pager.setCurrentItem(pos+1);

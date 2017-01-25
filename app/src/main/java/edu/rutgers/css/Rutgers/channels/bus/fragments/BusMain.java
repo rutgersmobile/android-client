@@ -98,7 +98,6 @@ public class BusMain extends BaseChannelFragment {
 
         mViewPager = (ViewPager) v.findViewById(R.id.viewPager);
         mViewPager.setAdapter(pagerAdapter);
-        this.parent = (CoordinatorLayout)v.findViewById(R.id.fragment_search_tabbed_pager_parent_layout);
 
         tabs = (TabLayout) v.findViewById(R.id.tabs);
         tabs.setupWithViewPager(mViewPager);

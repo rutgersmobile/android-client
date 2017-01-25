@@ -13,7 +13,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.oldapi.Analytics;
+
+import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
 
 /**
  * Preference keys and helpers.
@@ -196,6 +200,16 @@ public final class PrefUtils {
         }
         enabled.addAll(disabled);
         return enabled;
+    }
+
+    public static void FirstLaunchCompleted(Context context) {
+        PreferenceManager.setDefaultValues(context, R.xml.pref_general, false);
+
+        // Check if this is the first time the app is being launched
+        if (PrefUtils.isFirstLaunch(context)) {
+            PrefUtils.markFirstLaunch(context);
+            Analytics.queueEvent(context, Analytics.NEW_INSTALL, null);
+        }
     }
 
 }

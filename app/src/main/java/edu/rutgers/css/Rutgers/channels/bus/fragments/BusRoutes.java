@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,6 @@ import edu.rutgers.css.Rutgers.model.SimpleSectionedRecyclerAdapter;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.utils.FuncWrapper;
-import edu.rutgers.css.Rutgers.utils.LogUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -58,7 +56,6 @@ public class BusRoutes extends BaseChannelFragment {
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        hideNetworkError();
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_recycler_progress_simple);
 
         RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
@@ -66,7 +63,6 @@ public class BusRoutes extends BaseChannelFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
         recyclerView.setAdapter(mAdapter);
-        this.parent = (FrameLayout) v.findViewById(R.id.fragment_recycler_progress_simple_parent_layout);
         return v;
     }
 
