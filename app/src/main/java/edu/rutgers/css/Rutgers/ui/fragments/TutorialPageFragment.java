@@ -70,7 +70,6 @@ public class TutorialPageFragment extends Fragment {
         this.body = (TextView) v.findViewById(R.id.tutorial_fragment_body);
         this.img = (ImageView) v.findViewById(R.id.tutorial_fragment_image);
         this.parent = (RelativeLayout) v.findViewById(R.id.basic_tutorial_page1);
-        Log.e(TAG, Boolean.toString(this.title == null));
         applyAllChanges();
         return v;
     }
@@ -121,11 +120,11 @@ public class TutorialPageFragment extends Fragment {
         }
     }
 
-    public void setImageDisplayed(int src) {
+    public void presetImageDisplayed(int src) {
         changes.add(new Changes(TutorialPageElement.TUTORIAL_PAGE_IMAGE, Integer.toString(src), ModifyValue.NONE));
     }
 
-    public void setBackground(String color) {
+    public void presetBackground(String color) {
         changes.add(new Changes(TutorialPageElement.TUTORIAL_PAGE_BG, color, ModifyValue.NONE));
     }
 
@@ -133,11 +132,11 @@ public class TutorialPageFragment extends Fragment {
         this.img.setImageResource(src);
     }
 
-    public String[] getPageElementData(TutorialPageElement element) {
+    public String getPageElementData(TutorialPageElement element) {
         if (element == TutorialPageElement.TUTORIAL_PAGE_TITLE) {
-            return new String[]{ this.title.getText().toString() };
+            return this.title.getText().toString();
         } else if (element == TutorialPageElement.TUTORIAL_PAGE_DESCR) {
-            return new String[]{ this.body.getText().toString() };
+            return this.body.getText().toString();
         }
         return null;
     }

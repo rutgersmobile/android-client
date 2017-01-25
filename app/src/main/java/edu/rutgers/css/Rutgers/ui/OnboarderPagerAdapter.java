@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.ui;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
@@ -13,14 +14,14 @@ import edu.rutgers.css.Rutgers.ui.fragments.TutorialPageFragment;
 
 public class OnboarderPagerAdapter extends FragmentPagerAdapter {
     public static int pos = 0;
-    private List<TutorialPageFragment> tutorialFragments;
+    private List<? extends Fragment> tutorialFragments;
 
-    public OnboarderPagerAdapter(FragmentManager fm, List<TutorialPageFragment> tutorialFragments) {
+    public OnboarderPagerAdapter(FragmentManager fm, List<? extends Fragment> tutorialFragments) {
         super(fm);
         this.tutorialFragments = tutorialFragments;
     }
 
-    public TutorialPageFragment getItem(int p) {
+    public Fragment getItem(int p) {
         return this.tutorialFragments.get(p);
     }
 
@@ -29,8 +30,11 @@ public class OnboarderPagerAdapter extends FragmentPagerAdapter {
     }
 
     public CharSequence getPageTitle(int p) {
-        TutorialPageFragment tpf = getItem(p);
-        String[] data = tpf.getPageElementData(TutorialPageFragment.TutorialPageElement.TUTORIAL_PAGE_TITLE);
-        return data[0];
+        Fragment tpf = getItem(p);
+        String data = "";
+        if (tpf instanceof TutorialPageFragment) {
+            data = ((TutorialPageFragment) tpf).getPageElementData(TutorialPageFragment.TutorialPageElement.TUTORIAL_PAGE_TITLE);
+        }
+        return data;
     }
 }
