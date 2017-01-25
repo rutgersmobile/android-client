@@ -342,7 +342,6 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
         if (PrefUtils.isFirstLaunch(this)) {
             LOGI(TAG, "First launch");
 
-            PrefUtils.markFirstLaunch(this);
             Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
         }
 

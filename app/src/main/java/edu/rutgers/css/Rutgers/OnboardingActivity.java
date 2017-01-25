@@ -31,7 +31,7 @@ public class OnboardingActivity extends AppCompatActivity {
         this.nextFragment = (Button)findViewById(R.id.tutorial_to_next_fragment);
         this.parent = (RelativeLayout)findViewById(R.id.activity_onboarding_parent_layout);
         this.finish.setOnClickListener(view -> {
-            PrefUtils.FirstLaunchCompleted(getApplicationContext());
+            PrefUtils.markFirstLaunch(getApplicationContext());
             finish();
         });
         this.nextFragment.setOnClickListener(view -> loadNextItem());
@@ -64,7 +64,7 @@ public class OnboardingActivity extends AppCompatActivity {
     public void loadNextItem() {
         int pos = this.pager.getCurrentItem();
         if (pos + 1 >= this.pager.getAdapter().getCount()) {
-            PrefUtils.FirstLaunchCompleted(getApplicationContext());
+            PrefUtils.markFirstLaunch(getApplicationContext());
             finish();
         } else {
             this.pager.setCurrentItem(pos+1);
