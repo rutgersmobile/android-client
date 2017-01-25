@@ -11,7 +11,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -260,7 +259,8 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
                     mDrawerAdapter.addAll(PrefUtils.getBookmarks(getApplicationContext()));
                 }
             }, error -> AppUtils.showFailedLoadToast(getApplicationContext()));
-        if (firstLaunch) startOnboardingIntent();
+        // uncomment this after @rlh151 gives us better images
+//        if (firstLaunch) startOnboardingIntent();
     }
 
     private void startOnboardingIntent() {
@@ -342,6 +342,7 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
         if (PrefUtils.isFirstLaunch(this)) {
             LOGI(TAG, "First launch");
 
+            PrefUtils.markFirstLaunch(this);
             Analytics.queueEvent(this, Analytics.NEW_INSTALL, null);
         }
 
