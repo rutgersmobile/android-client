@@ -235,7 +235,7 @@ public final class BusNotificationService extends IntentService {
         }
 
         // The predictions are sorted, so we're getting the next one
-        final int predictionMinutes = foundPrediction.getMinutes().get(0);
+        final int predictionMinutes = foundPrediction.getVehiclePredictions().get(0).getMinutes();
 
         // Text to display in the short notification
         final String shortText

@@ -93,7 +93,7 @@
             android:name=".channels.bus.model.BusNotificationAlarm"
             android:process=":remote" />
 
-        <activity android:name=".OnboardingActivity"></activity>
+        <activity android:name=".ui.OnboardingActivity"></activity>
     </application>
 
 </manifest>

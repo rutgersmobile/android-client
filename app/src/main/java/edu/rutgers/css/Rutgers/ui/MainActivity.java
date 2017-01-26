@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.rutgers.css.Rutgers.OnboardingActivity;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.api.model.Motd;

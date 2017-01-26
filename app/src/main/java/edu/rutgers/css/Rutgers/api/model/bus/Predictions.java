@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.api.model.bus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,17 @@ public final class Predictions {
      */
     public List<Prediction> getPredictions() {
         return predictions;
+    }
+
+    public List<Prediction> getPredictions(String vehicle) {
+        final List<Prediction> filteredPredictions = new ArrayList<>();
+        for (final Prediction prediction : predictions) {
+            final List<VehiclePrediction> vehiclePredictions = prediction.getVehiclePredictions(vehicle);
+            if (!vehiclePredictions.isEmpty()) {
+                filteredPredictions.add(new Prediction(prediction.getTitle(), prediction.getTag(), vehiclePredictions));
+            }
+        }
+        return filteredPredictions;
     }
 
     public void add(Predictions other) {

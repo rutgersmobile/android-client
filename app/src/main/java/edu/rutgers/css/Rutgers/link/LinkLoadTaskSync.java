@@ -122,7 +122,7 @@ public class LinkLoadTaskSync {
                 break;
         }
 
-        return BusDisplay.createLinkArgs(mode,
+        return BusDisplay.createArgs(mode,
                 NextbusAPI.AGENCY_NB, stopOrRoute);
     }
     /**

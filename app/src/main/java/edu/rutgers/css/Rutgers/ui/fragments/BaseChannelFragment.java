@@ -47,6 +47,12 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     private Button mNetworkRetry;
     protected PublishSubject<View> networkErrorSubject = PublishSubject.create();
 
+    private FabSpeedDial fab;
+
+    public FabSpeedDial getFab() {
+        return fab;
+    }
+
     private boolean loading = false;
 
     public void setLoading(boolean loading) {
@@ -240,7 +246,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
     }
 
     protected void setupToggleFab(final @NonNull View v, final int fabRes) {
-        final FabSpeedDial fab = (FabSpeedDial) v.findViewById(fabRes);
+        fab = (FabSpeedDial) v.findViewById(fabRes);
         if (fab == null) {
             return;
         }

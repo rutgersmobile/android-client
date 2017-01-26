@@ -30,8 +30,13 @@ import java.util.Locale;
 
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
+import edu.rutgers.css.Rutgers.api.model.bus.VehiclePrediction;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
 import edu.rutgers.css.Rutgers.link.Link;
+import rx.Observable;
+import rx.subjects.PublishSubject;
+
+import static edu.rutgers.css.Rutgers.R.id.minutes;
 
 /**
  * Bus arrival time predictions adapter.
@@ -44,6 +49,11 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
     private static final SimpleDateFormat arriveDf24 = new SimpleDateFormat("H:mm", Locale.US);
     private static final Calendar cal = Calendar.getInstance(Locale.US);
     private final List<Prediction> predictions;
+    private PublishSubject<Prediction> aedanPublishSubject = PublishSubject.create();
+    public Observable<Prediction> getAedanClicks() {
+        return aedanPublishSubject.asObservable();
+    }
+    final boolean hideAedan;
 
     private String agency;
     private String tag;
@@ -87,7 +97,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
         Resources res = fragmentActivity.getResources();
 
         parentViewHolder.itemView.setOnClickListener(view -> {
-            if (parentViewHolder.isExpanded() || prediction.getMinutes().isEmpty()) {
+            if (parentViewHolder.isExpanded() || prediction.getVehiclePredictions().isEmpty()) {
                 collapseParent(parentListItem);
             } else {
                 expandParent(parentListItem);
@@ -124,13 +134,13 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
         parentViewHolder.titleTextView.setText(prediction.getTitle());
 
         // Set prediction minutes
-        if (!prediction.getMinutes().isEmpty()) {
+        if (!prediction.getVehiclePredictions().isEmpty()) {
             // Reset title color to default
             parentViewHolder.titleTextView.setTextColor(res.getColor(R.color.black));
             parentViewHolder.directionTextView.setTextColor(res.getColor(R.color.black));
 
             // Change color of text based on how much time is remaining before the first bus arrives
-            int first = prediction.getMinutes().get(0);
+            int first = prediction.getVehiclePredictions().get(0).getMinutes();
 
             if (first < 2) {
                 parentViewHolder.minutesTextView.setTextColor(res.getColor(R.color.bus_soonest));
@@ -140,7 +150,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
                 parentViewHolder.minutesTextView.setTextColor(res.getColor(R.color.bus_later));
             }
 
-            parentViewHolder.minutesTextView.setText(formatMinutes(prediction.getMinutes()));
+            parentViewHolder.minutesTextView.setText(formatMinutes(prediction.getVehiclePredictions()));
         } else {
             // No predictions loaded - gray out all text
             parentViewHolder.titleTextView.setTextColor(res.getColor(R.color.light_gray));
@@ -161,15 +171,23 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
     @SuppressWarnings("unchecked")
     @Override
     public void onBindChildViewHolder(PopViewHolder childViewHolder, int position, Object childListItem) {
-        final List<Integer> minutes = (List<Integer>) childListItem;
+        final List<VehiclePrediction> vehicles = (List<VehiclePrediction>) childListItem;
         childViewHolder.itemView.setOnClickListener(view -> {
             final int adapterPosition = childViewHolder.getAdapterPosition();
             final ParentWrapper item = (ParentWrapper) mItemList.get(adapterPosition - 1);
             collapseParent(item.getParentListItem());
         });
-        if (!minutes.isEmpty()) {
+        childViewHolder.aedanButton.setOnClickListener(view -> {
+            final int adapterPosition = childViewHolder.getAdapterPosition();
+            final ParentWrapper item = (ParentWrapper)  mItemList.get(adapterPosition - 1);
+            aedanPublishSubject.onNext((Prediction) item.getParentListItem());
+        });
+        if (hideAedan) {
+            childViewHolder.aedanButton.setVisibility(View.GONE);
+        }
+        if (!vehicles.isEmpty()) {
             // Set pop-down contents
-            childViewHolder.popdownTextView.setText(formatMinutesDetails(minutes));
+            childViewHolder.popdownTextView.setText(formatMinutesDetails(vehicles));
             childViewHolder.popdownTextView.setGravity(Gravity.END);
         } else {
             // No predictions loaded
@@ -204,13 +222,14 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
             super(itemView);
             titleTextView = (TextView) itemView.findViewById(R.id.title);
             directionTextView = (TextView) itemView.findViewById(R.id.direction);
-            minutesTextView = (TextView) itemView.findViewById(R.id.minutes);
+            minutesTextView = (TextView) itemView.findViewById(minutes);
             alarmImageView = (ImageView) itemView.findViewById(R.id.add_alarm);
         }
     }
 
     static class PopViewHolder extends ChildViewHolder {
         TextView popdownTextView;
+        ImageView aedanButton;
 
         /**
          * Default constructor.
@@ -220,13 +239,15 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
         public PopViewHolder(View itemView) {
             super(itemView);
             popdownTextView = (TextView) itemView.findViewById(R.id.popdownTextView);
+            aedanButton = (ImageView) itemView.findViewById(R.id.aedan_button);
         }
     }
     
-    public PredictionAdapter(FragmentActivity fragmentActivity, List<Prediction> objects) {
+    public PredictionAdapter(FragmentActivity fragmentActivity, List<Prediction> objects, boolean hideAedan) {
         super(objects);
         this.fragmentActivity = fragmentActivity;
         predictions = objects;
+        this.hideAedan = hideAedan;
     }
 
     /**
@@ -235,23 +256,23 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
      *         Arriving in 2 and 4 minutes.<br>
      *         Arriving in 2, 3, and 4 minutes.<br>
      *         Arriving in 1 minute.<br>
-     * @param minutes Array of arrival times in minutes
+     * @param predictions Array of arrival times in minutes with vehicle ids
      * @return Formatted arrival time string
      */
-    private String formatMinutes(List<Integer> minutes) {
+    private String formatMinutes(List<VehiclePrediction> predictions) {
         Resources resources = fragmentActivity.getResources();
         StringBuilder result = new StringBuilder(resources.getString(R.string.bus_prediction_begin));
         
-        for (int i = 0; i < minutes.size(); i++) {
-            if (i != 0 && i == minutes.size() - 1) result.append(resources.getString(R.string.bus_and));
+        for (int i = 0; i < predictions.size(); i++) {
+            if (i != 0 && i == predictions.size() - 1) result.append(resources.getString(R.string.bus_and));
             
-            if (minutes.get(i) < 1) result.append(" <1");
-            else result.append(" ").append(minutes.get(i));
+            if (predictions.get(i).getMinutes() < 1) result.append(" <1");
+            else result.append(" ").append(predictions.get(i).getMinutes());
             
-            if (minutes.size() > 2 && i != minutes.size() - 1) result.append(",");
+            if (predictions.size() > 2 && i != predictions.size() - 1) result.append(",");
         }
         
-        if (minutes.size() == 1 && minutes.get(0) == 1) result.append(resources.getString(R.string.bus_minute_singular));
+        if (predictions.size() == 1 && predictions.get(0).getMinutes() == 1) result.append(resources.getString(R.string.bus_minute_singular));
         else result.append(resources.getString(R.string.bus_minute_plural));
         
         return result.toString();
@@ -260,12 +281,17 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
     /**
      * Create pop-down details string<br/>
      * e.g. <b>10</b> minutes at <b>12:30</b>
-     * @param minutes Array of arrival times in minutes
+     * @param vehicles Array of arrival times in minutes with a vehicle
      * @return Formatted and stylized arrival time details string
      */
-    private CharSequence formatMinutesDetails(List<Integer> minutes) {
+    private CharSequence formatMinutesDetails(List<VehiclePrediction> vehicles) {
         Resources resources = fragmentActivity.getResources();
         SpannableStringBuilder result = new SpannableStringBuilder();
+
+        final List<Integer> minutes = new ArrayList<>();
+        for (final VehiclePrediction prediction : vehicles) {
+            minutes.add(prediction.getMinutes());
+        }
 
         for (int i = 0; i < minutes.size(); i++) {
             // Hack so that it displays "<1 minute" instead of "0 minutes"

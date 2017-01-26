@@ -1,4 +1,4 @@
-package edu.rutgers.css.Rutgers;
+package edu.rutgers.css.Rutgers.ui;
 
 import android.graphics.Color;
 import android.support.v4.app.Fragment;
@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
+import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.ui.OnboarderPagerAdapter;
 import edu.rutgers.css.Rutgers.ui.fragments.TutorialPageFragment;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;

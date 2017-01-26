@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -24,11 +23,14 @@ import edu.rutgers.css.Rutgers.api.NextbusAPI;
 import edu.rutgers.css.Rutgers.api.model.bus.NextbusItem;
 import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
 import edu.rutgers.css.Rutgers.api.model.bus.Predictions;
+import edu.rutgers.css.Rutgers.api.model.bus.VehiclePrediction;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.bus.model.AedanDialogFragment;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
+import edu.rutgers.css.Rutgers.utils.FuncUtils;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -51,6 +53,7 @@ public class BusDisplay extends BaseChannelFragment {
     private static final String ARG_AGENCY_TAG      = "agency";
     private static final String ARG_MODE_TAG        = "mode";
     private static final String ARG_TAG_TAG         = "tag";
+    private static final String ARG_VEHICLE_TAG     = "vehicle";
 
     /* Argument options */
     public static final String STOP_MODE            = "stop";
@@ -72,6 +75,7 @@ public class BusDisplay extends BaseChannelFragment {
     private String mTitle;
     private String mAgency;
     private String mMessage;
+    private String mVehicle;
     private SwipeRefreshLayout refreshLayout;
     private TextView messagesView;
     private View dividerView;
@@ -100,20 +104,23 @@ public class BusDisplay extends BaseChannelFragment {
         // Required empty public constructor
     }
 
-    /** Create argument bundle for bus arrival time display. */
     public static Bundle createArgs(@NonNull String title, @NonNull String mode,
-                                    @NonNull String agency, @NonNull String tag) {
-        Bundle bundle = new Bundle();
-        bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, BusDisplay.HANDLE);
-        bundle.putString(ARG_TITLE_TAG, title);
-        bundle.putString(ARG_AGENCY_TAG, agency);
-        bundle.putString(ARG_MODE_TAG, mode);
-        bundle.putString(ARG_TAG_TAG, tag);
+                                    @NonNull String agency, @NonNull String tag, @NonNull String vehicle) {
+        Bundle bundle = createArgs(title, mode, agency, tag);
+        bundle.putString(ARG_VEHICLE_TAG, vehicle);
         return bundle;
     }
 
-    public static Bundle createLinkArgs(@NonNull String mode, @NonNull String agency,
-                                        @NonNull String tag) {
+    /** Create argument bundle for bus arrival time display. */
+    public static Bundle createArgs(@NonNull String title, @NonNull String mode,
+                                    @NonNull String agency, @NonNull String tag) {
+        Bundle bundle = createArgs(mode, agency, tag);
+        bundle.putString(ARG_TITLE_TAG, title);
+        return bundle;
+    }
+
+    public static Bundle createArgs(@NonNull String mode, @NonNull String agency,
+                                    @NonNull String tag) {
         Bundle bundle = new Bundle();
         bundle.putString(ComponentFactory.ARG_COMPONENT_TAG, BusDisplay.HANDLE);
         bundle.putString(ARG_AGENCY_TAG, agency);
@@ -127,8 +134,13 @@ public class BusDisplay extends BaseChannelFragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        // Load arguments anew
+        final Bundle args = getArguments();
+
+        mVehicle = args.getString(ARG_VEHICLE_TAG);
+
         mData = new ArrayList<>();
-        mAdapter = new PredictionAdapter(getActivity(), mData);
+        mAdapter = new PredictionAdapter(getActivity(), mData, mVehicle != null);
 
         mAgency = null;
         mTag = null;
@@ -146,9 +158,6 @@ public class BusDisplay extends BaseChannelFragment {
             mMessage = savedInstanceState.getString(SAVED_MESSAGE_TAG);
             return;
         }
-
-        // Load arguments anew
-        final Bundle args = getArguments();
 
         boolean missingArg = false;
         String requiredArgs[] = {ARG_AGENCY_TAG, ARG_MODE_TAG, ARG_TAG_TAG};
@@ -182,6 +191,24 @@ public class BusDisplay extends BaseChannelFragment {
         mAdapter.setAgency(mAgency);
         mAdapter.setTag(mTag);
         mAdapter.setMode(mMode);
+
+        mAdapter
+            .getAedanClicks()
+            .flatMap(prediction -> {
+                final ArrayList<VehiclePrediction> vehiclePredictions = new ArrayList<>();
+                vehiclePredictions.addAll(prediction.getVehiclePredictions());
+                final Bundle aedanArgs = AedanDialogFragment.createArgs(vehiclePredictions);
+                AedanDialogFragment aedanFragment = new AedanDialogFragment();
+                aedanFragment.setArguments(aedanArgs);
+                aedanFragment.show(getFragmentManager(), "aedan");
+                return aedanFragment.getSelection();
+            })
+            .filter(FuncUtils::nonNull)
+            .map(vehiclePrediction ->
+                BusDisplay.createArgs(mTitle, mMode, mAgency, mTag, vehiclePrediction.getVehicle())
+            )
+            .compose(bindToLifecycle())
+            .subscribe(this::switchFragments, this::logError);
     }
 
     @Override
@@ -194,6 +221,7 @@ public class BusDisplay extends BaseChannelFragment {
         final String agency = mAgency;
         final String tag = mTag;
         final String mode = mMode;
+        final String vehicle = mVehicle;
         Observable.merge(
             Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
             refreshSubject)
@@ -201,27 +229,32 @@ public class BusDisplay extends BaseChannelFragment {
             .flatMap(t -> {
                 LOGI(TAG, "Starting load");
                 Observable<Predictions> predictionsObservable;
-                Observable<List<? extends NextbusItem>> itemObservable;
+                Observable<List<? extends NextbusItem>> activeObservable;
                 if (BusDisplay.ROUTE_MODE.equals(mode)) {
                     // if we have a route
                     predictionsObservable = NextbusAPI.routePredict(agency, tag);
                     // that whooshing sound is the Java type system coming apart at the seams
-                    itemObservable = NextbusAPI.getActiveRoutes(agency).map(x -> x);
+                    activeObservable = NextbusAPI.getActiveRoutes(agency).map(x -> x);
                 } else if (BusDisplay.STOP_MODE.equals(mode)) {
                     // else if we have a stop
                     predictionsObservable = NextbusAPI.stopPredict(agency, tag);
-                    itemObservable = NextbusAPI.getActiveStops(agency).map(x -> x);
+                    activeObservable = NextbusAPI.getActiveStops(agency).map(x -> x);
                 } else {
                     // else error if we have neither
                     predictionsObservable = Observable.error(
                         new IllegalArgumentException("Invalid mode (stop / route only)")
                     );
-                    itemObservable = Observable.error(
+                    activeObservable = Observable.error(
                         new IllegalArgumentException("Invalid mode (stop / route only)")
                     );
                 }
-                return predictionsObservable.flatMap(predictions ->
-                    itemObservable.flatMap(nextbusItems -> {
+                return predictionsObservable.map(predictions -> {
+                    if (vehicle != null) {
+                        return new Predictions(predictions.getMessages(), predictions.getPredictions(vehicle));
+                    }
+                    return predictions;
+                }).flatMap(predictions ->
+                    activeObservable.flatMap(nextbusItems -> {
                     for (final NextbusItem item : nextbusItems) {
                         if (item.getTag().equals(tag)) {
                             return Observable.just(
@@ -246,7 +279,7 @@ public class BusDisplay extends BaseChannelFragment {
 
                 Predictions predictions = data.getPredictions();
                 mTitle = data.getTitle();
-                getActivity().setTitle(mTitle);
+                setTitle();
 
                 // If there are no active routes or stops, show a message
                 if (predictions.getPredictions().isEmpty()) {
@@ -268,21 +301,33 @@ public class BusDisplay extends BaseChannelFragment {
                 }
             }, this::handleErrorWithRetry);
     }
+
+    private void setTitle() {
+        if (mTitle != null) {
+            if (mVehicle != null) {
+                getActivity().setTitle(mTitle + " - " + mVehicle);
+            } else {
+                getActivity().setTitle(mTitle);
+            }
+        }
+    }
     
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         final View v = super.createView(inflater, parent, savedInstanceState, R.layout.fragment_list_refresh_progress_sticky);
 
+        if (mVehicle != null) {
+            getFab().setVisibility(View.INVISIBLE);
+        }
+
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+
+        setTitle();
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext()));
         recyclerView.setAdapter(mAdapter);
-
-        if (mTitle != null) {
-            getActivity().setTitle(mTitle);
-        }
 
         messagesView = (TextView)  v.findViewById(R.id.messages);
         dividerView = v.findViewById(R.id.message_separator);
