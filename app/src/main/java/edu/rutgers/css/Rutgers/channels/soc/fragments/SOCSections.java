@@ -27,6 +27,7 @@ import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
 import edu.rutgers.css.Rutgers.ui.fragments.TextDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.WebDisplay;
+import edu.rutgers.css.Rutgers.utils.FuncUtils;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -150,7 +151,12 @@ public class SOCSections extends BaseChannelFragment {
                 return null;
             })
             .compose(bindToLifecycle())
+            .filter(FuncUtils::nonNull)
             .subscribe(this::switchFragments, this::logError);
+
+        if (mCourse != null) {
+            return;
+        }
 
         setLoading(true);
         final String campus = args.getString(ARG_CAMPUS_TAG);

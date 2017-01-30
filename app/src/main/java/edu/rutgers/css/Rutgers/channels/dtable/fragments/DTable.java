@@ -231,7 +231,6 @@ public class DTable extends DtableChannelFragment {
         super.onResume();
 
         if (mDRoot != null) {
-            LOGE(TAG, "");
             return;
         }
 
@@ -253,6 +252,7 @@ public class DTable extends DtableChannelFragment {
         .retryWhen(this::logAndRetry)
         .subscribe(root -> {
             reset();
+            mDRoot = root;
             banner.addAll(root.getBanner());
             if (carouselView != null) {
                 carouselView.setPageCount(banner.size());

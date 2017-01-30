@@ -225,7 +225,6 @@ public class BusDisplay extends BaseChannelFragment {
         Observable.merge(
             Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
             refreshSubject)
-            // need to specify io scheduler because refreshSubject exists on main thread
             .flatMap(t -> {
                 LOGI(TAG, "Starting load");
                 Observable<Predictions> predictionsObservable;
