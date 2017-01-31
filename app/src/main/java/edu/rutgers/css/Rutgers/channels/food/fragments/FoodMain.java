@@ -180,7 +180,7 @@ public class FoodMain extends BaseChannelFragment {
     }
 
     public Link getLink() {
-        return new Link("food", new ArrayList<>(), getLinkTitle());
+        return new Link("food", new ArrayList<>(), getLinkTitle(HANDLE));
     }
 
     protected void reset() {

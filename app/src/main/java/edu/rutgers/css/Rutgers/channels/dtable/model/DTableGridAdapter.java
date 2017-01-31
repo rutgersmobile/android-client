@@ -20,6 +20,7 @@ import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
  * Adapter for DTable with a Grid layout
@@ -44,7 +45,7 @@ public class DTableGridAdapter extends RecyclerView.Adapter<DTableGridAdapter.Vi
         }
 
         public void bind(Context context, DTableElement element) {
-            title.setText(element.getTitle());
+            title.setText(element.getTitle(RutgersUtils.getHomeCampus(context)));
             String imageUrl = element.getImage();
             if (imageUrl != null) {
                 imageUrl = Config.API_BASE + "img/" + imageUrl;

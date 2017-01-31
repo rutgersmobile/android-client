@@ -6,13 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.link.Link;
 
 /**
  * Base class for channels that can be in a Dtable
  * currently just figures out the link
  */
-public class DtableChannelFragment extends BaseChannelFragment {
+public abstract class DtableChannelFragment extends BaseChannelFragment {
     @Override
     public Link getLink() {
         final Bundle args = getArguments();
@@ -26,9 +27,11 @@ public class DtableChannelFragment extends BaseChannelFragment {
                 linkArgs.add(title);
             }
             linkArgs.add(pathPart);
-            return new Link(topHandle, linkArgs, getLinkTitle());
+            return new Link(topHandle, linkArgs, new VarTitle(getLinkTitle(getChannelHandle())));
         }
 
         return null;
     }
+
+    abstract public String getChannelHandle();
 }

@@ -94,4 +94,9 @@ public final class AthleticsDisplay extends DtableChannelFragment {
     public String getLogTag() {
         return TAG;
     }
+
+    @Override
+    public String getChannelHandle() {
+        return HANDLE;
+    }
 }

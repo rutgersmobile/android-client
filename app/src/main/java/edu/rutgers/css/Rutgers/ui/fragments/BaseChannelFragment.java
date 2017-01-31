@@ -26,8 +26,12 @@ import android.widget.Toast;
 
 import edu.rutgers.css.Rutgers.Config;
 import edu.rutgers.css.Rutgers.R;
+import edu.rutgers.css.Rutgers.channels.ChannelManager;
+import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
+import edu.rutgers.css.Rutgers.interfaces.ChannelManagerProvider;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
 import edu.rutgers.css.Rutgers.link.Linkable;
+import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
@@ -40,12 +44,17 @@ import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGE;
 /**
  * Base channel fragment. Handles progress circle display and communication with parent activity.
  */
-public abstract class BaseChannelFragment extends BaseDisplay implements Linkable {
+public abstract class BaseChannelFragment extends BaseDisplay implements Linkable, ChannelManagerProvider {
 
     private ProgressBar mProgressCircle;
     private LinearLayout mNetworkErrorPage;
     private Button mNetworkRetry;
     protected PublishSubject<View> networkErrorSubject = PublishSubject.create();
+
+    @Override
+    public ChannelManager getChannelManager() {
+        return ((MainActivity) getActivity()).getChannelManager();
+    }
 
     private FabSpeedDial fab;
 
@@ -361,8 +370,14 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
         }
     }
 
-    public String getLinkTitle() {
-        return getActivity().getTitle().toString();
+    @Override
+    public VarTitle getLinkTitle(String channelHandle) {
+        Channel channel = getChannelManager().getChannelByTag(channelHandle);
+        if (channel == null) {
+            return new VarTitle((String)getActivity().getTitle());
+        }
+
+        return channel.getVarTitle();
     }
 
     public String getLogTag() {

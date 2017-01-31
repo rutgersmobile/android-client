@@ -1,6 +1,5 @@
 package edu.rutgers.css.Rutgers.channels.bus.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
@@ -205,7 +204,7 @@ public class BusMain extends BaseChannelFragment {
 
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(tab);
-        return new Link("bus", pathParts, getLinkTitle());
+        return new Link("bus", pathParts, getLinkTitle(HANDLE));
     }
 
     public String getLinkTitle() {

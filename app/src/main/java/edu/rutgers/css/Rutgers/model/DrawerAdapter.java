@@ -18,6 +18,7 @@ import edu.rutgers.css.Rutgers.ui.SettingsActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.AboutDisplay;
 import edu.rutgers.css.Rutgers.ui.fragments.BookmarksDisplay;
 import edu.rutgers.css.Rutgers.utils.ImageUtils;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
  * Adapter for holding channels
@@ -86,7 +87,7 @@ public class DrawerAdapter extends BaseAdapter {
         switch (typeForPosition(position)) {
             case CHANNEL:
                 Link link = (Link) getItem(position);
-                holder.textView.setText(link.getTitle());
+                holder.textView.setText(link.getTitle(RutgersUtils.getHomeCampus(activity)));
                 holder.imageView.setImageDrawable(iconForPosition(position));
                 break;
             case SETTINGS:

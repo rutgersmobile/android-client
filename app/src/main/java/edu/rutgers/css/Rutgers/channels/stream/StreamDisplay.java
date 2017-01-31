@@ -86,4 +86,9 @@ public class StreamDisplay extends DtableChannelFragment {
             : R.drawable.ic_play_arrow_black_24dp;
         return ContextCompat.getDrawable(getContext(), icon);
     }
+
+    @Override
+    public String getChannelHandle() {
+        return HANDLE;
+    }
 }

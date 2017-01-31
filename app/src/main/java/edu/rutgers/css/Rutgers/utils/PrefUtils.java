@@ -17,8 +17,6 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.oldapi.Analytics;
 
-import static edu.rutgers.css.Rutgers.utils.LogUtils.LOGI;
-
 /**
  * Preference keys and helpers.
  */
@@ -55,7 +53,7 @@ public final class PrefUtils {
 
     public static String getHomeCampus(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString(KEY_PREF_HOME_CAMPUS, "NB");
+        return prefs.getString(KEY_PREF_HOME_CAMPUS, "New Brunswick");
     }
 
     public static void setGPSRequest(@NonNull Context context, boolean b) {

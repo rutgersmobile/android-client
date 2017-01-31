@@ -49,6 +49,14 @@ public class VarTitle implements Serializable {
         }
     }
 
+    public boolean isVariable() {
+        return homeCampus != null && foreignTitle != null;
+    }
+
+    public boolean isHome(String homeCampus) {
+        return isVariable() && this.homeCampus.equalsIgnoreCase(homeCampus);
+    }
+
     /**
      * Get element title.
      * @return Element title, default to home title if campus-localized.
@@ -63,9 +71,9 @@ public class VarTitle implements Serializable {
      * @return Campus-localized element title
      */
     public String getTitle(@NonNull String homeCampus) {
-        if (this.homeCampus == null) {
+        if (!isVariable()) {
             return homeTitle;
-        } else if (this.homeCampus.equalsIgnoreCase(homeCampus)) {
+        } else if (isHome(homeCampus)) {
             return homeTitle;
         } else {
             return foreignTitle;

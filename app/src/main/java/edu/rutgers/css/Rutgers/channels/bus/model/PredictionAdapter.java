@@ -32,11 +32,10 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.model.bus.Prediction;
 import edu.rutgers.css.Rutgers.api.model.bus.VehiclePrediction;
 import edu.rutgers.css.Rutgers.channels.bus.fragments.BusDisplay;
+import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.link.Link;
 import rx.Observable;
 import rx.subjects.PublishSubject;
-
-import static edu.rutgers.css.Rutgers.R.id.minutes;
 
 /**
  * Bus arrival time predictions adapter.
@@ -53,7 +52,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
     public Observable<Prediction> getAedanClicks() {
         return aedanPublishSubject.asObservable();
     }
-    final boolean hideAedan;
+    private final boolean hideAedan;
 
     private String agency;
     private String tag;
@@ -122,7 +121,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
                 agency,
                 routeTag,
                 stopTag,
-                new Link("bus", pathParts, prediction.getTitle())
+                new Link("bus", pathParts, new VarTitle(prediction.getTitle()))
             );
 
             DialogFragment notificationDialog = new BusNotificationDialogFragment();
@@ -244,7 +243,7 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
             super(itemView);
             titleTextView = (TextView) itemView.findViewById(R.id.title);
             directionTextView = (TextView) itemView.findViewById(R.id.direction);
-            minutesTextView = (TextView) itemView.findViewById(minutes);
+            minutesTextView = (TextView) itemView.findViewById(R.id.minutes);
             alarmImageView = (ImageView) itemView.findViewById(R.id.add_alarm);
         }
     }

@@ -24,6 +24,7 @@ import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.api.RutgersAPI;
 import edu.rutgers.css.Rutgers.api.model.food.DiningMenu;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
+import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.link.LinkMaps;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -150,12 +151,12 @@ public class FoodHall extends BaseChannelFragment {
     public Link getLink() {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(LinkMaps.diningHallsInv.get(mLocation));
-        return new Link("food", pathParts, getLinkTitle());
+        return new Link("food", pathParts, getLinkTitle(FoodMain.HANDLE));
     }
 
     @Override
-    public String getLinkTitle() {
-        return mLocation;
+    public VarTitle getLinkTitle(String homeCampus) {
+        return new VarTitle(mLocation);
     }
 
     @Override

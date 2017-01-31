@@ -8,6 +8,7 @@ import android.media.AudioManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.link.Link;
 
 /**
@@ -22,7 +23,7 @@ public class MusicIntentReceiver extends BroadcastReceiver {
             if (StreamService.isPlaying()) {
                 final List<String> pathParts = new ArrayList<>();
                 pathParts.add("wrnu");
-                StreamService.startStream(context, false, StreamService.getResourceUrl(), new Link("radio", pathParts, "WRNU").getUri(Link.Schema.RUTGERS));
+                StreamService.startStream(context, false, StreamService.getResourceUrl(), new Link("radio", pathParts, new VarTitle("WRNU")).getUri(Link.Schema.RUTGERS));
             }
         }
     }

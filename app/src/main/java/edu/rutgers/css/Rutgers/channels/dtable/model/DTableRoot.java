@@ -100,6 +100,26 @@ public class DTableRoot extends DTableElement {
         return children;
     }
 
+    public List<DTableElement> getChildren(String homeCampus) {
+        final List<DTableElement> home = new ArrayList<>();
+        final List<DTableElement> away = new ArrayList<>();
+
+        for (final DTableElement element : children) {
+            final VarTitle title = element.getVarTitle();
+            if (title.isVariable() && title.isHome(homeCampus)) {
+                home.add(element);
+            } else {
+                away.add(element);
+            }
+        }
+
+        final List<DTableElement> ret = new ArrayList<>();
+        ret.addAll(home);
+        ret.addAll(away);
+
+        return ret;
+    }
+
     @Override
     public List<DTableElement> getChildItemList() {
         return children;

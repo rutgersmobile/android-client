@@ -371,7 +371,7 @@ public class BusDisplay extends BaseChannelFragment {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(mMode);
         pathParts.add(mTag);
-        return new Link("bus", pathParts, getLinkTitle());
+        return new Link("bus", pathParts, getLinkTitle(BusMain.HANDLE));
     }
 
     @Override

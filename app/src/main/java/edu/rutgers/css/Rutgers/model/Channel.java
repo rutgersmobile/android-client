@@ -79,9 +79,9 @@ public class Channel implements Serializable {
         }
 
         if (JsonUtils.exists(channelJson, "link")) {
-            this.link = Link.createLink(Uri.parse(channelJson.getAsJsonPrimitive("link").getAsString()), getTitle(), false);
+            this.link = Link.createLink(Uri.parse(channelJson.getAsJsonPrimitive("link").getAsString()), getVarTitle(), false);
         } else {
-            this.link = Link.createLink(Uri.parse("rutgers://" + handle), getTitle(), false);
+            this.link = Link.createLink(Uri.parse("rutgers://" + handle), getVarTitle(), false);
         }
 
         if (JsonUtils.exists(channelJson, "layout")) {
@@ -101,6 +101,10 @@ public class Channel implements Serializable {
 
     public String getTitle(@NonNull String homeCampus) {
         return title.getTitle(homeCampus);
+    }
+
+    public VarTitle getVarTitle() {
+        return title;
     }
 
     public Bundle getBundle(){

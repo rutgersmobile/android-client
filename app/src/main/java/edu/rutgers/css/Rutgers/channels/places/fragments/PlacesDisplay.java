@@ -267,7 +267,7 @@ public class PlacesDisplay extends BaseChannelFragment {
     public Link getLink() {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(getArguments().getString(ARG_PLACEKEY_TAG));
-        return new Link("places", pathParts, getLinkTitle());
+        return new Link("places", pathParts, getLinkTitle(PlacesMain.HANDLE));
     }
 
     /**

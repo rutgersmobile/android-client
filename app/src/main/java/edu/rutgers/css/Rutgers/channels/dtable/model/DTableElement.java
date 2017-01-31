@@ -66,6 +66,10 @@ public class DTableElement implements Serializable, ParentListItem {
         return varTitle.getTitle(homeCampus);
     }
 
+    public VarTitle getVarTitle() {
+        return varTitle;
+    }
+
     @Override
     public List<?> getChildItemList() {
         return noChildrenList;

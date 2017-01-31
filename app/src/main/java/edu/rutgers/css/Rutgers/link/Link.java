@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.rutgers.css.Rutgers.Config;
+import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 
 /**
  * POJO for holding link info
@@ -18,7 +19,7 @@ public class Link implements Serializable {
 
     private final String handle;
     private final List<String> pathParts;
-    private final String title;
+    private final VarTitle title;
     private final boolean removable;
     private boolean enabled;
 
@@ -30,7 +31,7 @@ public class Link implements Serializable {
         this.enabled = other.enabled;
     }
 
-    public Link(String handle, List<String> pathParts, String title) {
+    public Link(String handle, List<String> pathParts, VarTitle title) {
         this.handle = handle;
         this.pathParts = pathParts;
         this.title = title;
@@ -38,7 +39,7 @@ public class Link implements Serializable {
         this.enabled = true;
     }
 
-    public Link(final String handle, final List<String> pathParts, final String title,
+    public Link(final String handle, final List<String> pathParts, final VarTitle title,
                 final boolean removable, final boolean enabled) {
         this.handle = handle;
         this.pathParts = pathParts;
@@ -72,11 +73,11 @@ public class Link implements Serializable {
         return hash;
     }
 
-    public static Link createLink(Uri uri, String title) {
+    public static Link createLink(Uri uri, VarTitle title) {
         return createLink(uri, title, true);
     }
 
-    public static Link createLink(Uri uri, String title, boolean removable) {
+    public static Link createLink(Uri uri, VarTitle title, boolean removable) {
         if (uri.getScheme().equals("rutgers")) {
             final String handle = uri.getAuthority();
             final List<String> pathParts = uri.getPathSegments();
@@ -127,7 +128,11 @@ public class Link implements Serializable {
     }
 
     public String getTitle() {
-        return title;
+        return title.getTitle();
+    }
+
+    public String getTitle(String homeCampus) {
+        return title.getTitle(homeCampus);
     }
 
     public boolean isRemovable() {

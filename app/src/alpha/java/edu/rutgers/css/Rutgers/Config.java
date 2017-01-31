@@ -20,16 +20,17 @@ public final class Config {
 
     // Server and API level
     public static final String API_LEVEL = "3";
-    public static final String API_MACHINE = "10.0.2.2:8000";
-    public static final String API_HOSTNAME = API_MACHINE;
-    public static final String API_SCHEME = "http";
-    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/mobile/"+API_LEVEL+"/";
+    public static final String API_MACHINE = "doxa";
+    public static final String API_HOSTNAME = API_MACHINE+".rutgers.edu";
+    public static final String API_SCHEME = "https";
+    public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/mobile-mattro/"+API_LEVEL+"/";
     public static final String NB_API_BASE = "http://webservices.nextbus.com/";
     public static final String SOC_API_BASE = "http://sis.rutgers.edu/soc/";
 
-    public static final float NEARBY_RANGE = 300.0f; // Within 301 meters is considered "nearby"
+    // Location-based services config
+    public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
 
     // Deep link schema info
     public static final Link.Schema SCHEMA = Link.Schema.HTTP;
-    public static final String LINK_HOSTNAME = "rumobile";
+    public static final String LINK_HOSTNAME = API_HOSTNAME;
 }

@@ -183,7 +183,7 @@ public class PlacesMain extends BaseChannelFragment
     }
 
     public Link getLink() {
-        return new Link("places", new ArrayList<>(), getLinkTitle());
+        return new Link("places", new ArrayList<>(), getLinkTitle(HANDLE));
     }
 
     @Override

@@ -27,10 +27,13 @@ import edu.rutgers.css.Rutgers.channels.dtable.model.DTableChannel;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableGridAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableLinearAdapter;
 import edu.rutgers.css.Rutgers.channels.dtable.model.DTableRoot;
+import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.link.Link;
+import edu.rutgers.css.Rutgers.model.Channel;
 import edu.rutgers.css.Rutgers.oldapi.ApiRequest;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.GridSpacingItemDecoration;
+import edu.rutgers.css.Rutgers.ui.MainActivity;
 import edu.rutgers.css.Rutgers.ui.fragments.DtableChannelFragment;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
@@ -206,6 +209,7 @@ public class DTable extends DtableChannelFragment {
         mLayout = args.getString(ComponentFactory.ARG_LAYOUT_TAG, "linear");
         if (mLayout.equals("linear")) {
             mAdapter = new DTableLinearAdapter(
+                getContext(),
                 new ArrayList<>(),
                 getFragmentMediator(),
                 mHandle,
@@ -261,7 +265,7 @@ public class DTable extends DtableChannelFragment {
                 }
                 carouselView.invalidate();
             }
-            mAdapter.addAll(root.getChildren());
+            mAdapter.addAll(root.getChildren(RutgersUtils.getHomeCampus(getContext())));
             mAdapter.addAllHistory(root.getHistory());
         }, this::handleErrorWithRetry);
     }
@@ -279,6 +283,7 @@ public class DTable extends DtableChannelFragment {
 
     private DTableLinearAdapter createLinearAdapter() {
         return new DTableLinearAdapter(
+            getContext(),
             mDRoot.getChildren(),
             getFragmentMediator(),
             mHandle,
@@ -346,7 +351,24 @@ public class DTable extends DtableChannelFragment {
         final List<String> linkArgs = new ArrayList<>();
         linkArgs.addAll(mDRoot.getHistory());
 
-        return  new Link(mTopHandle, linkArgs, getLinkTitle());
+        return new Link(mTopHandle, linkArgs, getLinkTitle(null));
+    }
+
+    @Override
+    public VarTitle getLinkTitle(String homeCampus) {
+        Channel channel = ((MainActivity)getActivity()).getChannelManager().getChannelByTag(mTopHandle);
+        if (channel != null) {
+            return channel.getVarTitle();
+        } else if (mDRoot != null) {
+            return mDRoot.getVarTitle();
+        } else {
+            return new VarTitle((String) getActivity().getTitle());
+        }
+    }
+
+    @Override
+    public String getChannelHandle() {
+        return null;
     }
 
     @Override

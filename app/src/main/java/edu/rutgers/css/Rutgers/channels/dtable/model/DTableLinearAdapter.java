@@ -1,5 +1,6 @@
 package edu.rutgers.css.Rutgers.channels.dtable.model;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import java.util.List;
 import edu.rutgers.css.Rutgers.R;
 import edu.rutgers.css.Rutgers.channels.dtable.fragments.DTable;
 import edu.rutgers.css.Rutgers.interfaces.FragmentMediator;
+import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 
 /**
  * Adapter for making menus from DTable roots.
@@ -37,6 +39,7 @@ public class DTableLinearAdapter
     private final String homeCampus;
     private final ArrayList<String> history;
     private final List<DTableElement> elements;
+    private final Context context;
 
     public static class QuestionViewHolder extends ParentViewHolder {
 
@@ -52,8 +55,8 @@ public class DTableLinearAdapter
             questionText = (TextView) itemView.findViewById(R.id.question);
         }
 
-        public void bind(DTableElement item) {
-            questionText.setText(item.getTitle());
+        public void bind(Context context, DTableElement item) {
+            questionText.setText(item.getTitle(RutgersUtils.getHomeCampus(context)));
         }
     }
 
@@ -76,13 +79,15 @@ public class DTableLinearAdapter
         }
     }
 
-    public DTableLinearAdapter(@NonNull List<DTableElement> parentItemList,
+    public DTableLinearAdapter(Context context,
+                               @NonNull List<DTableElement> parentItemList,
                                FragmentMediator fm,
                                String handle,
                                String topHandle,
                                String homeCampus,
                                ArrayList<String> history) {
         super(parentItemList);
+        this.context = context;
         this.elements = parentItemList;
         this.fm = fm;
         this.handle = handle;
@@ -110,7 +115,7 @@ public class DTableLinearAdapter
     @Override
     public void onBindParentViewHolder(final QuestionViewHolder parentViewHolder, final int position, final ParentListItem parentListItem) {
         final DTableElement item = (DTableElement) parentListItem;
-        parentViewHolder.bind(item);
+        parentViewHolder.bind(context, item);
         parentViewHolder.itemView.setOnClickListener(view -> {
             if (item instanceof DTableFAQ && !parentViewHolder.isExpanded()) {
                 expandParent(item);

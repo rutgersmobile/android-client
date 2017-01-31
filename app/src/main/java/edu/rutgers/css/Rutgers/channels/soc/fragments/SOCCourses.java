@@ -168,7 +168,7 @@ public class SOCCourses extends BaseChannelFragment {
         linkArgs.add(args.getString(ARG_LEVEL_TAG));
         linkArgs.add(args.getString(ARG_SEMESTER_TAG));
         linkArgs.add(args.getString(ARG_SUBJECT_TAG));
-        return new Link("soc", linkArgs, getLinkTitle());
+        return new Link("soc", linkArgs, getLinkTitle(SOCMain.HANDLE));
     }
 
     @Override

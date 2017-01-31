@@ -339,7 +339,7 @@ public class SOCMain
         }
 
         pathParts.add(mLevel.toLowerCase());
-        return new Link("soc", pathParts, getLinkTitle());
+        return new Link("soc", pathParts, getLinkTitle(HANDLE));
     }
 
     @Override

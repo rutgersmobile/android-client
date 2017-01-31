@@ -202,7 +202,7 @@ public class SOCSections extends BaseChannelFragment {
             argParts.add(mCourse.getCourseNumber());
         }
 
-        return new Link("soc", argParts, getLinkTitle());
+        return new Link("soc", argParts, getLinkTitle(SOCMain.HANDLE));
     }
 
     private void loadCourse(@NonNull Course course) {

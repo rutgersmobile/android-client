@@ -169,4 +169,9 @@ public class RSSReader extends DtableChannelFragment implements LoaderManager.Lo
         super.reset();
         mAdapter.clear();
     }
+
+    @Override
+    public String getChannelHandle() {
+        return HANDLE;
+    }
 }
