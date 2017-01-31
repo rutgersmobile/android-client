@@ -224,81 +224,89 @@ public class BusDisplay extends BaseChannelFragment {
         final String vehicle = mVehicle;
         Observable.merge(
             Observable.interval(0, REFRESH_INTERVAL, TimeUnit.SECONDS),
-            refreshSubject)
-            .flatMap(t -> {
-                LOGI(TAG, "Starting load");
-                Observable<Predictions> predictionsObservable;
-                Observable<List<? extends NextbusItem>> activeObservable;
-                if (BusDisplay.ROUTE_MODE.equals(mode)) {
-                    // if we have a route
-                    predictionsObservable = NextbusAPI.routePredict(agency, tag);
-                    // that whooshing sound is the Java type system coming apart at the seams
-                    activeObservable = NextbusAPI.getActiveRoutes(agency).map(x -> x);
-                } else if (BusDisplay.STOP_MODE.equals(mode)) {
-                    // else if we have a stop
-                    predictionsObservable = NextbusAPI.stopPredict(agency, tag);
-                    activeObservable = NextbusAPI.getActiveStops(agency).map(x -> x);
-                } else {
-                    // else error if we have neither
-                    predictionsObservable = Observable.error(
-                        new IllegalArgumentException("Invalid mode (stop / route only)")
-                    );
-                    activeObservable = Observable.error(
-                        new IllegalArgumentException("Invalid mode (stop / route only)")
-                    );
+            refreshSubject
+        ).flatMap(t -> {
+            LOGI(TAG, "Starting load");
+            Observable<Predictions> predictionsObservable;
+            Observable<List<? extends NextbusItem>> activeObservable;
+            if (BusDisplay.ROUTE_MODE.equals(mode)) {
+                // if we have a route
+                predictionsObservable = NextbusAPI.routePredict(agency, tag);
+                // that whooshing sound is the Java type system coming apart at the seams
+                activeObservable = NextbusAPI.getActiveRoutes(agency).map(x -> x);
+            } else if (BusDisplay.STOP_MODE.equals(mode)) {
+                // else if we have a stop
+                predictionsObservable = NextbusAPI.stopPredict(agency, tag);
+                activeObservable = NextbusAPI.getActiveStops(agency).map(x -> x);
+            } else {
+                // else error if we have neither
+                predictionsObservable = Observable.error(
+                    new IllegalArgumentException("Invalid mode (stop / route only)")
+                );
+                activeObservable = Observable.error(
+                    new IllegalArgumentException("Invalid mode (stop / route only)")
+                );
+            }
+
+            return predictionsObservable.map(predictions -> {
+                if (vehicle != null) {
+                    return new Predictions(predictions.getMessages(), predictions.getPredictions(vehicle));
                 }
-                return predictionsObservable.map(predictions -> {
-                    if (vehicle != null) {
-                        return new Predictions(predictions.getMessages(), predictions.getPredictions(vehicle));
+
+                return predictions;
+            }).flatMap(predictions ->
+            activeObservable.flatMap(nextbusItems -> {
+                for (final NextbusItem item : nextbusItems) {
+                    if (item.getTag().equals(tag)) {
+                        return Observable.just(
+                            new PredictionHolder(predictions, item.getTitle())
+                        );
                     }
-                    return predictions;
-                }).flatMap(predictions ->
-                    activeObservable.flatMap(nextbusItems -> {
-                    for (final NextbusItem item : nextbusItems) {
-                        if (item.getTag().equals(tag)) {
-                            return Observable.just(
-                                new PredictionHolder(predictions, item.getTitle())
-                            );
-                        }
-                    }
-                    return Observable.error(new IllegalArgumentException("Stop tag not found"));
-                }))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .retryWhen(this::logAndRetry);
-            })
-            .compose(bindToLifecycle())
-            .subscribe(data -> {
-                LOGI(TAG, "Ran subscription");
-                reset();
-
-                if (refreshLayout != null) {
-                    refreshLayout.setRefreshing(false);
                 }
 
-                Predictions predictions = data.getPredictions();
-                mTitle = data.getTitle();
-                setTitle();
+                return Observable.error(new IllegalArgumentException("Stop tag not found"));
+            }))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .retryWhen(this::logAndRetry);
+        })
+        .compose(bindToLifecycle())
+        .subscribe(data -> {
+            LOGI(TAG, "Ran subscription");
+            reset();
 
-                // If there are no active routes or stops, show a message
-                if (predictions.getPredictions().isEmpty()) {
-                    // A stop may have no active routes; a route may have no active stops
-                    int message = BusDisplay.STOP_MODE.equals(mMode)
-                        ? R.string.bus_no_active_routes
-                        : R.string.bus_no_active_stops;
+            if (refreshLayout != null) {
+                refreshLayout.setRefreshing(false);
+            }
 
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                }
+            Predictions predictions = data.getPredictions();
+            mTitle = data.getTitle();
+            setTitle();
 
-                mAdapter.addAll(predictions.getPredictions());
+            // If there are no active routes or stops, show a message
+            if (predictions.getPredictions().isEmpty()) {
+                // A stop may have no active routes; a route may have no active stops
+                int message = BusDisplay.STOP_MODE.equals(mMode)
+                    ? R.string.bus_no_active_routes
+                    : R.string.bus_no_active_stops;
 
-                mMessage = StringUtils.join(predictions.getMessages(), "\n");
-                if (!mMessage.isEmpty()) {
-                    dividerView.setVisibility(View.VISIBLE);
-                    messagesView.setVisibility(View.VISIBLE);
-                    messagesView.setText(mMessage);
-                }
-            }, this::handleErrorWithRetry);
+                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                mAdapter.clear();
+                return;
+            }
+
+            mAdapter.updatePredictions(predictions.getPredictions());
+
+            mMessage = StringUtils.join(predictions.getMessages(), "\n");
+            if (!mMessage.isEmpty()) {
+                dividerView.setVisibility(View.VISIBLE);
+                messagesView.setVisibility(View.VISIBLE);
+                messagesView.setText(mMessage);
+            }
+        }, error -> {
+            mAdapter.clear();
+            handleErrorWithRetry(error);
+        });
     }
 
     private void setTitle() {
@@ -375,10 +383,5 @@ public class BusDisplay extends BaseChannelFragment {
         outState.putSerializable(SAVED_DATA_TAG, mData);
         outState.putSerializable(SAVED_TITLE_TAG, mTitle);
         outState.putString(SAVED_MESSAGE_TAG, mMessage);
-    }
-
-    protected void reset() {
-        super.reset();
-        mAdapter.clear();
     }
 }

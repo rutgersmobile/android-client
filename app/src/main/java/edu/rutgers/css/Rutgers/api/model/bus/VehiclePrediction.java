@@ -26,4 +26,23 @@ public final class VehiclePrediction implements Serializable {
     public String toString() {
         return minutes + " minutes";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        VehiclePrediction that = (VehiclePrediction) o;
+
+        if (vehicle != null ? !vehicle.equals(that.vehicle) : that.vehicle != null) return false;
+        return minutes != null ? minutes.equals(that.minutes) : that.minutes == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = vehicle != null ? vehicle.hashCode() : 0;
+        result = 31 * result + (minutes != null ? minutes.hashCode() : 0);
+        return result;
+    }
 }

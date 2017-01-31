@@ -195,6 +195,28 @@ public class PredictionAdapter extends ExpandableRecyclerAdapter<PredictionAdapt
         }
     }
 
+    public void updatePredictions(List<? extends Prediction> predictions) {
+        final List<? extends ParentListItem> parentItemList = getParentItemList();
+        if (parentItemList.size() != predictions.size()) {
+            clear();
+            addAll(predictions);
+        } else {
+            for (int i = 0; i < parentItemList.size(); i++) {
+                Prediction oldPrediction = (Prediction) parentItemList.get(i);
+                Prediction newPrediction = predictions.get(i);
+
+                if (!newPrediction.equals(oldPrediction)) {
+                    oldPrediction.setTitle(newPrediction.getTitle());
+                    oldPrediction.setTag(newPrediction.getTag());
+                    oldPrediction.setDirection(newPrediction.getDirection());
+                }
+
+                oldPrediction.setVehiclePredictions(newPrediction.getVehiclePredictions());
+                notifyParentItemChanged(i);
+            }
+        }
+    }
+
     public void addAll(Collection<? extends Prediction> predictions) {
         final int currentSize = this.predictions.size();
         this.predictions.addAll(predictions);
