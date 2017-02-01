@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -110,7 +111,16 @@ public final class PrefUtils {
         Type type = new TypeToken<List<Link>>(){}.getType();
         String emptyList = gson.toJson(new ArrayList<Link>(), type);
         String prefString = prefs.getString(KEY_PREF_BOOKMARK, emptyList);
-        List<Link> links = gson.fromJson(prefString, type);
+        List<Link> links;
+        try {
+            links = gson.fromJson(prefString, type);
+        } catch (JsonSyntaxException ignored) {
+            links = null;
+        }
+        if (links == null) {
+            links = new ArrayList<>();
+            prefs.edit().putString(KEY_PREF_BOOKMARK, "").apply();
+        }
         return dedupLinks(links);
     }
 
