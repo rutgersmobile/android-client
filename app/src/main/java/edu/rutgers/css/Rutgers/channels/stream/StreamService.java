@@ -84,6 +84,7 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     private boolean needsToStart = true;
     private WifiManager.WifiLock wifiLock;
     private Uri linkBack;
+    private static int intentId_static = 0;
 
     private void startMediaPlayer(String url) {
         mediaPlayer = new MediaPlayer();
@@ -172,7 +173,8 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     }
 
     private static PendingIntent createPendingIntent(Context context, int intentId, Intent intent) {
-        return PendingIntent.getService(context, intentId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        intentId_static += 1;
+        return PendingIntent.getService(context, intentId_static, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     private static Intent createStopIntent(Context context) {
