@@ -36,6 +36,7 @@
             android:scaleType="fitCenter"
             android:tint="@color/white"/>
         <Button
+            android:id="@+id/stop_text_button"
             android:layout_width="75dp"
             android:layout_height="50dp"
             android:background="@android:color/transparent"

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import edu.rutgers.css.Rutgers.link.Link;
  * Stop playing music when headphones are unplugged
  */
 public class MusicIntentReceiver extends BroadcastReceiver {
+    private static final String TAG = "MUSICINTENTRECV";
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {

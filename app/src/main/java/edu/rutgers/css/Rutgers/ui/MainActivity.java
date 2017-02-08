@@ -387,9 +387,9 @@ public class MainActivity extends GoogleApiProviderActivity implements ChannelMa
             }
         }
     }
-
     /**
      * Determine if the current intent will cause deep linking
+
      * @return True if the intent has a uri
      */
     private boolean wantsLink() {

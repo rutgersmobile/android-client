@@ -1,10 +1,10 @@
 [
   {
-    "handle": "radio",
-    "title": "Radio",
-    "icon": "radio",
+    "handle": "studentmedia",
+    "title": "Student Media",
+    "icon": "studentmedia",
     "view": "dtable",
-    "api": "radio.txt"
+    "api": "studentmedia.txt"
   },
   {
     "handle": "fixit",
@@ -52,8 +52,7 @@
     "icon": "knights",
     "grouped": true,
     "view": "dtable",
-    "api": "athleticsfaq.txt",
-    "layout": "grid"
+    "api": "athleticsfaq.txt"
   },
   {
     "handle": "soc",
@@ -159,3 +158,4 @@
     "icon": "feedback"
   }
 ]
+
