@@ -7,6 +7,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import edu.rutgers.css.Rutgers.R;
@@ -24,6 +25,7 @@ public class StreamDisplay extends DtableChannelFragment {
     private String radioUrl;
     private String title;
     private ImageView playButton;
+    private Button playTButton;
 
     public static Bundle createArgs(String title, String url) {
         final Bundle args = new Bundle();
@@ -61,6 +63,7 @@ public class StreamDisplay extends DtableChannelFragment {
         final View v = super.createView(inflater, container, savedInstanceState, R.layout.fragment_radio);
         hideProgressCircle();
         playButton = (ImageView) v.findViewById(R.id.play_button);
+        playTButton = (Button) v.findViewById(R.id.play_text_button);
         setPlayButtonIcon();
         playButton.setOnClickListener(view -> {
             if (!StreamService.isPlaying()) {
@@ -69,8 +72,18 @@ public class StreamDisplay extends DtableChannelFragment {
                 StreamService.startStream(getContext(), false, radioUrl, getLink().getUri(Link.Schema.RUTGERS));
             }
         });
+
+        playTButton.setOnClickListener(view -> {
+            if (!StreamService.isPlaying()) {
+                StreamService.startStream(getContext(), true, radioUrl, getLink().getUri(Link.Schema.RUTGERS));
+            } else {
+                StreamService.startStream(getContext(), false, radioUrl, getLink().getUri(Link.Schema.RUTGERS));
+            }
+        });
         ImageView stopButton = (ImageView) v.findViewById(R.id.stop_button);
+        Button stopTButton = (Button) v.findViewById(R.id.stop_text_button);
         stopButton.setOnClickListener(view -> StreamService.stopStream(getContext()));
+        stopTButton.setOnClickListener(view -> StreamService.stopStream(getContext()));
         return v;
     }
 
@@ -84,6 +97,14 @@ public class StreamDisplay extends DtableChannelFragment {
         int icon = playing
             ? R.drawable.ic_pause_black_24dp
             : R.drawable.ic_play_arrow_black_24dp;
+        switch (icon) {
+            case R.drawable.ic_pause_black_24dp:
+                playTButton.setText("Pause");
+                break;
+            case R.drawable.ic_play_arrow_black_24dp:
+                playTButton.setText("Play");
+                break;
+        }
         return ContextCompat.getDrawable(getContext(), icon);
     }
 

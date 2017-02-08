@@ -14,6 +14,7 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -195,6 +196,7 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     }
 
     private static PendingIntent createLinkBackPendingIntent(Context context, Uri linkBack) {
+        Log.e(TAG, "ohshit wutsgud2");
         Intent intent = new Intent(context, MainActivity.class);
         intent.setData(linkBack);
         intent.setAction(Intent.ACTION_VIEW);
