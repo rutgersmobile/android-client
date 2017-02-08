@@ -196,7 +196,6 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
     }
 
     private static PendingIntent createLinkBackPendingIntent(Context context, Uri linkBack) {
-        Log.e(TAG, "ohshit wutsgud2");
         Intent intent = new Intent(context, MainActivity.class);
         intent.setData(linkBack);
         intent.setAction(Intent.ACTION_VIEW);
