@@ -33,3 +33,5 @@ local.properties
 # Old-style IDEA project files
 *.ipr
 *.iws
+API_KEYS.java
+google-services.json
