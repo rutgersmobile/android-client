@@ -128,7 +128,7 @@ public class DrawerAdapter extends BaseAdapter {
                 iconName = "settings_black_24dp";
                 break;
             case ABOUT:
-                iconName = "info";
+                iconName = "about";
                 break;
             default:
                 iconName = "bookmark";
