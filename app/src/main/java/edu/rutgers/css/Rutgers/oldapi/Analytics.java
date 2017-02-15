@@ -24,13 +24,13 @@ import java.util.Iterator;
 
 import edu.rutgers.css.Rutgers.BuildConfig;
 import edu.rutgers.css.Rutgers.Config;
+import edu.rutgers.css.Rutgers.RutgersApplication;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.model.AnalyticsOpenHelper;
 import edu.rutgers.css.Rutgers.utils.AppUtils;
 import edu.rutgers.css.Rutgers.utils.PrefUtils;
 import edu.rutgers.css.Rutgers.utils.RutgersUtils;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -243,13 +243,12 @@ public final class Analytics extends IntentService {
 
                 try {
                     // Build POST request
-                    OkHttpClient client = new OkHttpClient();
                     RequestBody body = RequestBody.create(JSON, eventOutQueue.toString());
                     Request request = new Request.Builder()
                             .url(POST_URL)
                             .post(body)
                             .build();
-                    Response response = client.newCall(request).execute();
+                    Response response = RutgersApplication.getClient().newCall(request).execute();
                     if(response.code() >= 200 && response.code() <= 299) {
                         database.setTransactionSuccessful();
                         LOGI(TAG, cursor.getCount() + " events posted.");
