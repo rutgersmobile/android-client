@@ -190,23 +190,27 @@ public class SOCMain
         mAdapter.getPositionClicks()
             .flatMap(clickedItem -> {
                 if (clickedItem instanceof Subject) {
-                    return Observable.just(SOCCourses.createArgs(clickedItem.getDisplayTitle(), mCampus,
-                            mSemester, mLevel, clickedItem.getCode()));
+                    return Observable.just(SOCCourses.createArgs(
+                        clickedItem.getDisplayTitle(),
+                        mCampus, mSemester, mLevel,
+                        clickedItem.getCode()
+                    ));
                 } else if (clickedItem instanceof Course) {
                     // This is for when courses are loaded into the list by user-supplied filter
                     final Course course = (Course) clickedItem;
                     return Observable.just(SOCSections.createArgs(
-                            course.getDisplayTitle(), mSemester, mSOCIndex.getCampusCode(),
-                            course.getSubject(), course.getCourseNumber()
+                        course.getDisplayTitle(), mSemester, mSOCIndex.getCampusCode(),
+                        course.getSubject(), course.getCourseNumber()
                     ));
                 }
 
                 return Observable.error(new IllegalStateException("SOC item must be Subject or Course"));
             })
+            .compose(bindToLifecycle())
             .subscribe(this::switchFragments, this::logError);
         getClasses();
-
     }
+
     public void getClasses() {
         // Load up schedule settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -226,8 +230,8 @@ public class SOCMain
         setLoading(true);
         ScheduleArgHolder argHolder = new ScheduleArgHolder(mLevel, mCampus, mSemester);
         Observable.merge(
-                Observable.just(argHolder),
-                argHolderPublishSubject.asObservable()
+            Observable.just(argHolder),
+            argHolderPublishSubject.asObservable()
         )
         .observeOn(Schedulers.io())
         .flatMap(scheduleArgHolder -> RutgersAPI.getSemesters()
@@ -254,9 +258,9 @@ public class SOCMain
                     : defaultSemester;
 
             return RutgersAPI.getSOCIndex(semester, campusArg, levelArg).flatMap(socIndex ->
-                    SOCAPI.getSubjects(semester, campusArg, levelArg).map(subjects ->
-                            new SubjectHolder(socIndex, subjects, semesters, semester, defaultSemester)
-                    )
+                SOCAPI.getSubjects(semester, campusArg, levelArg).map(subjects ->
+                    new SubjectHolder(socIndex, subjects, semesters, semester, defaultSemester)
+                )
             );
         }))
         .observeOn(AndroidSchedulers.mainThread())

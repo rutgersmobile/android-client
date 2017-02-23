@@ -117,6 +117,8 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
             mGoogleApiClientProvider.registerListener(this);
         }
 
+        setLoading(true);
+
         // The null value is to make sure this runs once without a location and will be updated
         // on subsequent calls to locationSubject::onNext
         Observable.merge(Observable.just(null), locationSubject.asObservable())
@@ -135,20 +137,10 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
                     (float) location.getLatitude(),
                     (float) location.getLongitude(),
                     Config.NEARBY_RANGE
-                ).flatMap(nbNearby -> NextbusAPI.getActiveStopsByTitleNear(
-                    NextbusAPI.AGENCY_NB,
-                    (float) location.getLatitude(),
-                    (float) location.getLongitude(),
-                    Config.NEARBY_RANGE
-                ).map(nwkNearby -> {
-                    for (StopGroup stopGroup : nbNearby) {
-                        nearbyStops.add(new StopStub(stopGroup));
-                    }
-                    for (StopGroup stopGroup : nwkNearby) {
-                        nearbyStops.add(new StopStub(stopGroup));
-                    }
+                ).flatMap(Observable::from).map(StopStub::new).toList().map(nearby -> {
+                    nearbyStops.addAll(nearby);
                     return stops;
-                }))
+                })
 
                 // otherwise just use our empty nearby sections
                 : Observable.just(stops);

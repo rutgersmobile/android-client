@@ -217,6 +217,7 @@ public class PlacesMain extends BaseChannelFragment
         super.onResume();
 
         mAdapter.getPositionClicks()
+            .compose(bindToLifecycle())
             .flatMap(placeStub -> placeStub.getKey() == null
                     ? Observable.error(new IllegalArgumentException("Place has no key"))
                     : Observable.just(PlacesDisplay.createArgs(placeStub.getValue(), placeStub.getKey()))

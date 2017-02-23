@@ -128,6 +128,7 @@ public class PlacesDisplay extends BaseChannelFragment {
 
         mAdapter
             .getPositionClicks()
+            .compose(bindToLifecycle())
             .map(rMenuRow -> (RMenuItemRow) rMenuRow)
             .subscribe(rMenuItemRow -> {
                 switch (rMenuItemRow.getArgs().getInt(ID_KEY)) {

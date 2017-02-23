@@ -122,6 +122,7 @@ public class SOCCourses extends BaseChannelFragment {
             .map(course ->
                 SOCSections.createArgs(course.getDisplayTitle(), campus,  semester, course)
             )
+            .compose(bindToLifecycle())
             .subscribe(this::switchFragments, this::logError);
 
         // Start loading courses

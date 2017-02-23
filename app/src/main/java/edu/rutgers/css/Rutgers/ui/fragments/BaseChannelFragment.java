@@ -66,6 +66,7 @@ public abstract class BaseChannelFragment extends BaseDisplay implements Linkabl
 
     public void setLoading(boolean loading) {
         this.loading = loading;
+        showProgressCircle();
     }
 
     public boolean isLoading() {

@@ -25,7 +25,7 @@ public final class Config {
     public static final String API_SCHEME = "https";
     public static final String API_BASE = API_SCHEME+"://"+API_HOSTNAME+"/mobile/"+API_LEVEL+"/";
     public static final String NB_API_BASE = "http://webservices.nextbus.com/";
-    public static final String SOC_API_BASE = "http://sis.rutgers.edu/soc/";
+    public static final String SOC_API_BASE = "https://sis.rutgers.edu/soc/";
 
     // Location-based services config
     public static final float NEARBY_RANGE = 300.0f; // Within 300 meters is considered "nearby"
