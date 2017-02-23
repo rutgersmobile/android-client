@@ -132,11 +132,19 @@ public class BusStops extends BaseChannelFragment implements GoogleApiClient.Con
 
             return location != null
                 // if we have a location, use it to get nearby stops
-                ? NextbusAPI.getActiveStopsByTitleNear(
-                    NextbusAPI.AGENCY_NB,
-                    (float) location.getLatitude(),
-                    (float) location.getLongitude(),
-                    Config.NEARBY_RANGE
+                ? Observable.merge(
+                    NextbusAPI.getActiveStopsByTitleNear(
+                        NextbusAPI.AGENCY_NB,
+                        (float) location.getLatitude(),
+                        (float) location.getLongitude(),
+                        Config.NEARBY_RANGE
+                    ),
+                    NextbusAPI.getActiveStopsByTitleNear(
+                        NextbusAPI.AGENCY_NWK,
+                        (float) location.getLatitude(),
+                        (float) location.getLongitude(),
+                        Config.NEARBY_RANGE
+                    )
                 ).flatMap(Observable::from).map(StopStub::new).toList().map(nearby -> {
                     nearbyStops.addAll(nearby);
                     return stops;
