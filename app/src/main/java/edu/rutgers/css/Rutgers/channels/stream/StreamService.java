@@ -14,7 +14,6 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -109,8 +108,9 @@ public class StreamService extends Service implements AudioManager.OnAudioFocusC
                 needsToStart = false;
                 mediaPlayer.start();
                 if (wifiLock == null) {
-                    wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE))
-                        .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+                    wifiLock = ((WifiManager) getApplicationContext()
+                        .getSystemService(Context.WIFI_SERVICE)
+                    ).createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
                     if (!wifiLock.isHeld()) {
                         wifiLock.acquire();
                     }
