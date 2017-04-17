@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:layout_editor_absoluteY="25dp"
+    tools:layout_editor_absoluteX="0dp">
+
+    <ImageView
+        android:id="@+id/wrnu_image"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="33dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/wrnu"
+        app:layout_constraintHorizontal_bias="0.074" />
+
+    <TextView
+        android:id="@+id/wrnu_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="WELCOME TO WRNU RUTGERS NEWARK RADIO!"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="@+id/wrnu_image"
+        app:layout_constraintRight_toRightOf="@+id/wrnu_image"
+        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_marginTop="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/wrnu_image"/>
+
+    <TextView
+        android:id="@+id/campus_beat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="THE CAMPUS BEAT"
+        android:textColor="@color/white"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/play_button"
+        app:layout_constraintRight_toRightOf="@+id/textView10"
+        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@+id/play_button" />
+
+    <ImageView
+        android:id="@+id/twitter_logo"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:tint="@color/white"
+        app:layout_constraintRight_toLeftOf="@+id/instagram_logo"
+        app:srcCompat="@drawable/twitter_logo"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/textView10"
+        app:layout_constraintTop_toTopOf="@+id/instagram_logo"
+        android:layout_marginTop="0dp" />
+
+    <ImageView
+        android:id="@+id/instagram_logo"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/instagram_logo"
+        app:layout_constraintLeft_toRightOf="@+id/twitter_logo"
+        android:layout_marginLeft="0dp"
+        app:layout_constraintRight_toLeftOf="@+id/facebook_logo"
+        app:layout_constraintTop_toTopOf="@+id/facebook_logo"
+        android:layout_marginTop="0dp" />
+
+    <ImageView
+        android:id="@+id/facebook_logo"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/facebook_logo"
+        app:layout_constraintLeft_toRightOf="@+id/instagram_logo"
+        android:layout_marginLeft="0dp"
+        app:layout_constraintRight_toLeftOf="@+id/soundCloud_logo"
+        app:layout_constraintTop_toTopOf="@+id/soundCloud_logo"
+        android:layout_marginTop="-1dp" />
+
+    <ImageView
+        android:id="@+id/soundCloud_logo"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/soundcloud_logo"
+        app:layout_constraintLeft_toRightOf="@+id/facebook_logo"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="@+id/textView10"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/textView10" />
+
+    <ImageView
+        android:id="@+id/play_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/ic_play_arrow_black_24dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="75dp"
+        app:layout_constraintLeft_toRightOf="@+id/wrnu_image"
+        android:layout_marginLeft="47dp" />
+
+    <ImageView
+        android:id="@+id/stop_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="0dp"
+        android:layout_marginTop="0dp"
+        android:tint="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/play_button"
+        app:layout_constraintTop_toTopOf="@+id/play_button"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/ic_stop_black_24dp"
+        app:layout_constraintLeft_toRightOf="@+id/space"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.842" />
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        android:id="@+id/space"/>
+
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="0dp"
+        android:gravity="left|center"
+        android:text="Follow us on social media!"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        app:layout_constraintRight_toRightOf="@+id/stop_button"
+        app:layout_constraintTop_toBottomOf="@+id/campus_beat"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/play_button"
+        app:layout_constraintHorizontal_bias="0.0" />
+
+    <Button
+        android:id="@+id/email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="56dp"
+        android:text="Email WRNU"
+        app:layout_constraintLeft_toLeftOf="@+id/textView10"
+        app:layout_constraintRight_toRightOf="@+id/textView10"
+        app:layout_constraintTop_toBottomOf="@+id/textView10"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintHorizontal_bias="0.434"
+        app:layout_constraintVertical_bias="0.0" />
+</android.support.constraint.ConstraintLayout>
