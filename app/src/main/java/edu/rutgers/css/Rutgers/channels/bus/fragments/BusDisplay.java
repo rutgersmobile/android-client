@@ -27,6 +27,7 @@ import edu.rutgers.css.Rutgers.api.model.bus.VehiclePrediction;
 import edu.rutgers.css.Rutgers.channels.ComponentFactory;
 import edu.rutgers.css.Rutgers.channels.bus.model.AedanDialogFragment;
 import edu.rutgers.css.Rutgers.channels.bus.model.PredictionAdapter;
+import edu.rutgers.css.Rutgers.channels.dtable.model.VarTitle;
 import edu.rutgers.css.Rutgers.link.Link;
 import edu.rutgers.css.Rutgers.ui.DividerItemDecoration;
 import edu.rutgers.css.Rutgers.ui.fragments.BaseChannelFragment;
@@ -371,7 +372,7 @@ public class BusDisplay extends BaseChannelFragment {
         final List<String> pathParts = new ArrayList<>();
         pathParts.add(mMode);
         pathParts.add(mTag);
-        return new Link("bus", pathParts, getLinkTitle(BusMain.HANDLE));
+        return new Link("bus", pathParts, new VarTitle(mTitle));
     }
 
     @Override
