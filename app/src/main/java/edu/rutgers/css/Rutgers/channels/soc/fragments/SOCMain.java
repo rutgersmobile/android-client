@@ -274,6 +274,7 @@ public class SOCMain
             mSemesters = subjectHolder.getSemesters().getSemesters();
             mSOCIndex = subjectHolder.getIndex();
 
+            mAdapter.setFilterIndex(subjectHolder.getIndex());
             mAdapter.addAllSubjects(subjectHolder.getSubjects());
 
             setScheduleTitle();
